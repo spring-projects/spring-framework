@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,12 @@ public interface WebSocketSession extends Closeable {
 
 	/**
 	 * Return the map with attributes associated with the WebSocket session.
-	 * <p>When the WebSocketSession is created, on the server side, the map can be
-	 * through a {@link org.springframework.web.socket.server.HandshakeInterceptor}.
-	 * On the client side, the map can be populated by passing attributes to the
-	 * {@link org.springframework.web.socket.client.WebSocketClient} handshake methods.
+	 * <p>On the server side the map can be populated initially through a
+	 * {@link org.springframework.web.socket.server.HandshakeInterceptor
+	 * HandshakeInterceptor}. On the client side the map can be populated via
+	 * {@link org.springframework.web.socket.client.WebSocketClient
+	 * WebSocketClient} handshake methods.
+	 * @return a Map with the session attributes, never {@code null}.
 	 */
 	Map<String, Object> getAttributes();
 

@@ -36,7 +36,9 @@ import org.hibernate.cfg.Settings;
  * @author Juergen Hoeller
  * @since 3.0
  * @see LocalSessionFactoryBean#setCacheRegionFactory
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class LocalRegionFactoryProxy implements RegionFactory {
 
 	private final RegionFactory regionFactory;

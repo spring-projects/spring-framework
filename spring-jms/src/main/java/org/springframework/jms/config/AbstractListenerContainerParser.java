@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,8 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 	protected static final String DESTINATION_TYPE_SHARED_TOPIC = "sharedTopic";
 
 	protected static final String DESTINATION_TYPE_SHARED_DURABLE_TOPIC = "sharedDurableTopic";
+
+	protected static final String RESPONSE_DESTINATION_TYPE_ATTRIBUTE = "response-destination-type";
 
 	protected static final String CLIENT_ID_ATTRIBUTE = "client-id";
 
@@ -170,7 +172,7 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 
 		if (listenerEle.hasAttribute(RESPONSE_DESTINATION_ATTRIBUTE)) {
 			String responseDestination = listenerEle.getAttribute(RESPONSE_DESTINATION_ATTRIBUTE);
-			Boolean pubSubDomain = (Boolean) commonContainerProperties.getPropertyValue("pubSubDomain").getValue();
+			Boolean pubSubDomain = (Boolean) commonContainerProperties.getPropertyValue("replyPubSubDomain").getValue();
 			listenerDef.getPropertyValues().add(
 					pubSubDomain ? "defaultResponseTopicName" : "defaultResponseQueueName", responseDestination);
 			if (containerDef.getPropertyValues().contains("destinationResolver")) {
@@ -259,6 +261,23 @@ abstract class AbstractListenerContainerParser implements BeanDefinitionParser {
 		properties.add("pubSubDomain", pubSubDomain);
 		properties.add("subscriptionDurable", subscriptionDurable);
 		properties.add("subscriptionShared", subscriptionShared);
+
+		boolean replyPubSubDomain = false;
+		String replyDestinationType = containerEle.getAttribute(RESPONSE_DESTINATION_TYPE_ATTRIBUTE);
+		if (DESTINATION_TYPE_TOPIC.equals(replyDestinationType)) {
+			replyPubSubDomain = true;
+		}
+		else if (DESTINATION_TYPE_QUEUE.equals(replyDestinationType)) {
+			replyPubSubDomain = false;
+		}
+		else if (!StringUtils.hasText(replyDestinationType)) {
+			replyPubSubDomain = pubSubDomain; // the default: same value as pubSubDomain
+		}
+		else if (StringUtils.hasText(replyDestinationType)) {
+			parserContext.getReaderContext().error("Invalid listener container 'response-destination-type': only " +
+					"\"queue\", \"topic\" supported.", containerEle);
+		}
+		properties.add("replyPubSubDomain", replyPubSubDomain);
 
 		if (containerEle.hasAttribute(CLIENT_ID_ATTRIBUTE)) {
 			String clientId = containerEle.getAttribute(CLIENT_ID_ATTRIBUTE);

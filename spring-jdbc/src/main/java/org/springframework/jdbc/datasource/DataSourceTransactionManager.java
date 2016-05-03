@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * <p>This transaction manager can be used as a replacement for the
  * {@link org.springframework.transaction.jta.JtaTransactionManager} in the single
  * resource case, as it does not require a container that supports JTA, typically
- * in combination with a locally defined JDBC DataSource (e.g. a Jakarta Commons
+ * in combination with a locally defined JDBC DataSource (e.g. an Apache Commons
  * DBCP connection pool). Switching between this local strategy and a JTA
  * environment is just a matter of configuration!
  *
@@ -126,8 +126,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 	/**
 	 * Set the JDBC DataSource that this instance should manage transactions for.
-	 * <p>This will typically be a locally defined DataSource, for example a
-	 * Jakarta Commons DBCP connection pool. Alternatively, you can also drive
+	 * <p>This will typically be a locally defined DataSource, for example an
+	 * Apache Commons DBCP connection pool. Alternatively, you can also drive
 	 * transactions for a non-XA J2EE DataSource fetched from JNDI. For an XA
 	 * DataSource, use JtaTransactionManager.
 	 * <p>The DataSource specified here should be the target DataSource to manage

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,11 @@ import org.springframework.util.ReflectionUtils;
  */
 public class CachingConnectionFactory extends SingleConnectionFactory {
 
+	/** The JMS 2.0 Session.createSharedConsumer method, if available */
 	private static final Method createSharedConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedConsumer", Topic.class, String.class, String.class);
 
+	/** The JMS 2.0 Session.createSharedDurableConsumer method, if available */
 	private static final Method createSharedDurableConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedDurableConsumer", Topic.class, String.class, String.class);
 
@@ -507,7 +509,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * Simple wrapper class around a Destination reference.
 	 * Used as the cache key when caching MessageProducer objects.
 	 */
-	private static class DestinationCacheKey {
+	private static class DestinationCacheKey implements Comparable<DestinationCacheKey> {
 
 		private final Destination destination;
 
@@ -526,7 +528,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		protected boolean destinationEquals(DestinationCacheKey otherKey) {
-			return (this.destination.getClass().equals(otherKey.destination.getClass()) &&
+			return (this.destination.getClass() == otherKey.destination.getClass() &&
 					(this.destination.equals(otherKey.destination) ||
 							getDestinationString().equals(otherKey.getDestinationString())));
 		}
@@ -535,7 +537,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		public boolean equals(Object other) {
 			// Effectively checking object equality as well as toString equality.
 			// On WebSphere MQ, Destination objects do not implement equals...
-			return (other == this || destinationEquals((DestinationCacheKey) other));
+			return (this == other || destinationEquals((DestinationCacheKey) other));
 		}
 
 		@Override
@@ -544,6 +546,16 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			// this.destination.hashCode() actually being the same value
 			// for equivalent destinations... Thanks a lot, WebSphere MQ!
 			return this.destination.getClass().hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return getDestinationString();
+		}
+
+		@Override
+		public int compareTo(DestinationCacheKey other) {
+			return getDestinationString().compareTo(other.getDestinationString());
 		}
 	}
 
@@ -581,6 +593,12 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 					ObjectUtils.nullSafeEquals(this.noLocal, otherKey.noLocal) &&
 					ObjectUtils.nullSafeEquals(this.subscription, otherKey.subscription) &&
 					this.durable == otherKey.durable);
+		}
+
+		@Override
+		public String toString() {
+			return super.toString() + " [selector=" + this.selector + ", noLocal=" + this.noLocal +
+					", subscription=" + this.subscription + ", durable=" + this.durable + "]";
 		}
 	}
 

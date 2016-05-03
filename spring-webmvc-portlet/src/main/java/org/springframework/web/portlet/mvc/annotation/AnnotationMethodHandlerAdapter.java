@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,8 +76,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
-import org.springframework.web.bind.annotation.support.HandlerMethodResolver;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -232,7 +230,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * having a chance to resolve an argument value before the standard
 	 * argument handling kicks in.
 	 */
-	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
+	public void setCustomArgumentResolvers(WebArgumentResolver... argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 
@@ -250,7 +248,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * Any such custom ModelAndViewResolver will kick in first, having a chance to
 	 * resolve an return value before the standard ModelAndView handling kicks in.
 	 */
-	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
+	public void setCustomModelAndViewResolvers(ModelAndViewResolver... customModelAndViewResolvers) {
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
 	}
 
@@ -381,7 +379,8 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				if (response instanceof EventResponse) {
 					// Update the existing model, if any, when responding to an event -
 					// whereas we're replacing the model in case of an action response.
-					Map<String, Object> existingModel = (Map<String, Object>) request.getPortletSession().getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
+					Map<String, Object> existingModel = (Map<String, Object>)
+							request.getPortletSession().getAttribute(IMPLICIT_MODEL_SESSION_ATTRIBUTE);
 					if (existingModel != null) {
 						existingModel.putAll(implicitModel);
 						modelToStore = existingModel;
@@ -433,9 +432,10 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 
 	/**
-	 * Portlet-specific subclass of {@link HandlerMethodResolver}.
+	 * Portlet-specific subclass of {@code HandlerMethodResolver}.
 	 */
-	private static class PortletHandlerMethodResolver extends HandlerMethodResolver {
+	@SuppressWarnings("deprecation")
+	private static class PortletHandlerMethodResolver extends org.springframework.web.bind.annotation.support.HandlerMethodResolver {
 
 		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
 
@@ -455,10 +455,10 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 			EventMapping eventMapping = AnnotationUtils.findAnnotation(method, EventMapping.class);
 			RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 			if (actionMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.value(), actionMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.name(), actionMapping.params());
 			}
 			if (renderMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.value(), renderMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.windowState(), renderMapping.params());
 			}
 			if (resourceMapping != null) {
 				mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE, resourceMapping.value(), new String[0]);
@@ -519,7 +519,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 
 		private String determineDefaultPhase(Method handlerMethod) {
-			if (!void.class.equals(handlerMethod.getReturnType())) {
+			if (void.class != handlerMethod.getReturnType()) {
 				return PortletRequest.RENDER_PHASE;
 			}
 			for (Class<?> argType : handlerMethod.getParameterTypes()) {
@@ -544,11 +544,12 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 
 	/**
-	 * Portlet-specific subclass of {@link HandlerMethodInvoker}.
+	 * Portlet-specific subclass of {@code HandlerMethodInvoker}.
 	 */
-	private class PortletHandlerMethodInvoker extends HandlerMethodInvoker {
+	@SuppressWarnings("deprecation")
+	private class PortletHandlerMethodInvoker extends org.springframework.web.bind.annotation.support.HandlerMethodInvoker {
 
-		public PortletHandlerMethodInvoker(HandlerMethodResolver resolver) {
+		public PortletHandlerMethodInvoker(org.springframework.web.bind.annotation.support.HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore,
 					parameterNameDiscoverer, customArgumentResolvers, null);
 		}
@@ -649,7 +650,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 			else if (Principal.class.isAssignableFrom(parameterType)) {
 				return request.getUserPrincipal();
 			}
-			else if (Locale.class.equals(parameterType)) {
+			else if (Locale.class == parameterType) {
 				return request.getLocale();
 			}
 			else if (InputStream.class.isAssignableFrom(parameterType)) {
@@ -676,7 +677,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				}
 				return ((MimeResponse) response).getWriter();
 			}
-			else if (Event.class.equals(parameterType)) {
+			else if (Event.class == parameterType) {
 				if (!(request instanceof EventRequest)) {
 					throw new IllegalStateException("Event can only get obtained from EventRequest");
 				}
@@ -812,9 +813,9 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 					}
 				}
 			}
-			return PortletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
+			return (PortletAnnotationMappingUtils.checkRequestMethod(this.methods, request) &&
 					PortletAnnotationMappingUtils.checkParameters(this.params, request) &&
-					PortletAnnotationMappingUtils.checkHeaders(this.headers, request);
+					PortletAnnotationMappingUtils.checkHeaders(this.headers, request));
 		}
 
 		public boolean isBetterMatchThan(RequestMappingInfo other) {

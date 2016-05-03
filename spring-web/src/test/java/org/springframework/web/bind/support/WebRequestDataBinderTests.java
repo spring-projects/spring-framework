@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,15 @@
 
 package org.springframework.web.bind.support;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.beans.PropertyEditorSupport;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -33,8 +38,6 @@ import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -126,6 +129,31 @@ public class WebRequestDataBinderTests {
 		assertFalse(target.isPostProcessed());
 	}
 
+	// SPR-13502
+	@Test
+	public void testCollectionFieldsDefault() throws Exception {
+		TestBean target = new TestBean();
+		target.setSomeSet(null);
+		target.setSomeList(null);
+		target.setSomeMap(null);
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("_someSet", "visible");
+		request.addParameter("_someList", "visible");
+		request.addParameter("_someMap", "visible");
+
+		binder.bind(new ServletWebRequest(request));
+		assertThat(target.getSomeSet(), notNullValue());
+		assertThat(target.getSomeSet(), isA(Set.class));
+
+		assertThat(target.getSomeList(), notNullValue());
+		assertThat(target.getSomeList(), isA(List.class));
+
+		assertThat(target.getSomeMap(), notNullValue());
+		assertThat(target.getSomeMap(), isA(Map.class));
+	}
+
 	@Test
 	public void testFieldDefaultPreemptsFieldMarker() throws Exception {
 		TestBean target = new TestBean();
@@ -145,6 +173,28 @@ public class WebRequestDataBinderTests {
 		request.removeParameter("!postProcessed");
 		binder.bind(new ServletWebRequest(request));
 		assertFalse(target.isPostProcessed());
+	}
+
+	@Test
+	public void testFieldDefaultWithNestedProperty() throws Exception {
+		TestBean target = new TestBean();
+		target.setSpouse(new TestBean());
+		WebRequestDataBinder binder = new WebRequestDataBinder(target);
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addParameter("!spouse.postProcessed", "on");
+		request.addParameter("_spouse.postProcessed", "visible");
+		request.addParameter("spouse.postProcessed", "on");
+		binder.bind(new ServletWebRequest(request));
+		assertTrue(((TestBean) target.getSpouse()).isPostProcessed());
+
+		request.removeParameter("spouse.postProcessed");
+		binder.bind(new ServletWebRequest(request));
+		assertTrue(((TestBean) target.getSpouse()).isPostProcessed());
+
+		request.removeParameter("!spouse.postProcessed");
+		binder.bind(new ServletWebRequest(request));
+		assertFalse(((TestBean) target.getSpouse()).isPostProcessed());
 	}
 
 	@Test
@@ -323,11 +373,11 @@ public class WebRequestDataBinderTests {
 
 	static class TestBeanWithConcreteSpouse extends TestBean {
 		public void setConcreteSpouse(TestBean spouse) {
-			this.spouses = new ITestBean[] {spouse};
+			setSpouse(spouse);
 		}
 
 		public TestBean getConcreteSpouse() {
-			return (spouses != null ? (TestBean) spouses[0] : null);
+			return (TestBean) getSpouse();
 		}
 	}
 

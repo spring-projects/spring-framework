@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,10 @@ import org.springframework.core.Constants;
  * @see #setMaxWait
  * @see #setTimeBetweenEvictionRunsMillis
  * @see #setMinEvictableIdleTimeMillis
+ * @deprecated as of Spring 4.2, in favor of {@link CommonsPool2TargetSource}
  */
 @SuppressWarnings({"rawtypes", "unchecked", "serial"})
+@Deprecated
 public class CommonsPoolTargetSource extends AbstractPoolingTargetSource implements PoolableObjectFactory {
 
 	private static final Constants constants = new Constants(GenericObjectPool.class);
@@ -78,7 +80,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource impleme
 	private byte whenExhaustedAction = GenericObjectPool.DEFAULT_WHEN_EXHAUSTED_ACTION;
 
 	/**
-	 * The Jakarta Commons {@code ObjectPool} used to pool target objects
+	 * The Apache Commons {@code ObjectPool} used to pool target objects
 	 */
 	private ObjectPool pool;
 

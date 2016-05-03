@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.support;
 
 import java.lang.reflect.Method;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -34,7 +34,7 @@ import java.util.Set;
  */
 public class MethodOverrides {
 
-	private final Set<MethodOverride> overrides = new HashSet<MethodOverride>(0);
+	private final Set<MethodOverride> overrides = new LinkedHashSet<MethodOverride>(0);
 
 
 	/**
@@ -89,13 +89,15 @@ public class MethodOverrides {
 	 * @return the method override, or {@code null} if none
 	 */
 	public MethodOverride getOverride(Method method) {
-		for (MethodOverride override : this.overrides) {
-			if (override.matches(method)) {
-				return override;
+		MethodOverride match = null;
+		for (MethodOverride candidate : this.overrides) {
+			if (candidate.matches(method)) {
+				match = candidate;
 			}
 		}
-		return null;
+		return match;
 	}
+
 
 	@Override
 	public boolean equals(Object other) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,29 @@ package org.springframework.test.context.junit4;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runner.notification.RunNotifier;
+import org.junit.runner.Runner;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.util.ClassUtils;
 
 import static org.junit.Assert.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * Verifies proper handling of the following in conjunction with the
- * {@link SpringJUnit4ClassRunner}:
+ * {@link SpringRunner}:
  * <ul>
- * <li>Spring's {@link Repeat &#064;Repeat}</li>
- * <li>Spring's {@link Timed &#064;Timed}</li>
+ * <li>Spring's {@link Repeat @Repeat}</li>
+ * <li>Spring's {@link Timed @Timed}</li>
  * </ul>
  *
  * @author Sam Brannen
@@ -50,61 +50,52 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class RepeatedSpringRunnerTests {
 
-	private static final AtomicInteger invocationCount = new AtomicInteger();
+	protected static final AtomicInteger invocationCount = new AtomicInteger();
 
-	private final Class<? extends AbstractRepeatedTestCase> testClass;
+	private final Class<?> testClass;
 
 	private final int expectedFailureCount;
-
-	private final int expectedTestStartedCount;
-
-	private final int expectedTestFinishedCount;
-
+	private final int expectedStartedCount;
+	private final int expectedFinishedCount;
 	private final int expectedInvocationCount;
 
 
-	public RepeatedSpringRunnerTests(Class<? extends AbstractRepeatedTestCase> testClass, int expectedFailureCount,
-			int expectedTestStartedCount, int expectedTestFinishedCount, int expectedInvocationCount) {
-		this.testClass = testClass;
+	@Parameters(name = "{0}")
+	public static Object[][] repetitionData() {
+		return new Object[][] {//
+			{ NonAnnotatedRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
+			{ DefaultRepeatValueRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
+			{ NegativeRepeatValueRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 1 },//
+			{ RepeatedFiveTimesRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 5 },//
+			{ RepeatedFiveTimesViaMetaAnnotationRepeatedTestCase.class.getSimpleName(), 0, 1, 1, 5 },//
+			{ TimedRepeatedTestCase.class.getSimpleName(), 3, 4, 4, (5 + 1 + 4 + 10) } //
+		};
+	}
+
+	public RepeatedSpringRunnerTests(String testClassName, int expectedFailureCount,
+			int expectedTestStartedCount, int expectedTestFinishedCount, int expectedInvocationCount) throws Exception {
+		this.testClass = ClassUtils.forName(getClass().getName() + "." + testClassName, getClass().getClassLoader());
 		this.expectedFailureCount = expectedFailureCount;
-		this.expectedTestStartedCount = expectedTestStartedCount;
-		this.expectedTestFinishedCount = expectedTestFinishedCount;
+		this.expectedStartedCount = expectedTestStartedCount;
+		this.expectedFinishedCount = expectedTestFinishedCount;
 		this.expectedInvocationCount = expectedInvocationCount;
 	}
 
-	@Parameters
-	public static Collection<Object[]> repetitionData() {
-		return Arrays.asList(new Object[][] {//
-		//
-			{ NonAnnotatedRepeatedTestCase.class, 0, 1, 1, 1 },//
-			{ DefaultRepeatValueRepeatedTestCase.class, 0, 1, 1, 1 },//
-			{ NegativeRepeatValueRepeatedTestCase.class, 0, 1, 1, 1 },//
-			{ RepeatedFiveTimesRepeatedTestCase.class, 0, 1, 1, 5 },//
-			{ RepeatedFiveTimesViaMetaAnnotationRepeatedTestCase.class, 0, 1, 1, 5 },//
-			{ TimedRepeatedTestCase.class, 3, 4, 4, (5 + 1 + 4 + 10) } //
-		});
+	protected Class<? extends Runner> getRunnerClass() {
+		return SpringRunner.class;
 	}
 
 	@Test
 	public void assertRepetitions() throws Exception {
-		TrackingRunListener listener = new TrackingRunListener();
-		RunNotifier notifier = new RunNotifier();
-		notifier.addListener(listener);
 		invocationCount.set(0);
 
-		new SpringJUnit4ClassRunner(this.testClass).run(notifier);
-		assertEquals("Verifying number of failures for test class [" + this.testClass + "].",
-			this.expectedFailureCount, listener.getTestFailureCount());
-		assertEquals("Verifying number of tests started for test class [" + this.testClass + "].",
-			this.expectedTestStartedCount, listener.getTestStartedCount());
-		assertEquals("Verifying number of tests finished for test class [" + this.testClass + "].",
-			this.expectedTestFinishedCount, listener.getTestFinishedCount());
-		assertEquals("Verifying number of invocations for test class [" + this.testClass + "].",
-			this.expectedInvocationCount, invocationCount.get());
+		runTestsAndAssertCounters(getRunnerClass(), this.testClass, expectedStartedCount, expectedFailureCount,
+			expectedFinishedCount, 0, 0);
+
+		assertEquals("invocations for [" + testClass + "]:", expectedInvocationCount, invocationCount.get());
 	}
 
 
-	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners({})
 	public abstract static class AbstractRepeatedTestCase {
 
@@ -166,9 +157,7 @@ public class RepeatedSpringRunnerTests {
 	}
 
 	/**
-	 * Unit tests for claims raised in <a
-	 * href="http://jira.springframework.org/browse/SPR-6011"
-	 * target="_blank">SPR-6011</a>.
+	 * Unit tests for claims raised in <a href="https://jira.spring.io/browse/SPR-6011" target="_blank">SPR-6011</a>.
 	 */
 	@Ignore("TestCase classes are run manually by the enclosing test class")
 	public static final class TimedRepeatedTestCase extends AbstractRepeatedTestCase {

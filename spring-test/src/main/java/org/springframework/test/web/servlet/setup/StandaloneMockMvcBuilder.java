@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -64,20 +65,20 @@ import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
- * A MockMvcBuilder that accepts {@code @Controller} registrations thus allowing
- * full control over the instantiation and the initialization of controllers and
- * their dependencies similar to plain unit tests, and also making it possible
- * to test one controller at a time.
+ * A {@code MockMvcBuilder} that accepts {@code @Controller} registrations
+ * thus allowing full control over the instantiation and initialization of
+ * controllers and their dependencies similar to plain unit tests, and also
+ * making it possible to test one controller at a time.
  *
  * <p>This builder creates the minimum infrastructure required by the
  * {@link DispatcherServlet} to serve requests with annotated controllers and
- * also provides methods to customize it. The resulting configuration and
- * customizations possible are equivalent to using the MVC Java config except
+ * also provides methods for customization. The resulting configuration and
+ * customization options are equivalent to using MVC Java config except
  * using builder style methods.
  *
  * <p>To configure view resolution, either select a "fixed" view to use for every
- * performed request (see {@link #setSingleView(View)}) or provide a list of
- * {@code ViewResolver}'s, see {@link #setViewResolvers(ViewResolver...)}.
+ * request performed (see {@link #setSingleView(View)}) or provide a list of
+ * {@code ViewResolver}s (see {@link #setViewResolvers(ViewResolver...)}).
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -85,6 +86,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneMockMvcBuilder> {
 
 	private final Object[] controllers;
+
+	private List<Object> controllerAdvice;
 
 	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
 
@@ -100,7 +103,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private FormattingConversionService conversionService = null;
 
-	private List<HandlerExceptionResolver> handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>();
+	private List<HandlerExceptionResolver> handlerExceptionResolvers;
 
 	private Long asyncRequestTimeout;
 
@@ -126,6 +129,21 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 	protected StandaloneMockMvcBuilder(Object... controllers) {
 		Assert.isTrue(!ObjectUtils.isEmpty(controllers), "At least one controller is required");
 		this.controllers = controllers;
+	}
+
+	/**
+	 * Register one or more
+	 * {@link org.springframework.web.bind.annotation.ControllerAdvice
+	 * ControllerAdvice} instances to be used in tests.
+	 * <p>Normally {@code @ControllerAdvice} are auto-detected as long as they're
+	 * declared as Spring beans. However since the standalone setup does not load
+	 * any Spring configuration they need to be registered explicitly here
+	 * instead much like controllers.
+	 * @since 4.2
+	 */
+	public StandaloneMockMvcBuilder setControllerAdvice(Object... controllerAdvice) {
+		this.controllerAdvice = Arrays.asList(controllerAdvice);
+		return this;
 	}
 
 	/**
@@ -317,10 +335,14 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private void registerMvcSingletons(StubWebApplicationContext wac) {
 		StandaloneConfiguration config = new StandaloneConfiguration();
+		config.setApplicationContext(wac);
+
+		wac.addBeans(this.controllerAdvice);
 
 		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
 		hm.setServletContext(wac.getServletContext());
 		hm.setApplicationContext(wac);
+		hm.afterPropertiesSet();
 		hm.registerHandlers(this.controllers);
 		wac.addBean("requestMappingHandlerMapping", hm);
 
@@ -427,7 +449,23 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 		@Override
 		protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-			exceptionResolvers.addAll(StandaloneMockMvcBuilder.this.handlerExceptionResolvers);
+			if (handlerExceptionResolvers == null) {
+				return;
+			}
+			for (HandlerExceptionResolver resolver : handlerExceptionResolvers) {
+				if (resolver instanceof ApplicationContextAware) {
+					((ApplicationContextAware) resolver).setApplicationContext(getApplicationContext());
+				}
+				if (resolver instanceof InitializingBean) {
+					try {
+						((InitializingBean) resolver).afterPropertiesSet();
+					}
+					catch (Exception ex) {
+						throw new IllegalStateException("Failure from afterPropertiesSet", ex);
+					}
+				}
+				exceptionResolvers.add(resolver);
+			}
 		}
 	}
 

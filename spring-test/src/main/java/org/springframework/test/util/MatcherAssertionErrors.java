@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.util;
 
-import java.lang.reflect.Method;
+package org.springframework.test.util;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
-
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * A replacement of {@link org.hamcrest.MatcherAssert} that removes the need to
@@ -32,19 +28,14 @@ import org.springframework.util.ReflectionUtils;
  * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @since 3.2
+ * @deprecated as of Spring 4.2, in favor of the original
+ * {@link org.hamcrest.MatcherAssert} class with JUnit 4.9 / Hamcrest 1.3
  */
+@Deprecated
 public abstract class MatcherAssertionErrors {
 
-	private static final Method describeMismatchMethod =
-			ClassUtils.getMethodIfAvailable(Matcher.class, "describeMismatch", Object.class, Description.class);
-
-
-	private MatcherAssertionErrors() {
-	}
-
 	/**
-	 * Asserts that the given matcher matches the actual value.
-	 *
+	 * Assert that the given matcher matches the actual value.
 	 * @param <T> the static type accepted by the matcher
 	 * @param actual the value to match against
 	 * @param matcher the matcher
@@ -54,8 +45,7 @@ public abstract class MatcherAssertionErrors {
 	}
 
 	/**
-	 * Asserts that the given matcher matches the actual value.
-	 *
+	 * Assert that the given matcher matches the actual value.
 	 * @param <T> the static type accepted by the matcher
 	 * @param reason additional information about the error
 	 * @param actual the value to match against
@@ -67,16 +57,8 @@ public abstract class MatcherAssertionErrors {
 			description.appendText(reason);
 			description.appendText("\nExpected: ");
 			description.appendDescriptionOf(matcher);
-			if (describeMismatchMethod != null) {
-				description.appendText("\n     but: ");
-				// matcher.describeMismatch(actual, description);
-				ReflectionUtils.invokeMethod(describeMismatchMethod, matcher, actual, description);
-			}
-			else {
-				description.appendText("\n     got: ");
-				description.appendValue(actual);
-				description.appendText("\n");
-			}
+			description.appendText("\n     but: ");
+			matcher.describeMismatch(actual, description);
 			throw new AssertionError(description.toString());
 		}
 	}

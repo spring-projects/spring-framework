@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,17 @@ package org.springframework.web.socket;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.EnumSet;
-import javax.servlet.DispatcherType;
+
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.LifecycleEvent;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
@@ -39,8 +43,11 @@ import org.springframework.web.servlet.DispatcherServlet;
  * Tomcat based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class TomcatWebSocketTestServer implements WebSocketTestServer {
+
+	private static final Log logger = LogFactory.getLog(TomcatWebSocketTestServer.class);
 
 	private Tomcat tomcatServer;
 
@@ -105,8 +112,9 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 		}
 	}
 
-	private EnumSet<DispatcherType> getDispatcherTypes() {
-		return EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC);
+	@Override
+	public ServletContext getServletContext() {
+		return this.context.getServletContext();
 	}
 
 	@Override
@@ -120,6 +128,14 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.tomcatServer.start();
+		this.context.addLifecycleListener(new LifecycleListener() {
+			@Override
+			public void lifecycleEvent(LifecycleEvent event) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Event: " + event.getType());
+				}
+			}
+		});
 	}
 
 	@Override

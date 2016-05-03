@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -91,6 +92,7 @@ public class FreeMarkerMacroTests {
 	public void testExposeSpringMacroHelpers() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView() {
 			@Override
+			@SuppressWarnings("rawtypes")
 			protected void processTemplate(Template template, SimpleHash fmModel, HttpServletResponse response)
 					throws TemplateException {
 				Map model = fmModel.toMap();
@@ -209,12 +211,12 @@ public class FreeMarkerMacroTests {
 
 	@Test
 	public void testForm3() throws Exception {
-		assertEquals("<textarea id=\"name\" name=\"name\" >Darren</textarea>", getMacroOutput("FORM3"));
+		assertEquals("<textarea id=\"name\" name=\"name\" >\nDarren</textarea>", getMacroOutput("FORM3"));
 	}
 
 	@Test
 	public void testForm4() throws Exception {
-		assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>Darren</textarea>", getMacroOutput("FORM4"));
+		assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>\nDarren</textarea>", getMacroOutput("FORM4"));
 	}
 
 	// TODO verify remaining output (fix whitespace)
@@ -324,6 +326,7 @@ public class FreeMarkerMacroTests {
 
 		// tokenize output and ignore whitespace
 		String output = response.getContentAsString();
+		output = output.replace("\r\n", "\n");
 		return output.trim();
 	}
 

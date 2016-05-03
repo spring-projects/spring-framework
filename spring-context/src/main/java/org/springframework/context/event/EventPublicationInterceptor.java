@@ -63,7 +63,7 @@ public class EventPublicationInterceptor
 	 * if it does not expose a constructor that takes a single {@code Object} argument
 	 */
 	public void setApplicationEventClass(Class<?> applicationEventClass) {
-		if (ApplicationEvent.class.equals(applicationEventClass) ||
+		if (ApplicationEvent.class == applicationEventClass ||
 			!ApplicationEvent.class.isAssignableFrom(applicationEventClass)) {
 			throw new IllegalArgumentException("applicationEventClass needs to extend ApplicationEvent");
 		}

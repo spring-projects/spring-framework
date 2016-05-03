@@ -25,7 +25,6 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
-import org.springframework.ui.velocity.VelocityEngineFactory;
 import org.springframework.web.context.ServletContextAware;
 
 /**
@@ -69,8 +68,10 @@ import org.springframework.web.context.ServletContextAware;
  * @see #setResourceLoaderPath
  * @see #setVelocityEngine
  * @see VelocityView
+ * @deprecated as of Spring 4.3, in favor of FreeMarker
  */
-public class VelocityConfigurer extends VelocityEngineFactory
+@Deprecated
+public class VelocityConfigurer extends org.springframework.ui.velocity.VelocityEngineFactory
 		implements VelocityConfig, InitializingBean, ResourceLoaderAware, ServletContextAware {
 
 	/** the name of the resource loader for Spring's bind macros */

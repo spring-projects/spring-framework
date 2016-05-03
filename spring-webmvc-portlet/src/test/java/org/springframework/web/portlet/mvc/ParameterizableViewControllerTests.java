@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,11 @@
 
 package org.springframework.web.portlet.mvc;
 
-import javax.portlet.ActionRequest;
-import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
@@ -31,43 +29,37 @@ import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.web.portlet.ModelAndView;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Mark Fisher
+ * @author Sam Brannen
  */
-public class ParameterizableViewControllerTests extends TestCase {
+public class ParameterizableViewControllerTests {
 
-	public void testRenderRequestWithViewNameSet() throws Exception {
-		ParameterizableViewController controller = new ParameterizableViewController();
+	private final ParameterizableViewController controller = new ParameterizableViewController();
+
+	private final RenderRequest request = new MockRenderRequest();
+
+	private final RenderResponse response = new MockRenderResponse();
+
+
+	@Test
+	public void renderRequestWithViewNameSet() throws Exception {
 		String viewName = "testView";
 		controller.setViewName(viewName);
-		RenderRequest request = new MockRenderRequest();
-		RenderResponse response = new MockRenderResponse();
 		ModelAndView mav = controller.handleRenderRequest(request, response);
 		assertEquals(viewName, mav.getViewName());
 	}
 
-	public void testInitApplicationContextWithNoViewNameSet() throws Exception {
-		ParameterizableViewController controller = new ParameterizableViewController();
-		try {
-			controller.setApplicationContext(new StaticPortletApplicationContext());
-			fail("should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void initApplicationContextWithNoViewNameSet() throws Exception {
+		controller.setApplicationContext(new StaticPortletApplicationContext());
 	}
 
-	public void testActionRequestNotHandled() throws Exception {
-		ParameterizableViewController controller = new ParameterizableViewController();
-		ActionRequest request = new MockActionRequest();
-		ActionResponse response = new MockActionResponse();
-		try {
-			controller.handleActionRequest(request, response);
-			fail("should have thrown PortletException");
-		}
-		catch (PortletException ex) {
-			// expected
-		}
+	@Test(expected = PortletException.class)
+	public void actionRequestNotHandled() throws Exception {
+		controller.handleActionRequest(new MockActionRequest(), new MockActionResponse());
 	}
 
 }

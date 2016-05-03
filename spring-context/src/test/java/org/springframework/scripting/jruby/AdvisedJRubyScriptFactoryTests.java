@@ -58,7 +58,8 @@ public final class AdvisedJRubyScriptFactoryTests {
 			assertEquals(0, advice.getCalls());
 			bean.getMessage();
 			assertEquals(1, advice.getCalls());
-		} finally {
+		}
+		finally {
 			ctx.close();
 		}
 	}
@@ -76,7 +77,8 @@ public final class AdvisedJRubyScriptFactoryTests {
 			assertEquals(0, advice.getCalls());
 			bean.getMessage();
 			assertEquals(1, advice.getCalls());
-		} finally {
+		}
+		finally {
 			ctx.close();
 		}
 	}

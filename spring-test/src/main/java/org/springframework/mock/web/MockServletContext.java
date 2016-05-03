@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -144,7 +143,7 @@ public class MockServletContext implements ServletContext {
 
 	private String servletContextName = "MockServletContext";
 
-	private final Set<String> declaredRoles = new HashSet<String>();
+	private final Set<String> declaredRoles = new LinkedHashSet<String>();
 
 	private Set<SessionTrackingMode> sessionTrackingModes;
 
@@ -291,7 +290,7 @@ public class MockServletContext implements ServletContext {
 	 */
 	@Override
 	public String getMimeType(String filePath) {
-		String mimeType = MimeTypeResolver.getMimeType(filePath);
+		String mimeType = FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
 		return ("application/octet-stream".equals(mimeType) ? null : mimeType);
 	}
 
@@ -370,7 +369,6 @@ public class MockServletContext implements ServletContext {
 	/**
 	 * Register a {@link RequestDispatcher} (typically a {@link MockRequestDispatcher})
 	 * that acts as a wrapper for the named Servlet.
-	 *
 	 * @param name the name of the wrapped Servlet
 	 * @param requestDispatcher the dispatcher that wraps the named Servlet
 	 * @see #getNamedDispatcher
@@ -384,7 +382,6 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * Unregister the {@link RequestDispatcher} with the given name.
-	 *
 	 * @param name the name of the dispatcher to unregister
 	 * @see #getNamedDispatcher
 	 * @see #registerNamedDispatcher
@@ -429,13 +426,13 @@ public class MockServletContext implements ServletContext {
 	@Override
 	@Deprecated
 	public Enumeration<Servlet> getServlets() {
-		return Collections.enumeration(new HashSet<Servlet>());
+		return Collections.enumeration(Collections.<Servlet>emptySet());
 	}
 
 	@Override
 	@Deprecated
 	public Enumeration<String> getServletNames() {
-		return Collections.enumeration(new HashSet<String>());
+		return Collections.enumeration(Collections.<String>emptySet());
 	}
 
 	@Override
@@ -678,18 +675,6 @@ public class MockServletContext implements ServletContext {
 	@Override
 	public <T extends EventListener> T createListener(Class<T> c) throws ServletException {
 		throw new UnsupportedOperationException();
-	}
-
-
-	/**
-	 * Inner factory class used to introduce a Java Activation Framework
-	 * dependency when actually asked to resolve a MIME type.
-	 */
-	private static class MimeTypeResolver {
-
-		public static String getMimeType(String filePath) {
-			return FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
-		}
 	}
 
 }

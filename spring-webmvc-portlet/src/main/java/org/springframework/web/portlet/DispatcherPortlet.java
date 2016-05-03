@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.core.style.StylerUtils;
@@ -66,9 +66,8 @@ import org.springframework.web.servlet.ViewResolver;
  * controllers. Dispatches to registered handlers for processing a portlet request.
  *
  * <p>This portlet is very flexible: It can be used with just about any workflow,
- * with the installation of the appropriate adapter classes. It offers the
- * following functionality that distinguishes it from other request-driven
- * portlet MVC frameworks:
+ * with the installation of the appropriate adapter classes. It offers the following
+ * functionality that distinguishes it from other request-driven Portlet MVC frameworks:
  *
  * <ul>
  * <li>It is based around a JavaBeans configuration mechanism.
@@ -77,8 +76,8 @@ import org.springframework.web.servlet.ViewResolver;
  * as part of an application - to control the routing of requests to handler objects.
  * Default is a {@link org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping}.
  * HandlerMapping objects can be defined as beans in the portlet's application context,
- * implementing the HandlerMapping interface, overriding the default HandlerMapping if present.
- * HandlerMappings can be given any bean name (they are tested by type).
+ * implementing the HandlerMapping interface, overriding the default HandlerMapping
+ * if present. HandlerMappings can be given any bean name (they are tested by type).
  *
  * <li>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
  * The default adapter is {@link org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter}
@@ -102,27 +101,24 @@ import org.springframework.web.servlet.ViewResolver;
  * (they are tested by type).
  *
  * <li>The dispatcher's strategy for resolving multipart requests is determined by a
- * {@link org.springframework.web.portlet.multipart.PortletMultipartResolver} implementation.
- * An implementations for Jakarta Commons FileUpload is included:
+ * {@link org.springframework.web.portlet.multipart.PortletMultipartResolver}
+ * implementation. An implementations for Apache Commons FileUpload is included:
  * {@link org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver}.
  * The MultipartResolver bean name is "portletMultipartResolver"; default is none.
  * </ul>
  *
- * <p><b>NOTE: The {@code @RequestMapping} annotation will only be processed
- * if a corresponding {@code HandlerMapping} (for type level annotations)
- * and/or {@code HandlerAdapter} (for method level annotations)
- * is present in the dispatcher.</b> This is the case by default.
- * However, if you are defining custom {@code HandlerMappings} or
- * {@code HandlerAdapters}, then you need to make sure that a
- * corresponding custom {@code DefaultAnnotationHandlerMapping}
- * and/or {@code AnnotationMethodHandlerAdapter} is defined as well
- * - provided that you intend to use {@code @RequestMapping}.
+ * <p><b>NOTE: The {@code @RequestMapping} annotation will only be processed if a
+ * corresponding {@code HandlerMapping} (for type-level annotations) and/or
+ * {@code HandlerAdapter} (for method-level annotations) is present in the dispatcher.</b>
+ * This is the case by default. However, if you are defining custom {@code HandlerMappings}
+ * or {@code HandlerAdapters}, then you need to make sure that a corresponding custom
+ * {@code DefaultAnnotationHandlerMapping} and/or {@code AnnotationMethodHandlerAdapter}
+ * is defined as well - provided that you intend to use {@code @RequestMapping}.
  *
  * <p><b>A web application can define any number of DispatcherPortlets.</b>
- * Each portlet will operate in its own namespace, loading its own application
- * context with mappings, handlers, etc. Only the root application context
- * as loaded by {@link org.springframework.web.context.ContextLoaderListener},
- * if any, will be shared.
+ * Each portlet will operate in its own namespace, loading its own application context
+ * with mappings, handlers, etc. Only the root application context as loaded by
+ * {@link org.springframework.web.context.ContextLoaderListener}, if any, will be shared.
  *
  * <p>Thanks to Rainer Schmitz, Nick Lothian and Eric Dalquist for their suggestions!
  *
@@ -401,7 +397,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList<HandlerMapping>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
-				OrderComparator.sort(this.handlerMappings);
+				AnnotationAwareOrderComparator.sort(this.handlerMappings);
 			}
 		}
 		else {
@@ -439,7 +435,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerAdapters = new ArrayList<HandlerAdapter>(matchingBeans.values());
 				// We keep HandlerAdapters in sorted order.
-				OrderComparator.sort(this.handlerAdapters);
+				AnnotationAwareOrderComparator.sort(this.handlerAdapters);
 			}
 		}
 		else {
@@ -477,7 +473,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>(matchingBeans.values());
 				// We keep HandlerExceptionResolvers in sorted order.
-				OrderComparator.sort(this.handlerExceptionResolvers);
+				AnnotationAwareOrderComparator.sort(this.handlerExceptionResolvers);
 			}
 		}
 		else {
@@ -516,7 +512,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			if (!matchingBeans.isEmpty()) {
 				this.viewResolvers = new ArrayList<ViewResolver>(matchingBeans.values());
 				// We keep ViewResolvers in sorted order.
-				OrderComparator.sort(this.viewResolvers);
+				AnnotationAwareOrderComparator.sort(this.viewResolvers);
 			}
 		}
 		else {

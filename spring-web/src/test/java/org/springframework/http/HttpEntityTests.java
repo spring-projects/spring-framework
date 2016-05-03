@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.http;
+
+import java.net.URI;
 
 import org.junit.Test;
 
@@ -86,12 +88,39 @@ public class HttpEntityTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);
 		String body = "foo";
-		ResponseEntity<String> entity = new ResponseEntity<String>(body, headers, HttpStatus.OK);
-		assertEquals(body, entity.getBody());
-		assertEquals(MediaType.TEXT_PLAIN, entity.getHeaders().getContentType());
-		assertEquals("text/plain", entity.getHeaders().getFirst("Content-Type"));
-		assertEquals("text/plain", entity.getHeaders().getFirst("Content-Type"));
+		HttpEntity<String> httpEntity = new HttpEntity<String>(body, headers);
+		ResponseEntity<String> responseEntity = new ResponseEntity<String>(body, headers, HttpStatus.OK);
+		ResponseEntity<String> responseEntity2 = new ResponseEntity<String>(body, headers, HttpStatus.OK);
 
+		assertEquals(body, responseEntity.getBody());
+		assertEquals(MediaType.TEXT_PLAIN, responseEntity.getHeaders().getContentType());
+		assertEquals("text/plain", responseEntity.getHeaders().getFirst("Content-Type"));
+		assertEquals("text/plain", responseEntity.getHeaders().getFirst("Content-Type"));
+
+		assertFalse(httpEntity.equals(responseEntity));
+		assertFalse(responseEntity.equals(httpEntity));
+		assertTrue(responseEntity.equals(responseEntity2));
+		assertTrue(responseEntity2.equals(responseEntity));
+	}
+
+	@Test
+	public void requestEntity() throws Exception {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.TEXT_PLAIN);
+		String body = "foo";
+		HttpEntity<String> httpEntity = new HttpEntity<String>(body, headers);
+		RequestEntity<String> requestEntity = new RequestEntity<String>(body, headers, HttpMethod.GET, new URI("/"));
+		RequestEntity<String> requestEntity2 = new RequestEntity<String>(body, headers, HttpMethod.GET, new URI("/"));
+
+		assertEquals(body, requestEntity.getBody());
+		assertEquals(MediaType.TEXT_PLAIN, requestEntity.getHeaders().getContentType());
+		assertEquals("text/plain", requestEntity.getHeaders().getFirst("Content-Type"));
+		assertEquals("text/plain", requestEntity.getHeaders().getFirst("Content-Type"));
+
+		assertFalse(httpEntity.equals(requestEntity));
+		assertFalse(requestEntity.equals(httpEntity));
+		assertTrue(requestEntity.equals(requestEntity2));
+		assertTrue(requestEntity2.equals(requestEntity));
 	}
 
 }

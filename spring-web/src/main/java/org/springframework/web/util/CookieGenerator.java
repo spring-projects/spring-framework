@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,6 +203,12 @@ public class CookieGenerator {
 		Assert.notNull(response, "HttpServletResponse must not be null");
 		Cookie cookie = createCookie("");
 		cookie.setMaxAge(0);
+		if (isCookieSecure()) {
+			cookie.setSecure(true);
+		}
+		if (isCookieHttpOnly()) {
+			cookie.setHttpOnly(true);
+		}
 		response.addCookie(cookie);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Removed cookie with name [" + getCookieName() + "]");

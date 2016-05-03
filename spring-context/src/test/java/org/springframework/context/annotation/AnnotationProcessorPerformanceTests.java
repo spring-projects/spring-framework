@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +47,14 @@ public class AnnotationProcessorPerformanceTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
-	@Test
-	public void testPrototypeCreationWithResourcePropertiesIsFastEnough() {
+	@Before
+	public void commonAssumptions() {
 		Assume.group(TestGroup.PERFORMANCE);
 		Assume.notLogging(factoryLog);
+	}
+
+	@Test
+	public void testPrototypeCreationWithResourcePropertiesIsFastEnough() {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
@@ -65,14 +71,11 @@ public class AnnotationProcessorPerformanceTests {
 			assertSame(spouse, tb.getSpouse());
 		}
 		sw.stop();
-		//System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
 	@Test
 	public void testPrototypeCreationWithOverriddenResourcePropertiesIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-		Assume.notLogging(factoryLog);
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
@@ -90,14 +93,11 @@ public class AnnotationProcessorPerformanceTests {
 			assertSame(spouse, tb.getSpouse());
 		}
 		sw.stop();
-		//System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
 	@Test
 	public void testPrototypeCreationWithAutowiredPropertiesIsFastEnough() {
-		Assume.group(TestGroup.PERFORMANCE);
-		Assume.notLogging(factoryLog);
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
@@ -114,14 +114,11 @@ public class AnnotationProcessorPerformanceTests {
 			assertSame(spouse, tb.getSpouse());
 		}
 		sw.stop();
-		//System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 4000);
 	}
 
 	@Test
 	public void testPrototypeCreationWithOverriddenAutowiredPropertiesIsFastEnough() {
-		// Assume.group(TestGroup.PERFORMANCE);
-		Assume.notLogging(factoryLog);
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
@@ -139,7 +136,6 @@ public class AnnotationProcessorPerformanceTests {
 			assertSame(spouse, tb.getSpouse());
 		}
 		sw.stop();
-		System.out.println(sw.getTotalTimeMillis());
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 6000);
 	}
 
@@ -152,7 +148,6 @@ public class AnnotationProcessorPerformanceTests {
 			super.setSpouse(spouse);
 		}
 	}
-
 
 	private static class AutowiredAnnotatedTestBean extends TestBean {
 

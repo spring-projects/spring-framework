@@ -26,7 +26,9 @@ import org.springframework.core.NestedRuntimeException;
  * @author Juergen Hoeller
  * @since 2.5.6
  * @see HandlerMethodInvoker#invokeHandlerMethod
+ * @deprecated as of 4.3, in favor of the {@code HandlerMethod}-based MVC infrastructure
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class HandlerMethodInvocationException extends NestedRuntimeException {
 

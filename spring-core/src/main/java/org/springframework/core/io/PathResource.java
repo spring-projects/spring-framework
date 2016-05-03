@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * Implements the extended {@link WritableResource} interface.
  *
  * @author Philippe Marschall
+ * @author Juergen Hoeller
  * @since 4.0
  * @see java.nio.file.Path
  */
@@ -131,6 +132,29 @@ public class PathResource extends AbstractResource implements WritableResource {
 	}
 
 	/**
+	 * This implementation checks whether the underlying file is marked as writable
+	 * (and corresponds to an actual file with content, not to a directory).
+	 * @see java.nio.file.Files#isWritable(Path)
+	 * @see java.nio.file.Files#isDirectory(Path, java.nio.file.LinkOption...)
+	 */
+	@Override
+	public boolean isWritable() {
+		return (Files.isWritable(this.path) && !Files.isDirectory(this.path));
+	}
+
+	/**
+	 * This implementation opens a OutputStream for the underlying file.
+	 * @see java.nio.file.spi.FileSystemProvider#newOutputStream(Path, OpenOption...)
+	 */
+	@Override
+	public OutputStream getOutputStream() throws IOException {
+		if (Files.isDirectory(this.path)) {
+			throw new FileNotFoundException(getPath() + " (is a directory)");
+		}
+		return Files.newOutputStream(this.path);
+	}
+
+	/**
 	 * This implementation returns a URL for the underlying file.
 	 * @see java.nio.file.Path#toUri()
 	 * @see java.net.URI#toURL()
@@ -178,8 +202,8 @@ public class PathResource extends AbstractResource implements WritableResource {
 	 */
 	@Override
 	public long lastModified() throws IOException {
-		// we can not use the super class method since it uses conversion to a File and
-		// only Paths on the default file system can be converted to a File
+		// We can not use the superclass method since it uses conversion to a File and
+		// only a Path on the default file system can be converted to a File...
 		return Files.getLastModifiedTime(path).toMillis();
 	}
 
@@ -205,31 +229,6 @@ public class PathResource extends AbstractResource implements WritableResource {
 	@Override
 	public String getDescription() {
 		return "path [" + this.path.toAbsolutePath() + "]";
-	}
-
-	// implementation of WritableResource
-
-	/**
-	 * This implementation checks whether the underlying file is marked as writable
-	 * (and corresponds to an actual file with content, not to a directory).
-	 * @see java.nio.file.Files#isWritable(Path)
-	 * @see java.nio.file.Files#isDirectory(Path, java.nio.file.LinkOption...)
-	 */
-	@Override
-	public boolean isWritable() {
-		return Files.isWritable(this.path) && !Files.isDirectory(this.path);
-	}
-
-	/**
-	 * This implementation opens a OutputStream for the underlying file.
-	 * @see java.nio.file.spi.FileSystemProvider#newOutputStream(Path, OpenOption...)
-	 */
-	@Override
-	public OutputStream getOutputStream() throws IOException {
-		if (Files.isDirectory(this.path)) {
-			throw new FileNotFoundException(getPath() + " (is a directory)");
-		}
-		return Files.newOutputStream(this.path);
 	}
 
 

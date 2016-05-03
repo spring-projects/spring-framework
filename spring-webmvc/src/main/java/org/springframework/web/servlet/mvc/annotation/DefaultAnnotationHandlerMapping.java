@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,7 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * @since 2.5
  * @see RequestMapping
  * @see AnnotationMethodHandlerAdapter
- *
- * @deprecated in Spring 3.2 in favor of
+ * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping RequestMappingHandlerMapping}
  */
 @Deprecated

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ import org.springframework.util.StringUtils;
  *   &lt;property name="message" value="Hello World!"/&gt;
  * &lt;/bean&gt;
  *
- * &lt;bean id="groovyMessenger" class="org.springframework.scripting.bsh.GroovyScriptFactory"&gt;
+ * &lt;bean id="groovyMessenger" class="org.springframework.scripting.groovy.GroovyScriptFactory"&gt;
  *   &lt;constructor-arg value="classpath:mypackage/Messenger.groovy"/&gt;
  *   &lt;property name="message" value="Hello World!"/&gt;
  * &lt;/bean&gt;</pre>
@@ -346,17 +346,16 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * @param scriptedObjectBeanName the name of the internal scripted object bean
 	 */
 	protected void prepareScriptBeans(BeanDefinition bd, String scriptFactoryBeanName, String scriptedObjectBeanName) {
-
 		// Avoid recreation of the script bean definition in case of a prototype.
 		synchronized (this.scriptBeanFactory) {
 			if (!this.scriptBeanFactory.containsBeanDefinition(scriptedObjectBeanName)) {
 
-				this.scriptBeanFactory.registerBeanDefinition(scriptFactoryBeanName,
-						createScriptFactoryBeanDefinition(bd));
-				ScriptFactory scriptFactory = this.scriptBeanFactory
-						.getBean(scriptFactoryBeanName, ScriptFactory.class);
-				ScriptSource scriptSource = getScriptSource(scriptFactoryBeanName,
-						scriptFactory.getScriptSourceLocator());
+				this.scriptBeanFactory.registerBeanDefinition(
+						scriptFactoryBeanName, createScriptFactoryBeanDefinition(bd));
+				ScriptFactory scriptFactory =
+						this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);
+				ScriptSource scriptSource =
+						getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());
 				Class<?>[] interfaces = scriptFactory.getScriptInterfaces();
 
 				Class<?>[] scriptedInterfaces = interfaces;
@@ -365,8 +364,8 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 					scriptedInterfaces = ObjectUtils.addObjectToArray(interfaces, configInterface);
 				}
 
-				BeanDefinition objectBd = createScriptedObjectBeanDefinition(bd, scriptFactoryBeanName, scriptSource,
-						scriptedInterfaces);
+				BeanDefinition objectBd = createScriptedObjectBeanDefinition(
+						bd, scriptFactoryBeanName, scriptSource, scriptedInterfaces);
 				long refreshCheckDelay = resolveRefreshCheckDelay(bd);
 				if (refreshCheckDelay >= 0) {
 					objectBd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
@@ -382,7 +381,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * If the {@link BeanDefinition} has a
 	 * {@link org.springframework.core.AttributeAccessor metadata attribute}
 	 * under the key {@link #REFRESH_CHECK_DELAY_ATTRIBUTE} which is a valid {@link Number}
-	 * type, then this value is used. Otherwise, the the {@link #defaultRefreshCheckDelay}
+	 * type, then this value is used. Otherwise, the {@link #defaultRefreshCheckDelay}
 	 * value is used.
 	 * @param beanDefinition the BeanDefinition to check
 	 * @return the refresh check delay
@@ -506,7 +505,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 				Signature signature = new Signature(abd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
 				maker.add(signature, new Type[0]);
 			}
-			if (abd.getDestroyMethodName() != null) {
+			if (StringUtils.hasText(abd.getDestroyMethodName())) {
 				Signature signature = new Signature(abd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
 				maker.add(signature, new Type[0]);
 			}
@@ -569,7 +568,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		proxyFactory.setInterfaces(interfaces);
 		if (proxyTargetClass) {
 			classLoader = null;  // force use of Class.getClassLoader()
-			proxyFactory.setProxyTargetClass(proxyTargetClass);
+			proxyFactory.setProxyTargetClass(true);
 		}
 
 		DelegatingIntroductionInterceptor introduction = new DelegatingIntroductionInterceptor(ts);

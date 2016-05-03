@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.springframework.http;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -33,14 +33,14 @@ import org.springframework.util.ObjectUtils;
  * {@link org.springframework.web.client.RestTemplate#exchange(RequestEntity, Class) exchange()}:
  * <pre class="code">
  * MyRequest body = ...
- * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(new URI(&quot;http://example.com/bar&quot;).accept(MediaType.APPLICATION_JSON).body(body);
+ * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(new URI(&quot;http://example.com/bar&quot;)).accept(MediaType.APPLICATION_JSON).body(body);
  * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
  * </pre>
  *
  * <p>If you would like to provide a URI template with variables, consider using
  * {@link org.springframework.web.util.UriTemplate}:
  * <pre class="code">
- * URI uri = new UriTemplate(&quot;http://example.com/{foo}&quot;").expand(&quot;bar&quot;);
+ * URI uri = new UriTemplate(&quot;http://example.com/{foo}&quot;).expand(&quot;bar&quot;);
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
  * </pre>
  *
@@ -55,6 +55,7 @@ import org.springframework.util.ObjectUtils;
  * </pre>
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 4.1
  * @see #getMethod()
  * @see #getUrl()
@@ -64,6 +65,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	private final HttpMethod method;
 
 	private final URI url;
+
+	private final Type type;
 
 
 	/**
@@ -82,7 +85,19 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(T body, HttpMethod method, URI url) {
-		this(body, null, method, url);
+		this(body, null, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, body and type but without headers.
+	 * @param body the body
+	 * @param method the method
+	 * @param url the URL
+	 * @param type the type used for generic type resolution
+	 * @since 4.3
+	 */
+	public RequestEntity(T body, HttpMethod method, URI url, Type type) {
+		this(body, null, method, url, type);
 	}
 
 	/**
@@ -92,7 +107,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
-		this(null, headers, method, url);
+		this(null, headers, method, url, null);
 	}
 
 	/**
@@ -103,11 +118,23 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url) {
+		this(body, headers, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, headers, body and type.
+	 * @param body the body
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @param type the type used for generic type resolution
+	 * @since 4.3
+	 */
+	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url, Type type) {
 		super(body, headers);
-		Assert.notNull(method, "'method' is required");
-		Assert.notNull(url, "'url' is required");
 		this.method = method;
 		this.url = url;
+		this.type = type;
 	}
 
 
@@ -127,13 +154,21 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		return this.url;
 	}
 
+	/**
+	 * Return the type of the request's body.
+	 * @return the request's body type
+	 * @since 4.3
+	 */
+	public Type getType() {
+		return (this.type == null && this.getBody() != null ? this.getBody().getClass() : this.type );
+	}
 
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RequestEntity) || !super.equals(other)) {
+		if (!super.equals(other)) {
 			return false;
 		}
 		RequestEntity<?> otherEntity = (RequestEntity<?>) other;
@@ -325,11 +360,21 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the body of the request entity and build the RequestEntity.
-		 * @param body the body of the request entity
 		 * @param <T> the type of the body
+		 * @param body the body of the request entity
 		 * @return the built request entity
 		 */
 		<T> RequestEntity<T> body(T body);
+
+		/**
+		 * Set the body and type of the request entity and build the RequestEntity.
+		 * @param <T> the type of the body
+		 * @param body the body of the request entity
+		 * @param type the type of the body, useful for generic type resolution
+		 * @return the built request entity
+		 * @since 4.3
+		 */
+		<T> RequestEntity<T> body(T body, Type type);
 	}
 
 
@@ -398,6 +443,11 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		@Override
 		public <T> RequestEntity<T> body(T body) {
 			return new RequestEntity<T>(body, this.headers, this.method, this.url);
+		}
+
+		@Override
+		public <T> RequestEntity<T> body(T body, Type type) {
+			return new RequestEntity<T>(body, this.headers, this.method, this.url, type);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,16 @@ public interface WebMvcConfigurer {
 	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
 	/**
+	 * A hook for extending or modifying the list of
+	 * {@link HandlerExceptionResolver}s after it has been configured. This may
+	 * be useful for example to allow default resolvers to be registered and then
+	 * insert a custom one through this method.
+	 * @param exceptionResolvers the list of configured resolvers to extend.
+	 * @since 4.3.1
+	 */
+	void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
+
+	/**
 	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of
 	 * controller method invocations. Interceptors can be registered to apply
 	 * to all requests or be limited to a subset of URL patterns.
@@ -181,5 +191,11 @@ public interface WebMvcConfigurer {
 	 * Servlet container's default handling of static resources.
 	 */
 	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
+
+	/**
+	 * Configure cross origin requests processing.
+	 * @since 4.2
+	 */
+	void addCorsMappings(CorsRegistry registry);
 
 }

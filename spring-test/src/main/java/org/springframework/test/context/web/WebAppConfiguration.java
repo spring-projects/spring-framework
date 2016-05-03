@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.test.context.BootstrapWith;
-
 /**
  * {@code @WebAppConfiguration} is a class-level annotation that is used to
  * declare that the {@code ApplicationContext} loaded for an integration test
  * should be a {@link org.springframework.web.context.WebApplicationContext
  * WebApplicationContext}.
  *
- * <p>The mere presence of {@code @WebAppConfiguration} on a test class ensures
- * that a {@code WebApplicationContext} will be loaded for the test using a default
+ * <p>The presence of {@code @WebAppConfiguration} on a test class indicates that
+ * a {@code WebApplicationContext} should be loaded for the test using a default
  * for the path to the root of the web application. To override the default,
  * specify an explicit resource path via the {@link #value} attribute.
  *
@@ -49,20 +47,17 @@ import org.springframework.test.context.BootstrapWith;
  * @see org.springframework.test.context.ContextConfiguration
  * @see ServletTestExecutionListener
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@BootstrapWith(WebTestContextBootstrapper.class)
 public @interface WebAppConfiguration {
 
 	/**
 	 * The resource path to the root directory of the web application.
-	 *
 	 * <p>A path that does not include a Spring resource prefix (e.g., {@code classpath:},
 	 * {@code file:}, etc.) will be interpreted as a file system resource, and a
 	 * path should not end with a slash.
-	 *
 	 * <p>Defaults to {@code "src/main/webapp"} as a file system resource. Note
 	 * that this is the standard directory for the root of a web application in
 	 * a project that follows the standard Maven project layout for a WAR.

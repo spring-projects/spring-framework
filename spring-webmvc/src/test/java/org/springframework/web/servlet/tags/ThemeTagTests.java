@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,13 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.junit.Test;
+
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.web.servlet.support.RequestContext;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -34,8 +38,9 @@ import org.springframework.web.servlet.support.RequestContext;
  */
 public class ThemeTagTests extends AbstractTagTests {
 
+	@Test
 	@SuppressWarnings("serial")
-	public void testThemeTag() throws JspException {
+	public void themeTag() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		ThemeTag tag = new ThemeTag() {
@@ -51,7 +56,9 @@ public class ThemeTagTests extends AbstractTagTests {
 		assertEquals("theme test message", message.toString());
 	}
 
-	public void testRequestContext() throws ServletException {
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void requestContext() throws ServletException {
 		PageContext pc = createPageContext();
 		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest());
 		assertEquals("theme test message", rc.getThemeMessage("themetest"));

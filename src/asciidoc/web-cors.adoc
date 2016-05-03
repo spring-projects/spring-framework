@@ -1,0 +1,206 @@
+[[cors]]
+= CORS Support
+
+== Introduction
+
+For security reasons, browsers prohibit AJAX calls to resources residing outside the
+current origin. For example, as you're checking your bank account in one tab, you
+could have the evil.com website open in another tab. The scripts from evil.com should not
+be able to make AJAX requests to your bank API (e.g., withdrawing money from your account!)
+using your credentials.
+
+http://en.wikipedia.org/wiki/Cross-origin_resource_sharing[Cross-origin resource sharing]
+(CORS) is a http://www.w3.org/TR/cors/[W3C specification] implemented by
+http://caniuse.com/#feat=cors[most browsers] that allows you to specify in a flexible
+way what kind of cross domain requests are authorized, instead of using some less secured
+and less powerful hacks like IFRAME or JSONP.
+
+As of Spring Framework 4.2, CORS is supported out of the box. CORS requests
+(https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/java/org/springframework/web/servlet/FrameworkServlet.java#L906[including preflight ones with an `OPTIONS` method])
+are automatically dispatched to the various registered ++HandlerMapping++s. They handle
+CORS preflight requests and intercept CORS simple and actual requests thanks to a
+{api-spring-framework}/web/cors/CorsProcessor.html[CorsProcessor]
+implementation (https://github.com/spring-projects/spring-framework/blob/master/spring-web/src/main/java/org/springframework/web/cors/DefaultCorsProcessor.java[DefaultCorsProcessor]
+by default) in order to add the relevant CORS response headers (like `Access-Control-Allow-Origin`)
+based on the CORS configuration you have provided.
+
+[NOTE]
+====
+Since CORS requests are automatically dispatched, you *do not need* to change the
+`DispatcherServlet` `dispatchOptionsRequest` init parameter value; using its default value
+(`false`) is the recommended approach.
+====
+
+== Controller method CORS configuration
+
+You can add an
+{api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
+annotation to your `@RequestMapping` annotated handler method in order to enable CORS on
+it. By default `@CrossOrigin` allows all origins and the HTTP methods specified in the
+`@RequestMapping` annotation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@RestController
+@RequestMapping("/account")
+public class AccountController {
+
+	@CrossOrigin
+	@RequestMapping("/{id}")
+	public Account retrieve(@PathVariable Long id) {
+		// ...
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
+	public void remove(@PathVariable Long id) {
+		// ...
+	}
+}
+----
+
+It is also possible to enable CORS for the whole controller:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@CrossOrigin(origins = "http://domain2.com", maxAge = 3600)
+@RestController
+@RequestMapping("/account")
+public class AccountController {
+
+	@RequestMapping("/{id}")
+	public Account retrieve(@PathVariable Long id) {
+		// ...
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
+	public void remove(@PathVariable Long id) {
+		// ...
+	}
+}
+----
+
+In the above example CORS support is enabled for both the `retrieve()` and the `remove()`
+handler methods, and you can also see how you can customize the CORS configuration using
+`@CrossOrigin` attributes.
+
+You can even use both controller-level and method-level CORS configurations; Spring will
+then combine attributes from both annotations to create merged CORS configuration.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@CrossOrigin(maxAge = 3600)
+@RestController
+@RequestMapping("/account")
+public class AccountController {
+
+	@CrossOrigin("http://domain2.com")
+	@RequestMapping("/{id}")
+	public Account retrieve(@PathVariable Long id) {
+		// ...
+	}
+
+	@RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
+	public void remove(@PathVariable Long id) {
+		// ...
+	}
+}
+----
+
+== Global CORS configuration
+
+In addition to fine-grained, annotation-based configuration you'll probably want to
+define some global CORS configuration as well. This is similar to using filters but can
+be declared within Spring MVC and combined with fine-grained `@CrossOrigin` configuration.
+By default all origins and `GET`, `HEAD`, and `POST` methods are allowed.
+
+=== JavaConfig
+
+Enabling CORS for the whole application is as simple as:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebMvc
+public class WebConfig extends WebMvcConfigurerAdapter {
+
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		registry.addMapping("/**");
+	}
+}
+----
+
+You can easily change any properties, as well as only apply this CORS configuration to a
+specific path pattern:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+@EnableWebMvc
+public class WebConfig extends WebMvcConfigurerAdapter {
+
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		registry.addMapping("/api/**")
+			.allowedOrigins("http://domain2.com")
+			.allowedMethods("PUT", "DELETE")
+			.allowedHeaders("header1", "header2", "header3")
+			.exposedHeaders("header1", "header2")
+			.allowCredentials(false).maxAge(3600);
+	}
+}
+----
+
+=== XML namespace
+
+The following minimal XML configuration enables CORS for the `/**` path pattern with
+the same default properties as with the aforementioned JavaConfig examples:
+
+[source,xml,indent=0]
+[subs="verbatim"]
+----
+<mvc:cors>
+	<mvc:mapping path="/**" />
+</mvc:cors>
+----
+
+It is also possible to declare several CORS mappings with customized properties:
+
+[source,xml,indent=0]
+[subs="verbatim"]
+----
+<mvc:cors>
+
+	<mvc:mapping path="/api/**"
+		allowed-origins="http://domain1.com, http://domain2.com"
+		allowed-methods="GET, PUT"
+		allowed-headers="header1, header2, header3"
+		exposed-headers="header1, header2" allow-credentials="false"
+		max-age="123" />
+
+	<mvc:mapping path="/resources/**"
+		allowed-origins="http://domain1.com" />
+
+</mvc:cors>
+----
+
+== Advanced Customization
+
+{api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
+allows you to specify how the CORS requests should be processed: allowed origins, headers, methods, etc.
+It can be provided in various ways:
+
+ * {api-spring-framework}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfiguration-java.util.Map-[`AbstractHandlerMapping#setCorsConfiguration()`]
+   allows to specify a `Map` with several {api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
+   instances mapped to path patterns like `/api/**`.
+ * Subclasses can provide their own `CorsConfiguration` by overriding the
+   `AbstractHandlerMapping#getCorsConfiguration(Object, HttpServletRequest)` method.
+ * Handlers can implement the {api-spring-framework}/web/cors/CorsConfigurationSource.html[`CorsConfigurationSource`]
+   interface (like https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/java/org/springframework/web/servlet/resource/ResourceHttpRequestHandler.java[`ResourceHttpRequestHandler`]
+   now does) in order to provide a {api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
+   instance for each request.

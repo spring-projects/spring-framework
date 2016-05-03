@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ public class JmsActivationSpecConfig {
 
 	private boolean pubSubDomain = false;
 
+	private Boolean replyPubSubDomain;
+
 	private boolean subscriptionDurable = false;
 
 	private boolean subscriptionShared = false;
@@ -79,6 +81,19 @@ public class JmsActivationSpecConfig {
 
 	public boolean isPubSubDomain() {
 		return this.pubSubDomain;
+	}
+
+	public void setReplyPubSubDomain(boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	public boolean isReplyPubSubDomain() {
+		if (this.replyPubSubDomain != null) {
+			return this.replyPubSubDomain;
+		}
+		else {
+			return isPubSubDomain();
+		}
 	}
 
 	public void setSubscriptionDurable(boolean subscriptionDurable) {

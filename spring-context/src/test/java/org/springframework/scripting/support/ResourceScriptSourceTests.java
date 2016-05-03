@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,25 @@
 
 package org.springframework.scripting.support;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StreamUtils;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public class ResourceScriptSourceTests extends TestCase {
+public class ResourceScriptSourceTests {
 
-	public void testDoesNotPropagateFatalExceptionOnResourceThatCannotBeResolvedToAFile() throws Exception {
+	@Test
+	public void doesNotPropagateFatalExceptionOnResourceThatCannotBeResolvedToAFile() throws Exception {
 		Resource resource = mock(Resource.class);
 		given(resource.lastModified()).willThrow(new IOException());
 
@@ -41,13 +43,15 @@ public class ResourceScriptSourceTests extends TestCase {
 		assertEquals(0, lastModified);
 	}
 
-	public void testBeginsInModifiedState() throws Exception {
+	@Test
+	public void beginsInModifiedState() throws Exception {
 		Resource resource = mock(Resource.class);
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
 		assertTrue(scriptSource.isModified());
 	}
 
-	public void testLastModifiedWorksWithResourceThatDoesNotSupportFileBasedReading() throws Exception {
+	@Test
+	public void lastModifiedWorksWithResourceThatDoesNotSupportFileBasedReading() throws Exception {
 		Resource resource = mock(Resource.class);
 		// underlying File is asked for so that the last modified time can be checked...
 		// And then mock the file changing; i.e. the File says it has been modified
@@ -55,7 +59,7 @@ public class ResourceScriptSourceTests extends TestCase {
 		// does not support File-based reading; delegates to InputStream-style reading...
 		//resource.getFile();
 		//mock.setThrowable(new FileNotFoundException());
-		given(resource.getInputStream()).willReturn(new ByteArrayInputStream(new byte[0]));
+		given(resource.getInputStream()).willReturn(StreamUtils.emptyInput());
 
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
 		assertTrue("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).", scriptSource.isModified());
@@ -65,7 +69,8 @@ public class ResourceScriptSourceTests extends TestCase {
 		assertTrue("ResourceScriptSource must report back as being modified if the underlying File resource is reporting a changed lastModified time.", scriptSource.isModified());
 	}
 
-	public void testLastModifiedWorksWithResourceThatDoesNotSupportFileBasedAccessAtAll() throws Exception {
+	@Test
+	public void lastModifiedWorksWithResourceThatDoesNotSupportFileBasedAccessAtAll() throws Exception {
 		Resource resource = new ByteArrayResource(new byte[0]);
 		ResourceScriptSource scriptSource = new ResourceScriptSource(resource);
 		assertTrue("ResourceScriptSource must start off in the 'isModified' state (it obviously isn't).", scriptSource.isModified());

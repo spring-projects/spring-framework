@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 /**
  * Mock implementation of the {@link javax.servlet.FilterConfig} interface.
  *
- * <p>Used for testing the web framework; also usefol for testing
+ * <p>Used for testing the web framework; also useful for testing
  * custom {@link javax.servlet.Filter} implementations.
  *
  * @author Juergen Hoeller

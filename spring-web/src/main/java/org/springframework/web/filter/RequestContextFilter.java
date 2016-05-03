@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * Servlet 2.3 Filter that exposes the request to the current thread,
+ * Servlet Filter that exposes the request to the current thread,
  * through both {@link org.springframework.context.i18n.LocaleContextHolder} and
  * {@link RequestContextHolder}. To be registered as filter in {@code web.xml}.
  *
@@ -67,6 +67,7 @@ public class RequestContextFilter extends OncePerRequestFilter {
 	public void setThreadContextInheritable(boolean threadContextInheritable) {
 		this.threadContextInheritable = threadContextInheritable;
 	}
+
 
 	/**
 	 * Returns "false" so that the filter may set up the request context in each

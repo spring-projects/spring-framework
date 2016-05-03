@@ -207,6 +207,17 @@ public class SockJsServiceRegistration {
 	}
 
 	/**
+	 * @since 4.1.2
+	 */
+	protected SockJsServiceRegistration setAllowedOrigins(String... allowedOrigins) {
+		this.allowedOrigins.clear();
+		if (!ObjectUtils.isEmpty(allowedOrigins)) {
+			this.allowedOrigins.addAll(Arrays.asList(allowedOrigins));
+		}
+		return this;
+	}
+
+	/**
 	 * This option can be used to disable automatic addition of CORS headers for
 	 * SockJS requests.
 	 * <p>The default value is "false".
@@ -226,17 +237,6 @@ public class SockJsServiceRegistration {
 	 */
 	public SockJsServiceRegistration setMessageCodec(SockJsMessageCodec codec) {
 		this.messageCodec = codec;
-		return this;
-	}
-
-	/**
-	 * @since 4.1.2
-	 */
-	protected SockJsServiceRegistration setAllowedOrigins(String... origins) {
-		this.allowedOrigins.clear();
-		if (!ObjectUtils.isEmpty(origins)) {
-			this.allowedOrigins.addAll(Arrays.asList(origins));
-		}
 		return this;
 	}
 
@@ -264,11 +264,11 @@ public class SockJsServiceRegistration {
 		if (this.webSocketEnabled != null) {
 			service.setWebSocketEnabled(this.webSocketEnabled);
 		}
+		if (this.allowedOrigins != null) {
+			service.setAllowedOrigins(this.allowedOrigins);
+		}
 		if (this.suppressCors != null) {
 			service.setSuppressCors(this.suppressCors);
-		}
-		if (!this.allowedOrigins.isEmpty()) {
-			service.setAllowedOrigins(this.allowedOrigins);
 		}
 		if (this.messageCodec != null) {
 			service.setMessageCodec(this.messageCodec);

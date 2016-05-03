@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings("rawtypes")
 public class IndexingTests {
 
 	@Test
@@ -190,8 +191,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			expression.setValue(this, "4");
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 
@@ -250,8 +252,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1027E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1027E"));
 		}
 	}
 
@@ -267,8 +270,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 
@@ -284,8 +288,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property2[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 

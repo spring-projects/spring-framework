@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.Callable;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation for mapping web requests onto specific handler classes and/or
  * handler methods. Provides a consistent style between Servlet and Portlet
@@ -38,8 +40,8 @@ import java.util.concurrent.Callable;
  * details see the note on the new support classes added in Spring MVC 3.1
  * further below.
  *
- * <p>Handler methods which are annotated with this annotation are allowed
- * to have very flexible signatures. They may have arguments of the following
+ * <p>Handler methods which are annotated with this annotation are allowed to
+ * have very flexible signatures. They may have parameters of the following
  * types, in arbitrary order (except for validation results, which need to
  * follow right after the corresponding command object, if desired):
  * <ul>
@@ -57,8 +59,9 @@ import java.util.concurrent.Callable;
  * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
- * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession
+ * "synchronizeOnSession"} flag to "true" if multiple requests are allowed to
+ * access a session concurrently.</i>
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
  * Allows for generic request parameter access as well as request/session
@@ -123,6 +126,12 @@ import java.util.concurrent.Callable;
  * {@link org.springframework.validation.Errors} argument.
  * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
  * exception is raised.
+ * <li>{@link SessionAttribute @SessionAttribute} annotated parameters for access
+ * to existing, permanent session attributes (e.g. user authentication object)
+ * as opposed to model attributes temporarily stored in the session as part of
+ * a controller workflow via {@link SessionAttributes}.
+ * <li>{@link RequestAttribute @RequestAttribute} annotated parameters for access
+ * to request attributes.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
  * (Servlet-only) for access to the Servlet request HTTP headers and contents.
  * The request stream will be converted to the entity body using
@@ -160,7 +169,7 @@ import java.util.concurrent.Callable;
  * context path, and the literal part of the servlet mapping.
  * </ul>
  *
- * <p><strong>Note:</strong> JDK 1.8's {@code java.util.Optional} is supported
+ * <p><strong>Note:</strong> Java 8's {@code java.util.Optional} is supported
  * as a method parameter type with annotations that provide a {@code required}
  * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.). The use
  * of {@code java.util.Optional} in those cases is equivalent to having
@@ -171,8 +180,8 @@ import java.util.concurrent.Callable;
  * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link org.springframework.ui.Model Model} object, with the view name
- * implicitly determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * <li>A {@link org.springframework.ui.Model Model} object, with the view name implicitly
+ * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link java.util.Map} object for exposing a model,
@@ -213,6 +222,19 @@ import java.util.concurrent.Callable;
  * <li>A {@link org.springframework.util.concurrent.ListenableFuture}
  * which the application uses to produce a return value in a separate
  * thread of its own choosing, as an alternative to returning a Callable.
+ * <li>A {@link java.util.concurrent.CompletionStage} (implemented by
+ * {@link java.util.concurrent.CompletableFuture} for example)
+ * which the application uses to produce a return value in a separate
+ * thread of its own choosing, as an alternative to returning a Callable.
+ * <li>A {@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter}
+ * can be used to write multiple objects to the response asynchronously;
+ * also supported as the body within {@code ResponseEntity}.</li>
+ * <li>An {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter}
+ * can be used to write Server-Sent Events to the response asynchronously;
+ * also supported as the body within {@code ResponseEntity}.</li>
+ * <li>A {@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody}
+ * can be used to write to the response asynchronously;
+ * also supported as the body within {@code ResponseEntity}.</li>
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
@@ -257,8 +279,16 @@ import java.util.concurrent.Callable;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @since 2.5
+ * @see GetMapping
+ * @see PostMapping
+ * @see PutMapping
+ * @see DeleteMapping
+ * @see PatchMapping
  * @see RequestParam
+ * @see RequestAttribute
+ * @see PathVariable
  * @see ModelAttribute
+ * @see SessionAttribute
  * @see SessionAttributes
  * @see InitBinder
  * @see org.springframework.web.context.request.WebRequest
@@ -284,19 +314,32 @@ public @interface RequestMapping {
 
 	/**
 	 * The primary mapping expressed by this annotation.
-	 * <p>In a Servlet environment: the path mapping URIs (e.g. "/myPath.do").
-	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
-	 * At the method level, relative paths (e.g. "edit.do") are supported
-	 * within the primary mapping expressed at the type level.
-	 * Path mapping URIs may contain placeholders (e.g. "/${connect}")
-	 * <p>In a Portlet environment: the mapped portlet modes
+	 * <p>In a Servlet environment this is an alias for {@link #path}.
+	 * For example {@code @RequestMapping("/foo")} is equivalent to
+	 * {@code @RequestMapping(path="/foo")}.
+	 * <p>In a Portlet environment this is the mapped portlet modes
 	 * (i.e. "EDIT", "VIEW", "HELP" or any custom modes).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
-	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
 	 */
+	@AliasFor("path")
 	String[] value() default {};
+
+	/**
+	 * In a Servlet environment only: the path mapping URIs (e.g. "/myPath.do").
+	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
+	 * At the method level, relative paths (e.g. "edit.do") are supported within
+	 * the primary mapping expressed at the type level. Path mapping URIs may
+	 * contain placeholders (e.g. "/${connect}")
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used at the type level, all method-level mappings inherit
+	 * this primary mapping, narrowing it for a specific handler method.
+	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
+	 * @since 4.2
+	 */
+	@AliasFor("value")
+	String[] path() default {};
 
 	/**
 	 * The HTTP request methods to map to, narrowing the primary mapping:
@@ -385,8 +428,11 @@ public @interface RequestMapping {
 	 * <pre class="code">
 	 * produces = "text/plain"
 	 * produces = {"text/plain", "application/*"}
+	 * produces = "application/json; charset=UTF-8"
 	 * </pre>
-	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
+	 * <p>It affects the actual content type written, for example to produce a JSON response
+	 * with UTF-8 encoding, {@code "application/json; charset=UTF-8"} should be used.
+	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings override

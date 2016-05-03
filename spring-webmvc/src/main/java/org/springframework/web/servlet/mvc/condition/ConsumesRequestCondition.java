@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 
 /**
@@ -45,6 +46,9 @@ import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.Hea
  * @since 3.1
  */
 public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
+
+	private final static ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
+
 
 	private final List<ConsumeMediaTypeExpression> expressions;
 
@@ -160,6 +164,9 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 */
 	@Override
 	public ConsumesRequestCondition getMatchingCondition(HttpServletRequest request) {
+		if (CorsUtils.isPreFlightRequest(request)) {
+			return PRE_FLIGHT_MATCH;
+		}
 		if (isEmpty()) {
 			return this;
 		}

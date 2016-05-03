@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.util.Assert;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -60,19 +60,15 @@ class DefaultMvcResult implements MvcResult {
 		this.mockResponse = response;
 	}
 
-	@Override
-	public MockHttpServletResponse getResponse() {
-		return mockResponse;
-	}
 
 	@Override
 	public MockHttpServletRequest getRequest() {
-		return mockRequest;
+		return this.mockRequest;
 	}
 
 	@Override
-	public Object getHandler() {
-		return this.handler;
+	public MockHttpServletResponse getResponse() {
+		return this.mockResponse;
 	}
 
 	public void setHandler(Object handler) {
@@ -80,17 +76,17 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
-	public HandlerInterceptor[] getInterceptors() {
-		return this.interceptors;
+	public Object getHandler() {
+		return this.handler;
 	}
 
-	public void setInterceptors(HandlerInterceptor[] interceptors) {
+	public void setInterceptors(HandlerInterceptor... interceptors) {
 		this.interceptors = interceptors;
 	}
 
 	@Override
-	public Exception getResolvedException() {
-		return this.resolvedException;
+	public HandlerInterceptor[] getInterceptors() {
+		return this.interceptors;
 	}
 
 	public void setResolvedException(Exception resolvedException) {
@@ -98,8 +94,8 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
-	public ModelAndView getModelAndView() {
-		return this.modelAndView;
+	public Exception getResolvedException() {
+		return this.resolvedException;
 	}
 
 	public void setModelAndView(ModelAndView mav) {
@@ -107,8 +103,13 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	@Override
+	public ModelAndView getModelAndView() {
+		return this.modelAndView;
+	}
+
+	@Override
 	public FlashMap getFlashMap() {
-		return RequestContextUtils.getOutputFlashMap(mockRequest);
+		return RequestContextUtils.getOutputFlashMap(this.mockRequest);
 	}
 
 	public void setAsyncResult(Object asyncResult) {
@@ -122,7 +123,6 @@ class DefaultMvcResult implements MvcResult {
 
 	@Override
 	public Object getAsyncResult(long timeToWait) {
-
 		if (this.mockRequest.getAsyncContext() != null) {
 			timeToWait = (timeToWait == -1 ? this.mockRequest.getAsyncContext().getTimeout() : timeToWait);
 		}
@@ -131,7 +131,7 @@ class DefaultMvcResult implements MvcResult {
 			long endTime = System.currentTimeMillis() + timeToWait;
 			while (System.currentTimeMillis() < endTime && this.asyncResult.get() == RESULT_NONE) {
 				try {
-					Thread.sleep(200);
+					Thread.sleep(100);
 				}
 				catch (InterruptedException ex) {
 					throw new IllegalStateException("Interrupted while waiting for " +
@@ -140,11 +140,12 @@ class DefaultMvcResult implements MvcResult {
 			}
 		}
 
-		Assert.state(this.asyncResult.get() != RESULT_NONE,
-				"Async result for handler [" + this.handler + "] " +
-						"was not set during the specified timeToWait=" + timeToWait);
-
-		return this.asyncResult.get();
+		Object result = this.asyncResult.get();
+		if (result == RESULT_NONE) {
+			throw new IllegalStateException("Async result for handler [" + this.handler + "] " +
+					"was not set during the specified timeToWait=" + timeToWait);
+		}
+		return result;
 	}
 
 }

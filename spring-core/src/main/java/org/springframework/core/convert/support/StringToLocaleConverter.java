@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.StringUtils;
 
 /**
- * Converts a String to a Locale.
+ * Converts from a String to a {@link java.util.Locale}.
  *
  * @author Keith Donald
  * @since 3.0
+ * @see StringUtils#parseLocaleString
  */
 final class StringToLocaleConverter implements Converter<String, Locale> {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,6 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	// SiMP header names
 
-	public static final String CONNECT_MESSAGE_HEADER = "simpConnectMessage";
-
 	public static final String DESTINATION_HEADER = "simpDestination";
 
 	public static final String MESSAGE_TYPE_HEADER = "simpMessageType";
@@ -65,14 +63,22 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public static final String USER_HEADER = "simpUser";
 
+	public static final String CONNECT_MESSAGE_HEADER = "simpConnectMessage";
+
+	public static final String HEART_BEAT_HEADER = "simpHeartbeat";
+
+
 	/**
-	 * For internal use.
-	 * <p>The original destination used by a client when subscribing. Such a
-	 * destination may have been modified (e.g. user destinations) on the server
-	 * side. This header provides a hint so messages sent to clients may have
-	 * a destination matching to their original subscription.
+	 * A header for internal use with "user" destinations where we need to
+	 * restore the destination prior to sending messages to clients.
 	 */
 	public static final String ORIGINAL_DESTINATION = "simpOrigDestination";
+
+	/**
+	 * A header that indicates to the broker that the sender will ignore errors.
+	 * The header is simply checked for presence or absence.
+	 */
+	public static final String IGNORE_ERROR = "simpIgnoreError";
 
 
 	/**
@@ -260,6 +266,10 @@ public class SimpMessageHeaderAccessor extends NativeMessageHeaderAccessor {
 
 	public static Principal getUser(Map<String, Object> headers) {
 		return (Principal) headers.get(USER_HEADER);
+	}
+
+	public static long[] getHeartbeat(Map<String, Object> headers) {
+		return (long[]) headers.get(HEART_BEAT_HEADER);
 	}
 
 }

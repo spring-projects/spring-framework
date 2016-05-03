@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -63,6 +64,8 @@ final class ConfigurationClass {
 	private final Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> importBeanDefinitionRegistrars =
 			new LinkedHashMap<ImportBeanDefinitionRegistrar, AnnotationMetadata>();
 
+	final Set<String> skippedBeanMethods = new HashSet<String>();
+
 
 	/**
 	 * Create a new {@link ConfigurationClass} with the given name.
@@ -100,7 +103,7 @@ final class ConfigurationClass {
 	public ConfigurationClass(Class<?> clazz, String beanName) {
 		Assert.hasText(beanName, "Bean name must not be null");
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
-		this.resource = new DescriptiveResource(clazz.toString());
+		this.resource = new DescriptiveResource(clazz.getName());
 		this.beanName = beanName;
 	}
 
@@ -114,7 +117,7 @@ final class ConfigurationClass {
 	 */
 	public ConfigurationClass(Class<?> clazz, ConfigurationClass importedBy) {
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
-		this.resource = new DescriptiveResource(clazz.toString());
+		this.resource = new DescriptiveResource(clazz.getName());
 		this.importedBy.add(importedBy);
 	}
 

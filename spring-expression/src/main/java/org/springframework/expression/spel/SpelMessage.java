@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,7 +214,7 @@ public enum SpelMessage {
 			"A problem occurred when trying to resolve bean ''{0}'':''{1}''"),
 
 	INVALID_BEAN_REFERENCE(Kind.ERROR, 1059,
-			"@ can only be followed by an identifier or a quoted name"),
+			"@ or & can only be followed by an identifier or a quoted name"),
 
 	TYPE_NAME_EXPECTED_FOR_ARRAY_CONSTRUCTION(Kind.ERROR, 1060,
 			"Expected the type of the new array to be specified as a String but found ''{0}''"),
@@ -250,7 +250,7 @@ public enum SpelMessage {
 
 	MISSING_SELECTION_EXPRESSION(Kind.ERROR, 1071,
 			"A required selection expression has not been specified"),
-	
+
 	EXCEPTION_RUNNING_COMPILED_EXPRESSION(Kind.ERROR,1072,
 			"An exception occurred whilst evaluating a compiled expression");
 

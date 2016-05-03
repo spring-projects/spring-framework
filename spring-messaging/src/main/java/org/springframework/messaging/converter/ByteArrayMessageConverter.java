@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class ByteArrayMessageConverter extends AbstractMessageConverter {
 
-
 	public ByteArrayMessageConverter() {
 		super(MimeTypeUtils.APPLICATION_OCTET_STREAM);
 	}
@@ -37,16 +36,16 @@ public class ByteArrayMessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected boolean supports(Class<?> clazz) {
-		return byte[].class.equals(clazz);
+		return (byte[].class == clazz);
 	}
 
 	@Override
-	public Object convertFromInternal(Message<?> message, Class<?> targetClass) {
+	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
 		return message.getPayload();
 	}
 
 	@Override
-	public Object convertToInternal(Object payload, MessageHeaders headers) {
+	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
 		return payload;
 	}
 

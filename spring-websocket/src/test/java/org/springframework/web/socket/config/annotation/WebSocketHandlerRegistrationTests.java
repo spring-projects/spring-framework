@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.socket.config.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -29,9 +28,9 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
-import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
@@ -69,12 +68,14 @@ public class WebSocketHandlerRegistrationTests {
 		Mapping m1 = mappings.get(0);
 		assertEquals(handler, m1.webSocketHandler);
 		assertEquals("/foo", m1.path);
-		assertEquals(0, m1.interceptors.length);
+		assertEquals(1, m1.interceptors.length);
+		assertEquals(OriginHandshakeInterceptor.class, m1.interceptors[0].getClass());
 
 		Mapping m2 = mappings.get(1);
 		assertEquals(handler, m2.webSocketHandler);
 		assertEquals("/bar", m2.path);
-		assertEquals(0, m2.interceptors.length);
+		assertEquals(1, m2.interceptors.length);
+		assertEquals(OriginHandshakeInterceptor.class, m2.interceptors[0].getClass());
 	}
 
 	@Test
@@ -90,7 +91,27 @@ public class WebSocketHandlerRegistrationTests {
 		Mapping mapping = mappings.get(0);
 		assertEquals(handler, mapping.webSocketHandler);
 		assertEquals("/foo", mapping.path);
-		assertArrayEquals(new HandshakeInterceptor[] {interceptor}, mapping.interceptors);
+		assertEquals(2, mapping.interceptors.length);
+		assertEquals(interceptor, mapping.interceptors[0]);
+		assertEquals(OriginHandshakeInterceptor.class, mapping.interceptors[1].getClass());
+	}
+
+	@Test
+	public void emptyAllowedOrigin() {
+		WebSocketHandler handler = new TextWebSocketHandler();
+		HttpSessionHandshakeInterceptor interceptor = new HttpSessionHandshakeInterceptor();
+
+		this.registration.addHandler(handler, "/foo").addInterceptors(interceptor).setAllowedOrigins();
+
+		List<Mapping> mappings = this.registration.getMappings();
+		assertEquals(1, mappings.size());
+
+		Mapping mapping = mappings.get(0);
+		assertEquals(handler, mapping.webSocketHandler);
+		assertEquals("/foo", mapping.path);
+		assertEquals(2, mapping.interceptors.length);
+		assertEquals(interceptor, mapping.interceptors[0]);
+		assertEquals(OriginHandshakeInterceptor.class, mapping.interceptors[1].getClass());
 	}
 
 	@Test
@@ -126,8 +147,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertEquals(handler, mapping.webSocketHandler);
 		assertEquals("/foo/**", mapping.path);
 		assertNotNull(mapping.sockJsService);
-		assertEquals(Arrays.asList("http://mydomain1.com"),
-				mapping.sockJsService.getAllowedOrigins());
+		assertTrue(mapping.sockJsService.getAllowedOrigins().contains("http://mydomain1.com"));
 		List<HandshakeInterceptor> interceptors = mapping.sockJsService.getHandshakeInterceptors();
 		assertEquals(interceptor, interceptors.get(0));
 		assertEquals(OriginHandshakeInterceptor.class, interceptors.get(1).getClass());
@@ -196,6 +216,7 @@ public class WebSocketHandlerRegistrationTests {
 		}
 	}
 
+
 	private static class Mapping {
 
 		private final WebSocketHandler webSocketHandler;
@@ -207,7 +228,6 @@ public class WebSocketHandlerRegistrationTests {
 		private final HandshakeInterceptor[] interceptors;
 
 		private final DefaultSockJsService sockJsService;
-
 
 		public Mapping(WebSocketHandler handler, String path, SockJsService sockJsService) {
 			this.webSocketHandler = handler;

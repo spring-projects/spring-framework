@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,22 +17,17 @@
 package org.springframework.web.method.annotation;
 
 import java.beans.PropertyEditor;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.Part;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
@@ -45,6 +40,8 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.multipart.support.MultipartResolutionDelegate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.WebUtils;
 
@@ -53,8 +50,8 @@ import org.springframework.web.util.WebUtils;
  * type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver}
  * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction
  * with Servlet 3.0 multipart requests. This resolver can also be created in default
- * resolution mode in which simple types (int, long, etc.) not annotated
- * with @{@link RequestParam} are also treated as request parameters with the
+ * resolution mode in which simple types (int, long, etc.) not annotated with
+ * @{@link RequestParam} are also treated as request parameters with the
  * parameter name derived from the argument name.
  *
  * <p>If the method parameter type is {@link Map}, the name specified in the
@@ -85,7 +82,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	/**
 	 * @param useDefaultResolution in default resolution mode a method argument
 	 * that is a simple type, as defined in {@link BeanUtils#isSimpleProperty},
-	 * is treated as a request parameter even if it it isn't annotated, the
+	 * is treated as a request parameter even if it isn't annotated, the
 	 * request parameter name is derived from the method parameter name.
 	 */
 	public RequestParamMethodArgumentResolver(boolean useDefaultResolution) {
@@ -98,7 +95,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * values are not expected to contain expressions
 	 * @param useDefaultResolution in default resolution mode a method argument
 	 * that is a simple type, as defined in {@link BeanUtils#isSimpleProperty},
-	 * is treated as a request parameter even if it it isn't annotated, the
+	 * is treated as a request parameter even if it isn't annotated, the
 	 * request parameter name is derived from the method parameter name.
 	 */
 	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory, boolean useDefaultResolution) {
@@ -124,10 +121,9 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType();
 		if (parameter.hasParameterAnnotation(RequestParam.class)) {
-			if (Map.class.isAssignableFrom(paramType)) {
-				String paramName = parameter.getParameterAnnotation(RequestParam.class).value();
+			if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
+				String paramName = parameter.getParameterAnnotation(RequestParam.class).name();
 				return StringUtils.hasText(paramName);
 			}
 			else {
@@ -138,11 +134,12 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (parameter.hasParameterAnnotation(RequestPart.class)) {
 				return false;
 			}
-			else if (MultipartFile.class.equals(paramType) || "javax.servlet.http.Part".equals(paramType.getName())) {
+			parameter = parameter.nestedIfOptional();
+			if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
 				return true;
 			}
 			else if (this.useDefaultResolution) {
-				return BeanUtils.isSimpleProperty(paramType);
+				return BeanUtils.isSimpleProperty(parameter.getNestedParameterType());
 			}
 			else {
 				return false;
@@ -157,114 +154,61 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	@Override
-	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest webRequest) throws Exception {
-		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		MultipartHttpServletRequest multipartRequest =
 				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
-		Object arg;
 
-		if (MultipartFile.class.equals(parameter.getParameterType())) {
-			assertIsMultipartRequest(servletRequest);
-			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			arg = multipartRequest.getFile(name);
-		}
-		else if (isMultipartFileCollection(parameter)) {
-			assertIsMultipartRequest(servletRequest);
-			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			arg = multipartRequest.getFiles(name);
-		}
-		else if (isMultipartFileArray(parameter)) {
-			assertIsMultipartRequest(servletRequest);
-			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			List<MultipartFile> multipartFiles = multipartRequest.getFiles(name);
-			arg = multipartFiles.toArray(new MultipartFile[multipartFiles.size()]);
-		}
-		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
-			assertIsMultipartRequest(servletRequest);
-			arg = servletRequest.getPart(name);
-		}
-		else if (isPartCollection(parameter)) {
-			assertIsMultipartRequest(servletRequest);
-			arg = new ArrayList<Object>(servletRequest.getParts());
-		}
-		else if (isPartArray(parameter)) {
-			assertIsMultipartRequest(servletRequest);
-			arg = RequestPartResolver.resolvePart(servletRequest);
-		}
-		else {
-			arg = null;
-			if (multipartRequest != null) {
-				List<MultipartFile> files = multipartRequest.getFiles(name);
-				if (!files.isEmpty()) {
-					arg = (files.size() == 1 ? files.get(0) : files);
-				}
-			}
-			if (arg == null) {
-				String[] paramValues = webRequest.getParameterValues(name);
-				if (paramValues != null) {
-					arg = paramValues.length == 1 ? paramValues[0] : paramValues;
-				}
-			}
+		Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, servletRequest);
+		if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
+			return mpArg;
 		}
 
+		Object arg = null;
+		if (multipartRequest != null) {
+			List<MultipartFile> files = multipartRequest.getFiles(name);
+			if (!files.isEmpty()) {
+				arg = (files.size() == 1 ? files.get(0) : files);
+			}
+		}
+		if (arg == null) {
+			String[] paramValues = request.getParameterValues(name);
+			if (paramValues != null) {
+				arg = (paramValues.length == 1 ? paramValues[0] : paramValues);
+			}
+		}
 		return arg;
 	}
 
-	private void assertIsMultipartRequest(HttpServletRequest request) {
-		String contentType = request.getContentType();
-		if (contentType == null || !contentType.toLowerCase().startsWith("multipart/")) {
-			throw new MultipartException("The current request is not a multipart request");
-		}
-	}
-
-	private boolean isMultipartFileCollection(MethodParameter parameter) {
-		Class<?> collectionType = getCollectionParameterType(parameter);
-		return ((collectionType != null) && collectionType.equals(MultipartFile.class));
-	}
-
-	private boolean isPartCollection(MethodParameter parameter) {
-		Class<?> collectionType = getCollectionParameterType(parameter);
-		return ((collectionType != null) && "javax.servlet.http.Part".equals(collectionType.getName()));
-	}
-
-	private boolean isPartArray(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType().getComponentType();
-		return ((paramType != null) && "javax.servlet.http.Part".equals(paramType.getName()));
-	}
-
-	private boolean isMultipartFileArray(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType().getComponentType();
-		return ((paramType != null) && MultipartFile.class.equals(paramType));
-	}
-
-	private Class<?> getCollectionParameterType(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType();
-		if (Collection.class.equals(paramType) || List.class.isAssignableFrom(paramType)){
-			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
-			if (valueType != null) {
-				return valueType;
+	@Override
+	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
+		if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
+			if (!MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
+				throw new MultipartException("Current request is not a multipart request");
+			}
+			else {
+				throw new MissingServletRequestPartException(name);
 			}
 		}
-		return null;
-	}
-
-	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
-		throw new MissingServletRequestParameterException(name, parameter.getParameterType().getSimpleName());
+		else {
+			throw new MissingServletRequestParameterException(name, parameter.getNestedParameterType().getSimpleName());
+		}
 	}
 
 	@Override
 	public void contributeMethodArgument(MethodParameter parameter, Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		Class<?> paramType = parameter.getParameterType();
-		if (Map.class.isAssignableFrom(paramType) || MultipartFile.class.equals(paramType) ||
+		Class<?> paramType = parameter.getNestedParameterType();
+		if (Map.class.isAssignableFrom(paramType) || MultipartFile.class == paramType ||
 				"javax.servlet.http.Part".equals(paramType.getName())) {
 			return;
 		}
 
-		RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
-		String name = (ann == null || StringUtils.isEmpty(ann.value()) ? parameter.getParameterName() : ann.value());
+		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
+		String name = (requestParam == null || StringUtils.isEmpty(requestParam.name()) ?
+				parameter.getParameterName() : requestParam.name());
 
 		if (value == null) {
 			builder.queryParam(name);
@@ -303,15 +247,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		}
 
 		public RequestParamNamedValueInfo(RequestParam annotation) {
-			super(annotation.value(), annotation.required(), annotation.defaultValue());
-		}
-	}
-
-
-	private static class RequestPartResolver {
-
-		public static Object resolvePart(HttpServletRequest servletRequest) throws Exception {
-			return servletRequest.getParts().toArray(new Part[servletRequest.getParts().size()]);
+			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
 

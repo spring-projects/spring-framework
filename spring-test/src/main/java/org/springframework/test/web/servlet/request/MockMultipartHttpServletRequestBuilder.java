@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,6 +105,11 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 		return this;
 	}
 
+	/**
+	 * Create a new {@link MockMultipartHttpServletRequest} based on the
+	 * supplied {@code ServletContext} and the {@code MockMultipartFiles}
+	 * added to this builder.
+	 */
 	@Override
 	protected final MockHttpServletRequest createServletRequest(ServletContext servletContext) {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest(servletContext);

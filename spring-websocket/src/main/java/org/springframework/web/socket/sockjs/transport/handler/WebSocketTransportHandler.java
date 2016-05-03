@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import java.util.Collections;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+
+import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeFailureException;
@@ -46,9 +49,11 @@ import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSo
  * @since 4.0
  */
 public class WebSocketTransportHandler extends AbstractTransportHandler
-		implements SockJsSessionFactory, HandshakeHandler {
+		implements SockJsSessionFactory, HandshakeHandler, Lifecycle, ServletContextAware {
 
 	private final HandshakeHandler handshakeHandler;
+
+	private boolean running;
 
 
 	public WebSocketTransportHandler(HandshakeHandler handshakeHandler) {
@@ -67,10 +72,40 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 	}
 
 	@Override
-	public AbstractSockJsSession createSession(
-			String sessionId, WebSocketHandler handler, Map<String, Object> attributes) {
+	public void setServletContext(ServletContext servletContext) {
+		if (this.handshakeHandler instanceof ServletContextAware) {
+			((ServletContextAware) this.handshakeHandler).setServletContext(servletContext);
+		}
+	}
 
-		return new WebSocketServerSockJsSession(sessionId, getServiceConfig(), handler, attributes);
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			if (this.handshakeHandler instanceof Lifecycle) {
+				((Lifecycle) this.handshakeHandler).start();
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			if (this.handshakeHandler instanceof Lifecycle) {
+				((Lifecycle) this.handshakeHandler).stop();
+			}
+		}
+	}
+
+	@Override
+	public AbstractSockJsSession createSession(String id, WebSocketHandler handler, Map<String, Object> attrs) {
+		return new WebSocketServerSockJsSession(id, getServiceConfig(), handler, attrs);
 	}
 
 	@Override
@@ -80,7 +115,7 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 		WebSocketServerSockJsSession sockJsSession = (WebSocketServerSockJsSession) wsSession;
 		try {
 			wsHandler = new SockJsWebSocketHandler(getServiceConfig(), wsHandler, sockJsSession);
-			this.handshakeHandler.doHandshake(request, response, wsHandler, Collections.<String, Object>emptyMap());
+			this.handshakeHandler.doHandshake(request, response, wsHandler, sockJsSession.getAttributes());
 		}
 		catch (Throwable ex) {
 			sockJsSession.tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
@@ -94,5 +129,4 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 
 		return this.handshakeHandler.doHandshake(request, response, handler, attributes);
 	}
-
 }

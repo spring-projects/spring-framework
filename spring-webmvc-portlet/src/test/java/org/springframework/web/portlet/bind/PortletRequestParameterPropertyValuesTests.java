@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,34 @@
 
 package org.springframework.web.portlet.bind;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockPortletRequest;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
  */
-public class PortletRequestParameterPropertyValuesTests extends TestCase {
+public class PortletRequestParameterPropertyValuesTests {
 
-	public void testWithNoParams() {
-		MockPortletRequest request = new MockPortletRequest();
+	private final MockPortletRequest request = new MockPortletRequest();
+
+	@Test
+	public void withNoParams() {
 		PortletRequestParameterPropertyValues pvs = new PortletRequestParameterPropertyValues(request);
 		assertTrue("Should not have any property values", pvs.getPropertyValues().length == 0);
 	}
 
-	public void testWithNoPrefix() {
-		MockPortletRequest request = new MockPortletRequest();
+	@Test
+	public void withNoPrefix() {
 		request.addParameter("param", "value");
 		PortletRequestParameterPropertyValues pvs = new PortletRequestParameterPropertyValues(request);
 		assertEquals("value", pvs.getPropertyValue("param").getValue());
 	}
 
-	public void testWithPrefix() {
-		MockPortletRequest request = new MockPortletRequest();
+	@Test
+	public void withPrefix() {
 		request.addParameter("test_param", "value");
 		PortletRequestParameterPropertyValues pvs = new PortletRequestParameterPropertyValues(request, "test");
 		assertTrue(pvs.contains("param"));
@@ -47,8 +51,8 @@ public class PortletRequestParameterPropertyValuesTests extends TestCase {
 		assertEquals("value", pvs.getPropertyValue("param").getValue());
 	}
 
-	public void testWithPrefixAndOverridingSeparator() {
-		MockPortletRequest request = new MockPortletRequest();
+	@Test
+	public void withPrefixAndOverridingSeparator() {
 		request.addParameter("test.param", "value");
 		request.addParameter("test_another", "anotherValue");
 		request.addParameter("some.other", "someValue");
@@ -61,4 +65,5 @@ public class PortletRequestParameterPropertyValuesTests extends TestCase {
 		assertTrue(pvs.contains("param"));
 		assertEquals("value", pvs.getPropertyValue("param").getValue());
 	}
+
 }

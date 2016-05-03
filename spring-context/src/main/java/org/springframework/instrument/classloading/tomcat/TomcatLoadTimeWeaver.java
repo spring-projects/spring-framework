@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -103,7 +104,7 @@ public class TomcatLoadTimeWeaver implements LoadTimeWeaver {
 	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		try {
-			return (ClassLoader) this.copyMethod.invoke(this.classLoader);
+			return new OverridingClassLoader(this.classLoader, (ClassLoader) this.copyMethod.invoke(this.classLoader));
 		}
 		catch (InvocationTargetException ex) {
 			throw new IllegalStateException("Tomcat copy method threw exception", ex.getCause());

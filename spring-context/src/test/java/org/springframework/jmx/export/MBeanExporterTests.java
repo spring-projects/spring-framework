@@ -17,6 +17,8 @@
 package org.springframework.jmx.export;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -643,6 +645,28 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 				ObjectNameManager.getInstance(objectName2));
 	}
 
+	@Test
+	public void testIgnoreBeanName() throws MalformedObjectNameException {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		String firstBeanName = "spring:type=TestBean";
+		factory.registerSingleton(firstBeanName, new TestBean("test"));
+		String secondBeanName = "spring:type=TestBean2";
+		factory.registerSingleton(secondBeanName, new TestBean("test2"));
+
+		MBeanExporter exporter = new MBeanExporter();
+		exporter.setServer(getServer());
+		exporter.setAssembler(new NamedBeanAutodetectCapableMBeanInfoAssemblerStub(firstBeanName, secondBeanName));
+		exporter.setBeanFactory(factory);
+		exporter.setAutodetectMode(MBeanExporter.AUTODETECT_ALL);
+		exporter.addExcludedBean(secondBeanName);
+
+		start(exporter);
+		assertIsRegistered("Bean not autodetected in (AUTODETECT_ALL) mode",
+				ObjectNameManager.getInstance(firstBeanName));
+		assertIsNotRegistered("Bean should have been excluded",
+				ObjectNameManager.getInstance(secondBeanName));
+	}
+
 	private ConfigurableApplicationContext load(String context) {
 		return new ClassPathXmlApplicationContext(context, getClass());
 	}
@@ -763,15 +787,15 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	private static final class NamedBeanAutodetectCapableMBeanInfoAssemblerStub extends
 			SimpleReflectiveMBeanInfoAssembler implements AutodetectCapableMBeanInfoAssembler {
 
-		private String namedBean;
+		private Collection<String> namedBeans;
 
-		public NamedBeanAutodetectCapableMBeanInfoAssemblerStub(String namedBean) {
-			this.namedBean = namedBean;
+		public NamedBeanAutodetectCapableMBeanInfoAssemblerStub(String... namedBeans) {
+			this.namedBeans = Arrays.asList(namedBeans);
 		}
 
 		@Override
 		public boolean includeBean(Class<?> beanClass, String beanName) {
-			return this.namedBean.equals(beanName);
+			return this.namedBeans.contains(beanName);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,12 +88,6 @@ public class RequestContext {
 	 * By default, the DispatcherServlet's context (or the root context as fallback) is exposed.
 	 */
 	public static final String WEB_APPLICATION_CONTEXT_ATTRIBUTE = RequestContext.class.getName() + ".CONTEXT";
-
-	/**
-	 * The name of the bean to use to look up in an implementation of
-	 * {@link RequestDataValueProcessor} has been configured.
-	 */
-	private static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
 
 
 	protected static final boolean jstlPresent = ClassUtils.isPresent("javax.servlet.jsp.jstl.core.Config",
@@ -236,7 +230,11 @@ public class RequestContext {
 		// ServletContext needs to be specified to be able to fall back to the root context!
 		this.webApplicationContext = (WebApplicationContext) request.getAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (this.webApplicationContext == null) {
-			this.webApplicationContext = RequestContextUtils.getWebApplicationContext(request, servletContext);
+			this.webApplicationContext = RequestContextUtils.findWebApplicationContext(request, servletContext);
+			if (this.webApplicationContext == null) {
+				throw new IllegalStateException("No WebApplicationContext found: not in a DispatcherServlet " +
+						"request and no ContextLoaderListener registered?");
+			}
 		}
 
 		// Determine locale to use for this RequestContext.
@@ -271,9 +269,9 @@ public class RequestContext {
 
 		this.urlPathHelper = new UrlPathHelper();
 
-		if (this.webApplicationContext.containsBean(REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
+		if (this.webApplicationContext.containsBean(RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME)) {
 			this.requestDataValueProcessor = this.webApplicationContext.getBean(
-					REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
+					RequestContextUtils.REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME, RequestDataValueProcessor.class);
 		}
 	}
 

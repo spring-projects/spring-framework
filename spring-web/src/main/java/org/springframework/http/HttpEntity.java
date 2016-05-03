@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import org.springframework.util.ObjectUtils;
 /**
  * Represents an HTTP request or response entity, consisting of headers and body.
  *
- * <p>Typically used in combination with the {@link org.springframework.web.client.RestTemplate RestTemplate}, like so:
+ * <p>Typically used in combination with the {@link org.springframework.web.client.RestTemplate},
+ * like so:
  * <pre class="code">
  * HttpHeaders headers = new HttpHeaders();
  * headers.setContentType(MediaType.TEXT_PLAIN);
@@ -46,6 +47,7 @@ import org.springframework.util.ObjectUtils;
  * </pre>
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0.2
  * @see org.springframework.web.client.RestTemplate
  * @see #getBody()
@@ -123,12 +125,13 @@ public class HttpEntity<T> {
 		return (this.body != null);
 	}
 
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof HttpEntity)) {
+		if (other == null || other.getClass() != getClass()) {
 			return false;
 		}
 		HttpEntity<?> otherEntity = (HttpEntity<?>) other;

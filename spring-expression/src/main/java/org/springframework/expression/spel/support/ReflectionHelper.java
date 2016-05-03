@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,14 @@ import org.springframework.util.MethodInvoker;
 public class ReflectionHelper {
 
 	/**
-	 * Compare argument arrays and return information about whether they match. A supplied
-	 * type converter and conversionAllowed flag allow for matches to take into account
-	 * that a type may be transformed into a different type by the converter.
-	 * @param expectedArgTypes the array of types the method/constructor is expecting
-	 * @param suppliedArgTypes the array of types that are being supplied at the point of invocation
+	 * Compare argument arrays and return information about whether they match.
+	 * A supplied type converter and conversionAllowed flag allow for matches to take
+	 * into account that a type may be transformed into a different type by the converter.
+	 * @param expectedArgTypes the types the method/constructor is expecting
+	 * @param suppliedArgTypes the types that are being supplied at the point of invocation
 	 * @param typeConverter a registered type converter
-	 * @return a MatchInfo object indicating what kind of match it was or null if it was not a match
+	 * @return a MatchInfo object indicating what kind of match it was,
+	 * or {@code null} if it was not a match
 	 */
 	static ArgumentsMatchInfo compareArguments(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
@@ -90,7 +91,7 @@ public class ReflectionHelper {
 		int result = 0;
 		for (int i = 0; i < paramTypes.size(); i++) {
 			TypeDescriptor paramType = paramTypes.get(i);
-			TypeDescriptor argType = argTypes.get(i);
+			TypeDescriptor argType = (i < argTypes.size() ? argTypes.get(i) : null);
 			if (argType == null) {
 				if (paramType.isPrimitive()) {
 					return Integer.MAX_VALUE;
@@ -127,13 +128,15 @@ public class ReflectionHelper {
 	}
 
 	/**
-	 * Compare argument arrays and return information about whether they match. A supplied type converter and
-	 * conversionAllowed flag allow for matches to take into account that a type may be transformed into a different
-	 * type by the converter. This variant of compareArguments also allows for a varargs match.
-	 * @param expectedArgTypes the array of types the method/constructor is expecting
-	 * @param suppliedArgTypes the array of types that are being supplied at the point of invocation
+	 * Compare argument arrays and return information about whether they match.
+	 * A supplied type converter and conversionAllowed flag allow for matches to
+	 * take into account that a type may be transformed into a different type by the
+	 * converter. This variant of compareArguments also allows for a varargs match.
+	 * @param expectedArgTypes the types the method/constructor is expecting
+	 * @param suppliedArgTypes the types that are being supplied at the point of invocation
 	 * @param typeConverter a registered type converter
-	 * @return a MatchInfo object indicating what kind of match it was or null if it was not a match
+	 * @return a MatchInfo object indicating what kind of match it was,
+	 * or {@code null} if it was not a match
 	 */
 	static ArgumentsMatchInfo compareArgumentsVarargs(
 			List<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {
@@ -235,23 +238,27 @@ public class ReflectionHelper {
 	 * @return true if some kind of conversion occurred on the argument
 	 * @throws SpelEvaluationException if there is a problem with conversion
 	 */
-	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method) throws SpelEvaluationException {
-		Integer varargsPosition = method.isVarArgs() ? method.getParameterTypes().length-1:null;
+	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)
+			throws SpelEvaluationException {
+
+		Integer varargsPosition = (method.isVarArgs() ? method.getParameterTypes().length - 1 : null);
 		return convertArguments(converter, arguments, method, varargsPosition);
 	}
-	
+
 	/**
 	 * Takes an input set of argument values and converts them to the types specified as the
 	 * required parameter types. The arguments are converted 'in-place' in the input array.
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
 	 * @param methodOrCtor the target Method or Constructor
-	 * @param varargsPosition the known position of the varargs argument, if any (null if not varargs)
-	 * @return true if some kind of conversion occurred on an argument
+	 * @param varargsPosition the known position of the varargs argument, if any
+	 * ({@code null} if not varargs)
+	 * @return {@code true} if some kind of conversion occurred on an argument
 	 * @throws EvaluationException if a problem occurs during conversion
 	 */
 	static boolean convertArguments(TypeConverter converter, Object[] arguments, Object methodOrCtor,
 			Integer varargsPosition) throws EvaluationException {
+
 		boolean conversionOccurred = false;
 		if (varargsPosition == null) {
 			for (int i = 0; i < arguments.length; i++) {
@@ -320,9 +327,9 @@ public class ReflectionHelper {
 
 	/**
 	 * Package up the arguments so that they correctly match what is expected in parameterTypes.
-	 * For example, if parameterTypes is (int, String[]) because the second parameter was declared String...
-	 * then if arguments is [1,"a","b"] then it must be repackaged as [1,new String[]{"a","b"}] in order to
-	 * match the expected parameterTypes.
+	 * For example, if parameterTypes is {@code (int, String[])} because the second parameter
+	 * was declared {@code String...}, then if arguments is {@code [1,"a","b"]} then it must be
+	 * repackaged as {@code [1,new String[]{"a","b"}]} in order to match the expected types.
 	 * @param requiredParameterTypes the types of the parameters for the invocation
 	 * @param args the arguments to be setup ready for the invocation
 	 * @return a repackaged array of arguments where any varargs setup has been done
@@ -374,10 +381,11 @@ public class ReflectionHelper {
 
 
 	/**
-	 * An instance of ArgumentsMatchInfo describes what kind of match was achieved between two sets of arguments -
-	 * the set that a method/constructor is expecting and the set that are being supplied at the point of invocation.
-	 * If the kind indicates that conversion is required for some of the arguments then the arguments that require
-	 * conversion are listed in the argsRequiringConversion array.
+	 * An instance of ArgumentsMatchInfo describes what kind of match was achieved
+	 * between two sets of arguments - the set that a method/constructor is expecting
+	 * and the set that are being supplied at the point of invocation. If the kind
+	 * indicates that conversion is required for some of the arguments then the arguments
+	 * that require conversion are listed in the argsRequiringConversion array.
 	 */
 	static class ArgumentsMatchInfo {
 

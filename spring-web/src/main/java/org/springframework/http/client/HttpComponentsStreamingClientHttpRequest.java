@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import java.net.URI;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 
@@ -47,7 +47,7 @@ import org.springframework.http.StreamingHttpOutputMessage;
  */
 final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpRequest implements StreamingHttpOutputMessage {
 
-	private final CloseableHttpClient httpClient;
+	private final HttpClient httpClient;
 
 	private final HttpUriRequest httpRequest;
 
@@ -56,7 +56,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 	private Body body;
 
 
-	HttpComponentsStreamingClientHttpRequest(CloseableHttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
+	HttpComponentsStreamingClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
@@ -65,7 +65,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.httpRequest.getMethod());
+		return HttpMethod.resolve(this.httpRequest.getMethod());
 	}
 
 	@Override
@@ -94,7 +94,7 @@ final class HttpComponentsStreamingClientHttpRequest extends AbstractClientHttpR
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
-		CloseableHttpResponse httpResponse = this.httpClient.execute(this.httpRequest, this.httpContext);
+		HttpResponse httpResponse = this.httpClient.execute(this.httpRequest, this.httpContext);
 		return new HttpComponentsClientHttpResponse(httpResponse);
 	}
 

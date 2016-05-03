@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.jms.support.converter;
 
-import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
@@ -24,7 +23,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.SimpleJmsHeaderMapper;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.core.AbstractMessagingTemplate;
 import org.springframework.util.Assert;
 
 /**
@@ -93,8 +93,11 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 					Message.class.getName() + "] is handled by this converter");
 		}
 		Message<?> input = (Message<?>) object;
-		javax.jms.Message reply = this.payloadConverter.toMessage(input.getPayload(), session);
-		this.headerMapper.fromHeaders(input.getHeaders(), reply);
+		MessageHeaders headers = input.getHeaders();
+		Object conversionHint = (headers != null ? headers.get(
+				AbstractMessagingTemplate.CONVERSION_HINT_HEADER) : null);
+		javax.jms.Message reply = createMessageForPayload(input.getPayload(), session, conversionHint);
+		this.headerMapper.fromHeaders(headers, reply);
 		return reply;
 	}
 
@@ -104,12 +107,7 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 		if (message == null) {
 			return null;
 		}
-		Map<String, Object> mappedHeaders = this.headerMapper.toHeaders(message);
-		Object convertedObject = extractPayload(message);
-		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message) ?
-				MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>) convertedObject) :
-				MessageBuilder.withPayload(convertedObject);
-		return builder.copyHeadersIfAbsent(mappedHeaders).build();
+		return new LazyResolutionMessage(message);
 	}
 
 	/**
@@ -117,6 +115,70 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	 */
 	protected Object extractPayload(javax.jms.Message message) throws JMSException {
 		return this.payloadConverter.fromMessage(message);
+	}
+
+	/**
+	 * Create a JMS message for the specified payload.
+	 * @see MessageConverter#toMessage(Object, Session)
+	 * @deprecated as of 4.3, use {@link #createMessageForPayload(Object, Session, Object)}
+	 */
+	@Deprecated
+	protected javax.jms.Message createMessageForPayload(Object payload, Session session) throws JMSException {
+		return this.payloadConverter.toMessage(payload, session);
+	}
+
+	/**
+	 * Create a JMS message for the specified payload and conversionHint.
+	 * The conversion hint is an extra object passed to the {@link MessageConverter},
+	 * e.g. the associated {@code MethodParameter} (may be {@code null}}.
+	 * @see MessageConverter#toMessage(Object, Session)
+	 * @since 4.3
+	 */
+	@SuppressWarnings("deprecation")
+	protected javax.jms.Message createMessageForPayload(Object payload, Session session, Object conversionHint)
+			throws JMSException {
+
+		return createMessageForPayload(payload, session);
+	}
+
+	private MessageHeaders extractHeaders(javax.jms.Message message) {
+		return this.headerMapper.toHeaders(message);
+	}
+
+
+	private class LazyResolutionMessage implements Message<Object> {
+
+		private final javax.jms.Message message;
+
+		private Object payload;
+
+		private MessageHeaders headers;
+
+		public LazyResolutionMessage(javax.jms.Message message) {
+			this.message = message;
+		}
+
+		@Override
+		public Object getPayload() {
+			if (this.payload == null) {
+				try {
+					this.payload = extractPayload(this.message);
+				}
+				catch (JMSException ex) {
+					throw new MessageConversionException(
+							"Failed to extract payload from [" + this.message + "]", ex);
+				}
+			}
+			return this.payload;
+		}
+
+		@Override
+		public MessageHeaders getHeaders() {
+			if (this.headers == null) {
+				this.headers = extractHeaders(this.message);
+			}
+			return this.headers;
+		}
 	}
 
 }

@@ -54,6 +54,8 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 
 	private boolean copyHttpSessionId = true;
 
+	private boolean createSession;
+
 
 	/**
 	 * Default constructor for copying all HTTP session attributes and the HTTP
@@ -121,6 +123,22 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 		return this.copyHttpSessionId;
 	}
 
+	/**
+	 * Whether to allow the HTTP session to be created while accessing it.
+	 * <p>By default set to {@code false}.
+	 * @see javax.servlet.http.HttpServletRequest#getSession(boolean)
+	 */
+	public void setCreateSession(boolean createSession) {
+		this.createSession = createSession;
+	}
+
+	/**
+	 * Whether the HTTP session is allowed to be created.
+	 */
+	public boolean isCreateSession() {
+		return this.createSession;
+	}
+
 
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -145,7 +163,7 @@ public class HttpSessionHandshakeInterceptor implements HandshakeInterceptor {
 	private HttpSession getSession(ServerHttpRequest request) {
 		if (request instanceof ServletServerHttpRequest) {
 			ServletServerHttpRequest serverRequest = (ServletServerHttpRequest) request;
-			return serverRequest.getServletRequest().getSession(false);
+			return serverRequest.getServletRequest().getSession(isCreateSession());
 		}
 		return null;
 	}

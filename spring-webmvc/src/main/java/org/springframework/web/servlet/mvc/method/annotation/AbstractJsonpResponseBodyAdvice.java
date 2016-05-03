@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -44,6 +48,14 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractJsonpResponseBodyAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
+	/**
+	 * Pattern for validating jsonp callback parameter values.
+	 */
+	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
+
+
+	private final Log logger = LogFactory.getLog(getClass());
+
 	private final String[] jsonpQueryParamNames;
 
 
@@ -62,12 +74,29 @@ public abstract class AbstractJsonpResponseBodyAdvice extends AbstractMappingJac
 		for (String name : this.jsonpQueryParamNames) {
 			String value = servletRequest.getParameter(name);
 			if (value != null) {
+				if (!isValidJsonpQueryParam(value)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring invalid jsonp parameter value: " + value);
+					}
+					continue;
+				}
 				MediaType contentTypeToUse = getContentType(contentType, request, response);
 				response.getHeaders().setContentType(contentTypeToUse);
 				bodyContainer.setJsonpFunction(value);
-				return;
+				break;
 			}
 		}
+	}
+
+	/**
+	 * Validate the jsonp query parameter value. The default implementation
+	 * returns true if it consists of digits, letters, or "_" and ".".
+	 * Invalid parameter values are ignored.
+	 * @param value the query param value, never {@code null}
+	 * @since 4.1.8
+	 */
+	protected boolean isValidJsonpQueryParam(String value) {
+		return CALLBACK_PARAM_PATTERN.matcher(value).matches();
 	}
 
 	/**

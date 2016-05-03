@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,32 +23,37 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link AntPathMatcher}.
+ *
  * @author Alef Arendsen
  * @author Seth Ladd
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class AntPathMatcherTests {
 
-	private AntPathMatcher pathMatcher;
+	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-	@Before
-	public void createMatcher() {
-		pathMatcher = new AntPathMatcher();
-	}
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
 
 	@Test
 	public void match() {
 		// test exact matching
 		assertTrue(pathMatcher.match("test", "test"));
 		assertTrue(pathMatcher.match("/test", "/test"));
+		assertTrue(pathMatcher.match("http://example.org", "http://example.org")); // SPR-14141
 		assertFalse(pathMatcher.match("/test.jpg", "test.jpg"));
 		assertFalse(pathMatcher.match("test", "/test"));
 		assertFalse(pathMatcher.match("/test", "test"));
@@ -63,7 +68,7 @@ public class AntPathMatcherTests {
 		assertFalse(pathMatcher.match("tes?", "testt"));
 		assertFalse(pathMatcher.match("tes?", "tsst"));
 
-		// test matchin with *'s
+		// test matching with *'s
 		assertTrue(pathMatcher.match("*", "test"));
 		assertTrue(pathMatcher.match("test*", "test"));
 		assertTrue(pathMatcher.match("test*", "testTest"));
@@ -124,6 +129,8 @@ public class AntPathMatcherTests {
 
 		assertFalse(pathMatcher.match("/x/x/**/bla", "/x/x/x/"));
 
+		assertTrue(pathMatcher.match("/foo/bar/**", "/foo/bar")) ;
+
 		assertTrue(pathMatcher.match("", ""));
 
 		assertTrue(pathMatcher.match("/{bla}.*", "/testing.html"));
@@ -148,7 +155,7 @@ public class AntPathMatcherTests {
 		assertFalse(pathMatcher.matchStart("tes?", "testt"));
 		assertFalse(pathMatcher.matchStart("tes?", "tsst"));
 
-		// test matchin with *'s
+		// test matching with *'s
 		assertTrue(pathMatcher.matchStart("*", "test"));
 		assertTrue(pathMatcher.matchStart("test*", "test"));
 		assertTrue(pathMatcher.matchStart("test*", "testTest"));
@@ -237,7 +244,7 @@ public class AntPathMatcherTests {
 		assertFalse(pathMatcher.match("tes?", "testt"));
 		assertFalse(pathMatcher.match("tes?", "tsst"));
 
-		// test matchin with *'s
+		// test matching with *'s
 		assertTrue(pathMatcher.match("*", "test"));
 		assertTrue(pathMatcher.match("test*", "test"));
 		assertTrue(pathMatcher.match("test*", "testTest"));
@@ -294,7 +301,7 @@ public class AntPathMatcherTests {
 		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("*.html", "/docs/commit.html"));
 		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("**/*.*", "/docs/commit.html"));
 		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("*", "/docs/commit.html"));
-		//SPR-10515
+		// SPR-10515
 		assertEquals("/docs/cvs/other/commit.html", pathMatcher.extractPathWithinPattern("**/commit.html", "/docs/cvs/other/commit.html"));
 		assertEquals("cvs/other/commit.html", pathMatcher.extractPathWithinPattern("/docs/**/commit.html", "/docs/cvs/other/commit.html"));
 		assertEquals("cvs/other/commit.html", pathMatcher.extractPathWithinPattern("/docs/**/**/**/**", "/docs/cvs/other/commit.html"));
@@ -354,8 +361,9 @@ public class AntPathMatcherTests {
 		assertEquals("1.0.0", result.get("version"));
 	}
 
-	// SPR-7787
-
+	/**
+	 * SPR-7787
+	 */
 	@Test
 	public void extractUriTemplateVarsRegexQualifiers() {
 		Map<String, String> result = pathMatcher.extractUriTemplateVariables(
@@ -380,18 +388,14 @@ public class AntPathMatcherTests {
 		assertEquals("1.0.0.{12}", result.get("version"));
 	}
 
-	// SPR-8455
-
+	/**
+	 * SPR-8455
+	 */
 	@Test
 	public void extractUriTemplateVarsRegexCapturingGroups() {
-		try {
-			pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue("Expected helpful message on the use of capturing groups",
-					ex.getMessage().contains("The number of capturing groups in the pattern"));
-		}
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("The number of capturing groups in the pattern"));
+		pathMatcher.extractUriTemplateVariables("/web/{id:foo(bar)?}", "/web/foobar");
 	}
 
 	@Test
@@ -417,10 +421,18 @@ public class AntPathMatcherTests {
 		assertEquals("/*.html", pathMatcher.combine("/**", "/*.html"));
 		assertEquals("/*.html", pathMatcher.combine("/*", "/*.html"));
 		assertEquals("/*.html", pathMatcher.combine("/*.*", "/*.html"));
-		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));	// SPR-8858
-		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));	// SPR-7970
+		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));    // SPR-8858
+		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));    // SPR-7970
 		assertEquals("/{foo:.*[^0-9].*}/edit/", pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")); // SPR-10062
 		assertEquals("/1.0/foo/test", pathMatcher.combine("/1.0", "/foo/test")); // SPR-10554
+		assertEquals("/hotel", pathMatcher.combine("/", "/hotel")); // SPR-12975
+		assertEquals("/hotel/booking", pathMatcher.combine("/hotel/", "/booking")); // SPR-12975
+	}
+
+	@Test
+	public void combineWithTwoFileExtensionPatterns() {
+		exception.expect(IllegalArgumentException.class);
+		pathMatcher.combine("/*.html", "/*.txt");
 	}
 
 	@Test
@@ -443,10 +455,10 @@ public class AntPathMatcherTests {
 		assertEquals(-1, comparator.compare("/hotels/{hotel}/booking", "/hotels/{hotel}/bookings/{booking}"));
 		assertEquals(1, comparator.compare("/hotels/{hotel}/bookings/{booking}", "/hotels/{hotel}/booking"));
 
-		//SPR-10550
+		// SPR-10550
 		assertEquals(-1, comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/**"));
-		assertEquals(1, comparator.compare("/**","/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
-		assertEquals(0, comparator.compare("/**","/**"));
+		assertEquals(1, comparator.compare("/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
+		assertEquals(0, comparator.compare("/**", "/**"));
 
 		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/*"));
 		assertEquals(1, comparator.compare("/hotels/*", "/hotels/{hotel}"));
@@ -457,7 +469,7 @@ public class AntPathMatcherTests {
 		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/new.*"));
 		assertEquals(2, comparator.compare("/hotels/{hotel}", "/hotels/{hotel}.*"));
 
-		//SPR-6741
+		// SPR-6741
 		assertEquals(-1, comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/hotels/**"));
 		assertEquals(1, comparator.compare("/hotels/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
 		assertEquals(1, comparator.compare("/hotels/foo/bar/**", "/hotels/{hotel}"));
@@ -465,11 +477,15 @@ public class AntPathMatcherTests {
 		assertEquals(2, comparator.compare("/hotels/**/bookings/**", "/hotels/**"));
 		assertEquals(-2, comparator.compare("/hotels/**", "/hotels/**/bookings/**"));
 
-		//SPR-8683
+		// SPR-8683
 		assertEquals(1, comparator.compare("/**", "/hotels/{hotel}"));
 
 		// longer is better
 		assertEquals(1, comparator.compare("/hotels", "/hotels2"));
+
+		// SPR-13139
+		assertEquals(-1, comparator.compare("*", "*/**"));
+		assertEquals(1, comparator.compare("*/**", "*"));
 	}
 
 	@Test
@@ -568,18 +584,26 @@ public class AntPathMatcherTests {
 		paths.clear();
 	}
 
-	// SPR-8687
-
-	@Test
+	@Test  // SPR-8687
 	public void trimTokensOff() {
 		pathMatcher.setTrimTokens(false);
 
 		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/sales/members"));
 		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/  sales/members"));
+		assertFalse(pathMatcher.match("/group/{groupName}/members", "/Group/  Sales/Members"));
+	}
+
+	@Test  // SPR-13286
+	public void caseInsensitive() {
+		pathMatcher.setCaseSensitive(false);
+
+		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/sales/members"));
+		assertTrue(pathMatcher.match("/group/{groupName}/members", "/Group/Sales/Members"));
+		assertTrue(pathMatcher.match("/Group/{groupName}/Members", "/group/Sales/members"));
 	}
 
 	@Test
-	public void testDefaultCacheSetting() {
+	public void defaultCacheSetting() {
 		match();
 		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
 
@@ -591,27 +615,59 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
-	public void testCacheSetToTrue() {
+	public void cachePatternsSetToTrue() {
 		pathMatcher.setCachePatterns(true);
 		match();
 		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
 
 		for (int i = 0; i < 65536; i++) {
-			pathMatcher.match("test" + i, "test");
+			pathMatcher.match("test" + i, "test" + i);
 		}
 		// Cache keeps being alive due to the explicit cache setting
 		assertTrue(pathMatcher.stringMatcherCache.size() > 65536);
 	}
 
 	@Test
-	public void testCacheSetToFalse() {
+	public void preventCreatingStringMatchersIfPathDoesNotStartsWithPatternPrefix() {
+		pathMatcher.setCachePatterns(true);
+		assertEquals(0, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test?", "test");
+		assertEquals(1, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test?", "best");
+		pathMatcher.match("test/*", "view/test.jpg");
+		pathMatcher.match("test/**/test.jpg", "view/test.jpg");
+		pathMatcher.match("test/{name}.jpg", "view/test.jpg");
+		assertEquals(1, pathMatcher.stringMatcherCache.size());
+	}
+
+	@Test
+	public void creatingStringMatchersIfPatternPrefixCannotDetermineIfPathMatch() {
+		pathMatcher.setCachePatterns(true);
+		assertEquals(0, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test", "testian");
+		pathMatcher.match("test?", "testFf");
+		pathMatcher.match("test/*", "test/dir/name.jpg");
+		pathMatcher.match("test/{name}.jpg", "test/lorem.jpg");
+		pathMatcher.match("bla/**/test.jpg", "bla/test.jpg");
+		pathMatcher.match("**/{name}.jpg", "test/lorem.jpg");
+		pathMatcher.match("/**/{name}.jpg", "/test/lorem.jpg");
+		pathMatcher.match("/*/dir/{name}.jpg", "/*/dir/lorem.jpg");
+
+		assertEquals(7, pathMatcher.stringMatcherCache.size());
+	}
+
+	@Test
+	public void cachePatternsSetToFalse() {
 		pathMatcher.setCachePatterns(false);
 		match();
 		assertTrue(pathMatcher.stringMatcherCache.isEmpty());
 	}
 
 	@Test
-	public void testExtensionMappingWithDotPathSeparator() {
+	public void extensionMappingWithDotPathSeparator() {
 		pathMatcher.setPathSeparator(".");
 		assertEquals("Extension mapping should be disabled with \".\" as path separator",
 				"/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));

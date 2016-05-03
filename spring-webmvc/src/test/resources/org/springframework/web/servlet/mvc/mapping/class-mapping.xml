@@ -8,7 +8,7 @@
 	<bean id="welcome" class="org.springframework.web.servlet.mvc.mapping.WelcomeController"/>
 	<bean id="admin" class="org.springframework.web.servlet.mvc.mapping.AdminController"/>
 	<bean id="buy" class="org.springframework.web.servlet.mvc.mapping.BuyForm"/>
-	
+
 	<bean name="/myFile" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
 	<bean name="/myFile2" class="org.springframework.web.servlet.mvc.UrlFilenameViewController"/>
 

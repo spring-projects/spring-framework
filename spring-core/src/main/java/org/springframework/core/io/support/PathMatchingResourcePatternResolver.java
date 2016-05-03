@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -143,6 +145,9 @@ import org.springframework.util.StringUtils;
  * root of expanded directories. This originates from a limitation in the JDK's
  * {@code ClassLoader.getResources()} method which only returns file system
  * locations for a passed-in empty String (indicating potential roots to search).
+ * This {@code ResourcePatternResolver} implementation is trying to mitigate the
+ * jar root lookup limitation through {@link URLClassLoader} introspection and
+ * "java.class.path" manifest evaluation; however, without portability guarantees.
  *
  * <p><b>WARNING:</b> Ant-style patterns with "classpath:" resources are not
  * guaranteed to find matching resources if the root package to search is available
@@ -155,9 +160,9 @@ import org.springframework.util.StringUtils;
  *     classpath:com/mycompany/**&#47;service-context.xml
  * </pre>
  * is used to try to resolve it, the resolver will work off the (first) URL
- * returned by {@code getResource("com/mycompany");}. If this base package
- * node exists in multiple classloader locations, the actual end resource may
- * not be underneath. Therefore, preferably, use "{@code classpath*:}" with the same
+ * returned by {@code getResource("com/mycompany");}. If this base package node
+ * exists in multiple classloader locations, the actual end resource may not be
+ * underneath. Therefore, preferably, use "{@code classpath*:}" with the same
  * Ant-style pattern in such a case, which will search <i>all</i> class path
  * locations that contain the root package.
  *
@@ -165,6 +170,7 @@ import org.springframework.util.StringUtils;
  * @author Colin Sampaleanu
  * @author Marius Bogoevici
  * @author Costin Leau
+ * @author Phil Webb
  * @since 1.0.2
  * @see #CLASSPATH_ALL_URL_PREFIX
  * @see org.springframework.util.AntPathMatcher
@@ -307,6 +313,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			path = path.substring(1);
 		}
 		Set<Resource> result = doFindAllClassPathResources(path);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resolved classpath location [" + location + "] to resources " + result);
+		}
 		return result.toArray(new Resource[result.size()]);
 	}
 
@@ -315,6 +324,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Called by {@link #findAllClassPathResources(String)}.
 	 * @param path the absolute path within the classpath (never a leading slash)
 	 * @return a mutable Set of matching Resource instances
+	 * @since 4.1.1
 	 */
 	protected Set<Resource> doFindAllClassPathResources(String path) throws IOException {
 		Set<Resource> result = new LinkedHashSet<Resource>(16);
@@ -349,6 +359,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * given set of resources in the form of pointers to the root of the jar file content.
 	 * @param classLoader the ClassLoader to search (including its ancestors)
 	 * @param result the set of resources to add jar roots to
+	 * @since 4.1.1
 	 */
 	protected void addAllClassLoaderJarRoots(ClassLoader classLoader, Set<Resource> result) {
 		if (classLoader instanceof URLClassLoader) {
@@ -378,8 +389,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				}
 			}
 		}
+
+		if (classLoader == ClassLoader.getSystemClassLoader()) {
+			// "java.class.path" manifest evaluation...
+			addClassPathManifestEntries(result);
+		}
+
 		if (classLoader != null) {
 			try {
+				// Hierarchy traversal...
 				addAllClassLoaderJarRoots(classLoader.getParent(), result);
 			}
 			catch (Exception ex) {
@@ -387,6 +405,41 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					logger.debug("Cannot introspect jar files in parent ClassLoader since [" + classLoader +
 							"] does not support 'getParent()': " + ex);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Determine jar file references from the "java.class.path." manifest property and add them
+	 * to the given set of resources in the form of pointers to the root of the jar file content.
+	 * @param result the set of resources to add jar roots to
+	 * @since 4.3
+	 */
+	protected void addClassPathManifestEntries(Set<Resource> result) {
+		try {
+			String javaClassPathProperty = System.getProperty("java.class.path");
+			for (String url : StringUtils.delimitedListToStringArray(
+					javaClassPathProperty, System.getProperty("path.separator"))) {
+				try {
+					if (url.endsWith(ResourceUtils.JAR_FILE_EXTENSION)) {
+						UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
+								ResourceUtils.FILE_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR);
+						if (jarResource.exists()) {
+							result.add(jarResource);
+						}
+					}
+				}
+				catch (MalformedURLException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Cannot search for matching files underneath [" + url +
+								"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
+					}
+				}
+			}
+		}
+		catch (Exception ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to evaluate 'java.class.path' manifest entries: " + ex);
 			}
 		}
 	}
@@ -409,11 +462,18 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Set<Resource> result = new LinkedHashSet<Resource>(16);
 		for (Resource rootDirResource : rootDirResources) {
 			rootDirResource = resolveRootDirResource(rootDirResource);
-			if (rootDirResource.getURL().getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
-				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirResource, subPattern, getPathMatcher()));
+			URL rootDirURL = rootDirResource.getURL();
+			if (equinoxResolveMethod != null) {
+				if (rootDirURL.getProtocol().startsWith("bundle")) {
+					rootDirURL = (URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, rootDirURL);
+					rootDirResource = new UrlResource(rootDirURL);
+				}
 			}
-			else if (isJarResource(rootDirResource)) {
-				result.addAll(doFindPathMatchingJarResources(rootDirResource, subPattern));
+			if (rootDirURL.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirURL, subPattern, getPathMatcher()));
+			}
+			else if (ResourceUtils.isJarURL(rootDirURL) || isJarResource(rootDirResource)) {
+				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirURL, subPattern));
 			}
 			else {
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
@@ -451,56 +511,61 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Resolve the specified resource for path matching.
-	 * <p>The default implementation detects an Equinox OSGi "bundleresource:"
-	 * / "bundleentry:" URL and resolves it into a standard jar file URL that
-	 * can be traversed using Spring's standard jar file traversal algorithm.
+	 * <p>By default, Equinox OSGi "bundleresource:" / "bundleentry:" URL will be
+	 * resolved into a standard jar file URL that be traversed using Spring's
+	 * standard jar file traversal algorithm. For any preceding custom resolution,
+	 * override this method and replace the resource handle accordingly.
 	 * @param original the resource to resolve
 	 * @return the resolved resource (may be identical to the passed-in resource)
 	 * @throws IOException in case of resolution failure
 	 */
 	protected Resource resolveRootDirResource(Resource original) throws IOException {
-		if (equinoxResolveMethod != null) {
-			URL url = original.getURL();
-			if (url.getProtocol().startsWith("bundle")) {
-				return new UrlResource((URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, url));
-			}
-		}
 		return original;
 	}
 
 	/**
 	 * Return whether the given resource handle indicates a jar resource
 	 * that the {@code doFindPathMatchingJarResources} method can handle.
-	 * <p>The default implementation checks against the URL protocols
-	 * "jar", "zip" and "wsjar" (the latter are used by BEA WebLogic Server
-	 * and IBM WebSphere, respectively, but can be treated like jar files).
+	 * <p>By default, the URL protocols "jar", "zip", "vfszip and "wsjar"
+	 * will be treated as jar resources. This template method allows for
+	 * detecting further kinds of jar-like resources, e.g. through
+	 * {@code instanceof} checks on the resource handle type.
 	 * @param resource the resource handle to check
 	 * (usually the root directory to start path matching from)
 	 * @see #doFindPathMatchingJarResources
 	 * @see org.springframework.util.ResourceUtils#isJarURL
 	 */
 	protected boolean isJarResource(Resource resource) throws IOException {
-		return ResourceUtils.isJarURL(resource.getURL());
+		return false;
 	}
 
 	/**
 	 * Find all resources in jar files that match the given location pattern
 	 * via the Ant-style PathMatcher.
 	 * @param rootDirResource the root directory as Resource
+	 * @param rootDirURL the pre-resolved root directory URL
 	 * @param subPattern the sub pattern to match (below the root directory)
 	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
+	 * @since 4.3
 	 * @see java.net.JarURLConnection
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, String subPattern)
+	@SuppressWarnings("deprecation")
+	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, URL rootDirURL, String subPattern)
 			throws IOException {
 
-		URLConnection con = rootDirResource.getURL().openConnection();
+		// Check deprecated variant for potential overriding first...
+		Set<Resource> result = doFindPathMatchingJarResources(rootDirResource, subPattern);
+		if (result != null) {
+			return result;
+		}
+
+		URLConnection con = rootDirURL.openConnection();
 		JarFile jarFile;
 		String jarFileUrl;
 		String rootEntryPath;
-		boolean newJarFile = false;
+		boolean closeJarFile;
 
 		if (con instanceof JarURLConnection) {
 			// Should usually be the case for traditional JAR files.
@@ -510,25 +575,34 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			jarFileUrl = jarCon.getJarFileURL().toExternalForm();
 			JarEntry jarEntry = jarCon.getJarEntry();
 			rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
+			closeJarFile = !jarCon.getUseCaches();
 		}
 		else {
 			// No JarURLConnection -> need to resort to URL file parsing.
 			// We'll assume URLs of the format "jar:path!/entry", with the protocol
 			// being arbitrary as long as following the entry format.
 			// We'll also handle paths with and without leading "file:" prefix.
-			String urlFile = rootDirResource.getURL().getFile();
-			int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
-			if (separatorIndex != -1) {
-				jarFileUrl = urlFile.substring(0, separatorIndex);
-				rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
-				jarFile = getJarFile(jarFileUrl);
+			String urlFile = rootDirURL.getFile();
+			try {
+				int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
+				if (separatorIndex != -1) {
+					jarFileUrl = urlFile.substring(0, separatorIndex);
+					rootEntryPath = urlFile.substring(separatorIndex + ResourceUtils.JAR_URL_SEPARATOR.length());
+					jarFile = getJarFile(jarFileUrl);
+				}
+				else {
+					jarFile = new JarFile(urlFile);
+					jarFileUrl = urlFile;
+					rootEntryPath = "";
+				}
+				closeJarFile = true;
 			}
-			else {
-				jarFile = new JarFile(urlFile);
-				jarFileUrl = urlFile;
-				rootEntryPath = "";
+			catch (ZipException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Skipping invalid jar classpath entry [" + urlFile + "]");
+				}
+				return Collections.emptySet();
 			}
-			newJarFile = true;
 		}
 
 		try {
@@ -540,7 +614,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				// The Sun JRE does not return a slash here, but BEA JRockit does.
 				rootEntryPath = rootEntryPath + "/";
 			}
-			Set<Resource> result = new LinkedHashSet<Resource>(8);
+			result = new LinkedHashSet<Resource>(8);
 			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 				JarEntry entry = entries.nextElement();
 				String entryPath = entry.getName();
@@ -554,12 +628,27 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return result;
 		}
 		finally {
-			// Close jar file, but only if freshly obtained -
-			// not from JarURLConnection, which might cache the file reference.
-			if (newJarFile) {
+			if (closeJarFile) {
 				jarFile.close();
 			}
 		}
+	}
+
+	/**
+	 * Find all resources in jar files that match the given location pattern
+	 * via the Ant-style PathMatcher.
+	 * @param rootDirResource the root directory as Resource
+	 * @param subPattern the sub pattern to match (below the root directory)
+	 * @return a mutable Set of matching Resource instances
+	 * @throws IOException in case of I/O errors
+	 * @deprecated as of Spring 4.3, in favor of
+	 * {@link #doFindPathMatchingJarResources(Resource, URL, String)}
+	 */
+	@Deprecated
+	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, String subPattern)
+			throws IOException {
+
+		return null;
 	}
 
 	/**
@@ -691,6 +780,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			return;
 		}
+		Arrays.sort(dirContents);
 		for (File content : dirContents) {
 			String currPath = StringUtils.replace(content.getAbsolutePath(), File.separator, "/");
 			if (content.isDirectory() && getPathMatcher().matchStart(fullPattern, currPath + "/")) {
@@ -717,8 +807,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private static class VfsResourceMatchingDelegate {
 
 		public static Set<Resource> findMatchingResources(
-				Resource rootResource, String locationPattern, PathMatcher pathMatcher) throws IOException {
-			Object root = VfsPatternUtils.findRoot(rootResource.getURL());
+				URL rootDirURL, String locationPattern, PathMatcher pathMatcher) throws IOException {
+
+			Object root = VfsPatternUtils.findRoot(rootDirURL);
 			PatternVirtualFileVisitor visitor =
 					new PatternVirtualFileVisitor(VfsPatternUtils.getPath(root), locationPattern, pathMatcher);
 			VfsPatternUtils.visit(root, visitor);
@@ -750,7 +841,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
-			if (Object.class.equals(method.getDeclaringClass())) {
+			if (Object.class == method.getDeclaringClass()) {
 				if (methodName.equals("equals")) {
 					// Only consider equal when proxies are identical.
 					return (proxy == args[0]);

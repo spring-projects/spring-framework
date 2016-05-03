@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.util.MimeType.SpecificityComparator;
 
@@ -36,6 +38,17 @@ import org.springframework.util.MimeType.SpecificityComparator;
  * @since 4.0
  */
 public abstract class MimeTypeUtils {
+
+	private static final byte[] BOUNDARY_CHARS =
+			new byte[] {'-', '_', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+					'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A',
+					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+					'V', 'W', 'X', 'Y', 'Z'};
+
+	private static final Random RND = new Random();
+
+	private static Charset US_ASCII = Charset.forName("US-ASCII");
+
 
 	/**
 	 * Public constant mime type that includes all media ranges (i.e. "&#42;/&#42;").
@@ -207,6 +220,9 @@ public abstract class MimeTypeUtils {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
 		}
 		String[] parts = StringUtils.tokenizeToStringArray(mimeType, ";");
+		if (parts.length == 0) {
+			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
+		}
 
 		String fullType = parts[0].trim();
 		// java.net.HttpURLConnection returns a *; q=.2 Accept header
@@ -318,6 +334,25 @@ public abstract class MimeTypeUtils {
 			Collections.sort(mimeTypes, SPECIFICITY_COMPARATOR);
 		}
 	}
+
+	/**
+	 * Generate a random MIME boundary as bytes, often used in multipart mime types.
+	 */
+	public static byte[] generateMultipartBoundary() {
+		byte[] boundary = new byte[RND.nextInt(11) + 30];
+		for (int i = 0; i < boundary.length; i++) {
+			boundary[i] = BOUNDARY_CHARS[RND.nextInt(BOUNDARY_CHARS.length)];
+		}
+		return boundary;
+	}
+
+	/**
+	 * Generate a random MIME boundary as String, often used in multipart mime types.
+	 */
+	public static String generateMultipartBoundaryString() {
+		return new String(generateMultipartBoundary(), US_ASCII);
+	}
+
 
 
 	/**

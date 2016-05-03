@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,17 @@
 package org.springframework.web.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
@@ -30,6 +36,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class WebUtilsTests {
 
@@ -63,9 +70,17 @@ public class WebUtilsTests {
 		assertEquals("index.html", WebUtils.extractFullFilenameFromUrlPath("index.html"));
 		assertEquals("index.html", WebUtils.extractFullFilenameFromUrlPath("/index.html"));
 		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/a"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/path/a"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/path/a.do"));
 		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=a"));
 		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a"));
 		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a#/path/a"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do#/path/a.do"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html?param=/path/a.do"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html;r=22?param=/path/a.do"));
+		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html;r=22;s=33?param=/path/a.do"));
 	}
 
 	@Test
@@ -96,6 +111,76 @@ public class WebUtilsTests {
 		variables = WebUtils.parseMatrixVariables("colors=red;colors=blue;colors=green");
 		assertEquals(1, variables.size());
 		assertEquals(Arrays.asList("red", "blue", "green"), variables.get("colors"));
+	}
+
+	@Test
+	public void isValidOrigin() {
+		List<String> allowed = Collections.emptyList();
+		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain1.com", allowed));
+		assertFalse(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
+
+		allowed = Collections.singletonList("*");
+		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
+
+		allowed = Collections.singletonList("http://mydomain1.com");
+		assertTrue(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com", allowed));
+		assertFalse(checkValidOrigin("mydomain2.com", -1, "http://mydomain3.com", allowed));
+	}
+
+	@Test
+	public void isSameOrigin() {
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80"));
+		assertTrue(checkSameOrigin("mydomain1.com", 443, "https://mydomain1.com"));
+		assertTrue(checkSameOrigin("mydomain1.com", 443, "https://mydomain1.com:443"));
+		assertTrue(checkSameOrigin("mydomain1.com", 123, "http://mydomain1.com:123"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "ws://mydomain1.com"));
+		assertTrue(checkSameOrigin("mydomain1.com", 443, "wss://mydomain1.com"));
+
+		assertFalse(checkSameOrigin("mydomain1.com", -1, "http://mydomain2.com"));
+		assertFalse(checkSameOrigin("mydomain1.com", -1, "https://mydomain1.com"));
+		assertFalse(checkSameOrigin("mydomain1.com", -1, "invalid-origin"));
+
+		// Handling of invalid origins as described in SPR-13478
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com/"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80/"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com/path"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80/path"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com/"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com:80/"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com/path"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com:80/path"));
+
+		// Handling of IPv6 hosts as described in SPR-13525
+		assertTrue(checkSameOrigin("[::1]", -1, "http://[::1]"));
+		assertTrue(checkSameOrigin("[::1]", 8080, "http://[::1]:8080"));
+		assertTrue(checkSameOrigin("[2001:0db8:0000:85a3:0000:0000:ac1f:8001]", -1, "http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]"));
+		assertTrue(checkSameOrigin("[2001:0db8:0000:85a3:0000:0000:ac1f:8001]", 8080, "http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]:8080"));
+		assertFalse(checkSameOrigin("[::1]", -1, "http://[::1]:8080"));
+		assertFalse(checkSameOrigin("[::1]", 8080, "http://[2001:0db8:0000:85a3:0000:0000:ac1f:8001]:8080"));
+	}
+
+
+	private boolean checkValidOrigin(String serverName, int port, String originHeader, List<String> allowed) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+		servletRequest.setServerName(serverName);
+		if (port != -1) {
+			servletRequest.setServerPort(port);
+		}
+		request.getHeaders().set(HttpHeaders.ORIGIN, originHeader);
+		return WebUtils.isValidOrigin(request, allowed);
+	}
+
+	private boolean checkSameOrigin(String serverName, int port, String originHeader) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+		servletRequest.setServerName(serverName);
+		if (port != -1) {
+			servletRequest.setServerPort(port);
+		}
+		request.getHeaders().set(HttpHeaders.ORIGIN, originHeader);
+		return WebUtils.isSameOrigin(request);
 	}
 
 }

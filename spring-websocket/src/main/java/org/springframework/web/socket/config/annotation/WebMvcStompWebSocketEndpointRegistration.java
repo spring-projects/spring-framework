@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 import java.util.ArrayList;
 import java.util.List;
 /**
- * An abstract base class class for configuring STOMP over WebSocket/SockJS endpoints.
+ * An abstract base class for configuring STOMP over WebSocket/SockJS endpoints.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -85,10 +85,10 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	}
 
 	@Override
-	public StompWebSocketEndpointRegistration setAllowedOrigins(String... origins) {
+	public StompWebSocketEndpointRegistration setAllowedOrigins(String... allowedOrigins) {
 		this.allowedOrigins.clear();
-		if (!ObjectUtils.isEmpty(origins)) {
-			this.allowedOrigins.addAll(Arrays.asList(origins));
+		if (!ObjectUtils.isEmpty(allowedOrigins)) {
+			this.allowedOrigins.addAll(Arrays.asList(allowedOrigins));
 		}
 		return this;
 	}
@@ -113,11 +113,7 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	protected HandshakeInterceptor[] getInterceptors() {
 		List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
 		interceptors.addAll(this.interceptors);
-		if (!this.allowedOrigins.isEmpty()) {
-			OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-			interceptor.setAllowedOrigins(this.allowedOrigins);
-			interceptors.add(interceptor);
-		}
+		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
 		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.util.Assert;
@@ -85,37 +86,43 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter param, Message<?> message) throws Exception {
-		Payload ann = param.getParameterAnnotation(Payload.class);
-		if (ann != null && StringUtils.hasText(ann.value())) {
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
+		Payload ann = parameter.getParameterAnnotation(Payload.class);
+		if (ann != null && StringUtils.hasText(ann.expression())) {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver");
 		}
 
 		Object payload = message.getPayload();
 		if (isEmptyPayload(payload)) {
 			if (ann == null || ann.required()) {
-				String paramName = getParameterName(param);
+				String paramName = getParameterName(parameter);
 				BindingResult bindingResult = new BeanPropertyBindingResult(payload, paramName);
-				bindingResult.addError(new ObjectError(paramName, "@Payload param is required"));
-				throw new MethodArgumentNotValidException(message, param, bindingResult);
+				bindingResult.addError(new ObjectError(paramName, "Payload value must not be empty"));
+				throw new MethodArgumentNotValidException(message, parameter, bindingResult);
 			}
 			else {
 				return null;
 			}
 		}
 
-		Class<?> targetClass = param.getParameterType();
+		Class<?> targetClass = parameter.getParameterType();
 		if (ClassUtils.isAssignable(targetClass, payload.getClass())) {
-			validate(message, param, payload);
+			validate(message, parameter, payload);
 			return payload;
 		}
 		else {
-			payload = this.converter.fromMessage(message, targetClass);
+			if (this.converter instanceof SmartMessageConverter) {
+				SmartMessageConverter smartConverter = (SmartMessageConverter) this.converter;
+				payload = smartConverter.fromMessage(message, targetClass, parameter);
+			}
+			else {
+				payload = this.converter.fromMessage(message, targetClass);
+			}
 			if (payload == null) {
 				throw new MessageConversionException(message,
 						"No converter found to convert to " + targetClass + ", message=" + message);
 			}
-			validate(message, param, payload);
+			validate(message, parameter, payload);
 			return payload;
 		}
 	}
@@ -144,6 +151,16 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 		}
 	}
 
+	/**
+	 * Validate the payload if applicable.
+	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * Spring's {@link org.springframework.validation.annotation.Validated},
+	 * and custom annotations whose name starts with "Valid".
+	 * @param message the currently processed message
+	 * @param parameter the method parameter
+	 * @param target the target payload object
+	 * @throws MethodArgumentNotValidException in case of binding errors
+	 */
 	protected void validate(Message<?> message, MethodParameter parameter, Object target) {
 		if (this.validator == null) {
 			return;

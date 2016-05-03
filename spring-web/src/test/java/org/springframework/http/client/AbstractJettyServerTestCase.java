@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Map;
+
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -27,33 +29,40 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 
-import org.springframework.util.SocketUtils;
 import org.springframework.util.StreamUtils;
 
-/** @author Arjen Poutsma */
-public class AbstractJettyServerTestCase {
+import static org.junit.Assert.*;
 
-	protected static String baseUrl;
+/**
+ * @author Arjen Poutsma
+ * @author Sam Brannen
+ */
+public abstract class AbstractJettyServerTestCase {
 
 	private static Server jettyServer;
 
+	protected static String baseUrl;
+
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-		int port = SocketUtils.findAvailableTcpPort();
-		jettyServer = new Server(port);
-		baseUrl = "http://localhost:" + port;
+
+		// Let server pick its own random, available port.
+		jettyServer = new Server(0);
 
 		ServletContextHandler handler = new ServletContextHandler();
 		handler.setContextPath("/");
 
 		handler.addServlet(new ServletHolder(new EchoServlet()), "/echo");
+		handler.addServlet(new ServletHolder(new ParameterServlet()), "/params");
 		handler.addServlet(new ServletHolder(new StatusServlet(200)), "/status/ok");
 		handler.addServlet(new ServletHolder(new StatusServlet(404)), "/status/notfound");
 		handler.addServlet(new ServletHolder(new MethodServlet("DELETE")), "/methods/delete");
@@ -66,6 +75,10 @@ public class AbstractJettyServerTestCase {
 
 		jettyServer.setHandler(handler);
 		jettyServer.start();
+
+		Connector[] connectors = jettyServer.getConnectors();
+		NetworkConnector connector = (NetworkConnector) connectors[0];
+		baseUrl = "http://localhost:" + connector.getLocalPort();
 	}
 
 	@AfterClass
@@ -74,6 +87,7 @@ public class AbstractJettyServerTestCase {
 			jettyServer.stop();
 		}
 	}
+
 
 	/**
 	 * Servlet that sets a given status code.
@@ -94,6 +108,7 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class MethodServlet extends GenericServlet {
 
@@ -111,6 +126,7 @@ public class AbstractJettyServerTestCase {
 			((HttpServletResponse) res).setStatus(200);
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class PostServlet extends MethodServlet {
@@ -136,6 +152,7 @@ public class AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@SuppressWarnings("serial")
 	private static class EchoServlet extends HttpServlet {
 
@@ -158,4 +175,28 @@ public class AbstractJettyServerTestCase {
 			StreamUtils.copy(request.getInputStream(), response.getOutputStream());
 		}
 	}
+
+
+	@SuppressWarnings("serial")
+	private static class ParameterServlet extends HttpServlet {
+
+		@Override
+		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			Map<String, String[]> parameters = req.getParameterMap();
+			assertEquals(2, parameters.size());
+
+			String[] values = parameters.get("param1");
+			assertEquals(1, values.length);
+			assertEquals("value", values[0]);
+
+			values = parameters.get("param2");
+			assertEquals(2, values.length);
+			assertEquals("value1", values[0]);
+			assertEquals("value2", values[1]);
+
+			resp.setStatus(200);
+			resp.setContentLength(0);
+		}
+	}
+
 }

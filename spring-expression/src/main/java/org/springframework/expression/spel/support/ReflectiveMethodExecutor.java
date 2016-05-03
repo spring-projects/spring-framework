@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,11 @@ import org.springframework.util.ReflectionUtils;
 public class ReflectiveMethodExecutor implements MethodExecutor {
 
 	private final Method method;
-	
+
 	private final Integer varargsPosition;
 
 	private boolean computedPublicDeclaringClass = false;
-	
+
 	private Class<?> publicDeclaringClass;
 
 	private boolean argumentConversionOccurred = false;
@@ -58,10 +58,10 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	public Method getMethod() {
 		return this.method;
 	}
-	
+
 	/**
 	 * Find the first public class in the methods declaring class hierarchy that declares this method.
-	 * Sometimes the reflective method discovery logic finds a suitable method that can easily be 
+	 * Sometimes the reflective method discovery logic finds a suitable method that can easily be
 	 * called via reflection but cannot be called from generated code when compiling the expression
 	 * because of visibility restrictions. For example if a non public class overrides toString(), this
 	 * helper method will walk up the type hierarchy to find the first public type that declares the
@@ -80,20 +80,21 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 			try {
 				clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
 				return clazz;
-			} catch (NoSuchMethodException nsme) {
-				
+			}
+			catch (NoSuchMethodException ex) {
+				// Continue below...
 			}
 		}
-		Class<?>[] intfaces = clazz.getInterfaces();
-		for (Class<?> intface: intfaces) {
-			discoverPublicClass(method, intface);
+		Class<?>[] ifcs = clazz.getInterfaces();
+		for (Class<?> ifc: ifcs) {
+			discoverPublicClass(method, ifc);
 		}
 		if (clazz.getSuperclass() != null) {
 			return discoverPublicClass(method, clazz.getSuperclass());
 		}
 		return null;
 	}
-	
+
 	public boolean didArgumentConversionOccur() {
 		return this.argumentConversionOccurred;
 	}

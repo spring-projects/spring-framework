@@ -30,7 +30,9 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see MethodNameResolver#getHandlerMethodName(javax.servlet.http.HttpServletRequest)
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class NoSuchRequestHandlingMethodException extends ServletException {
 

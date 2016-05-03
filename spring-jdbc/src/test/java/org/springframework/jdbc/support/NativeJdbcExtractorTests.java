@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.sql.Statement;
 
 import org.junit.Test;
 
-import org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor;
 import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
 
 import static org.junit.Assert.*;
@@ -39,7 +38,7 @@ import static org.mockito.BDDMockito.*;
 public class NativeJdbcExtractorTests {
 
 	@Test
-	public void testSimpleNativeJdbcExtractor() throws SQLException {
+	public void simpleNativeJdbcExtractor() throws SQLException {
 		SimpleNativeJdbcExtractor extractor = new SimpleNativeJdbcExtractor();
 
 		Connection con = mock(Connection.class);
@@ -76,8 +75,9 @@ public class NativeJdbcExtractorTests {
 		assertEquals(nativeRs, rs);
 	}
 
-	public void testCommonsDbcpNativeJdbcExtractor() throws SQLException {
-		CommonsDbcpNativeJdbcExtractor extractor = new CommonsDbcpNativeJdbcExtractor();
+	@SuppressWarnings("deprecation")
+	public void commonsDbcpNativeJdbcExtractor() throws SQLException {
+		org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor extractor = new org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor();
 		assertFalse(extractor.isNativeConnectionNecessaryForNativeStatements());
 
 		Connection con = mock(Connection.class);

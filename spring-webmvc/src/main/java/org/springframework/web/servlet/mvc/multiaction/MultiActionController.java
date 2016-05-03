@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.multiaction;
+package org.springframework.web.servlet. mvc.multiaction;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -127,7 +127,9 @@ import org.springframework.web.servlet.mvc.LastModified;
  * @see ParameterMethodNameResolver
  * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
  * @see org.springframework.web.bind.ServletRequestDataBinder
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public class MultiActionController extends AbstractController implements LastModified {
 
 	/** Suffix for last-modified methods */
@@ -288,12 +290,12 @@ public class MultiActionController extends AbstractController implements LastMod
 	 */
 	private boolean isHandlerMethod(Method method) {
 		Class<?> returnType = method.getReturnType();
-		if (ModelAndView.class.equals(returnType) || Map.class.equals(returnType) || String.class.equals(returnType) ||
-				void.class.equals(returnType)) {
+		if (ModelAndView.class == returnType || Map.class == returnType || String.class == returnType ||
+				void.class == returnType) {
 			Class<?>[] parameterTypes = method.getParameterTypes();
 			return (parameterTypes.length >= 2 &&
-					HttpServletRequest.class.equals(parameterTypes[0]) &&
-					HttpServletResponse.class.equals(parameterTypes[1]) &&
+					HttpServletRequest.class == parameterTypes[0] &&
+					HttpServletResponse.class == parameterTypes[1] &&
 					!("handleRequest".equals(method.getName()) && parameterTypes.length == 2));
 		}
 		return false;
@@ -329,7 +331,7 @@ public class MultiActionController extends AbstractController implements LastMod
 					method.getName() + LAST_MODIFIED_METHOD_SUFFIX,
 					new Class<?>[] {HttpServletRequest.class});
 			Class<?> returnType = lastModifiedMethod.getReturnType();
-			if (!(long.class.equals(returnType) || Long.class.equals(returnType))) {
+			if (!(long.class == returnType || Long.class == returnType)) {
 				throw new IllegalStateException("last-modified method [" + lastModifiedMethod +
 						"] declares an invalid return type - needs to be 'long' or 'Long'");
 			}
@@ -452,7 +454,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			params.add(request);
 			params.add(response);
 
-			if (paramTypes.length >= 3 && paramTypes[2].equals(HttpSession.class)) {
+			if (paramTypes.length >= 3 && HttpSession.class == paramTypes[2]) {
 				HttpSession session = request.getSession(false);
 				if (session == null) {
 					throw new HttpSessionRequiredException(
@@ -462,8 +464,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			}
 
 			// If last parameter isn't of HttpSession type, it's a command.
-			if (paramTypes.length >= 3 &&
-					!paramTypes[paramTypes.length - 1].equals(HttpSession.class)) {
+			if (paramTypes.length >= 3 && HttpSession.class != paramTypes[paramTypes.length - 1]) {
 				Object command = newCommandObject(paramTypes[paramTypes.length - 1]);
 				params.add(command);
 				bind(request, command);
@@ -608,7 +609,7 @@ public class MultiActionController extends AbstractController implements LastMod
 			logger.debug("Trying to find handler for exception class [" + exceptionClass.getName() + "]");
 		}
 		Method handler = this.exceptionHandlerMap.get(exceptionClass);
-		while (handler == null && !exceptionClass.equals(Throwable.class)) {
+		while (handler == null && exceptionClass != Throwable.class) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Trying to find handler for exception superclass [" + exceptionClass.getName() + "]");
 			}

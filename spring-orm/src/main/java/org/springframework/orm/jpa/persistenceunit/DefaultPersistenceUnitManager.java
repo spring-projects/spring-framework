@@ -234,7 +234,7 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Specify one or more mapping resources (equivalent to {@code &lt;mapping-file&gt;}
+	 * Specify one or more mapping resources (equivalent to {@code <mapping-file>}
 	 * entries in {@code persistence.xml}) for the default persistence unit.
 	 * Can be used on its own or in combination with entity scanning in the classpath,
 	 * in both cases avoiding {@code persistence.xml}.

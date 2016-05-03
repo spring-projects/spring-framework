@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,28 @@
 package org.springframework.web.servlet.view.json;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
+
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
+import org.mozilla.javascript.ScriptableObject;
+
+import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.View;
+
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
@@ -35,20 +49,12 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.SerializerFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.ScriptableObject;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.ui.ModelMap;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.servlet.View;
-
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -97,9 +103,7 @@ public class MappingJackson2JsonViewTests {
 		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
-		assertEquals("no-cache", response.getHeader("Pragma"));
-		assertEquals("no-cache, no-store, max-age=0", response.getHeader("Cache-Control"));
-		assertNotNull(response.getHeader("Expires"));
+		assertEquals("no-store", response.getHeader("Cache-Control"));
 
 		assertEquals(MappingJackson2JsonView.DEFAULT_CONTENT_TYPE, response.getContentType());
 
@@ -134,9 +138,7 @@ public class MappingJackson2JsonViewTests {
 
 		view.render(model, request, response);
 
-		assertNull(response.getHeader("Pragma"));
 		assertNull(response.getHeader("Cache-Control"));
-		assertNull(response.getHeader("Expires"));
 	}
 
 	@Test
@@ -178,14 +180,14 @@ public class MappingJackson2JsonViewTests {
 	public void renderSimpleBeanPrefixed() throws Exception {
 		view.setPrefixJson(true);
 		renderSimpleBean();
-		assertTrue(response.getContentAsString().startsWith("{} && "));
+		assertTrue(response.getContentAsString().startsWith(")]}', "));
 	}
 
 	@Test
 	public void renderSimpleBeanNotPrefixed() throws Exception {
 		view.setPrefixJson(false);
 		renderSimpleBean();
-		assertFalse(response.getContentAsString().startsWith("{} && "));
+		assertFalse(response.getContentAsString().startsWith(")]}', "));
 	}
 
 	@Test
@@ -298,50 +300,70 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderWithJsonpDefaultParameterName() throws Exception {
+	public void renderSimpleBeanWithFilters() throws Exception {
+		TestSimpleBeanFiltered bean = new TestSimpleBeanFiltered();
+		bean.setProperty1("value");
+		bean.setProperty2("value");
 		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("foo", "bar");
-		request.addParameter("otherparam", "value");
-		request.addParameter("jsonp", "jsonpCallback");
+		model.put("bindingResult", mock(BindingResult.class, "binding_result"));
+		model.put("foo", bean);
+		FilterProvider filters = new SimpleFilterProvider().addFilter("myJacksonFilter",
+				SimpleBeanPropertyFilter.serializeAllExcept("property2"));
+		model.put(FilterProvider.class.getName(), filters);
 
+		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
 		String content = response.getContentAsString();
-		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
+		assertTrue(content.length() > 0);
+		assertEquals(content.length(), response.getContentLength());
+		assertThat(content, containsString("\"property1\":\"value\""));
+		assertThat(content, not(containsString("\"property2\":\"value\"")));
+		assertFalse(content.contains(FilterProvider.class.getName()));
 	}
 
 	@Test
-	public void renderWithCallbackDefaultParameterName() throws Exception {
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("foo", "bar");
-		request.addParameter("otherparam", "value");
-		request.addParameter("callback", "jsonpCallback");
+	public void renderWithJsonp() throws Exception {
+		testJsonp("jsonp", "callback", true);
+		testJsonp("jsonp", "_callback", true);
+		testJsonp("jsonp", "_Call.bAcK", true);
+		testJsonp("jsonp", "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", true);
 
-		view.render(model, request, response);
-
-		String content = response.getContentAsString();
-		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
-	}
-
-	@Test
-	 public void renderWithCustomJsonpParameterName() throws Exception {
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("foo", "bar");
-		request.addParameter("otherparam", "value");
-		request.addParameter("custom", "jsonpCallback");
-		view.setJsonpParameterNames(new LinkedHashSet(Arrays.asList("jsonp", "callback", "custom")));
-
-		view.render(model, request, response);
-
-		String content = response.getContentAsString();
-		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
+		testJsonp("jsonp", "<script>", false);
+		testJsonp("jsonp", "!foo!bar", false);
 	}
 
 	private void validateResult() throws Exception {
+		String json = response.getContentAsString();
+		DirectFieldAccessor viewAccessor = new DirectFieldAccessor(view);
+		String jsonPrefix = (String)viewAccessor.getPropertyValue("jsonPrefix");
+		if (jsonPrefix != null) {
+			json = json.substring(5);
+		}
 		Object jsResult =
-				jsContext.evaluateString(jsScope, "(" + response.getContentAsString() + ")", "JSON Stream", 1, null);
+				jsContext.evaluateString(jsScope, "(" + json + ")", "JSON Stream", 1, null);
 		assertNotNull("Json Result did not eval as valid JavaScript", jsResult);
 		assertEquals("application/json", response.getContentType());
+	}
+
+	private void testJsonp(String paramName, String paramValue, boolean validValue) throws Exception {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("foo", "bar");
+
+		this.request = new MockHttpServletRequest();
+		this.request.addParameter("otherparam", "value");
+		this.request.addParameter(paramName, paramValue);
+		this.response = new MockHttpServletResponse();
+
+		this.view.render(model, this.request, this.response);
+
+		String content = this.response.getContentAsString();
+		if (validValue) {
+			assertEquals("/**/" + paramValue + "({\"foo\":\"bar\"});", content);
+		}
+		else {
+			assertEquals("{\"foo\":\"bar\"}", content);
+		}
 	}
 
 
@@ -427,6 +449,30 @@ public class MappingJackson2JsonViewTests {
 			jgen.writeFieldName("testBeanSimple");
 			jgen.writeString("custom");
 			jgen.writeEndObject();
+		}
+	}
+
+
+	@JsonFilter("myJacksonFilter")
+	private static class TestSimpleBeanFiltered {
+
+		private String property1;
+		private String property2;
+
+		public String getProperty1() {
+			return property1;
+		}
+
+		public void setProperty1(String property1) {
+			this.property1 = property1;
+		}
+
+		public String getProperty2() {
+			return property2;
+		}
+
+		public void setProperty2(String property2) {
+			this.property2 = property2;
 		}
 	}
 

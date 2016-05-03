@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
+import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.tests.sample.beans.TestBean;
@@ -42,12 +44,15 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.tags.RequestContextAwareTag;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @author Jeremy Grelle
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 	private static final String COMMAND_NAME = "testBean";
@@ -81,7 +86,8 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-	public void testWithCollection() throws Exception {
+	@Test
+	public void withCollection() throws Exception {
 		getPageContext().setAttribute(
 				SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.country", false));
 
@@ -110,7 +116,8 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("CLICK", element.attribute("onclick").getValue());
 	}
 
-	public void testWithCollectionAndDynamicAttributes() throws Exception {
+	@Test
+	public void withCollectionAndDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 
@@ -147,7 +154,8 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(dynamicAttribute2, element.attribute(dynamicAttribute2).getValue());
 	}
 
-	public void testWithCollectionAndCustomEditor() throws Exception {
+	@Test
+	public void withCollectionAndCustomEditor() throws Exception {
 		PropertyEditor propertyEditor = new SimpleFloatEditor();
 
 		TestBean target = new TestBean();
@@ -192,7 +200,8 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertNull("No id rendered", element.attribute("id"));
 	}
 
-	public void testWithItemsNullReference() throws Exception {
+	@Test
+	public void withItemsNullReference() throws Exception {
 		getPageContext().setAttribute(
 				SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.country", false));
 
@@ -212,7 +221,8 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("Incorrect number of children", 0, children.size());
 	}
 
-	public void testWithoutItems() throws Exception {
+	@Test
+	public void withoutItems() throws Exception {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		this.selectTag.setPath("testBean");
@@ -232,7 +242,8 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("Incorrect number of children", 0, children.size());
 	}
 
-	public void testWithoutItemsEnumParent() throws Exception {
+	@Test
+	public void withoutItemsEnumParent() throws Exception {
 		BeanWithEnum testBean = new BeanWithEnum();
 		testBean.setTestEnum(TestEnum.VALUE_2);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
@@ -259,7 +270,8 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(value2, rootElement.selectSingleNode("option[@selected]"));
 	}
 
-	public void testWithoutItemsEnumParentWithExplicitLabelsAndValues() throws Exception {
+	@Test
+	public void withoutItemsEnumParentWithExplicitLabelsAndValues() throws Exception {
 		BeanWithEnum testBean = new BeanWithEnum();
 		testBean.setTestEnum(TestEnum.VALUE_2);
 		getPageContext().getRequest().setAttribute("testBean", testBean);

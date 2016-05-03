@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.test.web.servlet.request;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.Principal;
@@ -33,8 +36,10 @@ import javax.servlet.http.Cookie;
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -51,7 +56,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -61,17 +65,22 @@ import org.springframework.web.util.UriUtils;
  *
  * <p>Application tests will typically access this builder through the static factory
  * methods in {@link MockMvcRequestBuilders}.
+ * <p>Although this class cannot be extended, additional ways to initialize
+ * the {@code MockHttpServletRequest} can be plugged in via
+ * {@link #with(RequestPostProcessor)}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Sam Brannen
+ * @author Kamill Sokol
  * @since 3.2
  */
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
 
-	private final HttpMethod method;
+	private final String method;
 
-	private final UriComponents uriComponents;
+	private final URI url;
 
 	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<String, Object>();
 
@@ -115,42 +124,61 @@ public class MockHttpServletRequestBuilder
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param urlVariables zero or more URL variables
+	 * @param url a URL template; the resulting URL will be encoded
+	 * @param vars zero or more URL variables
 	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, String urlTemplate, Object... urlVariables) {
-		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(urlTemplate, "uriTemplate is required");
-		this.method = httpMethod;
-		this.uriComponents = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(urlVariables).encode();
+	MockHttpServletRequestBuilder(HttpMethod httpMethod, String url, Object... vars) {
+		this(httpMethod.name(), UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri());
 	}
 
 	/**
-	 * Package private constructor. To get an instance, use static factory
-	 * methods in {@link MockMvcRequestBuilders}.
-	 * <p>Although this class cannot be extended, additional ways to initialize
-	 * the {@code MockHttpServletRequest} can be plugged in via
-	 * {@link #with(RequestPostProcessor)}.
+	 * Alternative to {@link #MockHttpServletRequestBuilder(HttpMethod, String, Object...)}
+	 * with a pre-built URI.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param uri the URL
+	 * @param url the URL
 	 * @since 4.0.3
 	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
-		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(uri, "uri is required");
-		this.method = httpMethod;
-		this.uriComponents = UriComponentsBuilder.fromUri(uri).build();
+	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
+		this(httpMethod.name(), url);
 	}
 
+	/**
+	 * Alternative constructor for custom HTTP methods.
+	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param url the URL
+	 * @since 4.3
+	 */
+	MockHttpServletRequestBuilder(String httpMethod, URI url) {
+		Assert.notNull(httpMethod, "httpMethod is required");
+		Assert.notNull(url, "url is required");
+		this.method = httpMethod;
+		this.url = url;
+	}
 
 	/**
 	 * Add a request parameter to the {@link MockHttpServletRequest}.
-	 * If called more than once, the new values are added.
+	 * <p>If called more than once, new values get added to existing ones.
 	 * @param name the parameter name
 	 * @param values one or more values
 	 */
 	public MockHttpServletRequestBuilder param(String name, String... values) {
 		addToMultiValueMap(this.parameters, name, values);
+		return this;
+	}
+
+	/**
+	 * Add a map of request parameters to the {@link MockHttpServletRequest},
+	 * for example when testing a form submission.
+	 * <p>If called more than once, new values get added to existing ones.
+	 * @param params the parameters to add
+	 * @since 4.2.4
+	 */
+	public MockHttpServletRequestBuilder params(MultiValueMap<String, String> params) {
+		for (String name : params.keySet()) {
+			for (String value : params.get(name)) {
+				this.parameters.add(name, value);
+			}
+		}
 		return this;
 	}
 
@@ -288,7 +316,7 @@ public class MockHttpServletRequestBuilder
 	 * @param value the attribute value
 	 */
 	public MockHttpServletRequestBuilder requestAttr(String name, Object value) {
-		addAttributeToMap(this.attributes, name, value);
+		addToMap(this.attributes, name, value);
 		return this;
 	}
 
@@ -298,7 +326,7 @@ public class MockHttpServletRequestBuilder
 	 * @param value the session attribute value
 	 */
 	public MockHttpServletRequestBuilder sessionAttr(String name, Object value) {
-		addAttributeToMap(this.sessionAttributes, name, value);
+		addToMap(this.sessionAttributes, name, value);
 		return this;
 	}
 
@@ -320,7 +348,7 @@ public class MockHttpServletRequestBuilder
 	 * @param value the flash attribute value
 	 */
 	public MockHttpServletRequestBuilder flashAttr(String name, Object value) {
-		addAttributeToMap(this.flashAttributes, name, value);
+		addToMap(this.flashAttributes, name, value);
 		return this;
 	}
 
@@ -537,7 +565,7 @@ public class MockHttpServletRequestBuilder
 			this.pathInfo = parentBuilder.pathInfo;
 		}
 
-		this.postProcessors.addAll(parentBuilder.postProcessors);
+		this.postProcessors.addAll(0, parentBuilder.postProcessors);
 
 		return this;
 	}
@@ -558,43 +586,32 @@ public class MockHttpServletRequestBuilder
 	public final MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		MockHttpServletRequest request = createServletRequest(servletContext);
 
-		String requestUri = this.uriComponents.getPath();
+		String requestUri = this.url.getRawPath();
 		request.setRequestURI(requestUri);
 		updatePathRequestProperties(request, requestUri);
 
-		if (this.uriComponents.getScheme() != null) {
-			request.setScheme(this.uriComponents.getScheme());
+		if (this.url.getScheme() != null) {
+			request.setScheme(this.url.getScheme());
 		}
-		if (this.uriComponents.getHost() != null) {
-			request.setServerName(uriComponents.getHost());
+		if (this.url.getHost() != null) {
+			request.setServerName(this.url.getHost());
 		}
-		if (this.uriComponents.getPort() != -1) {
-			request.setServerPort(this.uriComponents.getPort());
+		if (this.url.getPort() != -1) {
+			request.setServerPort(this.url.getPort());
 		}
 
-		request.setMethod(this.method.name());
+		request.setMethod(this.method);
+
 		for (String name : this.headers.keySet()) {
 			for (Object value : this.headers.get(name)) {
 				request.addHeader(name, value);
 			}
 		}
 
-		try {
-			if (this.uriComponents.getQuery() != null) {
-				String query = UriUtils.decode(this.uriComponents.getQuery(), "UTF-8");
-				request.setQueryString(query);
-			}
-
-			for (Entry<String, List<String>> entry : this.uriComponents.getQueryParams().entrySet()) {
-				for (String value : entry.getValue()) {
-					value = (value != null) ? UriUtils.decode(value, "UTF-8") : null;
-					request.addParameter(UriUtils.decode(entry.getKey(), "UTF-8"), value);
-				}
-			}
+		if (this.url.getRawQuery() != null) {
+			request.setQueryString(this.url.getRawQuery());
 		}
-		catch (UnsupportedEncodingException ex) {
-			// shouldn't happen
-		}
+		addRequestParams(request, UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
 
 		for (String name : this.parameters.keySet()) {
 			for (String value : this.parameters.get(name)) {
@@ -604,16 +621,27 @@ public class MockHttpServletRequestBuilder
 
 		request.setContentType(this.contentType);
 		request.setContent(this.content);
-		request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
+		request.setCharacterEncoding(this.characterEncoding);
+
+		if (this.content != null && this.contentType != null) {
+			MediaType mediaType = MediaType.parseMediaType(this.contentType);
+			if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
+				addRequestParams(request, parseFormData(mediaType));
+			}
+		}
+
+		if (!ObjectUtils.isEmpty(this.cookies)) {
+			request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
+		}
 
 		if (this.locale != null) {
 			request.addPreferredLocale(this.locale);
 		}
-		request.setCharacterEncoding(this.characterEncoding);
 
 		if (this.secure != null) {
 			request.setSecure(this.secure);
 		}
+
 		request.setUserPrincipal(this.principal);
 
 		for (String name : this.attributes.keySet()) {
@@ -640,8 +668,9 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Create a new {@link MockHttpServletRequest} based on the given
-	 * {@link ServletContext}. Can be overridden in subclasses.
+	 * Create a new {@link MockHttpServletRequest} based on the supplied
+	 * {@code ServletContext}.
+	 * <p>Can be overridden in subclasses.
 	 */
 	protected MockHttpServletRequest createServletRequest(ServletContext servletContext) {
 		return new MockHttpServletRequest(servletContext);
@@ -662,6 +691,43 @@ public class MockHttpServletRequestBuilder
 			this.pathInfo = (StringUtils.hasText(extraPath)) ? extraPath : null;
 		}
 		request.setPathInfo(this.pathInfo);
+	}
+
+	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {
+		try {
+			for (Entry<String, List<String>> entry : map.entrySet()) {
+				for (String value : entry.getValue()) {
+					value = (value != null) ? UriUtils.decode(value, "UTF-8") : null;
+					request.addParameter(UriUtils.decode(entry.getKey(), "UTF-8"), value);
+				}
+			}
+		}
+		catch (UnsupportedEncodingException ex) {
+			// shouldn't happen
+		}
+	}
+
+	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {
+		MultiValueMap<String, String> map;HttpInputMessage message = new HttpInputMessage() {
+			@Override
+			public InputStream getBody() throws IOException {
+				return new ByteArrayInputStream(content);
+			}
+
+			@Override
+			public HttpHeaders getHeaders() {
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(mediaType);
+				return headers;
+			}
+		};
+		try {
+			map = new FormHttpMessageConverter().read(null, message);
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to parse form data in request body: ", ex);
+		}
+		return map;
 	}
 
 	private FlashMapManager getFlashMapManager(MockHttpServletRequest request) {
@@ -692,19 +758,19 @@ public class MockHttpServletRequestBuilder
 		return request;
 	}
 
+
+	private static void addToMap(Map<String, Object> map, String name, Object value) {
+		Assert.hasLength(name, "'name' must not be empty");
+		Assert.notNull(value, "'value' must not be null");
+		map.put(name, value);
+	}
+
 	private static <T> void addToMultiValueMap(MultiValueMap<String, T> map, String name, T[] values) {
 		Assert.hasLength(name, "'name' must not be empty");
-		Assert.notNull(values, "'values' is required");
 		Assert.notEmpty(values, "'values' must not be empty");
 		for (T value : values) {
 			map.add(name, value);
 		}
-	}
-
-	private static void addAttributeToMap(Map<String, Object> map, String name, Object value) {
-		Assert.hasLength(name, "'name' must not be empty");
-		Assert.notNull(value, "'value' must not be null");
-		map.put(name, value);
 	}
 
 }

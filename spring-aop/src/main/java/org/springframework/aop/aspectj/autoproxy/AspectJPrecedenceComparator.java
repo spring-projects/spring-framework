@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Comparator;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AspectJAopUtils;
 import org.springframework.aop.aspectj.AspectJPrecedenceInformation;
-import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 
 /**
@@ -62,7 +62,7 @@ class AspectJPrecedenceComparator implements Comparator<Advisor> {
 	 * Create a default AspectJPrecedenceComparator.
 	 */
 	public AspectJPrecedenceComparator() {
-		this.advisorComparator = OrderComparator.INSTANCE;
+		this.advisorComparator = AnnotationAwareOrderComparator.INSTANCE;
 	}
 
 	/**

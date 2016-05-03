@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  * <p>Two implementations are provided out of the box:
  * <ul>
  * <li><b>{@code SimpleHttpInvokerRequestExecutor}:</b>
- * Uses J2SE facilities to execute POST requests, without support
+ * Uses JDK facilities to execute POST requests, without support
  * for HTTP authentication or advanced configuration options.
  * <li><b>{@code HttpComponentsHttpInvokerRequestExecutor}:</b>
- * Uses Jakarta's Commons HttpClient to execute POST requests,
+ * Uses Apache's Commons HttpClient to execute POST requests,
  * allowing to use a preconfigured HttpClient instance
  * (potentially with authentication, HTTP connection pooling, etc).
  * </ul>

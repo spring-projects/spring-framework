@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -217,7 +217,7 @@ public class FacesRequestAttributes implements RequestAttributes {
 		Object session = getExternalContext().getSession(true);
 		try {
 			// Both HttpSession and PortletSession have a getId() method.
-			Method getIdMethod = session.getClass().getMethod("getId", new Class<?>[0]);
+			Method getIdMethod = session.getClass().getMethod("getId");
 			return ReflectionUtils.invokeMethod(getIdMethod, session).toString();
 		}
 		catch (NoSuchMethodException ex) {
@@ -227,12 +227,12 @@ public class FacesRequestAttributes implements RequestAttributes {
 
 	@Override
 	public Object getSessionMutex() {
-		// Enforce presence of a session first to allow listeners
-		// to create the mutex attribute, if any.
-		Object session = getExternalContext().getSession(true);
-		Object mutex = getExternalContext().getSessionMap().get(WebUtils.SESSION_MUTEX_ATTRIBUTE);
+		// Enforce presence of a session first to allow listeners to create the mutex attribute
+		ExternalContext externalContext = getExternalContext();
+		Object session = externalContext.getSession(true);
+		Object mutex = externalContext.getSessionMap().get(WebUtils.SESSION_MUTEX_ATTRIBUTE);
 		if (mutex == null) {
-			mutex = session;
+			mutex = (session != null ? session : externalContext);
 		}
 		return mutex;
 	}

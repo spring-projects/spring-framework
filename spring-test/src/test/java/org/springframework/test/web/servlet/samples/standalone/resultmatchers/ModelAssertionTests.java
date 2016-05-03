@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -43,6 +45,7 @@ public class ModelAssertionTests {
 
 	private MockMvc mockMvc;
 
+
 	@Before
 	public void setup() {
 
@@ -51,6 +54,7 @@ public class ModelAssertionTests {
 		this.mockMvc = standaloneSetup(controller)
 				.defaultRequest(get("/"))
 				.alwaysExpect(status().isOk())
+				.setControllerAdvice(new ModelAttributeAdvice())
 				.build();
 	}
 
@@ -60,7 +64,8 @@ public class ModelAssertionTests {
 			.andExpect(model().attribute("integer", 3))
 			.andExpect(model().attribute("string", "a string value"))
 			.andExpect(model().attribute("integer", equalTo(3))) // Hamcrest...
-			.andExpect(model().attribute("string", equalTo("a string value")));
+			.andExpect(model().attribute("string", equalTo("a string value")))
+			.andExpect(model().attribute("globalAttrName", equalTo("Global Attribute Value")));
 	}
 
 	@Test
@@ -110,6 +115,15 @@ public class ModelAssertionTests {
 		@RequestMapping(value="/persons", method=RequestMethod.POST)
 		public String create(@Valid Person person, BindingResult result, Model model) {
 			return "view";
+		}
+	}
+
+	@ControllerAdvice
+	private static class ModelAttributeAdvice {
+
+		@ModelAttribute("globalAttrName")
+		public String getAttribute() {
+			return "Global Attribute Value";
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.TestCase;
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -39,15 +41,16 @@ import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DummyMacroRequestContext;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 18.06.2004
  */
-public class VelocityMacroTests extends TestCase {
+public class VelocityMacroTests {
 
 	private static final String TEMPLATE_FILE = "test.vm";
-
 
 	private StaticWebApplicationContext wac;
 
@@ -56,7 +59,7 @@ public class VelocityMacroTests extends TestCase {
 	private MockHttpServletResponse response;
 
 
-	@Override
+	@Before
 	public void setUp() throws Exception {
 		wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
@@ -78,7 +81,8 @@ public class VelocityMacroTests extends TestCase {
 		response = new MockHttpServletResponse();
 	}
 
-	public void testExposeSpringMacroHelpers() throws Exception {
+	@Test
+	public void exposeSpringMacroHelpers() throws Exception {
 		VelocityView vv = new VelocityView() {
 			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
@@ -98,7 +102,8 @@ public class VelocityMacroTests extends TestCase {
 		vv.render(model, request, response);
 	}
 
-	public void testSpringMacroRequestContextAttributeUsed() {
+	@Test
+	public void springMacroRequestContextAttributeUsed() {
 		final String helperTool = "wrongType";
 
 		VelocityView vv = new VelocityView() {
@@ -123,7 +128,8 @@ public class VelocityMacroTests extends TestCase {
 		}
 	}
 
-	public void testAllMacros() throws Exception {
+	@Test
+	public void allMacros() throws Exception {
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
 		Map<String, String> msgMap = new HashMap<String, String>();
 		msgMap.put("hello", "Howdy");
@@ -178,8 +184,10 @@ public class VelocityMacroTests extends TestCase {
 			if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i + 1]);
 			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\">", tokens[i + 1]);
-			if (tokens[i].equals("FORM3")) assertEquals("<textarea id=\"name\" name=\"name\" >Darren</textarea>", tokens[i + 1]);
-			if (tokens[i].equals("FORM4")) assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>Darren</textarea>", tokens[i + 1]);
+			if (tokens[i].equals("FORM3")) assertEquals("<textarea id=\"name\" name=\"name\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM3")) assertEquals("Darren</textarea>", tokens[i + 2]);
+			if (tokens[i].equals("FORM4")) assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>", tokens[i + 1]);
+			if (tokens[i].equals("FORM4")) assertEquals("Darren</textarea>", tokens[i + 2]);
 			//TODO verify remaining output (fix whitespace)
 			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >", tokens[i + 1]);
@@ -192,7 +200,8 @@ public class VelocityMacroTests extends TestCase {
 
 	// SPR-5172
 
-	public void testIdContainsBraces() throws Exception {
+	@Test
+	public void idContainsBraces() throws Exception {
 		DummyMacroRequestContext rc = new DummyMacroRequestContext(request);
 		Map<String, String> msgMap = new HashMap<String, String>();
 		msgMap.put("hello", "Howdy");
@@ -241,7 +250,8 @@ public class VelocityMacroTests extends TestCase {
 
 		for (int i = 0; i < tokens.length; i++) {
 			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >", tokens[i + 1]); //
-			if (tokens[i].equals("FORM2")) assertEquals("<textarea id=\"spouses0.name\" name=\"spouses[0].name\" >Fred</textarea>", tokens[i + 1]);
+			if (tokens[i].equals("FORM2")) assertEquals("<textarea id=\"spouses0.name\" name=\"spouses[0].name\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM2")) assertEquals("Fred</textarea>", tokens[i + 2]);
 			if (tokens[i].equals("FORM3")) assertEquals("<select id=\"spouses0.name\" name=\"spouses[0].name\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM4")) assertEquals("<select multiple=\"multiple\" id=\"spouses\" name=\"spouses\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM5")) assertEquals("<input type=\"radio\" name=\"spouses[0].name\" value=\"Darren\"", tokens[i + 1]);

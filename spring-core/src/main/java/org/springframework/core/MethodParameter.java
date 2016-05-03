@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,19 +27,41 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
- * Helper class that encapsulates the specification of a method parameter, i.e.
- * a Method or Constructor plus a parameter index and a nested type index for
- * a declared generic type. Useful as a specification object to pass along.
+ * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
+ * or {@link Constructor} plus a parameter index and a nested type index for a declared generic
+ * type. Useful as a specification object to pass along.
+ *
+ * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
+ * subclass available which synthesizes annotations with attribute aliases. That subclass is used
+ * for web and message endpoint processing, in particular.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 2.0
  * @see GenericCollectionTypeResolver
+ * @see org.springframework.core.annotation.SynthesizingMethodParameter
  */
 public class MethodParameter {
+
+	private static final Class<?> javaUtilOptionalClass;
+
+	static {
+		Class<?> clazz;
+		try {
+			clazz = ClassUtils.forName("java.util.Optional", MethodParameter.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// Java 8 not available - Optional references simply not supported then.
+			clazz = null;
+		}
+		javaUtilOptionalClass = clazz;
+	}
+
 
 	private final Method method;
 
@@ -64,22 +86,26 @@ public class MethodParameter {
 
 	private volatile String parameterName;
 
+	private volatile MethodParameter nestedMethodParameter;
+
 
 	/**
-	 * Create a new MethodParameter for the given method, with nesting level 1.
+	 * Create a new {@code MethodParameter} for the given method, with nesting level 1.
 	 * @param method the Method to specify a parameter for
-	 * @param parameterIndex the index of the parameter
+	 * @param parameterIndex the index of the parameter: -1 for the method
+	 * return type; 0 for the first method parameter; 1 for the second method
+	 * parameter, etc.
 	 */
 	public MethodParameter(Method method, int parameterIndex) {
 		this(method, parameterIndex, 1);
 	}
 
 	/**
-	 * Create a new MethodParameter for the given method.
+	 * Create a new {@code MethodParameter} for the given method.
 	 * @param method the Method to specify a parameter for
-	 * @param parameterIndex the index of the parameter
-	 * (-1 for the method return type; 0 for the first method parameter,
-	 * 1 for the second method parameter, etc)
+	 * @param parameterIndex the index of the parameter: -1 for the method
+	 * return type; 0 for the first method parameter; 1 for the second method
+	 * parameter, etc.
 	 * @param nestingLevel the nesting level of the target type
 	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
 	 * nested List, whereas 2 would indicate the element of the nested List)
@@ -157,7 +183,14 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Returns the wrapped member.
+	 * Return the class that declares the underlying Method or Constructor.
+	 */
+	public Class<?> getDeclaringClass() {
+		return getMember().getDeclaringClass();
+	}
+
+	/**
+	 * Return the wrapped member.
 	 * @return the Method or Constructor as Member
 	 */
 	public Member getMember() {
@@ -173,7 +206,9 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Returns the wrapped annotated element.
+	 * Return the wrapped annotated element.
+	 * <p>Note: This method exposes the annotations declared on the method/constructor
+	 * itself (i.e. at the method/constructor level, not at the parameter level).
 	 * @return the Method or Constructor as AnnotatedElement
 	 */
 	public AnnotatedElement getAnnotatedElement() {
@@ -189,15 +224,8 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return the class that declares the underlying Method or Constructor.
-	 */
-	public Class<?> getDeclaringClass() {
-		return getMember().getDeclaringClass();
-	}
-
-	/**
 	 * Return the index of the method/constructor parameter.
-	 * @return the parameter index (never negative)
+	 * @return the parameter index (-1 in case of the return type)
 	 */
 	public int getParameterIndex() {
 		return this.parameterIndex;
@@ -269,6 +297,44 @@ public class MethodParameter {
 		return this.typeIndexesPerLevel;
 	}
 
+	/**
+	 * Return a variant of this {@code MethodParameter} which points to the
+	 * same parameter but one nesting level deeper. This is effectively the
+	 * same as {@link #increaseNestingLevel()}, just with an independent
+	 * {@code MethodParameter} object (e.g. in case of the original being cached).
+	 * @since 4.3
+	 */
+	public MethodParameter nested() {
+		if (this.nestedMethodParameter != null) {
+			return this.nestedMethodParameter;
+		}
+		MethodParameter nestedParam = clone();
+		nestedParam.nestingLevel = this.nestingLevel + 1;
+		this.nestedMethodParameter = nestedParam;
+		return nestedParam;
+	}
+
+	/**
+	 * Return whether this method parameter is declared as optional
+	 * in the form of Java 8's {@link java.util.Optional}.
+	 * @since 4.3
+	 */
+	public boolean isOptional() {
+		return (getParameterType() == javaUtilOptionalClass);
+	}
+
+	/**
+	 * Return a variant of this {@code MethodParameter} which points to
+	 * the same parameter but one nesting level deeper in case of a
+	 * {@link java.util.Optional} declaration.
+	 * @since 4.3
+	 * @see #isOptional()
+	 * @see #nested()
+	 */
+	public MethodParameter nestedIfOptional() {
+		return (isOptional() ? nested() : this);
+	}
+
 
 	/**
 	 * Set a containing class to resolve the parameter type against.
@@ -309,6 +375,7 @@ public class MethodParameter {
 	/**
 	 * Return the generic type of the method/constructor parameter.
 	 * @return the parameter type (never {@code null})
+	 * @since 3.0
 	 */
 	public Type getGenericParameterType() {
 		if (this.genericParameterType == null) {
@@ -324,6 +391,12 @@ public class MethodParameter {
 		return this.genericParameterType;
 	}
 
+	/**
+	 * Return the nested type of the method/constructor parameter.
+	 * @return the parameter type (never {@code null})
+	 * @see #getNestingLevel()
+	 * @since 3.1
+	 */
 	public Class<?> getNestedParameterType() {
 		if (this.nestingLevel > 1) {
 			Type type = getGenericParameterType();
@@ -333,6 +406,7 @@ public class MethodParameter {
 					Integer index = getTypeIndexForLevel(i);
 					type = args[index != null ? index : args.length - 1];
 				}
+				// TODO: Object.class if unresolvable
 			}
 			if (type instanceof Class) {
 				return (Class<?>) type;
@@ -351,10 +425,33 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Return the nested generic type of the method/constructor parameter.
+	 * @return the parameter type (never {@code null})
+	 * @since 4.2
+	 * @see #getNestingLevel()
+	 */
+	public Type getNestedGenericParameterType() {
+		if (this.nestingLevel > 1) {
+			Type type = getGenericParameterType();
+			for (int i = 2; i <= this.nestingLevel; i++) {
+				if (type instanceof ParameterizedType) {
+					Type[] args = ((ParameterizedType) type).getActualTypeArguments();
+					Integer index = getTypeIndexForLevel(i);
+					type = args[index != null ? index : args.length - 1];
+				}
+			}
+			return type;
+		}
+		else {
+			return getGenericParameterType();
+		}
+	}
+
+	/**
 	 * Return the annotations associated with the target method/constructor itself.
 	 */
 	public Annotation[] getMethodAnnotations() {
-		return getAnnotatedElement().getAnnotations();
+		return adaptAnnotationArray(getAnnotatedElement().getAnnotations());
 	}
 
 	/**
@@ -362,8 +459,18 @@ public class MethodParameter {
 	 * @param annotationType the annotation type to look for
 	 * @return the annotation object, or {@code null} if not found
 	 */
-	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
-		return getAnnotatedElement().getAnnotation(annotationType);
+	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
+		return adaptAnnotation(getAnnotatedElement().getAnnotation(annotationType));
+	}
+
+	/**
+	 * Return whether the method/constructor is annotated with the given type.
+	 * @param annotationType the annotation type to look for
+	 * @since 4.3
+	 * @see #getMethodAnnotation(Class)
+	 */
+	public <A extends Annotation> boolean hasMethodAnnotation(Class<A> annotationType) {
+		return getAnnotatedElement().isAnnotationPresent(annotationType);
 	}
 
 	/**
@@ -374,7 +481,7 @@ public class MethodParameter {
 			Annotation[][] annotationArray = (this.method != null ?
 					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
 			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
-				this.parameterAnnotations = annotationArray[this.parameterIndex];
+				this.parameterAnnotations = adaptAnnotationArray(annotationArray[this.parameterIndex]);
 			}
 			else {
 				this.parameterAnnotations = new Annotation[0];
@@ -384,32 +491,36 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return the parameter annotation of the given type, if available.
-	 * @param annotationType the annotation type to look for
-	 * @return the annotation object, or {@code null} if not found
-	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Annotation> T getParameterAnnotation(Class<T> annotationType) {
-		Annotation[] anns = getParameterAnnotations();
-		for (Annotation ann : anns) {
-			if (annotationType.isInstance(ann)) {
-				return (T) ann;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Return true if the parameter has at least one annotation, false if it has none.
+	 * Return {@code true} if the parameter has at least one annotation,
+	 * {@code false} if it has none.
+	 * @see #getParameterAnnotations()
 	 */
 	public boolean hasParameterAnnotations() {
 		return (getParameterAnnotations().length != 0);
 	}
 
 	/**
-	 * Return true if the parameter has the given annotation type, and false if it doesn't.
+	 * Return the parameter annotation of the given type, if available.
+	 * @param annotationType the annotation type to look for
+	 * @return the annotation object, or {@code null} if not found
 	 */
-	public <T extends Annotation> boolean hasParameterAnnotation(Class<T> annotationType) {
+	@SuppressWarnings("unchecked")
+	public <A extends Annotation> A getParameterAnnotation(Class<A> annotationType) {
+		Annotation[] anns = getParameterAnnotations();
+		for (Annotation ann : anns) {
+			if (annotationType.isInstance(ann)) {
+				return (A) ann;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Return whether the parameter is declared with the given annotation type.
+	 * @param annotationType the annotation type to look for
+	 * @see #getParameterAnnotation(Class)
+	 */
+	public <A extends Annotation> boolean hasParameterAnnotation(Class<A> annotationType) {
 		return (getParameterAnnotation(annotationType) != null);
 	}
 
@@ -444,6 +555,31 @@ public class MethodParameter {
 	}
 
 
+	/**
+	 * A template method to post-process a given annotation instance before
+	 * returning it to the caller.
+	 * <p>The default implementation simply returns the given annotation as-is.
+	 * @param annotation the annotation about to be returned
+	 * @return the post-processed annotation (or simply the original one)
+	 * @since 4.2
+	 */
+	protected <A extends Annotation> A adaptAnnotation(A annotation) {
+		return annotation;
+	}
+
+	/**
+	 * A template method to post-process a given annotation array before
+	 * returning it to the caller.
+	 * <p>The default implementation simply returns the given annotation array as-is.
+	 * @param annotations the annotation array about to be returned
+	 * @return the post-processed annotation array (or simply the original one)
+	 * @since 4.2
+	 */
+	protected Annotation[] adaptAnnotationArray(Annotation[] annotations) {
+		return annotations;
+	}
+
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
@@ -459,6 +595,17 @@ public class MethodParameter {
 	@Override
 	public int hashCode() {
 		return (getMember().hashCode() * 31 + this.parameterIndex);
+	}
+
+	@Override
+	public String toString() {
+		return (this.method != null ? "method '" + this.method.getName() + "'" : "constructor") +
+				" parameter " + this.parameterIndex;
+	}
+
+	@Override
+	public MethodParameter clone() {
+		return new MethodParameter(this);
 	}
 
 

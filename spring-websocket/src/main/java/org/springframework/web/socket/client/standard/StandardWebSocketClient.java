@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
@@ -49,9 +51,9 @@ import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import org.springframework.web.socket.adapter.standard.WebSocketToStandardExtensionAdapter;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
 
+
 /**
- * Initiates WebSocket requests to a WebSocket server programmatically
- * through the standard Java WebSocket API.
+ * A WebSocketClient based on standard Java WebSocket API.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -59,6 +61,8 @@ import org.springframework.web.socket.client.AbstractWebSocketClient;
 public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final WebSocketContainer webSocketContainer;
+
+	private final Map<String,Object> userProperties = new HashMap<String, Object>();
 
 	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
@@ -83,6 +87,25 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		this.webSocketContainer = webSocketContainer;
 	}
 
+
+	/**
+	 * The standard Java WebSocket API allows passing "user properties" to the
+	 * server via {@link ClientEndpointConfig#getUserProperties() userProperties}.
+	 * Use this property to configure one or more properties to be passed on
+	 * every handshake.
+	 */
+	public void setUserProperties(Map<String, Object> userProperties) {
+		if (userProperties != null) {
+			this.userProperties.putAll(userProperties);
+		}
+	}
+
+	/**
+	 * The configured user properties, or {@code null}.
+	 */
+	public Map<String, Object> getUserProperties() {
+		return this.userProperties;
+	}
 
 	/**
 	 * Set an {@link AsyncListenableTaskExecutor} to use when opening connections.
@@ -114,16 +137,19 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		final StandardWebSocketSession session = new StandardWebSocketSession(headers,
 				attributes, localAddress, remoteAddress);
 
-		final ClientEndpointConfig.Builder configBuilder = ClientEndpointConfig.Builder.create();
-		configBuilder.configurator(new StandardWebSocketClientConfigurator(headers));
-		configBuilder.preferredSubprotocols(protocols);
-		configBuilder.extensions(adaptExtensions(extensions));
+		final ClientEndpointConfig endpointConfig = ClientEndpointConfig.Builder.create()
+				.configurator(new StandardWebSocketClientConfigurator(headers))
+				.preferredSubprotocols(protocols)
+				.extensions(adaptExtensions(extensions)).build();
+
+		endpointConfig.getUserProperties().putAll(getUserProperties());
+
 		final Endpoint endpoint = new StandardWebSocketHandlerAdapter(webSocketHandler, session);
 
 		Callable<WebSocketSession> connectTask = new Callable<WebSocketSession>() {
 			@Override
 			public WebSocketSession call() throws Exception {
-				webSocketContainer.connectToServer(endpoint, configBuilder.build(), uri);
+				webSocketContainer.connectToServer(endpoint, endpointConfig, uri);
 				return session;
 			}
 		};

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,7 @@ public class MappingJackson2XmlViewTests {
 		view.setUpdateContentLength(true);
 		view.render(model, request, response);
 
-		assertEquals("no-cache", response.getHeader("Pragma"));
-		assertEquals("no-cache, no-store, max-age=0", response.getHeader("Cache-Control"));
-		assertNotNull(response.getHeader("Expires"));
+		assertEquals("no-store", response.getHeader("Cache-Control"));
 
 		assertEquals(MappingJackson2XmlView.DEFAULT_CONTENT_TYPE, response.getContentType());
 
@@ -127,9 +125,7 @@ public class MappingJackson2XmlViewTests {
 
 		view.render(model, request, response);
 
-		assertNull(response.getHeader("Pragma"));
 		assertNull(response.getHeader("Cache-Control"));
-		assertNull(response.getHeader("Expires"));
 	}
 
 	@Test

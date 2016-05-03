@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,21 +48,23 @@ public class ExecutorBeanDefinitionParserTests {
 				"executorContext.xml", ExecutorBeanDefinitionParserTests.class);
 	}
 
+
 	@Test
 	public void defaultExecutor() throws Exception {
-		Object executor = this.context.getBean("default");
+		ThreadPoolTaskExecutor executor = this.context.getBean("default", ThreadPoolTaskExecutor.class);
 		assertEquals(1, getCorePoolSize(executor));
 		assertEquals(Integer.MAX_VALUE, getMaxPoolSize(executor));
 		assertEquals(Integer.MAX_VALUE, getQueueCapacity(executor));
 		assertEquals(60, getKeepAliveSeconds(executor));
 		assertEquals(false, getAllowCoreThreadTimeOut(executor));
+
 		FutureTask<String> task = new FutureTask<String>(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
 				return "foo";
 			}
 		});
-		((ThreadPoolTaskExecutor)executor).execute(task);
+		executor.execute(task);
 		assertEquals("foo", task.get());
 	}
 

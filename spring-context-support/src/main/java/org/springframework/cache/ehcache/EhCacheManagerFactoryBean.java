@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	/**
 	 * Set the name of the EhCache CacheManager (if a specific name is desired).
-	 * @see net.sf.ehcache.CacheManager#setName(String)
+	 * @see net.sf.ehcache.config.Configuration#setName(String)
 	 */
 	public void setCacheManagerName(String cacheManagerName) {
 		this.cacheManagerName = cacheManagerName;
@@ -126,12 +126,17 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	@Override
 	public void afterPropertiesSet() throws CacheException {
-		logger.info("Initializing EhCache CacheManager");
+		if (logger.isInfoEnabled()) {
+			logger.info("Initializing EhCache CacheManager" +
+					(this.cacheManagerName != null ? " '" + this.cacheManagerName + "'" : ""));
+		}
+
 		Configuration configuration = (this.configLocation != null ?
 				EhCacheManagerUtils.parseConfiguration(this.configLocation) : ConfigurationFactory.parseConfiguration());
 		if (this.cacheManagerName != null) {
 			configuration.setName(this.cacheManagerName);
 		}
+
 		if (this.shared) {
 			// Old-school EhCache singleton sharing...
 			// No way to find out whether we actually created a new CacheManager
@@ -178,7 +183,10 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 	@Override
 	public void destroy() {
 		if (this.locallyManaged) {
-			logger.info("Shutting down EhCache CacheManager");
+			if (logger.isInfoEnabled()) {
+				logger.info("Shutting down EhCache CacheManager" +
+						(this.cacheManagerName != null ? " '" + this.cacheManagerName + "'" : ""));
+			}
 			this.cacheManager.shutdown();
 		}
 	}

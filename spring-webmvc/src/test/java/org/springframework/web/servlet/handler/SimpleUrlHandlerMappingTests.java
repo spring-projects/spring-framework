@@ -110,6 +110,11 @@ public class SimpleUrlHandlerMappingTests {
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == otherBean);
 		assertEquals("welcome.x", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
 
+		req = new MockHttpServletRequest("GET", "/welcome/");
+		hec = getHandler(hm, req);
+		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == otherBean);
+		assertEquals("welcome", req.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE));
+
 		req = new MockHttpServletRequest("GET", "/");
 		req.setServletPath("/welcome.html");
 		hec = getHandler(hm, req);

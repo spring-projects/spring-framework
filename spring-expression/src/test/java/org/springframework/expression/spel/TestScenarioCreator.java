@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testresources.Inventor;
 import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
-///CLOVER:OFF
 /**
- * Builds an evaluation context for test expressions. Features of the test evaluation context are:
+ * Builds an evaluation context for test expressions.
+ * Features of the test evaluation context are:
  * <ul>
  * <li>The root context object is an Inventor instance {@link Inventor}
  * </ul>
@@ -45,21 +45,19 @@ public class TestScenarioCreator {
 	 */
 	private static void populateFunctions(StandardEvaluationContext testContext) {
 		try {
-			testContext.registerFunction("isEven", TestScenarioCreator.class.getDeclaredMethod("isEven",
-					new Class[] { Integer.TYPE }));
-			testContext.registerFunction("reverseInt", TestScenarioCreator.class.getDeclaredMethod("reverseInt",
-					new Class[] { Integer.TYPE, Integer.TYPE, Integer.TYPE }));
-			testContext.registerFunction("reverseString", TestScenarioCreator.class.getDeclaredMethod("reverseString",
-					new Class[] { String.class }));
-			testContext.registerFunction("varargsFunctionReverseStringsAndMerge", TestScenarioCreator.class
-					.getDeclaredMethod("varargsFunctionReverseStringsAndMerge", new Class[] { String[].class }));
-			testContext.registerFunction("varargsFunctionReverseStringsAndMerge2", TestScenarioCreator.class
-					.getDeclaredMethod("varargsFunctionReverseStringsAndMerge2", new Class[] { Integer.TYPE,
-							String[].class }));
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+			testContext.registerFunction("isEven",
+					TestScenarioCreator.class.getDeclaredMethod("isEven", Integer.TYPE));
+			testContext.registerFunction("reverseInt",
+					TestScenarioCreator.class.getDeclaredMethod("reverseInt", Integer.TYPE, Integer.TYPE, Integer.TYPE));
+			testContext.registerFunction("reverseString",
+					TestScenarioCreator.class.getDeclaredMethod("reverseString", String.class));
+			testContext.registerFunction("varargsFunctionReverseStringsAndMerge",
+					TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge", String[].class));
+			testContext.registerFunction("varargsFunctionReverseStringsAndMerge2",
+					TestScenarioCreator.class.getDeclaredMethod("varargsFunctionReverseStringsAndMerge2", Integer.TYPE, String[].class));
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 
@@ -72,9 +70,8 @@ public class TestScenarioCreator {
 	}
 
 	/**
-	 * Create the root context object, an Inventor instance. Non-qualified property and method references will be
-	 * resolved against this context object.
-	 *
+	 * Create the root context object, an Inventor instance. Non-qualified property
+	 * and method references will be resolved against this context object.
 	 * @param testContext the evaluation context in which to set the root object
 	 */
 	private static void setupRootContextObject(StandardEvaluationContext testContext) {
@@ -88,12 +85,14 @@ public class TestScenarioCreator {
 		testContext.setRootObject(tesla);
 	}
 
+
 	// These methods are registered in the test context and therefore accessible through function calls
 	// in test expressions
 
 	public static String isEven(int i) {
-		if ((i % 2) == 0)
+		if ((i % 2) == 0) {
 			return "y";
+		}
 		return "n";
 	}
 
@@ -129,4 +128,5 @@ public class TestScenarioCreator {
 		}
 		return sb.toString();
 	}
+
 }

@@ -70,7 +70,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 
 	/**
 	 * Stores the result of merging the {@code mappings} {@code Properties}
-	 * with the the properties stored in the resources defined by {@code mappingLocations}.
+	 * with the properties stored in the resources defined by {@code mappingLocations}.
 	 */
 	private Properties mergedMappings;
 

@@ -1,18 +1,21 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.setup;
 
-import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -28,19 +31,24 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
- *
  * @author Rob Winch
  */
 public class ConditionalDelegatingFilterProxyTests {
+
 	private MockHttpServletRequest request;
+
 	private MockHttpServletResponse response;
+
 	private MockFilterChain filterChain;
+
 	private MockFilter delegate;
+
 	private PatternMappingFilterProxy filter;
+
 
 	@Before
 	public void setup() {
@@ -50,6 +58,7 @@ public class ConditionalDelegatingFilterProxyTests {
 		filterChain = new MockFilterChain();
 		delegate = new MockFilter();
 	}
+
 
 	@Test
 	public void init() throws Exception {
@@ -245,11 +254,17 @@ public class ConditionalDelegatingFilterProxyTests {
 		delegate = new MockFilter();
 	}
 
+
 	private static class MockFilter implements Filter {
+
 		private FilterConfig filterConfig;
+
 		private ServletRequest request;
+
 		private ServletResponse response;
+
 		private FilterChain chain;
+
 		private boolean destroy;
 
 		@Override
@@ -258,8 +273,7 @@ public class ConditionalDelegatingFilterProxyTests {
 		}
 
 		@Override
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-				ServletException {
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
 			this.request = request;
 			this.response = response;
 			this.chain = chain;
@@ -270,4 +284,5 @@ public class ConditionalDelegatingFilterProxyTests {
 			this.destroy = true;
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
@@ -37,14 +36,7 @@ import static org.mockito.BDDMockito.*;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTests {
-
-
-	@Override
-	@Before
-	public void setUp() {
-		super.setUp();
-	}
+public class HttpReceivingTransportHandlerTests extends AbstractHttpRequestTests {
 
 	@Test
 	public void readMessagesXhr() throws Exception {
@@ -73,9 +65,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 		assertEquals("ok", this.servletResponse.getContentAsString());
 	}
 
-	// SPR-10621
-
-	@Test
+	@Test  // SPR-10621
 	public void readMessagesJsonpFormEncodedWithEncoding() throws Exception {
 		this.servletRequest.setContent("d=[\"x\"]".getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/x-www-form-urlencoded;charset=UTF-8");
@@ -102,9 +92,7 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 
 	@Test
 	public void delegateMessageException() throws Exception {
-
 		StubSockJsServiceConfig sockJsConfig = new StubSockJsServiceConfig();
-
 		this.servletRequest.setContent("[\"x\"]".getBytes("UTF-8"));
 
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
@@ -126,7 +114,6 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 
 
 	private void handleRequest(AbstractHttpReceivingTransportHandler transportHandler) throws Exception {
-
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);
 		AbstractSockJsSession session = new TestHttpSockJsSession("1", new StubSockJsServiceConfig(), wsHandler, null);
 
@@ -138,7 +125,6 @@ public class HttpReceivingTransportHandlerTests  extends AbstractHttpRequestTest
 	}
 
 	private void handleRequestAndExpectFailure() throws Exception {
-
 		resetResponse();
 
 		WebSocketHandler wsHandler = mock(WebSocketHandler.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletException;
 
+import org.springframework.beans.ConversionNotSupportedException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -51,6 +54,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -59,7 +63,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	private final BeanExpressionContext expressionContext;
 
-	private Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
+	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
 
 
 	public AbstractNamedValueMethodArgumentResolver() {
@@ -82,26 +86,43 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	public final Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-		Class<?> paramType = parameter.getParameterType();
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
+		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
-		Object arg = resolveName(namedValueInfo.name, parameter, webRequest);
+		Object resolvedName = resolveStringValue(namedValueInfo.name);
+		if (resolvedName == null) {
+			throw new IllegalArgumentException(
+					"Specified name must not resolve to null: [" + namedValueInfo.name + "]");
+		}
+
+		Object arg = resolveName(resolvedName.toString(), nestedParameter, webRequest);
 		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
-				arg = resolveDefaultValue(namedValueInfo.defaultValue);
+				arg = resolveStringValue(namedValueInfo.defaultValue);
 			}
-			else if (namedValueInfo.required && !parameter.getParameterType().getName().equals("java.util.Optional")) {
-				handleMissingValue(namedValueInfo.name, parameter);
+			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
+				handleMissingValue(namedValueInfo.name, nestedParameter, webRequest);
 			}
-			arg = handleNullValue(namedValueInfo.name, arg, paramType);
+			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
 		}
 		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
-			arg = resolveDefaultValue(namedValueInfo.defaultValue);
+			arg = resolveStringValue(namedValueInfo.defaultValue);
 		}
 
 		if (binderFactory != null) {
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
-			arg = binder.convertIfNecessary(arg, paramType, parameter);
+			try {
+				arg = binder.convertIfNecessary(arg, parameter.getParameterType(), parameter);
+			}
+			catch (ConversionNotSupportedException ex) {
+				throw new MethodArgumentConversionNotSupportedException(arg, ex.getRequiredType(),
+						namedValueInfo.name, parameter, ex.getCause());
+			}
+			catch (TypeMismatchException ex) {
+				throw new MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),
+						namedValueInfo.name, parameter, ex.getCause());
+
+			}
 		}
 
 		handleResolvedValue(arg, namedValueInfo.name, parameter, mavContainer, webRequest);
@@ -138,7 +159,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		if (info.name.length() == 0) {
 			name = parameter.getParameterName();
 			if (name == null) {
-				throw new IllegalArgumentException("Name for argument type [" + parameter.getParameterType().getName() +
+				throw new IllegalArgumentException(
+						"Name for argument type [" + parameter.getNestedParameterType().getName() +
 						"] not available, and parameter name information not found in class file either.");
 			}
 		}
@@ -147,29 +169,43 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	}
 
 	/**
-	 * Resolves the given parameter type and value name into an argument value.
+	 * Resolve the given annotation-specified value,
+	 * potentially containing placeholders and expressions.
+	 */
+	private Object resolveStringValue(String value) {
+		if (this.configurableBeanFactory == null) {
+			return value;
+		}
+		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
+		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
+		if (exprResolver == null) {
+			return value;
+		}
+		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
+	}
+
+	/**
+	 * Resolve the given parameter type and value name into an argument value.
 	 * @param name the name of the value being resolved
 	 * @param parameter the method parameter to resolve to an argument value
+	 * (pre-nested in case of a {@link java.util.Optional} declaration)
 	 * @param request the current request
-	 * @return the resolved argument. May be {@code null}
+	 * @return the resolved argument (may be {@code null})
 	 * @throws Exception in case of errors
 	 */
 	protected abstract Object resolveName(String name, MethodParameter parameter, NativeWebRequest request)
 			throws Exception;
 
 	/**
-	 * Resolves the given default value into an argument value.
+	 * Invoked when a named value is required, but {@link #resolveName(String, MethodParameter, NativeWebRequest)}
+	 * returned {@code null} and there is no default value. Subclasses typically throw an exception in this case.
+	 * @param name the name for the value
+	 * @param parameter the method parameter
+	 * @param request the current request
+	 * @since 4.3
 	 */
-	private Object resolveDefaultValue(String defaultValue) {
-		if (this.configurableBeanFactory == null) {
-			return defaultValue;
-		}
-		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(defaultValue);
-		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
-		if (exprResolver == null) {
-			return defaultValue;
-		}
-		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
+	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+		handleMissingValue(name, parameter);
 	}
 
 	/**
@@ -178,7 +214,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 * @param name the name for the value
 	 * @param parameter the method parameter
 	 */
-	protected abstract void handleMissingValue(String name, MethodParameter parameter) throws ServletException;
+	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletException {
+		throw new ServletRequestBindingException("Missing argument '" + name +
+				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
+	}
 
 	/**
 	 * A {@code null} results in a {@code false} value for {@code boolean}s or an exception for other primitives.
@@ -189,7 +228,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 				return Boolean.FALSE;
 			}
 			else if (paramType.isPrimitive()) {
-				throw new IllegalStateException("Optional " + paramType + " parameter '" + name +
+				throw new IllegalStateException("Optional " + paramType.getSimpleName() + " parameter '" + name +
 						"' is present but cannot be translated into a null value due to being declared as a " +
 						"primitive type. Consider declaring it as object wrapper for the corresponding primitive type.");
 			}

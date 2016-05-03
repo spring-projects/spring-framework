@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.context.annotation.configuration;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -35,9 +34,9 @@ import static org.junit.Assert.*;
  * Unit tests cornering the bug exposed in SPR-6779.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ImportedConfigurationClassEnhancementTests {
-
 
 	@Test
 	public void autowiredConfigClassIsEnhancedWhenImported() {
@@ -77,30 +76,42 @@ public class ImportedConfigurationClassEnhancementTests {
 	}
 
 
-	@Test(expected=BeanDefinitionParsingException.class)
+	@Test
 	public void importingNonConfigurationClassCausesBeanDefinitionParsingException() {
-		new AnnotationConfigApplicationContext(ConfigThatImportsNonConfigClass.class);
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigThatImportsNonConfigClass.class);
+		ConfigThatImportsNonConfigClass config = ctx.getBean(ConfigThatImportsNonConfigClass.class);
+		assertSame(ctx.getBean(TestBean.class), config.testBean);
 	}
-}
 
-@Configuration
-class ConfigToBeAutowired {
-	public @Bean TestBean testBean() {
-		return new TestBean();
+
+
+	@Configuration
+	static class ConfigToBeAutowired {
+
+		public @Bean TestBean testBean() {
+			return new TestBean();
+		}
 	}
+
+	static class Config {
+
+		@Autowired ConfigToBeAutowired autowiredConfig;
+	}
+
+	@Import(ConfigToBeAutowired.class)
+	@Configuration
+	static class ConfigThatDoesImport extends Config {
+	}
+
+	@Configuration
+	static class ConfigThatDoesNotImport extends Config {
+	}
+
+	@Configuration
+	@Import(TestBean.class)
+	static class ConfigThatImportsNonConfigClass {
+
+		@Autowired TestBean testBean;
+	}
+
 }
-
-class Config {
-	@Autowired ConfigToBeAutowired autowiredConfig;
-}
-
-@Import(ConfigToBeAutowired.class)
-@Configuration
-class ConfigThatDoesImport extends Config { }
-
-@Configuration
-class ConfigThatDoesNotImport extends Config { }
-
-@Configuration
-@Import(TestBean.class)
-class ConfigThatImportsNonConfigClass { }

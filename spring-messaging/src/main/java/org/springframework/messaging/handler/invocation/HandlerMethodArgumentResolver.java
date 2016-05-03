@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 
 /**
- * Strategy interface for resolving method parameters into argument values in
- * the context of a given {@link Message}.
+ * Strategy interface for resolving method parameters into argument values
+ * in the context of a given {@link Message}.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -39,12 +39,12 @@ public interface HandlerMethodArgumentResolver {
 
 	/**
 	 * Resolves a method parameter into an argument value from a given message.
-	 * @param parameter the method parameter to resolve. This parameter must
-	 * have previously been passed to
+	 * @param parameter the method parameter to resolve.
+	 * This parameter must have previously been passed to
 	 * {@link #supportsParameter(org.springframework.core.MethodParameter)}
-	 * and it must have returned {@code true}
+	 * which must have returned {@code true}.
 	 * @param message the currently processed message
-	 * @return the resolved argument value, or {@code null}.
+	 * @return the resolved argument value, or {@code null}
 	 * @throws Exception in case of errors with the preparation of argument values
 	 */
 	Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception;

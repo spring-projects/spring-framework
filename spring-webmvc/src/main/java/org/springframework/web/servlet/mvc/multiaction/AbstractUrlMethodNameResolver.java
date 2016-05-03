@@ -34,7 +34,9 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @author Juergen Hoeller
  * @since 14.01.2004
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public abstract class AbstractUrlMethodNameResolver implements MethodNameResolver {
 
 	/** Logger available to subclasses */

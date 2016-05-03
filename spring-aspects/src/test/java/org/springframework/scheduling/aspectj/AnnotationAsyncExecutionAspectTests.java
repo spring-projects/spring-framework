@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.scheduling.aspectj;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -35,6 +36,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.not;
@@ -50,9 +52,10 @@ public class AnnotationAsyncExecutionAspectTests {
 
 	private static final long WAIT_TIME = 1000; //milliseconds
 
+	private final AsyncUncaughtExceptionHandler defaultExceptionHandler = new SimpleAsyncUncaughtExceptionHandler();
+
 	private CountingExecutor executor;
 
-	private AsyncUncaughtExceptionHandler defaultExceptionHandler = new SimpleAsyncUncaughtExceptionHandler();
 
 	@Before
 	public void setUp() {
@@ -61,6 +64,7 @@ public class AnnotationAsyncExecutionAspectTests {
 		executor = new CountingExecutor();
 		AnnotationAsyncExecutionAspect.aspectOf().setExecutor(executor);
 	}
+
 
 	@Test
 	public void asyncMethodGetsRoutedAsynchronously() {
@@ -137,8 +141,11 @@ public class AnnotationAsyncExecutionAspectTests {
 		assertThat(defaultThread.get(), not(Thread.currentThread()));
 		assertThat(defaultThread.get().getName(), not(startsWith("e1-")));
 
-		Future<Thread> e1Thread = obj.e1Work();
+		ListenableFuture<Thread> e1Thread = obj.e1Work();
 		assertThat(e1Thread.get().getName(), startsWith("e1-"));
+
+		CompletableFuture<Thread> e1OtherThread = obj.e1OtherWork();
+		assertThat(e1OtherThread.get().getName(), startsWith("e1-"));
 	}
 
 	@Test
@@ -184,7 +191,9 @@ public class AnnotationAsyncExecutionAspectTests {
 
 	@SuppressWarnings("serial")
 	private static class CountingExecutor extends SimpleAsyncTaskExecutor {
+
 		int submitStartCounter;
+
 		int submitCompleteCounter;
 
 		@Override
@@ -201,7 +210,8 @@ public class AnnotationAsyncExecutionAspectTests {
 		public synchronized void waitForCompletion() {
 			try {
 				wait(WAIT_TIME);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException ex) {
 				fail("Didn't finish the async job in " + WAIT_TIME + " milliseconds");
 			}
 		}
@@ -209,6 +219,7 @@ public class AnnotationAsyncExecutionAspectTests {
 
 
 	static class ClassWithoutAsyncAnnotation {
+
 		int counter;
 
 		@Async public void incrementAsync() {
@@ -239,6 +250,7 @@ public class AnnotationAsyncExecutionAspectTests {
 
 	@Async
 	static class ClassWithAsyncAnnotation {
+
 		int counter;
 
 		public void increment() {
@@ -261,16 +273,23 @@ public class AnnotationAsyncExecutionAspectTests {
 
 
 	static class ClassWithQualifiedAsyncMethods {
+
 		@Async
 		public Future<Thread> defaultWork() {
 			return new AsyncResult<Thread>(Thread.currentThread());
 		}
 
 		@Async("e1")
-		public Future<Thread> e1Work() {
+		public ListenableFuture<Thread> e1Work() {
 			return new AsyncResult<Thread>(Thread.currentThread());
 		}
+
+		@Async("e1")
+		public CompletableFuture<Thread> e1OtherWork() {
+			return CompletableFuture.completedFuture(Thread.currentThread());
+		}
 	}
+
 
 	static class ClassWithException {
 
@@ -279,4 +298,5 @@ public class AnnotationAsyncExecutionAspectTests {
 			 throw new UnsupportedOperationException("failWithVoid");
 		}
 	}
+
 }

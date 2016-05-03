@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,17 +62,18 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 
 	public ReflectiveMethodResolver() {
-		this.useDistance = false;
+		this.useDistance = true;
 	}
 
 	/**
-	 * This constructors allows the ReflectiveMethodResolver to be configured such that it will
-	 * use a distance computation to check which is the better of two close matches (when there
-	 * are multiple matches). Using the distance computation is intended to ensure matches
-	 * are more closely representative of what a Java compiler would do when taking into
-	 * account boxing/unboxing and whether the method candidates are declared to handle a
-	 * supertype of the type (of the argument) being passed in.
-	 * @param useDistance true if distance computation should be used when calculating matches
+	 * This constructor allows the ReflectiveMethodResolver to be configured such that it
+	 * will use a distance computation to check which is the better of two close matches
+	 * (when there are multiple matches). Using the distance computation is intended to
+	 * ensure matches are more closely representative of what a Java compiler would do
+	 * when taking into account boxing/unboxing and whether the method candidates are
+	 * declared to handle a supertype of the type (of the argument) being passed in.
+	 * @param useDistance {@code true} if distance computation should be used when
+	 * calculating matches; {@code false} otherwise
 	 */
 	public ReflectiveMethodResolver(boolean useDistance) {
 		this.useDistance = useDistance;
@@ -175,17 +176,17 @@ public class ReflectiveMethodResolver implements MethodResolver {
 							return new ReflectiveMethodExecutor(method);
 						}
 						else if (matchInfo.isCloseMatch()) {
-							if (!this.useDistance) {
-								// Take this as a close match if there isn't one already
-								if (closeMatch == null) {
+							if (this.useDistance) {
+								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
+								if (closeMatch == null || matchDistance < closeMatchDistance) {
+									// This is a better match...
 									closeMatch = method;
+									closeMatchDistance = matchDistance;
 								}
 							}
 							else {
-								int matchDistance = ReflectionHelper.getTypeDifferenceWeight(paramDescriptors, argumentTypes);
-								if (matchDistance < closeMatchDistance) {
-									// This is a better match...
-									closeMatchDistance = matchDistance;
+								// Take this as a close match if there isn't one already
+								if (closeMatch == null) {
 									closeMatch = method;
 								}
 							}
@@ -220,14 +221,15 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	private Collection<Method> getMethods(Class<?> type, Object targetObject) {
 		if (targetObject instanceof Class) {
 			Set<Method> result = new LinkedHashSet<Method>();
-			result.addAll(Arrays.asList(getMethods(targetObject.getClass())));
-			// Add these also so that static result are invocable on the type: e.g. Float.valueOf(..)
+			// Add these so that static methods are invocable on the type: e.g. Float.valueOf(..)
 			Method[] methods = getMethods(type);
 			for (Method method : methods) {
 				if (Modifier.isStatic(method.getModifiers())) {
 					result.add(method);
 				}
 			}
+			// Also expose methods from java.lang.Class itself
+			result.addAll(Arrays.asList(getMethods(Class.class)));
 			return result;
 		}
 		else {

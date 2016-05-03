@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,12 +42,14 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.util.DefaultUriTemplateHandler;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unchecked")
 public class RestTemplateTests {
@@ -134,7 +136,7 @@ public class RestTemplateTests {
 		given(response.getStatusCode()).willReturn(status);
 		given(response.getStatusText()).willReturn(status.getReasonPhrase());
 
-		Map<String, String> vars = new HashMap<String, String>(2);
+		Map<String, String> vars = new HashMap<>(2);
 		vars.put("first", null);
 		vars.put("last", "foo");
 		template.execute("http://example.com/{first}-{last}", HttpMethod.GET, null, null, vars);
@@ -259,6 +261,35 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
+	@Test
+	public void getForObjectWithCustomUriTemplateHandler() throws Exception {
+
+		DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
+		uriTemplateHandler.setParsePath(true);
+		template.setUriTemplateHandler(uriTemplateHandler);
+
+		URI expectedUri = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
+		given(requestFactory.createRequest(expectedUri, HttpMethod.GET)).willReturn(request);
+
+		given(request.getHeaders()).willReturn(new HttpHeaders());
+		given(request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(false);
+
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(new HttpHeaders());
+		given(response.getBody()).willReturn(null);
+
+		Map<String, String> uriVariables = new HashMap<>(2);
+		uriVariables.put("hotel", "1");
+		uriVariables.put("publicpath", "pics/logo.png");
+		uriVariables.put("scale", "150x150");
+
+		String url = "http://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
+		template.getForObject(url, String.class, uriVariables);
+
+		verify(response).close();
+	}
+
 
 	@Test
 	public void headForHeaders() throws Exception {
@@ -321,7 +352,7 @@ public class RestTemplateTests {
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(contentType);
-		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
+		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 
 		URI result = template.postForLocation("http://example.com", entity);
 		assertEquals("Invalid POST result", expected, result);
@@ -349,7 +380,7 @@ public class RestTemplateTests {
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
-		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
+		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 
 		URI result = template.postForLocation("http://example.com", entity);
 		assertEquals("Invalid POST result", expected, result);
@@ -592,21 +623,27 @@ public class RestTemplateTests {
 		verify(response).close();
 	}
 
+	// Issue: SPR-9325, SPR-13860
+
 	@Test
 	public void ioException() throws Exception {
+		String url = "http://example.com/resource?access_token=123";
+
 		given(converter.canRead(String.class, null)).willReturn(true);
 		MediaType mediaType = new MediaType("foo", "bar");
 		given(converter.getSupportedMediaTypes()).willReturn(Collections.singletonList(mediaType));
-		given(requestFactory.createRequest(new URI("http://example.com/resource"), HttpMethod.GET)).willReturn(request);
+		given(requestFactory.createRequest(new URI(url), HttpMethod.GET)).willReturn(request);
 		given(request.getHeaders()).willReturn(new HttpHeaders());
-		given(request.execute()).willThrow(new IOException());
+		given(request.execute()).willThrow(new IOException("Socket failure"));
 
 		try {
-			template.getForObject("http://example.com/resource", String.class);
+			template.getForObject(url, String.class);
 			fail("RestClientException expected");
 		}
 		catch (ResourceAccessException ex) {
-			// expected
+			assertEquals("I/O error on GET request for \"http://example.com/resource\": " +
+					"Socket failure; nested exception is java.io.IOException: Socket failure",
+					ex.getMessage());
 		}
 	}
 
@@ -639,7 +676,7 @@ public class RestTemplateTests {
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
-		HttpEntity<String> requestEntity = new HttpEntity<String>(body, entityHeaders);
+		HttpEntity<String> requestEntity = new HttpEntity<>(body, entityHeaders);
 		ResponseEntity<Integer> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, Integer.class);
 		assertEquals("Invalid POST result", expected, result.getBody());
 		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());
@@ -662,9 +699,9 @@ public class RestTemplateTests {
 		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(this.request.getHeaders()).willReturn(requestHeaders);
-		given(converter.canWrite(String.class, null)).willReturn(true);
+		given(converter.canWrite(String.class, String.class, null)).willReturn(true);
 		String requestBody = "Hello World";
-		converter.write(requestBody, null, this.request);
+		converter.write(requestBody, String.class, null, this.request);
 		given(this.request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(false);
 		List<Integer> expected = Collections.singletonList(42);
@@ -673,7 +710,7 @@ public class RestTemplateTests {
 		responseHeaders.setContentLength(10);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
-		given(response.getBody()).willReturn(new ByteArrayInputStream(new Integer(42).toString().getBytes()));
+		given(response.getBody()).willReturn(new ByteArrayInputStream(Integer.toString(42).getBytes()));
 		given(converter.canRead(intList.getType(), null, MediaType.TEXT_PLAIN)).willReturn(true);
 		given(converter.read(eq(intList.getType()), eq(null), any(HttpInputMessage.class))).willReturn(expected);
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
@@ -683,7 +720,7 @@ public class RestTemplateTests {
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.set("MyHeader", "MyValue");
-		HttpEntity<String> requestEntity = new HttpEntity<String>(requestBody, entityHeaders);
+		HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, entityHeaders);
 		ResponseEntity<List<Integer>> result = template.exchange("http://example.com", HttpMethod.POST, requestEntity, intList);
 		assertEquals("Invalid POST result", expected, result.getBody());
 		assertEquals("Invalid Content-Type", MediaType.TEXT_PLAIN, result.getHeaders().getContentType());

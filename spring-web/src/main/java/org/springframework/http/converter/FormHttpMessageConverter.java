@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.Resource;
@@ -36,8 +35,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -88,12 +89,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
-	private static final byte[] BOUNDARY_CHARS =
-			new byte[] {'-', '_', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-					'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A',
-					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-					'V', 'W', 'X', 'Y', 'Z'};
-
 
 	private Charset charset = DEFAULT_CHARSET;
 
@@ -102,8 +97,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	private List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
-
-	private final Random random = new Random();
 
 
 	public FormHttpMessageConverter() {
@@ -209,7 +202,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
-		Charset charset = (contentType.getCharSet() != null ? contentType.getCharSet() : this.charset);
+		Charset charset = (contentType.getCharset() != null ? contentType.getCharset() : this.charset);
 		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
 
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
@@ -256,13 +249,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
-	private void writeForm(MultiValueMap<String, String> form, MediaType contentType, HttpOutputMessage outputMessage)
-			throws IOException {
+	private void writeForm(MultiValueMap<String, String> form, MediaType contentType,
+			HttpOutputMessage outputMessage) throws IOException {
 
 		Charset charset;
 		if (contentType != null) {
 			outputMessage.getHeaders().setContentType(contentType);
-			charset = contentType.getCharSet() != null ? contentType.getCharSet() : this.charset;
+			charset = contentType.getCharset() != null ? contentType.getCharset() : this.charset;
 		}
 		else {
 			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -286,20 +279,45 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 				builder.append('&');
 			}
 		}
-		byte[] bytes = builder.toString().getBytes(charset.name());
+		final byte[] bytes = builder.toString().getBytes(charset.name());
 		outputMessage.getHeaders().setContentLength(bytes.length);
-		StreamUtils.copy(bytes, outputMessage.getBody());
+
+		if (outputMessage instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(OutputStream outputStream) throws IOException {
+					StreamUtils.copy(bytes, outputStream);
+				}
+			});
+		}
+		else {
+			StreamUtils.copy(bytes, outputMessage.getBody());
+		}
 	}
 
-	private void writeMultipart(MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
-		byte[] boundary = generateMultipartBoundary();
+	private void writeMultipart(final MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage) throws IOException {
+		final byte[] boundary = generateMultipartBoundary();
 		Map<String, String> parameters = Collections.singletonMap("boundary", new String(boundary, "US-ASCII"));
 
 		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
-		outputMessage.getHeaders().setContentType(contentType);
+		HttpHeaders headers = outputMessage.getHeaders();
+		headers.setContentType(contentType);
 
-		writeParts(outputMessage.getBody(), parts, boundary);
-		writeEnd(outputMessage.getBody(), boundary);
+		if (outputMessage instanceof StreamingHttpOutputMessage) {
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
+			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
+				@Override
+				public void writeTo(OutputStream outputStream) throws IOException {
+					writeParts(outputStream, parts, boundary);
+					writeEnd(outputStream, boundary);
+				}
+			});
+		}
+		else {
+			writeParts(outputMessage.getBody(), parts, boundary);
+			writeEnd(outputMessage.getBody(), boundary);
+		}
 	}
 
 	private void writeParts(OutputStream os, MultiValueMap<String, Object> parts, byte[] boundary) throws IOException {
@@ -339,15 +357,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Generate a multipart boundary.
-	 * <p>The default implementation returns a random boundary.
-	 * Can be overridden in subclasses.
+	 * <p>This implementation delegates to
+	 * {@link MimeTypeUtils#generateMultipartBoundary()}.
 	 */
 	protected byte[] generateMultipartBoundary() {
-		byte[] boundary = new byte[this.random.nextInt(11) + 30];
-		for (int i = 0; i < boundary.length; i++) {
-			boundary[i] = BOUNDARY_CHARS[this.random.nextInt(BOUNDARY_CHARS.length)];
-		}
-		return boundary;
+		return MimeTypeUtils.generateMultipartBoundary();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,11 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @deprecated as of 4.2 this class is no longer used, see deprecation notes
+ * on {@link UserSessionRegistry} for more details.
  */
+@Deprecated
+@SuppressWarnings({"deprecation", "unused"})
 public class DefaultUserSessionRegistry implements UserSessionRegistry {
 
 	// userId -> sessionId
@@ -41,7 +45,7 @@ public class DefaultUserSessionRegistry implements UserSessionRegistry {
 	@Override
 	public Set<String> getSessionIds(String user) {
 		Set<String> set = this.userSessionIds.get(user);
-		return (set != null) ? set : Collections.<String>emptySet();
+		return (set != null ? set : Collections.<String>emptySet());
 	}
 
 	@Override

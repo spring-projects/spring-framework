@@ -36,7 +36,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @since 2.5.4
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  * @see org.hibernate.transaction.JDBCTransactionFactory
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class SpringTransactionFactory implements TransactionFactory {
 
 	/**

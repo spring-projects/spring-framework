@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request.async;
 
-import java.lang.reflect.Constructor;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.WebRequest;
@@ -29,13 +28,15 @@ import org.springframework.web.context.request.WebRequest;
  * Utility methods related to processing asynchronous web requests.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 public abstract class WebAsyncUtils {
 
 	public static final String WEB_ASYNC_MANAGER_ATTRIBUTE = WebAsyncManager.class.getName() + ".WEB_ASYNC_MANAGER";
 
-	private static Constructor<?> standardAsyncRequestConstructor;
+	// Determine whether Servlet 3.0's ServletRequest.startAsync method is available
+	private static final boolean startAsyncAvailable = ClassUtils.hasMethod(ServletRequest.class, "startAsync");
 
 
 	/**
@@ -66,31 +67,27 @@ public abstract class WebAsyncUtils {
 	}
 
 	/**
-	 * Create an AsyncWebRequest instance. By default an instance of
-	 * {@link StandardServletAsyncWebRequest} is created if running in Servlet
-	 * 3.0 (or higher) environment or as a fallback, an instance of
-	 * {@link NoSupportAsyncWebRequest} is returned.
-	 *
+	 * Create an AsyncWebRequest instance. By default, an instance of
+	 * {@link StandardServletAsyncWebRequest} gets created when running in
+	 * Servlet 3.0 (or higher) environment - as a fallback, an instance
+	 * of {@link NoSupportAsyncWebRequest} will be returned.
 	 * @param request the current request
 	 * @param response the current response
-	 * @return an AsyncWebRequest instance, never {@code null}
+	 * @return an AsyncWebRequest instance (never {@code null})
 	 */
 	public static AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		return ClassUtils.hasMethod(ServletRequest.class, "startAsync") ?
-				createStandardServletAsyncWebRequest(request, response) : new NoSupportAsyncWebRequest(request, response);
+		return (startAsyncAvailable ? AsyncWebRequestFactory.createStandardAsyncWebRequest(request, response) :
+				new NoSupportAsyncWebRequest(request, response));
 	}
 
-	private static AsyncWebRequest createStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		try {
-			if (standardAsyncRequestConstructor == null) {
-				String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
-				Class<?> clazz = ClassUtils.forName(className, WebAsyncUtils.class.getClassLoader());
-				standardAsyncRequestConstructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
-			}
-			return (AsyncWebRequest) BeanUtils.instantiateClass(standardAsyncRequestConstructor, request, response);
-		}
-		catch (Throwable t) {
-			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", t);
+
+	/**
+	 * Inner class to avoid a hard dependency on the Servlet 3.0 API.
+	 */
+	private static class AsyncWebRequestFactory {
+
+		public static AsyncWebRequest createStandardAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
+			return new StandardServletAsyncWebRequest(request, response);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.servlet.resource.CachingResourceResolver;
 import org.springframework.web.servlet.resource.CachingResourceTransformer;
 import org.springframework.web.servlet.resource.CssLinkResourceTransformer;
@@ -29,6 +30,7 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 
 /**
  * Assists with the registration of resource resolvers and transformers.
@@ -40,6 +42,10 @@ public class ResourceChainRegistration {
 
 	private static final String DEFAULT_CACHE_NAME = "spring-resource-chain-cache";
 
+	private static final boolean isWebJarsAssetLocatorPresent = ClassUtils.isPresent(
+			"org.webjars.WebJarAssetLocator", ResourceChainRegistration.class.getClassLoader());
+
+
 	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>(4);
 
 	private final List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>(4);
@@ -49,6 +55,8 @@ public class ResourceChainRegistration {
 	private boolean hasPathResolver;
 
 	private boolean hasCssLinkTransformer;
+
+	private boolean hasWebjarsResolver;
 
 
 	public ResourceChainRegistration(boolean cacheResources) {
@@ -78,6 +86,9 @@ public class ResourceChainRegistration {
 		else if (resolver instanceof PathResourceResolver) {
 			this.hasPathResolver = true;
 		}
+		else if (resolver instanceof WebJarsResourceResolver) {
+			this.hasWebjarsResolver = true;
+		}
 		return this;
 	}
 
@@ -98,6 +109,9 @@ public class ResourceChainRegistration {
 	protected List<ResourceResolver> getResourceResolvers() {
 		if (!this.hasPathResolver) {
 			List<ResourceResolver> result = new ArrayList<ResourceResolver>(this.resolvers);
+			if (isWebJarsAssetLocatorPresent && !this.hasWebjarsResolver) {
+				result.add(new WebJarsResourceResolver());
+			}
 			result.add(new PathResourceResolver());
 			return result;
 		}
@@ -105,7 +119,7 @@ public class ResourceChainRegistration {
 	}
 
 	protected List<ResourceTransformer> getResourceTransformers() {
-		if (this.hasVersionResolver  && !this.hasCssLinkTransformer) {
+		if (this.hasVersionResolver && !this.hasCssLinkTransformer) {
 			List<ResourceTransformer> result = new ArrayList<ResourceTransformer>(this.transformers);
 			boolean hasTransformers = !this.transformers.isEmpty();
 			boolean hasCaching = hasTransformers && this.transformers.get(0) instanceof CachingResourceTransformer;

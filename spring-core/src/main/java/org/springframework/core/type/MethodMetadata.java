@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,21 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 	/**
 	 * Return the fully-qualified name of the class that declares this method.
 	 */
-	public String getDeclaringClassName();
+	String getDeclaringClassName();
+
+	/**
+	 * Return the fully-qualified name of this method's declared return type.
+	 * @since 4.2
+	 */
+	String getReturnTypeName();
+
+	/**
+	 * Return whether the underlying method is effectively abstract:
+	 * i.e. marked as abstract on a class or declared as a regular,
+	 * non-default method in an interface.
+	 * @since 4.2
+	 */
+	boolean isAbstract();
 
 	/**
 	 * Return whether the underlying method is declared as 'static'.

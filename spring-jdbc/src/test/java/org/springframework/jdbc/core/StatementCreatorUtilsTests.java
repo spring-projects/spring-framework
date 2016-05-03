@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,12 @@ public class StatementCreatorUtilsTests {
 
 	private PreparedStatement preparedStatement;
 
+
 	@Before
 	public void setUp() {
 		preparedStatement = mock(PreparedStatement.class);
 	}
+
 
 	@Test
 	public void testSetParameterValueWithNullAndType() throws SQLException {
@@ -264,9 +266,15 @@ public class StatementCreatorUtilsTests {
 
 	@Test  // SPR-8571
 	public void testSetParameterValueWithStringAndVendorSpecificType() throws SQLException {
+		Connection con = mock(Connection.class);
+		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		given(preparedStatement.getConnection()).willReturn(con);
+		given(dbmd.getDatabaseProductName()).willReturn("Oracle");
+		given(con.getMetaData()).willReturn(dbmd);
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null, "test");
 		verify(preparedStatement).setString(1, "test");
 	}
+
 	@Test  // SPR-8571
 	public void testSetParameterValueWithNullAndVendorSpecificType() throws SQLException {
 		StatementCreatorUtils.setParameterValue(preparedStatement, 1, Types.OTHER, null, null);

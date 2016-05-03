@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.web.socket.sockjs;
 
 /**
- * Indicates a serious failure that occurred in the SockJS implementation as opposed to in
- * user code (e.g. IOException while writing to the response). When this exception is
- * raised, the SockJS session is typically closed.
+ * Indicates a serious failure that occurred in the SockJS implementation as opposed to
+ * in user code (e.g. IOException while writing to the response). When this exception
+ * is raised, the SockJS session is typically closed.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -27,6 +27,22 @@ package org.springframework.web.socket.sockjs;
 @SuppressWarnings("serial")
 public class SockJsTransportFailureException extends SockJsException {
 
+	/**
+	 * Constructor for SockJsTransportFailureException.
+	 * @param message the exception message
+	 * @param cause the root cause
+	 * @since 4.1.7
+	 */
+	public SockJsTransportFailureException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	/**
+	 * Constructor for SockJsTransportFailureException.
+	 * @param message the exception message
+	 * @param sessionId the SockJS session id
+	 * @param cause the root cause
+	 */
 	public SockJsTransportFailureException(String message, String sessionId, Throwable cause) {
 		super(message, sessionId, cause);
 	}

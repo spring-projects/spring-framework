@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,19 @@
 
 package org.springframework.messaging.tcp;
 
+import java.io.Closeable;
+
 import org.springframework.messaging.Message;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A contract for sending messages and managing a TCP connection.
  *
- * @param <P> the type of payload for outbound {@link Message}s
- *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <P> the type of payload for outbound {@link Message}s
  */
-public interface TcpConnection<P> {
+public interface TcpConnection<P> extends Closeable {
 
 	/**
 	 * Send the given message.
@@ -38,14 +39,14 @@ public interface TcpConnection<P> {
 	ListenableFuture<Void> send(Message<P> message);
 
 	/**
-	 * Register a task to invoke after a period of of read inactivity.
+	 * Register a task to invoke after a period of read inactivity.
 	 * @param runnable the task to invoke
 	 * @param duration the amount of inactive time in milliseconds
 	 */
 	void onReadInactivity(Runnable runnable, long duration);
 
 	/**
-	 * Register a task to invoke after a period of of write inactivity.
+	 * Register a task to invoke after a period of write inactivity.
 	 * @param runnable the task to invoke
 	 * @param duration the amount of inactive time in milliseconds
 	 */
@@ -54,6 +55,7 @@ public interface TcpConnection<P> {
 	/**
 	 * Close the connection.
 	 */
+	@Override
 	void close();
 
 }

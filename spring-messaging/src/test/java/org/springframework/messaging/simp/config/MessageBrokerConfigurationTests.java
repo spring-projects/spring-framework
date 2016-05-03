@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.messaging.simp.config;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -51,8 +55,12 @@ import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
+import org.springframework.messaging.simp.user.MultiServerUserRegistry;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
+import org.springframework.messaging.simp.user.UserDestinationResolver;
+import org.springframework.messaging.simp.user.UserRegistryMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ChannelInterceptorAdapter;
@@ -66,9 +74,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 /**
  * Test fixture for {@link AbstractMessageBrokerConfiguration}.
  *
@@ -79,8 +84,11 @@ import static org.mockito.Mockito.*;
 public class MessageBrokerConfigurationTests {
 
 	private ApplicationContext defaultContext = new AnnotationConfigApplicationContext(DefaultConfig.class);
+
 	private ApplicationContext simpleBrokerContext = new AnnotationConfigApplicationContext(SimpleBrokerConfig.class);
+
 	private ApplicationContext brokerRelayContext = new AnnotationConfigApplicationContext(BrokerRelayConfig.class);
+
 	private ApplicationContext customContext = new AnnotationConfigApplicationContext(CustomConfig.class);
 
 
@@ -233,26 +241,6 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
-	public void brokerChannelUsedByUserDestinationMessageHandler() {
-		TestChannel channel = this.simpleBrokerContext.getBean("brokerChannel", TestChannel.class);
-		UserDestinationMessageHandler messageHandler = this.simpleBrokerContext.getBean(UserDestinationMessageHandler.class);
-
-		this.simpleBrokerContext.getBean(UserSessionRegistry.class).registerSessionId("joe", "s1");
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SEND);
-		headers.setDestination("/user/joe/foo");
-		Message<?> message = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
-
-		messageHandler.handleMessage(message);
-
-		message = channel.messages.get(0);
-		headers = StompHeaderAccessor.wrap(message);
-
-		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
-		assertEquals("/foo-users1", headers.getDestination());
-	}
-
-	@Test
 	public void brokerChannelCustomized() {
 		AbstractSubscribableChannel channel = this.customContext.getBean(
 				"brokerChannel", AbstractSubscribableChannel.class);
@@ -269,7 +257,7 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void configureMessageConvertersDefault() {
-		AbstractMessageBrokerConfiguration config = new AbstractMessageBrokerConfiguration() {};
+		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig();
 		CompositeMessageConverter compositeConverter = config.brokerMessageConverter();
 
 		List<MessageConverter> converters = compositeConverter.getConverters();
@@ -302,7 +290,7 @@ public class MessageBrokerConfigurationTests {
 	@Test
 	public void configureMessageConvertersCustom() {
 		final MessageConverter testConverter = mock(MessageConverter.class);
-		AbstractMessageBrokerConfiguration config = new AbstractMessageBrokerConfiguration() {
+		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
 			protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 				messageConverters.add(testConverter);
@@ -320,7 +308,7 @@ public class MessageBrokerConfigurationTests {
 	public void configureMessageConvertersCustomAndDefault() {
 		final MessageConverter testConverter = mock(MessageConverter.class);
 
-		AbstractMessageBrokerConfiguration config = new AbstractMessageBrokerConfiguration() {
+		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
 			protected boolean configureMessageConverters(List<MessageConverter> messageConverters) {
 				messageConverters.add(testConverter);
@@ -352,7 +340,7 @@ public class MessageBrokerConfigurationTests {
 
 	@Test
 	public void simpValidatorDefault() {
-		AbstractMessageBrokerConfiguration config = new AbstractMessageBrokerConfiguration() {};
+		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {};
 		config.setApplicationContext(new StaticApplicationContext());
 
 		assertThat(config.simpValidator(), Matchers.notNullValue());
@@ -362,7 +350,7 @@ public class MessageBrokerConfigurationTests {
 	@Test
 	public void simpValidatorCustom() {
 		final Validator validator = mock(Validator.class);
-		AbstractMessageBrokerConfiguration config = new AbstractMessageBrokerConfiguration() {
+		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {
 			@Override
 			public Validator getValidator() {
 				return validator;
@@ -376,7 +364,7 @@ public class MessageBrokerConfigurationTests {
 	public void simpValidatorMvc() {
 		StaticApplicationContext appCxt = new StaticApplicationContext();
 		appCxt.registerSingleton("mvcValidator", TestValidator.class);
-		AbstractMessageBrokerConfiguration config = new AbstractMessageBrokerConfiguration() {};
+		AbstractMessageBrokerConfiguration config = new BaseTestMessageBrokerConfig() {};
 		config.setApplicationContext(appCxt);
 
 		assertThat(config.simpValidator(), Matchers.notNullValue());
@@ -399,9 +387,46 @@ public class MessageBrokerConfigurationTests {
 
 		SimpAnnotationMethodMessageHandler handler = this.customContext.getBean(SimpAnnotationMethodMessageHandler.class);
 		assertEquals("a.a", handler.getPathMatcher().combine("a", "a"));
+
+		DefaultUserDestinationResolver resolver = this.customContext.getBean(DefaultUserDestinationResolver.class);
+		assertNotNull(resolver);
+		assertEquals(false, new DirectFieldAccessor(resolver).getPropertyValue("keepLeadingSlash"));
+	}
+
+	@Test
+	public void userBroadcasts() throws Exception {
+		SimpUserRegistry userRegistry = this.brokerRelayContext.getBean(SimpUserRegistry.class);
+		assertEquals(MultiServerUserRegistry.class, userRegistry.getClass());
+
+		UserDestinationMessageHandler handler1 = this.brokerRelayContext.getBean(UserDestinationMessageHandler.class);
+		assertEquals("/topic/unresolved-user-destination", handler1.getBroadcastDestination());
+
+		UserRegistryMessageHandler handler2 = this.brokerRelayContext.getBean(UserRegistryMessageHandler.class);
+		assertEquals("/topic/simp-user-registry", handler2.getBroadcastDestination());
+
+		StompBrokerRelayMessageHandler relay = this.brokerRelayContext.getBean(StompBrokerRelayMessageHandler.class);
+		assertNotNull(relay.getSystemSubscriptions());
+		assertEquals(2, relay.getSystemSubscriptions().size());
+		assertSame(handler1, relay.getSystemSubscriptions().get("/topic/unresolved-user-destination"));
+		assertSame(handler2, relay.getSystemSubscriptions().get("/topic/simp-user-registry"));
+	}
+
+	@Test
+	public void userBroadcastsDisabledWithSimpleBroker() throws Exception {
+		SimpUserRegistry registry = this.simpleBrokerContext.getBean(SimpUserRegistry.class);
+		assertNotNull(registry);
+		assertNotEquals(MultiServerUserRegistry.class, registry.getClass());
+
+		UserDestinationMessageHandler handler = this.simpleBrokerContext.getBean(UserDestinationMessageHandler.class);
+		assertNull(handler.getBroadcastDestination());
+
+		String name = "userRegistryMessageHandler";
+		MessageHandler messageHandler = this.simpleBrokerContext.getBean(name, MessageHandler.class);
+		assertNotEquals(UserRegistryMessageHandler.class, messageHandler.getClass());
 	}
 
 
+	@SuppressWarnings("unused")
 	@Controller
 	static class TestController {
 
@@ -417,9 +442,17 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+	static class BaseTestMessageBrokerConfig extends AbstractMessageBrokerConfiguration {
 
+		@Override
+		protected SimpUserRegistry createLocalUserRegistry() {
+			return mock(SimpUserRegistry.class);
+		}
+	}
+
+	@SuppressWarnings("unused")
 	@Configuration
-	static class SimpleBrokerConfig extends AbstractMessageBrokerConfiguration {
+	static class SimpleBrokerConfig extends BaseTestMessageBrokerConfig {
 
 		@Bean
 		public TestController subscriptionController() {
@@ -450,16 +483,18 @@ public class MessageBrokerConfigurationTests {
 
 		@Override
 		public void configureMessageBroker(MessageBrokerRegistry registry) {
-			registry.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(true);
+			registry.enableStompBrokerRelay("/topic", "/queue").setAutoStartup(true)
+					.setUserDestinationBroadcast("/topic/unresolved-user-destination")
+					.setUserRegistryBroadcast("/topic/simp-user-registry");
 		}
 	}
 
 	@Configuration
-	static class DefaultConfig extends AbstractMessageBrokerConfiguration {
+	static class DefaultConfig extends BaseTestMessageBrokerConfig {
 	}
 
 	@Configuration
-	static class CustomConfig extends AbstractMessageBrokerConfiguration {
+	static class CustomConfig extends BaseTestMessageBrokerConfig {
 
 		private ChannelInterceptor interceptor = new ChannelInterceptorAdapter() {};
 

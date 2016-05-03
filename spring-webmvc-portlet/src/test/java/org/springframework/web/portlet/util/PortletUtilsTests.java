@@ -435,12 +435,13 @@ public final class PortletUtilsTests {
 	public void testGetRequiredSessionAttributeWithExistingSessionAndNoAttribute() throws Exception {
 		MockPortletSession session = new MockPortletSession();
 
-		final PortletRequest request = mock(PortletRequest.class);
+		PortletRequest request = mock(PortletRequest.class);
 		given(request.getPortletSession(false)).willReturn(session);
 		try {
 			PortletUtils.getRequiredSessionAttribute(request, "foo");
 			fail("expected IllegalStateException");
-		} catch (IllegalStateException ex) { /* expected */ }
+		}
+		catch (IllegalStateException ex) { /* expected */ }
 
 	}
 

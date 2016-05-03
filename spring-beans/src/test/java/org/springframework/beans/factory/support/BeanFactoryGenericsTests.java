@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.tests.Assume;
@@ -770,7 +771,7 @@ public class BeanFactoryGenericsTests {
 	}
 
 	@Test
-	public void testSpr11250() {
+	public void testGenericMatchingWithBeanNameDifferentiation() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
 
@@ -780,8 +781,43 @@ public class BeanFactoryGenericsTests {
 				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
 
 		NumberBean nb = bf.getBean(NumberBean.class);
-		assertNotNull(nb.getDoubleStore());
-		assertNotNull(nb.getFloatStore());
+		assertSame(bf.getBean("doubleStore"), nb.getDoubleStore());
+		assertSame(bf.getBean("floatStore"), nb.getFloatStore());
+
+		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
+		String[] doubleStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
+		String[] floatStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
+		assertEquals(2, numberStoreNames.length);
+		assertEquals("doubleStore", numberStoreNames[0]);
+		assertEquals("floatStore", numberStoreNames[1]);
+		assertEquals(0, doubleStoreNames.length);
+		assertEquals(0, floatStoreNames.length);
+	}
+
+	@Test
+	public void testGenericMatchingWithFullTypeDifferentiation() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new GenericTypeAwareAutowireCandidateResolver());
+
+		bf.registerBeanDefinition("store1", new RootBeanDefinition(DoubleStore.class));
+		bf.registerBeanDefinition("store2", new RootBeanDefinition(FloatStore.class));
+		bf.registerBeanDefinition("numberBean",
+				new RootBeanDefinition(NumberBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR, false));
+
+		NumberBean nb = bf.getBean(NumberBean.class);
+		assertSame(bf.getBean("store1"), nb.getDoubleStore());
+		assertSame(bf.getBean("store2"), nb.getFloatStore());
+
+		String[] numberStoreNames = bf.getBeanNamesForType(ResolvableType.forClass(NumberStore.class));
+		String[] doubleStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Double.class));
+		String[] floatStoreNames = bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(NumberStore.class, Float.class));
+		assertEquals(2, numberStoreNames.length);
+		assertEquals("store1", numberStoreNames[0]);
+		assertEquals("store2", numberStoreNames[1]);
+		assertEquals(1, doubleStoreNames.length);
+		assertEquals("store1", doubleStoreNames[0]);
+		assertEquals(1, floatStoreNames.length);
+		assertEquals("store2", floatStoreNames[0]);
 	}
 
 
@@ -848,6 +884,14 @@ public class BeanFactoryGenericsTests {
 
 
 	public static class NumberStore<T extends Number> {
+	}
+
+
+	public static class DoubleStore extends NumberStore<Double> {
+	}
+
+
+	public static class FloatStore extends NumberStore<Float> {
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.hibernate.validator.HibernateValidator;
 
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -111,24 +113,42 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	@SuppressWarnings("unchecked")
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Class<?>[] groups = determineValidationGroups(invocation);
+
 		if (forExecutablesMethod != null) {
-			Object executableValidator = ReflectionUtils.invokeMethod(forExecutablesMethod, this.validator);
-			Set<ConstraintViolation<?>> result = (Set<ConstraintViolation<?>>)
-					ReflectionUtils.invokeMethod(validateParametersMethod, executableValidator,
-							invocation.getThis(), invocation.getMethod(), invocation.getArguments(), groups);
+			// Standard Bean Validation 1.1 API
+			Object execVal = ReflectionUtils.invokeMethod(forExecutablesMethod, this.validator);
+			Method methodToValidate = invocation.getMethod();
+			Set<ConstraintViolation<?>> result;
+
+			try {
+				result = (Set<ConstraintViolation<?>>) ReflectionUtils.invokeMethod(validateParametersMethod,
+						execVal, invocation.getThis(), methodToValidate, invocation.getArguments(), groups);
+			}
+			catch (IllegalArgumentException ex) {
+				// Probably a generic type mismatch between interface and impl as reported in SPR-12237 / HV-1011
+				// Let's try to find the bridged method on the implementation class...
+				methodToValidate = BridgeMethodResolver.findBridgedMethod(
+						ClassUtils.getMostSpecificMethod(invocation.getMethod(), invocation.getThis().getClass()));
+				result = (Set<ConstraintViolation<?>>) ReflectionUtils.invokeMethod(validateParametersMethod,
+						execVal, invocation.getThis(), methodToValidate, invocation.getArguments(), groups);
+			}
 			if (!result.isEmpty()) {
 				throw new ConstraintViolationException(result);
 			}
+
 			Object returnValue = invocation.proceed();
-			result = (Set<ConstraintViolation<?>>)
-					ReflectionUtils.invokeMethod(validateReturnValueMethod, executableValidator,
-							invocation.getThis(), invocation.getMethod(), returnValue, groups);
+
+			result = (Set<ConstraintViolation<?>>) ReflectionUtils.invokeMethod(validateReturnValueMethod,
+					execVal, invocation.getThis(), methodToValidate, returnValue, groups);
 			if (!result.isEmpty()) {
 				throw new ConstraintViolationException(result);
 			}
+
 			return returnValue;
 		}
+
 		else {
+			// Hibernate Validator 4.3's native API
 			return HibernateValidatorDelegate.invokeWithinValidation(invocation, this.validator, groups);
 		}
 	}
@@ -179,4 +199,5 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 			return returnValue;
 		}
 	}
+
 }

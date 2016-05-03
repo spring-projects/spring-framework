@@ -38,7 +38,8 @@ public class ContextLoaderTestUtils {
 	public static void setCurrentWebApplicationContext(ClassLoader classLoader, WebApplicationContext applicationContext) {
 		if (applicationContext != null) {
 			currentContextPerThread.put(classLoader, applicationContext);
-		} else {
+		}
+		else {
 			currentContextPerThread.remove(classLoader);
 		}
 	}

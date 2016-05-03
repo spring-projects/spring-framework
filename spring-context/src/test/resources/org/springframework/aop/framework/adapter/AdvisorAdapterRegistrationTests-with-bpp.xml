@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="testBeanTarget" class="org.springframework.tests.sample.beans.TestBean"/>
+
+	<bean id="simpleBeforeAdvice" class="org.springframework.aop.framework.adapter.SimpleBeforeAdviceImpl"/>
+
+	<bean id="simpleBeforeAdviceAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+		<constructor-arg><ref local="simpleBeforeAdvice"/></constructor-arg>
+	</bean>
+   
+	<bean id="testBean" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.ITestBean</value></property>
+		<property name="interceptorNames"><value>simpleBeforeAdviceAdvisor,testBeanTarget</value></property>
+	</bean>
+
+	<bean id="testAdvisorAdapter" class="org.springframework.aop.framework.adapter.SimpleBeforeAdviceAdapter"/>
+
+	<bean id="adapterRegistrationManager" class="org.springframework.aop.framework.adapter.AdvisorAdapterRegistrationManager"/>
+
+</beans>

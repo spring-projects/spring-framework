@@ -6,6 +6,7 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 	<mvc:resources mapping="/resources/**" location="/, classpath:/META-INF/">
+		<mvc:cache-control max-age="3600" s-maxage="1800" cache-public="true"/>
 		<mvc:resource-chain resource-cache="false" auto-registration="false">
 			<mvc:resolvers>
 				<mvc:version-resolver>

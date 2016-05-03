@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,17 @@ import org.springframework.util.StringUtils;
 
 /**
  * A Groovy-based reader for Spring bean definitions: like a Groovy builder,
- * but more of a DSL for Spring configuration. Allows syntax like:
+ * but more of a DSL for Spring configuration.
  *
+ * <p>This bean definition reader also understands XML bean definition files,
+ * allowing for seamless mixing and matching with Groovy bean definition files.
+ *
+ * <p>Typically applied to a
+ * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
+ * or a {@link org.springframework.context.support.GenericApplicationContext},
+ * but can be used against any {@link BeanDefinitionRegistry} implementation.
+ *
+ * <h3>Example Syntax</h3>
  * <pre class="code">
  * import org.hibernate.SessionFactory
  * import org.apache.commons.dbcp.BasicDataSource
@@ -84,8 +93,9 @@ import org.springframework.util.StringUtils;
  * }</pre>
  *
  * <p>You can also load resources containing beans defined in a Groovy script using
- * either the {@link #loadBeanDefinitions(org.springframework.core.io.Resource...)}
- * or {@link #loadBeanDefinitions(String...)} method, with a script looking as follows:
+ * either the {@link #loadBeanDefinitions(Resource...)} or
+ * {@link #loadBeanDefinitions(String...)} method, with a script looking similar to
+ * the following.
  *
  * <pre class="code">
  * import org.hibernate.SessionFactory
@@ -109,17 +119,10 @@ import org.springframework.util.StringUtils;
  *     }
  * }</pre>
  *
- * <p><b>This bean definition reader also understands XML bean definition files,
- * allowing for seamless mixing and matching with Groovy bean definition files.</b>
- *
- * <p>Typically applied to a
- * {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}
- * or a {@link org.springframework.context.support.GenericApplicationContext},
- * but can be used against any {@link BeanDefinitionRegistry} implementation.
- *
  * @author Jeff Brown
  * @author Graeme Rocher
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  * @see BeanDefinitionRegistry
  * @see org.springframework.beans.factory.support.DefaultListableBeanFactory
@@ -128,7 +131,21 @@ import org.springframework.util.StringUtils;
  */
 public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader implements GroovyObject {
 
-	private final XmlBeanDefinitionReader xmlBeanDefinitionReader;
+	/**
+	 * Standard {@code XmlBeanDefinitionReader} created with default
+	 * settings for loading bean definitions from XML files.
+	 */
+	private final XmlBeanDefinitionReader standardXmlBeanDefinitionReader;
+
+	/**
+	 * Groovy DSL {@code XmlBeanDefinitionReader} for loading bean definitions
+	 * via the Groovy DSL, typically configured with XML validation disabled.
+	 */
+	private final XmlBeanDefinitionReader groovyDslXmlBeanDefinitionReader;
+
+	private final Map<String, String> namespaces = new HashMap<String, String>();
+
+	private final Map<String, DeferredProperty> deferredProperties = new HashMap<String, DeferredProperty>();
 
 	private MetaClass metaClass = GroovySystem.getMetaClassRegistry().getMetaClass(getClass());
 
@@ -136,31 +153,32 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	private GroovyBeanDefinitionWrapper currentBeanDefinition;
 
-	private final Map <String, String> namespaces = new HashMap<String, String>();
-
-	private final Map<String, DeferredProperty> deferredProperties = new HashMap<String, DeferredProperty>();
-
 
 	/**
-	 * Create new GroovyBeanDefinitionReader for the given bean factory.
-	 * @param registry the BeanFactory to load bean definitions into,
-	 * in the form of a BeanDefinitionRegistry
+	 * Create a new {@code GroovyBeanDefinitionReader} for the given
+	 * {@link BeanDefinitionRegistry}.
+	 * @param registry the {@code BeanDefinitionRegistry} to load bean definitions into
 	 */
 	public GroovyBeanDefinitionReader(BeanDefinitionRegistry registry) {
 		super(registry);
-		this.xmlBeanDefinitionReader = new XmlBeanDefinitionReader(registry);
-		this.xmlBeanDefinitionReader.setValidating(false);
+		this.standardXmlBeanDefinitionReader = new XmlBeanDefinitionReader(registry);
+		this.groovyDslXmlBeanDefinitionReader = new XmlBeanDefinitionReader(registry);
+		this.groovyDslXmlBeanDefinitionReader.setValidating(false);
 	}
 
 	/**
-	 * Create new GroovyBeanDefinitionReader based on the given XmlBeanDefinitionReader,
-	 * using the same registry and delegating XML loading to it.
-	 * @param xmlBeanDefinitionReader the XmlBeanDefinitionReader to derive the registry
-	 * from and to delegate XML loading to
+	 * Create a new {@code GroovyBeanDefinitionReader} based on the given
+	 * {@link XmlBeanDefinitionReader}, loading bean definitions into its
+	 * {@code BeanDefinitionRegistry} and delegating Groovy DSL loading to it.
+	 * <p>The supplied {@code XmlBeanDefinitionReader} should typically
+	 * be pre-configured with XML validation disabled.
+	 * @param xmlBeanDefinitionReader the {@code XmlBeanDefinitionReader} to
+	 * derive the registry from and to delegate Groovy DSL loading to
 	 */
 	public GroovyBeanDefinitionReader(XmlBeanDefinitionReader xmlBeanDefinitionReader) {
 		super(xmlBeanDefinitionReader.getRegistry());
-		this.xmlBeanDefinitionReader = xmlBeanDefinitionReader;
+		this.standardXmlBeanDefinitionReader = new XmlBeanDefinitionReader(xmlBeanDefinitionReader.getRegistry());
+		this.groovyDslXmlBeanDefinitionReader = xmlBeanDefinitionReader;
 	}
 
 
@@ -174,7 +192,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	/**
 	 * Set the binding, i.e. the Groovy variables available in the scope
-	 * of a GroovyBeanDefinitionReader closure.
+	 * of a {@code GroovyBeanDefinitionReader} closure.
 	 */
 	public void setBinding(Binding binding) {
 		this.binding = binding;
@@ -192,9 +210,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	/**
 	 * Load bean definitions from the specified Groovy script or XML file.
-	 * <p>Note that ".xml" files will be parsed as XML content; all other kinds
+	 * <p>Note that {@code ".xml"} files will be parsed as XML content; all other kinds
 	 * of resources will be parsed as Groovy scripts.
-	 * @param resource the resource descriptor for the Groovy script
+	 * @param resource the resource descriptor for the Groovy script or XML file
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -204,18 +222,18 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	/**
 	 * Load bean definitions from the specified Groovy script or XML file.
-	 * <p>Note that ".xml" files will be parsed as XML content; all other kinds
+	 * <p>Note that {@code ".xml"} files will be parsed as XML content; all other kinds
 	 * of resources will be parsed as Groovy scripts.
-	 * @param encodedResource the resource descriptor for the Groovy script,
-	 * allowing to specify an encoding to use for parsing the file
+	 * @param encodedResource the resource descriptor for the Groovy script or XML file,
+	 * allowing specification of an encoding to use for parsing the file
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
 	public int loadBeanDefinitions(EncodedResource encodedResource) throws BeanDefinitionStoreException {
-		// Check for XML files and redirect them to the XmlBeanDefinitionReader
+		// Check for XML files and redirect them to the "standard" XmlBeanDefinitionReader
 		String filename = encodedResource.getResource().getFilename();
 		if (StringUtils.endsWithIgnoreCase(filename, ".xml")) {
-			return this.xmlBeanDefinitionReader.loadBeanDefinitions(encodedResource);
+			return this.standardXmlBeanDefinitionReader.loadBeanDefinitions(encodedResource);
 		}
 
 		Closure beans = new Closure(this) {
@@ -255,14 +273,14 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	/**
 	 * Defines a set of beans for the given block or closure.
 	 * @param closure the block or closure
-	 * @return this GroovyBeanDefinitionReader instance
+	 * @return this {@code GroovyBeanDefinitionReader} instance
 	 */
 	public GroovyBeanDefinitionReader beans(Closure closure) {
 		return invokeBeanDefiningClosure(closure);
 	}
 
 	/**
-	 * Defines an inner bean definition.
+	 * Define an inner bean definition.
 	 * @param type the bean type
 	 * @return the bean definition
 	 */
@@ -307,7 +325,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Define a Spring namespace definition to use.
+	 * Define a Spring XML namespace definition to use.
 	 * @param definition the namespace definition
 	 */
 	public void xmlns(Map<String, String> definition) {
@@ -318,7 +336,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				if (uri == null) {
 					throw new IllegalArgumentException("Namespace definition must supply a non-null URI");
 				}
-				NamespaceHandler namespaceHandler = this.xmlBeanDefinitionReader.getNamespaceHandlerResolver().resolve(uri);
+				NamespaceHandler namespaceHandler =
+						this.groovyDslXmlBeanDefinitionReader.getNamespaceHandlerResolver().resolve(uri);
 				if (namespaceHandler == null) {
 					throw new BeanDefinitionParsingException(new Problem("No namespace handler found for URI: " + uri,
 							new Location(new DescriptiveResource(("Groovy")))));
@@ -355,7 +374,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				throw new IllegalArgumentException("Argument to ref() is not a valid bean or was not found");
 
 			if (args[0] instanceof RuntimeBeanReference) {
-				refName = ((RuntimeBeanReference)args[0]).getBeanName();
+				refName = ((RuntimeBeanReference) args[0]).getBeanName();
 			}
 			else {
 				refName = args[0].toString();
@@ -368,7 +387,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 			return new RuntimeBeanReference(refName, parentRef);
 		}
-		else if (this.namespaces.containsKey(name) && args.length > 0 && (args[0] instanceof Closure)) {
+		else if (this.namespaces.containsKey(name) && args.length > 0 && args[0] instanceof Closure) {
 			GroovyDynamicElementReader reader = createDynamicElementReader(name);
 			reader.invokeMethod("doCall", args);
 		}
@@ -376,7 +395,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			// abstract bean definition
 			return invokeBeanDefiningMethod(name, args);
 		}
-		else if (args.length > 0 && (args[0] instanceof Class || args[0] instanceof RuntimeBeanReference || args[0] instanceof Map)) {
+		else if (args.length > 0 &&
+				(args[0] instanceof Class || args[0] instanceof RuntimeBeanReference || args[0] instanceof Map)) {
 			return invokeBeanDefiningMethod(name, args);
 		}
 		else if (args.length > 1 && args[args.length -1] instanceof Closure) {
@@ -419,7 +439,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	/**
 	 * When a method argument is only a closure it is a set of bean definitions.
 	 * @param callable the closure argument
-	 * @return this GroovyBeanDefinitionReader instance
+	 * @return this {@code GroovyBeanDefinitionReader} instance
 	 */
 	protected GroovyBeanDefinitionReader invokeBeanDefiningClosure(Closure callable) {
 		callable.setDelegate(this);
@@ -534,8 +554,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Checks whether there are any {@link RuntimeBeanReference}s inside the Map
-	 * and converts it to a ManagedMap if necessary.
+	 * Checks whether there are any {@link RuntimeBeanReference}s inside the {@link Map}
+	 * and converts it to a {@link ManagedMap} if necessary.
 	 * @param map the original Map
 	 * @return either the original map or a managed copy of it
 	 */
@@ -556,8 +576,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * Checks whether there are any {@link RuntimeBeanReference}s inside the List
-	 * and converts it to a ManagedList if necessary.
+	 * Checks whether there are any {@link RuntimeBeanReference}s inside the {@link List}
+	 * and converts it to a {@link ManagedList} if necessary.
 	 * @param list the original List
 	 * @return either the original list or a managed copy of it
 	 */
@@ -578,7 +598,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	/**
-	 * This method overrides property setting in the scope of the GroovyBeanDefinitionReader
+	 * This method overrides property setting in the scope of the {@code GroovyBeanDefinitionReader}
 	 * to set properties on the current bean definition.
 	 */
 	public void setProperty(String name, Object value) {
@@ -599,7 +619,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			try {
 				Closure callable = (Closure) value;
 				Class<?> parameterType = callable.getParameterTypes()[0];
-				if (parameterType.equals(Object.class)) {
+				if (Object.class == parameterType) {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper("");
 					callable.call(this.currentBeanDefinition);
 				}
@@ -619,12 +639,12 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 
 	/**
 	 * This method overrides property retrieval in the scope of the
-	 * GroovyBeanDefinitionReader to either:
+	 * {@code GroovyBeanDefinitionReader} to either:
 	 * <ul>
 	 * <li>Retrieve a variable from the bean builder's binding if it exists
 	 * <li>Retrieve a RuntimeBeanReference for a specific bean if it exists
 	 * <li>Otherwise just delegate to MetaClass.getProperty which will resolve
-	 * properties from the GroovyBeanDefinitionReader itself
+	 * properties from the {@code GroovyBeanDefinitionReader} itself
 	 * </ul>
 	 */
 	public Object getProperty(String name) {
@@ -670,7 +690,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	}
 
 	private GroovyDynamicElementReader createDynamicElementReader(String namespace) {
-		XmlReaderContext readerContext = this.xmlBeanDefinitionReader.createReaderContext(new DescriptiveResource("Groovy"));
+		XmlReaderContext readerContext = this.groovyDslXmlBeanDefinitionReader.createReaderContext(new DescriptiveResource(
+			"Groovy"));
 		BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(readerContext);
 		boolean decorating = (this.currentBeanDefinition != null);
 		if (!decorating) {

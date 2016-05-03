@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -95,8 +96,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
-import org.springframework.web.bind.annotation.support.HandlerMethodResolver;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -109,9 +108,6 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
-import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.UrlPathHelper;
@@ -119,7 +115,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerAdapter} interface
- * that maps handler methods based on HTTP paths, HTTP methods and request parameters
+ * that maps handler methods based on HTTP paths, HTTP methods, and request parameters
  * expressed through the {@link RequestMapping} annotation.
  *
  * <p>Supports request parameter binding through the {@link RequestParam} annotation.
@@ -133,13 +129,13 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 2.5
  * @see #setPathMatcher
  * @see #setMethodNameResolver
  * @see #setWebBindingInitializer
  * @see #setSessionAttributeStore
- *
- * @deprecated in Spring 3.2 in favor of
+ * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter RequestMappingHandlerAdapter}
  */
 @Deprecated
@@ -163,7 +159,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
+	private org.springframework.web.servlet.mvc.multiaction.MethodNameResolver methodNameResolver =
+			new org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver();
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -254,7 +251,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * <p>Will only kick in when the handler method cannot be resolved uniquely
 	 * through the annotation metadata already.
 	 */
-	public void setMethodNameResolver(MethodNameResolver methodNameResolver) {
+	public void setMethodNameResolver(org.springframework.web.servlet.mvc.multiaction.MethodNameResolver methodNameResolver) {
 		this.methodNameResolver = methodNameResolver;
 	}
 
@@ -334,7 +331,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * <p>Any such custom WebArgumentResolver will kick in first, having a chance to resolve
 	 * an argument value before the standard argument handling kicks in.
 	 */
-	public void setCustomArgumentResolvers(WebArgumentResolver[] argumentResolvers) {
+	public void setCustomArgumentResolvers(WebArgumentResolver... argumentResolvers) {
 		this.customArgumentResolvers = argumentResolvers;
 	}
 
@@ -352,7 +349,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * <p>Any such custom ModelAndViewResolver will kick in first, having a chance to resolve
 	 * a return value before the standard ModelAndView handling kicks in.
 	 */
-	public void setCustomModelAndViewResolvers(ModelAndViewResolver[] customModelAndViewResolvers) {
+	public void setCustomModelAndViewResolvers(ModelAndViewResolver... customModelAndViewResolvers) {
 		this.customModelAndViewResolvers = customModelAndViewResolvers;
 	}
 
@@ -411,12 +408,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		if (annotatedWithSessionAttributes) {
-			// Always prevent caching in case of session attribute management.
 			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
-			// Prepare cached set of session attributes names.
 		}
 		else {
-			// Uses configured default cacheSeconds setting.
 			checkAndPrepare(request, response, true);
 		}
 
@@ -526,9 +520,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 
 	/**
-	 * Servlet-specific subclass of {@link HandlerMethodResolver}.
+	 * Servlet-specific subclass of {@code HandlerMethodResolver}.
 	 */
-	private class ServletHandlerMethodResolver extends HandlerMethodResolver {
+	@SuppressWarnings("deprecation")
+	private class ServletHandlerMethodResolver extends org.springframework.web.bind.annotation.support.HandlerMethodResolver {
 
 		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
 
@@ -676,7 +671,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				if (!allowedMethods.isEmpty()) {
 					throw new HttpRequestMethodNotSupportedException(request.getMethod(), StringUtils.toStringArray(allowedMethods));
 				}
-				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(), request.getParameterMap());
+				throw new org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException(
+						lookupPath, request.getMethod(), request.getParameterMap());
 			}
 		}
 
@@ -770,13 +766,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 
 	/**
-	 * Servlet-specific subclass of {@link HandlerMethodInvoker}.
+	 * Servlet-specific subclass of {@code HandlerMethodInvoker}.
 	 */
-	private class ServletHandlerMethodInvoker extends HandlerMethodInvoker {
+	@SuppressWarnings("deprecation")
+	private class ServletHandlerMethodInvoker extends org.springframework.web.bind.annotation.support.HandlerMethodInvoker {
 
 		private boolean responseArgumentUsed = false;
 
-		private ServletHandlerMethodInvoker(HandlerMethodResolver resolver) {
+		private ServletHandlerMethodInvoker(org.springframework.web.bind.annotation.support.HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore, parameterNameDiscoverer,
 					customArgumentResolvers, messageConverters);
 		}
@@ -891,7 +888,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			else if (Principal.class.isAssignableFrom(parameterType)) {
 				return request.getUserPrincipal();
 			}
-			else if (Locale.class.equals(parameterType)) {
+			else if (Locale.class == parameterType) {
 				return RequestContextUtils.getLocale(request);
 			}
 			else if (InputStream.class.isAssignableFrom(parameterType)) {
@@ -915,21 +912,21 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		public ModelAndView getModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue,
 				ExtendedModelMap implicitModel, ServletWebRequest webRequest) throws Exception {
 
-			ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
-			if (responseStatusAnn != null) {
-				HttpStatus responseStatus = responseStatusAnn.value();
-				String reason = responseStatusAnn.reason();
+			ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(handlerMethod, ResponseStatus.class);
+			if (responseStatus != null) {
+				HttpStatus statusCode = responseStatus.code();
+				String reason = responseStatus.reason();
 				if (!StringUtils.hasText(reason)) {
-					webRequest.getResponse().setStatus(responseStatus.value());
+					webRequest.getResponse().setStatus(statusCode.value());
 				}
 				else {
-					webRequest.getResponse().sendError(responseStatus.value(), reason);
+					webRequest.getResponse().sendError(statusCode.value(), reason);
 				}
 
 				// to be picked up by the RedirectView
-				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, responseStatus);
+				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, statusCode);
 
-				responseArgumentUsed = true;
+				this.responseArgumentUsed = true;
 			}
 
 			// Invoke custom resolvers if present...
@@ -992,8 +989,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 		}
 
-		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest)
-				throws Exception {
+		private void handleResponseBody(Object returnValue, ServletWebRequest webRequest) throws Exception {
 			if (returnValue == null) {
 				return;
 			}
@@ -1002,8 +998,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			writeWithMessageConverters(returnValue, inputMessage, outputMessage);
 		}
 
-		private void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest)
-				throws Exception {
+		private void handleHttpEntityResponse(HttpEntity<?> responseEntity, ServletWebRequest webRequest) throws Exception {
 			if (responseEntity == null) {
 				return;
 			}
@@ -1030,6 +1025,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		private void writeWithMessageConverters(Object returnValue,
 				HttpInputMessage inputMessage, HttpOutputMessage outputMessage)
 				throws IOException, HttpMediaTypeNotAcceptableException {
+
 			List<MediaType> acceptedMediaTypes = inputMessage.getHeaders().getAccept();
 			if (acceptedMediaTypes.isEmpty()) {
 				acceptedMediaTypes = Collections.singletonList(MediaType.ALL);
@@ -1061,7 +1057,6 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
 		}
-
 	}
 
 
@@ -1079,30 +1074,30 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		private final String[] headers;
 
 		RequestMappingInfo(String[] patterns, RequestMethod[] methods, String[] params, String[] headers) {
-			this.patterns = patterns != null ? patterns : new String[0];
-			this.methods = methods != null ? methods : new RequestMethod[0];
-			this.params = params != null ? params : new String[0];
-			this.headers = headers != null ? headers : new String[0];
+			this.patterns = (patterns != null ? patterns : new String[0]);
+			this.methods = (methods != null ? methods : new RequestMethod[0]);
+			this.params = (params != null ? params : new String[0]);
+			this.headers = (headers != null ? headers : new String[0]);
 		}
 
 		public boolean hasPatterns() {
-			return patterns.length > 0;
+			return (this.patterns.length > 0);
 		}
 
 		public String[] getPatterns() {
-			return patterns;
+			return this.patterns;
 		}
 
 		public int getMethodCount() {
-			return methods.length;
+			return this.methods.length;
 		}
 
 		public int getParamCount() {
-			return params.length;
+			return this.params.length;
 		}
 
 		public int getHeaderCount() {
-			return headers.length;
+			return this.headers.length;
 		}
 
 		public boolean matches(HttpServletRequest request) {
@@ -1122,8 +1117,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		public Set<String> methodNames() {
-			Set<String> methodNames = new LinkedHashSet<String>(methods.length);
-			for (RequestMethod method : methods) {
+			Set<String> methodNames = new LinkedHashSet<String>(this.methods.length);
+			for (RequestMethod method : this.methods) {
 				methodNames.add(method.name());
 			}
 			return methodNames;
@@ -1145,18 +1140,18 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
-			builder.append(Arrays.asList(patterns));
-			if (methods.length > 0) {
+			builder.append(Arrays.asList(this.patterns));
+			if (this.methods.length > 0) {
 				builder.append(',');
-				builder.append(Arrays.asList(methods));
+				builder.append(Arrays.asList(this.methods));
 			}
-			if (headers.length > 0) {
+			if (this.headers.length > 0) {
 				builder.append(',');
-				builder.append(Arrays.asList(headers));
+				builder.append(Arrays.asList(this.headers));
 			}
-			if (params.length > 0) {
+			if (this.params.length > 0) {
 				builder.append(',');
-				builder.append(Arrays.asList(params));
+				builder.append(Arrays.asList(this.params));
 			}
 			return builder.toString();
 		}

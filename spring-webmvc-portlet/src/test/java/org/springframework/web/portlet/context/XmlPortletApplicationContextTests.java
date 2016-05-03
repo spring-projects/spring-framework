@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@
 package org.springframework.web.portlet.context;
 
 import java.util.Locale;
+
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
+
+import org.junit.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -29,6 +32,8 @@ import org.springframework.context.NoSuchMessageException;
 import org.springframework.mock.web.portlet.MockPortletConfig;
 import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -53,7 +58,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
 					@Override
 					public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-						if(bean instanceof TestBean) {
+						if (bean instanceof TestBean) {
 							((TestBean) bean).getFriends().add("myFriend");
 						}
 						return bean;
@@ -80,7 +85,9 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 	 * Overridden in order to use MockPortletConfig
 	 * @see org.springframework.web.context.XmlWebApplicationContextTests#testWithoutMessageSource()
 	 */
-	public void testWithoutMessageSource() throws Exception {
+	@Test
+	@SuppressWarnings("resource")
+	public void withoutMessageSource() throws Exception {
 		MockPortletContext portletContext = new MockPortletContext("");
 		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
 		XmlPortletApplicationContext pac = new XmlPortletApplicationContext();
@@ -97,15 +104,17 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 			// expected;
 		}
 		String msg = pac.getMessage("someMessage", null, "default", Locale.getDefault());
-		assertTrue("Default message returned", "default".equals(msg));
+		assertEquals("Default message returned", "default", msg);
 	}
 
 	/**
-	 * Overridden in order to access the root ApplicationContext
-	 * @see org.springframework.web.context.XmlWebApplicationContextTests#testContextNesting()
+	 * Overridden in order to access the root ApplicationContext.
+	 *
+	 * @see org.springframework.web.context.XmlWebApplicationContextTests#contextNesting()
 	 */
+	@Test
 	@Override
-	public void testContextNesting() {
+	public void contextNesting() {
 		TestBean father = (TestBean) this.applicationContext.getBean("father");
 		assertTrue("Bean from root context", father != null);
 		assertTrue("Custom BeanPostProcessor applied", father.getFriends().contains("myFriend"));
@@ -120,18 +129,21 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 		assertTrue("Custom BeanPostProcessor applied", rod.getFriends().contains("myFriend"));
 	}
 
+	@Test
 	@Override
-	public void testCount() {
+	public void count() {
 		assertTrue("should have 16 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
 				this.applicationContext.getBeanDefinitionCount() == 16);
 	}
 
-	public void testPortletContextAwareBean() {
+	@Test
+	public void portletContextAwareBean() {
 		PortletContextAwareBean bean = (PortletContextAwareBean)this.applicationContext.getBean("portletContextAwareBean");
 		assertNotNull(bean.getPortletContext());
 	}
 
-	public void testPortletConfigAwareBean() {
+	@Test
+	public void portletConfigAwareBean() {
 		PortletConfigAwareBean bean = (PortletConfigAwareBean)this.applicationContext.getBean("portletConfigAwareBean");
 		assertNotNull(bean.getPortletConfig());
 	}

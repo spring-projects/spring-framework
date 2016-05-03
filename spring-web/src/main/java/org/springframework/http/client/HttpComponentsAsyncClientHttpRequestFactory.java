@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ import org.springframework.util.Assert;
  * HttpAsyncClient 4.0</a> to create requests.
  *
  * @author Arjen Poutsma
+ * @author Stephane Nicoll
  * @since 4.0
  * @see HttpAsyncClient
  */
-public class HttpComponentsAsyncClientHttpRequestFactory
-		extends HttpComponentsClientHttpRequestFactory
+public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsClientHttpRequestFactory
 		implements AsyncClientHttpRequestFactory, InitializingBean {
 
 	private CloseableHttpAsyncClient httpAsyncClient;
@@ -65,7 +65,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory(CloseableHttpAsyncClient httpAsyncClient) {
 		super();
-		Assert.notNull(httpAsyncClient, "'httpAsyncClient' must not be null");
+		Assert.notNull(httpAsyncClient, "HttpAsyncClient must not be null");
 		this.httpAsyncClient = httpAsyncClient;
 	}
 
@@ -79,14 +79,14 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 			CloseableHttpClient httpClient, CloseableHttpAsyncClient httpAsyncClient) {
 
 		super(httpClient);
-		Assert.notNull(httpAsyncClient, "'httpAsyncClient' must not be null");
+		Assert.notNull(httpAsyncClient, "HttpAsyncClient must not be null");
 		this.httpAsyncClient = httpAsyncClient;
 	}
 
 
 	/**
 	 * Set the {@code HttpClient} used for
-	 * {@linkplain #createAsyncRequest(java.net.URI, org.springframework.http.HttpMethod) asynchronous execution}.
+	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
 	 */
 	public void setHttpAsyncClient(CloseableHttpAsyncClient httpAsyncClient) {
 		this.httpAsyncClient = httpAsyncClient;
@@ -97,8 +97,9 @@ public class HttpComponentsAsyncClientHttpRequestFactory
 	 * {@linkplain #createAsyncRequest(URI, HttpMethod) asynchronous execution}.
 	 */
 	public CloseableHttpAsyncClient getHttpAsyncClient() {
-		return httpAsyncClient;
+		return this.httpAsyncClient;
 	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -122,18 +123,20 @@ public class HttpComponentsAsyncClientHttpRequestFactory
         if (context == null) {
             context = HttpClientContext.create();
         }
-        // Request configuration not set in the context
-        if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
-            // Use request configuration given by the user, when available
-            RequestConfig config = null;
-            if (httpRequest instanceof Configurable) {
-                config = ((Configurable) httpRequest).getConfig();
-            }
-            if (config == null) {
-                config = RequestConfig.DEFAULT;
-            }
-            context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
-        }
+		// Request configuration not set in the context
+		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+			// Use request configuration given by the user, when available
+			RequestConfig config = null;
+			if (httpRequest instanceof Configurable) {
+				config = ((Configurable) httpRequest).getConfig();
+			}
+			if (config == null) {
+				config = createRequestConfig(asyncClient);
+			}
+			if (config != null) {
+				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+			}
+		}
 		return new HttpComponentsAsyncClientHttpRequest(asyncClient, httpRequest, context);
 	}
 

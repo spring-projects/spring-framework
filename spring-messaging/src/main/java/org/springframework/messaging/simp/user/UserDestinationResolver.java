@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,14 @@ package org.springframework.messaging.simp.user;
 import org.springframework.messaging.Message;
 
 /**
- * A strategy for resolving a "user" destination and translating it to one or more
- * actual destinations unique to the user's active session(s).
- * <p>
- * For messages sent to a user, the destination must contain the name of the target
- * user, The name, extracted from the destination, is used to look up the active
- * user session(s), and then translate the destination accordingly.
- * <p>
- * For SUBSCRIBE and UNSUBSCRIBE messages, the user is the user associated with
- * the message. In other words the destination does not contain the user name.
- * <p>
- * See the documentation on implementations for specific examples.
+ * A strategy for resolving a "user" destination by translating it to one or more
+ * actual destinations one per active user session. When sending a message to a
+ * user destination, the destination must contain the user name so it may be
+ * extracted and used to look up the user sessions. When subscribing to a user
+ * destination, the destination does not have to contain the user's own name.
+ * We simply use the current session.
+ *
+ * <p>See implementation classes and the documentation for example destinations.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -40,18 +37,11 @@ import org.springframework.messaging.Message;
 public interface UserDestinationResolver {
 
 	/**
-	 * Resolve the destination of the message to a set of actual target destinations.
-	 * <p>
-	 * If the message is SUBSCRIBE/UNSUBSCRIBE, the returned set will contain a
-	 * single translated target destination.
-	 * <p>
-	 * If the message represents data being sent to a user, the returned set may
-	 * contain multiple target destinations, one for each active user session.
-	 *
-	 * @param message the message with a user destination to be resolved
-	 *
-	 * @return the result of the resolution, or {@code null} if the resolution
-	 * 	fails (e.g. not a user destination, or no user info available, etc)
+	 * Resolve the given message with a user destination to one or more messages
+	 * with actual destinations, one for each active user session.
+	 * @param message the message to try to resolve
+	 * @return 0 or more target messages (one for each active session), or
+	 * {@code null} if the source message does not contain a user destination.
 	 */
 	UserDestinationResult resolveDestination(Message<?> message);
 

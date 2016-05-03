@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ public class MethodValidationTests {
 		ac.registerSingleton("bean", MyValidBean.class);
 		ac.refresh();
 		doTestProxyValidation(ac.getBean("bean", MyValidInterface.class));
+		ac.close();
 	}
 
 
@@ -68,21 +69,21 @@ public class MethodValidationTests {
 		assertNotNull(proxy.myValidMethod("value", 5));
 		try {
 			assertNotNull(proxy.myValidMethod("value", 15));
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 		try {
 			assertNotNull(proxy.myValidMethod(null, 5));
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 		try {
 			assertNotNull(proxy.myValidMethod("value", 0));
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
@@ -91,14 +92,23 @@ public class MethodValidationTests {
 		proxy.myValidAsyncMethod("value", 5);
 		try {
 			proxy.myValidAsyncMethod("value", 15);
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 		try {
 			proxy.myValidAsyncMethod(null, 5);
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
+		}
+		catch (javax.validation.ValidationException ex) {
+			// expected
+		}
+
+		assertEquals("myValue", proxy.myGenericMethod("myValue"));
+		try {
+			proxy.myGenericMethod(null);
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
@@ -107,7 +117,7 @@ public class MethodValidationTests {
 
 
 	@MyStereotype
-	public static class MyValidBean implements MyValidInterface {
+	public static class MyValidBean implements MyValidInterface<String> {
 
 		@Override
 		public Object myValidMethod(String arg1, int arg2) {
@@ -117,15 +127,22 @@ public class MethodValidationTests {
 		@Override
 		public void myValidAsyncMethod(String arg1, int arg2) {
 		}
+
+		@Override
+		public String myGenericMethod(String value) {
+			return value;
+		}
 	}
 
 
-	public interface MyValidInterface {
+	public interface MyValidInterface<T> {
 
 		@NotNull Object myValidMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
 
 		@MyValid
 		@Async void myValidAsyncMethod(@NotNull(groups = OtherGroup.class) String arg1, @Max(10) int arg2);
+
+		T myGenericMethod(@NotNull T value);
 	}
 
 

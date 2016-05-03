@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,13 @@ import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
- * Factory for response content assertions. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#content()}.
+ * Factory for response content assertions.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#content}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -55,6 +56,7 @@ public class ContentResultMatchers {
 		this.xmlHelper = new XmlExpectationsHelper();
 		this.jsonHelper = new JsonExpectationsHelper();
 	}
+
 
 	/**
 	 * Assert the ServletResponse content type. The given content type must
@@ -165,10 +167,8 @@ public class ContentResultMatchers {
 	 * Parse the response content and the given string as XML and assert the two
 	 * are "similar" - i.e. they contain the same elements and attributes
 	 * regardless of order.
-	 *
 	 * <p>Use of this matcher requires the <a
 	 * href="http://xmlunit.sourceforge.net/">XMLUnit<a/> library.
-	 *
 	 * @param xmlContent the expected XML content
 	 * @see MockMvcResultMatchers#xpath(String, Object...)
 	 * @see MockMvcResultMatchers#xpath(String, Map, Object...)
@@ -200,7 +200,6 @@ public class ContentResultMatchers {
 	/**
 	 * Parse the response content as {@link DOMSource} and apply the given
 	 * Hamcrest {@link Matcher}.
-	 *
 	 * @see <a href="http://code.google.com/p/xml-matchers/">xml-matchers</a>
 	 */
 	public ResultMatcher source(final Matcher<? super Source> matcher) {
@@ -214,23 +213,42 @@ public class ContentResultMatchers {
 	}
 
 	/**
-	 * Parse the response content and the given string as JSON and assert the two
+	 * Parse the expected and actual strings as JSON and assert the two
 	 * are "similar" - i.e. they contain the same attribute-value pairs
-	 * regardless of order and formatting.
-	 *
-	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * regardless of formatting with a lenient checking (extensible, and non-strict array
+	 * ordering).
 	 *
 	 * @param jsonContent the expected JSON content
 	 * @since 4.1
 	 */
 	public ResultMatcher json(final String jsonContent) {
-		return new ResultMatcher() {
+		return json(jsonContent, false);
+	}
 
+	/**
+	 * Parse the response content and the given string as JSON and assert the two
+	 * are "similar" - i.e. they contain the same attribute-value pairs
+	 * regardless of formatting.
+	 *
+	 * <p>Can compare in two modes, depending on {@code strict} parameter value:
+	 * <ul>
+	 *     <li>{@code true}: strict checking. Not extensible, and strict array ordering.</li>
+	 *     <li>{@code false}: lenient checking. Extensible, and non-strict array ordering.</li>
+	 * </ul>
+	 *
+	 * <p>Use of this matcher requires the <a
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 *
+	 * @param jsonContent the expected JSON content
+	 * @param strict enables strict checking
+	 * @since 4.2
+	 */
+	public ResultMatcher json(final String jsonContent, final boolean strict) {
+		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				jsonHelper.assertJsonEqual(jsonContent, content);
+				jsonHelper.assertJsonEqual(jsonContent, content, strict);
 			}
 		};
 	}

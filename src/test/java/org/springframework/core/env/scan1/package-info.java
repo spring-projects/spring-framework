@@ -20,8 +20,8 @@
  */
 package org.springframework.core.env.scan1;
 
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.DEV_ENV_NAME;
-import static org.springframework.core.env.EnvironmentIntegrationTests.Constants.PROD_ENV_NAME;
+import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.DEV_ENV_NAME;
+import static org.springframework.core.env.EnvironmentSystemIntegrationTests.Constants.PROD_ENV_NAME;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

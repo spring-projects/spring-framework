@@ -161,7 +161,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private boolean exposeManagedResourceClassLoader = true;
 
 	/** A set of bean names that should be excluded from autodetection */
-	private Set<String> excludedBeans;
+	private Set<String> excludedBeans = new HashSet<String>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
 	private MBeanExporterListener[] listeners;
@@ -314,7 +314,18 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Set the list of names for beans that should be excluded from autodetection.
 	 */
 	public void setExcludedBeans(String... excludedBeans) {
-		this.excludedBeans = (excludedBeans != null ? new HashSet<String>(Arrays.asList(excludedBeans)) : null);
+		this.excludedBeans.clear();
+		if (excludedBeans != null) {
+			this.excludedBeans.addAll(Arrays.asList(excludedBeans));
+		}
+	}
+
+	/**
+	 * Add the name of bean that should be excluded from autodetection.
+	 */
+	public void addExcludedBean(String excludedBean) {
+		Assert.notNull(excludedBean, "ExcludedBean must not be null");
+		this.excludedBeans.add(excludedBean);
 	}
 
 	/**
@@ -559,7 +570,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * should be exposed to the {@code MBeanServer}. Specifically, if the
 	 * supplied {@code mapValue} is the name of a bean that is configured
 	 * for lazy initialization, then a proxy to the resource is registered with
-	 * the {@code MBeanServer} so that the the lazy load behavior is
+	 * the {@code MBeanServer} so that the lazy load behavior is
 	 * honored. If the bean is already an MBean then it will be registered
 	 * directly with the {@code MBeanServer} without any intervention. For
 	 * all other beans or bean names, the resource itself is registered with
@@ -922,10 +933,9 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * Indicates whether or not a particular bean name is present in the excluded beans list.
 	 */
 	private boolean isExcluded(String beanName) {
-		return (this.excludedBeans != null &&
-				(this.excludedBeans.contains(beanName) ||
-						(beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX) &&
-								this.excludedBeans.contains(beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length())))));
+		return (this.excludedBeans.contains(beanName) ||
+					(beanName.startsWith(BeanFactory.FACTORY_BEAN_PREFIX) &&
+							this.excludedBeans.contains(beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length()))));
 	}
 
 	/**

@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
@@ -42,6 +43,11 @@ public class ParameterizableViewController extends AbstractController {
 
 	private boolean statusOnly;
 
+
+	public ParameterizableViewController() {
+		super(false);
+		setSupportedMethods(HttpMethod.GET.name(), HttpMethod.HEAD.name());
+	}
 
 	/**
 	 * Set a view name for the ModelAndView to return, to be resolved by the

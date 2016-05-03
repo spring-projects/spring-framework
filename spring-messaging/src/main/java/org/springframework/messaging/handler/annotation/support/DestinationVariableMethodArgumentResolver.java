@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ public class DestinationVariableMethodArgumentResolver extends AbstractNamedValu
 		super(cs, null);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(DestinationVariable.class);
@@ -58,10 +59,9 @@ public class DestinationVariableMethodArgumentResolver extends AbstractNamedValu
 			throws Exception {
 
 		@SuppressWarnings("unchecked")
-		Map<String, String> vars = (Map<String, String>) message.getHeaders().get(
-				DESTINATION_TEMPLATE_VARIABLES_HEADER);
-
-		return (vars != null) ? vars.get(name) : null;
+		Map<String, String> vars =
+				(Map<String, String>) message.getHeaders().get(DESTINATION_TEMPLATE_VARIABLES_HEADER);
+		return (vars != null ? vars.get(name) : null);
 	}
 
 	@Override
@@ -77,4 +77,5 @@ public class DestinationVariableMethodArgumentResolver extends AbstractNamedValu
 			super(annotation.value(), true, ValueConstants.DEFAULT_NONE);
 		}
 	}
+
 }

@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.mvc;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -32,12 +34,13 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rick Evans
  * @since 14.09.2005
  */
-public class UrlFilenameViewControllerTests extends TestCase {
+public class UrlFilenameViewControllerTests {
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
 
-	public void testWithPlainFilename() throws Exception {
+	@Test
+	public void withPlainFilename() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -46,7 +49,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testWithFilenamePlusExtension() throws Exception {
+	@Test
+	public void withFilenamePlusExtension() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -55,7 +59,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testWithFilenameAndMatrixVariables() throws Exception {
+	@Test
+	public void withFilenameAndMatrixVariables() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index;a=A;b=B");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -64,7 +69,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testWithPrefixAndSuffix() throws Exception {
+	@Test
+	public void withPrefixAndSuffix() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setPrefix("mypre_");
 		ctrl.setSuffix("_mysuf");
@@ -75,7 +81,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testWithPrefix() throws Exception {
+	@Test
+	public void withPrefix() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setPrefix("mypre_");
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
@@ -85,7 +92,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testWithSuffix() throws Exception {
+	@Test
+	public void withSuffix() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setSuffix("_mysuf");
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index.html");
@@ -95,7 +103,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testMultiLevel() throws Exception {
+	@Test
+	public void multiLevel() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -104,7 +113,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testMultiLevelWithMapping() throws Exception {
+	@Test
+	public void multiLevelWithMapping() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
 		exposePathInMapping(request, "/docs/**");
@@ -114,7 +124,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testMultiLevelMappingWithFallback() throws Exception {
+	@Test
+	public void multiLevelMappingWithFallback() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/docs/cvs/commit.html");
 		exposePathInMapping(request, "/docs/cvs/commit.html");
@@ -124,7 +135,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testWithContextMapping() throws Exception {
+	@Test
+	public void withContextMapping() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/docs/cvs/commit.html");
 		request.setContextPath("/myapp");
@@ -134,14 +146,16 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testSettingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
+	@Test
+	public void settingPrefixToNullCausesEmptyStringToBeUsed() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setPrefix(null);
 		assertNotNull("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getPrefix());
 		assertEquals("When setPrefix(..) is called with a null argument, the empty string value must be used instead.", "", ctrl.getPrefix());
 	}
 
-	public void testSettingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
+	@Test
+	public void settingSuffixToNullCausesEmptyStringToBeUsed() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setSuffix(null);
 		assertNotNull("When setSuffix(..) is called with a null argument, the empty string value must be used instead.", ctrl.getSuffix());
@@ -152,7 +166,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 	 * This is the expected behavior, and it now has a test to prove it.
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2789
 	 */
-	public void testNestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line() throws Exception {
+	@Test
+	public void nestedPathisUsedAsViewName_InBreakingChangeFromSpring12Line() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/products/view.html");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -161,7 +176,8 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
-	public void testWithFlashAttributes() throws Exception {
+	@Test
+	public void withFlashAttributes() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
 		request.setAttribute(DispatcherServlet.INPUT_FLASH_MAP_ATTRIBUTE, new ModelMap("name", "value"));

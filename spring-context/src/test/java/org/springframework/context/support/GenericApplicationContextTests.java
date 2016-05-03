@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,36 @@ public class GenericApplicationContextTests {
 			fail("Should have thrown NoUniqueBeanDefinitionException");
 		}
 		catch (NoUniqueBeanDefinitionException ex) {
+			// expected
+		}
+	}
+
+	@Test
+	public void accessAfterClosing() {
+		GenericApplicationContext ac = new GenericApplicationContext();
+		ac.registerBeanDefinition("testBean", new RootBeanDefinition(String.class));
+		ac.refresh();
+
+		assertSame(ac.getBean("testBean"), ac.getBean(String.class));
+		assertSame(ac.getAutowireCapableBeanFactory().getBean("testBean"),
+				ac.getAutowireCapableBeanFactory().getBean(String.class));
+
+		ac.close();
+
+		try {
+			assertSame(ac.getBean("testBean"), ac.getBean(String.class));
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+
+		try {
+			assertSame(ac.getAutowireCapableBeanFactory().getBean("testBean"),
+					ac.getAutowireCapableBeanFactory().getBean(String.class));
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}

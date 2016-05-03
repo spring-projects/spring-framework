@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.beans.support;
 import java.beans.PropertyEditor;
 import java.io.File;
 import java.io.InputStream;
+import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
 
@@ -32,10 +33,10 @@ import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
+import org.springframework.beans.propertyeditors.ReaderEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
 import org.springframework.core.env.PropertyResolver;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
@@ -102,6 +103,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 		doRegisterEditor(registry, InputStream.class, new InputStreamEditor(baseEditor));
 		doRegisterEditor(registry, InputSource.class, new InputSourceEditor(baseEditor));
 		doRegisterEditor(registry, File.class, new FileEditor(baseEditor));
+		doRegisterEditor(registry, Reader.class, new ReaderEditor(baseEditor));
 		doRegisterEditor(registry, URL.class, new URLEditor(baseEditor));
 
 		ClassLoader classLoader = this.resourceLoader.getClassLoader();

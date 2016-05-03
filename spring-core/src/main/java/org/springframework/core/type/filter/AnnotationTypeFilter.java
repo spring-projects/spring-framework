@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.ClassUtils;
  * A simple filter which matches classes with a given annotation,
  * checking inherited annotations as well.
  *
- * <p>The matching logic mirrors that of {@code Class.isAnnotationPresent()}.
+ * <p>The matching logic mirrors that of {@link java.lang.Class#isAnnotationPresent(Class)}.
  *
  * @author Mark Fisher
  * @author Ramnivas Laddad

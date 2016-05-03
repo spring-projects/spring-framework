@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.DisposableBean;
  * implementations which maintain a pool of target instances, acquiring and
  * releasing a target object from the pool for each method invocation.
  * This abstract base class is independent of concrete pooling technology;
- * see the subclass {@link CommonsPoolTargetSource} for a concrete example.
+ * see the subclass {@link CommonsPool2TargetSource} for a concrete example.
  *
  * <p>Subclasses must implement the {@link #getTarget} and
  * {@link #releaseTarget} methods based on their chosen object pool.

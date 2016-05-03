@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.io.support.PropertySourceFactory;
+
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
  * {@link org.springframework.core.env.PropertySource PropertySource} to Spring's
@@ -30,6 +32,7 @@ import java.lang.annotation.Target;
  * conjunction with @{@link Configuration} classes.
  *
  * <h3>Example usage</h3>
+ *
  * <p>Given a file {@code app.properties} containing the key/value pair
  * {@code testbean.name=myTestBean}, the following {@code @Configuration} class
  * uses {@code @PropertySource} to contribute {@code app.properties} to the
@@ -56,19 +59,22 @@ import java.lang.annotation.Target;
  * the configuration above, a call to {@code testBean.getName()} will return "myTestBean".
  *
  * <h3>Resolving ${...} placeholders in {@code <bean>} and {@code @Value} annotations</h3>
+ *
  * In order to resolve ${...} placeholders in {@code <bean>} definitions or {@code @Value}
  * annotations using properties from a {@code PropertySource}, one must register
  * a {@code PropertySourcesPlaceholderConfigurer}. This happens automatically when using
  * {@code <context:property-placeholder>} in XML, but must be explicitly registered using
  * a {@code static} {@code @Bean} method when using {@code @Configuration} classes. See
- * the "Working with externalized values" section of @{@link Configuration} Javadoc and
- * "a note on BeanFactoryPostProcessor-returning @Bean methods" of @{@link Bean} Javadoc
+ * the "Working with externalized values" section of @{@link Configuration}'s javadoc and
+ * "a note on BeanFactoryPostProcessor-returning @Bean methods" of @{@link Bean}'s javadoc
  * for details and examples.
  *
  * <h3>Resolving ${...} placeholders within {@code @PropertySource} resource locations</h3>
+ *
  * Any ${...} placeholders present in a {@code @PropertySource} {@linkplain #value()
  * resource location} will be resolved against the set of property sources already
- * registered against the environment.  For example:
+ * registered against the environment. For example:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;PropertySource("classpath:/com/${my.placeholder:default/path}/app.properties")
@@ -92,6 +98,7 @@ import java.lang.annotation.Target;
  * IllegalArgumentException} will be thrown.
  *
  * <h3>A note on property overriding with @PropertySource</h3>
+ *
  * In cases where a given property key exists in more than one {@code .properties}
  * file, the last {@code @PropertySource} annotation processed will 'win' and override.
  *
@@ -126,13 +133,14 @@ import java.lang.annotation.Target;
  * <p>In certain situations, it may not be possible or practical to tightly control
  * property source ordering when using {@code @ProperySource} annotations. For example,
  * if the {@code @Configuration} classes above were registered via component-scanning,
- * the ordering is difficult to predict.  In such cases - and if overriding is important -
+ * the ordering is difficult to predict. In such cases - and if overriding is important -
  * it is recommended that the user fall back to using the programmatic PropertySource API.
  * See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment}
  * and {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
- * Javadoc for details.
+ * javadocs for details.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @author Phillip Webb
  * @since 3.1
  * @see PropertySources
@@ -148,9 +156,8 @@ import java.lang.annotation.Target;
 public @interface PropertySource {
 
 	/**
-	 * Indicate the name of this property source. If omitted, a name
-	 * will be generated based on the description of the underlying
-	 * resource.
+	 * Indicate the name of this property source. If omitted, a name will
+	 * be generated based on the description of the underlying resource.
 	 * @see org.springframework.core.env.PropertySource#getName()
 	 * @see org.springframework.core.io.Resource#getDescription()
 	 */
@@ -160,11 +167,11 @@ public @interface PropertySource {
 	 * Indicate the resource location(s) of the properties file to be loaded.
 	 * For example, {@code "classpath:/com/myco/app.properties"} or
 	 * {@code "file:/path/to/file"}.
-	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted; each
-	 * location must evaluate to exactly one {@code .properties} resource.
+	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted;
+	 * each location must evaluate to exactly one {@code .properties} resource.
 	 * <p>${...} placeholders will be resolved against any/all property sources already
-	 * registered with the {@code Environment}. See {@linkplain PropertySource above} for
-	 * examples.
+	 * registered with the {@code Environment}. See {@linkplain PropertySource above}
+	 * for examples.
 	 * <p>Each location will be added to the enclosing {@code Environment} as its own
 	 * property source, and in the order declared.
 	 */
@@ -178,5 +185,20 @@ public @interface PropertySource {
 	 * @since 4.0
 	 */
 	boolean ignoreResourceNotFound() default false;
+
+	/**
+	 * A specific character encoding for the given resources, e.g. "UTF-8".
+	 * @since 4.3
+	 */
+	String encoding() default "";
+
+	/**
+	 * Specify a custom {@link PropertySourceFactory}, if any.
+	 * <p>By default, a default factory for standard resource files will be used.
+	 * @since 4.3
+	 * @see org.springframework.core.io.support.DefaultPropertySourceFactory
+	 * @see org.springframework.core.io.support.ResourcePropertySource
+	 */
+	Class<? extends PropertySourceFactory> factory() default PropertySourceFactory.class;
 
 }

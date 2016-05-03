@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
@@ -67,6 +66,7 @@ public class SubProtocolWebSocketHandlerTests {
 		given(mqttHandler.getSupportedProtocols()).willReturn(Arrays.asList("MQTT"));
 		this.session = new TestWebSocketSession();
 		this.session.setId("1");
+		this.session.setOpen(true);
 	}
 
 
@@ -145,32 +145,40 @@ public class SubProtocolWebSocketHandlerTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void checkSession() throws Exception {
 		TestWebSocketSession session1 = new TestWebSocketSession("id1");
 		TestWebSocketSession session2 = new TestWebSocketSession("id2");
+		session1.setOpen(true);
+		session2.setOpen(true);
 		session1.setAcceptedProtocol("v12.stomp");
 		session2.setAcceptedProtocol("v12.stomp");
 
 		this.webSocketHandler.setProtocolHandlers(Arrays.asList(this.stompHandler));
 		this.webSocketHandler.afterConnectionEstablished(session1);
 		this.webSocketHandler.afterConnectionEstablished(session2);
-		session1.setOpen(true);
-		session2.setOpen(true);
+
+		DirectFieldAccessor handlerAccessor = new DirectFieldAccessor(this.webSocketHandler);
+		Map<String, ?> map = (Map<String, ?>) handlerAccessor.getPropertyValue("sessions");
+		DirectFieldAccessor session1Accessor = new DirectFieldAccessor(map.get("id1"));
+		DirectFieldAccessor session2Accessor = new DirectFieldAccessor(map.get("id2"));
 
 		long sixtyOneSecondsAgo = System.currentTimeMillis() - 61 * 1000;
-		new DirectFieldAccessor(this.webSocketHandler).setPropertyValue("lastSessionCheckTime", sixtyOneSecondsAgo);
-		Map<String, ?> sessions = (Map<String, ?>) new DirectFieldAccessor(this.webSocketHandler).getPropertyValue("sessions");
-		new DirectFieldAccessor(sessions.get("id1")).setPropertyValue("createTime", sixtyOneSecondsAgo);
-		new DirectFieldAccessor(sessions.get("id2")).setPropertyValue("createTime", sixtyOneSecondsAgo);
+		handlerAccessor.setPropertyValue("lastSessionCheckTime", sixtyOneSecondsAgo);
+		session1Accessor.setPropertyValue("createTime", sixtyOneSecondsAgo);
+		session2Accessor.setPropertyValue("createTime", sixtyOneSecondsAgo);
 
 		this.webSocketHandler.start();
 		this.webSocketHandler.handleMessage(session1, new TextMessage("foo"));
 
 		assertTrue(session1.isOpen());
-		assertFalse(session2.isOpen());
 		assertNull(session1.getCloseStatus());
-		assertEquals(CloseStatus.SESSION_NOT_RELIABLE, session2.getCloseStatus());
-	}
 
+		assertFalse(session2.isOpen());
+		assertEquals(CloseStatus.SESSION_NOT_RELIABLE, session2.getCloseStatus());
+
+		assertNotEquals("lastSessionCheckTime not updated", sixtyOneSecondsAgo,
+				handlerAccessor.getPropertyValue("lastSessionCheckTime"));
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -332,9 +332,8 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Populate the given DocumentDefaultsDefinition instance with the default lazy-init,
 	 * autowire, dependency check settings, init-method, destroy-method and merge settings.
-	 * Support nested 'beans' element use cases by falling back to
-	 * <literal>parentDefaults</literal> in case the defaults are not explicitly set
-	 * locally.
+	 * Support nested 'beans' element use cases by falling back to <literal>parentDefaults</literal>
+	 * in case the defaults are not explicitly set locally.
 	 * @param defaults the defaults to populate
 	 * @param parentDefaults the parent BeanDefinitionParserDelegate (if any) defaults to fall back to
 	 * @param root the root element of the current bean definition document (or nested beans element)
@@ -342,25 +341,27 @@ public class BeanDefinitionParserDelegate {
 	protected void populateDefaults(DocumentDefaultsDefinition defaults, DocumentDefaultsDefinition parentDefaults, Element root) {
 		String lazyInit = root.getAttribute(DEFAULT_LAZY_INIT_ATTRIBUTE);
 		if (DEFAULT_VALUE.equals(lazyInit)) {
-			lazyInit = parentDefaults != null ? parentDefaults.getLazyInit() : FALSE_VALUE;
+			// Potentially inherited from outer <beans> sections, otherwise falling back to false.
+			lazyInit = (parentDefaults != null ? parentDefaults.getLazyInit() : FALSE_VALUE);
 		}
 		defaults.setLazyInit(lazyInit);
 
 		String merge = root.getAttribute(DEFAULT_MERGE_ATTRIBUTE);
 		if (DEFAULT_VALUE.equals(merge)) {
-			merge = parentDefaults != null ? parentDefaults.getMerge() : FALSE_VALUE;
+			// Potentially inherited from outer <beans> sections, otherwise falling back to false.
+			merge = (parentDefaults != null ? parentDefaults.getMerge() : FALSE_VALUE);
 		}
 		defaults.setMerge(merge);
 
 		String autowire = root.getAttribute(DEFAULT_AUTOWIRE_ATTRIBUTE);
 		if (DEFAULT_VALUE.equals(autowire)) {
-			autowire = parentDefaults != null ? parentDefaults.getAutowire() : AUTOWIRE_NO_VALUE;
+			// Potentially inherited from outer <beans> sections, otherwise falling back to 'no'.
+			autowire = (parentDefaults != null ? parentDefaults.getAutowire() : AUTOWIRE_NO_VALUE);
 		}
 		defaults.setAutowire(autowire);
 
-		// don't fall back to parentDefaults for dependency-check as it's no
-		// longer supported in <beans> as of 3.0. Therefore, no nested <beans>
-		// would ever need to fall back to it.
+		// Don't fall back to parentDefaults for dependency-check as it's no longer supported in
+		// <beans> as of 3.0. Therefore, no nested <beans> would ever need to fall back to it.
 		defaults.setDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
 
 		if (root.hasAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE)) {
@@ -397,7 +398,7 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Return the default settings for bean definitions as indicated within
-	 * the attributes of the top-level {@code &lt;beans/&gt;} element.
+	 * the attributes of the top-level {@code <beans/>} element.
 	 */
 	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
 		BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
@@ -411,7 +412,7 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Return any patterns provided in the 'default-autowire-candidates'
-	 * attribute of the top-level {@code &lt;beans/&gt;} element.
+	 * attribute of the top-level {@code <beans/>} element.
 	 */
 	public String[] getAutowireCandidatePatterns() {
 		String candidatePattern = this.defaults.getAutowireCandidates();
@@ -420,7 +421,7 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
-	 * Parses the supplied {@code &lt;bean&gt;} element. May return {@code null}
+	 * Parses the supplied {@code <bean>} element. May return {@code null}
 	 * if there were errors during parse. Errors are reported to the
 	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
@@ -429,7 +430,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Parses the supplied {@code &lt;bean&gt;} element. May return {@code null}
+	 * Parses the supplied {@code <bean>} element. May return {@code null}
 	 * if there were errors during parse. Errors are reported to the
 	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
@@ -640,9 +641,7 @@ public class BeanDefinitionParserDelegate {
 
 		if (ele.hasAttribute(DESTROY_METHOD_ATTRIBUTE)) {
 			String destroyMethodName = ele.getAttribute(DESTROY_METHOD_ATTRIBUTE);
-			if (!"".equals(destroyMethodName)) {
-				bd.setDestroyMethodName(destroyMethodName);
-			}
+			bd.setDestroyMethodName(destroyMethodName);
 		}
 		else {
 			if (this.defaults.getDestroyMethod() != null) {
@@ -1012,7 +1011,7 @@ public class BeanDefinitionParserDelegate {
 	 * constructor-arg element.
 	 * @param ele subelement of property element; we don't know which yet
 	 * @param defaultValueType the default type (class name) for any
-	 * {@code &lt;value&gt;} tag that might be created
+	 * {@code <value>} tag that might be created
 	 */
 	public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultValueType) {
 		if (!isDefaultNamespace(ele)) {

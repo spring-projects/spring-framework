@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,13 +66,13 @@ public class StandardMethodMetadata implements MethodMetadata {
 		this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
 	}
 
+
 	/**
 	 * Return the underlying Method.
 	 */
 	public final Method getIntrospectedMethod() {
 		return this.introspectedMethod;
 	}
-
 
 	@Override
 	public String getMethodName() {
@@ -82,6 +82,16 @@ public class StandardMethodMetadata implements MethodMetadata {
 	@Override
 	public String getDeclaringClassName() {
 		return this.introspectedMethod.getDeclaringClass().getName();
+	}
+
+	@Override
+	public String getReturnTypeName() {
+		return this.introspectedMethod.getReturnType().getName();
+	}
+
+	@Override
+	public boolean isAbstract() {
+		return Modifier.isAbstract(this.introspectedMethod.getModifiers());
 	}
 
 	@Override
@@ -100,30 +110,30 @@ public class StandardMethodMetadata implements MethodMetadata {
 	}
 
 	@Override
-	public boolean isAnnotated(String annotationType) {
-		return AnnotatedElementUtils.isAnnotated(this.introspectedMethod, annotationType);
+	public boolean isAnnotated(String annotationName) {
+		return AnnotatedElementUtils.isAnnotated(this.introspectedMethod, annotationName);
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return getAnnotationAttributes(annotationType, false);
+	public Map<String, Object> getAnnotationAttributes(String annotationName) {
+		return getAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		return AnnotatedElementUtils.getAnnotationAttributes(this.introspectedMethod,
-				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
+	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		return AnnotatedElementUtils.getMergedAnnotationAttributes(this.introspectedMethod,
+				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
-		return getAllAnnotationAttributes(annotationType, false);
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
+		return getAllAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getAllAnnotationAttributes(this.introspectedMethod,
-				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
+				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
@@ -31,11 +32,10 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.context.MessageSource} implementation that
@@ -50,11 +50,11 @@ import org.springframework.util.StringUtils;
  * base class. The caching provided by this MessageSource is significantly faster
  * than the built-in caching of the {@code java.util.ResourceBundle} class.
  *
- * <p>Unfortunately, {@code java.util.ResourceBundle} caches loaded bundles
- * forever: Reloading a bundle during VM execution is <i>not</i> possible.
- * As this MessageSource relies on ResourceBundle, it faces the same limitation.
- * Consider {@link ReloadableResourceBundleMessageSource} for an alternative
- * that is capable of refreshing the underlying bundle files.
+ * <p>The basenames follow {@link java.util.ResourceBundle} conventions: essentially,
+ * a fully-qualified classpath location. If it doesn't contain a package qualifier
+ * (such as {@code org.mypackage}), it will be resolved from the classpath root.
+ * Note that the JDK's standard ResourceBundle treats dots as package separators:
+ * This means that "test.theme" is effectively equivalent to "test/theme".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -63,15 +63,7 @@ import org.springframework.util.StringUtils;
  * @see java.util.ResourceBundle
  * @see java.text.MessageFormat
  */
-public class ResourceBundleMessageSource extends AbstractMessageSource implements BeanClassLoaderAware {
-
-	private String[] basenames = new String[0];
-
-	private String defaultEncoding;
-
-	private boolean fallbackToSystemLocale = true;
-
-	private long cacheMillis = -1;
+public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements BeanClassLoaderAware {
 
 	private ClassLoader bundleClassLoader;
 
@@ -98,100 +90,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
 			new HashMap<ResourceBundle, Map<String, Map<Locale, MessageFormat>>>();
 
-
-	/**
-	 * Set a single basename, following {@link java.util.ResourceBundle} conventions:
-	 * essentially, a fully-qualified classpath location. If it doesn't contain a
-	 * package qualifier (such as {@code org.mypackage}), it will be resolved
-	 * from the classpath root.
-	 * <p>Messages will normally be held in the "/lib" or "/classes" directory of
-	 * a web application's WAR structure. They can also be held in jar files on
-	 * the class path.
-	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
-	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
-	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
-	 * @see #setBasenames
-	 * @see java.util.ResourceBundle#getBundle(String)
-	 */
-	public void setBasename(String basename) {
-		setBasenames(basename);
-	}
-
-	/**
-	 * Set an array of basenames, each following {@link java.util.ResourceBundle}
-	 * conventions: essentially, a fully-qualified classpath location. If it
-	 * doesn't contain a package qualifier (such as {@code org.mypackage}),
-	 * it will be resolved from the classpath root.
-	 * <p>The associated resource bundles will be checked sequentially
-	 * when resolving a message code. Note that message definitions in a
-	 * <i>previous</i> resource bundle will override ones in a later bundle,
-	 * due to the sequential lookup.
-	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
-	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
-	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
-	 * @see #setBasename
-	 * @see java.util.ResourceBundle#getBundle(String)
-	 */
-	public void setBasenames(String... basenames) {
-		if (basenames != null) {
-			this.basenames = new String[basenames.length];
-			for (int i = 0; i < basenames.length; i++) {
-				String basename = basenames[i];
-				Assert.hasText(basename, "Basename must not be empty");
-				this.basenames[i] = basename.trim();
-			}
-		}
-		else {
-			this.basenames = new String[0];
-		}
-	}
-
-	/**
-	 * Set the default charset to use for parsing resource bundle files.
-	 * <p>Default is none, using the {@code java.util.ResourceBundle}
-	 * default encoding: ISO-8859-1.
-	 * and more flexibility in setting of an encoding per file.
-	 */
-	public void setDefaultEncoding(String defaultEncoding) {
-		this.defaultEncoding = defaultEncoding;
-	}
-
-	/**
-	 * Set whether to fall back to the system Locale if no files for a specific
-	 * Locale have been found. Default is "true"; if this is turned off, the only
-	 * fallback will be the default file (e.g. "messages.properties" for
-	 * basename "messages").
-	 * <p>Falling back to the system Locale is the default behavior of
-	 * {@code java.util.ResourceBundle}. However, this is often not desirable
-	 * in an application server environment, where the system Locale is not relevant
-	 * to the application at all: Set this flag to "false" in such a scenario.
-	 */
-	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
-		this.fallbackToSystemLocale = fallbackToSystemLocale;
-	}
-
-	/**
-	 * Set the number of seconds to cache loaded resource bundle files.
-	 * <ul>
-	 * <li>Default is "-1", indicating to cache forever.
-	 * <li>A positive number will expire resource bundles after the given
-	 * number of seconds. This is essentially the interval between refresh checks.
-	 * Note that a refresh attempt will first check the last-modified timestamp
-	 * of the file before actually reloading it; so if files don't change, this
-	 * interval can be set rather low, as refresh attempts will not actually reload.
-	 * <li>A value of "0" will check the last-modified timestamp of the file on
-	 * every message access. <b>Do not use this in a production environment!</b>
-	 * <li><b>Note that depending on your ClassLoader, expiration might not work reliably
-	 * since the ClassLoader may hold on to a cached version of the bundle file.</b>
-	 * Consider {@link ReloadableResourceBundleMessageSource} in combination
-	 * with resource bundle files in a non-classpath location.
-	 * </ul>
-	 */
-	public void setCacheSeconds(int cacheSeconds) {
-		this.cacheMillis = (cacheSeconds * 1000);
-	}
 
 	/**
 	 * Set the ClassLoader to load resource bundles with.
@@ -226,14 +124,17 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 */
 	@Override
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
-		String result = null;
-		for (int i = 0; result == null && i < this.basenames.length; i++) {
-			ResourceBundle bundle = getResourceBundle(this.basenames[i], locale);
+		Set<String> basenames = getBasenameSet();
+		for (String basename : basenames) {
+			ResourceBundle bundle = getResourceBundle(basename, locale);
 			if (bundle != null) {
-				result = getStringOrNull(bundle, code);
+				String result = getStringOrNull(bundle, code);
+				if (result != null) {
+					return result;
+				}
 			}
 		}
-		return result;
+		return null;
 	}
 
 	/**
@@ -242,14 +143,17 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 */
 	@Override
 	protected MessageFormat resolveCode(String code, Locale locale) {
-		MessageFormat messageFormat = null;
-		for (int i = 0; messageFormat == null && i < this.basenames.length; i++) {
-			ResourceBundle bundle = getResourceBundle(this.basenames[i], locale);
+		Set<String> basenames = getBasenameSet();
+		for (String basename : basenames) {
+			ResourceBundle bundle = getResourceBundle(basename, locale);
 			if (bundle != null) {
-				messageFormat = getMessageFormat(bundle, code, locale);
+				MessageFormat messageFormat = getMessageFormat(bundle, code, locale);
+				if (messageFormat != null) {
+					return messageFormat;
+				}
 			}
 		}
-		return messageFormat;
+		return null;
 	}
 
 
@@ -262,7 +166,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * found for the given basename and Locale
 	 */
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
-		if (this.cacheMillis >= 0) {
+		if (getCacheMillis() >= 0) {
 			// Fresh ResourceBundle.getBundle call in order to let ResourceBundle
 			// do its native caching, at the expense of more extensive lookup steps.
 			return doGetBundle(basename, locale);
@@ -304,18 +208,24 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @param locale the Locale to look for
 	 * @return the corresponding ResourceBundle
 	 * @throws MissingResourceException if no matching bundle could be found
-	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
+	 * @see java.util.ResourceBundle#getBundle(String, Locale, ClassLoader)
 	 * @see #getBundleClassLoader()
 	 */
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
-		if ((this.defaultEncoding != null && !"ISO-8859-1".equals(this.defaultEncoding)) ||
-				!this.fallbackToSystemLocale || this.cacheMillis >= 0) {
-			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
-		}
-		else {
-			// Good old standard call...
-			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());
-		}
+		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
+	}
+
+	/**
+	 * Load a property-based resource bundle from the given reader.
+	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
+	 * @param reader the reader for the target resource
+	 * @return the fully loaded bundle
+	 * @throws IOException in case of I/O failure
+	 * @since 4.2
+	 * @see PropertyResourceBundle#PropertyResourceBundle(Reader)
+	 */
+	protected ResourceBundle loadBundle(Reader reader) throws IOException {
+		return new PropertyResourceBundle(reader);
 	}
 
 	/**
@@ -363,15 +273,31 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		}
 	}
 
-	private String getStringOrNull(ResourceBundle bundle, String key) {
-		try {
-			return bundle.getString(key);
+	/**
+	 * Efficiently retrieve the String value for the specified key,
+	 * or return {@code null} if not found.
+	 * <p>As of 4.2, the default implementation checks {@code containsKey}
+	 * before it attempts to call {@code getString} (which would require
+	 * catching {@code MissingResourceException} for key not found).
+	 * <p>Can be overridden in subclasses.
+	 * @param bundle the ResourceBundle to perform the lookup in
+	 * @param key the key to look up
+	 * @return the associated value, or {@code null} if none
+	 * @since 4.2
+	 * @see ResourceBundle#getString(String)
+	 * @see ResourceBundle#containsKey(String)
+	 */
+	protected String getStringOrNull(ResourceBundle bundle, String key) {
+		if (bundle.containsKey(key)) {
+			try {
+				return bundle.getString(key);
+			}
+			catch (MissingResourceException ex){
+				// Assume key not found for some other reason
+				// -> do NOT throw the exception to allow for checking parent message source.
+			}
 		}
-		catch (MissingResourceException ex) {
-			// Assume key not found
-			// -> do NOT throw the exception to allow for checking parent message source.
-			return null;
-		}
+		return null;
 	}
 
 	/**
@@ -379,8 +305,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 */
 	@Override
 	public String toString() {
-		return getClass().getName() + ": basenames=[" +
-				StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
+		return getClass().getName() + ": basenames=" + getBasenameSet();
 	}
 
 
@@ -394,6 +319,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		@Override
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
 				throws IllegalAccessException, InstantiationException, IOException {
+
+			// Special handling of default encoding
 			if (format.equals("java.properties")) {
 				String bundleName = toBundleName(baseName, locale);
 				final String resourceName = toResourceName(bundleName, "properties");
@@ -427,10 +354,12 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 					throw (IOException) ex.getException();
 				}
 				if (stream != null) {
+					String encoding = getDefaultEncoding();
+					if (encoding == null) {
+						encoding = "ISO-8859-1";
+					}
 					try {
-						return (defaultEncoding != null ?
-								new PropertyResourceBundle(new InputStreamReader(stream, defaultEncoding)) :
-								new PropertyResourceBundle(stream));
+						return loadBundle(new InputStreamReader(stream, encoding));
 					}
 					finally {
 						stream.close();
@@ -441,17 +370,19 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 				}
 			}
 			else {
+				// Delegate handling of "java.class" format to standard Control
 				return super.newBundle(baseName, locale, format, loader, reload);
 			}
 		}
 
 		@Override
 		public Locale getFallbackLocale(String baseName, Locale locale) {
-			return (fallbackToSystemLocale ? super.getFallbackLocale(baseName, locale) : null);
+			return (isFallbackToSystemLocale() ? super.getFallbackLocale(baseName, locale) : null);
 		}
 
 		@Override
 		public long getTimeToLive(String baseName, Locale locale) {
+			long cacheMillis = getCacheMillis();
 			return (cacheMillis >= 0 ? cacheMillis : super.getTimeToLive(baseName, locale));
 		}
 

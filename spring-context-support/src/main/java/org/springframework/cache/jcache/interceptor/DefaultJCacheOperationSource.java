@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cache.jcache.interceptor;
 
+import java.util.Collection;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -23,7 +25,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.interceptor.CacheOperationInvocationContext;
 import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
@@ -128,9 +132,9 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 
 	@Override
 	public void afterSingletonsInstantiated() {
-		// Make sure those are initialized on startup...
+		// Make sure that the cache resolver is initialized. An exception cache resolver is only
+		// required if the exceptionCacheName attribute is set on an operation
 		Assert.notNull(getDefaultCacheResolver(), "Cache resolver should have been initialized");
-		Assert.notNull(getDefaultExceptionCacheResolver(), "Exception cache resolver should have been initialized");
 	}
 
 
@@ -179,7 +183,7 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	@Override
 	protected CacheResolver getDefaultExceptionCacheResolver() {
 		if (this.exceptionCacheResolver == null) {
-			this.exceptionCacheResolver = new SimpleExceptionCacheResolver(getDefaultCacheManager());
+			this.exceptionCacheResolver = new LazyCacheResolver();
 		}
 		return this.exceptionCacheResolver;
 	}
@@ -187,6 +191,29 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 	@Override
 	protected KeyGenerator getDefaultKeyGenerator() {
 		return this.adaptedKeyGenerator;
+	}
+
+
+	/**
+	 * Only resolve the default exception cache resolver when an exception needs to be handled.
+	 * <p>A non-JSR-107 setup requires either a {@link CacheManager} or a {@link CacheResolver}. If only
+	 * the latter is specified, it is not possible to extract a default exception {@code CacheResolver}
+	 * from a custom {@code CacheResolver} implementation so we have to fallback on the {@code CacheManager}.
+	 * <p>This gives this weird situation of a perfectly valid configuration that breaks all the sudden
+	 * because the JCache support is enabled. To avoid this we resolve the default exception {@code CacheResolver}
+	 * as late as possible to avoid such hard requirement in other cases.
+	 */
+	class LazyCacheResolver implements CacheResolver {
+
+		private CacheResolver cacheResolver;
+
+		@Override
+		public Collection<? extends Cache> resolveCaches(CacheOperationInvocationContext<?> context) {
+			if (this.cacheResolver == null) {
+				this.cacheResolver = new SimpleExceptionCacheResolver(getDefaultCacheManager());
+			}
+			return this.cacheResolver.resolveCaches(context);
+		}
 	}
 
 }

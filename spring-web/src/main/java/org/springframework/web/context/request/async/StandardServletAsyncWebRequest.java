@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * <p>The servlet and all filters involved in an async request must have async
  * support enabled using the Servlet API or by adding an
  * {@code <async-support>true</async-support>} element to servlet and filter
- * declarations in web.xml
+ * declarations in {@code web.xml}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -62,9 +62,9 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		super(request, response);
 	}
 
+
 	/**
-	 * {@inheritDoc}
-	 * <p>In Servlet 3 async processing, the timeout period begins after the
+	 * In Servlet 3 async processing, the timeout period begins after the
 	 * container processing thread has exited.
 	 */
 	@Override
@@ -85,7 +85,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public boolean isAsyncStarted() {
-		return ((this.asyncContext != null) && getRequest().isAsyncStarted());
+		return (this.asyncContext != null && getRequest().isAsyncStarted());
 	}
 
 	/**
@@ -106,6 +106,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 				"or by adding \"<async-supported>true</async-supported>\" to servlet and " +
 				"filter declarations in web.xml.");
 		Assert.state(!isAsyncComplete(), "Async processing has already completed");
+
 		if (isAsyncStarted()) {
 			return;
 		}
@@ -122,6 +123,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		this.asyncContext.dispatch();
 	}
 
+
 	// ---------------------------------------------------------------------
 	// Implementation of AsyncListener methods
 	// ---------------------------------------------------------------------
@@ -132,6 +134,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public void onError(AsyncEvent event) throws IOException {
+		onComplete(event);
 	}
 
 	@Override

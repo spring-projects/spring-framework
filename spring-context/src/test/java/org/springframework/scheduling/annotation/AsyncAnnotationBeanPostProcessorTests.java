@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,20 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
+import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 import static org.junit.Assert.*;
 
@@ -83,6 +88,60 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void taskExecutorByBeanType() {
+		StaticApplicationContext context = new StaticApplicationContext();
+
+		BeanDefinition processorDefinition = new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+
+		BeanDefinition executorDefinition = new RootBeanDefinition(ThreadPoolTaskExecutor.class);
+		executorDefinition.getPropertyValues().add("threadNamePrefix", "testExecutor");
+		context.registerBeanDefinition("myExecutor", executorDefinition);
+
+		BeanDefinition targetDefinition =
+				new RootBeanDefinition(AsyncAnnotationBeanPostProcessorTests.TestBean.class);
+		context.registerBeanDefinition("target", targetDefinition);
+
+		context.refresh();
+
+		ITestBean testBean = context.getBean("target", ITestBean.class);
+		testBean.test();
+		testBean.await(3000);
+		Thread asyncThread = testBean.getThread();
+		assertTrue(asyncThread.getName().startsWith("testExecutor"));
+		context.close();
+	}
+
+	@Test
+	public void taskExecutorByBeanName() {
+		StaticApplicationContext context = new StaticApplicationContext();
+
+		BeanDefinition processorDefinition = new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+
+		BeanDefinition executorDefinition = new RootBeanDefinition(ThreadPoolTaskExecutor.class);
+		executorDefinition.getPropertyValues().add("threadNamePrefix", "testExecutor");
+		context.registerBeanDefinition("myExecutor", executorDefinition);
+
+		BeanDefinition executorDefinition2 = new RootBeanDefinition(ThreadPoolTaskExecutor.class);
+		executorDefinition2.getPropertyValues().add("threadNamePrefix", "testExecutor2");
+		context.registerBeanDefinition("taskExecutor", executorDefinition2);
+
+		BeanDefinition targetDefinition =
+				new RootBeanDefinition(AsyncAnnotationBeanPostProcessorTests.TestBean.class);
+		context.registerBeanDefinition("target", targetDefinition);
+
+		context.refresh();
+
+		ITestBean testBean = context.getBean("target", ITestBean.class);
+		testBean.test();
+		testBean.await(3000);
+		Thread asyncThread = testBean.getThread();
+		assertTrue(asyncThread.getName().startsWith("testExecutor2"));
+		context.close();
+	}
+
+	@Test
 	public void configuredThroughNamespace() {
 		GenericXmlApplicationContext context = new GenericXmlApplicationContext();
 		context.load(new ClassPathResource("taskNamespaceTests.xml", getClass()));
@@ -106,10 +165,32 @@ public class AsyncAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void handleExceptionWithFuture() {
-		ConfigurableApplicationContext context = initContext(
-				new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
+		ConfigurableApplicationContext context =
+				new AnnotationConfigApplicationContext(ConfigWithExceptionHandler.class);
 		ITestBean testBean = context.getBean("target", ITestBean.class);
-		final Future<Object> result = testBean.failWithFuture();
+
+		TestableAsyncUncaughtExceptionHandler exceptionHandler =
+				context.getBean("exceptionHandler", TestableAsyncUncaughtExceptionHandler.class);
+		assertFalse("handler should not have been called yet", exceptionHandler.isCalled());
+		Future<Object> result = testBean.failWithFuture();
+		assertFutureWithException(result, exceptionHandler);
+	}
+
+	@Test
+	public void handleExceptionWithListenableFuture() {
+		ConfigurableApplicationContext context =
+				new AnnotationConfigApplicationContext(ConfigWithExceptionHandler.class);
+		ITestBean testBean = context.getBean("target", ITestBean.class);
+
+		TestableAsyncUncaughtExceptionHandler exceptionHandler =
+				context.getBean("exceptionHandler", TestableAsyncUncaughtExceptionHandler.class);
+		assertFalse("handler should not have been called yet", exceptionHandler.isCalled());
+		Future<Object> result = testBean.failWithListenableFuture();
+		assertFutureWithException(result, exceptionHandler);
+	}
+
+	private void assertFutureWithException(Future<Object> result,
+			TestableAsyncUncaughtExceptionHandler exceptionHandler) {
 
 		try {
 			result.get();
@@ -121,6 +202,7 @@ public class AsyncAnnotationBeanPostProcessorTests {
 			// expected
 			assertEquals("Wrong exception cause", UnsupportedOperationException.class, ex.getCause().getClass());
 		}
+		assertFalse("handler should never be called with Future return type", exceptionHandler.isCalled());
 	}
 
 	@Test
@@ -173,13 +255,15 @@ public class AsyncAnnotationBeanPostProcessorTests {
 	}
 
 
-	private static interface ITestBean {
+	private interface ITestBean {
 
 		Thread getThread();
 
 		void test();
 
 		Future<Object> failWithFuture();
+
+		ListenableFuture<Object> failWithListenableFuture();
 
 		void failWithVoid();
 
@@ -206,11 +290,19 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		}
 
 		@Async
+		@Override
 		public Future<Object> failWithFuture() {
 			throw new UnsupportedOperationException("failWithFuture");
 		}
 
 		@Async
+		@Override
+		public ListenableFuture<Object> failWithListenableFuture() {
+			throw new UnsupportedOperationException("failWithListenableFuture");
+		}
+
+		@Async
+		@Override
 		public void failWithVoid() {
 			throw new UnsupportedOperationException("failWithVoid");
 		}
@@ -226,11 +318,33 @@ public class AsyncAnnotationBeanPostProcessorTests {
 		}
 	}
 
+
 	private static class DirectExecutor implements Executor {
 
 		@Override
 		public void execute(Runnable r) {
 			r.run();
+		}
+	}
+
+
+	@Configuration
+	@EnableAsync
+	static class ConfigWithExceptionHandler extends AsyncConfigurerSupport {
+
+		@Bean
+		public ITestBean target() {
+			return new TestBean();
+		}
+
+		@Override
+		public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+			return exceptionHandler();
+		}
+
+		@Bean
+		public TestableAsyncUncaughtExceptionHandler exceptionHandler() {
+			return new TestableAsyncUncaughtExceptionHandler();
 		}
 	}
 

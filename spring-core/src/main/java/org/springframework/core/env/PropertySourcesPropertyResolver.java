@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,8 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 				if (debugEnabled) {
 					logger.debug(String.format("Searching for key '%s' in [%s]", key, propertySource.getName()));
 				}
-				Object value;
-				if ((value = propertySource.getProperty(key)) != null) {
+				Object value = propertySource.getProperty(key);
+				if (value != null) {
 					Class<?> valueType = value.getClass();
 					if (resolveNestedPlaceholders && value instanceof String) {
 						value = resolveNestedPlaceholders((String) value);

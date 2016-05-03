@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.LinkedMultiValueMap;
@@ -56,19 +57,21 @@ public class RequestParamMapMethodArgumentResolverTests {
 
 	private MockHttpServletRequest request;
 
+
 	@Before
 	public void setUp() throws Exception {
 		resolver = new RequestParamMapMethodArgumentResolver();
 
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, Map.class, Map.class);
-		paramMap = new MethodParameter(method, 0);
-		paramMultiValueMap = new MethodParameter(method, 1);
-		paramNamedMap = new MethodParameter(method, 2);
-		paramMapWithoutAnnot = new MethodParameter(method, 3);
+		paramMap = new SynthesizingMethodParameter(method, 0);
+		paramMultiValueMap = new SynthesizingMethodParameter(method, 1);
+		paramNamedMap = new SynthesizingMethodParameter(method, 2);
+		paramMapWithoutAnnot = new SynthesizingMethodParameter(method, 3);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -107,6 +110,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 		assertTrue(result instanceof MultiValueMap);
 		assertEquals("Invalid result", expected, result);
 	}
+
 
 	public void params(@RequestParam Map<?, ?> param1,
 					   @RequestParam MultiValueMap<?, ?> param2,

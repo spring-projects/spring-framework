@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.TestListener;
+import org.springframework.context.event.test.TestEvent;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
@@ -45,20 +46,20 @@ public class EventPublicationInterceptorTests {
 
 	@Before
 	public void setUp() {
-		publisher = mock(ApplicationEventPublisher.class);
+		this.publisher = mock(ApplicationEventPublisher.class);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithNoApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.afterPropertiesSet();
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithNonApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.setApplicationEventClass(getClass());
 		interceptor.afterPropertiesSet();
 	}
@@ -66,7 +67,7 @@ public class EventPublicationInterceptorTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithAbstractStraightApplicationEventClassSupplied() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.setApplicationEventClass(ApplicationEvent.class);
 		interceptor.afterPropertiesSet();
 	}
@@ -74,7 +75,7 @@ public class EventPublicationInterceptorTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithApplicationEventClassThatDoesntExposeAValidCtor() throws Exception {
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
-		interceptor.setApplicationEventPublisher(publisher);
+		interceptor.setApplicationEventPublisher(this.publisher);
 		interceptor.setApplicationEventClass(TestEventWithNoValidOneArgObjectCtor.class);
 		interceptor.afterPropertiesSet();
 	}
@@ -113,15 +114,6 @@ public class EventPublicationInterceptorTests {
 		assertTrue("Interceptor must have published 2 events", listener.getEventCount() == 2);
 		TestListener otherListener = (TestListener) ctx.getBean("&otherListener");
 		assertTrue("Interceptor must have published 2 events", otherListener.getEventCount() == 2);
-	}
-
-
-	@SuppressWarnings("serial")
-	public static class TestEvent extends ApplicationEvent {
-
-		public TestEvent(Object source) {
-			super(source);
-		}
 	}
 
 

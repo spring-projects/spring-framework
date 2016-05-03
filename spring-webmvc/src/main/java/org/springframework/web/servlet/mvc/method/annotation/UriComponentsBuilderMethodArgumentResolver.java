@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+
 /**
  * Resolvers argument values of type {@link UriComponentsBuilder}.
  *
@@ -37,9 +38,11 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class UriComponentsBuilderMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return UriComponentsBuilder.class.isAssignableFrom(parameter.getParameterType());
+		Class<?> type = parameter.getParameterType();
+		return (UriComponentsBuilder.class == type || ServletUriComponentsBuilder.class == type);
 	}
 
 	@Override

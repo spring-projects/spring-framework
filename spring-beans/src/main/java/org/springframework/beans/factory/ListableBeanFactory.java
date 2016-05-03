@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.core.ResolvableType;
 
 /**
  * Extension of the {@link BeanFactory} interface to be implemented by bean factories
@@ -84,6 +85,35 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * or an empty array if none defined
 	 */
 	String[] getBeanDefinitionNames();
+
+	/**
+	 * Return the names of beans matching the given type (including subclasses),
+	 * judging from either bean definitions or the value of {@code getObjectType}
+	 * in the case of FactoryBeans.
+	 * <p><b>NOTE: This method introspects top-level beans only.</b> It does <i>not</i>
+	 * check nested beans which might match the specified type as well.
+	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
+	 * will get initialized. If the object created by the FactoryBean doesn't match,
+	 * the raw FactoryBean itself will be matched against the type.
+	 * <p>Does not consider any hierarchy this factory may participate in.
+	 * Use BeanFactoryUtils' {@code beanNamesForTypeIncludingAncestors}
+	 * to include beans in ancestor factories too.
+	 * <p>Note: Does <i>not</i> ignore singleton beans that have been registered
+	 * by other means than bean definitions.
+	 * <p>This version of {@code getBeanNamesForType} matches all kinds of beans,
+	 * be it singletons, prototypes, or FactoryBeans. In most implementations, the
+	 * result will be the same as for {@code getBeanNamesForType(type, true, true)}.
+	 * <p>Bean names returned by this method should always return bean names <i>in the
+	 * order of definition</i> in the backend configuration, as far as possible.
+	 * @param type the class or interface to match, or {@code null} for all bean names
+	 * @return the names of beans (or objects created by FactoryBeans) matching
+	 * the given object type (including subclasses), or an empty array if none
+	 * @since 4.2
+	 * @see #isTypeMatch(String, ResolvableType)
+	 * @see FactoryBean#getObjectType
+	 * @see BeanFactoryUtils#beanNamesForTypeIncludingAncestors(ListableBeanFactory, ResolvableType)
+	 */
+	String[] getBeanNamesForType(ResolvableType type);
 
 	/**
 	 * Return the names of beans matching the given type (including subclasses),

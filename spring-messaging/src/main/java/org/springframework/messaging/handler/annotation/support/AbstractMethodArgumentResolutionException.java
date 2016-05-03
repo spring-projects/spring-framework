@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,22 +42,22 @@ public abstract class AbstractMethodArgumentResolutionException extends Messagin
 
 	/**
 	 * Create a new instance providing the invalid {@code MethodParameter} and
-	 * a prepared description. Sub-classes should prepend the description with
+	 * a prepared description. Subclasses should prepend the description with
 	 * the help of {@link #getMethodParamMessage(org.springframework.core.MethodParameter)}.
 	 */
-	protected AbstractMethodArgumentResolutionException(Message<?> message,
-			MethodParameter parameter, String description) {
-
+	protected AbstractMethodArgumentResolutionException(Message<?> message, MethodParameter param, String description) {
 		super(message, description);
-		this.parameter = parameter;
+		this.parameter = param;
 	}
+
 
 	/**
 	 * Return the MethodParameter that was rejected.
 	 */
-	public MethodParameter getMethodParameter() {
+	public final MethodParameter getMethodParameter() {
 		return this.parameter;
 	}
+
 
 	protected static String getMethodParamMessage(MethodParameter param) {
 		return new StringBuilder("Could not resolve method parameter at index ")

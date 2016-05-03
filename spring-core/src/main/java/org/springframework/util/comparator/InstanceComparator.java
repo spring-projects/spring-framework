@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.util.Assert;
  *
  * @author Phillip Webb
  * @since 3.2
- * @param <T> the type of objects being compared
  * @see CompoundComparator
+ * @param <T> the type of objects being compared
  */
 public class InstanceComparator<T> implements Comparator<T> {
 
@@ -43,7 +43,7 @@ public class InstanceComparator<T> implements Comparator<T> {
 	/**
 	 * Create a new {@link InstanceComparator} instance.
 	 * @param instanceOrder the ordered list of classes that should be used when comparing
-	 * objects. Classes earlier in the list will be be given a higher priority.
+	 * objects. Classes earlier in the list will be given a higher priority.
 	 */
 	public InstanceComparator(Class<?>... instanceOrder) {
 		Assert.notNull(instanceOrder, "'instanceOrder' must not be null");

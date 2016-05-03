@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.jdbc.IncorrectResultSetColumnCountException;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
 
 /**
@@ -41,23 +42,26 @@ import org.springframework.util.NumberUtils;
  */
 public class SingleColumnRowMapper<T> implements RowMapper<T> {
 
-	private Class<T> requiredType;
+	private Class<?> requiredType;
 
 
 	/**
-	 * Create a new SingleColumnRowMapper.
+	 * Create a new {@code SingleColumnRowMapper} for bean-style configuration.
 	 * @see #setRequiredType
 	 */
 	public SingleColumnRowMapper() {
 	}
 
 	/**
-	 * Create a new SingleColumnRowMapper.
+	 * Create a new {@code SingleColumnRowMapper}.
+	 * <p>Consider using the {@link #newInstance} factory method instead,
+	 * which allows for specifying the required type once only.
 	 * @param requiredType the type that each result object is expected to match
 	 */
 	public SingleColumnRowMapper(Class<T> requiredType) {
-		this.requiredType = requiredType;
+		setRequiredType(requiredType);
 	}
+
 
 	/**
 	 * Set the type that each result object is expected to match.
@@ -65,7 +69,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 * returned by the JDBC driver.
 	 */
 	public void setRequiredType(Class<T> requiredType) {
-		this.requiredType = requiredType;
+		this.requiredType = ClassUtils.resolvePrimitiveIfNecessary(requiredType);
 	}
 
 
@@ -165,7 +169,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 */
 	@SuppressWarnings("unchecked")
 	protected Object convertValueToRequiredType(Object value, Class<?> requiredType) {
-		if (String.class.equals(requiredType)) {
+		if (String.class == requiredType) {
 			return value.toString();
 		}
 		else if (Number.class.isAssignableFrom(requiredType)) {
@@ -187,15 +191,13 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 
 
 	/**
-	 * Static factory method to create a new ParameterizedSingleColumnRowMapper
+	 * Static factory method to create a new {@code SingleColumnRowMapper}
 	 * (with the required type specified only once).
 	 * @param requiredType the type that each result object is expected to match
 	 * @since 4.1
 	 */
 	public static <T> SingleColumnRowMapper<T> newInstance(Class<T> requiredType) {
-		SingleColumnRowMapper<T> newInstance = new SingleColumnRowMapper<T>();
-		newInstance.setRequiredType(requiredType);
-		return newInstance;
+		return new SingleColumnRowMapper<T>(requiredType);
 	}
 
 }

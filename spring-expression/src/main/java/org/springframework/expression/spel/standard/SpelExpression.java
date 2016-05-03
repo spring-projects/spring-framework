@@ -66,7 +66,7 @@ public class SpelExpression implements Expression {
 	// Count of many times as the expression been interpreted - can trigger compilation
 	// when certain limit reached
 	private volatile int interpretedCount = 0;
-	
+
 	// The number of times compilation was attempted and failed - enables us to eventually
 	// give up trying to compile it when it just doesn't seem to be possible.
 	private volatile int failedAttempts = 0;
@@ -448,8 +448,8 @@ public class SpelExpression implements Expression {
 
 
 	/**
-	 * Perform expression compilation. This will only succeed once exit descriptors for all nodes have 
-	 * been determined. If the compilation fails and has failed more than 100 times the expression is 
+	 * Perform expression compilation. This will only succeed once exit descriptors for all nodes have
+	 * been determined. If the compilation fails and has failed more than 100 times the expression is
 	 * no longer considered suitable for compilation.
 	 */
 	public boolean compileExpression() {

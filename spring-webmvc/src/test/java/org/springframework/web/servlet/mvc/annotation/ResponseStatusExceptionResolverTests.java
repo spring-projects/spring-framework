@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,38 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 
-import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 import static org.junit.Assert.*;
 
-/** @author Arjen Poutsma */
+/**
+ * Integration tests for {@link ResponseStatusExceptionResolver}.
+ *
+ * @author Arjen Poutsma
+ * @author Sam Brannen
+ */
 public class ResponseStatusExceptionResolverTests {
 
-	private ResponseStatusExceptionResolver exceptionResolver;
+	private final ResponseStatusExceptionResolver exceptionResolver = new ResponseStatusExceptionResolver();
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 
-	private MockHttpServletResponse response;
-
-	@Before
-	public void setUp() {
-		exceptionResolver = new ResponseStatusExceptionResolver();
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-		request.setMethod("GET");
-	}
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 	@Test
 	public void statusCode() {
@@ -55,6 +56,17 @@ public class ResponseStatusExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
+		assertTrue("Response has not been committed", response.isCommitted());
+	}
+
+	@Test
+	public void statusCodeFromComposedResponseStatus() {
+		StatusCodeFromComposedResponseStatusException ex = new StatusCodeFromComposedResponseStatusException();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 400, response.getStatus());
+		assertTrue("Response has not been committed", response.isCommitted());
 	}
 
 	@Test
@@ -65,6 +77,7 @@ public class ResponseStatusExceptionResolverTests {
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 410, response.getStatus());
 		assertEquals("Invalid status reason", "You suck!", response.getErrorMessage());
+		assertTrue("Response has not been committed", response.isCommitted());
 	}
 
 	@Test
@@ -93,22 +106,45 @@ public class ResponseStatusExceptionResolverTests {
 		assertNull("ModelAndView returned", mav);
 	}
 
+	// SPR-12903
+
+	@Test
+	public void nestedException() throws Exception {
+		Exception cause = new StatusCodeAndReasonMessageException();
+		TypeMismatchException ex = new TypeMismatchException("value", ITestBean.class, cause);
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 410, response.getStatus());
+	}
+
+
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@SuppressWarnings("serial")
 	private static class StatusCodeException extends Exception {
-
 	}
 
-	@ResponseStatus(value = HttpStatus.GONE, reason = "You suck!")
+	@ResponseStatus(code = HttpStatus.GONE, reason = "You suck!")
 	@SuppressWarnings("serial")
 	private static class StatusCodeAndReasonException extends Exception {
-
 	}
 
-	@ResponseStatus(value = HttpStatus.GONE, reason = "gone.reason")
+	@ResponseStatus(code = HttpStatus.GONE, reason = "gone.reason")
 	@SuppressWarnings("serial")
 	private static class StatusCodeAndReasonMessageException extends Exception {
+	}
 
+	@ResponseStatus
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComposedResponseStatus {
+
+		@AliasFor(annotation = ResponseStatus.class, attribute = "code")
+		HttpStatus responseStatus() default HttpStatus.INTERNAL_SERVER_ERROR;
+	}
+
+	@ComposedResponseStatus(responseStatus = HttpStatus.BAD_REQUEST)
+	@SuppressWarnings("serial")
+	private static class StatusCodeFromComposedResponseStatusException extends Exception {
 	}
 
 }

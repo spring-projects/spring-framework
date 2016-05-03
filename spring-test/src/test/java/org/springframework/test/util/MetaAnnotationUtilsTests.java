@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,6 +159,22 @@ public class MetaAnnotationUtilsTests {
 	@Test
 	public void findAnnotationDescriptorForClassWithMetaAnnotatedInterface() {
 		assertNull(findAnnotationDescriptor(ClassWithMetaAnnotatedInterface.class, Component.class));
+	}
+
+	@Test
+	public void findAnnotationDescriptorForClassWithLocalMetaAnnotationAndAnnotatedSuperclass() {
+		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(
+			MetaAnnotatedAndSuperAnnotatedContextConfigClass.class, ContextConfiguration.class);
+
+		assertNotNull("AnnotationDescriptor should not be null", descriptor);
+		assertEquals("rootDeclaringClass", MetaAnnotatedAndSuperAnnotatedContextConfigClass.class, descriptor.getRootDeclaringClass());
+		assertEquals("declaringClass", MetaConfig.class, descriptor.getDeclaringClass());
+		assertEquals("annotationType", ContextConfiguration.class, descriptor.getAnnotationType());
+		assertNotNull("composedAnnotation should not be null", descriptor.getComposedAnnotation());
+		assertEquals("composedAnnotationType", MetaConfig.class, descriptor.getComposedAnnotationType());
+
+		assertArrayEquals("configured classes", new Class[] { String.class },
+			descriptor.getAnnotationAttributes().getClassArray("classes"));
 	}
 
 	@Test
@@ -544,6 +560,14 @@ public class MetaAnnotationUtilsTests {
 	}
 
 	static class SubNonInheritedAnnotationClass extends NonInheritedAnnotationClass {
+	}
+
+	@ContextConfiguration(classes = Number.class)
+	static class AnnotatedContextConfigClass {
+	}
+
+	@MetaConfig(classes = String.class)
+	static class MetaAnnotatedAndSuperAnnotatedContextConfigClass extends AnnotatedContextConfigClass {
 	}
 
 }

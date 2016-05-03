@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,37 @@
 
 package org.springframework.web.servlet.resource;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import javax.servlet.http.HttpServletResponse;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.HandlerMapping;
-
-import static org.junit.Assert.*;
 
 /**
  * Unit tests for ResourceHttpRequestHandler.
@@ -42,8 +54,11 @@ import static org.junit.Assert.*;
  * @author Keith Donald
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class ResourceHttpRequestHandlerTests {
+
+	private SimpleDateFormat dateFormat;
 
 	private ResourceHttpRequestHandler handler;
 
@@ -54,9 +69,13 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
+		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
 		List<Resource> paths = new ArrayList<>(2);
 		paths.add(new ClassPathResource("test/", getClass()));
 		paths.add(new ClassPathResource("testalternatepath/", getClass()));
+		paths.add(new ClassPathResource("META-INF/resources/webjars/"));
 
 		this.handler = new ResourceHttpRequestHandler();
 		this.handler.setLocations(paths);
@@ -75,11 +94,93 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals("text/css", this.response.getContentType());
 		assertEquals(17, this.response.getContentLength());
-		assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
-		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
+		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
+	}
+
+	@Test
+	public void getResourceHttpHeader() throws Exception {
+		this.request.setMethod("HEAD");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("text/css", this.response.getContentType());
+		assertEquals(17, this.response.getContentLength());
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
+		assertTrue(this.response.containsHeader("Last-Modified"));
+		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
+		assertEquals(0, this.response.getContentAsByteArray().length);
+	}
+
+	@Test
+	public void getResourceHttpOptions() throws Exception {
+		this.request.setMethod("OPTIONS");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("GET,HEAD,OPTIONS", this.response.getHeader("Allow"));
+	}
+
+	@Test
+	public void getResourceNoCache() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setCacheSeconds(0);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("no-store", this.response.getHeader("Cache-Control"));
+		assertTrue(this.response.containsHeader("Last-Modified"));
+		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
+	}
+
+	@Test
+	public void getVersionedResource() throws Exception {
+		VersionResourceResolver versionResolver = new VersionResourceResolver()
+				.addFixedVersionStrategy("versionString", "/**");
+		this.handler.setResourceResolvers(Arrays.asList(versionResolver, new PathResourceResolver()));
+		this.handler.afterPropertiesSet();
+
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "versionString/foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("\"versionString\"", this.response.getHeader("ETag"));
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void getResourceHttp10BehaviorCache() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setCacheSeconds(3600);
+		this.handler.setUseExpiresHeader(true);
+		this.handler.setUseCacheControlHeader(true);
+		this.handler.setAlwaysMustRevalidate(true);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
+		assertTrue(dateHeaderAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
+		assertTrue(this.response.containsHeader("Last-Modified"));
+		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
+	}
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void getResourceHttp10BehaviorNoCache() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.setCacheSeconds(0);
+		this.handler.setUseExpiresHeader(true);
+		this.handler.setUseCacheControlNoStore(false);
+		this.handler.setUseCacheControlHeader(true);
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("no-cache", this.response.getHeader("Pragma"));
+		assertThat(this.response.getHeaderValues("Cache-Control"), Matchers.iterableWithSize(1));
+		assertEquals("no-cache", this.response.getHeader("Cache-Control"));
+		assertTrue(dateHeaderAsLong("Expires") <= System.currentTimeMillis());
+		assertTrue(this.response.containsHeader("Last-Modified"));
+		assertEquals(dateHeaderAsLong("Last-Modified") / 1000, resourceLastModified("test/foo.css") / 1000);
 	}
 
 	@Test
@@ -88,10 +189,9 @@ public class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals("text/html", this.response.getContentType());
-		assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
-		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.html"));
+		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.html"));
 	}
 
 	@Test
@@ -101,10 +201,9 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals("text/css", this.response.getContentType());
 		assertEquals(17, this.response.getContentLength());
-		assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
-		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("testalternatepath/baz.css"));
+		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("testalternatepath/baz.css"));
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
@@ -126,18 +225,68 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("function foo() { console.log(\"hello world\"); }", this.response.getContentAsString());
 	}
 
+	@Test // SPR-13658
+	public void getResourceWithRegisteredMediaType() throws Exception {
+		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
+		factory.addMediaType("css", new MediaType("foo", "bar"));
+		factory.afterPropertiesSet();
+		ContentNegotiationManager manager = factory.getObject();
+
+		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
+		this.handler = new ResourceHttpRequestHandler();
+		this.handler.setLocations(paths);
+		this.handler.setContentNegotiationManager(manager);
+		this.handler.afterPropertiesSet();
+
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("foo/bar", this.response.getContentType());
+		assertEquals("h1 { color:red; }", this.response.getContentAsString());
+	}
+
+	@Test // SPR-13658
+	public void getResourceWithRegisteredMediaTypeDefaultStrategy() throws Exception {
+		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
+		factory.setFavorPathExtension(false);
+		factory.setDefaultContentType(new MediaType("foo", "bar"));
+		factory.afterPropertiesSet();
+		ContentNegotiationManager manager = factory.getObject();
+
+		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
+		this.handler = new ResourceHttpRequestHandler();
+		this.handler.setLocations(paths);
+		this.handler.setContentNegotiationManager(manager);
+		this.handler.afterPropertiesSet();
+
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("foo/bar", this.response.getContentType());
+		assertEquals("h1 { color:red; }", this.response.getContentAsString());
+	}
+
 	@Test
 	public void invalidPath() throws Exception {
+		for (HttpMethod method : HttpMethod.values()) {
+			this.request = new MockHttpServletRequest("GET", "");
+			this.response = new MockHttpServletResponse();
+			testInvalidPath(method);
+		}
+	}
+
+	private void testInvalidPath(HttpMethod httpMethod) throws Exception {
+		this.request.setMethod(httpMethod.name());
 
 		Resource location = new ClassPathResource("test/", getClass());
-		this.handler.setLocations(Arrays.asList(location));
+		this.handler.setLocations(Collections.singletonList(location));
 
 		testInvalidPath(location, "../testsecret/secret.txt");
 		testInvalidPath(location, "test/../../testsecret/secret.txt");
 		testInvalidPath(location, ":/../../testsecret/secret.txt");
 
 		location = new UrlResource(getClass().getResource("./test/"));
-		this.handler.setLocations(Arrays.asList(location));
+		this.handler.setLocations(Collections.singletonList(location));
 		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
 		String secretPath = secretResource.getURL().getPath();
 
@@ -159,7 +308,7 @@ public class ResourceHttpRequestHandlerTests {
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
 			fail(requestPath + " doesn't actually exist as a relative path");
 		}
-		assertEquals(404, this.response.getStatus());
+		assertEquals(HttpStatus.NOT_FOUND.value(), this.response.getStatus());
 	}
 
 	@Test
@@ -204,9 +353,10 @@ public class ResourceHttpRequestHandlerTests {
 		PathResourceResolver resolver = (PathResourceResolver) this.handler.getResourceResolvers().get(0);
 		Resource[] locations = resolver.getAllowedLocations();
 
-		assertEquals(2, locations.length);
+		assertEquals(3, locations.length);
 		assertEquals("test/", ((ClassPathResource) locations[0]).getPath());
 		assertEquals("testalternatepath/", ((ClassPathResource) locations[1]).getPath());
+		assertEquals("META-INF/resources/webjars/", ((ClassPathResource) locations[2]).getPath());
 	}
 
 	@Test
@@ -218,7 +368,7 @@ public class ResourceHttpRequestHandlerTests {
 		pathResolver.setAllowedLocations(location1);
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-		handler.setResourceResolvers(Arrays.asList(pathResolver));
+		handler.setResourceResolvers(Collections.singletonList(pathResolver));
 		handler.setLocations(Arrays.asList(location1, location2));
 		handler.afterPropertiesSet();
 
@@ -252,6 +402,14 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
+	public void directoryInJarFile() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "underscorejs/");
+		this.handler.handleRequest(this.request, this.response);
+		assertEquals(200, this.response.getStatus());
+		assertEquals(0, this.response.getContentLength());
+	}
+
+	@Test
 	public void missingResourcePath() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "");
 		this.handler.handleRequest(this.request, this.response);
@@ -272,18 +430,148 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void resourceNotFound() throws Exception {
+		for (HttpMethod method : HttpMethod.values()) {
+			this.request = new MockHttpServletRequest("GET", "");
+			this.response = new MockHttpServletResponse();
+			resourceNotFound(method);
+		}
+	}
+
+	private void resourceNotFound(HttpMethod httpMethod) throws Exception {
+		this.request.setMethod(httpMethod.name());
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "not-there.css");
 		this.handler.handleRequest(this.request, this.response);
-		assertEquals(404, this.response.getStatus());
+		assertEquals(HttpStatus.NOT_FOUND.value(), this.response.getStatus());
+	}
+
+	@Test
+	public void partialContentByteRange() throws Exception {
+		this.request.addHeader("Range", "bytes=0-1");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(206, this.response.getStatus());
+		assertEquals("text/plain", this.response.getContentType());
+		assertEquals(2, this.response.getContentLength());
+		assertEquals("bytes 0-1/10", this.response.getHeader("Content-Range"));
+		assertEquals("So", this.response.getContentAsString());
+	}
+
+	@Test
+	public void partialContentByteRangeNoEnd() throws Exception {
+		this.request.addHeader("Range", "bytes=9-");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(206, this.response.getStatus());
+		assertEquals("text/plain", this.response.getContentType());
+		assertEquals(1, this.response.getContentLength());
+		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
+		assertEquals(".", this.response.getContentAsString());
+	}
+
+	@Test
+	public void partialContentByteRangeLargeEnd() throws Exception {
+		this.request.addHeader("Range", "bytes=9-10000");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(206, this.response.getStatus());
+		assertEquals("text/plain", this.response.getContentType());
+		assertEquals(1, this.response.getContentLength());
+		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
+		assertEquals(".", this.response.getContentAsString());
+	}
+
+	@Test
+	public void partialContentSuffixRange() throws Exception {
+		this.request.addHeader("Range", "bytes=-1");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(206, this.response.getStatus());
+		assertEquals("text/plain", this.response.getContentType());
+		assertEquals(1, this.response.getContentLength());
+		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
+		assertEquals(".", this.response.getContentAsString());
+	}
+
+	@Test
+	public void partialContentSuffixRangeLargeSuffix() throws Exception {
+		this.request.addHeader("Range", "bytes=-11");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(206, this.response.getStatus());
+		assertEquals("text/plain", this.response.getContentType());
+		assertEquals(10, this.response.getContentLength());
+		assertEquals("bytes 0-9/10", this.response.getHeader("Content-Range"));
+		assertEquals("Some text.", this.response.getContentAsString());
+	}
+
+	@Test
+	public void partialContentInvalidRangeHeader() throws Exception {
+		this.request.addHeader("Range", "bytes= foo bar");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(416, this.response.getStatus());
+		assertEquals("bytes */10", this.response.getHeader("Content-Range"));
+	}
+
+	@Test
+	public void partialContentMultipleByteRanges() throws Exception {
+		this.request.addHeader("Range", "bytes=0-1, 4-5, 8-9");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(206, this.response.getStatus());
+		assertTrue(this.response.getContentType().startsWith("multipart/byteranges; boundary="));
+
+		String boundary = "--" + this.response.getContentType().substring(31);
+
+		String content = this.response.getContentAsString();
+		String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
+
+		assertEquals(boundary, ranges[0]);
+		assertEquals("Content-Type: text/plain", ranges[1]);
+		assertEquals("Content-Range: bytes 0-1/10", ranges[2]);
+		assertEquals("So", ranges[3]);
+
+		assertEquals(boundary, ranges[4]);
+		assertEquals("Content-Type: text/plain", ranges[5]);
+		assertEquals("Content-Range: bytes 4-5/10", ranges[6]);
+		assertEquals(" t", ranges[7]);
+
+		assertEquals(boundary, ranges[8]);
+		assertEquals("Content-Type: text/plain", ranges[9]);
+		assertEquals("Content-Range: bytes 8-9/10", ranges[10]);
+		assertEquals("t.", ranges[11]);
+	}
+
+	// SPR-14005
+	@Test
+	public void doOverwriteExistingCacheControlHeaders() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.response.setHeader("Cache-Control", "no-store");
+
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 	}
 
 
-	private long headerAsLong(String responseHeaderName) {
-		return Long.valueOf(this.response.getHeader(responseHeaderName));
+	private long dateHeaderAsLong(String responseHeaderName) throws Exception {
+		return dateFormat.parse(this.response.getHeader(responseHeaderName)).getTime();
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {
 		return new ClassPathResource(resourceName, getClass()).getFile().lastModified();
+	}
+
+	private String resourceLastModifiedDate(String resourceName) throws IOException {
+		long lastModified = new ClassPathResource(resourceName, getClass()).getFile().lastModified();
+		return dateFormat.format(lastModified);
 	}
 
 

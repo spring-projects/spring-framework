@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,28 +47,56 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.ClassUtils;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write XML using JAXB2.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter
+ * HttpMessageConverter} that can read and write XML using JAXB2.
  *
- * <p>This converter can read classes annotated with {@link XmlRootElement} and {@link XmlType},
- * and write classes annotated with with {@link XmlRootElement}, or subclasses thereof.
+ * <p>This converter can read classes annotated with {@link XmlRootElement} and
+ * {@link XmlType}, and write classes annotated with {@link XmlRootElement},
+ * or subclasses thereof.
+ *
+ * <p>Note that if using Spring's Marshaller/Unmarshaller abstractions from the
+ * {@code spring-oxm} module you should can the
+ * {@link MarshallingHttpMessageConverter} instead.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 3.0
+ * @see MarshallingHttpMessageConverter
  */
 public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessageConverter<Object> {
+
+	private boolean supportDtd = false;
 
 	private boolean processExternalEntities = false;
 
 
 	/**
+	 * Indicates whether DTD parsing should be supported.
+	 * <p>Default is {@code false} meaning that DTD is disabled.
+	 */
+	public void setSupportDtd(boolean supportDtd) {
+		this.supportDtd = supportDtd;
+	}
+
+	/**
+	 * Whether DTD parsing is supported.
+	 */
+	public boolean isSupportDtd() {
+		return this.supportDtd;
+	}
+
+	/**
 	 * Indicates whether external XML entities are processed when converting to a Source.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 * <p><strong>Note:</strong> setting this option to {@code true} also
+	 * automatically sets {@link #setSupportDtd} to {@code true}.
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
+		if (processExternalEntities) {
+			setSupportDtd(true);
+		}
 	}
 
 	/**
@@ -109,6 +137,14 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 				return jaxbElement.getValue();
 			}
 		}
+		catch (NullPointerException ex) {
+			if (!isSupportDtd()) {
+				throw new HttpMessageNotReadableException("NPE while unmarshalling. " +
+						"This can happen on JDK 1.6 due to the presence of DTD " +
+						"declarations, which are disabled.", ex);
+			}
+			throw ex;
+		}
 		catch (UnmarshalException ex) {
 			throw new HttpMessageNotReadableException("Could not unmarshal to [" + clazz + "]: " + ex.getMessage(), ex);
 
@@ -124,6 +160,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
 			try {
 				XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+				xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 				String featureName = "http://xml.org/sax/features/external-general-entities";
 				xmlReader.setFeature(featureName, isProcessExternalEntities());
 				if (!isProcessExternalEntities()) {
@@ -158,8 +195,8 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	private void setCharset(MediaType contentType, Marshaller marshaller) throws PropertyException {
-		if (contentType != null && contentType.getCharSet() != null) {
-			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharSet().name());
+		if (contentType != null && contentType.getCharset() != null) {
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharset().name());
 		}
 	}
 

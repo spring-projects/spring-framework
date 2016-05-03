@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
@@ -33,11 +34,9 @@ import org.springframework.util.FileCopyUtils;
  */
 public class ContentVersionStrategy extends AbstractVersionStrategy {
 
-
 	public ContentVersionStrategy() {
 		super(new FileNameVersionPathStrategy());
 	}
-
 
 	@Override
 	public String getResourceVersion(Resource resource) {
@@ -46,7 +45,7 @@ public class ContentVersionStrategy extends AbstractVersionStrategy {
 			return DigestUtils.md5DigestAsHex(content);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Failed to calculate hash for resource [" + resource + "]", ex);
+			throw new IllegalStateException("Failed to calculate hash for " + resource, ex);
 		}
 	}
 

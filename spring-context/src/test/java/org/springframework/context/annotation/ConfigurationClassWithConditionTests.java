@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,6 +40,7 @@ import static org.junit.Assert.*;
  * Test for {@link Conditional} beans.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("resource")
 public class ConfigurationClassWithConditionTests {
@@ -116,6 +118,29 @@ public class ConfigurationClassWithConditionTests {
 		ctx.register(ImportsNotCreated.class);
 		ctx.refresh();
 	}
+
+	@Test
+	public void conditionOnOverriddenMethodHonored() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanSkipped.class);
+		assertEquals(0, context.getBeansOfType(ExampleBean.class).size());
+	}
+
+	@Test
+	public void noConditionOnOverriddenMethodHonored() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithBeanReactivated.class);
+		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
+		assertEquals(1, beans.size());
+		assertEquals("baz", beans.keySet().iterator().next());
+	}
+
+	@Test
+	public void configWithAlternativeBeans() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithAlternativeBeans.class);
+		Map<String, ExampleBean> beans = context.getBeansOfType(ExampleBean.class);
+		assertEquals(1, beans.size());
+		assertEquals("baz", beans.keySet().iterator().next());
+	}
+
 
 	@Configuration
 	static class BeanOneConfiguration {
@@ -197,9 +222,18 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	static class NeverCondition implements Condition {
+
 		@Override
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return false;
+		}
+	}
+
+	static class AlwaysCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return true;
 		}
 	}
 
@@ -259,6 +293,50 @@ public class ConfigurationClassWithConditionTests {
 	}
 
 	static class ExampleBean {
+	}
+
+	@Configuration
+	static class ConfigWithBeanActive {
+
+		@Bean
+		public ExampleBean baz() {
+			return new ExampleBean();
+		}
+	}
+
+	static class ConfigWithBeanSkipped extends ConfigWithBeanActive {
+
+		@Override
+		@Bean
+		@Conditional(NeverCondition.class)
+		public ExampleBean baz() {
+			return new ExampleBean();
+		}
+	}
+
+	static class ConfigWithBeanReactivated extends ConfigWithBeanSkipped {
+
+		@Override
+		@Bean
+		public ExampleBean baz() {
+			return new ExampleBean();
+		}
+	}
+
+	@Configuration
+	static class ConfigWithAlternativeBeans {
+
+		@Bean(name = "baz")
+		@Conditional(AlwaysCondition.class)
+		public ExampleBean baz1() {
+			return new ExampleBean();
+		}
+
+		@Bean(name = "baz")
+		@Conditional(NeverCondition.class)
+		public ExampleBean baz2() {
+			return new ExampleBean();
+		}
 	}
 
 }

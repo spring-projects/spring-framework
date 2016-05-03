@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.test.context.junit4;
 
-import org.springframework.dao.DataAccessException;
+import org.junit.runner.RunWith;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @see MethodLevelTransactionalSpringRunnerTests
  * @see Transactional
  */
+@RunWith(SpringRunner.class)
 @ContextConfiguration("transactionalTests-context.xml")
 public abstract class AbstractTransactionalSpringRunnerTests {
 
@@ -44,15 +46,6 @@ public abstract class AbstractTransactionalSpringRunnerTests {
 
 	protected static int clearPersonTable(JdbcTemplate jdbcTemplate) {
 		return jdbcTemplate.update("DELETE FROM person");
-	}
-
-	protected static void createPersonTable(JdbcTemplate jdbcTemplate) {
-		try {
-			jdbcTemplate.update("CREATE TABLE person (name VARCHAR(20) NOT NULL, PRIMARY KEY(name))");
-		}
-		catch (DataAccessException dae) {
-			// ignore
-		}
 	}
 
 	protected static int countRowsInPersonTable(JdbcTemplate jdbcTemplate) {

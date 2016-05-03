@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
+import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
@@ -60,6 +62,7 @@ public class ViewResolverRegistryTests {
 		context.registerSingleton("velocityConfigurer", VelocityConfigurer.class);
 		context.registerSingleton("tilesConfigurer", TilesConfigurer.class);
 		context.registerSingleton("groovyMarkupConfigurer", GroovyMarkupConfigurer.class);
+		context.registerSingleton("scriptTemplateConfigurer", ScriptTemplateConfigurer.class);
 		this.registry = new ViewResolverRegistry();
 		this.registry.setApplicationContext(context);
 		this.registry.setContentNegotiationManager(new ContentNegotiationManager());
@@ -96,9 +99,7 @@ public class ViewResolverRegistryTests {
 
 	@Test
 	public void customViewResolver() {
-		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
-		viewResolver.setPrefix("/");
-		viewResolver.setSuffix(".jsp");
+		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver("/", ".jsp");
 		this.registry.viewResolver(viewResolver);
 		assertSame(viewResolver, this.registry.getViewResolvers().get(0));
 	}
@@ -180,6 +181,20 @@ public class ViewResolverRegistryTests {
 		this.registry.groovy();
 		GroovyMarkupViewResolver resolver = checkAndGetResolver(GroovyMarkupViewResolver.class);
 		checkPropertyValues(resolver, "prefix", "", "suffix", ".tpl");
+	}
+
+	@Test
+	public void scriptTemplate() {
+		this.registry.scriptTemplate().prefix("/").suffix(".html").cache(true);
+		ScriptTemplateViewResolver resolver = checkAndGetResolver(ScriptTemplateViewResolver.class);
+		checkPropertyValues(resolver, "prefix", "/", "suffix", ".html", "cacheLimit", 1024);
+	}
+
+	@Test
+	public void scriptTemplateDefaultValues() {
+		this.registry.scriptTemplate();
+		ScriptTemplateViewResolver resolver = checkAndGetResolver(ScriptTemplateViewResolver.class);
+		checkPropertyValues(resolver, "prefix", "", "suffix", "");
 	}
 
 	@Test

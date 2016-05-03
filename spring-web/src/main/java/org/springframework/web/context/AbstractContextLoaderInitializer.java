@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.web.WebApplicationInitializer;
 
 /**
@@ -34,6 +35,7 @@ import org.springframework.web.WebApplicationInitializer;
  *
  * @author Arjen Poutsma
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.2
  */
 public abstract class AbstractContextLoaderInitializer implements WebApplicationInitializer {
@@ -56,7 +58,9 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	protected void registerContextLoaderListener(ServletContext servletContext) {
 		WebApplicationContext rootAppContext = createRootApplicationContext();
 		if (rootAppContext != null) {
-			servletContext.addListener(new ContextLoaderListener(rootAppContext));
+			ContextLoaderListener listener = new ContextLoaderListener(rootAppContext);
+			listener.setContextInitializers(getRootApplicationContextInitializers());
+			servletContext.addListener(listener);
 		}
 		else {
 			logger.debug("No ContextLoaderListener registered, as " +
@@ -76,5 +80,16 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	 * @see org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
 	 */
 	protected abstract WebApplicationContext createRootApplicationContext();
+
+	/**
+	 * Specify application context initializers to be applied to the root application
+	 * context that the {@code ContextLoaderListener} is being created with.
+	 * @since 4.2
+	 * @see #createRootApplicationContext()
+	 * @see ContextLoaderListener#setContextInitializers
+	 */
+	protected ApplicationContextInitializer<?>[] getRootApplicationContextInitializers() {
+		return null;
+	}
 
 }

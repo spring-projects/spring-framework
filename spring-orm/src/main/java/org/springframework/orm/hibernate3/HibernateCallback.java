@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,25 +40,24 @@ import org.hibernate.Session;
  * @since 1.2
  * @see HibernateTemplate
  * @see HibernateTransactionManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public interface HibernateCallback<T> {
 
 	/**
 	 * Gets called by {@code HibernateTemplate.execute} with an active
 	 * Hibernate {@code Session}. Does not need to care about activating
 	 * or closing the {@code Session}, or handling transactions.
-	 *
 	 * <p>If called without a thread-bound Hibernate transaction (initiated
 	 * by HibernateTransactionManager), the code will simply get executed on the
 	 * underlying JDBC connection with its transactional semantics. If Hibernate
 	 * is configured to use a JTA-aware DataSource, the JDBC connection and thus
 	 * the callback code will be transactional if a JTA transaction is active.
-	 *
 	 * <p>Allows for returning a result object created within the callback,
 	 * i.e. a domain object or a collection of domain objects.
 	 * A thrown custom RuntimeException is treated as an application exception:
 	 * It gets propagated to the caller of the template.
-	 *
 	 * @param session active Hibernate session
 	 * @return a result object, or {@code null} if none
 	 * @throws HibernateException if thrown by the Hibernate API

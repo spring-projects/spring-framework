@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
@@ -25,12 +26,12 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * AOP Alliance {@code MethodInterceptor} that processes method invocations
@@ -64,25 +65,29 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
  * @see org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor
  */
-public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
-		implements MethodInterceptor, Ordered {
+public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport implements MethodInterceptor, Ordered {
+
+	/**
+	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
+	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to;
+	 * as of 4.2.6, a local executor for this interceptor will be built otherwise
+	 */
+	public AsyncExecutionInterceptor(Executor defaultExecutor) {
+		super(defaultExecutor);
+	}
 
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
 	 * @param defaultExecutor the {@link Executor} (typically a Spring {@link AsyncTaskExecutor}
-	 * or {@link java.util.concurrent.ExecutorService}) to delegate to
+	 * or {@link java.util.concurrent.ExecutorService}) to delegate to;
+	 * as of 4.2.6, a local executor for this interceptor will be built otherwise
 	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use
 	 */
 	public AsyncExecutionInterceptor(Executor defaultExecutor, AsyncUncaughtExceptionHandler exceptionHandler) {
 		super(defaultExecutor, exceptionHandler);
 	}
 
-	/**
-	 * Create a new instance with a default {@link AsyncUncaughtExceptionHandler}.
-	 */
-	public AsyncExecutionInterceptor(Executor defaultExecutor) {
-		super(defaultExecutor);
-	}
 
 	/**
 	 * Intercept the given method invocation, submit the actual calling of the method to
@@ -112,6 +117,9 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 						return ((Future<?>) result).get();
 					}
 				}
+				catch (ExecutionException ex) {
+					handleError(ex.getCause(), userDeclaredMethod, invocation.getArguments());
+				}
 				catch (Throwable ex) {
 					handleError(ex, userDeclaredMethod, invocation.getArguments());
 				}
@@ -119,17 +127,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 			}
 		};
 
-		Class<?> returnType = invocation.getMethod().getReturnType();
-		if (ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
-		}
-		else if (Future.class.isAssignableFrom(returnType)) {
-			return executor.submit(task);
-		}
-		else {
-			executor.submit(task);
-			return null;
-		}
+		return doSubmit(task, executor, invocation.getMethod().getReturnType());
 	}
 
 	/**
@@ -143,6 +141,20 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	@Override
 	protected String getExecutorQualifier(Method method) {
 		return null;
+	}
+
+	/**
+	 * This implementation searches for a unique {@link org.springframework.core.task.TaskExecutor}
+	 * bean in the context, or for an {@link Executor} bean named "taskExecutor" otherwise.
+	 * If neither of the two is resolvable (e.g. if no {@code BeanFactory} was configured at all),
+	 * this implementation falls back to a newly created {@link SimpleAsyncTaskExecutor} instance
+	 * for local use if no default could be found.
+	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
+	 */
+	@Override
+	protected Executor getDefaultExecutor(BeanFactory beanFactory) {
+		Executor defaultExecutor = super.getDefaultExecutor(beanFactory);
+		return (defaultExecutor != null ? defaultExecutor : new SimpleAsyncTaskExecutor());
 	}
 
 	@Override

@@ -34,7 +34,7 @@ public class SessionStatusMethodArgumentResolver implements HandlerMethodArgumen
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return SessionStatus.class.equals(parameter.getParameterType());
+		return SessionStatus.class == parameter.getParameterType();
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.util.xml;
 
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.Socket;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;
@@ -25,8 +27,10 @@ import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamResult;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -34,6 +38,10 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
 
+/**
+ * @author Arjen Poutsma
+ * @author Sam Brannen
+ */
 public abstract class AbstractStaxHandlerTestCase {
 
 	private static final String COMPLEX_XML =
@@ -57,6 +65,8 @@ public abstract class AbstractStaxHandlerTestCase {
 
 	@Test
 	public void noNamespacePrefixes() throws Exception {
+		Assume.assumeTrue(wwwSpringframeworkOrgIsAccessible());
+
 		StringWriter stringWriter = new StringWriter();
 		AbstractStaxHandler handler = createStaxHandler(new StreamResult(stringWriter));
 		xmlReader.setContentHandler(handler);
@@ -70,8 +80,20 @@ public abstract class AbstractStaxHandlerTestCase {
 		assertXMLEqual(COMPLEX_XML, stringWriter.toString());
 	}
 
+	private static boolean wwwSpringframeworkOrgIsAccessible() {
+		try {
+			new Socket("www.springframework.org", 80).close();
+		}
+		catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+
 	@Test
 	public void namespacePrefixes() throws Exception {
+		Assume.assumeTrue(wwwSpringframeworkOrgIsAccessible());
+
 		StringWriter stringWriter = new StringWriter();
 		AbstractStaxHandler handler = createStaxHandler(new StreamResult(stringWriter));
 		xmlReader.setContentHandler(handler);

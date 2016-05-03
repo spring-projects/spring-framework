@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 
 	private static final String MBEAN_EXPORTER_BEAN_NAME = "mbeanExporter";
 
-	private AnnotationAttributes attributes;
+	private AnnotationAttributes enableMBeanExport;
 
 	private Environment environment;
 
@@ -61,8 +61,8 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		Map<String, Object> map = importMetadata.getAnnotationAttributes(EnableMBeanExport.class.getName());
-		this.attributes = AnnotationAttributes.fromMap(map);
-		if (this.attributes == null) {
+		this.enableMBeanExport = AnnotationAttributes.fromMap(map);
+		if (this.enableMBeanExport == null) {
 			throw new IllegalArgumentException(
 					"@EnableMBeanExport is not present on importing class " + importMetadata.getClassName());
 		}
@@ -90,7 +90,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	}
 
 	private void setupDomain(AnnotationMBeanExporter exporter) {
-		String defaultDomain = this.attributes.getString("defaultDomain");
+		String defaultDomain = this.enableMBeanExport.getString("defaultDomain");
 		if (defaultDomain != null && this.environment != null) {
 			defaultDomain = this.environment.resolvePlaceholders(defaultDomain);
 		}
@@ -100,7 +100,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	}
 
 	private void setupServer(AnnotationMBeanExporter exporter) {
-		String server = this.attributes.getString("server");
+		String server = this.enableMBeanExport.getString("server");
 		if (server != null && this.environment != null) {
 			server = this.environment.resolvePlaceholders(server);
 		}
@@ -116,7 +116,7 @@ public class MBeanExportConfiguration implements ImportAware, EnvironmentAware, 
 	}
 
 	private void setupRegistrationPolicy(AnnotationMBeanExporter exporter) {
-		RegistrationPolicy registrationPolicy = this.attributes.getEnum("registration");
+		RegistrationPolicy registrationPolicy = this.enableMBeanExport.getEnum("registration");
 		exporter.setRegistrationPolicy(registrationPolicy);
 	}
 

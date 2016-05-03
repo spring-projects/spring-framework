@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class UnsatisfiedDependencyException extends BeanCreationException {
 
+	private InjectionPoint injectionPoint;
+
+
 	/**
 	 * Create a new UnsatisfiedDependencyException.
 	 * @param resourceDescription description of the resource that the bean definition came from
@@ -56,7 +59,37 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	public UnsatisfiedDependencyException(
 			String resourceDescription, String beanName, String propertyName, BeansException ex) {
 
-		this(resourceDescription, beanName, propertyName, (ex != null ? ": " + ex.getMessage() : ""));
+		this(resourceDescription, beanName, propertyName, (ex != null ? ex.getMessage() : ""));
+		initCause(ex);
+	}
+
+	/**
+	 * Create a new UnsatisfiedDependencyException.
+	 * @param resourceDescription description of the resource that the bean definition came from
+	 * @param beanName the name of the bean requested
+	 * @param injectionPoint the injection point (field or method/constructor parameter)
+	 * @param msg the detail message
+	 * @since 4.3
+	 */
+	public UnsatisfiedDependencyException(
+			String resourceDescription, String beanName, InjectionPoint injectionPoint, String msg) {
+
+		super(resourceDescription, beanName, "Unsatisfied dependency expressed through " + injectionPoint + ": " + msg);
+		this.injectionPoint = injectionPoint;
+	}
+
+	/**
+	 * Create a new UnsatisfiedDependencyException.
+	 * @param resourceDescription description of the resource that the bean definition came from
+	 * @param beanName the name of the bean requested
+	 * @param injectionPoint the injection point (field or method/constructor parameter)
+	 * @param ex the bean creation exception that indicated the unsatisfied dependency
+	 * @since 4.3
+	 */
+	public UnsatisfiedDependencyException(
+			String resourceDescription, String beanName, InjectionPoint injectionPoint, BeansException ex) {
+
+		this(resourceDescription, beanName, injectionPoint, (ex != null ? ex.getMessage() : ""));
 		initCause(ex);
 	}
 
@@ -67,7 +100,9 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * @param ctorArgIndex the index of the constructor argument that couldn't be satisfied
 	 * @param ctorArgType the type of the constructor argument that couldn't be satisfied
 	 * @param msg the detail message
+	 * @deprecated in favor of {@link #UnsatisfiedDependencyException(String, String, InjectionPoint, String)}
 	 */
+	@Deprecated
 	public UnsatisfiedDependencyException(
 			String resourceDescription, String beanName, int ctorArgIndex, Class<?> ctorArgType, String msg) {
 
@@ -84,12 +119,23 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * @param ctorArgIndex the index of the constructor argument that couldn't be satisfied
 	 * @param ctorArgType the type of the constructor argument that couldn't be satisfied
 	 * @param ex the bean creation exception that indicated the unsatisfied dependency
+	 * @deprecated in favor of {@link #UnsatisfiedDependencyException(String, String, InjectionPoint, BeansException)}
 	 */
+	@Deprecated
 	public UnsatisfiedDependencyException(
 			String resourceDescription, String beanName, int ctorArgIndex, Class<?> ctorArgType, BeansException ex) {
 
-		this(resourceDescription, beanName, ctorArgIndex, ctorArgType, (ex != null ? ": " + ex.getMessage() : ""));
+		this(resourceDescription, beanName, ctorArgIndex, ctorArgType, (ex != null ? ex.getMessage() : ""));
 		initCause(ex);
+	}
+
+
+	/**
+	 * Return the injection point (field or method/constructor parameter), if known.
+	 * @since 4.3
+	 */
+	public InjectionPoint getInjectionPoint() {
+		return this.injectionPoint;
 	}
 
 }

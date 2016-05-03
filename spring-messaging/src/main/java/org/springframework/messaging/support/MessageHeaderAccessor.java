@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,7 +319,8 @@ public class MessageHeaderAccessor {
 
 	protected void verifyType(String headerName, Object headerValue) {
 		if (headerName != null && headerValue != null) {
-			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) || MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
+			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) ||
+					MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
 				if (!(headerValue instanceof MessageChannel || headerValue instanceof String)) {
 					throw new IllegalArgumentException(
 							"'" + headerName + "' header value must be a MessageChannel or String");
@@ -418,11 +419,31 @@ public class MessageHeaderAccessor {
 	// Specific header accessors
 
 	public UUID getId() {
-		return (UUID) getHeader(MessageHeaders.ID);
+		Object value = getHeader(MessageHeaders.ID);
+		if (value == null) {
+			return null;
+		}
+		return (value instanceof UUID ? (UUID) value : UUID.fromString(value.toString()));
 	}
 
 	public Long getTimestamp() {
-		return (Long) getHeader(MessageHeaders.TIMESTAMP);
+		Object value = getHeader(MessageHeaders.TIMESTAMP);
+		if (value == null) {
+			return null;
+		}
+		return (value instanceof Long ? (Long) value : Long.parseLong(value.toString()));
+	}
+
+	public void setContentType(MimeType contentType) {
+		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
+	}
+
+	public MimeType getContentType() {
+		Object value = getHeader(MessageHeaders.CONTENT_TYPE);
+		if (value == null) {
+			return null;
+		}
+		return (value instanceof MimeType ? (MimeType) value : MimeType.valueOf(value.toString()));
 	}
 
 	public void setReplyChannelName(String replyChannelName) {
@@ -448,14 +469,6 @@ public class MessageHeaderAccessor {
     public Object getErrorChannel() {
         return getHeader(MessageHeaders.ERROR_CHANNEL);
     }
-
-	public void setContentType(MimeType contentType) {
-		setHeader(MessageHeaders.CONTENT_TYPE, contentType);
-	}
-
-	public MimeType getContentType() {
-		return (MimeType) getHeader(MessageHeaders.CONTENT_TYPE);
-	}
 
 
 	// Log message stuff
@@ -488,7 +501,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return (bytes.length < 80) ?
 						" payload=" + new String(bytes, charset) :
@@ -508,12 +521,12 @@ public class MessageHeaderAccessor {
 
 	protected String getDetailedPayloadLogMessage(Object payload) {
 		if (payload instanceof String) {
-			return " payload=" + ((String) payload);
+			return " payload=" + payload;
 		}
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return " payload=" + new String(bytes, charset);
 			}
@@ -560,11 +573,13 @@ public class MessageHeaderAccessor {
 	 * A variation of {@link #getAccessor(org.springframework.messaging.Message, Class)}
 	 * with a {@code MessageHeaders} instance instead of a {@code Message}.
 	 * <p>This is for cases when a full message may not have been created yet.
-	 * @return an accessor instance of the specified typem or {@code null} if none
+	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends MessageHeaderAccessor> T getAccessor(MessageHeaders messageHeaders, Class<T> requiredType) {
+	public static <T extends MessageHeaderAccessor> T getAccessor(
+			MessageHeaders messageHeaders, Class<T> requiredType) {
+
 		if (messageHeaders instanceof MutableMessageHeaders) {
 			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
 			MessageHeaderAccessor headerAccessor = mutableHeaders.getMessageHeaderAccessor();
@@ -581,7 +596,7 @@ public class MessageHeaderAccessor {
 	 * wrapping the message with a {@code MessageHeaderAccessor} instance.
 	 * <p>This is for cases where a header needs to be updated in generic code
 	 * while preserving the accessor type for downstream processing.
-	 * @return an accessor of the required type, never {@code null}.
+	 * @return an accessor of the required type (never {@code null})
 	 * @since 4.1
 	 */
 	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
@@ -634,7 +649,6 @@ public class MessageHeaderAccessor {
 			if (getId() == null) {
 				IdGenerator idGenerator = (MessageHeaderAccessor.this.idGenerator != null ?
 						MessageHeaderAccessor.this.idGenerator : MessageHeaders.getIdGenerator());
-
 				UUID id = idGenerator.generateId();
 				if (id != null && id != MessageHeaders.ID_VALUE_NONE) {
 					getRawHeaders().put(ID, id);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import static java.lang.String.*;
  */
 public enum TestGroup {
 
-
 	/**
 	 * Tests that take a considerable amount of time to run. Any test lasting longer than
 	 * 500ms should be considered a candidate in order to avoid making the overall test
@@ -68,6 +67,7 @@ public enum TestGroup {
 	 */
 	CUSTOM_COMPILATION;
 
+
 	/**
 	 * Parse the specified comma separated string of groups.
 	 * @param value the comma separated string of groups
@@ -93,7 +93,8 @@ public enum TestGroup {
 		for (String group : value.split(",")) {
 			try {
 				groups.add(valueOf(group.trim().toUpperCase()));
-			} catch (IllegalArgumentException e) {
+			}
+			catch (IllegalArgumentException ex) {
 				throw new IllegalArgumentException(format(
 						"Unable to find test group '%s' when parsing testGroups value: '%s'. " +
 						"Available groups include: [%s]", group.trim(), value,
@@ -102,4 +103,5 @@ public enum TestGroup {
 		}
 		return groups;
 	}
+
 }

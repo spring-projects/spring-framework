@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans;
 
-import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 
 import org.springframework.util.Assert;
@@ -60,9 +59,6 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	/** Package-visible field for caching the resolved property path tokens */
 	transient volatile Object resolvedTokens;
 
-	/** Package-visible field for caching the resolved PropertyDescriptor */
-	transient volatile PropertyDescriptor resolvedDescriptor;
-
 
 	/**
 	 * Create a new PropertyValue instance.
@@ -88,7 +84,6 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		this.convertedValue = original.convertedValue;
 		this.conversionNecessary = original.conversionNecessary;
 		this.resolvedTokens = original.resolvedTokens;
-		this.resolvedDescriptor = original.resolvedDescriptor;
 		copyAttributesFrom(original);
 	}
 
@@ -106,7 +101,6 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		this.optional = original.isOptional();
 		this.conversionNecessary = original.conversionNecessary;
 		this.resolvedTokens = original.resolvedTokens;
-		this.resolvedDescriptor = original.resolvedDescriptor;
 		copyAttributesFrom(original);
 	}
 

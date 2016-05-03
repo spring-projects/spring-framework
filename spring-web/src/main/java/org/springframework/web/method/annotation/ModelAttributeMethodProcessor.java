@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,30 +38,32 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves method arguments annotated with {@code @ModelAttribute} and handles
- * return values from methods annotated with {@code @ModelAttribute}.
+ * Resolve {@code @ModelAttribute} annotated method arguments and handle
+ * return values from {@code @ModelAttribute} annotated methods.
  *
- * <p>Model attributes are obtained from the model or if not found possibly
- * created with a default constructor if it is available. Once created, the
- * attributed is populated with request data via data binding and also
- * validation may be applied if the argument is annotated with
- * {@code @javax.validation.Valid}.
+ * <p>Model attributes are obtained from the model or created with a default
+ * constructor (and then added to the model). Once created the attribute is
+ * populated via data binding to Servlet request parameters. Validation may be
+ * applied if the argument is annotated with {@code @javax.validation.Valid}.
+ * or {@link @Validated}.
  *
- * <p>When this handler is created with {@code annotationNotRequired=true},
+ * <p>When this handler is created with {@code annotationNotRequired=true}
  * any non-simple type argument and return value is regarded as a model
  * attribute with or without the presence of an {@code @ModelAttribute}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
+public class ModelAttributeMethodProcessor
+		implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
-	protected Log logger = LogFactory.getLog(this.getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final boolean annotationNotRequired;
 
 
 	/**
+	 * Class constructor.
 	 * @param annotationNotRequired if "true", non-simple method arguments and
 	 * return values are considered model attributes with or without a
 	 * {@code @ModelAttribute} annotation.
@@ -72,20 +74,14 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 
 	/**
-	 * @return true if the parameter is annotated with {@link ModelAttribute}
-	 * or in default resolution mode also if it is not a simple type.
+	 * Returns {@code true} if the parameter is annotated with
+	 * {@link ModelAttribute} or, if in default resolution mode, for any
+	 * method parameter that is not a simple type.
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
-			return true;
-		}
-		else if (this.annotationNotRequired) {
-			return !BeanUtils.isSimpleProperty(parameter.getParameterType());
-		}
-		else {
-			return false;
-		}
+		return (parameter.hasParameterAnnotation(ModelAttribute.class) ||
+				(this.annotationNotRequired && !BeanUtils.isSimpleProperty(parameter.getParameterType())));
 	}
 
 	/**
@@ -102,22 +98,28 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		String name = ModelFactory.getNameForParameter(parameter);
-		Object attribute = (mavContainer.containsAttribute(name) ?
-				mavContainer.getModel().get(name) : createAttribute(name, parameter, binderFactory, webRequest));
+		Object attribute = (mavContainer.containsAttribute(name) ? mavContainer.getModel().get(name) :
+				createAttribute(name, parameter, binderFactory, webRequest));
+
+		if (!mavContainer.isBindingDisabled(name)) {
+			ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+			if (ann != null && !ann.binding()) {
+				mavContainer.setBindingDisabled(name);
+			}
+		}
 
 		WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
 		if (binder.getTarget() != null) {
-			bindRequestParameters(binder, webRequest);
+			if (!mavContainer.isBindingDisabled(name)) {
+				bindRequestParameters(binder, webRequest);
+			}
 			validateIfApplicable(binder, parameter);
-			if (binder.getBindingResult().hasErrors()) {
-				if (isBindExceptionRequired(binder, parameter)) {
-					throw new BindException(binder.getBindingResult());
-				}
+			if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
+				throw new BindException(binder.getBindingResult());
 			}
 		}
 
 		// Add resolved attribute and BindingResult at the end of the model
-
 		Map<String, Object> bindingResultModel = binder.getBindingResult().getModel();
 		mavContainer.removeAttributes(bindingResultModel);
 		mavContainer.addAllAttributes(bindingResultModel);
@@ -129,15 +131,15 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * Extension point to create the model attribute if not found in the model.
 	 * The default implementation uses the default constructor.
 	 * @param attributeName the name of the attribute (never {@code null})
-	 * @param parameter the method parameter
+	 * @param methodParam the method parameter
 	 * @param binderFactory for creating WebDataBinder instance
 	 * @param request the current request
 	 * @return the created model attribute (never {@code null})
 	 */
-	protected Object createAttribute(String attributeName, MethodParameter parameter,
-			WebDataBinderFactory binderFactory,  NativeWebRequest request) throws Exception {
+	protected Object createAttribute(String attributeName, MethodParameter methodParam,
+			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
-		return BeanUtils.instantiateClass(parameter.getParameterType());
+		return BeanUtils.instantiateClass(methodParam.getParameterType());
 	}
 
 	/**
@@ -151,12 +153,14 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 	/**
 	 * Validate the model attribute if applicable.
-	 * <p>The default implementation checks for {@code @javax.validation.Valid}.
+	 * <p>The default implementation checks for {@code @javax.validation.Valid},
+	 * Spring's {@link org.springframework.validation.annotation.Validated},
+	 * and custom annotations whose name starts with "Valid".
 	 * @param binder the DataBinder to be used
-	 * @param parameter the method parameter
+	 * @param methodParam the method parameter
 	 */
-	protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {
-		Annotation[] annotations = parameter.getParameterAnnotations();
+	protected void validateIfApplicable(WebDataBinder binder, MethodParameter methodParam) {
+		Annotation[] annotations = methodParam.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Validated validatedAnn = AnnotationUtils.getAnnotation(ann, Validated.class);
 			if (validatedAnn != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
@@ -169,34 +173,27 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	}
 
 	/**
-	 * Whether to raise a {@link BindException} on validation errors.
+	 * Whether to raise a fatal bind exception on validation errors.
 	 * @param binder the data binder used to perform data binding
-	 * @param parameter the method argument
-	 * @return {@code true} if the next method argument is not of type {@link Errors}.
+	 * @param methodParam the method argument
+	 * @return {@code true} if the next method argument is not of type {@link Errors}
 	 */
-	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
-		int i = parameter.getParameterIndex();
-		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
+	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter methodParam) {
+		int i = methodParam.getParameterIndex();
+		Class<?>[] paramTypes = methodParam.getMethod().getParameterTypes();
 		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
-
 		return !hasBindingResult;
 	}
 
 	/**
 	 * Return {@code true} if there is a method-level {@code @ModelAttribute}
-	 * or if it is a non-simple type when {@code annotationNotRequired=true}.
+	 * or, in default resolution mode, for any return value type that is not
+	 * a simple type.
 	 */
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		if (returnType.getMethodAnnotation(ModelAttribute.class) != null) {
-			return true;
-		}
-		else if (this.annotationNotRequired) {
-			return !BeanUtils.isSimpleProperty(returnType.getParameterType());
-		}
-		else {
-			return false;
-		}
+		return (returnType.hasMethodAnnotation(ModelAttribute.class) ||
+				(this.annotationNotRequired && !BeanUtils.isSimpleProperty(returnType.getParameterType())));
 	}
 
 	/**

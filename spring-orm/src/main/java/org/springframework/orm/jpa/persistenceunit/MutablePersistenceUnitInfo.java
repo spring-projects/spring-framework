@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import org.springframework.util.ClassUtils;
 /**
  * Spring's base implementation of the JPA
  * {@link javax.persistence.spi.PersistenceUnitInfo} interface,
- * used to bootstrap an EntityManagerFactory in a container.
+ * used to bootstrap an {@code EntityManagerFactory} in a container.
  *
  * <p>This implementation is largely a JavaBean, offering mutators
- * for all standard PersistenceUnitInfo properties.
+ * for all standard {@code PersistenceUnitInfo} properties.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -154,6 +154,11 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.persistenceUnitRootUrl;
 	}
 
+	/**
+	 * Add a managed class name to the persistence provider's metadata.
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getManagedClassNames()
+	 * @see #addManagedPackage
+	 */
 	public void addManagedClassName(String managedClassName) {
 		this.managedClassNames.add(managedClassName);
 	}
@@ -163,6 +168,15 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.managedClassNames;
 	}
 
+	/**
+	 * Add a managed package to the persistence provider's metadata.
+	 * <p>Note: This refers to annotated {@code package-info.java} files. It does
+	 * <i>not</i> trigger entity scanning in the specified package; this is
+	 * rather the job of {@link DefaultPersistenceUnitManager#setPackagesToScan}.
+	 * @since 4.1
+	 * @see SmartPersistenceUnitInfo#getManagedPackages()
+	 * @see #addManagedClassName
+	 */
 	public void addManagedPackage(String packageName) {
 		this.managedPackages.add(packageName);
 	}
@@ -262,7 +276,8 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	@Override
 	public String toString() {
-		return "PersistenceUnitInfo: name '" + this.persistenceUnitName + "', root URL [" + this.persistenceUnitRootUrl + "]";
+		return "PersistenceUnitInfo: name '" + this.persistenceUnitName +
+				"', root URL [" + this.persistenceUnitRootUrl + "]";
 	}
 
 }

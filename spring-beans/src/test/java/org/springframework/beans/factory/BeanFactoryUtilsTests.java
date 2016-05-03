@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -53,15 +51,15 @@ public final class BeanFactoryUtilsTests {
 	private static final Resource LEAF_CONTEXT = qualifiedResource(CLASS, "leaf.xml");
 	private static final Resource DEPENDENT_BEANS_CONTEXT = qualifiedResource(CLASS, "dependentBeans.xml");
 
-	private ConfigurableListableBeanFactory listableBeanFactory;
+	private DefaultListableBeanFactory listableBeanFactory;
 
-	private ConfigurableListableBeanFactory dependentBeansBF;
+	private DefaultListableBeanFactory dependentBeansFactory;
+
 
 	@Before
 	public void setUp() {
 		// Interesting hierarchical factory to test counts.
 		// Slow to read so we cache it.
-
 
 		DefaultListableBeanFactory grandParent = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(grandParent).loadBeanDefinitions(ROOT_CONTEXT);
@@ -70,11 +68,12 @@ public final class BeanFactoryUtilsTests {
 		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
 		new XmlBeanDefinitionReader(child).loadBeanDefinitions(LEAF_CONTEXT);
 
-		this.dependentBeansBF = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.dependentBeansBF).loadBeanDefinitions(DEPENDENT_BEANS_CONTEXT);
-		dependentBeansBF.preInstantiateSingletons();
+		this.dependentBeansFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.dependentBeansFactory).loadBeanDefinitions(DEPENDENT_BEANS_CONTEXT);
+		dependentBeansFactory.preInstantiateSingletons();
 		this.listableBeanFactory = child;
 	}
+
 
 	@Test
 	public void testHierarchicalCountBeansWithNonHierarchicalFactory() {
@@ -92,22 +91,21 @@ public final class BeanFactoryUtilsTests {
 		// Leaf count
 		assertTrue(this.listableBeanFactory.getBeanDefinitionCount() == 1);
 		// Count minus duplicate
-		assertTrue("Should count 7 beans, not "
-				+ BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory),
-			BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 7);
+		assertTrue("Should count 7 beans, not " + BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory),
+				BeanFactoryUtils.countBeansIncludingAncestors(this.listableBeanFactory) == 7);
 	}
 
 	@Test
 	public void testHierarchicalNamesWithNoMatch() throws Exception {
-		List<String> names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
-			NoOp.class));
+		List<String> names = Arrays.asList(
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, NoOp.class));
 		assertEquals(0, names.size());
 	}
 
 	@Test
 	public void testHierarchicalNamesWithMatchOnlyInRoot() throws Exception {
-		List<String> names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
-			IndexedTestBean.class));
+		List<String> names = Arrays.asList(
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, IndexedTestBean.class));
 		assertEquals(1, names.size());
 		assertTrue(names.contains("indexedBean"));
 		// Distinguish from default ListableBeanFactory behavior
@@ -116,8 +114,8 @@ public final class BeanFactoryUtilsTests {
 
 	@Test
 	public void testGetBeanNamesForTypeWithOverride() throws Exception {
-		List<String> names = Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory,
-			ITestBean.class));
+		List<String> names = Arrays.asList(
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class));
 		// includes 2 TestBeans from FactoryBeans (DummyFactory definitions)
 		assertEquals(4, names.size());
 		assertTrue(names.contains("test"));
@@ -130,7 +128,7 @@ public final class BeanFactoryUtilsTests {
 	public void testNoBeansOfType() {
 		StaticListableBeanFactory lbf = new StaticListableBeanFactory();
 		lbf.addBean("foo", new Object());
-		Map<?, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
+		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
 		assertTrue(beans.isEmpty());
 	}
 
@@ -147,18 +145,7 @@ public final class BeanFactoryUtilsTests {
 		lbf.addBean("t3", t3);
 		lbf.addBean("t4", t4);
 
-		Map<?, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, false);
-		assertEquals(2, beans.size());
-		assertEquals(t1, beans.get("t1"));
-		assertEquals(t2, beans.get("t2"));
-
-		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, false, true);
-		assertEquals(3, beans.size());
-		assertEquals(t1, beans.get("t1"));
-		assertEquals(t2, beans.get("t2"));
-		assertEquals(t3.getObject(), beans.get("t3"));
-
-		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, true);
+		Map<String, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(lbf, ITestBean.class, true, true);
 		assertEquals(4, beans.size());
 		assertEquals(t1, beans.get("t1"));
 		assertEquals(t2, beans.get("t2"));
@@ -191,8 +178,8 @@ public final class BeanFactoryUtilsTests {
 		this.listableBeanFactory.registerSingleton("t3", t3);
 		this.listableBeanFactory.registerSingleton("t4", t4);
 
-		Map<?, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true,
-			false);
+		Map<String, ?> beans =
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, false);
 		assertEquals(6, beans.size());
 		assertEquals(test3, beans.get("test3"));
 		assertEquals(test, beans.get("test"));
@@ -200,12 +187,9 @@ public final class BeanFactoryUtilsTests {
 		assertEquals(t2, beans.get("t2"));
 		assertEquals(t3.getObject(), beans.get("t3"));
 		assertTrue(beans.get("t4") instanceof TestBean);
-		// t3 and t4 are found here as of Spring 2.0, since they are
-		// pre-registered
-		// singleton instances, while testFactory1 and testFactory are *not*
-		// found
-		// because they are FactoryBean definitions that haven't been
-		// initialized yet.
+		// t3 and t4 are found here as of Spring 2.0, since they are pre-registered
+		// singleton instances, while testFactory1 and testFactory are *not* found
+		// because they are FactoryBean definitions that haven't been initialized yet.
 
 		beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, false, true);
 		Object testFactory1 = this.listableBeanFactory.getBean("testFactory1");
@@ -247,8 +231,8 @@ public final class BeanFactoryUtilsTests {
 		Object test3 = this.listableBeanFactory.getBean("test3");
 		Object test = this.listableBeanFactory.getBean("test");
 
-		Map<?, ?> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true,
-			false);
+		Map<String, ?> beans =
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(this.listableBeanFactory, ITestBean.class, true, false);
 		assertEquals(2, beans.size());
 		assertEquals(test3, beans.get("test3"));
 		assertEquals(test, beans.get("test"));
@@ -283,25 +267,25 @@ public final class BeanFactoryUtilsTests {
 
 	@Test
 	public void testADependencies() {
-		String[] deps = this.dependentBeansBF.getDependentBeans("a");
+		String[] deps = this.dependentBeansFactory.getDependentBeans("a");
 		assertTrue(ObjectUtils.isEmpty(deps));
 	}
 
 	@Test
 	public void testBDependencies() {
-		String[] deps = this.dependentBeansBF.getDependentBeans("b");
+		String[] deps = this.dependentBeansFactory.getDependentBeans("b");
 		assertTrue(Arrays.equals(new String[] { "c" }, deps));
 	}
 
 	@Test
 	public void testCDependencies() {
-		String[] deps = this.dependentBeansBF.getDependentBeans("c");
+		String[] deps = this.dependentBeansFactory.getDependentBeans("c");
 		assertTrue(Arrays.equals(new String[] { "int", "long" }, deps));
 	}
 
 	@Test
 	public void testIntDependencies() {
-		String[] deps = this.dependentBeansBF.getDependentBeans("int");
+		String[] deps = this.dependentBeansFactory.getDependentBeans("int");
 		assertTrue(Arrays.equals(new String[] { "buffer" }, deps));
 	}
 

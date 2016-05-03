@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.test.context.testng.transaction.ejb;
 
-import org.testng.annotations.Test;
-
-import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
+
+import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.*;
 
@@ -35,7 +35,7 @@ import static org.testng.AssertJUnit.*;
  * @since 4.0.1
  */
 @Test(suiteName = "Rollback for REQUIRED")
-@TransactionConfiguration(defaultRollback = true)
+@Rollback
 public class RollbackForRequiredEjbTxDaoTestNGTests extends CommitForRequiredEjbTxDaoTestNGTests {
 
 	/**

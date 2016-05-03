@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,68 +17,131 @@
 package org.springframework.web.multipart.support;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 
-import org.junit.Before;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Rossen Stoyanchev
  */
 public class RequestPartServletServerHttpRequestTests {
 
-	private RequestPartServletServerHttpRequest request;
+	private final MockMultipartHttpServletRequest mockRequest = new MockMultipartHttpServletRequest();
 
-	private MockMultipartHttpServletRequest mockRequest;
-
-	private MockMultipartFile mockFile;
-
-	@Before
-	public void create() throws Exception {
-		mockFile = new MockMultipartFile("part", "", "application/json" ,"Part Content".getBytes("UTF-8"));
-		mockRequest = new MockMultipartHttpServletRequest();
-		mockRequest.addFile(mockFile);
-		request = new RequestPartServletServerHttpRequest(mockRequest, "part");
-	}
 
 	@Test
 	public void getMethod() throws Exception {
-		mockRequest.setMethod("POST");
-		assertEquals("Invalid method", HttpMethod.POST, request.getMethod());
+		this.mockRequest.addFile(new MockMultipartFile("part", "", "", "content".getBytes("UTF-8")));
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
+		this.mockRequest.setMethod("POST");
+
+		assertEquals(HttpMethod.POST, request.getMethod());
 	}
 
 	@Test
 	public void getURI() throws Exception {
+		this.mockRequest.addFile(new MockMultipartFile("part", "", "application/json", "content".getBytes("UTF-8")));
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
+
 		URI uri = new URI("http://example.com/path?query");
-		mockRequest.setServerName(uri.getHost());
-		mockRequest.setServerPort(uri.getPort());
-		mockRequest.setRequestURI(uri.getPath());
-		mockRequest.setQueryString(uri.getQuery());
-		assertEquals("Invalid uri", uri, request.getURI());
+		this.mockRequest.setServerName(uri.getHost());
+		this.mockRequest.setServerPort(uri.getPort());
+		this.mockRequest.setRequestURI(uri.getPath());
+		this.mockRequest.setQueryString(uri.getQuery());
+		assertEquals(uri, request.getURI());
 	}
 
 	@Test
 	public void getContentType() throws Exception {
-		HttpHeaders headers = request.getHeaders();
-		assertNotNull("No HttpHeaders returned", headers);
+		MultipartFile part = new MockMultipartFile("part", "", "application/json", "content".getBytes("UTF-8"));
+		this.mockRequest.addFile(part);
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
 
-		MediaType expected = MediaType.parseMediaType(mockFile.getContentType());
-		MediaType actual = headers.getContentType();
-		assertEquals("Invalid content type returned", expected, actual);
+		HttpHeaders headers = request.getHeaders();
+		assertNotNull(headers);
+		assertEquals(MediaType.APPLICATION_JSON, headers.getContentType());
 	}
 
 	@Test
 	public void getBody() throws Exception {
+		byte[] bytes = "content".getBytes("UTF-8");
+		MultipartFile part = new MockMultipartFile("part", "", "application/json", bytes);
+		this.mockRequest.addFile(part);
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
+
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
-		assertArrayEquals("Invalid content returned", mockFile.getBytes(), result);
+		assertArrayEquals(bytes, result);
+	}
+
+	// SPR-13317
+
+	@Test
+	public void getBodyWithWrappedRequest() throws Exception {
+		byte[] bytes = "content".getBytes("UTF-8");
+		MultipartFile part = new MockMultipartFile("part", "", "application/json", bytes);
+		this.mockRequest.addFile(part);
+		HttpServletRequest wrapped = new HttpServletRequestWrapper(this.mockRequest);
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(wrapped, "part");
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertArrayEquals(bytes, result);
+	}
+
+	// SPR-13096
+
+	@Test
+	public void getBodyViaRequestParameter() throws Exception {
+		MockMultipartHttpServletRequest mockRequest = new MockMultipartHttpServletRequest() {
+
+			@Override
+			public HttpHeaders getMultipartHeaders(String paramOrFileName) {
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(new MediaType("application", "octet-stream", Charset.forName("iso-8859-1")));
+				return headers;
+			}
+		};
+		byte[] bytes = {(byte) 0xC4};
+		mockRequest.setParameter("part", new String(bytes, Charset.forName("iso-8859-1")));
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(mockRequest, "part");
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertArrayEquals(bytes, result);
+	}
+
+	@Test
+	public void getBodyViaRequestParameterWithRequestEncoding() throws Exception {
+		MockMultipartHttpServletRequest mockRequest = new MockMultipartHttpServletRequest() {
+
+			@Override
+			public HttpHeaders getMultipartHeaders(String paramOrFileName) {
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+				return headers;
+			}
+		};
+		byte[] bytes = {(byte) 0xC4};
+		mockRequest.setParameter("part", new String(bytes, Charset.forName("iso-8859-1")));
+		mockRequest.setCharacterEncoding("iso-8859-1");
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(mockRequest, "part");
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertArrayEquals(bytes, result);
 	}
 
 }

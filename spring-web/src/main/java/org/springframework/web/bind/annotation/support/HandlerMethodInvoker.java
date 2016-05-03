@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -93,7 +94,9 @@ import org.springframework.web.multipart.MultipartRequest;
  * @author Arjen Poutsma
  * @since 2.5.2
  * @see #invokeHandlerMethod
+ * @deprecated as of 4.3, in favor of the {@code HandlerMethod}-based MVC infrastructure
  */
+@Deprecated
 public class HandlerMethodInvoker {
 
 	private static final String MODEL_KEY_PREFIX_STALE = SessionAttributeStore.class.getName() + ".STALE.";
@@ -241,7 +244,7 @@ public class HandlerMethodInvoker {
 		Object[] args = new Object[paramTypes.length];
 
 		for (int i = 0; i < args.length; i++) {
-			MethodParameter methodParam = new MethodParameter(handlerMethod, i);
+			MethodParameter methodParam = new SynthesizingMethodParameter(handlerMethod, i);
 			methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
@@ -260,14 +263,14 @@ public class HandlerMethodInvoker {
 			for (Annotation paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
-					paramName = requestParam.value();
+					paramName = requestParam.name();
 					required = requestParam.required();
 					defaultValue = parseDefaultValueAttribute(requestParam.defaultValue());
 					annotationsFound++;
 				}
 				else if (RequestHeader.class.isInstance(paramAnn)) {
 					RequestHeader requestHeader = (RequestHeader) paramAnn;
-					headerName = requestHeader.value();
+					headerName = requestHeader.name();
 					required = requestHeader.required();
 					defaultValue = parseDefaultValueAttribute(requestHeader.defaultValue());
 					annotationsFound++;
@@ -278,7 +281,7 @@ public class HandlerMethodInvoker {
 				}
 				else if (CookieValue.class.isInstance(paramAnn)) {
 					CookieValue cookieValue = (CookieValue) paramAnn;
-					cookieName = cookieValue.value();
+					cookieName = cookieValue.name();
 					required = cookieValue.required();
 					defaultValue = parseDefaultValueAttribute(cookieValue.defaultValue());
 					annotationsFound++;
@@ -420,7 +423,7 @@ public class HandlerMethodInvoker {
 		Object[] initBinderArgs = new Object[initBinderParams.length];
 
 		for (int i = 0; i < initBinderArgs.length; i++) {
-			MethodParameter methodParam = new MethodParameter(initBinderMethod, i);
+			MethodParameter methodParam = new SynthesizingMethodParameter(initBinderMethod, i);
 			methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
@@ -432,7 +435,7 @@ public class HandlerMethodInvoker {
 			for (Annotation paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
-					paramName = requestParam.value();
+					paramName = requestParam.name();
 					paramRequired = requestParam.required();
 					paramDefaultValue = parseDefaultValueAttribute(requestParam.defaultValue());
 					break;
@@ -740,7 +743,7 @@ public class HandlerMethodInvoker {
 
 	private Object checkValue(String name, Object value, Class<?> paramType) {
 		if (value == null) {
-			if (boolean.class.equals(paramType)) {
+			if (boolean.class == paramType) {
 				return Boolean.FALSE;
 			}
 			else if (paramType.isPrimitive()) {

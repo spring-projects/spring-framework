@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.web.servlet.config;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -32,8 +34,10 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
+import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
@@ -49,6 +53,7 @@ import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
@@ -75,6 +80,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String CONTENT_VERSION_STRATEGY_ELEMENT = "content-version-strategy";
 
 	private static final String RESOURCE_URL_PROVIDER = "mvcResourceUrlProvider";
+
+	private static final boolean isWebJarsAssetLocatorPresent = ClassUtils.isPresent(
+			"org.webjars.WebJarAssetLocator", ResourcesBeanDefinitionParser.class.getClassLoader());
 
 
 	@Override
@@ -108,6 +116,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		String order = element.getAttribute("order");
 		// Use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
 		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
+
+		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
+		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
 
 		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
@@ -155,16 +166,29 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getPropertyValues().add("locations", locations);
+
+		MutablePropertyValues values = resourceHandlerDef.getPropertyValues();
+		values.add("locations", locations);
 
 		String cacheSeconds = element.getAttribute("cache-period");
 		if (StringUtils.hasText(cacheSeconds)) {
-			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
+			values.add("cacheSeconds", cacheSeconds);
+		}
+
+		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cache-control");
+		if (cacheControlElement != null) {
+			CacheControl cacheControl = parseCacheControl(cacheControlElement);
+			values.add("cacheControl", cacheControl);
 		}
 
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
 		if (resourceChainElement != null) {
 			parseResourceChain(resourceHandlerDef, parserContext, resourceChainElement, source);
+		}
+
+		Object manager = MvcNamespaceUtils.getContentNegotiationManager(parserContext);
+		if (manager != null) {
+			values.add("contentNegotiationManager", manager);
 		}
 
 		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
@@ -195,6 +219,46 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		if (!resourceTransformers.isEmpty()) {
 			resourceHandlerDef.getPropertyValues().add("resourceTransformers", resourceTransformers);
 		}
+	}
+
+	private CacheControl parseCacheControl(Element element) {
+		CacheControl cacheControl = CacheControl.empty();
+		if ("true".equals(element.getAttribute("no-cache"))) {
+			cacheControl = CacheControl.noCache();
+		}
+		else if ("true".equals(element.getAttribute("no-store"))) {
+			cacheControl = CacheControl.noStore();
+		}
+		else if (element.hasAttribute("max-age")) {
+			cacheControl = CacheControl.maxAge(Long.parseLong(element.getAttribute("max-age")), TimeUnit.SECONDS);
+		}
+		if ("true".equals(element.getAttribute("must-revalidate"))) {
+			cacheControl = cacheControl.mustRevalidate();
+		}
+		if ("true".equals(element.getAttribute("no-transform"))) {
+			cacheControl = cacheControl.noTransform();
+		}
+		if ("true".equals(element.getAttribute("cache-public"))) {
+			cacheControl = cacheControl.cachePublic();
+		}
+		if ("true".equals(element.getAttribute("cache-private"))) {
+			cacheControl = cacheControl.cachePrivate();
+		}
+		if ("true".equals(element.getAttribute("proxy-revalidate"))) {
+			cacheControl = cacheControl.proxyRevalidate();
+		}
+		if (element.hasAttribute("s-maxage")) {
+			cacheControl = cacheControl.sMaxAge(Long.parseLong(element.getAttribute("s-maxage")), TimeUnit.SECONDS);
+		}
+		if (element.hasAttribute("stale-while-revalidate")) {
+			cacheControl = cacheControl.staleWhileRevalidate(
+					Long.parseLong(element.getAttribute("stale-while-revalidate")), TimeUnit.SECONDS);
+		}
+		if (element.hasAttribute("stale-if-error")) {
+			cacheControl = cacheControl.staleIfError(
+					Long.parseLong(element.getAttribute("stale-if-error")), TimeUnit.SECONDS);
+		}
+		return cacheControl;
 	}
 
 	private void parseResourceCache(ManagedList<? super Object> resourceResolvers,
@@ -262,6 +326,12 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		if (isAutoRegistration) {
+			if (isWebJarsAssetLocatorPresent) {
+				RootBeanDefinition webJarsResolverDef = new RootBeanDefinition(WebJarsResourceResolver.class);
+				webJarsResolverDef.setSource(source);
+				webJarsResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+				resourceResolvers.add(webJarsResolverDef);
+			}
 			RootBeanDefinition pathResolverDef = new RootBeanDefinition(PathResourceResolver.class);
 			pathResolverDef.setSource(source);
 			pathResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,12 +30,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
@@ -52,7 +56,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketHttpRequestHandler implements HttpRequestHandler {
+public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycle, ServletContextAware {
 
 	private final Log logger = LogFactory.getLog(WebSocketHttpRequestHandler.class);
 
@@ -61,6 +65,8 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	private final HandshakeHandler handshakeHandler;
 
 	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+
+	private volatile boolean running = false;
 
 
 	public WebSocketHttpRequestHandler(WebSocketHandler wsHandler) {
@@ -105,6 +111,39 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler {
 	public List<HandshakeInterceptor> getHandshakeInterceptors() {
 		return this.interceptors;
 	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		if (this.handshakeHandler instanceof ServletContextAware) {
+			((ServletContextAware) this.handshakeHandler).setServletContext(servletContext);
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			if (this.handshakeHandler instanceof Lifecycle) {
+				((Lifecycle) this.handshakeHandler).start();
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			if (this.handshakeHandler instanceof Lifecycle) {
+				((Lifecycle) this.handshakeHandler).stop();
+			}
+		}
+	}
+
 
 	@Override
 	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)

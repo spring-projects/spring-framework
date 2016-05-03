@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,20 @@
 
 package org.springframework.test;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import javax.sql.DataSource;
+
+import org.springframework.core.io.Resource;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
+import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
@@ -75,8 +85,22 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * non-transactional capability is provided to enable use of the same subclass
  * in different environments.
  *
+ * <p>Adds some convenience functionality for JDBC access. Expects a
+ * {@link javax.sql.DataSource} bean to be defined in the Spring application
+ * context.
+ *
+ * <p>This class exposes a {@link org.springframework.jdbc.core.JdbcTemplate}
+ * and provides an easy way to delete from the database in a new transaction.
+ *
+ * <p>Test methods can be annotated with the regular Spring
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional}
+ * annotation &mdash; for example, to force execution in a read-only transaction
+ * or to prevent any transaction from being created at all by setting the propagation
+ * level to {@code NOT_SUPPORTED}.
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Thomas Risberg
  * @author Sam Brannen
  * @since 1.1.1
  * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
@@ -102,27 +126,30 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * DefaultTransactionDefinition. Subclasses can change this to cause
 	 * different behavior.
 	 */
-	protected TransactionDefinition	transactionDefinition= new DefaultTransactionDefinition();
+	protected TransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+
+	private final TransactionAttributeSource transactionAttributeSource = new AnnotationTransactionAttributeSource();
 
 	/**
 	 * TransactionStatus for this test. Typical subclasses won't need to use it.
 	 */
-	protected TransactionStatus	transactionStatus;
+	protected TransactionStatus transactionStatus;
+
+	protected JdbcTemplate jdbcTemplate;
+
+	/**
+	 * Did this test delete any tables? If so, we forbid transaction completion,
+	 * and only allow rollback.
+	 */
+	private boolean zappedTables;
 
 
 	/**
-	 * Default constructor for AbstractTransactionalSpringContextTests.
+	 * Setter: DataSource is provided by Dependency Injection.
 	 */
-	public AbstractTransactionalSpringContextTests() {
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
-
-	/**
-	 * Constructor for AbstractTransactionalSpringContextTests with a JUnit name.
-	 */
-	public AbstractTransactionalSpringContextTests(String name) {
-		super(name);
-	}
-
 
 	/**
 	 * Specify the transaction manager to use. No transaction management will be
@@ -140,9 +167,10 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * Subclasses can set this value in their constructor to change the default,
 	 * which is always to roll the transaction back.
 	 */
-	public void setDefaultRollback(final boolean defaultRollback) {
+	protected void setDefaultRollback(final boolean defaultRollback) {
 		this.defaultRollback = defaultRollback;
 	}
+
 	/**
 	 * Get the <em>default rollback</em> flag for this test.
 	 * @see #setDefaultRollback(boolean)
@@ -153,12 +181,17 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	}
 
 	/**
-	 * Determines whether or not to rollback transactions for the current test.
-	 * <p>The default implementation delegates to {@link #isDefaultRollback()}.
+	 * Determine whether or not to roll back transactions for the current test.
+	 * <p>The default implementation simply delegates to {@link #isDefaultRollback()}.
 	 * Subclasses can override as necessary.
+	 * @return the <em>rollback</em> flag for the current test
 	 */
 	protected boolean isRollback() {
-		return isDefaultRollback();
+		boolean rollback = isDefaultRollback();
+		if (this.logger.isDebugEnabled()) {
+			this.logger.debug("Using default rollback [" + rollback + "] for test [" + getName() + "].");
+		}
+		return rollback;
 	}
 
 	/**
@@ -295,6 +328,49 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	}
 
 	/**
+	 * Overridden to populate transaction definition from annotations.
+	 */
+	@Override
+	public void runBare() throws Throwable {
+		final Method testMethod = getTestMethod();
+
+		TransactionDefinition explicitTransactionDefinition = this.transactionAttributeSource.getTransactionAttribute(
+			testMethod, getClass());
+		if (explicitTransactionDefinition != null) {
+			this.logger.info("Custom transaction definition [" + explicitTransactionDefinition + "] for test method ["
+					+ getName() + "].");
+			setTransactionDefinition(explicitTransactionDefinition);
+		}
+
+		if (this.transactionDefinition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
+			preventTransaction();
+		}
+
+		super.runBare();
+	}
+
+	/**
+	 * Get the current test method.
+	 */
+	protected Method getTestMethod() {
+		assertNotNull("TestCase.getName() cannot be null", getName());
+		Method testMethod = null;
+		try {
+			// Use same algorithm as JUnit itself to retrieve the test method
+			// about to be executed (the method name is returned by getName). It
+			// has to be public so we can retrieve it.
+			testMethod = getClass().getMethod(getName(), (Class[]) null);
+		}
+		catch (NoSuchMethodException ex) {
+			fail("Method '" + getName() + "' not found");
+		}
+		if (!Modifier.isPublic(testMethod.getModifiers())) {
+			fail("Method '" + getName() + "' should be public");
+		}
+		return testMethod;
+	}
+
+	/**
 	 * Cause the transaction to commit for this test method, even if the test
 	 * method is configured to {@link #isRollback() rollback}.
 	 * @throws IllegalStateException if the operation cannot be set to complete
@@ -303,6 +379,9 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	protected void setComplete() {
 		if (this.transactionManager == null) {
 			throw new IllegalStateException("No transaction manager set");
+		}
+		if (this.zappedTables) {
+			throw new IllegalStateException("Cannot set complete after deleting tables");
 		}
 		this.complete = true;
 	}
@@ -358,6 +437,48 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 			this.logger.debug("Began transaction (" + this.transactionsStarted + "): transaction manager ["
 					+ this.transactionManager + "]; rollback [" + this.isRollback() + "].");
 		}
+	}
+
+	/**
+	 * Convenient method to delete all rows from these tables.
+	 * Calling this method will make avoidance of rollback by calling
+	 * {@code setComplete()} impossible.
+	 * @see #setComplete
+	 */
+	protected void deleteFromTables(String... names) {
+		for (String name : names) {
+			int rowCount = this.jdbcTemplate.update("DELETE FROM " + name);
+			if (logger.isInfoEnabled()) {
+				logger.info("Deleted " + rowCount + " rows from table " + name);
+			}
+		}
+		this.zappedTables = true;
+	}
+
+	/**
+	 * Count the rows in the given table
+	 * @param tableName table name to count rows in
+	 * @return the number of rows in the table
+	 */
+	protected int countRowsInTable(String tableName) {
+		return this.jdbcTemplate.queryForObject("SELECT COUNT(0) FROM " + tableName, Integer.class);
+	}
+
+	/**
+	 * Execute the given SQL script.
+	 * <p>Use with caution outside of a transaction!
+	 * <p>The script will normally be loaded by classpath.
+	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
+	 * @param sqlResourcePath the Spring resource path for the SQL script
+	 * @param continueOnError whether or not to continue without throwing an
+	 * exception in the event of an error
+	 * @throws DataAccessException if there is an error executing a statement
+	 * @see ResourceDatabasePopulator
+	 * @see #setSqlScriptEncoding
+	 */
+	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
+		Resource resource = this.applicationContext.getResource(sqlResourcePath);
+		new ResourceDatabasePopulator(continueOnError, false, null, resource).execute(jdbcTemplate.getDataSource());
 	}
 
 }

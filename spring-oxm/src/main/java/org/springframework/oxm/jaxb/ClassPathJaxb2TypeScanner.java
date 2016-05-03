@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ class ClassPathJaxb2TypeScanner {
 
 	protected boolean isJaxb2Class(MetadataReader reader, MetadataReaderFactory factory) throws IOException {
 		for (TypeFilter filter : JAXB2_TYPE_FILTERS) {
-			if (filter.match(reader, factory)) {
+			if (filter.match(reader, factory) && !reader.getClassMetadata().isInterface() ) {
 				return true;
 			}
 		}

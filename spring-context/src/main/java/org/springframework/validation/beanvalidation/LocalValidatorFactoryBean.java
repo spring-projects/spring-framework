@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,12 @@ import javax.validation.ConstraintValidatorFactory;
 import javax.validation.MessageInterpolator;
 import javax.validation.TraversableResolver;
 import javax.validation.Validation;
+import javax.validation.ValidationProviderResolver;
 import javax.validation.Validator;
 import javax.validation.ValidatorContext;
 import javax.validation.ValidatorFactory;
+import javax.validation.bootstrap.GenericBootstrap;
+import javax.validation.bootstrap.ProviderSpecificBootstrap;
 
 import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
 
@@ -51,9 +54,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * This is the central class for {@code javax.validation} (JSR-303) setup
- * in a Spring application context: It bootstraps a {@code javax.validation.ValidationFactory}
- * and exposes it through the Spring {@link org.springframework.validation.Validator} interface
+ * This is the central class for {@code javax.validation} (JSR-303) setup in a Spring
+ * application context: It bootstraps a {@code javax.validation.ValidationFactory} and
+ * exposes it through the Spring {@link org.springframework.validation.Validator} interface
  * as well as through the JSR-303 {@link javax.validation.Validator} interface and the
  * {@link javax.validation.ValidatorFactory} interface itself.
  *
@@ -92,6 +95,8 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	@SuppressWarnings("rawtypes")
 	private Class providerClass;
 
+	private ValidationProviderResolver validationProviderResolver;
+
 	private MessageInterpolator messageInterpolator;
 
 	private TraversableResolver traversableResolver;
@@ -118,6 +123,15 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	@SuppressWarnings("rawtypes")
 	public void setProviderClass(Class providerClass) {
 		this.providerClass = providerClass;
+	}
+
+	/**
+	 * Specify a JSR-303 {@link ValidationProviderResolver} for bootstrapping the
+	 * provider of choice, as an alternative to {@code META-INF} driven resolution.
+	 * @since 4.3
+	 */
+	public void setValidationProviderResolver(ValidationProviderResolver validationProviderResolver) {
+		this.validationProviderResolver = validationProviderResolver;
 	}
 
 	/**
@@ -216,11 +230,34 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 
 	@Override
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void afterPropertiesSet() {
-		@SuppressWarnings({"rawtypes", "unchecked"})
-		Configuration<?> configuration = (this.providerClass != null ?
-				Validation.byProvider(this.providerClass).configure() :
-				Validation.byDefaultProvider().configure());
+		Configuration<?> configuration;
+		if (this.providerClass != null) {
+			ProviderSpecificBootstrap bootstrap = Validation.byProvider(this.providerClass);
+			if (this.validationProviderResolver != null) {
+				bootstrap = bootstrap.providerResolver(this.validationProviderResolver);
+			}
+			configuration = bootstrap.configure();
+		}
+		else {
+			GenericBootstrap bootstrap = Validation.byDefaultProvider();
+			if (this.validationProviderResolver != null) {
+				bootstrap = bootstrap.providerResolver(this.validationProviderResolver);
+			}
+			configuration = bootstrap.configure();
+		}
+
+		// Try Hibernate Validator 5.2's externalClassLoader(ClassLoader) method
+		if (this.applicationContext != null) {
+			try {
+				Method eclMethod = configuration.getClass().getMethod("externalClassLoader", ClassLoader.class);
+				ReflectionUtils.invokeMethod(eclMethod, configuration, this.applicationContext.getClassLoader());
+			}
+			catch (NoSuchMethodException ex) {
+				// Ignore - no Hibernate Validator 5.2+ or similar provider
+			}
+		}
 
 		MessageInterpolator targetInterpolator = this.messageInterpolator;
 		if (targetInterpolator == null) {

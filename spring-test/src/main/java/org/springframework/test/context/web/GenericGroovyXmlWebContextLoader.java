@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,12 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 public class GenericGroovyXmlWebContextLoader extends GenericXmlWebContextLoader {
 
 	/**
-	 * Loads bean definitions using a {@link GroovyBeanDefinitionReader}.
+	 * Load bean definitions into the supplied {@link GenericWebApplicationContext context}
+	 * from the locations in the supplied {@code WebMergedContextConfiguration} using a
+	 * {@link GroovyBeanDefinitionReader}.
+	 *
+	 * @param context the context into which the bean definitions should be loaded
+	 * @param webMergedConfig the merged context configuration
 	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions
 	 */
 	@Override

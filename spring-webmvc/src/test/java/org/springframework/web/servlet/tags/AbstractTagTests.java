@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.web.servlet.tags;
-
-import junit.framework.TestCase;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -37,7 +35,7 @@ import org.springframework.web.servlet.theme.FixedThemeResolver;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-public abstract class AbstractTagTests extends TestCase {
+public abstract class AbstractTagTests {
 
 	protected MockPageContext createPageContext() {
 		MockServletContext sc = new MockServletContext();

@@ -1,0 +1,713 @@
+[[spring-whats-new]]
+= What's New in Spring Framework 4.x
+
+
+[[new-in-4.0]]
+== New Features and Enhancements in Spring Framework 4.0
+The Spring Framework was first released in 2004; since then there have been significant
+major revisions: Spring 2.0 provided XML namespaces and AspectJ support; Spring 2.5
+embraced annotation-driven configuration; Spring 3.0 introduced a strong Java 5+ foundation
+across the framework codebase, and features such as the Java-based `@Configuration` model.
+
+Version 4.0 is the latest major release of the Spring Framework and the first to fully
+support Java 8 features. You can still use Spring with older versions of Java, however,
+the minimum requirement has now been raised to Java SE 6. We have also taken the
+opportunity of a major release to remove many deprecated classes and methods.
+
+A {wiki-spring-framework}/Migrating-from-earlier-versions-of-the-spring-framework[migration guide for upgrading to Spring 4.0]
+is available on the {wiki-spring-framework}[Spring Framework GitHub Wiki].
+
+
+
+
+=== Improved Getting Started Experience
+The new https://spring.io[spring.io] website provides a whole series of
+https://spring.io/guides["Getting Started"] guides to help you learn Spring. You
+can read more about the guides in the <<overview-getting-started-with-spring>> section
+in this document. The new website also provides a comprehensive overview of the many
+additional projects that are released under the Spring umbrella.
+
+If you are a Maven user you may also be interested in the helpful
+<<overview-maven-bom,bill of materials>> POM file that is now published with each Spring
+Framework release.
+
+
+
+
+=== Removed Deprecated Packages and Methods
+All deprecated packages, and many deprecated classes and methods have been removed with
+version 4.0. If you are upgrading from a previous release of Spring, you should ensure
+that you have fixed any deprecated calls that you were making to outdated APIs.
+
+For a complete set of changes, check out the
+http://docs.spring.io/spring-framework/docs/3.2.4.RELEASE_to_4.0.0.RELEASE/[API
+Differences Report].
+
+Note that optional third-party dependencies have been raised to a 2010/2011 minimum
+(i.e. Spring 4 generally only supports versions released in late 2010 or later now):
+notably, Hibernate 3.6+, EhCache 2.1+, Quartz 1.8+, Groovy 1.8+, and Joda-Time 2.0+.
+As an exception to the rule, Spring 4 requires the recent Hibernate Validator 4.3+,
+and support for Jackson has been focused on 2.0+ now (with Jackson 1.8/1.9 support
+retained for the time being where Spring 3.2 had it; now just in deprecated form).
+
+
+
+
+=== Java 8 (as well as 6 and 7)
+Spring Framework 4.0 provides support for several Java 8 features. You can make use of
+__lambda expressions__ and __method references__ with Spring's callback interfaces. There
+is first-class support for `java.time` (http://jcp.org/en/jsr/detail?id=310[JSR-310]),
+and several existing annotations have been retrofitted as `@Repeatable`. You can also
+use Java 8's parameter name discovery (based on the `-parameters` compiler flag) as an
+alternative to compiling your code with debug information enabled.
+
+Spring remains compatible with older versions of Java and the JDK: concretely, Java SE 6
+(specifically, a minimum level equivalent to JDK 6 update 18, as released in January 2010)
+and above are still fully supported. However, for newly started development projects
+based on Spring 4, we recommend the use of Java 7 or 8.
+
+
+
+
+=== Java EE 6 and 7
+Java EE version 6 or above is now considered the baseline for Spring Framework 4, with
+the JPA 2.0 and Servlet 3.0 specifications being of particular relevance. In order to
+remain compatible with Google App Engine and older application servers, it is possible
+to deploy a Spring 4 application into a Servlet 2.5 environment. However, Servlet 3.0+
+is strongly recommended and a prerequisite in Spring's test and mock packages for test
+setups in development environments.
+
+[NOTE]
+====
+If you are a WebSphere 7 user, be sure to install the JPA 2.0 feature pack. On
+WebLogic 10.3.4 or higher, install the JPA 2.0 patch that comes with it. This turns
+both of those server generations into Spring 4 compatible deployment environments.
+====
+
+On a more forward-looking note, Spring Framework 4.0 supports the Java EE 7 level of
+applicable specifications now: in particular, JMS 2.0, JTA 1.2, JPA 2.1, Bean Validation
+1.1, and JSR-236 Concurrency Utilities. As usual, this support focuses on individual
+use of those specifications, e.g. on Tomcat or in standalone environments. However,
+it works equally well when a Spring application is deployed to a Java EE 7 server.
+
+Note that Hibernate 4.3 is a JPA 2.1 provider and therefore only supported as of
+Spring Framework 4.0. The same applies to Hibernate Validator 5.0 as a Bean Validation
+1.1 provider. Neither of the two are officially supported with Spring Framework 3.2.
+
+
+
+[[groovy-bean-definition-dsl]]
+=== Groovy Bean Definition DSL
+Beginning with Spring Framework 4.0, it is possible to define external bean configuration
+using a Groovy DSL. This is similar in concept to using XML bean definitions but allows
+for a more concise syntax. Using Groovy also allows you to easily embed bean definitions
+directly in your bootstrap code. For example:
+
+[source,groovy,indent=0]
+[subs="verbatim,quotes"]
+----
+	def reader = new GroovyBeanDefinitionReader(myApplicationContext)
+	reader.beans {
+		dataSource(BasicDataSource) {
+			driverClassName = "org.hsqldb.jdbcDriver"
+			url = "jdbc:hsqldb:mem:grailsDB"
+			username = "sa"
+			password = ""
+			settings = [mynew:"setting"]
+		}
+		sessionFactory(SessionFactory) {
+			dataSource = dataSource
+		}
+		myService(MyService) {
+			nestedBean = { AnotherBean bean ->
+				dataSource = dataSource
+			}
+		}
+	}
+----
+
+For more information consult the `GroovyBeanDefinitionReader`
+{api-spring-framework}/beans/factory/groovy/GroovyBeanDefinitionReader.html[javadocs].
+
+
+
+
+=== Core Container Improvements
+There have been several general improvements to the core container:
+
+* Spring now treats <<beans-generics-as-qualifiers,__generic types__ as a form of
+  __qualifier__>> when injecting Beans. For example, if you are using a Spring Data
+  `Repository` you can now easily inject a specific implementation:
+  `@Autowired Repository<Customer> customerRepository`.
+* If you use Spring's meta-annotation support, you can now develop custom annotations that
+  <<beans-meta-annotations,expose specific attributes from the source annotation>>.
+* Beans can now be __ordered__ when they are <<beans-autowired-annotation,autowired into
+  lists and arrays>>. Both the `@Order` annotation and `Ordered` interface are
+  supported.
+* The `@Lazy` annotation can now be used on injection points, as well as on `@Bean`
+  definitions.
+* The <<beans-java-bean-description,`@Description` annotation has been introduced>> for
+  developers using Java-based configuration.
+* A generalized model for <<beans-java-conditional,conditionally filtering beans>> has
+  been added via the `@Conditional` annotation. This is similar to `@Profile` support but
+  allows for user-defined strategies to be developed programmatically.
+* <<aop-pfb-proxy-types,CGLIB-based proxy classes>> no longer require a default
+  constructor. Support is provided via the http://code.google.com/p/objenesis/[objenesis]
+  library which is repackaged __inline__ and distributed as part of the Spring Framework.
+  With this strategy, no constructor at all is being invoked for proxy instances anymore.
+* There is managed time zone support across the framework now, e.g. on `LocaleContext`.
+
+
+
+
+=== General Web Improvements
+Deployment to Servlet 2.5 servers remains an option, but Spring Framework 4.0 is now
+focused primarily on Servlet 3.0+ environments. If you are using the
+<<spring-mvc-test-framework,Spring MVC Test Framework>> you
+will need to ensure that a Servlet 3.0 compatible JAR is in your __test classpath__.
+
+In addition to the WebSocket support mentioned later, the following general improvements
+have been made to Spring's Web modules:
+
+* You can use the <<mvc-ann-restcontroller,new `@RestController` annotation>> with Spring
+  MVC applications, removing the need to add `@ResponseBody` to each of your
+  `@RequestMapping` methods.
+* The `AsyncRestTemplate` class has been added, <<rest-async-resttemplate,allowing
+  non-blocking asynchronous support>> when developing REST clients.
+* Spring now offers <<mvc-timezone,comprehensive timezone support>> when developing
+  Spring MVC applications.
+
+
+
+
+=== WebSocket, SockJS, and STOMP Messaging
+A new `spring-websocket` module provides comprehensive support for WebSocket-based,
+two-way communication between client and server in web applications. It is compatible with
+http://jcp.org/en/jsr/detail?id=356[JSR-356], the Java WebSocket API, and in addition
+provides SockJS-based fallback options (i.e. WebSocket emulation) for use in browsers
+that don't yet support the WebSocket protocol (e.g. Internet Explorer < 10).
+
+A new `spring-messaging` module adds support for STOMP as the WebSocket sub-protocol
+to use in applications along with an annotation programming model for routing and
+processing STOMP messages from WebSocket clients. As a result an `@Controller`
+can now contain both `@RequestMapping` and `@MessageMapping` methods for handling
+HTTP requests and messages from WebSocket-connected clients. The new `spring-messaging`
+module also contains key abstractions formerly from the
+http://projects.spring.io/spring-integration/[Spring Integration] project such as
+`Message`, `MessageChannel`, `MessageHandler`, and others to serve as a foundation
+for messaging-based applications.
+
+For further details, including a more thorough introduction, see the <<websocket>> section.
+
+
+
+
+=== Testing Improvements
+In addition to pruning of deprecated code within the `spring-test` module, Spring
+Framework 4.0 introduces several new features for use in unit and integration testing.
+
+* Almost all annotations in the `spring-test` module (e.g., `@ContextConfiguration`,
+  `@WebAppConfiguration`, `@ContextHierarchy`, `@ActiveProfiles`, etc.) can now be used
+  as <<integration-testing-annotations-meta,meta-annotations>> to create custom
+  _composed annotations_ and reduce configuration duplication across a test suite.
+* Active bean definition profiles can now be resolved programmatically, simply by
+  implementing a custom <<testcontext-ctx-management-env-profiles-ActiveProfilesResolver,`ActiveProfilesResolver`>>
+  and registering it via the `resolver` attribute of `@ActiveProfiles`.
+* A new `SocketUtils` class has been introduced in the `spring-core` module
+  which enables you to scan for free TCP and UDP server ports on localhost. This
+  functionality is not specific to testing but can prove very useful when writing
+  integration tests that require the use of sockets, for example tests that start
+  an in-memory SMTP server, FTP server, Servlet container, etc.
+* As of Spring 4.0, the set of mocks in the `org.springframework.mock.web` package is
+  now based on the Servlet 3.0 API. Furthermore, several of the Servlet API mocks
+  (e.g., `MockHttpServletRequest`, `MockServletContext`, etc.) have been updated with
+  minor enhancements and improved configurability.
+
+
+
+
+[[new-in-4.1]]
+== New Features and Enhancements in Spring Framework 4.1
+
+=== JMS Improvements
+Spring 4.1 introduces a much simpler infrastructure <<jms-annotated,to register JMS
+listener endpoints>> by annotating bean methods with
+{api-spring-framework}/jms/annotation/JmsListener.html[`@JmsListener`].
+The XML namespace has been enhanced to support this new style (`jms:annotation-driven`),
+and it is also possible to fully configure the infrastructure using Java config
+({api-spring-framework}/jms/annotation/EnableJms.html[`@EnableJms`],
+`JmsListenerContainerFactory`). It is also possible to register listener endpoints
+programmatically using
+{api-spring-framework}/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`].
+
+Spring 4.1 also aligns its JMS support to allow you to benefit from the `spring-messaging`
+abstraction introduced in 4.0, that is:
+
+* Message listener endpoints can have a more flexible signature and benefit from
+  standard messaging annotations such as `@Payload`, `@Header`, `@Headers`, and `@SendTo`. It
+  is also possible to use a standard `Message` in lieu of `javax.jms.Message` as method
+  argument.
+* A new {api-spring-framework}/jms/core/JmsMessageOperations.html[`JmsMessageOperations`]
+  interface is available and permits `JmsTemplate` like operations using the `Message`
+  abstraction.
+
+Finally, Spring 4.1 provides additional miscellaneous improvements:
+
+* Synchronous request-reply operations support in `JmsTemplate`
+* Listener priority can be specified per `<jms:listener/>` element
+* Recovery options for the message listener container are configurable using a
+  {api-spring-framework}/util/backoff/BackOff.html[`BackOff`] implementation
+* JMS 2.0 shared consumers are supported
+
+=== Caching Improvements
+
+Spring 4.1 supports <<cache-jsr-107,JCache (JSR-107) annotations>> using Spring's
+existing cache configuration and infrastructure abstraction; no changes are required
+to use the standard annotations.
+
+Spring 4.1 also improves its own caching abstraction significantly:
+
+* Caches can be resolved at runtime using a
+  <<cache-annotations-cacheable-cache-resolver,`CacheResolver`>>. As a result the
+  `value` argument defining the cache name(s) to use is no longer mandatory.
+* More operation-level customizations: cache resolver, cache manager, key
+  generator
+* A new <<cache-annotations-config,`@CacheConfig` class-level annotation>> allows
+  common settings to be shared at the class level **without** enabling any cache operation.
+* Better exception handling of cached methods using `CacheErrorHandler`
+
+Spring 4.1 also has a breaking change in the `Cache` interface as a new `putIfAbsent`
+method has been added.
+
+=== Web Improvements
+
+* The existing support for resource handling based on the `ResourceHttpRequestHandler`
+  has been expanded with new abstractions `ResourceResolver`, `ResourceTransformer`,
+  and `ResourceUrlProvider`. A number of built-in implementations provide support
+  for versioned resource URLs (for effective HTTP caching), locating gzipped resources,
+  generating an HTML 5 AppCache manifests, and more. See <<mvc-config-static-resources>>.
+* JDK 1.8's `java.util.Optional` is now supported for `@RequestParam`, `@RequestHeader`,
+  and `@MatrixVariable` controller method arguments.
+* `ListenableFuture` is supported as a return value alternative to `DeferredResult`
+  where an underlying service (or perhaps a call to `AsyncRestTemplate`) already
+  returns `ListenableFuture`.
+* `@ModelAttribute` methods are now invoked in an order that respects inter-dependencies.
+  See https://jira.spring.io/browse/SPR-6299[SPR-6299].
+* Jackson's `@JsonView` is supported directly on `@ResponseBody` and `ResponseEntity`
+  controller methods for serializing different amounts of detail for the same POJO (e.g.
+  summary vs. detail page). This is also supported with View-based rendering by
+  adding the serialization view type as a model attribute under a special key.
+  See <<mvc-ann-jsonview>> for details.
+* JSONP is now supported with Jackson. See <<mvc-ann-jsonp>>.
+* A new lifecycle option is available for intercepting `@ResponseBody` and `ResponseEntity`
+  methods just after the controller method returns and before the response is written.
+  To take advantage declare an `@ControllerAdvice` bean that implements `ResponseBodyAdvice`.
+  The built-in support for `@JsonView` and JSONP take advantage of this.
+  See <<mvc-handlermapping-interceptor>>.
+* There are three new `HttpMessageConverter` options:
+** Gson -- lighter footprint than Jackson; has already been in use in Spring Android.
+** Google Protocol Buffers -- efficient and effective as an inter-service communication
+   data protocol within an enterprise but can also be exposed as JSON and XML for browsers.
+** Jackson based XML serialization is now supported through the
+  https://github.com/FasterXML/jackson-dataformat-xml[jackson-dataformat-xml] extension.
+  When using `@EnableWebMvc` or `<mvc:annotation-driven/>`, this is used by default
+  instead of JAXB2 if `jackson-dataformat-xml` is in the classpath.
+* Views such as JSPs can now build links to controllers by referring to controller mappings
+  by name. A default name is assigned to every `@RequestMapping`. For example `FooController`
+  with method `handleFoo` is named "FC#handleFoo". The naming strategy is pluggable.
+  It is also possible to name an `@RequestMapping` explicitly through its name attribute.
+  A new `mvcUrl` function in the Spring JSP tag library makes this easy to use in JSP pages.
+  See <<mvc-links-to-controllers-from-views>>.
+* `ResponseEntity` provides a builder-style API to guide controller methods
+  towards the preparation of server-side responses, e.g. `ResponseEntity.ok()`.
+* `RequestEntity` is a new type that provides a builder-style API to guide client-side REST
+  code towards the preparation of HTTP requests.
+* MVC Java config and XML namespace:
+** View resolvers can now be configured including support for content
+   negotiation, see <<mvc-config-view-resolvers>>.
+** View controllers now have built-in support for redirects and for setting the response
+   status. An application can use this to configure redirect URLs, render 404 responses
+   with a view, send "no content" responses, etc.
+   Some use cases are
+   https://jira.spring.io/browse/SPR-11543?focusedCommentId=100308&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-100308[listed here].
+** Path matching customizations are frequently used and now built-in.
+   See <<mvc-config-path-matching>>.
+* http://groovy-lang.org/docs/groovy-2.3.6/html/documentation/markup-template-engine.html[Groovy markup template]
+  support (based on Groovy 2.3). See the `GroovyMarkupConfigurer` and respecitve
+  `ViewResolver` and `View' implementations.
+
+=== WebSocket Messaging Improvements
+
+* SockJS (Java) client-side support. See `SockJsClient` and classes in same package.
+* New application context events `SessionSubscribeEvent` and `SessionUnsubscribeEvent` published
+  when STOMP clients subscribe and unsubscribe.
+* New "websocket" scope. See <<websocket-stomp-websocket-scope>>.
+* `@SendToUser` can target only a single session and does not require an authenticated user.
+* `@MessageMapping` methods can use dot "." instead of slash "/" as path separator.
+  See https://jira.spring.io/browse/SPR-11660[SPR-11660].
+* STOMP/WebSocket monitoring info collected and logged. See <<websocket-stomp-stats>>.
+* Significantly optimized and improved logging that should remain very readable
+  and compact even at DEBUG level.
+* Optimized message creation including support for temporary message mutability
+  and avoiding automatic message id and timestamp creation. See Javadoc of
+  `MessageHeaderAccessor`.
+* Close STOMP/WebSocket connections that have no activity within 60 seconds after the
+  WebSocket session is established. See https://jira.spring.io/browse/SPR-11884[SPR-11884].
+
+=== Testing Improvements
+
+* Groovy scripts can now be used to configure the `ApplicationContext` loaded for
+  integration tests in the TestContext framework.
+** See <<testcontext-ctx-management-groovy>> for details.
+* Test-managed transactions can now be programmatically started and ended within
+  transactional test methods via the new `TestTransaction` API.
+** See <<testcontext-tx-programmatic-tx-mgt>> for details.
+* SQL script execution can now be configured declaratively via the new `@Sql` and
+  `@SqlConfig` annotations on a per-class or per-method basis.
+** See <<testcontext-executing-sql>> for details.
+* Test property sources which automatically override system and application property
+  sources can be configured via the new `@TestPropertySource` annotation.
+** See <<testcontext-ctx-management-property-sources>> for details.
+* Default ++TestExecutionListener++s can now be automatically discovered.
+** See <<testcontext-tel-config-automatic-discovery>> for details.
+* Custom ++TestExecutionListener++s can now be automatically merged with the default
+  listeners.
+** See <<testcontext-tel-config-merging>> for details.
+* The documentation for transactional testing support in the TestContext framework has
+  been improved with more thorough explanations and additional examples.
+** See <<testcontext-tx>> for details.
+* Various improvements to `MockServletContext`, `MockHttpServletRequest`, and other
+  Servlet API mocks.
+* `AssertThrows` has been refactored to support `Throwable` instead of `Exception`.
+* In Spring MVC Test, JSON responses can be asserted with https://github.com/skyscreamer/JSONassert[JSON Assert]
+  as an extra option to using JSONPath much like it has been possible to do for XML with
+  XMLUnit.
+* `MockMvcBuilder` _recipes_ can now be created with the help of `MockMvcConfigurer`. This
+  was added to make it easy to apply Spring Security setup but can be used to encapsulate
+  common setup for any 3rd party framework or within a project.
+* `MockRestServiceServer` now supports the `AsyncRestTemplate` for client-side testing.
+
+
+
+[[new-in-4.2]]
+== New Features and Enhancements in Spring Framework 4.2
+
+=== Core Container Improvements
+
+* Annotations such as `@Bean` get detected and processed on Java 8 default methods as well,
+  allowing for composing a configuration class from interfaces with default `@Bean` methods.
+* Configuration classes may declare `@Import` with regular component classes now, allowing
+  for a mix of imported configuration classes and component classes.
+* Configuration classes may declare an `@Order` value, getting processed in a corresponding
+  order (e.g. for overriding beans by name) even when detected through classpath scanning.
+* `@Resource` injection points support an `@Lazy` declaration, analogous to `@Autowired`,
+  receiving a lazy-initializing proxy for the requested target bean.
+* The application event infrastructure now offers an <<context-functionality-events-annotation,
+  annotation-based model>> as well as the ability to publish any arbitrary event.
+** Any public method in a managed bean can be annotated with `@EventListener` to consume events.
+** `@TransactionalEventListener` provides transaction-bound event support.
+* Spring Framework 4.2 introduces first-class support for declaring and
+  looking up aliases for annotation attributes. The new `@AliasFor`
+  annotation can be used to declare a pair of aliased attributes within
+  a single annotation or to declare an alias from one attribute in a
+  custom composed annotation to an attribute in a meta-annotation.
+** The following annotations have been retrofitted with `@AliasFor` support
+   in order to provide meaningful aliases for their `value` attributes:
+   `@Cacheable`, `@CacheEvict`, `@CachePut`, `@ComponentScan`,
+   `@ComponentScan.Filter`, `@ImportResource`, `@Scope`, `@ManagedResource`,
+   `@Header`, `@Payload`, `@SendToUser`, `@ActiveProfiles`,
+   `@ContextConfiguration`, `@Sql`, `@TestExecutionListeners`,
+   `@TestPropertySource`, `@Transactional`, `@ControllerAdvice`,
+   `@CookieValue`, `@CrossOrigin`, `@MatrixVariable`, `@RequestHeader`,
+   `@RequestMapping`, `@RequestParam`, `@RequestPart`, `@ResponseStatus`,
+   `@SessionAttributes`, `@ActionMapping`, `@RenderMapping`,
+   `@EventListener`, `@TransactionalEventListener`.
+** For example, `@ContextConfiguration` from the `spring-test` module
+   is now declared as follows:
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+public @interface ContextConfiguration {
+
+    @AliasFor("locations")
+    String[] value() default {};
+
+    @AliasFor("value")
+    String[] locations() default {};
+
+    // ...
+}
+----
+
++
+
+** Similarly, _composed annotations_ that override attributes from
+   meta-annotations can now use `@AliasFor` for fine-grained control
+   over exactly which attributes are overridden within an annotation
+   hierarchy. In fact, it is now possible to declare an alias for the
+   `value` attribute of a meta-annotation.
+** For example, one can now develop a composed annotation with a custom
+   attribute override as follows.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@ContextConfiguration
+public @interface MyTestConfig {
+
+    @AliasFor(annotation = ContextConfiguration.class, attribute = "value")
+    String[] xmlFiles();
+
+    // ...
+}
+----
+
++
+
+** See <<annotation-programming-model,Spring Annotation Programming Model>>.
+* Numerous improvements to Spring's search algorithms used for finding
+  meta-annotations. For example, locally declared _composed annotations_
+  are now favored over inherited annotations.
+* _Composed annotations_ that override attributes from meta-annotations
+  can now be discovered on interfaces and on abstract, bridge, & interface
+  methods as well as on classes, standard methods, constructors, and 
+  fields.
+* Maps representing annotation attributes (and `AnnotationAttributes` instances)
+  can be _synthesized_ (i.e., converted) into an annotation.
+* The features of field-based data binding (`DirectFieldAccessor`) have been aligned with the current
+  property-based data binding (`BeanWrapper`). In particular, field-based binding now supports
+  navigation for Collections, Arrays, and Maps.
+* `DefaultConversionService` now provides out-of-the-box converters for `Stream`, `Charset`,
+  `Currency`, and `TimeZone`. Such converters can be added individually to any arbitrary
+  `ConversionService` as well.
+* `DefaultFormattingConversionService` comes with out-of-the-box support for the value types
+  in JSR-354 Money & Currency (if the 'javax.money' API is present on the classpath): namely,
+  `MonetaryAmount` and `CurrencyUnit`. This includes support for applying `@NumberFormat`.
+* `@NumberFormat` can now be used as a meta-annotation.
+* `JavaMailSenderImpl` has a new `testConnection()` method for checking connectivity to the server.
+* `ScheduledTaskRegistrar` exposes scheduled tasks.
+* Apache `commons-pool2` is now supported for a pooling AOP `CommonsPool2TargetSource`.
+* Introduced `StandardScriptFactory` as a JSR-223 based mechanism for scripted beans,
+  exposed through the `lang:std` element in XML. Supports e.g. JavaScript and JRuby.
+  (Note: JRubyScriptFactory and `lang:jruby` are deprecated now, in favor of using JSR-223.)
+
+=== Data Access Improvements
+
+* `javax.transaction.Transactional` is now supported via AspectJ.
+* `SimpleJdbcCallOperations` now supports named binding.
+* Full support for Hibernate ORM 5.0: as a JPA provider (automatically adapted) as well as
+  through its native API (covered by the new `org.springframework.orm.hibernate5` package).
+* Embedded databases can now be automatically assigned unique names, and
+  `<jdbc:embedded-database>` supports a new `database-name` attribute.
+  See "Testing Improvements" below for further details.
+
+=== JMS Improvements
+
+* The `autoStartup` attribute can be controlled via `JmsListenerContainerFactory`.
+* The type of the reply `Destination` can now be configured per listener container.
+* The value of the `@SendTo` annotation can now use a SpEL expression.
+* The response destination can be <<jms-annotated-response,computed at runtime using `JmsResponse`>>
+* `@JmsListener` is now a repeatable annotation to declare several JMS containers on the same
+  method (use the newly introduced `@JmsListeners` if you're not using Java8 yet).
+
+=== Web Improvements
+
+* HTTP Streaming and Server-Sent Events support, see <<mvc-ann-async-http-streaming>>.
+* Built-in support for CORS including global (MVC Java config and XML namespace) and
+  local (e.g. `@CrossOrigin`) configuration. See <<cors>> for details.
+* HTTP caching updates:
+** new `CacheControl` builder; plugged into `ResponseEntity`, `WebContentGenerator`,
+   `ResourceHttpRequestHandler`.
+** improved ETag/Last-Modified support in `WebRequest`.
+* Custom mapping annotations, using `@RequestMapping` as a meta-annotation.
+* Public methods in `AbstractHandlerMethodMapping` to register and unregister request
+  mappings at runtime.
+* Protected `createDispatcherServlet` method in `AbstractDispatcherServletInitializer` to
+  further customize the `DispatcherServlet` instance to use.
+* `HandlerMethod` as a method argument on `@ExceptionHandler` methods, especially
+  handy in `@ControllerAdvice` components.
+* `java.util.concurrent.CompletableFuture` as an `@Controller` method return value type.
+* Byte-range request support in `HttpHeaders` and for serving static resources.
+* `@ResponseStatus` detected on nested exceptions.
+* `UriTemplateHandler` extension point in the `RestTemplate`.
+** `DefaultUriTemplateHandler` exposes `baseUrl` property and path segment encoding options.
+** the extension point can also be used to plug in any URI template library.
+* http://square.github.io/okhttp/[OkHTTP] integration with the `RestTemplate`.
+* Custom `baseUrl` alternative for methods in `MvcUriComponentsBuilder`.
+* Serialization/deserialization exception messages are now logged at WARN level.
+* Default JSON prefix has been changed from "{} && " to the safer ")]}', " one.
+* New `RequestBodyAdvice` extension point and built-in implementation to support Jackson's
+  `@JsonView` on `@RequestBody` method arguments.
+* When using GSON or Jackson 2.6+, the handler method return type is used to improve
+  serialization of parameterized types like `List<Foo>`.
+* Introduced `ScriptTemplateView` as a JSR-223 based mechanism for scripted web views,
+  with a focus on JavaScript view templating on Nashorn (JDK 8).
+
+=== WebSocket Messaging Improvements
+
+* Expose presence information about connected users and subscriptions:
+** new `SimpUserRegistry` exposed as a bean named "userRegistry".
+** sharing of presence information across cluster of servers (see broker relay config options).
+* Resolve user destinations across cluster of servers (see broker relay config options).
+* `StompSubProtocolErrorHandler` extension point to customize and control STOMP ERROR frames to clients.
+* Global `@MessageExceptionHandler` methods via `@ControllerAdvice` components.
+* Heart-beats and a SpEL expression 'selector' header for subscriptions with `SimpleBrokerMessageHandler`.
+* STOMP client for use over TCP and WebSocket; see <<websocket-stomp-client>>.
+* `@SendTo` and `@SendToUser` can contain destination variable placeholders.
+* Jackson's `@JsonView` supported for return values on `@MessageMapping` and `@SubscribeMapping` methods.
+* `ListenableFuture` and `CompletableFuture` as return value types from
+  `@MessageMapping` and `@SubscribeMapping` methods.
+* `MarshallingMessageConverter` for XML payloads.
+
+=== Testing Improvements
+
+* JUnit-based integration tests can now be executed with JUnit rules instead of the
+  `SpringJUnit4ClassRunner`. This allows Spring-based integration tests to be run with
+  alternative runners like JUnit's `Parameterized` or third-party runners such as the
+  `MockitoJUnitRunner`.
+** See <<testcontext-junit4-rules>> for details.
+* The Spring MVC Test framework now provides first-class support for HtmlUnit,
+  including integration with Selenium's WebDriver, allowing for page-based
+  web application testing without the need to deploy to a Servlet container.
+** See <<spring-mvc-test-server-htmlunit>> for details.
+* `AopTestUtils` is a new testing utility that allows developers to
+  obtain a reference to the underlying target object hidden behind one
+  or more Spring proxies.
+** See <<unit-testing-utilities>> for details.
+* `ReflectionTestUtils` now supports setting and getting `static` fields,
+  including constants.
+* The original ordering of bean definition profiles declared via 
+  `@ActiveProfiles` is now retained in order to support use cases such 
+  as Spring Boot's `ConfigFileApplicationListener` which loads 
+  configuration files based on the names of active profiles.
+* `@DirtiesContext` supports new `BEFORE_METHOD`, `BEFORE_CLASS`, and
+  `BEFORE_EACH_TEST_METHOD` modes for closing the `ApplicationContext`
+  _before_ a test -- for example, if some rogue (i.e., yet to be
+  determined) test within a large test suite has corrupted the original
+  configuration for the `ApplicationContext`.
+* `@Commit` is a new annotation that may be used as a direct replacement for
+  `@Rollback(false)`.
+* `@Rollback` may now be used to configure class-level _default rollback_ semantics.
+** Consequently, `@TransactionConfiguration` is now deprecated and will be removed in a
+   subsequent release.
+* `@Sql` now supports execution of _inlined SQL statements_ via a new
+  `statements` attribute.
+* The `ContextCache` that is used for caching ++ApplicationContext++s
+  between tests is now a public API with a default implementation that
+  can be replaced for custom caching needs.
+* `DefaultTestContext`, `DefaultBootstrapContext`, and
+  `DefaultCacheAwareContextLoaderDelegate` are now public classes in the
+  `support` subpackage, allowing for custom extensions.
+* ++TestContextBootstrapper++s are now responsible for building the
+  `TestContext`.
+* In the Spring MVC Test framework, `MvcResult` details can now be logged
+  at `DEBUG` level or written to a custom `OutputStream` or `Writer`. See
+  the new `log()`, `print(OutputStream)`, and `print(Writer)` methods in
+  `MockMvcResultHandlers` for details.
+* The JDBC XML namespace supports a new `database-name` attribute in
+  `<jdbc:embedded-database>`, allowing developers to set unique names
+  for embedded databases –- for example, via a SpEL expression or a
+  property placeholder that is influenced by the current active bean
+  definition profiles.
+* Embedded databases can now be automatically assigned a unique name,
+  allowing common test database configuration to be reused in different
+  ++ApplicationContext++s within a test suite.
+** See <<jdbc-embedded-database-unique-names>> for details.
+* `MockHttpServletRequest` and `MockHttpServletResponse` now provide better
+  support for date header formatting via the `getDateHeader` and `setDateHeader`
+  methods.
+
+
+
+[[new-in-4.3]]
+== New Features and Enhancements in Spring Framework 4.3
+
+=== Core Container Improvements
+
+* It is no longer necessary to specify the `@Autowired` annotation if the target
+  bean only defines one constructor.
+* `@Configuration` classes support constructor injection.
+* Any SpEL expression used to specify the `condition` of an `@EventListener` can
+  now refer to beans (e.g. `@beanName.method()`).
+* _Composed annotations_ can now override array attributes in meta-annotations
+  with a single element of the component type of the array. For example, the
+  `String[] path` attribute of `@RequestMapping` can be overridden with
+  `String path` in a composed annotation.
+* `@Scheduled` and `@Schedules` may now be used as _meta-annotations_ to create
+  custom _composed annotations_ with attribute overrides.
+
+=== Data Access Improvements
+
+* `jdbc:initialize-database` and `jdbc:embedded-database` support a configurable
+  separator to be applied to each script.
+
+=== Caching Improvements
+
+Spring 4.3 allows concurrent calls on a given key to be synchronized so that the
+value is only computed once. This is an opt-in feature that should be enabled via
+the new `sync` attribute on `@Cacheable`. This features introduces a breaking
+change in the `Cache` interface as a `get(Object key, Callable<T> valueLoader)`
+method has been added.
+
+Spring 4.3 also improves the caching abstraction as follows:
+
+* SpEL expressions in caches-related annotations can now refer to beans (i.e.
+  `@beanName.method()`).
+* `ConcurrentMapCacheManager` and `ConcurrentMapCache` now support the serialization
+  of cache entries via a new `storeByValue` attribute.
+* `@Cacheable`, `@CacheEvict`, `@CachePut`, and `@Caching` may now be used as
+  _meta-annotations_ to create custom _composed annotations_ with attribute overrides.
+
+=== JMS Improvements
+
+* `@SendTo` can now be specified at the class level to share a common reply destination.
+* `@JmsListener` and `@JmsListeners` may now be used as _meta-annotations_ to create
+  custom _composed annotations_ with attribute overrides.
+
+=== Web Improvements
+
+* Built-in support for <<mvc-ann-requestmapping-head-options,HTTP HEAD and HTTP OPTIONS>>.
+* New `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping`
+  _composed annotations_ for `@RequestMapping`.
+* New `@RequestScope`, `@SessionScope`, and `@ApplicationScope` _composed annotations_ for web scopes.
+* New `@RestControllerAdvice` annotation with combined `@ControllerAdvice` with `@ResponseBody` semantics.
+* `@ResponseStatus` is now supported at the class level and inherited by all methods.
+* New `@SessionAttribute` annotation for access to session attributes (see <<mvc-ann-sessionattrib-global, example>>).
+* New `@RequestAttribute` annotation for access to request attributes (see <<mvc-ann-requestattrib, example>>).
+* `@ModelAttribute` allows preventing data binding via `binding=false` attribute (see <<mvc-ann-modelattrib-method-args, reference>>).
+* Static resource handling uses the configured `ContentNegotiationManager` for media type determination.
+* `RestTemplate` and `AsyncRestTemplate` support strict URI variable encoding via `DefaultUriTemplateHandler`.
+* `AsyncRestTemplate` supports request interception.
+
+=== WebSocket Messaging Improvements
+
+* `@SendTo` and `@SendToUser` can now be specified at class-level to share a common destination.
+
+=== Testing Improvements
+
+* The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.
+* New `SpringRunner` _alias_ for the `SpringJUnit4ClassRunner`.
+* An empty declaration of `@ContextConfiguration` can now be completely omitted if default
+  XML files, Groovy scripts, or `@Configuration` classes are detected.
+* `@Transactional` test methods are no longer required to be `public` (in TestNG and JUnit 5).
+* `@BeforeTransaction` and `@AfterTransaction` methods are no longer required to be `public`.
+* The `ApplicationContext` cache in the _Spring TestContext Framework_ is now bounded with a
+  default maximum size of 32 and a _least recently used_ eviction policy. The maximum size
+  can be configured by setting a JVM system property or Spring property called
+  `spring.test.context.cache.maxSize`.
+* New `ContextCustomizer` API for customizing a test `ApplicationContext` _after_ bean
+  definitions have been loaded into the context but _before_ the context has been refreshed.
+  Customizers can be registered globally by third parties, foregoing the need to implement a
+  custom `ContextLoader`.
+* `@Sql` and `@SqlGroup` may now be used as _meta-annotations_ to create custom _composed
+  annotations_ with attribute overrides.
+* Server-side Spring MVC Test supports expectations on response headers with multiple values.
+* Server-side Spring MVC Test parses form data request content and populates request parameters.
+* Client-side REST test support allows indicating how many times a request is expected and
+  whether the order of declaration for expectations should be ignored (see <<spring-mvc-test-client>>).
+* Client-side REST Test supports expectations for form data in the request body.

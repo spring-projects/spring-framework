@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,30 @@
 
 package org.springframework.web.portlet.handler;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
-import org.springframework.mock.web.portlet.MockRenderRequest;
-import org.springframework.mock.web.portlet.MockRenderResponse;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
+ * @author Sam Brannen
  */
-public class ParameterMappingInterceptorTests extends TestCase {
+public class ParameterMappingInterceptorTests {
 
-	public void testDefaultParameterMapped() throws Exception {
-		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
-		Object handler = new Object();
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
+	private final ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
+
+	private final Object handler = new Object();
+
+	private final MockActionRequest request = new MockActionRequest();
+
+	private final MockActionResponse response = new MockActionResponse();
+
+
+	@Test
+	public void defaultParameterMapped() throws Exception {
 		String param = ParameterHandlerMapping.DEFAULT_PARAMETER_NAME;
 		String value = "someValue";
 		request.setParameter(param, value);
@@ -43,11 +50,8 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertEquals(value, response.getRenderParameter(param));
 	}
 
-	public void testNonDefaultParameterNotMapped() throws Exception {
-		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
-		Object handler = new Object();
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
+	@Test
+	public void nonDefaultParameterNotMapped() throws Exception {
 		String param = "myParam";
 		String value = "someValue";
 		request.setParameter(param, value);
@@ -58,16 +62,13 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertNull(response.getRenderParameter(ParameterHandlerMapping.DEFAULT_PARAMETER_NAME));
 	}
 
-	public void testNonDefaultParameterMappedWhenHandlerMappingProvided() throws Exception {
+	@Test
+	public void nonDefaultParameterMappedWhenHandlerMappingProvided() throws Exception {
 		String param = "myParam";
 		String value = "someValue";
 		ParameterHandlerMapping handlerMapping = new ParameterHandlerMapping();
 		handlerMapping.setParameterName(param);
-		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
 		interceptor.setParameterName(param);
-		Object handler = new Object();
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
 		request.setParameter(param, value);
 		assertNull(response.getRenderParameter(param));
 		boolean shouldProceed = interceptor.preHandleAction(request, response, handler);
@@ -77,11 +78,8 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertEquals(value, response.getRenderParameter(param));
 	}
 
-	public void testNoEffectForRenderRequest() throws Exception {
-		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
-		Object handler = new Object();
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
+	@Test
+	public void noEffectForRenderRequest() throws Exception {
 		String param = ParameterHandlerMapping.DEFAULT_PARAMETER_NAME;
 		String value = "someValue";
 		request.setParameter(param, value);
@@ -89,11 +87,8 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertTrue(shouldProceed);
 	}
 
-	public void testNoParameterValueSetWithDefaultParameterName() throws Exception {
-		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
-		Object handler = new Object();
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
+	@Test
+	public void noParameterValueSetWithDefaultParameterName() throws Exception {
 		String param = ParameterHandlerMapping.DEFAULT_PARAMETER_NAME;
 		assertNull(response.getRenderParameter(param));
 		boolean shouldProceed = interceptor.preHandle(request, response, handler);
@@ -101,11 +96,8 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertNull(response.getRenderParameter(param));
 	}
 
-	public void testNoParameterValueSetWithNonDefaultParameterName() throws Exception {
-		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
-		Object handler = new Object();
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
+	@Test
+	public void noParameterValueSetWithNonDefaultParameterName() throws Exception {
 		String param = "myParam";
 		assertNull(response.getRenderParameter(param));
 		boolean shouldProceed = interceptor.preHandle(request, response, handler);
@@ -113,15 +105,12 @@ public class ParameterMappingInterceptorTests extends TestCase {
 		assertNull(response.getRenderParameter(param));
 	}
 
-	public void testNoParameterValueSetWithNonDefaultParameterNameWhenHandlerMappingProvided() throws Exception {
+	@Test
+	public void noParameterValueSetWithNonDefaultParameterNameWhenHandlerMappingProvided() throws Exception {
 		String param = "myParam";
 		ParameterHandlerMapping handlerMapping = new ParameterHandlerMapping();
 		handlerMapping.setParameterName(param);
-		ParameterMappingInterceptor interceptor = new ParameterMappingInterceptor();
 		interceptor.setParameterName(param);
-		Object handler = new Object();
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
 		assertNull(response.getRenderParameter(param));
 		boolean shouldProceed = interceptor.preHandle(request, response, handler);
 		assertTrue(shouldProceed);

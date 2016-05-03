@@ -1,17 +1,17 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.util;
@@ -21,17 +21,18 @@ import java.util.Map;
 
 /**
  * Assertion utility class that assists in validating arguments.
- * Useful for identifying programmer errors early and clearly at runtime.
+ *
+ * <p>Useful for identifying programmer errors early and clearly at runtime.
  *
  * <p>For example, if the contract of a public method states it does not
- * allow {@code null} arguments, Assert can be used to validate that
+ * allow {@code null} arguments, {@code Assert} can be used to validate that
  * contract. Doing this clearly indicates a contract violation when it
  * occurs and protects the class's invariants.
  *
  * <p>Typically used to validate method arguments rather than configuration
- * properties, to check for cases that are usually programmer errors rather than
- * configuration errors. In contrast to config initialization code, there is
- * usally no point in falling back to defaults in such methods.
+ * properties, to check for cases that are usually programmer errors rather
+ * than configuration errors. In contrast to configuration initialization
+ * code, there is usually no point in falling back to defaults in such methods.
  *
  * <p>This class is similar to JUnit's assertion library. If an argument value is
  * deemed invalid, an {@link IllegalArgumentException} is thrown (typically).
@@ -41,13 +42,15 @@ import java.util.Map;
  * Assert.notNull(clazz, "The class must not be null");
  * Assert.isTrue(i > 0, "The value must be greater than zero");</pre>
  *
- * Mainly for internal use within the framework; consider Jakarta's Commons Lang
- * >= 2.0 for a more comprehensive suite of assertion utilities.
+ * <p>Mainly for internal use within the framework; consider
+ * <a href="http://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
+ * for a more comprehensive suite of {@code String} utilities.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
  * @author Rob Harrop
+ * @author Sam Brannen
  * @since 1.1.2
  */
 public abstract class Assert {
@@ -130,6 +133,7 @@ public abstract class Assert {
 	 * @param text the String to check
 	 * @param message the exception message to use if the assertion fails
 	 * @see StringUtils#hasLength
+	 * @throws IllegalArgumentException if the text is empty
 	 */
 	public static void hasLength(String text, String message) {
 		if (!StringUtils.hasLength(text)) {
@@ -143,6 +147,7 @@ public abstract class Assert {
 	 * <pre class="code">Assert.hasLength(name);</pre>
 	 * @param text the String to check
 	 * @see StringUtils#hasLength
+	 * @throws IllegalArgumentException if the text is empty
 	 */
 	public static void hasLength(String text) {
 		hasLength(text,
@@ -156,6 +161,7 @@ public abstract class Assert {
 	 * @param text the String to check
 	 * @param message the exception message to use if the assertion fails
 	 * @see StringUtils#hasText
+	 * @throws IllegalArgumentException if the text does not contain valid text content
 	 */
 	public static void hasText(String text, String message) {
 		if (!StringUtils.hasText(text)) {
@@ -169,6 +175,7 @@ public abstract class Assert {
 	 * <pre class="code">Assert.hasText(name, "'name' must not be empty");</pre>
 	 * @param text the String to check
 	 * @see StringUtils#hasText
+	 * @throws IllegalArgumentException if the text does not contain valid text content
 	 */
 	public static void hasText(String text) {
 		hasText(text,
@@ -181,6 +188,7 @@ public abstract class Assert {
 	 * @param textToSearch the text to search
 	 * @param substring the substring to find within the text
 	 * @param message the exception message to use if the assertion fails
+	 * @throws IllegalArgumentException if the text contains the substring
 	 */
 	public static void doesNotContain(String textToSearch, String substring, String message) {
 		if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
@@ -194,12 +202,12 @@ public abstract class Assert {
 	 * <pre class="code">Assert.doesNotContain(name, "rod");</pre>
 	 * @param textToSearch the text to search
 	 * @param substring the substring to find within the text
+	 * @throws IllegalArgumentException if the text contains the substring
 	 */
 	public static void doesNotContain(String textToSearch, String substring) {
 		doesNotContain(textToSearch, substring,
 				"[Assertion failed] - this String argument must not contain the substring [" + substring + "]");
 	}
-
 
 	/**
 	 * Assert that an array has elements; that is, it must not be
@@ -306,7 +314,6 @@ public abstract class Assert {
 		notEmpty(map, "[Assertion failed] - this map must not be empty; it must contain at least one entry");
 	}
 
-
 	/**
 	 * Assert that the provided object is an instance of the provided class.
 	 * <pre class="code">Assert.instanceOf(Foo.class, foo);</pre>
@@ -326,8 +333,8 @@ public abstract class Assert {
 	 * @param obj the object to check
 	 * @param message a message which will be prepended to the message produced by
 	 * the function itself, and which may be used to provide context. It should
-	 * normally end in a ": " or ". " so that the function generate message looks
-	 * ok when prepended to it.
+	 * normally end in ":" or "." so that the generated message looks OK when
+	 * appended to it.
 	 * @throws IllegalArgumentException if the object is not an instance of clazz
 	 * @see Class#isInstance
 	 */
@@ -359,17 +366,17 @@ public abstract class Assert {
 	 * @param subType the sub type to check
 	 * @param message a message which will be prepended to the message produced by
 	 * the function itself, and which may be used to provide context. It should
-	 * normally end in a ": " or ". " so that the function generate message looks
-	 * ok when prepended to it.
+	 * normally end in ":" or "." so that the generated message looks OK when
+	 * appended to it.
 	 * @throws IllegalArgumentException if the classes are not assignable
 	 */
 	public static void isAssignable(Class<?> superType, Class<?> subType, String message) {
 		notNull(superType, "Type to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
-			throw new IllegalArgumentException(message + subType + " is not assignable to " + superType);
+			throw new IllegalArgumentException((StringUtils.hasLength(message) ? message + " " : "") +
+					subType + " is not assignable to " + superType);
 		}
 	}
-
 
 	/**
 	 * Assert a boolean expression, throwing {@code IllegalStateException}

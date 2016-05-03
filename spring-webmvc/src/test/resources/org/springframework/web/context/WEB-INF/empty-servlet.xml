@@ -6,7 +6,7 @@
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
 	<bean id="servletContextAwareBean" class="org.springframework.web.context.ServletContextAwareBean"/>
-	
+
 	<bean id="servletConfigAwareBean" class="org.springframework.web.context.ServletConfigAwareBean"/>
 
 </beans>

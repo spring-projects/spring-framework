@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,36 +19,32 @@ package org.springframework.test;
 import java.util.HashMap;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * This class is only used within tests in the spring-orm module.
  *
- * <p>
- * Superclass for JUnit 3.8 test cases using Spring
+ * <p>Superclass for JUnit 3.8 test cases using Spring
  * {@link org.springframework.context.ApplicationContext ApplicationContexts}.
- * </p>
- * <p>
- * Maintains a static cache of contexts by key. This has significant performance
+ *
+ * <p>Maintains a static cache of contexts by key. This has significant performance
  * benefit if initializing the context would take time. While initializing a
  * Spring context itself is very quick, some beans in a context, such as a
  * LocalSessionFactoryBean for working with Hibernate, may take some time to
  * initialize. Hence it often makes sense to do that initializing once.
- * </p>
- * <p>
- * Any ApplicationContext created by this class will be asked to register a JVM
+ *
+ * <p>Any ApplicationContext created by this class will be asked to register a JVM
  * shutdown hook for itself. Unless the context gets closed early, all context
  * instances will be automatically closed on JVM shutdown. This allows for
  * freeing external resources held by beans within the context, e.g. temporary
  * files.
- * </p>
- * <p>
- * Normally you won't extend this class directly but rather one of its
- * subclasses.
- * </p>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -62,104 +58,48 @@ import org.springframework.util.StringUtils;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
-public abstract class AbstractSpringContextTests extends ConditionalTestCase {
+abstract class AbstractSpringContextTests extends TestCase {
 
-	/**
-	 * Map of context keys returned by subclasses of this class, to Spring
-	 * contexts. This needs to be static, as JUnit tests are destroyed and
-	 * recreated between running individual test methods.
-	 */
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	private static Map<String, ConfigurableApplicationContext> contextKeyToContextMap =
 			new HashMap<String, ConfigurableApplicationContext>();
-
-
-	/**
-	 * Default constructor for AbstractSpringContextTests.
-	 */
-	public AbstractSpringContextTests() {
-	}
-
-	/**
-	 * Constructor for AbstractSpringContextTests with a JUnit name.
-	 */
-	public AbstractSpringContextTests(String name) {
-		super(name);
-	}
 
 
 	/**
 	 * Explicitly add an ApplicationContext instance under a given key.
 	 * <p>This is not meant to be used by subclasses. It is rather exposed for
 	 * special test suite environments.
-	 * @param key the context key
+	 * @param locations the context key
 	 * @param context the ApplicationContext instance
 	 */
-	public final void addContext(Object key, ConfigurableApplicationContext context) {
+	public final void addContext(String[] locations, ConfigurableApplicationContext context) {
 		Assert.notNull(context, "ApplicationContext must not be null");
-		contextKeyToContextMap.put(contextKeyString(key), context);
-	}
-
-	/**
-	 * Return whether there is a cached context for the given key.
-	 * @param key the context key
-	 */
-	protected final boolean hasCachedContext(Object key) {
-		return contextKeyToContextMap.containsKey(contextKeyString(key));
-	}
-
-	/**
-	 * Determine if the supplied context {@code key} is <em>empty</em>.
-	 * <p>By default, {@code null} values, empty strings, and zero-length
-	 * arrays are considered <em>empty</em>.
-	 * @param key the context key to check
-	 * @return {@code true} if the supplied context key is empty
-	 */
-	protected boolean isContextKeyEmpty(Object key) {
-		return (key == null) || ((key instanceof String) && !StringUtils.hasText((String) key)) ||
-				((key instanceof Object[]) && ObjectUtils.isEmpty((Object[]) key));
+		contextKeyToContextMap.put(contextKey(locations), context);
 	}
 
 	/**
 	 * Obtain an ApplicationContext for the given key, potentially cached.
-	 * @param key the context key; may be {@code null}.
+	 * @param locations the context key; may be {@code null}.
 	 * @return the corresponding ApplicationContext instance (potentially cached),
 	 * or {@code null} if the provided {@code key} is <em>empty</em>
 	 */
-	protected final ConfigurableApplicationContext getContext(Object key) throws Exception {
-		if (isContextKeyEmpty(key)) {
+	protected final ConfigurableApplicationContext getContext(String... locations) throws Exception {
+		if (ObjectUtils.isEmpty(locations)) {
 			return null;
 		}
-		String keyString = contextKeyString(key);
-		ConfigurableApplicationContext ctx = contextKeyToContextMap.get(keyString);
+		String key = contextKey(locations);
+		ConfigurableApplicationContext ctx = contextKeyToContextMap.get(key);
 		if (ctx == null) {
-			ctx = loadContext(key);
+			ctx = loadContext(locations);
 			ctx.registerShutdownHook();
-			contextKeyToContextMap.put(keyString, ctx);
+			contextKeyToContextMap.put(key, ctx);
 		}
 		return ctx;
 	}
 
-	/**
-	 * Mark the context with the given key as dirty. This will cause the cached
-	 * context to be reloaded before the next test case is executed.
-	 * <p>Call this method only if you change the state of a singleton bean,
-	 * potentially affecting future tests.
-	 */
-	protected final void setDirty(Object contextKey) {
-		String keyString = contextKeyString(contextKey);
-		ConfigurableApplicationContext ctx = contextKeyToContextMap.remove(keyString);
-		if (ctx != null) {
-			ctx.close();
-		}
-	}
-
-	/**
-	 * Subclasses can override this to return a String representation of their
-	 * context key for use in caching and logging.
-	 * @param contextKey the context key
-	 */
-	protected String contextKeyString(Object contextKey) {
-		return ObjectUtils.nullSafeToString(contextKey);
+	private final String contextKey(String... locations) {
+		return ObjectUtils.nullSafeToString(locations);
 	}
 
 	/**
@@ -168,6 +108,6 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 	 * @param key the context key
 	 * @return the corresponding ApplicationContext instance (new)
 	 */
-	protected abstract ConfigurableApplicationContext loadContext(Object key) throws Exception;
+	protected abstract ConfigurableApplicationContext loadContext(String... locations) throws Exception;
 
 }

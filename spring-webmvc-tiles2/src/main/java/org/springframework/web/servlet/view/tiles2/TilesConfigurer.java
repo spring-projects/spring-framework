@@ -102,6 +102,9 @@ import org.springframework.web.context.ServletContextAware;
  * The values in the list are the actual Tiles XML files containing the definitions.
  * If the list is not specified, the default is {@code "/WEB-INF/tiles.xml"}.
  *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
+ *
  * @author Juergen Hoeller
  * @since 2.5
  * @see TilesView

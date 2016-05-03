@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,21 +33,23 @@ import org.springframework.util.StringUtils;
  */
 class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
 
-	private static final String SYSTEM_PROPERTIES_MODE_ATTRIB = "system-properties-mode";
+	private static final String SYSTEM_PROPERTIES_MODE_ATTRIBUTE = "system-properties-mode";
+
 	private static final String SYSTEM_PROPERTIES_MODE_DEFAULT = "ENVIRONMENT";
+
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
 		// As of Spring 3.1, the default value of system-properties-mode has changed from
 		// 'FALLBACK' to 'ENVIRONMENT'. This latter value indicates that resolution of
 		// placeholders against system properties is a function of the Environment and
-		// its current set of PropertySources
-		if (element.getAttribute(SYSTEM_PROPERTIES_MODE_ATTRIB).equals(SYSTEM_PROPERTIES_MODE_DEFAULT)) {
+		// its current set of PropertySources.
+		if (SYSTEM_PROPERTIES_MODE_DEFAULT.equals(element.getAttribute(SYSTEM_PROPERTIES_MODE_ATTRIBUTE))) {
 			return PropertySourcesPlaceholderConfigurer.class;
 		}
 
-		// the user has explicitly specified a value for system-properties-mode. Revert
-		// to PropertyPlaceholderConfigurer to ensure backward compatibility.
+		// The user has explicitly specified a value for system-properties-mode: revert to
+		// PropertyPlaceholderConfigurer to ensure backward compatibility with 3.0 and earlier.
 		return PropertyPlaceholderConfigurer.class;
 	}
 
@@ -58,10 +60,20 @@ class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBea
 		builder.addPropertyValue("ignoreUnresolvablePlaceholders",
 				Boolean.valueOf(element.getAttribute("ignore-unresolvable")));
 
-		String systemPropertiesModeName = element.getAttribute(SYSTEM_PROPERTIES_MODE_ATTRIB);
+		String systemPropertiesModeName = element.getAttribute(SYSTEM_PROPERTIES_MODE_ATTRIBUTE);
 		if (StringUtils.hasLength(systemPropertiesModeName) &&
 				!systemPropertiesModeName.equals(SYSTEM_PROPERTIES_MODE_DEFAULT)) {
-			builder.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_"+systemPropertiesModeName);
+			builder.addPropertyValue("systemPropertiesModeName", "SYSTEM_PROPERTIES_MODE_" + systemPropertiesModeName);
+		}
+
+		if (element.hasAttribute("value-separator")) {
+			builder.addPropertyValue("valueSeparator", element.getAttribute("value-separator"));
+		}
+		if (element.hasAttribute("trim-values")) {
+			builder.addPropertyValue("trimValues", element.getAttribute("trim-values"));
+		}
+		if (element.hasAttribute("null-value")) {
+			builder.addPropertyValue("nullValue", element.getAttribute("null-value"));
 		}
 	}
 

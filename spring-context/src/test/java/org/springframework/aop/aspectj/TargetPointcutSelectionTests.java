@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.aspectj;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +28,7 @@ import static org.junit.Assert.*;
 
 /**
  * Tests for target selection matching (see SPR-3783).
- * Thanks to Tomasz Blachowicz for the bug report!
+ * <p>Thanks to Tomasz Blachowicz for the bug report!
  *
  * @author Ramnivas Laddad
  * @author Chris Beams
@@ -46,6 +47,7 @@ public final class TargetPointcutSelectionTests {
 
 
 	@Before
+	@SuppressWarnings("resource")
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
@@ -63,7 +65,7 @@ public final class TargetPointcutSelectionTests {
 
 
 	@Test
-	public void testTargetSelectionForMatchedType() {
+	public void targetSelectionForMatchedType() {
 		testImpl1.interfaceMethod();
 		assertEquals("Should have been advised by POJO advice for impl", 1, testAspectForTestImpl1.count);
 		assertEquals("Should have been advised by POJO advice for base type", 1, testAspectForAbstractTestImpl.count);
@@ -71,7 +73,7 @@ public final class TargetPointcutSelectionTests {
 	}
 
 	@Test
-	public void testTargetNonSelectionForMismatchedType() {
+	public void targetNonSelectionForMismatchedType() {
 		testImpl2.interfaceMethod();
 		assertEquals("Shouldn't have been advised by POJO advice for impl", 0, testAspectForTestImpl1.count);
 		assertEquals("Should have been advised by POJO advice for base type", 1, testAspectForAbstractTestImpl.count);

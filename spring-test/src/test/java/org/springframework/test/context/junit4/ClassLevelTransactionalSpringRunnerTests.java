@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListener;
@@ -38,35 +37,36 @@ import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * <p>
  * JUnit 4 based integration test which verifies support of Spring's
  * {@link Transactional &#64;Transactional}, {@link TestExecutionListeners
  * &#64;TestExecutionListeners}, and {@link ContextConfiguration
  * &#64;ContextConfiguration} annotations in conjunction with the
- * {@link SpringJUnit4ClassRunner} and the following
+ * {@link SpringRunner} and the following
  * {@link TestExecutionListener TestExecutionListeners}:
- * </p>
+ *
  * <ul>
  * <li>{@link DependencyInjectionTestExecutionListener}</li>
  * <li>{@link DirtiesContextTestExecutionListener}</li>
  * <li>{@link TransactionalTestExecutionListener}</li>
  * </ul>
- * <p>
- * This class specifically tests usage of {@code @Transactional} defined at the
- * <strong>class level</strong>.
- * </p>
+ *
+ * <p>This class specifically tests usage of {@code @Transactional} defined
+ * at the <strong>class level</strong>.
  *
  * @author Sam Brannen
  * @since 2.5
  * @see MethodLevelTransactionalSpringRunnerTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
 @Transactional
 public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
 
 	protected static JdbcTemplate jdbcTemplate;
 
+
+	@Autowired
+	public void setDataSource(DataSource dataSource) {
+		jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
 	@AfterClass
 	public static void verifyFinalTestData() {
@@ -101,16 +101,6 @@ public class ClassLevelTransactionalSpringRunnerTests extends AbstractTransactio
 		assertEquals("Adding yoda", 1, addPerson(jdbcTemplate, YODA));
 		assertEquals("Verifying the number of rows in the person table without a transaction.", 4,
 			countRowsInPersonTable(jdbcTemplate));
-	}
-
-
-	public static class DatabaseSetup {
-
-		@Resource
-		public void setDataSource(DataSource dataSource) {
-			jdbcTemplate = new JdbcTemplate(dataSource);
-			createPersonTable(jdbcTemplate);
-		}
 	}
 
 }

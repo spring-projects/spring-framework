@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.expression.spel.ast.InlineMap;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -78,7 +78,7 @@ public class MapTests extends AbstractExpressionTests {
 	public void testInlineMapWithFunkyKeys() {
 		evaluate("{#root.name:true}","{Nikola Tesla=true}",LinkedHashMap.class);
 	}
-	
+
 	@Test
 	public void testInlineMapError() {
 		parseAndCheckError("{key:'abc'", SpelMessage.OOD);
@@ -136,4 +136,66 @@ public class MapTests extends AbstractExpressionTests {
 		// list should be unmodifiable
 		evaluate("{a:1, b:2, c:3, d:4, e:5}[a]=6", "[a:1,b: 2,c: 3,d: 4,e: 5]", unmodifiableClass);
 	}
+
+	@Test
+	public void testMapKeysThatAreAlsoSpELKeywords() {
+		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelExpression expression = null;
+		Object o = null;
+
+		// expression = (SpelExpression) parser.parseExpression("foo['NEW']");
+		// o = expression.getValue(new MapHolder());
+		// assertEquals("VALUE",o);
+
+		expression = (SpelExpression) parser.parseExpression("foo[T]");
+		o = expression.getValue(new MapHolder());
+		assertEquals("TV", o);
+
+		expression = (SpelExpression) parser.parseExpression("foo[t]");
+		o = expression.getValue(new MapHolder());
+		assertEquals("tv", o);
+
+		expression = (SpelExpression) parser.parseExpression("foo[NEW]");
+		o = expression.getValue(new MapHolder());
+		assertEquals("VALUE", o);
+
+		expression = (SpelExpression) parser.parseExpression("foo[new]");
+		o = expression.getValue(new MapHolder());
+		assertEquals("value", o);
+
+		expression = (SpelExpression) parser.parseExpression("foo['abc.def']");
+		o = expression.getValue(new MapHolder());
+		assertEquals("value", o);
+
+		expression = (SpelExpression)parser.parseExpression("foo[foo[NEW]]");
+		o = expression.getValue(new MapHolder());
+		assertEquals("37",o);
+
+		expression = (SpelExpression)parser.parseExpression("foo[foo[new]]");
+		o = expression.getValue(new MapHolder());
+		assertEquals("38",o);
+
+		expression = (SpelExpression)parser.parseExpression("foo[foo[foo[T]]]");
+		o = expression.getValue(new MapHolder());
+		assertEquals("value",o);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static class MapHolder {
+
+		public Map foo;
+
+		public MapHolder() {
+			foo = new HashMap();
+			foo.put("NEW", "VALUE");
+			foo.put("new", "value");
+			foo.put("T", "TV");
+			foo.put("t", "tv");
+			foo.put("abc.def", "value");
+			foo.put("VALUE","37");
+			foo.put("value","38");
+			foo.put("TV","new");
+		}
+	}
+
 }

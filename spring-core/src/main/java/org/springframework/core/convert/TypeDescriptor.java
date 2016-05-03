@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,12 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -38,12 +41,16 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Sam Brannen
+ * @author Stephane Nicoll
  * @since 3.0
  */
 @SuppressWarnings("serial")
 public class TypeDescriptor implements Serializable {
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
+
+	private static final boolean streamAvailable = ClassUtils.isPresent(
+			"java.util.stream.Stream", TypeDescriptor.class.getClassLoader());
 
 	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>(18);
 
@@ -111,7 +118,7 @@ public class TypeDescriptor implements Serializable {
 	 * constructor is used internally and may also be used by subclasses that support
 	 * non-Java languages with extended type systems.
 	 * @param resolvableType the resolvable type
-	 * @param type the backing type or {@code null} if should be resolved
+	 * @param type the backing type (or {@code null} if it should get resolved)
 	 * @param annotations the type annotations
 	 */
 	protected TypeDescriptor(ResolvableType resolvableType, Class<?> type, Annotation[] annotations) {
@@ -194,7 +201,7 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * Cast this {@link TypeDescriptor} to a superclass or implemented interface
 	 * preserving annotations and nested type context.
-	 * @param superType the super type to cast to (can be {@code null}
+	 * @param superType the super type to cast to (can be {@code null})
 	 * @return a new TypeDescriptor for the up-cast type
 	 * @throws IllegalArgumentException if this type is not assignable to the super-type
 	 * @since 3.2
@@ -231,6 +238,8 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * Determine if this type descriptor has the specified annotation.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels
+	 * of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return <tt>true</tt> if the annotation is present
 	 */
@@ -239,19 +248,24 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Obtain the annotation associated with this type descriptor of the specified type.
+	 * Obtain the annotation of the specified {@code annotationType} that is on this type descriptor.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return the annotation, or {@code null} if no such annotation exists on this type descriptor
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
+		// Search in annotations that are "present" (i.e., locally declared or inherited)
+		// NOTE: this unfortunately favors inherited annotations over locally declared composed annotations.
 		for (Annotation annotation : getAnnotations()) {
-			if (annotation.annotationType().equals(annotationType)) {
+			if (annotation.annotationType() == annotationType) {
 				return (T) annotation;
 			}
 		}
-		for (Annotation metaAnn : getAnnotations()) {
-			T ann = metaAnn.annotationType().getAnnotation(annotationType);
+
+		// Search in annotation hierarchy
+		for (Annotation composedAnnotation : getAnnotations()) {
+			T ann = AnnotationUtils.findAnnotation(composedAnnotation.annotationType(), annotationType);
 			if (ann != null) {
 				return ann;
 			}
@@ -316,6 +330,7 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * If this type is an array, returns the array's component type.
+	 * If this type is a {@code Stream}, returns the stream's component type.
 	 * If this type is a {@link Collection} and it is parameterized, returns the Collection's element type.
 	 * If the Collection is not parameterized, returns {@code null} indicating the element type is not declared.
 	 * @return the array component type or Collection element type, or {@code null} if this type is a
@@ -325,6 +340,9 @@ public class TypeDescriptor implements Serializable {
 	public TypeDescriptor getElementTypeDescriptor() {
 		if (this.resolvableType.isArray()) {
 			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
+		}
+		if (streamAvailable && StreamDelegate.isStream(this.type)) {
+			return StreamDelegate.getStreamElementType(this);
 		}
 		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
 	}
@@ -427,10 +445,6 @@ public class TypeDescriptor implements Serializable {
 		return narrow(mapValue, getMapValueTypeDescriptor());
 	}
 
-	private Class<?> getType(TypeDescriptor typeDescriptor) {
-		return (typeDescriptor != null ? typeDescriptor.getType() : null);
-	}
-
 	private TypeDescriptor narrow(Object value, TypeDescriptor typeDescriptor) {
 		if (typeDescriptor != null) {
 			return typeDescriptor.narrow(value);
@@ -454,7 +468,7 @@ public class TypeDescriptor implements Serializable {
 			return false;
 		}
 		for (Annotation ann : getAnnotations()) {
-			if (other.getAnnotation(ann.annotationType()) == null) {
+			if (!ann.equals(other.getAnnotation(ann.annotationType()))) {
 				return false;
 			}
 		}
@@ -660,7 +674,7 @@ public class TypeDescriptor implements Serializable {
 	private static TypeDescriptor nested(TypeDescriptor typeDescriptor, int nestingLevel) {
 		ResolvableType nested = typeDescriptor.resolvableType;
 		for (int i = 0; i < nestingLevel; i++) {
-			if (Object.class.equals(nested.getType())) {
+			if (Object.class == nested.getType()) {
 				// Could be a collection type but we don't know about its element type,
 				// so let's just assume there is an element type of type Object...
 			}
@@ -679,6 +693,22 @@ public class TypeDescriptor implements Serializable {
 			return null;
 		}
 		return new TypeDescriptor(type, null, source.annotations);
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Java 8.
+	 */
+	@UsesJava8
+	private static class StreamDelegate {
+
+		public static boolean isStream(Class<?> type) {
+			return Stream.class.isAssignableFrom(type);
+		}
+
+		public static TypeDescriptor getStreamElementType(TypeDescriptor source) {
+			return getRelatedIfResolvable(source, source.resolvableType.as(Stream.class).getGeneric());
+		}
 	}
 
 }

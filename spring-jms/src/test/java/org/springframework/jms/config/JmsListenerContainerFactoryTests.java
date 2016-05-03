@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,6 @@ import static org.mockito.Mockito.*;
  */
 public class JmsListenerContainerFactoryTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private final ConnectionFactory connectionFactory = new StubConnectionFactory();
 
 	private final DestinationResolver destinationResolver = new DynamicDestinationResolver();
@@ -59,6 +56,10 @@ public class JmsListenerContainerFactoryTests {
 	private final MessageConverter messageConverter = new SimpleMessageConverter();
 
 	private final TransactionManager transactionManager = mock(TransactionManager.class);
+
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -148,6 +149,7 @@ public class JmsListenerContainerFactoryTests {
 		assertSame(backOff, new DirectFieldAccessor(container).getPropertyValue("backOff"));
 	}
 
+
 	private void setDefaultJmsConfig(AbstractJmsListenerContainerFactory<?> factory) {
 		factory.setConnectionFactory(connectionFactory);
 		factory.setDestinationResolver(destinationResolver);
@@ -155,8 +157,10 @@ public class JmsListenerContainerFactoryTests {
 		factory.setSessionTransacted(true);
 		factory.setSessionAcknowledgeMode(Session.DUPS_OK_ACKNOWLEDGE);
 		factory.setPubSubDomain(true);
+		factory.setReplyPubSubDomain(true);
 		factory.setSubscriptionDurable(true);
 		factory.setClientId("client-1234");
+		factory.setAutoStartup(false);
 	}
 
 	private void assertDefaultJmsConfig(AbstractMessageListenerContainer container) {
@@ -166,8 +170,10 @@ public class JmsListenerContainerFactoryTests {
 		assertEquals(true, container.isSessionTransacted());
 		assertEquals(Session.DUPS_OK_ACKNOWLEDGE, container.getSessionAcknowledgeMode());
 		assertEquals(true, container.isPubSubDomain());
+		assertEquals(true, container.isReplyPubSubDomain());
 		assertEquals(true, container.isSubscriptionDurable());
 		assertEquals("client-1234", container.getClientId());
+		assertEquals(false, container.isAutoStartup());
 	}
 
 	private void setDefaultJcaConfig(DefaultJcaListenerContainerFactory factory) {
@@ -182,6 +188,7 @@ public class JmsListenerContainerFactoryTests {
 
 	private void assertDefaultJcaConfig(JmsMessageEndpointManager container) {
 		assertEquals(messageConverter, container.getMessageConverter());
+		assertEquals(destinationResolver, container.getDestinationResolver());
 		JmsActivationSpecConfig config = container.getActivationSpecConfig();
 		assertNotNull(config);
 		assertEquals(Session.DUPS_OK_ACKNOWLEDGE, config.getAcknowledgeMode());

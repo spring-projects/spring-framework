@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.JmsException;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.destination.DestinationResolver;
 
 /**
  * @author Stephane Nicoll
  */
-public class MessageListenerTestContainer
-		implements MessageListenerContainer, InitializingBean, DisposableBean {
+public class MessageListenerTestContainer implements MessageListenerContainer, InitializingBean, DisposableBean {
 
 	private final JmsListenerEndpoint endpoint;
+
+	private boolean autoStartup = true;
 
 	private boolean startInvoked;
 
@@ -38,8 +40,14 @@ public class MessageListenerTestContainer
 
 	private boolean destroyInvoked;
 
+
 	MessageListenerTestContainer(JmsListenerEndpoint endpoint) {
 		this.endpoint = endpoint;
+	}
+
+
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
 	}
 
 	public JmsListenerEndpoint getEndpoint() {
@@ -85,7 +93,7 @@ public class MessageListenerTestContainer
 
 	@Override
 	public boolean isAutoStartup() {
-		return true;
+		return this.autoStartup;
 	}
 
 	@Override
@@ -104,8 +112,18 @@ public class MessageListenerTestContainer
 	}
 
 	@Override
+	public DestinationResolver getDestinationResolver() {
+		return null;
+	}
+
+	@Override
 	public boolean isPubSubDomain() {
 		return true;
+	}
+
+	@Override
+	public boolean isReplyPubSubDomain() {
+		return isPubSubDomain();
 	}
 
 	@Override
@@ -116,8 +134,7 @@ public class MessageListenerTestContainer
 	@Override
 	public void destroy() {
 		if (!stopInvoked) {
-			throw new IllegalStateException("Stop should have been invoked before " +
-					"destroy on " + this);
+			throw new IllegalStateException("Stop should have been invoked before " + "destroy on " + this);
 		}
 		destroyInvoked = true;
 	}
@@ -133,4 +150,5 @@ public class MessageListenerTestContainer
 		sb.append('}');
 		return sb.toString();
 	}
+
 }

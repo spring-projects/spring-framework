@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,11 @@ public class CompositePropertySource extends EnumerablePropertySource<Object> {
 	public String[] getPropertyNames() {
 		Set<String> names = new LinkedHashSet<String>();
 		for (PropertySource<?> propertySource : this.propertySources) {
-			if (propertySource instanceof EnumerablePropertySource) {
-				names.addAll(Arrays.asList(((EnumerablePropertySource<?>) propertySource).getPropertyNames()));
+			if (!(propertySource instanceof EnumerablePropertySource)) {
+				throw new IllegalStateException(
+						"Failed to enumerate property names due to non-enumerable property source: " + propertySource);
 			}
+			names.addAll(Arrays.asList(((EnumerablePropertySource<?>) propertySource).getPropertyNames()));
 		}
 		return StringUtils.toStringArray(names);
 	}

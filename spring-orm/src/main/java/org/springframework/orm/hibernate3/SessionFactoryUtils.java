@@ -100,7 +100,9 @@ import org.springframework.util.Assert;
  * @see HibernateTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public abstract class SessionFactoryUtils {
 
 	/**
@@ -511,7 +513,6 @@ public abstract class SessionFactoryUtils {
 	 * @param entityInterceptor Hibernate entity interceptor, or {@code null} if none
 	 * @return the new Session
 	 */
-	@SuppressWarnings("deprecation")
 	public static Session getNewSession(SessionFactory sessionFactory, Interceptor entityInterceptor) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
 

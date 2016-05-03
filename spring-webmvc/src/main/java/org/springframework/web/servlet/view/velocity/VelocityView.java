@@ -83,7 +83,9 @@ import org.springframework.web.util.NestedServletException;
  * @see #setVelocityEngine
  * @see VelocityConfig
  * @see VelocityConfigurer
+ * @deprecated as of Spring 4.3, in favor of FreeMarker
  */
+@Deprecated
 public class VelocityView extends AbstractTemplateView {
 
 	private Map<String, Class<?>> toolAttributes;

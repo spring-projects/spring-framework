@@ -1,21 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<!--
-  ~ Copyright 2002-2013 the original author or authors.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
 <xsd:schema xmlns="http://www.springframework.org/schema/websocket"
 			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 			xmlns:beans="http://www.springframework.org/schema/beans"
@@ -23,8 +7,7 @@
 			elementFormDefault="qualified"
 			attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans"
-				schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
 
 	<xsd:complexType name="mapping">
 		<xsd:annotation>
@@ -366,7 +349,7 @@
 	This is essentially the "Unbounded queues" strategy as explained in java.util.concurrent.ThreadPoolExecutor.
 	When this strategy is used, the max pool size is effectively ignored.
 	By default this is set to twice the value of Runtime.availableProcessors().
-	In an an application where tasks do not block frequently,
+	In an application where tasks do not block frequently,
 	the number should be closer to or equal to the number of available CPUs/cores.
                 ]]></xsd:documentation>
 			</xsd:annotation>

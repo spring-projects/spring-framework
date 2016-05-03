@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.remoting.httpinvoker;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -169,7 +170,8 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			HttpServletRequest request, HttpServletResponse response, RemoteInvocationResult result, OutputStream os)
 			throws IOException {
 
-		ObjectOutputStream oos = createObjectOutputStream(decorateOutputStream(request, response, os));
+		ObjectOutputStream oos =
+				createObjectOutputStream(new FlushGuardedOutputStream(decorateOutputStream(request, response, os)));
 		try {
 			doWriteRemoteInvocationResult(result, oos);
 		}
@@ -193,6 +195,27 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 			HttpServletRequest request, HttpServletResponse response, OutputStream os) throws IOException {
 
 		return os;
+	}
+
+	/**
+	 * Decorate an OutputStream to guard against {@code flush()} calls, which
+	 * are turned into no-ops.
+	 * <p>Because {@link ObjectOutputStream#close()} will in fact flush/drain
+	 * the underlying stream twice, this {@link FilterOutputStream} will
+	 * guard against individual flush calls. Multiple flush calls can lead
+	 * to performance issues, since writes aren't gathered as they should be.
+	 *
+	 * @see <a href="https://jira.spring.io/browse/SPR-14040">SPR-14040</a>
+	 */
+	class FlushGuardedOutputStream extends FilterOutputStream {
+		public FlushGuardedOutputStream(OutputStream out) {
+			super(out);
+		}
+
+		@Override
+		public void flush() throws IOException {
+			// Do nothing
+		}
 	}
 
 }

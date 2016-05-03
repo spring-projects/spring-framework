@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.socket.sockjs.frame;
 
 import java.nio.charset.Charset;
 
-import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 
 /**
  * Represents a SockJS frame. Provides factory methods to create SockJS frames.
@@ -49,7 +49,7 @@ public class SockJsFrame {
 	 * @param content the content, must be a non-empty and represent a valid SockJS frame
 	 */
 	public SockJsFrame(String content) {
-		StringUtils.hasText(content);
+		Assert.hasText(content);
 		if ("o".equals(content)) {
 			this.type = SockJsFrameType.OPEN;
 			this.content = content;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import java.io.ByteArrayOutputStream;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.xmlbeans.XmlObject;
+
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractMarshallerTests;
-import org.springframework.oxm.Marshaller;
 import org.springframework.samples.flight.FlightType;
 import org.springframework.samples.flight.FlightsDocument;
 
@@ -31,11 +31,14 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-public class XmlBeansMarshallerTests extends AbstractMarshallerTests {
+@SuppressWarnings("deprecation")
+public class XmlBeansMarshallerTests extends
+		AbstractMarshallerTests<org.springframework.oxm.xmlbeans.XmlBeansMarshaller> {
 
 	@Override
-	protected Marshaller createMarshaller() throws Exception {
+	protected XmlBeansMarshaller createMarshaller() throws Exception {
 		return new XmlBeansMarshaller();
 	}
 
@@ -49,7 +52,7 @@ public class XmlBeansMarshallerTests extends AbstractMarshallerTests {
 	}
 
 	@Test(expected = ClassCastException.class)
-	public void testMarshalNonXmlObject() throws Exception {
+	public void marshalNonXmlObject() throws Exception {
 		marshaller.marshal(new Object(), new StreamResult(new ByteArrayOutputStream()));
 	}
 

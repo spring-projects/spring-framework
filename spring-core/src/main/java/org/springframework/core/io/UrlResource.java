@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for {@code java.net.URL} locators.
- * Obviously supports resolution as URL, and also as File in case of
- * the "file:" protocol.
+ * <p>Supports resolution as a {@code URL} and also as a {@code File} in
+ * case of the {@code "file:"} protocol.
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
@@ -58,7 +58,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 
 
 	/**
-	 * Create a new UrlResource based on the given URI object.
+	 * Create a new {@code UrlResource} based on the given URI object.
 	 * @param uri a URI
 	 * @throws MalformedURLException if the given URL path is not valid
 	 */
@@ -70,7 +70,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new UrlResource based on the given URL object.
+	 * Create a new {@code UrlResource} based on the given URL object.
 	 * @param url a URL
 	 */
 	public UrlResource(URL url) {
@@ -81,7 +81,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new UrlResource based on a URL path.
+	 * Create a new {@code UrlResource} based on a URL path.
 	 * <p>Note: The given path needs to be pre-encoded if necessary.
 	 * @param path a URL path
 	 * @throws MalformedURLException if the given URL path is not valid
@@ -95,7 +95,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new UrlResource based on a URI specification.
+	 * Create a new {@code UrlResource} based on a URI specification.
 	 * <p>The given parts will automatically get encoded if necessary.
 	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
 	 * also known as "scheme"
@@ -109,7 +109,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * Create a new UrlResource based on a URI specification.
+	 * Create a new {@code UrlResource} based on a URI specification.
 	 * <p>The given parts will automatically get encoded if necessary.
 	 * @param protocol the URL protocol to use (e.g. "jar" or "file" - without colon);
 	 * also known as "scheme"
@@ -154,7 +154,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 
 	/**
 	 * This implementation opens an InputStream for the given URL.
-	 * It sets the "UseCaches" flag to {@code false},
+	 * <p>It sets the {@code useCaches} flag to {@code false},
 	 * mainly to avoid jar file locking on Windows.
 	 * @see java.net.URL#openConnection()
 	 * @see java.net.URLConnection#setUseCaches(boolean)
@@ -214,7 +214,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	}
 
 	/**
-	 * This implementation creates a UrlResource, applying the given path
+	 * This implementation creates a {@code UrlResource}, applying the given path
 	 * relative to the path of the underlying URL of this resource descriptor.
 	 * @see java.net.URL#URL(java.net.URL, String)
 	 */

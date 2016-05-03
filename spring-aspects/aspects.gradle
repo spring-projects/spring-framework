@@ -25,6 +25,9 @@ compileJava  {
 	ext.targetCompatibility = project(":spring-core").compileJava.targetCompatibility
 
 	doLast{
+		// Assemble runtime classpath from folders and JARs that actually exist
+		def runtimeClasspath = project.files(sourceSets.main.runtimeClasspath.files.findAll({ it.exists() }))
+
 		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
 				classpath: configurations.ajc.asPath)
 
@@ -34,7 +37,7 @@ compileJava  {
 				aspectPath: configurations.aspects.asPath,
 				inpath: configurations.ajInpath.asPath,
 				sourceRootCopyFilter: "**/*.java,**/*.aj",
-				classpath: (sourceSets.main.runtimeClasspath + configurations.rt).asPath) {
+				classpath: (runtimeClasspath + configurations.rt).asPath) {
 			sourceroots {
 				sourceSets.main.java.srcDirs.each {
 					pathelement(location:it.absolutePath)
@@ -58,6 +61,9 @@ compileTestJava  {
 	ext.targetCompatibility = project(":spring-core").compileTestJava.targetCompatibility
 
 	doLast{
+		// Assemble runtime classpath from folders and JARs that actually exist
+		def runtimeClasspath = project.files(sourceSets.test.runtimeClasspath.files.findAll({ it.exists() }))
+
 		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
 				classpath: configurations.ajc.asPath)
 
@@ -66,8 +72,7 @@ compileTestJava  {
 				destDir: outputDir.absolutePath,
 				aspectPath: jar.archivePath,
 				inpath: configurations.ajInpath.asPath,
-				classpath: sourceSets.test.runtimeClasspath.asPath + jar.archivePath +
-				           System.getProperty("path.separator") + configurations.rt.asPath) {
+				classpath: (runtimeClasspath + project.files(jar.archivePath) + configurations.rt).asPath) {
 			sourceroots {
 				sourceSets.test.java.srcDirs.each {
 					pathelement(location:it.absolutePath)

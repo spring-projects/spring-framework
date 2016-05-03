@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
  * more comprehensive suite of digest utilities.
  *
  * @author Arjen Poutsma
+ * @author Craig Andrews
  * @since 3.0
  * @see org.apache.commons.codec.digest.DigestUtils
  */
@@ -37,6 +38,7 @@ public abstract class DigestUtils {
 
 	private static final char[] HEX_CHARS =
 			{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
 
 	/**
 	 * Calculate the MD5 digest of the given bytes.
@@ -53,7 +55,7 @@ public abstract class DigestUtils {
 	 * @return the digest
 	 * @since 4.2
 	 */
-	public static byte[] md5Digest(InputStream inputStream) throws IOException{
+	public static byte[] md5Digest(InputStream inputStream) throws IOException {
 		return digest(MD5_ALGORITHM_NAME, inputStream);
 	}
 
@@ -74,7 +76,7 @@ public abstract class DigestUtils {
 	 * @return a hexadecimal digest string
 	 * @since 4.2
 	 */
-	public static String md5DigestAsHex(InputStream inputStream) throws IOException{
+	public static String md5DigestAsHex(InputStream inputStream) throws IOException {
 		return digestAsHexString(MD5_ALGORITHM_NAME, inputStream);
 	}
 
@@ -97,13 +99,14 @@ public abstract class DigestUtils {
 	 * @return the given string builder
 	 * @since 4.2
 	 */
-	public static StringBuilder appendMd5DigestAsHex(InputStream inputStream, StringBuilder builder) throws IOException{
+	public static StringBuilder appendMd5DigestAsHex(InputStream inputStream, StringBuilder builder) throws IOException {
 		return appendDigestAsHex(MD5_ALGORITHM_NAME, inputStream, builder);
 	}
 
+
 	/**
-	 * Creates a new {@link MessageDigest} with the given algorithm. Necessary
-	 * because {@code MessageDigest} is not thread-safe.
+	 * Create a new {@link MessageDigest} with the given algorithm.
+	 * Necessary because {@code MessageDigest} is not thread-safe.
 	 */
 	private static MessageDigest getDigest(String algorithm) {
 		try {
@@ -118,12 +121,13 @@ public abstract class DigestUtils {
 		return getDigest(algorithm).digest(bytes);
 	}
 
-	private static byte[] digest(String algorithm, InputStream inputStream) throws IOException{
+	private static byte[] digest(String algorithm, InputStream inputStream) throws IOException {
 		MessageDigest messageDigest = getDigest(algorithm);
-		if(inputStream instanceof UpdateMessageDigestInputStream){
+		if (inputStream instanceof UpdateMessageDigestInputStream){
 			((UpdateMessageDigestInputStream) inputStream).updateMessageDigest(messageDigest);
 			return messageDigest.digest();
-		}else{
+		}
+		else {
 			return messageDigest.digest(StreamUtils.copyToByteArray(inputStream));
 		}
 	}
@@ -133,7 +137,7 @@ public abstract class DigestUtils {
 		return new String(hexDigest);
 	}
 
-	private static String digestAsHexString(String algorithm, InputStream inputStream) throws IOException{
+	private static String digestAsHexString(String algorithm, InputStream inputStream) throws IOException {
 		char[] hexDigest = digestAsHexChars(algorithm, inputStream);
 		return new String(hexDigest);
 	}
@@ -143,7 +147,9 @@ public abstract class DigestUtils {
 		return builder.append(hexDigest);
 	}
 
-	private static StringBuilder appendDigestAsHex(String algorithm, InputStream inputStream, StringBuilder builder) throws IOException{
+	private static StringBuilder appendDigestAsHex(String algorithm, InputStream inputStream, StringBuilder builder)
+			throws IOException {
+
 		char[] hexDigest = digestAsHexChars(algorithm, inputStream);
 		return builder.append(hexDigest);
 	}
@@ -153,7 +159,7 @@ public abstract class DigestUtils {
 		return encodeHex(digest);
 	}
 
-	private static char[] digestAsHexChars(String algorithm, InputStream inputStream) throws IOException{
+	private static char[] digestAsHexChars(String algorithm, InputStream inputStream) throws IOException {
 		byte[] digest = digest(algorithm, inputStream);
 		return encodeHex(digest);
 	}

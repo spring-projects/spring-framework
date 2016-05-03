@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,19 +22,23 @@ import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.util.ClassUtils;
 
 /**
- * Simply calls {@link Object#toString()} to convert any supported Object to a String.
- * Supports CharSequence, StringWriter, and any class with a String constructor or
- * {@code valueOf(String)} method.
+ * Simply calls {@link Object#toString()} to convert any supported object
+ * to a {@link String}.
  *
- * <p>Used by the default ConversionService as a fallback if there are no other explicit
- * to-String converters registered.
+ * <p>Supports {@link CharSequence}, {@link StringWriter}, and any class
+ * with a String constructor or one of the following static factory methods:
+ * {@code valueOf(String)}, {@code of(String)}, {@code from(String)}.
+ *
+ * <p>Used by the {@link DefaultConversionService} as a fallback if there
+ * are no other explicit to-String converters registered.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
+ * @see ObjectToObjectConverter
  */
 final class FallbackObjectToStringConverter implements ConditionalGenericConverter {
 
@@ -46,13 +50,13 @@ final class FallbackObjectToStringConverter implements ConditionalGenericConvert
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
-		if (String.class.equals(sourceClass)) {
+		if (String.class == sourceClass) {
+			// no conversion required
 			return false;
 		}
 		return (CharSequence.class.isAssignableFrom(sourceClass) ||
 				StringWriter.class.isAssignableFrom(sourceClass) ||
-				ObjectToObjectConverter.getOfMethod(sourceClass, String.class) != null ||
-				ClassUtils.getConstructorIfAvailable(sourceClass, String.class) != null);
+				ObjectToObjectConverter.hasConversionMethodOrConstructor(sourceClass, String.class));
 	}
 
 	@Override

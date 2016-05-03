@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletSecurityException;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -44,24 +45,24 @@ import org.springframework.web.portlet.multipart.PortletMultipartResolver;
 import org.springframework.web.servlet.ViewRendererServlet;
 import org.springframework.web.servlet.view.InternalResourceView;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Dan McCallum
  */
-public class DispatcherPortletTests extends TestCase {
+public class DispatcherPortletTests {
 
-	private MockPortletConfig complexPortletConfig;
+	private final MockPortletConfig complexPortletConfig = new MockPortletConfig(new MockPortletContext(), "complex");
 
-	private DispatcherPortlet complexDispatcherPortlet;
+	private final DispatcherPortlet complexDispatcherPortlet = new DispatcherPortlet();
 
 
-	@Override
-	protected void setUp() throws PortletException {
-		complexPortletConfig = new MockPortletConfig(new MockPortletContext(), "complex");
+	@Before
+	public void setUp() throws PortletException {
 		complexPortletConfig.addInitParameter("publishContext", "false");
 
-		complexDispatcherPortlet = new DispatcherPortlet();
 		complexDispatcherPortlet.setContextClass(ComplexPortletApplicationContext.class);
 		complexDispatcherPortlet.setNamespace("test");
 		complexDispatcherPortlet.addRequiredProperty("publishContext");
@@ -73,14 +74,16 @@ public class DispatcherPortletTests extends TestCase {
 	}
 
 
-	public void testDispatcherPortletGetPortletNameDoesNotFailWithoutConfig() {
+	@Test
+	public void dispatcherPortletGetPortletNameDoesNotFailWithoutConfig() {
 		DispatcherPortlet dp = new DispatcherPortlet();
 		assertEquals(null, dp.getPortletConfig());
 		assertEquals(null, dp.getPortletName());
 		assertEquals(null, dp.getPortletContext());
 	}
 
-	public void testDispatcherPortlets() {
+	@Test
+	public void dispatcherPortlets() {
 		assertTrue("Correct namespace", "test".equals(complexDispatcherPortlet.getNamespace()));
 		assertTrue("Correct attribute",
 				(FrameworkPortlet.PORTLET_CONTEXT_PREFIX + "complex").equals(complexDispatcherPortlet.getPortletContextAttributeName()));
@@ -88,7 +91,8 @@ public class DispatcherPortletTests extends TestCase {
 				getPortletContext().getAttribute(FrameworkPortlet.PORTLET_CONTEXT_PREFIX + "complex") == null);
 	}
 
-	public void testPortletModeParameterMappingHelp1() throws Exception {
+	@Test
+	public void portletModeParameterMappingHelp1() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.HELP);
@@ -98,7 +102,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("help1 was here", param);
 	}
 
-	public void testPortletModeParameterMappingHelp2() throws Exception {
+	@Test
+	public void portletModeParameterMappingHelp2() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.HELP);
@@ -108,7 +113,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("help2 was here", param);
 	}
 
-	public void testPortletModeParameterMappingInvalidHelpActionRequest() throws Exception {
+	@Test
+	public void portletModeParameterMappingInvalidHelpActionRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.HELP);
@@ -119,7 +125,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
 	}
 
-	public void testPortletModeParameterMappingInvalidHelpRenderRequest() throws Exception {
+	@Test
+	public void portletModeParameterMappingInvalidHelpRenderRequest() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setPortletMode(PortletMode.HELP);
@@ -131,7 +138,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-unavailable", view.getBeanName());
 	}
 
-	public void testPortletModeMappingValidEditActionRequest() throws Exception {
+	@Test
+	public void portletModeMappingValidEditActionRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.EDIT);
@@ -142,7 +150,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("edit was here", response.getRenderParameter("param"));
 	}
 
-	public void testPortletModeMappingEditActionRequestWithUnauthorizedUserRole() throws Exception {
+	@Test
+	public void portletModeMappingEditActionRequestWithUnauthorizedUserRole() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.EDIT);
@@ -156,7 +165,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertTrue(exception.startsWith(name));
 	}
 
-	public void testPortletModeMappingValidViewRenderRequest() throws Exception {
+	@Test
+	public void portletModeMappingValidViewRenderRequest() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -170,7 +180,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("someViewName", view.getBeanName());
 	}
 
-	public void testPortletModeMappingViewRenderRequestWithUnauthorizedUserRole() throws Exception {
+	@Test
+	public void portletModeMappingViewRenderRequestWithUnauthorizedUserRole() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -186,7 +197,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
-	public void testParameterMappingValidActionRequest() throws Exception {
+	@Test
+	public void parameterMappingValidActionRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.EDIT);
@@ -196,7 +208,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("test1-action", response.getRenderParameter("result"));
 	}
 
-	public void testParameterMappingValidRenderRequest() throws Exception {
+	@Test
+	public void parameterMappingValidRenderRequest() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -206,7 +219,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("test2-view", response.getProperty("result"));
 	}
 
-	public void testUnknownHandlerActionRequest() throws Exception {
+	@Test
+	public void unknownHandlerActionRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter("myParam", "unknown");
@@ -217,7 +231,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertTrue(exceptionParam.indexOf("No adapter for handler") != -1);
 	}
 
-	public void testUnknownHandlerRenderRequest() throws Exception {
+	@Test
+	public void unknownHandlerRenderRequest() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "unknown");
@@ -230,7 +245,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
-	public void testNoDetectAllHandlerMappingsWithPortletModeActionRequest() throws Exception {
+	@Test
+	public void noDetectAllHandlerMappingsWithPortletModeActionRequest() throws Exception {
 		DispatcherPortlet complexDispatcherPortlet = new DispatcherPortlet();
 		complexDispatcherPortlet.setContextClass(ComplexPortletApplicationContext.class);
 		complexDispatcherPortlet.setNamespace("test");
@@ -245,7 +261,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
 	}
 
-	public void testNoDetectAllHandlerMappingsWithParameterRenderRequest() throws Exception {
+	@Test
+	public void noDetectAllHandlerMappingsWithParameterRenderRequest() throws Exception {
 		DispatcherPortlet complexDispatcherPortlet = new DispatcherPortlet();
 		complexDispatcherPortlet.setContextClass(ComplexPortletApplicationContext.class);
 		complexDispatcherPortlet.setNamespace("test");
@@ -262,7 +279,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-unavailable", view.getBeanName());
 	}
 
-	public void testExistingMultipartRequest() throws Exception {
+	@Test
+	public void existingMultipartRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.EDIT);
@@ -275,7 +293,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertNotNull(request.getAttribute("cleanedUp"));
 	}
 
-	public void testMultipartResolutionFailed() throws Exception {
+	@Test
+	public void multipartResolutionFailed() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.EDIT);
@@ -286,7 +305,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertTrue(exception.startsWith(MaxUploadSizeExceededException.class.getName()));
 	}
 
-	public void testActionRequestHandledEvent() throws Exception {
+	@Test
+	public void actionRequestHandledEvent() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		complexDispatcherPortlet.processAction(request, response);
@@ -296,7 +316,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals(1, listener.counter);
 	}
 
-	public void testRenderRequestHandledEvent() throws Exception {
+	@Test
+	public void renderRequestHandledEvent() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		complexDispatcherPortlet.doDispatch(request, response);
@@ -306,7 +327,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals(1, listener.counter);
 	}
 
-	public void testPublishEventsOff() throws Exception {
+	@Test
+	public void publishEventsOff() throws Exception {
 		complexDispatcherPortlet.setPublishEvents(false);
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
@@ -318,7 +340,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals(0, listener.counter);
 	}
 
-	public void testCorrectLocaleInRequest() throws Exception {
+	@Test
+	public void correctLocaleInRequest() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "requestLocaleChecker");
@@ -327,7 +350,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("locale-ok", response.getContentAsString());
 	}
 
-	public void testIncorrectLocaleInRequest() throws Exception {
+	@Test
+	public void incorrectLocaleInRequest() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "requestLocaleChecker");
@@ -341,7 +365,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
-	public void testCorrectLocaleInLocaleContextHolder() throws Exception {
+	@Test
+	public void correctLocaleInLocaleContextHolder() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "contextLocaleChecker");
@@ -350,7 +375,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("locale-ok", response.getContentAsString());
 	}
 
-	public void testIncorrectLocaleInLocalContextHolder() throws Exception {
+	@Test
+	public void incorrectLocaleInLocalContextHolder() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "contextLocaleChecker");
@@ -364,7 +390,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
-	public void testHandlerInterceptorNoAbort() throws Exception {
+	@Test
+	public void handlerInterceptorNoAbort() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -379,7 +406,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertTrue(request.getAttribute("test2-remove-after") == null);
 	}
 
-	public void testHandlerInterceptorAbort() throws Exception {
+	@Test
+	public void handlerInterceptorAbort() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -394,7 +422,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertTrue(request.getAttribute("test2-remove-after") == null);
 	}
 
-	public void testHandlerInterceptorNotClearingModelAndView() throws Exception {
+	@Test
+	public void handlerInterceptorNotClearingModelAndView() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -407,7 +436,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("someViewName", view.getBeanName());
 	}
 
-	public void testHandlerInterceptorClearingModelAndView() throws Exception {
+	@Test
+	public void handlerInterceptorClearingModelAndView() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -420,7 +450,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertNull(view);
 	}
 
-	public void testParameterMappingInterceptorWithCorrectParam() throws Exception {
+	@Test
+	public void parameterMappingInterceptorWithCorrectParam() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -430,7 +461,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("test1", response.getRenderParameter("interceptingParam"));
 	}
 
-	public void testParameterMappingInterceptorWithIncorrectParam() throws Exception {
+	@Test
+	public void parameterMappingInterceptorWithIncorrectParam() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setPortletMode(PortletMode.VIEW);
@@ -441,7 +473,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertNull(response.getRenderParameter("interceptingParam"));
 	}
 
-	public void testPortletHandlerAdapterActionRequest() throws Exception {
+	@Test
+	public void portletHandlerAdapterActionRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter("myParam", "myPortlet");
@@ -456,7 +489,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertNull(myPortlet.getPortletConfig());
 	}
 
-	public void testPortletHandlerAdapterRenderRequest() throws Exception {
+	@Test
+	public void portletHandlerAdapterRenderRequest() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		request.setParameter("myParam", "myPortlet");
@@ -473,7 +507,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertNull(myPortlet.getPortletConfig());
 	}
 
-	public void testModelAndViewDefiningExceptionInMappedHandler() throws Exception {
+	@Test
+	public void modelAndViewDefiningExceptionInMappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception1");
@@ -484,7 +519,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-modelandview", view.getBeanName());
 	}
 
-	public void testModelAndViewDefiningExceptionInUnmappedHandler() throws Exception {
+	@Test
+	public void modelAndViewDefiningExceptionInUnmappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception2");
@@ -495,7 +531,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-modelandview", view.getBeanName());
 	}
 
-	public void testIllegalAccessExceptionInMappedHandler() throws Exception {
+	@Test
+	public void illegalAccessExceptionInMappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception1");
@@ -506,7 +543,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-exception", view.getBeanName());
 	}
 
-	public void testIllegalAccessExceptionInUnmappedHandler() throws Exception {
+	@Test
+	public void illegalAccessExceptionInUnmappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception2");
@@ -517,7 +555,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-illegalaccess", view.getBeanName());
 	}
 
-	public void testPortletRequestBindingExceptionInMappedHandler() throws Exception {
+	@Test
+	public void portletRequestBindingExceptionInMappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception1");
@@ -528,7 +567,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-exception", view.getBeanName());
 	}
 
-	public void testPortletRequestBindingExceptionInUnmappedHandler() throws Exception {
+	@Test
+	public void portletRequestBindingExceptionInUnmappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception2");
@@ -539,7 +579,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-binding", view.getBeanName());
 	}
 
-	public void testIllegalArgumentExceptionInMappedHandler() throws Exception {
+	@Test
+	public void illegalArgumentExceptionInMappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception1");
@@ -550,7 +591,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-runtime", view.getBeanName());
 	}
 
-	public void testIllegalArgumentExceptionInUnmappedHandler() throws Exception {
+	@Test
+	public void illegalArgumentExceptionInUnmappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception2");
@@ -561,7 +603,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
-	public void testExceptionInMappedHandler() throws Exception {
+	@Test
+	public void exceptionInMappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception1");
@@ -572,7 +615,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-exception", view.getBeanName());
 	}
 
-	public void testExceptionInUnmappedHandler() throws Exception {
+	@Test
+	public void exceptionInUnmappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception2");
@@ -583,7 +627,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
-	public void testRuntimeExceptionInMappedHandler() throws Exception {
+	@Test
+	public void runtimeExceptionInMappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception1");
@@ -594,7 +639,8 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-runtime", view.getBeanName());
 	}
 
-	public void testRuntimeExceptionInUnmappedHandler() throws Exception {
+	@Test
+	public void runtimeExceptionInUnmappedHandler() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		request.setPortletMode(PortletMode.HELP);
 		request.addParameter("myParam", "exception2");
@@ -605,23 +651,27 @@ public class DispatcherPortletTests extends TestCase {
 		assertEquals("failed-default-1", view.getBeanName());
 	}
 
-	public void testGetMessage() {
+	@Test
+	public void getMessage() {
 		String message = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test", null, Locale.ENGLISH);
 		assertEquals("test message", message);
 	}
 
-	public void testGetMessageOtherLocale() {
+	@Test
+	public void getMessageOtherLocale() {
 		String message = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test", null, Locale.CANADA);
 		assertEquals("Canadian & test message", message);
 	}
 
-	public void testGetMessageWithArgs() {
+	@Test
+	public void getMessageWithArgs() {
 		Object[] args = new String[] {"this", "that"};
 		String message = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test.args", args, Locale.ENGLISH);
 		assertEquals("test this and that", message);
 	}
 
-	public void testPortletApplicationContextLookup() {
+	@Test
+	public void portletApplicationContextLookup() {
 		MockPortletContext portletContext = new MockPortletContext();
 		ApplicationContext ac = PortletApplicationContextUtils.getWebApplicationContext(portletContext);
 		assertNull(ac);
@@ -643,7 +693,8 @@ public class DispatcherPortletTests extends TestCase {
 		}
 	}
 
-	public void testDispatcherPortletRefresh() throws PortletException {
+	@Test
+	public void dispatcherPortletRefresh() throws PortletException {
 		MockPortletContext portletContext = new MockPortletContext("org/springframework/web/portlet/context");
 		DispatcherPortlet portlet = new DispatcherPortlet();
 
@@ -673,7 +724,8 @@ public class DispatcherPortletTests extends TestCase {
 		portlet.destroy();
 	}
 
-	public void testDispatcherPortletContextRefresh() throws PortletException {
+	@Test
+	public void dispatcherPortletContextRefresh() throws PortletException {
 		MockPortletContext portletContext = new MockPortletContext("org/springframework/web/portlet/context");
 		DispatcherPortlet portlet = new DispatcherPortlet();
 

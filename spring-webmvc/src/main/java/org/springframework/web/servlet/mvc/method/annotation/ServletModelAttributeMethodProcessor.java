@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	/**
 	 * @param annotationNotRequired if "true", non-simple method arguments and
 	 * return values are considered model attributes with or without a
-	 * {@code @ModelAttribute} annotation.
+	 * {@code @ModelAttribute} annotation
 	 */
 	public ServletModelAttributeMethodProcessor(boolean annotationNotRequired) {
 		super(annotationNotRequired);
@@ -62,21 +62,22 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * request parameter if the name matches to the model attribute name and
 	 * if there is an appropriate type conversion strategy. If none of these
 	 * are true delegate back to the base class.
-	 * @see #createAttributeFromRequestValue(String, String, MethodParameter, WebDataBinderFactory, NativeWebRequest)
+	 * @see #createAttributeFromRequestValue
 	 */
 	@Override
-	protected final Object createAttribute(String attributeName, MethodParameter parameter,
+	protected final Object createAttribute(String attributeName, MethodParameter methodParam,
 			WebDataBinderFactory binderFactory, NativeWebRequest request) throws Exception {
 
 		String value = getRequestValueForAttribute(attributeName, request);
 		if (value != null) {
-			Object attribute = createAttributeFromRequestValue(value, attributeName, parameter, binderFactory, request);
+			Object attribute = createAttributeFromRequestValue(
+					value, attributeName, methodParam, binderFactory, request);
 			if (attribute != null) {
 				return attribute;
 			}
 		}
 
-		return super.createAttribute(attributeName, parameter, binderFactory, request);
+		return super.createAttribute(attributeName, methodParam, binderFactory, request);
 	}
 
 	/**
@@ -103,9 +104,8 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 
 	@SuppressWarnings("unchecked")
 	protected final Map<String, String> getUriTemplateVariables(NativeWebRequest request) {
-		Map<String, String> variables =
-				(Map<String, String>) request.getAttribute(
-						HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+		Map<String, String> variables = (Map<String, String>) request.getAttribute(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 		return (variables != null ? variables : Collections.<String, String>emptyMap());
 	}
 
@@ -116,23 +116,23 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 	 * {@link Converter} that can perform the conversion.
 	 * @param sourceValue the source value to create the model attribute from
 	 * @param attributeName the name of the attribute, never {@code null}
-	 * @param parameter the method parameter
+	 * @param methodParam the method parameter
 	 * @param binderFactory for creating WebDataBinder instance
 	 * @param request the current request
 	 * @return the created model attribute, or {@code null}
 	 * @throws Exception
 	 */
 	protected Object createAttributeFromRequestValue(String sourceValue, String attributeName,
-			MethodParameter parameter, WebDataBinderFactory binderFactory, NativeWebRequest request)
+			MethodParameter methodParam, WebDataBinderFactory binderFactory, NativeWebRequest request)
 			throws Exception {
 
 		DataBinder binder = binderFactory.createBinder(request, null, attributeName);
 		ConversionService conversionService = binder.getConversionService();
 		if (conversionService != null) {
 			TypeDescriptor source = TypeDescriptor.valueOf(String.class);
-			TypeDescriptor target = new TypeDescriptor(parameter);
+			TypeDescriptor target = new TypeDescriptor(methodParam);
 			if (conversionService.canConvert(source, target)) {
-				return binder.convertIfNecessary(sourceValue, parameter.getParameterType(), parameter);
+				return binder.convertIfNecessary(sourceValue, methodParam.getParameterType(), methodParam);
 			}
 		}
 		return null;

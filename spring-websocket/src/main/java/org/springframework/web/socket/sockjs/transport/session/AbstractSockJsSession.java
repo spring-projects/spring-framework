@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.web.socket.sockjs.transport.SockJsSession;
  */
 public abstract class AbstractSockJsSession implements SockJsSession {
 
-	private static enum State {NEW, OPEN, CLOSED}
+	private enum State {NEW, OPEN, CLOSED}
 
 
 	/**
@@ -339,7 +339,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			catch (Throwable closeFailure) {
 				// Nothing of consequence, already forced disconnect
 			}
-			throw new SockJsTransportFailureException("Failed to write " + frame, this.getId(), ex);
+			throw new SockJsTransportFailureException("Failed to write " + frame, getId(), ex);
 		}
 	}
 
@@ -360,7 +360,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 			}
 		}
 		else {
-			logger.debug("Terminating connection after failure to send message to client.", failure);
+			logger.debug("Terminating connection after failure to send message to client", failure);
 		}
 	}
 

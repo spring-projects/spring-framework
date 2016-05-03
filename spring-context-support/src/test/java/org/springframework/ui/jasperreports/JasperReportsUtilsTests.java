@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +41,13 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.export.JRXlsExporterParameter;
 import net.sf.jasperreports.engine.util.JRLoader;
+
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.Assume;
 
@@ -58,6 +58,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @since 18.11.2004
  */
+@SuppressWarnings("deprecation")
 public class JasperReportsUtilsTests {
 
 	@BeforeClass
@@ -66,7 +67,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsCsvWithDataSource() throws Exception {
+	public void renderAsCsvWithDataSource() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getDataSource(), writer);
 		String output = writer.getBuffer().toString();
@@ -74,7 +75,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsCsvWithCollection() throws Exception {
+	public void renderAsCsvWithCollection() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getData(), writer);
 		String output = writer.getBuffer().toString();
@@ -82,7 +83,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsCsvWithExporterParameters() throws Exception {
+	public void renderAsCsvWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 		exporterParameters.put(JRCsvExporterParameter.FIELD_DELIMITER, "~");
@@ -93,7 +94,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsHtmlWithDataSource() throws Exception {
+	public void renderAsHtmlWithDataSource() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getDataSource(), writer);
 		String output = writer.getBuffer().toString();
@@ -101,7 +102,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsHtmlWithCollection() throws Exception {
+	public void renderAsHtmlWithCollection() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getData(), writer);
 		String output = writer.getBuffer().toString();
@@ -109,7 +110,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsHtmlWithExporterParameters() throws Exception {
+	public void renderAsHtmlWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 		String uri = "/my/uri";
@@ -121,7 +122,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsPdfWithDataSource() throws Exception {
+	public void renderAsPdfWithDataSource() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getDataSource(), os);
 		byte[] output = os.toByteArray();
@@ -129,7 +130,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsPdfWithCollection() throws Exception {
+	public void renderAsPdfWithCollection() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os);
 		byte[] output = os.toByteArray();
@@ -137,7 +138,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsPdfWithExporterParameters() throws Exception {
+	public void renderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6.toString());
@@ -148,7 +149,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsXlsWithDataSource() throws Exception {
+	public void renderAsXlsWithDataSource() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsXls(getReport(), getParameters(), getDataSource(), os);
 		byte[] output = os.toByteArray();
@@ -156,7 +157,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsXlsWithCollection() throws Exception {
+	public void renderAsXlsWithCollection() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperReportsUtils.renderAsXls(getReport(), getParameters(), getData(), os);
 		byte[] output = os.toByteArray();
@@ -164,7 +165,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderAsXlsWithExporterParameters() throws Exception {
+	public void renderAsXlsWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
 
@@ -178,7 +179,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderWithWriter() throws Exception {
+	public void renderWithWriter() throws Exception {
 		StringWriter writer = new StringWriter();
 		JasperPrint print = JasperFillManager.fillReport(getReport(), getParameters(), getDataSource());
 		JasperReportsUtils.render(new JRHtmlExporter(), print, writer);
@@ -187,7 +188,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	@Test
-	public void testRenderWithOutputStream() throws Exception {
+	public void renderWithOutputStream() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		JasperPrint print = JasperFillManager.fillReport(getReport(), getParameters(), getDataSource());
 		JasperReportsUtils.render(new JRPdfExporter(), print, os);
@@ -214,6 +215,7 @@ public class JasperReportsUtilsTests {
 		assertTrue("Output should start with %PDF", translated.startsWith("%PDF"));
 	}
 
+	@SuppressWarnings("resource")
 	private void assertXlsOutputCorrect(byte[] output) throws Exception {
 		HSSFWorkbook workbook = new HSSFWorkbook(new ByteArrayInputStream(output));
 		HSSFSheet sheet = workbook.getSheetAt(0);

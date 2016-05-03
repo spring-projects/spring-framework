@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,166 +20,294 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.junit.Test;
+
 import org.mockito.BDDMockito;
 
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListener;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.*;
 import static org.springframework.test.annotation.DirtiesContext.HierarchyMode.*;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
 
 /**
- * Unit tests for {@link DirtiesContextTestExecutionListener}.
+ * Unit tests for {@link DirtiesContextBeforeModesTestExecutionListener}.
+ * and {@link DirtiesContextTestExecutionListener}
  *
  * @author Sam Brannen
  * @since 4.0
  */
 public class DirtiesContextTestExecutionListenerTests {
 
-	private final DirtiesContextTestExecutionListener listener = new DirtiesContextTestExecutionListener();
+	private final TestExecutionListener beforeListener = new DirtiesContextBeforeModesTestExecutionListener();
+	private final TestExecutionListener afterListener = new DirtiesContextTestExecutionListener();
 	private final TestContext testContext = mock(TestContext.class);
 
 
 	@Test
-	public void afterTestMethodForDirtiesContextDeclaredLocallyOnMethod() throws Exception {
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredLocallyOnMethodWithBeforeMethodMode() throws Exception {
 		Class<?> clazz = getClass();
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("dirtiesContextDeclaredLocally"));
-		listener.afterTestMethod(testContext);
+		given(testContext.getTestMethod()).willReturn(
+			clazz.getDeclaredMethod("dirtiesContextDeclaredLocallyWithBeforeMethodMode"));
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
-	public void afterTestMethodForDirtiesContextDeclaredOnMethodViaMetaAnnotation() throws Exception {
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredLocallyOnMethodWithAfterMethodMode() throws Exception {
 		Class<?> clazz = getClass();
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("dirtiesContextDeclaredViaMetaAnnotation"));
-		listener.afterTestMethod(testContext);
+		given(testContext.getTestMethod()).willReturn(
+			clazz.getDeclaredMethod("dirtiesContextDeclaredLocallyWithAfterMethodMode"));
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
-	public void afterTestMethodForDirtiesContextDeclaredLocallyOnClassAfterEachTestMethod() throws Exception {
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredOnMethodViaMetaAnnotationWithAfterMethodMode()
+			throws Exception {
+		Class<?> clazz = getClass();
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.getTestMethod()).willReturn(
+			clazz.getDeclaredMethod("dirtiesContextDeclaredViaMetaAnnotationWithAfterMethodMode"));
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
+		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
+	}
+
+	@Test
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredLocallyOnClassBeforeEachTestMethod() throws Exception {
+		Class<?> clazz = DirtiesContextDeclaredLocallyBeforeEachTestMethod.class;
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("clean"));
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
+		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
+	}
+
+	@Test
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredLocallyOnClassAfterEachTestMethod() throws Exception {
 		Class<?> clazz = DirtiesContextDeclaredLocallyAfterEachTestMethod.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("clean"));
-		listener.afterTestMethod(testContext);
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
-	public void afterTestMethodForDirtiesContextDeclaredViaMetaAnnotationOnClassAfterEachTestMethod() throws Exception {
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredViaMetaAnnotationOnClassAfterEachTestMethod()
+			throws Exception {
 		Class<?> clazz = DirtiesContextDeclaredViaMetaAnnotationAfterEachTestMethod.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("clean"));
-		listener.afterTestMethod(testContext);
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
-	public void afterTestMethodForDirtiesContextDeclaredLocallyOnClassAfterClass() throws Exception {
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredLocallyOnClassBeforeClass() throws Exception {
+		Class<?> clazz = DirtiesContextDeclaredLocallyBeforeClass.class;
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("clean"));
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+	}
+
+	@Test
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredLocallyOnClassAfterClass() throws Exception {
 		Class<?> clazz = DirtiesContextDeclaredLocallyAfterClass.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("clean"));
-		listener.afterTestMethod(testContext);
-		verify(testContext, times(0)).markApplicationContextDirty(EXHAUSTIVE);
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
 	}
 
 	@Test
-	public void afterTestMethodForDirtiesContextDeclaredViaMetaAnnotationOnClassAfterClass() throws Exception {
+	public void beforeAndAfterTestMethodForDirtiesContextDeclaredViaMetaAnnotationOnClassAfterClass() throws Exception {
 		Class<?> clazz = DirtiesContextDeclaredViaMetaAnnotationAfterClass.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("clean"));
-		listener.afterTestMethod(testContext);
-		verify(testContext, times(0)).markApplicationContextDirty(EXHAUSTIVE);
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
 	}
 
 	@Test
-	public void afterTestMethodForDirtiesContextViaMetaAnnotationWithOverrides() throws Exception {
+	public void beforeAndAfterTestMethodForDirtiesContextViaMetaAnnotationWithOverrides() throws Exception {
 		Class<?> clazz = DirtiesContextViaMetaAnnotationWithOverrides.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("clean"));
-		listener.afterTestMethod(testContext);
+		beforeListener.beforeTestMethod(testContext);
+		afterListener.beforeTestMethod(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		afterListener.afterTestMethod(testContext);
+		beforeListener.afterTestMethod(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(CURRENT_LEVEL);
 	}
 
 	// -------------------------------------------------------------------------
 
 	@Test
-	public void afterTestClassForDirtiesContextDeclaredLocallyOnMethod() throws Exception {
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredLocallyOnMethod() throws Exception {
 		Class<?> clazz = getClass();
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		listener.afterTestClass(testContext);
-		verify(testContext, times(0)).markApplicationContextDirty(EXHAUSTIVE);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
 	}
 
 	@Test
-	public void afterTestClassForDirtiesContextDeclaredLocallyOnClassAfterEachTestMethod() throws Exception {
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredLocallyOnClassBeforeEachTestMethod() throws Exception {
+		Class<?> clazz = DirtiesContextDeclaredLocallyBeforeEachTestMethod.class;
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+	}
+
+	@Test
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredLocallyOnClassAfterEachTestMethod() throws Exception {
 		Class<?> clazz = DirtiesContextDeclaredLocallyAfterEachTestMethod.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		listener.afterTestClass(testContext);
-		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
 	}
 
 	@Test
-	public void afterTestClassForDirtiesContextDeclaredViaMetaAnnotationOnClassAfterEachTestMethod() throws Exception {
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredViaMetaAnnotationOnClassAfterEachTestMethod()
+			throws Exception {
 		Class<?> clazz = DirtiesContextDeclaredViaMetaAnnotationAfterEachTestMethod.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		listener.afterTestClass(testContext);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+	}
+
+	@Test
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredLocallyOnClassBeforeClass() throws Exception {
+		Class<?> clazz = DirtiesContextDeclaredLocallyBeforeClass.class;
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
-	public void afterTestClassForDirtiesContextDeclaredLocallyOnClassAfterClass() throws Exception {
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredLocallyOnClassAfterClass() throws Exception {
 		Class<?> clazz = DirtiesContextDeclaredLocallyAfterClass.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		listener.afterTestClass(testContext);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
-	public void afterTestClassForDirtiesContextDeclaredViaMetaAnnotationOnClassAfterClass() throws Exception {
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredViaMetaAnnotationOnClassAfterClass() throws Exception {
 		Class<?> clazz = DirtiesContextDeclaredViaMetaAnnotationAfterClass.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		listener.afterTestClass(testContext);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	@Test
-	public void afterTestClassForDirtiesContextDeclaredViaMetaAnnotationWithOverrides() throws Exception {
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredViaMetaAnnotationWithOverrides() throws Exception {
 		Class<?> clazz = DirtiesContextViaMetaAnnotationWithOverrides.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		listener.afterTestClass(testContext);
-		verify(testContext, times(1)).markApplicationContextDirty(CURRENT_LEVEL);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
 	}
 
 	@Test
-	public void afterTestClassForDirtiesContextDeclaredViaMetaAnnotationWithOverridenAttributes() throws Exception {
+	public void beforeAndAfterTestClassForDirtiesContextDeclaredViaMetaAnnotationWithOverridenAttributes()
+			throws Exception {
 		Class<?> clazz = DirtiesContextViaMetaAnnotationWithOverridenAttributes.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-		listener.afterTestClass(testContext);
+		beforeListener.beforeTestClass(testContext);
+		afterListener.beforeTestClass(testContext);
+		verify(testContext, times(0)).markApplicationContextDirty(any(HierarchyMode.class));
+		afterListener.afterTestClass(testContext);
+		beforeListener.afterTestClass(testContext);
 		verify(testContext, times(1)).markApplicationContextDirty(EXHAUSTIVE);
 	}
 
 	// -------------------------------------------------------------------------
 
-	@DirtiesContext
-	void dirtiesContextDeclaredLocally() {
+	@DirtiesContext(methodMode = BEFORE_METHOD)
+	void dirtiesContextDeclaredLocallyWithBeforeMethodMode() {
 		/* no-op */
 	}
 
-	@MetaDirty
-	void dirtiesContextDeclaredViaMetaAnnotation() {
+	@DirtiesContext
+	void dirtiesContextDeclaredLocallyWithAfterMethodMode() {
+		/* no-op */
+	}
+
+	@MetaDirtyAfterMethod
+	void dirtiesContextDeclaredViaMetaAnnotationWithAfterMethodMode() {
 		/* no-op */
 	}
 
 
 	@DirtiesContext
 	@Retention(RetentionPolicy.RUNTIME)
-	static @interface MetaDirty {
+	static @interface MetaDirtyAfterMethod {
 	}
 
 	@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -190,6 +318,14 @@ public class DirtiesContextTestExecutionListenerTests {
 	@DirtiesContext(classMode = AFTER_CLASS)
 	@Retention(RetentionPolicy.RUNTIME)
 	static @interface MetaDirtyAfterClass {
+	}
+
+	@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
+	static class DirtiesContextDeclaredLocallyBeforeEachTestMethod {
+
+		void clean() {
+			/* no-op */
+		}
 	}
 
 	@DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
@@ -211,6 +347,14 @@ public class DirtiesContextTestExecutionListenerTests {
 
 	@MetaDirtyAfterEachTestMethod
 	static class DirtiesContextDeclaredViaMetaAnnotationAfterEachTestMethod {
+
+		void clean() {
+			/* no-op */
+		}
+	}
+
+	@DirtiesContext(classMode = BEFORE_CLASS)
+	static class DirtiesContextDeclaredLocallyBeforeClass {
 
 		void clean() {
 			/* no-op */

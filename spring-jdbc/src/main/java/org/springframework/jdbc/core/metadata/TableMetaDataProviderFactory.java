@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,8 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
- * Factory used to create a {@link TableMetaDataProvider} implementation based on the type of databse being used.
+ * Factory used to create a {@link TableMetaDataProvider} implementation
+ * based on the type of database being used.
  *
  * @author Thomas Risberg
  * @since 2.5

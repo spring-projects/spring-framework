@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.springframework.cache.Cache;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -38,6 +40,8 @@ import static org.junit.Assert.*;
 
 
 /**
+ * Unit tests for
+ * {@link org.springframework.web.servlet.resource.GzipResourceResolver}.
  *
  * @author Jeremy Grelle
  */
@@ -46,6 +50,8 @@ public class GzipResourceResolverTests {
 	private ResourceResolverChain resolver;
 
 	private List<Resource> locations;
+
+	private Cache cache;
 
 	@BeforeClass
 	public static void createGzippedResources() throws IOException {
@@ -71,12 +77,15 @@ public class GzipResourceResolverTests {
 
 	@Before
 	public void setUp() {
+		this.cache = new ConcurrentMapCache("resourceCache");
+
 		Map<String, VersionStrategy> versionStrategyMap = new HashMap<>();
 		versionStrategyMap.put("/**", new ContentVersionStrategy());
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(versionStrategyMap);
 
 		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		resolvers.add(new CachingResourceResolver(this.cache));
 		resolvers.add(new GzipResourceResolver());
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
@@ -96,7 +105,7 @@ public class GzipResourceResolverTests {
 		Resource resolved = resolver.resolveResource(request, file, locations);
 
 		assertEquals(resource.getDescription(), resolved.getDescription());
-		assertEquals(new ClassPathResource("test/"+file).getFilename(), resolved.getFilename());
+		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
 		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
 				resolved instanceof EncodedResource);
 	}
@@ -112,6 +121,48 @@ public class GzipResourceResolverTests {
 
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/"+file).getFilename(), resolved.getFilename());
+		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
+				resolved instanceof EncodedResource);
+	}
+
+	@Test
+	public void resolveFromCacheWithEncodingVariants() throws IOException {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/js/foo.js");
+		request.addHeader("Accept-Encoding", "gzip");
+		String file = "js/foo.js";
+		String gzFile = file+".gz";
+		Resource resource = new ClassPathResource("test/"+file, getClass());
+		Resource gzResource = new ClassPathResource("test/"+gzFile, getClass());
+
+		// resolved resource is now cached in CachingResourceResolver
+		Resource resolved = resolver.resolveResource(request, file, locations);
+
+		assertEquals(gzResource.getDescription(), resolved.getDescription());
+		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
+		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
+				resolved instanceof EncodedResource);
+
+		request = new MockHttpServletRequest("GET", "/js/foo.js");
+		resolved = resolver.resolveResource(request, file, locations);
+		assertEquals(resource.getDescription(), resolved.getDescription());
+		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
+		assertFalse("Expected " + resolved + " to *not* be of type " + EncodedResource.class,
+				resolved instanceof EncodedResource);
+	}
+
+	// SPR-13149
+	@Test
+	public void resolveWithNullRequest() throws IOException {
+
+		String file = "js/foo.js";
+		String gzFile = file+".gz";
+		Resource gzResource = new ClassPathResource("test/"+gzFile, getClass());
+
+		// resolved resource is now cached in CachingResourceResolver
+		Resource resolved = resolver.resolveResource(null, file, locations);
+
+		assertEquals(gzResource.getDescription(), resolved.getDescription());
+		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
 		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
 				resolved instanceof EncodedResource);
 	}

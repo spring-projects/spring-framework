@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,20 +46,19 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
  * configured through the {@link #setReceiveTimeout "receiveTimeout"} property.
  *
  * <p>The underlying mechanism is based on standard JMS MessageConsumer handling,
- * which is perfectly compatible with both native JMS and JMS in a J2EE environment.
- * Neither the JMS {@code MessageConsumer.setMessageListener} facility
- * nor the JMS ServerSessionPool facility is required. A further advantage
- * of this approach is full control over the listening process, allowing for
- * custom scaling and throttling and of concurrent message processing
- * (which is up to concrete subclasses).
+ * which is perfectly compatible with both native JMS and JMS in a Java EE environment.
+ * Neither the JMS {@code MessageConsumer.setMessageListener} facility  nor the JMS
+ * ServerSessionPool facility is required. A further advantage of this approach is
+ * full control over the listening process, allowing for custom scaling and throttling
+ * and of concurrent message processing (which is up to concrete subclasses).
  *
  * <p>Message reception and listener execution can automatically be wrapped
  * in transactions through passing a Spring
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * J2EE enviroment, in combination with a JTA-aware JMS ConnectionFactory obtained
- * from JNDI (check your J2EE server's documentation).
+ * Java EE enviroment, in combination with a JTA-aware JMS ConnectionFactory
+ * obtained from JNDI (check your application server's documentation).
  *
  * <p>This base class does not assume any specific mechanism for asynchronous
  * execution of polling invokers. Check out {@link DefaultMessageListenerContainer}
@@ -159,14 +158,26 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * The default is 1000 ms, that is, 1 second.
 	 * <p><b>NOTE:</b> This value needs to be smaller than the transaction
 	 * timeout used by the transaction manager (in the appropriate unit,
-	 * of course). -1 indicates no timeout at all; however, this is only
-	 * feasible if not running within a transaction manager.
+	 * of course). 0 indicates no timeout at all; however, this is only
+	 * feasible if not running within a transaction manager and generally
+	 * discouraged since such a listener container cannot cleanly shut down.
+	 * A negative value such as -1 indicates a no-wait receive operation.
+	 * @see #receiveFromConsumer(MessageConsumer, long)
 	 * @see javax.jms.MessageConsumer#receive(long)
+	 * @see javax.jms.MessageConsumer#receiveNoWait()
 	 * @see javax.jms.MessageConsumer#receive()
 	 * @see #setTransactionTimeout
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
+	}
+
+	/**
+	 * Return the receive timeout (ms) configured for this listener container.
+	 * @since 4.2
+	 */
+	protected long getReceiveTimeout() {
+		return this.receiveTimeout;
 	}
 
 
@@ -410,7 +421,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @throws JMSException if thrown by JMS methods
 	 */
 	protected Message receiveMessage(MessageConsumer consumer) throws JMSException {
-		return (this.receiveTimeout < 0 ? consumer.receive() : consumer.receive(this.receiveTimeout));
+		return receiveFromConsumer(consumer, getReceiveTimeout());
 	}
 
 	/**

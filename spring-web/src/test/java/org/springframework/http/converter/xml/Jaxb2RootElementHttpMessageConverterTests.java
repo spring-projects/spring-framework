@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
@@ -37,6 +39,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertEquals;
@@ -48,6 +51,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class Jaxb2RootElementHttpMessageConverterTests {
 
@@ -56,6 +60,10 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 	private RootElement rootElement;
 
 	private RootElement rootElementCglib;
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 
 	@Before
 	public void setUp() {
@@ -68,6 +76,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		AopProxy proxy = proxyFactory.createAopProxy(advisedSupport);
 		rootElementCglib = (RootElement) proxy.getProxy();
 	}
+
 
 	@Test
 	public void canRead() throws Exception {
@@ -115,6 +124,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]>" +
 				"  <rootElement><external>&ext;</external></rootElement>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		converter.setSupportDtd(true);
 		RootElement rootElement = (RootElement) converter.read(RootElement.class, inputMessage);
 
 		assertEquals("", rootElement.external);
@@ -132,6 +142,31 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		RootElement rootElement = (RootElement) converter.read(RootElement.class, inputMessage);
 
 		assertEquals("Foo Bar", rootElement.external);
+	}
+
+	@Test
+	public void testXmlBomb() throws Exception {
+		// https://en.wikipedia.org/wiki/Billion_laughs
+		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
+		String content = "<?xml version=\"1.0\"?>\n" +
+				"<!DOCTYPE lolz [\n" +
+				" <!ENTITY lol \"lol\">\n" +
+				" <!ELEMENT lolz (#PCDATA)>\n" +
+				" <!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">\n" +
+				" <!ENTITY lol2 \"&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;\">\n" +
+				" <!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\">\n" +
+				" <!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\">\n" +
+				" <!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\">\n" +
+				" <!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\">\n" +
+				" <!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\">\n" +
+				" <!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\">\n" +
+				" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">\n" +
+				"]>\n" +
+				"<rootElement><external>&lol9;</external></rootElement>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expectMessage("DOCTYPE");
+		this.converter.read(RootElement.class, inputMessage);
 	}
 
 	@Test
@@ -175,6 +210,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		assertEquals("b", result.getElement().getField2());
 	}
 
+
 	@XmlRootElement
 	public static class RootElement {
 
@@ -193,6 +229,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		}
 	}
 
+
 	@XmlType
 	public static class Type {
 
@@ -201,9 +238,10 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 
 	}
 
-	public static class RootElementSubclass extends RootElement {
 
+	public static class RootElementSubclass extends RootElement {
 	}
+
 
 	public static class MyJaxb2RootElementHttpMessageConverter extends Jaxb2RootElementHttpMessageConverter {
 
@@ -218,8 +256,11 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		}
 	}
 
+
 	public static class MyCustomElement {
+
 		private String field1;
+
 		private String field2;
 
 		public MyCustomElement() {
@@ -247,6 +288,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		}
 	}
 
+
 	@XmlRootElement
 	public static class MyRootElement {
 
@@ -269,6 +311,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 			this.element = element;
 		}
 	}
+
 
 	public static class MyCustomElementAdapter extends XmlAdapter<String, MyCustomElement> {
 

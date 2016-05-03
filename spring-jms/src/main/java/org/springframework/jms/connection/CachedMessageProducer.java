@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ import org.springframework.util.ReflectionUtils;
  * @since 2.5.3
  */
 class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublisher {
+
+	// Various JMS 2.0 MessageProducer methods, if available
 
 	private static final Method setDeliveryDelayMethod =
 			ClassUtils.getMethodIfAvailable(MessageProducer.class, "setDeliveryDelay", long.class);
@@ -274,7 +276,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			try {
 				if (method.getName().equals("send") && args != null &&
-						completionListenerClass.equals(method.getParameterTypes()[args.length - 1])) {
+						completionListenerClass == method.getParameterTypes()[args.length - 1]) {
 					switch (args.length) {
 						case 2: // send(message, completionListener)
 							return sendWithCompletionListenerMethod.invoke(

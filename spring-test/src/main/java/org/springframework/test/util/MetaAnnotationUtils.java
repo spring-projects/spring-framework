@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,12 +98,11 @@ public abstract class MetaAnnotationUtils {
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
 	 */
-	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(Class<?> clazz,
-			Set<Annotation> visited, Class<T> annotationType) {
+	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
+			Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
-
-		if (clazz == null || clazz.equals(Object.class)) {
+		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
 
@@ -115,11 +114,11 @@ public abstract class MetaAnnotationUtils {
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
-				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedAnnotation.annotationType(),
-					visited, annotationType);
+				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(
+						composedAnnotation.annotationType(), visited, annotationType);
 				if (descriptor != null) {
-					return new AnnotationDescriptor<T>(clazz, descriptor.getDeclaringClass(), composedAnnotation,
-						descriptor.getAnnotation());
+					return new AnnotationDescriptor<T>(
+							clazz, descriptor.getDeclaringClass(), composedAnnotation, descriptor.getAnnotation());
 				}
 			}
 		}
@@ -181,7 +180,7 @@ public abstract class MetaAnnotationUtils {
 			Set<Annotation> visited, Class<? extends Annotation>... annotationTypes) {
 
 		assertNonEmptyAnnotationTypeArray(annotationTypes, "The list of annotation types must not be empty");
-		if (clazz == null || clazz.equals(Object.class)) {
+		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
 
@@ -196,10 +195,10 @@ public abstract class MetaAnnotationUtils {
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
 				UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(
-					composedAnnotation.annotationType(), visited, annotationTypes);
+						composedAnnotation.annotationType(), visited, annotationTypes);
 				if (descriptor != null) {
 					return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(), composedAnnotation,
-						descriptor.getAnnotation());
+							descriptor.getAnnotation());
 				}
 			}
 		}
@@ -280,14 +279,15 @@ public abstract class MetaAnnotationUtils {
 
 		public AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
 				Annotation composedAnnotation, T annotation) {
+
 			Assert.notNull(rootDeclaringClass, "rootDeclaringClass must not be null");
 			Assert.notNull(annotation, "annotation must not be null");
 			this.rootDeclaringClass = rootDeclaringClass;
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
-			this.annotationAttributes = AnnotatedElementUtils.getAnnotationAttributes(
-					rootDeclaringClass, annotation.annotationType().getName());
+			this.annotationAttributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
+					rootDeclaringClass, annotation.annotationType().getName(), false, false);
 		}
 
 		public Class<?> getRootDeclaringClass() {
@@ -300,6 +300,21 @@ public abstract class MetaAnnotationUtils {
 
 		public T getAnnotation() {
 			return this.annotation;
+		}
+
+		/**
+		 * Synthesize the merged {@link #getAnnotationAttributes AnnotationAttributes}
+		 * in this descriptor back into an annotation of the target
+		 * {@linkplain #getAnnotationType annotation type}.
+		 * @since 4.2
+		 * @see #getAnnotationAttributes()
+		 * @see #getAnnotationType()
+		 * @see AnnotationUtils#synthesizeAnnotation(java.util.Map, Class, java.lang.reflect.AnnotatedElement)
+		 */
+		@SuppressWarnings("unchecked")
+		public T synthesizeAnnotation() {
+			return AnnotationUtils.synthesizeAnnotation(
+					getAnnotationAttributes(), (Class<T>) getAnnotationType(), getRootDeclaringClass());
 		}
 
 		public Class<? extends Annotation> getAnnotationType() {
@@ -346,7 +361,20 @@ public abstract class MetaAnnotationUtils {
 
 		public UntypedAnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
 				Annotation composedAnnotation, Annotation annotation) {
+
 			super(rootDeclaringClass, declaringClass, composedAnnotation, annotation);
+		}
+
+		/**
+		 * Throws an {@link UnsupportedOperationException} since the type of annotation
+		 * represented by the {@link #getAnnotationAttributes AnnotationAttributes} in
+		 * an {@code UntypedAnnotationDescriptor} is unknown.
+		 * @since 4.2
+		 */
+		@Override
+		public Annotation synthesizeAnnotation() {
+			throw new UnsupportedOperationException(
+					"getMergedAnnotation() is unsupported in UntypedAnnotationDescriptor");
 		}
 	}
 

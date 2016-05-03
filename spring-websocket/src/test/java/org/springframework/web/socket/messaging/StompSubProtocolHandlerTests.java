@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,7 @@
 
 package org.springframework.web.socket.messaging;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
-import java.nio.ByteBuffer;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,8 +28,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpAttributes;
@@ -52,12 +40,9 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
@@ -70,6 +55,22 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Test fixture for {@link StompSubProtocolHandler} tests.
@@ -96,16 +97,15 @@ public class StompSubProtocolHandlerTests {
 		this.channel = Mockito.mock(MessageChannel.class);
 		this.messageCaptor = ArgumentCaptor.forClass(Message.class);
 
+		when(this.channel.send(any())).thenReturn(true);
+
 		this.session = new TestWebSocketSession();
 		this.session.setId("s1");
 		this.session.setPrincipal(new TestPrincipal("joe"));
 	}
 
 	@Test
-	public void handleMessageToClientConnected() {
-
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
+	public void handleMessageToClientWithConnectedFrame() {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
@@ -114,18 +114,13 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
 		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
-
-		assertEquals(Collections.singleton("s1"), registry.getSessionIds("joe"));
 	}
 
 	@Test
-	public void handleMessageToClientConnectedUniqueUserName() {
+	public void handleMessageToClientWithDestinationUserNameProvider() {
 
 		this.session.setPrincipal(new UniqueUser("joe"));
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
-
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
@@ -133,136 +128,88 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
 		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
-
-		assertEquals(Collections.<String>emptySet(), registry.getSessionIds("joe"));
-		assertEquals(Collections.singleton("s1"), registry.getSessionIds("Me myself and I"));
 	}
 
 	@Test
-	public void handleMessageToClientConnectedWithHeartbeats() {
+	public void handleMessageToClientWithSimpConnectAck() {
+
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+		accessor.setHeartbeat(10000, 10000);
+		accessor.setAcceptVersion("1.0,1.1");
+		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+
+		SimpMessageHeaderAccessor ackAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+		ackAccessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
+		ackAccessor.setHeader(SimpMessageHeaderAccessor.HEART_BEAT_HEADER, new long[] {15000, 15000});
+		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertEquals("CONNECTED\n" + "version:1.1\n" + "heart-beat:15000,15000\n" +
+				"user-name:joe\n" + "\n" + "\u0000", actual.getPayload());
+	}
+
+	@Test
+	public void handleMessageToClientWithSimpConnectAckDefaultHeartBeat() {
+
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+		accessor.setHeartbeat(10000, 10000);
+		accessor.setAcceptVersion("1.0,1.1");
+		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+
+		SimpMessageHeaderAccessor ackAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+		ackAccessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
+		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertEquals("CONNECTED\n" + "version:1.1\n" + "heart-beat:0,0\n" +
+				"user-name:joe\n" + "\n" + "\u0000", actual.getPayload());
+	}
+
+	@Test
+	public void handleMessageToClientWithSimpHeartbeat() {
+
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
+		accessor.setSessionId("s1");
+		accessor.setUser(new TestPrincipal("joe"));
+		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertEquals("\n", actual.getPayload());
+	}
+
+	@Test
+	public void handleMessageToClientWithHeartbeatSuppressingSockJsHeartbeat() throws IOException {
 
 		SockJsSession sockJsSession = Mockito.mock(SockJsSession.class);
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		headers.setHeartbeat(0,10);
-		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		accessor.setHeartbeat(0, 10);
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(sockJsSession, message);
 
+		verify(sockJsSession).getPrincipal();
 		verify(sockJsSession).disableHeartbeat();
+		verify(sockJsSession).sendMessage(any(WebSocketMessage.class));
+		verifyNoMoreInteractions(sockJsSession);
+
+		sockJsSession = Mockito.mock(SockJsSession.class);
+		accessor = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		accessor.setHeartbeat(0, 0);
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(sockJsSession, message);
+
+		verify(sockJsSession).getPrincipal();
+		verify(sockJsSession).sendMessage(any(WebSocketMessage.class));
+		verifyNoMoreInteractions(sockJsSession);
 	}
 
 	@Test
-	public void handleMessageToClientConnectAck() {
-
-		StompHeaderAccessor connectHeaders = StompHeaderAccessor.create(StompCommand.CONNECT);
-		connectHeaders.setHeartbeat(10000, 10000);
-		connectHeaders.setAcceptVersion("1.0,1.1");
-		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectHeaders.getMessageHeaders());
-
-		SimpMessageHeaderAccessor connectAckHeaders = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
-		connectAckHeaders.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
-		Message<byte[]> connectAckMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, connectAckHeaders.getMessageHeaders());
-
-		this.protocolHandler.handleMessageToClient(this.session, connectAckMessage);
-
-		verifyNoMoreInteractions(this.channel);
-
-		// Check CONNECTED reply
-
-		assertEquals(1, this.session.getSentMessages().size());
-		TextMessage textMessage = (TextMessage) this.session.getSentMessages().get(0);
-
-		List<Message<byte[]>> messages = new StompDecoder().decode(ByteBuffer.wrap(textMessage.getPayload().getBytes()));
-		assertEquals(1, messages.size());
-		StompHeaderAccessor replyHeaders = StompHeaderAccessor.wrap(messages.get(0));
-
-		assertEquals(StompCommand.CONNECTED, replyHeaders.getCommand());
-		assertEquals("1.1", replyHeaders.getVersion());
-		assertArrayEquals(new long[] {0, 0}, replyHeaders.getHeartbeat());
-		assertEquals("joe", replyHeaders.getNativeHeader("user-name").get(0));
-	}
-
-	@Test
-	public void eventPublication() {
-
-		TestPublisher publisher = new TestPublisher();
-
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
-		this.protocolHandler.setApplicationEventPublisher(publisher);
-		this.protocolHandler.afterSessionStarted(this.session, this.channel);
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
-		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
-		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
-
-		headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
-		this.protocolHandler.handleMessageToClient(this.session, message);
-
-		headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
-		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
-		textMessage = new TextMessage(new StompEncoder().encode(message));
-		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
-
-		headers = StompHeaderAccessor.create(StompCommand.UNSUBSCRIBE);
-		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
-		textMessage = new TextMessage(new StompEncoder().encode(message));
-		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
-
-		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, this.channel);
-
-		assertEquals("Unexpected events " + publisher.events, 5, publisher.events.size());
-		assertEquals(SessionConnectEvent.class, publisher.events.get(0).getClass());
-		assertEquals(SessionConnectedEvent.class, publisher.events.get(1).getClass());
-		assertEquals(SessionSubscribeEvent.class, publisher.events.get(2).getClass());
-		assertEquals(SessionUnsubscribeEvent.class, publisher.events.get(3).getClass());
-		assertEquals(SessionDisconnectEvent.class, publisher.events.get(4).getClass());
-	}
-
-	@Test
-	public void eventPublicationWithExceptions() {
-
-		ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
-
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
-		this.protocolHandler.setApplicationEventPublisher(publisher);
-		this.protocolHandler.afterSessionStarted(this.session, this.channel);
-
-		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
-		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
-		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
-		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
-
-		verify(this.channel).send(this.messageCaptor.capture());
-		Message<?> actual = this.messageCaptor.getValue();
-		assertNotNull(actual);
-		assertEquals(StompCommand.CONNECT, StompHeaderAccessor.wrap(actual).getCommand());
-		reset(this.channel);
-
-		headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
-		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
-		this.protocolHandler.handleMessageToClient(this.session, message);
-
-		assertEquals(1, this.session.getSentMessages().size());
-		textMessage = (TextMessage) this.session.getSentMessages().get(0);
-		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
-
-		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, this.channel);
-
-		verify(this.channel).send(this.messageCaptor.capture());
-		actual = this.messageCaptor.getValue();
-		assertNotNull(actual);
-		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(actual);
-		assertEquals(StompCommand.DISCONNECT, accessor.getCommand());
-		assertEquals("s1", accessor.getSessionId());
-		assertEquals("joe", accessor.getUser().getName());
-	}
-
-	@Test
-	public void handleMessageToClientUserDestination() {
+	public void handleMessageToClientWithUserDestination() {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
 		headers.setMessageId("mess0");
@@ -281,7 +228,7 @@ public class StompSubProtocolHandlerTests {
 	// SPR-12475
 
 	@Test
-	public void handleMessageToClientBinaryWebSocketMessage() {
+	public void handleMessageToClientWithBinaryWebSocketMessage() {
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.MESSAGE);
 		headers.setMessageId("mess0");
@@ -323,16 +270,19 @@ public class StompSubProtocolHandlerTests {
 		Message<?> actual = this.messageCaptor.getValue();
 		assertNotNull(actual);
 
-		StompHeaderAccessor headers = StompHeaderAccessor.wrap(actual);
-		assertEquals(StompCommand.CONNECT, headers.getCommand());
-		assertEquals("s1", headers.getSessionId());
-		assertNotNull(headers.getSessionAttributes());
-		assertEquals("joe", headers.getUser().getName());
-		assertEquals("guest", headers.getLogin());
-		assertEquals("guest", headers.getPasscode());
-		assertArrayEquals(new long[] {10000, 10000}, headers.getHeartbeat());
-		assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")), headers.getAcceptVersion());
+		assertEquals("s1", SimpMessageHeaderAccessor.getSessionId(actual.getHeaders()));
+		assertNotNull(SimpMessageHeaderAccessor.getSessionAttributes(actual.getHeaders()));
+		assertNotNull(SimpMessageHeaderAccessor.getUser(actual.getHeaders()));
+		assertEquals("joe", SimpMessageHeaderAccessor.getUser(actual.getHeaders()).getName());
+		assertNotNull(SimpMessageHeaderAccessor.getHeartbeat(actual.getHeaders()));
+		assertArrayEquals(new long[] {10000, 10000}, SimpMessageHeaderAccessor.getHeartbeat(actual.getHeaders()));
 
+		StompHeaderAccessor stompAccessor = StompHeaderAccessor.wrap(actual);
+		assertEquals(StompCommand.CONNECT, stompAccessor.getCommand());
+		assertEquals("guest", stompAccessor.getLogin());
+		assertEquals("guest", stompAccessor.getPasscode());
+		assertArrayEquals(new long[] {10000, 10000}, stompAccessor.getHeartbeat());
+		assertEquals(new HashSet<>(Arrays.asList("1.1","1.0")), stompAccessor.getAcceptVersion());
 		assertEquals(0, this.session.getSentMessages().size());
 	}
 
@@ -378,8 +328,9 @@ public class StompSubProtocolHandlerTests {
 		assertNotNull(mutable.get());
 		assertFalse(mutable.get());
 	}
+
 	@Test
-	public void handleMessageFromClientInvalidStompCommand() {
+	public void handleMessageFromClientWithInvalidStompCommand() {
 
 		TextMessage textMessage = new TextMessage("FOO\n\n\0");
 
@@ -390,6 +341,81 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
 		assertTrue(actual.getPayload().startsWith("ERROR"));
+	}
+
+	@Test
+	public void eventPublication() {
+
+		TestPublisher publisher = new TestPublisher();
+
+		this.protocolHandler.setApplicationEventPublisher(publisher);
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		textMessage = new TextMessage(new StompEncoder().encode(message));
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		headers = StompHeaderAccessor.create(StompCommand.UNSUBSCRIBE);
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		textMessage = new TextMessage(new StompEncoder().encode(message));
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, this.channel);
+
+		assertEquals("Unexpected events " + publisher.events, 5, publisher.events.size());
+		assertEquals(SessionConnectEvent.class, publisher.events.get(0).getClass());
+		assertEquals(SessionConnectedEvent.class, publisher.events.get(1).getClass());
+		assertEquals(SessionSubscribeEvent.class, publisher.events.get(2).getClass());
+		assertEquals(SessionUnsubscribeEvent.class, publisher.events.get(3).getClass());
+		assertEquals(SessionDisconnectEvent.class, publisher.events.get(4).getClass());
+	}
+
+	@Test
+	public void eventPublicationWithExceptions() {
+
+		ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
+
+		this.protocolHandler.setApplicationEventPublisher(publisher);
+		this.protocolHandler.afterSessionStarted(this.session, this.channel);
+
+		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECT);
+		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
+		this.protocolHandler.handleMessageFromClient(this.session, textMessage, this.channel);
+
+		verify(this.channel).send(this.messageCaptor.capture());
+		Message<?> actual = this.messageCaptor.getValue();
+		assertNotNull(actual);
+		assertEquals(StompCommand.CONNECT, StompHeaderAccessor.wrap(actual).getCommand());
+		reset(this.channel);
+
+		headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
+		message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, message);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		textMessage = (TextMessage) this.session.getSentMessages().get(0);
+		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
+
+		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, this.channel);
+
+		verify(this.channel).send(this.messageCaptor.capture());
+		actual = this.messageCaptor.getValue();
+		assertNotNull(actual);
+		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(actual);
+		assertEquals(StompCommand.DISCONNECT, accessor.getCommand());
+		assertEquals("s1", accessor.getSessionId());
+		assertEquals("joe", accessor.getUser().getName());
 	}
 
 	@Test
@@ -420,10 +446,10 @@ public class StompSubProtocolHandlerTests {
 		TextMessage textMessage = new TextMessage(new StompEncoder().encode(message));
 
 		this.protocolHandler.handleMessageFromClient(this.session, textMessage, testChannel);
-		assertEquals(Collections.emptyList(), session.getSentMessages());
+		assertEquals(Collections.<WebSocketMessage<?>>emptyList(), session.getSentMessages());
 
 		this.protocolHandler.afterSessionEnded(this.session, CloseStatus.BAD_DATA, testChannel);
-		assertEquals(Collections.emptyList(), session.getSentMessages());
+		assertEquals(Collections.<WebSocketMessage<?>>emptyList(), this.session.getSentMessages());
 		verify(runnable, times(1)).run();
 	}
 
@@ -447,6 +473,11 @@ public class StompSubProtocolHandlerTests {
 		@Override
 		public void publishEvent(ApplicationEvent event) {
 			events.add(event);
+		}
+
+		@Override
+		public void publishEvent(Object event) {
+			publishEvent(new PayloadApplicationEvent<Object>(this, event));
 		}
 	}
 

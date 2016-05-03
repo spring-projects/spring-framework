@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@ package org.springframework.cache.guava;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.util.concurrent.UncheckedExecutionException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -31,6 +34,9 @@ import static org.mockito.Mockito.*;
  * @author Stephane Nicoll
  */
 public class GuavaCacheManagerTests {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testDynamicMode() {
@@ -148,6 +154,28 @@ public class GuavaCacheManagerTests {
 		assertNull(cm.getCache("someCache"));
 		cm.setCacheNames(null);
 		assertNotNull(cm.getCache("someCache"));
+	}
+
+	@Test
+	public void cacheLoaderUseLoadingCache() {
+		GuavaCacheManager cm = new GuavaCacheManager("c1");
+		cm.setCacheLoader(new CacheLoader<Object, Object>() {
+			@Override
+			public Object load(Object key) throws Exception {
+				if ("ping".equals(key)) {
+					return "pong";
+				}
+				throw new IllegalArgumentException("I only know ping");
+			}
+		});
+		Cache cache1 = cm.getCache("c1");
+		Cache.ValueWrapper value = cache1.get("ping");
+		assertNotNull(value);
+		assertEquals("pong", value.get());
+
+		thrown.expect(UncheckedExecutionException.class);
+		thrown.expectMessage("I only know ping");
+		assertNull(cache1.get("foo"));
 	}
 
 	@SuppressWarnings("unchecked")

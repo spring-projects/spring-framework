@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import static org.junit.Assert.*;
  * @since 12.08.2003
  * @see org.springframework.web.context.support.Spr8510Tests
  */
-public final class ContextLoaderTests {
+public class ContextLoaderTests {
 
 	@Test
 	public void testContextLoaderListenerWithDefaultContext() {
@@ -156,6 +156,50 @@ public final class ContextLoaderTests {
 	}
 
 	@Test
+	public void testContextLoaderListenerWithProgrammaticInitializers() {
+		MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
+				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
+		ContextLoaderListener listener = new ContextLoaderListener();
+		listener.setContextInitializers(new TestContextInitializer(), new TestWebContextInitializer());
+		listener.contextInitialized(new ServletContextEvent(sc));
+		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
+		TestBean testBean = wac.getBean(TestBean.class);
+		assertThat(testBean.getName(), equalTo("testName"));
+		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+	}
+
+	@Test
+	public void testContextLoaderListenerWithProgrammaticAndLocalInitializers() {
+		MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
+				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
+		sc.addInitParameter(ContextLoader.CONTEXT_INITIALIZER_CLASSES_PARAM, TestContextInitializer.class.getName());
+		ContextLoaderListener listener = new ContextLoaderListener();
+		listener.setContextInitializers(new TestWebContextInitializer());
+		listener.contextInitialized(new ServletContextEvent(sc));
+		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
+		TestBean testBean = wac.getBean(TestBean.class);
+		assertThat(testBean.getName(), equalTo("testName"));
+		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+	}
+
+	@Test
+	public void testContextLoaderListenerWithProgrammaticAndGlobalInitializers() {
+		MockServletContext sc = new MockServletContext("");
+		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
+				"org/springframework/web/context/WEB-INF/ContextLoaderTests-acc-context.xml");
+		sc.addInitParameter(ContextLoader.GLOBAL_INITIALIZER_CLASSES_PARAM, TestWebContextInitializer.class.getName());
+		ContextLoaderListener listener = new ContextLoaderListener();
+		listener.setContextInitializers(new TestContextInitializer());
+		listener.contextInitialized(new ServletContextEvent(sc));
+		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
+		TestBean testBean = wac.getBean(TestBean.class);
+		assertThat(testBean.getName(), equalTo("testName"));
+		assertThat(wac.getServletContext().getAttribute("initialized"), notNullValue());
+	}
+
+	@Test
 	public void testRegisteredContextInitializerCanAccessServletContextParamsViaEnvironment() {
 		MockServletContext sc = new MockServletContext("");
 		// config file doesn't matter - just a placeholder
@@ -169,7 +213,7 @@ public final class ContextLoaderTests {
 	}
 
 	@Test
-	public void testContextLoaderListenerWithUnkownContextInitializer() {
+	public void testContextLoaderListenerWithUnknownContextInitializer() {
 		MockServletContext sc = new MockServletContext("");
 		// config file doesn't matter.  just a placeholder
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
@@ -181,7 +225,7 @@ public final class ContextLoaderTests {
 			listener.contextInitialized(new ServletContextEvent(sc));
 			fail("expected exception");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (ApplicationContextException ex) {
 			assertTrue(ex.getMessage().contains("not assignable"));
 		}
 	}

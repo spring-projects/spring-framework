@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,7 @@ import org.springframework.web.method.HandlerMethod;
  * conversion. Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply
  * a binder factory to pass to argument resolvers.
  *
- * <p>Use {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}
- * to customize the list of argument resolvers.
+ * <p>Use {@link #setHandlerMethodArgumentResolvers} to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -56,17 +55,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Create an instance from the given handler and method.
-	 */
-	public InvocableHandlerMethod(Object bean, Method method) {
-		super(bean, method);
-	}
-
-	/**
 	 * Create an instance from a {@code HandlerMethod}.
 	 */
 	public InvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
+	}
+
+	/**
+	 * Create an instance from a bean instance and a method.
+	 */
+	public InvocableHandlerMethod(Object bean, Method method) {
+		super(bean, method);
 	}
 
 	/**
@@ -112,7 +111,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the method after resolving its argument values in the context of the given request.
 	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver}s.
-	 * The {@code provideArgs} parameter however may supply argument values to be used directly,
+	 * The {@code providedArgs} parameter however may supply argument values to be used directly,
 	 * i.e. without argument resolution. Examples of provided argument values include a
 	 * {@link WebDataBinder}, a {@link SessionStatus}, or a thrown exception instance.
 	 * Provided argument values are checked before argument resolvers.
@@ -164,8 +163,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					continue;
 				}
 				catch (Exception ex) {
-					if (logger.isTraceEnabled()) {
-						logger.trace(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
 					}
 					throw ex;
 				}
@@ -185,7 +184,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Adds HandlerMethod details such as the controller type and method signature to the given error message.
+	 * Adds HandlerMethod details such as the controller type and method
+	 * signature to the given error message.
 	 * @param message error message to append the HandlerMethod details to
 	 */
 	protected String getDetailedErrorMessage(String message) {
@@ -222,7 +222,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(getBridgedMethod(), getBean(), args);
-			throw new IllegalStateException(getInvocationErrorMessage(ex.getMessage(), args), ex);
+			String message = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+			throw new IllegalStateException(getInvocationErrorMessage(message, args), ex);
 		}
 		catch (InvocationTargetException ex) {
 			// Unwrap for HandlerExceptionResolvers ...
@@ -255,7 +256,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
 			String msg = "The mapped controller method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual controller bean instance '" +
+					"' is not an instance of the actual controller bean class '" +
 					targetBeanClass.getName() + "'. If the controller requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(getInvocationErrorMessage(msg, args));
@@ -265,7 +266,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
 		sb.append("Resolved arguments: \n");
-		for (int i=0; i < resolvedArgs.length; i++) {
+		for (int i = 0; i < resolvedArgs.length; i++) {
 			sb.append("[").append(i).append("] ");
 			if (resolvedArgs[i] == null) {
 				sb.append("[null] \n");

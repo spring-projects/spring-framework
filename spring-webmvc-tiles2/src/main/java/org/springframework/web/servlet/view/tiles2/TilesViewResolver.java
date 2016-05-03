@@ -30,6 +30,9 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
  * check for the existence of the specified template resources and only return
  * a non-null View object if the template was actually found.
  *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
+ *
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 3.0

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class HttpComponentsHttpInvokerRequestExecutorTests {
@@ -78,16 +77,6 @@ public class HttpComponentsHttpInvokerRequestExecutorTests {
 		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
 		HttpPost httpPost = executor.createHttpPost(config);
 		assertEquals(10000, httpPost.getConfig().getSocketTimeout());
-	}
-
-	@Test
-	public void customHttpClientUsesItsDefault() throws IOException {
-		HttpComponentsHttpInvokerRequestExecutor executor =
-				new HttpComponentsHttpInvokerRequestExecutor(HttpClientBuilder.create().build());
-
-		HttpInvokerClientConfiguration config = mockHttpInvokerClientConfiguration("http://fake-service");
-		HttpPost httpPost = executor.createHttpPost(config);
-		assertNull("No custom config should be set with a custom HttpClient", httpPost.getConfig());
 	}
 
 	@Test

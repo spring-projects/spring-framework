@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package org.springframework.test.web.servlet.samples.context;
 
+import javax.servlet.ServletContext;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -43,6 +47,7 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -69,12 +74,16 @@ public class JavaConfigTests {
 	@Autowired
 	private PersonDao personDao;
 
+	@Autowired
+	private PersonController personController;
+
 	private MockMvc mockMvc;
 
 
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+		verifyRootWacSupport();
 		given(this.personDao.getPerson(5L)).willReturn(new Person("Joe"));
 	}
 
@@ -88,9 +97,37 @@ public class JavaConfigTests {
 
 	@Test
 	public void tilesDefinitions() throws Exception {
-		this.mockMvc.perform(get("/"))//
-		.andExpect(status().isOk())//
-		.andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
+		this.mockMvc.perform(get("/"))
+			.andExpect(status().isOk())
+			.andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
+	}
+
+	/**
+	 * Verify that the breaking change introduced in <a
+	 * href="https://jira.spring.io/browse/SPR-12553">SPR-12553</a> has been reverted.
+	 *
+	 * <p>This code has been copied from
+	 * {@link org.springframework.test.context.hierarchies.web.ControllerIntegrationTests}.
+	 *
+	 * @see org.springframework.test.context.hierarchies.web.ControllerIntegrationTests#verifyRootWacSupport()
+	 */
+	private void verifyRootWacSupport() {
+		assertNotNull(personDao);
+		assertNotNull(personController);
+
+		ApplicationContext parent = wac.getParent();
+		assertNotNull(parent);
+		assertTrue(parent instanceof WebApplicationContext);
+		WebApplicationContext root = (WebApplicationContext) parent;
+
+		ServletContext childServletContext = wac.getServletContext();
+		assertNotNull(childServletContext);
+		ServletContext rootServletContext = root.getServletContext();
+		assertNotNull(rootServletContext);
+		assertSame(childServletContext, rootServletContext);
+
+		assertSame(root, rootServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
+		assertSame(root, childServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE));
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * BeanDefinitionParser implementation for the '{@code &lt;lang:groovy/&gt;}',
- * '{@code &lt;lang:jruby/&gt;}' and '{@code &lt;lang:bsh/&gt;}' tags.
+ * BeanDefinitionParser implementation for the '{@code <lang:groovy/>}',
+ * '{@code <lang:jruby/>}' and '{@code <lang:bsh/>}' tags.
  * Allows for objects written using dynamic languages to be easily exposed with
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *
@@ -54,6 +54,8 @@ import org.springframework.util.xml.DomUtils;
  * @since 2.0
  */
 class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
+
+	private static final String ENGINE_ATTRIBUTE = "engine";
 
 	private static final String SCRIPT_SOURCE_ATTRIBUTE = "script-source";
 
@@ -104,6 +106,9 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	@Override
 	@SuppressWarnings("deprecation")
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+		// Engine attribute only supported for <lang:std>
+		String engine = element.getAttribute(ENGINE_ATTRIBUTE);
+
 		// Resolve the script source.
 		String value = resolveScriptSource(element, parserContext.getReaderContext());
 		if (value == null) {
@@ -160,8 +165,8 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			bd.setInitMethodName(beanDefinitionDefaults.getInitMethodName());
 		}
 
-		String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
-		if (StringUtils.hasLength(destroyMethod)) {
+		if (element.hasAttribute(DESTROY_METHOD_ATTRIBUTE)) {
+			String destroyMethod = element.getAttribute(DESTROY_METHOD_ATTRIBUTE);
 			bd.setDestroyMethodName(destroyMethod);
 		}
 		else if (beanDefinitionDefaults.getDestroyMethodName() != null) {
@@ -184,9 +189,13 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Add constructor arguments.
 		ConstructorArgumentValues cav = bd.getConstructorArgumentValues();
 		int constructorArgNum = 0;
+		if (StringUtils.hasLength(engine)) {
+			cav.addIndexedArgumentValue(constructorArgNum++, engine);
+		}
 		cav.addIndexedArgumentValue(constructorArgNum++, value);
 		if (element.hasAttribute(SCRIPT_INTERFACES_ATTRIBUTE)) {
-			cav.addIndexedArgumentValue(constructorArgNum++, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE));
+			cav.addIndexedArgumentValue(
+					constructorArgNum++, element.getAttribute(SCRIPT_INTERFACES_ATTRIBUTE), "java.lang.Class[]");
 		}
 
 		// This is used for Groovy. It's a bean reference to a customizer bean.

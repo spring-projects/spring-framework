@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.http.CacheControl;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -39,6 +40,7 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceResolver;
 import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 
 import static org.junit.Assert.*;
 
@@ -91,6 +93,16 @@ public class ResourceHandlerRegistryTests {
 	}
 
 	@Test
+	public void cacheControl() {
+		assertThat(getHandler("/resources/**").getCacheControl(),
+				Matchers.nullValue());
+
+		this.registration.setCacheControl(CacheControl.noCache().cachePrivate());
+		assertThat(getHandler("/resources/**").getCacheControl().getHeaderValue(),
+				Matchers.equalTo(CacheControl.noCache().cachePrivate().getHeaderValue()));
+	}
+
+	@Test
 	public void order() {
 		assertEquals(Integer.MAX_VALUE -1, registry.getHandlerMapping().getOrder());
 
@@ -112,12 +124,13 @@ public class ResourceHandlerRegistryTests {
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(3));
+		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(4));
 		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
 		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);
 		assertThat(cachingResolver.getCache(), Matchers.instanceOf(ConcurrentMapCache.class));
 		assertThat(resolvers.get(1), Matchers.equalTo(mockResolver));
-		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers.get(2), Matchers.instanceOf(WebJarsResourceResolver.class));
+		assertThat(resolvers.get(3), Matchers.instanceOf(PathResourceResolver.class));
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(2));
@@ -131,8 +144,9 @@ public class ResourceHandlerRegistryTests {
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(1));
-		assertThat(resolvers.get(0), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers, Matchers.hasSize(2));
+		assertThat(resolvers.get(0), Matchers.instanceOf(WebJarsResourceResolver.class));
+		assertThat(resolvers.get(1), Matchers.instanceOf(PathResourceResolver.class));
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(0));
@@ -149,10 +163,11 @@ public class ResourceHandlerRegistryTests {
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(3));
+		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(4));
 		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
 		assertThat(resolvers.get(1), Matchers.sameInstance(versionResolver));
-		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers.get(2), Matchers.instanceOf(WebJarsResourceResolver.class));
+		assertThat(resolvers.get(3), Matchers.instanceOf(PathResourceResolver.class));
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));
@@ -165,6 +180,7 @@ public class ResourceHandlerRegistryTests {
 	public void resourceChainWithOverrides() throws Exception {
 		CachingResourceResolver cachingResolver = Mockito.mock(CachingResourceResolver.class);
 		VersionResourceResolver versionResolver = Mockito.mock(VersionResourceResolver.class);
+		WebJarsResourceResolver webjarsResolver = Mockito.mock(WebJarsResourceResolver.class);
 		PathResourceResolver pathResourceResolver = new PathResourceResolver();
 		CachingResourceTransformer cachingTransformer = Mockito.mock(CachingResourceTransformer.class);
 		AppCacheManifestTransformer appCacheTransformer = Mockito.mock(AppCacheManifestTransformer.class);
@@ -174,6 +190,7 @@ public class ResourceHandlerRegistryTests {
 				.resourceChain(false)
 					.addResolver(cachingResolver)
 					.addResolver(versionResolver)
+					.addResolver(webjarsResolver)
 					.addResolver(pathResourceResolver)
 					.addTransformer(cachingTransformer)
 					.addTransformer(appCacheTransformer)
@@ -181,10 +198,11 @@ public class ResourceHandlerRegistryTests {
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(3));
+		assertThat(resolvers.toString(), resolvers, Matchers.hasSize(4));
 		assertThat(resolvers.get(0), Matchers.sameInstance(cachingResolver));
 		assertThat(resolvers.get(1), Matchers.sameInstance(versionResolver));
-		assertThat(resolvers.get(2), Matchers.sameInstance(pathResourceResolver));
+		assertThat(resolvers.get(2), Matchers.sameInstance(webjarsResolver));
+		assertThat(resolvers.get(3), Matchers.sameInstance(pathResourceResolver));
 
 		List<ResourceTransformer> transformers = handler.getResourceTransformers();
 		assertThat(transformers, Matchers.hasSize(3));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,34 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.util.ObjectUtils;
+
 /**
- * {@link Comparator} implementation for {@link Ordered} objects,
- * sorting by order value ascending (resp. by priority descending).
+ * {@link Comparator} implementation for {@link Ordered} objects, sorting
+ * by order value ascending, respectively by priority descending.
  *
- * <p>Non-{@code Ordered} objects are treated as greatest order
- * values, thus ending up at the end of the list, in arbitrary order
- * (just like same order values of {@code Ordered} objects).
+ * <h3>Same Order Objects</h3>
+ * <p>Objects that have the same order value will be sorted with arbitrary
+ * ordering with respect to other objects with the same order value.
+ *
+ * <h3>Non-ordered Objects</h3>
+ * <p>Any object that does not provide its own order value is implicitly
+ * assigned a value of {@link Ordered#LOWEST_PRECEDENCE}, thus ending up
+ * at the end of a sorted collection in arbitrary order with respect to
+ * other objects with the same order value.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 07.04.2003
  * @see Ordered
+ * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
  * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
  * @see java.util.Arrays#sort(Object[], java.util.Comparator)
  */
 public class OrderComparator implements Comparator<Object> {
 
 	/**
-	 * Shared default instance of OrderComparator.
+	 * Shared default instance of {@code OrderComparator}.
 	 */
 	public static final OrderComparator INSTANCE = new OrderComparator();
 
@@ -89,7 +99,19 @@ public class OrderComparator implements Comparator<Object> {
 	private int getOrder(Object obj, OrderSourceProvider sourceProvider) {
 		Integer order = null;
 		if (sourceProvider != null) {
-			order = findOrder(sourceProvider.getOrderSource(obj));
+			Object orderSource = sourceProvider.getOrderSource(obj);
+			if (orderSource != null && orderSource.getClass().isArray()) {
+				Object[] sources = ObjectUtils.toObjectArray(orderSource);
+				for (Object source : sources) {
+					order = findOrder(source);
+					if (order != null) {
+						break;
+					}
+				}
+			}
+			else {
+				order = findOrder(orderSource);
+			}
 		}
 		return (order != null ? order : getOrder(obj));
 	}
@@ -181,11 +203,12 @@ public class OrderComparator implements Comparator<Object> {
 	 * Strategy interface to provide an order source for a given object.
 	 * @since 4.1
 	 */
-	public static interface OrderSourceProvider {
+	public interface OrderSourceProvider {
 
 		/**
 		 * Return an order source for the specified object, i.e. an object that
 		 * should be checked for an order value as a replacement to the given object.
+		 * <p>Can also be an array of order source objects.
 		 * <p>If the returned object does not indicate any order, the comparator
 		 * will fall back to checking the original object.
 		 * @param obj the object to find an order source for

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -445,15 +445,14 @@ public class ConstructorReference extends SpelNodeImpl {
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		ReflectiveConstructorExecutor executor = ((ReflectiveConstructorExecutor) this.cachedExecutor);
 		Constructor<?> constructor = executor.getConstructor();		
-		String classSlashedDescriptor = constructor.getDeclaringClass().getName().replace('.', '/');
-		mv.visitTypeInsn(NEW, classSlashedDescriptor);
+		String classDesc = constructor.getDeclaringClass().getName().replace('.', '/');
+		mv.visitTypeInsn(NEW, classDesc);
 		mv.visitInsn(DUP);
 		// children[0] is the type of the constructor, don't want to include that in argument processing
-		SpelNodeImpl[] arguments = new SpelNodeImpl[children.length-1];
-		System.arraycopy(children, 1, arguments, 0, children.length-1);
+		SpelNodeImpl[] arguments = new SpelNodeImpl[children.length - 1];
+		System.arraycopy(children, 1, arguments, 0, children.length - 1);
 		generateCodeForArguments(mv, cf, constructor, arguments);	
-		mv.visitMethodInsn(INVOKESPECIAL, classSlashedDescriptor, "<init>",
-				CodeFlow.createSignatureDescriptor(constructor), false);
+		mv.visitMethodInsn(INVOKESPECIAL, classDesc, "<init>", CodeFlow.createSignatureDescriptor(constructor), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 

@@ -59,7 +59,7 @@ public class StatusResultMatchersTests {
 
 		List<AssertionError> failures = new ArrayList<AssertionError>();
 
-		for(HttpStatus status : HttpStatus.values()) {
+		for (HttpStatus status : HttpStatus.values()) {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			response.setStatus(status.value());
 			MvcResult mvcResult = new StubMvcResult(request, null, null, null, null, null, response);
@@ -91,9 +91,7 @@ public class StatusResultMatchersTests {
 
 	@Test
 	public void statusRanges() throws Exception {
-
-		for(HttpStatus status : HttpStatus.values()) {
-
+		for (HttpStatus status : HttpStatus.values()) {
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			response.setStatus(status.value());
 			MvcResult mvcResult = new StubMvcResult(request, null, null, null, null, null, response);

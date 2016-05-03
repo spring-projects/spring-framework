@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,15 +107,24 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	protected final PortletSession getSession(boolean allowCreate) {
 		if (isRequestActive()) {
-			return this.request.getPortletSession(allowCreate);
+			PortletSession session = this.request.getPortletSession(allowCreate);
+			this.session = session;
+			return session;
 		}
 		else {
 			// Access through stored session reference, if any...
-			if (this.session == null && allowCreate) {
-				throw new IllegalStateException(
-						"No session found and request already completed - cannot create new session!");
+			PortletSession session = this.session;
+			if (session == null) {
+				if (allowCreate) {
+					throw new IllegalStateException(
+							"No session found and request already completed - cannot create new session!");
+				}
+				else {
+					session = this.request.getPortletSession(false);
+					this.session = session;
+				}
 			}
-			return this.session;
+			return session;
 		}
 	}
 
@@ -147,9 +156,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 					return value;
 				}
 			}
-			else {
-				return null;
-			}
+			return null;
 		}
 	}
 
@@ -217,9 +224,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 					return StringUtils.toStringArray(session.getAttributeNames());
 				}
 			}
-			else {
-				return new String[0];
-			}
+			return new String[0];
 		}
 	}
 
@@ -263,32 +268,34 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	@Override
 	protected void updateAccessedSessionAttributes() {
-		this.session = this.request.getPortletSession(false);
-		if (this.session != null) {
-			try {
-				for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
-					String name = entry.getKey();
-					Object newValue = entry.getValue();
-					Object oldValue = this.session.getAttribute(name);
-					if (oldValue == newValue) {
-						this.session.setAttribute(name, newValue);
+		if (!this.sessionAttributesToUpdate.isEmpty() || !this.globalSessionAttributesToUpdate.isEmpty()) {
+			PortletSession session = getSession(false);
+			if (session != null) {
+				try {
+					for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
+						String name = entry.getKey();
+						Object newValue = entry.getValue();
+						Object oldValue = session.getAttribute(name);
+						if (oldValue == newValue) {
+							session.setAttribute(name, newValue);
+						}
+					}
+					for (Map.Entry<String, Object> entry : this.globalSessionAttributesToUpdate.entrySet()) {
+						String name = entry.getKey();
+						Object newValue = entry.getValue();
+						Object oldValue = session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
+						if (oldValue == newValue) {
+							session.setAttribute(name, newValue, PortletSession.APPLICATION_SCOPE);
+						}
 					}
 				}
-				for (Map.Entry<String, Object> entry : this.globalSessionAttributesToUpdate.entrySet()) {
-					String name = entry.getKey();
-					Object newValue = entry.getValue();
-					Object oldValue = this.session.getAttribute(name, PortletSession.APPLICATION_SCOPE);
-					if (oldValue == newValue) {
-						this.session.setAttribute(name, newValue, PortletSession.APPLICATION_SCOPE);
-					}
+				catch (IllegalStateException ex) {
+					// Session invalidated - shouldn't usually happen.
 				}
 			}
-			catch (IllegalStateException ex) {
-				// Session invalidated - shouldn't usually happen.
-			}
+			this.sessionAttributesToUpdate.clear();
+			this.globalSessionAttributesToUpdate.clear();
 		}
-		this.sessionAttributesToUpdate.clear();
-		this.globalSessionAttributesToUpdate.clear();
 	}
 
 	/**

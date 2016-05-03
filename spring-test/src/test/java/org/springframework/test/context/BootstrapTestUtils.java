@@ -16,6 +16,8 @@
 
 package org.springframework.test.context;
 
+import org.springframework.test.context.support.DefaultBootstrapContext;
+
 /**
  * Collection of test-related utility methods for working with {@link BootstrapContext
  * BootstrapContexts} and {@link TestContextBootstrapper TestContextBootstrappers}.

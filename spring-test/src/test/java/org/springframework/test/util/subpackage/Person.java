@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,85 +16,27 @@
 
 package org.springframework.test.util.subpackage;
 
-import org.springframework.core.style.ToStringCreator;
-
 /**
- * Concrete subclass of {@link PersistentEntity} representing a <em>person</em>
- * entity; intended for use in unit tests.
+ * Interface representing a <em>person</em> entity; intended for use in unit tests.
+ *
+ * <p>The introduction of an interface is necessary in order to test support for
+ * JDK dynamic proxies.
  *
  * @author Sam Brannen
- * @since 2.5
+ * @since 4.3
  */
-public class Person extends PersistentEntity {
+public interface Person {
 
-	protected String name;
+	long getId();
 
-	private int age;
+	String getName();
 
-	String eyeColor;
+	int getAge();
 
-	boolean likesPets = false;
+	String getEyeColor();
 
-	private Number favoriteNumber;
+	boolean likesPets();
 
+	Number getFavoriteNumber();
 
-	public final String getName() {
-		return this.name;
-	}
-
-	@SuppressWarnings("unused")
-	private final void setName(final String name) {
-		this.name = name;
-	}
-
-	public final int getAge() {
-		return this.age;
-	}
-
-	protected final void setAge(final int age) {
-		this.age = age;
-	}
-
-	public final String getEyeColor() {
-		return this.eyeColor;
-	}
-
-	final void setEyeColor(final String eyeColor) {
-		this.eyeColor = eyeColor;
-	}
-
-	public final boolean likesPets() {
-		return this.likesPets;
-	}
-
-	protected final void setLikesPets(final boolean likesPets) {
-		this.likesPets = likesPets;
-	}
-
-	public final Number getFavoriteNumber() {
-		return this.favoriteNumber;
-	}
-
-	protected final void setFavoriteNumber(Number favoriteNumber) {
-		this.favoriteNumber = favoriteNumber;
-	}
-
-	@Override
-	public String toString() {
-		return new ToStringCreator(this)
-
-		.append("id", this.getId())
-
-		.append("name", this.name)
-
-		.append("age", this.age)
-
-		.append("eyeColor", this.eyeColor)
-
-		.append("likesPets", this.likesPets)
-
-		.append("favoriteNumber", this.favoriteNumber)
-
-		.toString();
-	}
 }
