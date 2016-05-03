@@ -3297,13 +3297,14 @@ declarative SQL script execution with default transaction rollback semantics.
 .Avoid false positives when testing ORM code
 [NOTE]
 ====
-When you test application code that manipulates the state of the Hibernate or JPA session,
-make sure to __flush__ the underlying session within test methods that execute that code.
-Failing to flush the underlying session can produce __false positives__: your test may
-pass, but the same code throws an exception in a live, production environment. In the
-following Hibernate-based example test case, one method demonstrates a false positive,
-and the other method correctly exposes the results of flushing the session. Note that
-this applies to any ORM frameworks that maintain an in-memory __unit of work__.
+When you test application code that manipulates the state of a Hibernate session or JPA
+persistence context, make sure to __flush__ the underlying unit of work within test
+methods that execute that code. Failing to flush the underlying unit of work can produce
+__false positives__: your test may pass, but the same code throws an exception in a live,
+production environment. In the following Hibernate-based example test case, one method
+demonstrates a false positive, and the other method correctly exposes the results of
+flushing the session. Note that this applies to any ORM frameworks that maintain an
+in-memory __unit of work__.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3311,8 +3312,9 @@ this applies to any ORM frameworks that maintain an in-memory __unit of work__.
 	// ...
 
 	@Autowired
-	private SessionFactory sessionFactory;
+	SessionFactory sessionFactory;
 
+	@Transactional
 	@Test // no expected exception!
 	public void falsePositive() {
 		updateEntityInHibernateSession();
@@ -3320,6 +3322,7 @@ this applies to any ORM frameworks that maintain an in-memory __unit of work__.
 		// Session is finally flushed (i.e., in production code)
 	}
 
+	@Transactional
 	@Test(expected = ...)
 	public void updateWithSessionFlush() {
 		updateEntityInHibernateSession();
@@ -3337,19 +3340,21 @@ Or for JPA:
 ----
 	// ...
 
-	@Autowired
-	private EntityManager entityManager;
+	@PersistenceContext
+	EntityManager entityManager;
 
+	@Transactional
 	@Test // no expected exception!
 	public void falsePositive() {
-		updateEntityInJpaTransaction();
+		updateEntityInJpaPersistenceContext();
 		// False positive: an exception will be thrown once the JPA
 		// EntityManager is finally flushed (i.e., in production code)
 	}
 
+	@Transactional
 	@Test(expected = ...)
 	public void updateWithEntityManagerFlush() {
-		updateEntityInJpaTransaction();
+		updateEntityInJpaPersistenceContext();
 		// Manual flush is required to avoid false positive in test
 		entityManager.flush();
 	}
