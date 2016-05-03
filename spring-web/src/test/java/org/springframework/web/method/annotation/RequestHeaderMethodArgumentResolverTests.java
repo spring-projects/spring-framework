@@ -193,6 +193,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void dateConversion() throws Exception {
 		String rfc1123val = "Thu, 21 Apr 2016 17:11:08 +0100";
 		servletRequest.addHeader("name", rfc1123val);

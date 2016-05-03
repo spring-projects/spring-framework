@@ -136,6 +136,7 @@ public class HttpRangeTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unchecked")
 	public void toResourceRegionExceptionLength() {
 		ByteArrayResource resource = mock(ByteArrayResource.class);
 		given(resource.contentLength()).willThrow(IOException.class);
