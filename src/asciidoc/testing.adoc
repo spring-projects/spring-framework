@@ -983,7 +983,7 @@ however, these lifecycle annotations have limited usage within an actual test cl
 
 If a method within a test class is annotated with `@PostConstruct`, that method will be
 executed before any __before__ methods of the underlying test framework (e.g., methods
-annotated with JUnit's `@Before`), and that will apply for every test method in the test
+annotated with JUnit 4's `@Before`), and that will apply for every test method in the test
 class. On the other hand, if a method within a test class is annotated with
 `@PreDestroy`, that method will __never__ be executed. Within a test class it is
 therefore recommended to use test lifecycle callbacks from the underlying test framework
@@ -992,10 +992,10 @@ instead of `@PostConstruct` and `@PreDestroy`.
 
 
 [[integration-testing-annotations-junit]]
-==== Spring JUnit Testing Annotations
+==== Spring JUnit 4 Testing Annotations
 The following annotations are __only__ supported when used in conjunction with the
 <<testcontext-junit4-runner,SpringRunner>>, <<testcontext-junit4-rules,Spring's JUnit
-rules>>, or <<testcontext-support-classes-junit4,Spring's JUnit support classes>>.
+rules>>, or <<testcontext-support-classes-junit4,Spring's JUnit 4 support classes>>.
 
 * `@IfProfileValue`
 
@@ -1012,7 +1012,7 @@ Class-level usage of `@IfProfileValue` takes precedence over method-level usage 
 methods within that class or its subclasses. Specifically, a test is enabled if it is
 enabled both at the class level _and_ at the method level; the absence of
 `@IfProfileValue` means the test is implicitly enabled. This is analogous to the
-semantics of JUnit's `@Ignore` annotation, except that the presence of `@Ignore` always
+semantics of JUnit 4's `@Ignore` annotation, except that the presence of `@Ignore` always
 disables a test.
 
 +
@@ -1030,7 +1030,7 @@ disables a test.
 +
 
 Alternatively, you can configure `@IfProfileValue` with a list of `values` (with __OR__
-semantics) to achieve TestNG-like support for __test groups__ in a JUnit environment.
+semantics) to achieve TestNG-like support for __test groups__ in a JUnit 4 environment.
 Consider the following example:
 
 +
@@ -1093,8 +1093,8 @@ test (see `@Repeat`), as well as any __set up__ or __tear down__ of the test fix
 
 +
 
-Spring's `@Timed` annotation has different semantics than JUnit's `@Test(timeout=...)`
-support. Specifically, due to the manner in which JUnit handles test execution timeouts
+Spring's `@Timed` annotation has different semantics than JUnit 4's `@Test(timeout=...)`
+support. Specifically, due to the manner in which JUnit 4 handles test execution timeouts
 (that is, by executing the test method in a separate `Thread`), `@Test(timeout=...)`
 preemptively fails the test if the test takes too long. Spring's `@Timed`, on the other
 hand, does not preemptively fail the test but rather waits for the test to complete
@@ -1155,7 +1155,7 @@ Each of the following may be used as meta-annotations in conjunction with the
 * `@ProfileValueSourceConfiguration`
 
 For example, if we discover that we are repeating the following configuration
-across our JUnit-based test suite...
+across our JUnit 4 based test suite...
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1215,8 +1215,8 @@ configuration__ with reasonable defaults that can be overridden through annotati
 configuration.
 
 In addition to generic testing infrastructure, the TestContext framework provides
-explicit support for JUnit and TestNG in the form of `abstract` support classes. For
-JUnit, Spring also provides a custom JUnit `Runner` and custom JUnit `Rules` that allow
+explicit support for JUnit 4 and TestNG in the form of `abstract` support classes. For
+JUnit 4, Spring also provides a custom JUnit `Runner` and custom JUnit `Rules` that allow
 one to write so-called __POJO test classes__. POJO test classes are not required to
 extend a particular class hierarchy.
 
@@ -1234,7 +1234,7 @@ management>>), <<testcontext-support-classes,support classes>>, and
 The core of the framework consists of the `TestContextManager` class and the
 `TestContext`, `TestExecutionListener`, and `SmartContextLoader` interfaces. A
 `TestContextManager` is created per test class (e.g., for the execution of all test
-methods within a single test class in JUnit). The `TestContextManager` in turn manages a
+methods within a single test class in JUnit 4). The `TestContextManager` in turn manages a
 `TestContext` that holds the context of the current test. The `TestContextManager` also
 updates the state of the `TestContext` as the test progresses and delegates to
 ++TestExecutionListener++s, which instrument the actual test execution by providing
@@ -2636,7 +2636,7 @@ configuration resource type (i.e., XML configuration files or annotated classes)
 consistent; otherwise, it is perfectly acceptable to have different levels in a context
 hierarchy configured using different resource types.
 
-The following JUnit-based examples demonstrate common configuration scenarios for
+The following JUnit 4 based examples demonstrate common configuration scenarios for
 integration tests that require the use of context hierarchies.
 
 .Single test class with context hierarchy
@@ -2812,7 +2812,7 @@ is presented after all sample code listings.
 [NOTE]
 ====
 The dependency injection behavior in the following code listings is not specific to
-JUnit. The same DI techniques can be used in conjunction with any testing framework.
+JUnit 4. The same DI techniques can be used in conjunction with any testing framework.
 
 The following examples make calls to static assertion methods such as `assertNotNull()`
 but without prepending the call with `Assert`. In such cases, assume that the method was
@@ -2820,7 +2820,7 @@ properly imported through an `import static` declaration that is not shown in th
 example.
 ====
 
-The first code listing shows a JUnit-based implementation of the test class that uses
+The first code listing shows a JUnit 4 based implementation of the test class that uses
 `@Autowired` for field injection.
 
 [source,java,indent=0]
@@ -3219,8 +3219,8 @@ __after transaction method__ is executed at the appropriate time.
 
 [TIP]
 ====
-Any __before methods__ (such as methods annotated with JUnit's `@Before`) and any __after
-methods__ (such as methods annotated with JUnit's `@After`) are executed __within__ a
+Any __before methods__ (such as methods annotated with JUnit 4's `@Before`) and any __after
+methods__ (such as methods annotated with JUnit 4's `@After`) are executed __within__ a
 transaction. In addition, methods annotated with `@BeforeTransaction` or
 `@AfterTransaction` are naturally not executed for test methods that are not configured
 to run within a transaction.
@@ -3241,7 +3241,7 @@ used to look up a transaction manager in the test's `ApplicationContext`.
 [[testcontext-tx-annotation-demo]]
 ===== Demonstration of all transaction-related annotations
 
-The following JUnit-based example displays a fictitious integration testing scenario
+The following JUnit 4 based example displays a fictitious integration testing scenario
 highlighting all transaction-related annotations. The example is **not** intended to
 demonstrate best practices but rather to demonstrate how these annotations can be used.
 Consult the <<integration-testing-annotations,annotation support>> section for further
@@ -3443,7 +3443,7 @@ which references a URL (e.g., a path prefixed with `classpath:`, `file:`, `http:
 will be loaded using the specified resource protocol.
 
 The following example demonstrates how to use `@Sql` at the class level and at the method
-level within a JUnit-based integration test class.
+level within a JUnit 4 based integration test class.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3590,7 +3590,7 @@ executed in an isolated transaction. Although a thorough discussion of all suppo
 options for transaction management with `@Sql` is beyond the scope of this reference
 manual, the javadocs for `@SqlConfig` and `SqlScriptsTestExecutionListener` provide
 detailed information, and the following example demonstrates a typical testing scenario
-using JUnit and transactional tests with `@Sql`. Note that there is no need to clean up
+using JUnit 4 and transactional tests with `@Sql`. Note that there is no need to clean up
 the database after the `usersTest()` method is executed since any changes made to the
 database (either within the test method or within the `/test-data.sql` script) will
 be automatically rolled back by the `TransactionalTestExecutionListener` (see
@@ -3635,16 +3635,16 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 
 
 [[testcontext-junit4-runner]]
-===== Spring JUnit Runner
+===== Spring JUnit 4 Runner
 
 The __Spring TestContext Framework__ offers full integration with JUnit 4 through a
 custom runner (supported on JUnit 4.12 or higher). By annotating test classes with
 `@RunWith(SpringJUnit4ClassRunner.class)` or the shorter `@RunWith(SpringRunner.class)`
-variant, developers can implement standard JUnit-based unit and integration tests and
+variant, developers can implement standard JUnit 4 based unit and integration tests and
 simultaneously reap the benefits of the TestContext framework such as support for loading
 application contexts, dependency injection of test instances, transactional test method
 execution, and so on. If you would like to use the Spring TestContext Framework with an
-alternative runner such as JUnit's `Parameterized` or third-party runners such as the
+alternative runner such as JUnit 4's `Parameterized` or third-party runners such as the
 `MockitoJUnitRunner`, you may optionally use <<testcontext-junit4-rules,Spring's support
 for JUnit rules>> instead.
 
@@ -3669,7 +3669,7 @@ public class SimpleTest {
 
 
 [[testcontext-junit4-rules]]
-===== Spring JUnit Rules
+===== Spring JUnit 4 Rules
 
 The `org.springframework.test.context.junit4.rules` package provides the following JUnit
 4 rules (supported on JUnit 4.12 or higher).
@@ -3683,7 +3683,7 @@ supports instance-level and method-level features of the _Spring TestContext Fra
 
 In contrast to the `SpringRunner`, Spring's rule-based JUnit support has the advantage
 that it is independent of any `org.junit.runner.Runner` implementation and can therefore
-be combined with existing alternative runners like JUnit's `Parameterized` or third-party
+be combined with existing alternative runners like JUnit 4's `Parameterized` or third-party
 runners such as the `MockitoJUnitRunner`.
 
 In order to support the full functionality of the TestContext framework, a
@@ -3713,10 +3713,10 @@ public class IntegrationTest {
 
 
 [[testcontext-support-classes-junit4]]
-===== JUnit support classes
+===== JUnit 4 support classes
 
 The `org.springframework.test.context.junit4` package provides the following support
-classes for JUnit-based test cases (supported on JUnit 4.12 or higher).
+classes for JUnit 4 based test cases (supported on JUnit 4.12 or higher).
 
 * `AbstractJUnit4SpringContextTests`
 * `AbstractTransactionalJUnit4SpringContextTests`
@@ -3840,7 +3840,7 @@ of the Servlet API>> available in the `spring-test` module. This allows performi
 requests and generating responses without the need for running in a Servlet container.
 For the most part everything should work as it does at runtime with a few notable
 exceptions as explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>. Here is a
-JUnit-based example of using Spring MVC Test:
+JUnit 4 based example of using Spring MVC Test:
 
 [source,java,indent=0]
 ----
@@ -5155,7 +5155,7 @@ tests] of client-side REST tests.
 
 The PetClinic application, available on
 https://github.com/spring-projects/spring-petclinic[GitHub], illustrates several features
-of the __Spring TestContext Framework__ in a JUnit environment. Most test functionality
+of the __Spring TestContext Framework__ in a JUnit 4 environment. Most test functionality
 is included in the `AbstractClinicTests`, for which a partial listing is shown below:
 
 [source,java,indent=0]
