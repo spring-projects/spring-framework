@@ -83,7 +83,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	private boolean caseSensitive = true;
 
-	private boolean trimTokens = true;
+	private boolean trimTokens = false;
 
 	private volatile Boolean cachePatterns;
 
@@ -314,19 +314,21 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	private boolean isPotentialMatch(String path, String[] pattDirs) {
-		char[] pathChars = path.toCharArray();
-		int pos = 0;
-		for (String pattDir : pattDirs) {
-			int skipped = skipSeparator(path, pos, this.pathSeparator);
-			pos += skipped;
-			skipped = skipSegment(pathChars, pos, pattDir);
-			if (skipped < pattDir.length()) {
-				if (skipped > 0) {
-					return true;
+		if (!this.trimTokens) {
+			char[] pathChars = path.toCharArray();
+			int pos = 0;
+			for (String pattDir : pattDirs) {
+				int skipped = skipSeparator(path, pos, this.pathSeparator);
+				pos += skipped;
+				skipped = skipSegment(pathChars, pos, pattDir);
+				if (skipped < pattDir.length()) {
+					if (skipped > 0) {
+						return true;
+					}
+					return (pattDir.length() > 0) && isWildcardChar(pattDir.charAt(0));
 				}
-				return (pattDir.length() > 0) && isWildcardChar(pattDir.charAt(0));
+				pos += skipped;
 			}
-			pos += skipped;
 		}
 		return true;
 	}

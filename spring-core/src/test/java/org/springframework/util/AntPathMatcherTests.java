@@ -136,6 +136,14 @@ public class AntPathMatcherTests {
 		assertTrue(pathMatcher.match("/{bla}.*", "/testing.html"));
 	}
 
+	// SPR-14247
+	@Test
+	public void matchWithTrimTokensEnabled() throws Exception {
+		pathMatcher.setTrimTokens(true);
+
+		assertTrue(pathMatcher.match("/foo/bar", "/foo /bar"));
+	}
+
 	@Test
 	public void withMatchStart() {
 		// test exact matching
