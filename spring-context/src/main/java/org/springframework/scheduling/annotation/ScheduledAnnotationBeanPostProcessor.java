@@ -17,7 +17,9 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -35,7 +37,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -48,6 +50,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.IntervalTask;
+import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
@@ -81,8 +84,8 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.scheduling.config.ScheduledTaskRegistrar
  * @see AsyncAnnotationBeanPostProcessor
  */
-public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered,
-		EmbeddedValueResolverAware, BeanFactoryAware, ApplicationContextAware,
+public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBeanPostProcessor,
+		Ordered, EmbeddedValueResolverAware, BeanFactoryAware, ApplicationContextAware,
 		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
 	/**
@@ -108,6 +111,9 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 
 	private final Set<Class<?>> nonAnnotatedClasses =
 			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
+
+	private final Map<Object, Set<ScheduledTask>> scheduledTasks =
+			new ConcurrentHashMap<Object, Set<ScheduledTask>>(16);
 
 
 	@Override
@@ -296,6 +302,9 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
 
+			Set<ScheduledTask> tasks =
+					new LinkedHashSet<ScheduledTask>(4);
+
 			// Determine initial delay
 			long initialDelay = scheduled.initialDelay();
 			String initialDelayString = scheduled.initialDelayString();
@@ -330,7 +339,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 				else {
 					timeZone = TimeZone.getDefault();
 				}
-				this.registrar.addCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone)));
+				tasks.add(this.registrar.scheduleCronTask(new CronTask(runnable, new CronTrigger(cron, timeZone))));
 			}
 
 			// At this point we don't need to differentiate between initial delay set or not anymore
@@ -343,7 +352,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			if (fixedDelay >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				this.registrar.addFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay));
+				tasks.add(this.registrar.scheduleFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay)));
 			}
 			String fixedDelayString = scheduled.fixedDelayString();
 			if (StringUtils.hasText(fixedDelayString)) {
@@ -359,7 +368,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					throw new IllegalArgumentException(
 							"Invalid fixedDelayString value \"" + fixedDelayString + "\" - cannot parse into integer");
 				}
-				this.registrar.addFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay));
+				tasks.add(this.registrar.scheduleFixedDelayTask(new IntervalTask(runnable, fixedDelay, initialDelay)));
 			}
 
 			// Check fixed rate
@@ -367,7 +376,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			if (fixedRate >= 0) {
 				Assert.isTrue(!processedSchedule, errorMessage);
 				processedSchedule = true;
-				this.registrar.addFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay));
+				tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay)));
 			}
 			String fixedRateString = scheduled.fixedRateString();
 			if (StringUtils.hasText(fixedRateString)) {
@@ -383,11 +392,12 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					throw new IllegalArgumentException(
 							"Invalid fixedRateString value \"" + fixedRateString + "\" - cannot parse into integer");
 				}
-				this.registrar.addFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay));
+				tasks.add(this.registrar.scheduleFixedRateTask(new IntervalTask(runnable, fixedRate, initialDelay)));
 			}
 
 			// Check whether we had any attribute set
 			Assert.isTrue(processedSchedule, errorMessage);
+			this.scheduledTasks.put(bean, tasks);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new IllegalStateException(
@@ -397,7 +407,29 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 
 
 	@Override
+	public void postProcessBeforeDestruction(Object bean, String beanName) {
+		Set<ScheduledTask> tasks = this.scheduledTasks.remove(bean);
+		if (tasks != null) {
+			for (ScheduledTask task : tasks) {
+				task.cancel();
+			}
+		}
+	}
+
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return this.scheduledTasks.containsKey(bean);
+	}
+
+	@Override
 	public void destroy() {
+		Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
+		for (Set<ScheduledTask> tasks : allTasks) {
+			for (ScheduledTask task : tasks) {
+				task.cancel();
+			}
+		}
+		this.scheduledTasks.clear();
 		this.registrar.destroy();
 	}
 
