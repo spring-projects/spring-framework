@@ -335,7 +335,7 @@ public class MockHttpServletRequestBuilder
 	 * @param sessionAttributes the session attributes
 	 */
 	public MockHttpServletRequestBuilder sessionAttrs(Map<String, Object> sessionAttributes) {
-		Assert.notEmpty(sessionAttributes, "'sessionAttrs' must not be empty");
+		Assert.notEmpty(sessionAttributes, "'sessionAttributes' must not be empty");
 		for (String name : sessionAttributes.keySet()) {
 			sessionAttr(name, sessionAttributes.get(name));
 		}
@@ -357,7 +357,7 @@ public class MockHttpServletRequestBuilder
 	 * @param flashAttributes the flash attributes
 	 */
 	public MockHttpServletRequestBuilder flashAttrs(Map<String, Object> flashAttributes) {
-		Assert.notEmpty(flashAttributes, "'flashAttrs' must not be empty");
+		Assert.notEmpty(flashAttributes, "'flashAttributes' must not be empty");
 		for (String name : flashAttributes.keySet()) {
 			flashAttr(name, flashAttributes.get(name));
 		}
@@ -708,7 +708,8 @@ public class MockHttpServletRequestBuilder
 	}
 
 	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {
-		MultiValueMap<String, String> map;HttpInputMessage message = new HttpInputMessage() {
+		MultiValueMap<String, String> map;
+		HttpInputMessage message = new HttpInputMessage() {
 			@Override
 			public InputStream getBody() throws IOException {
 				return new ByteArrayInputStream(content);
@@ -725,7 +726,7 @@ public class MockHttpServletRequestBuilder
 			map = new FormHttpMessageConverter().read(null, message);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Failed to parse form data in request body: ", ex);
+			throw new IllegalStateException("Failed to parse form data in request body", ex);
 		}
 		return map;
 	}

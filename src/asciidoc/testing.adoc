@@ -3433,7 +3433,7 @@ for the various `executeSqlScript(..)` methods for further details.
 
 
 [[testcontext-executing-sql-declaratively]]
-===== Executing SQL scripts declaratively with `@Sql`
+===== Executing SQL scripts declaratively with @Sql
 
 In addition to the aforementioned mechanisms for executing SQL scripts
 _programmatically_, SQL scripts can also be configured _declaratively_ in the Spring
