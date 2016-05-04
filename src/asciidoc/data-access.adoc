@@ -1778,7 +1778,7 @@ a transaction. You then pass an instance of your custom `TransactionCallback` to
 
 		// use constructor-injection to supply the PlatformTransactionManager
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
+			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 		}
 
@@ -1845,7 +1845,7 @@ a specific `TransactionTemplate:`
 		private final TransactionTemplate transactionTemplate;
 
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
+			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 
 			// the transaction settings can be set here explicitly if so desired
@@ -3435,7 +3435,7 @@ The batch update methods for this call returns an array of int arrays containing
 entry for each batch with an array of the number of affected rows for each update. The top
 level array's length indicates the number of batches executed and the second level array's
 length indicates the number of updates in that batch. The number of updates in each batch
-should be the the batch size provided for all batches except for the last one that might
+should be the batch size provided for all batches except for the last one that might
 be less, depending on the total number of update objects provided. The update count for
 each update statement is the one reported by the JDBC driver. If the count is not
 available, the JDBC driver returns a -2 value.
@@ -5130,7 +5130,9 @@ chapter will then cover the other ORM technologies, showing briefer examples the
 
 [NOTE]
 ====
-As of Spring 4.0, Spring requires Hibernate 3.6 or later. We recommend Hibernate 5.0+.
+As of Spring 4.0, Spring requires Hibernate 3.6 or later. Note that the Hibernate team
+stopped supporting Hibernate 3 years ago and even phased out support for Hibernate 4.x
+in late 2015. We therefore recommend Hibernate 5.1 and higher from a 2016+ perspective.
 ====
 
 

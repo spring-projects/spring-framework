@@ -100,7 +100,7 @@ public class PortletRequestHandledEvent extends RequestHandledEvent {
 	}
 
 	/**
-	 * Return the the type of Portlet Request ('action' or 'render').
+	 * Return the type of Portlet Request ('action' or 'render').
 	 */
 	public String getRequestType() {
 		return this.requestType;

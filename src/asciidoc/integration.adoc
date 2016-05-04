@@ -6007,7 +6007,7 @@ along with an inline image.
 	helper.setTo("test@host.com");
 
 	// use the true flag to indicate the text included is HTML
-	helper.setText("<html><body><img src=''cid:identifier1234''></body></html>", true);
+	helper.setText("<html><body><img src='cid:identifier1234'></body></html>", true);
 
 	// let's include the infamous windows Sample file (this time copied to c:/)
 	FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
@@ -7366,7 +7366,7 @@ message is surrounded by quotes. Below are the changes that I (the author) make 
 
 		public String getMessage() {
 			// change the implementation to surround the message in quotes
-			return "''" + this.message + "''"
+			return "'" + this.message + "'"
 		}
 
 		public void setMessage(String message) {
@@ -7773,7 +7773,7 @@ will want to do with this callback, and you can see an example of doing that bel
 			DelegatingMetaClass metaClass = new DelegatingMetaClass(goo.getMetaClass()) {
 
 				public Object invokeMethod(Object object, String methodName, Object[] arguments) {
-					System.out.println("Invoking ''" + methodName + "''.");
+					System.out.println("Invoking '" + methodName + "'.");
 					return super.invokeMethod(object, methodName, arguments);
 				}
 			};

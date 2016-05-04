@@ -112,7 +112,7 @@ public final class ModelFactory {
 			if (!container.containsAttribute(name)) {
 				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
 				if (value == null) {
-					throw new HttpSessionRequiredException("Expected session attribute '" + name + "'");
+					throw new HttpSessionRequiredException("Expected session attribute '" + name + "'", name);
 				}
 				container.addAttribute(name, value);
 			}

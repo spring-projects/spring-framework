@@ -16,12 +16,16 @@
 
 package org.springframework.http;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceRegion;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -54,6 +58,30 @@ public abstract class HttpRange {
 	 * @return the end of the range for the representation
 	 */
 	public abstract long getRangeEnd(long length);
+
+	/**
+	 * Turn a {@code Resource} into a {@link ResourceRegion} using the range
+	 * information contained in the current {@code HttpRange}.
+	 * @param resource the {@code Resource} to select the region from
+	 * @return the selected region of the given {@code Resource}
+	 * @since 4.3.0
+	 */
+	public ResourceRegion toResourceRegion(Resource resource) {
+		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
+		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
+		Assert.isTrue(InputStreamResource.class != resource.getClass(),
+				"Can't convert an InputStreamResource to a ResourceRegion");
+		try {
+			long contentLength = resource.contentLength();
+			Assert.isTrue(contentLength > 0, "Resource content length should be > 0");
+			long start = getRangeStart(contentLength);
+			long end = getRangeEnd(contentLength);
+			return new ResourceRegion(resource, start, end - start + 1);
+		}
+		catch (IOException exc) {
+			throw new IllegalArgumentException("Can't convert this Resource to a ResourceRegion", exc);
+		}
+	}
 
 
 	/**
@@ -131,6 +159,26 @@ public abstract class HttpRange {
 		else {
 			throw new IllegalArgumentException("Range '" + range + "' does not contain \"-\"");
 		}
+	}
+
+	/**
+	 * Convert each {@code HttpRange} into a {@code ResourceRegion},
+	 * selecting the appropriate segment of the given {@code Resource}
+	 * using the HTTP Range information.
+	 *
+	 * @param ranges the list of ranges
+	 * @param resource the resource to select the regions from
+	 * @return the list of regions for the given resource
+	 */
+	public static List<ResourceRegion> toResourceRegions(List<HttpRange> ranges, Resource resource) {
+		if(ranges == null || ranges.size() == 0) {
+			return Collections.emptyList();
+		}
+		List<ResourceRegion> regions = new ArrayList<ResourceRegion>(ranges.size());
+		for(HttpRange range : ranges) {
+			regions.add(range.toResourceRegion(resource));
+		}
+		return regions;
 	}
 
 	/**

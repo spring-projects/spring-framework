@@ -139,30 +139,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * The origin of this test class is {@link ServletAnnotationControllerHandlerMethodTests}.
  *
  * Tests in this class run against the {@link HandlerMethod} infrastructure:
  * <ul>
- * 	<li>RequestMappingHandlerMapping
- * 	<li>RequestMappingHandlerAdapter
- * 	<li>ExceptionHandlerExceptionResolver
+ * <li>RequestMappingHandlerMapping
+ * <li>RequestMappingHandlerAdapter
+ * <li>ExceptionHandlerExceptionResolver
  * </ul>
  *
  * <p>Rather than against the existing infrastructure:
  * <ul>
- * 	<li>DefaultAnnotationHandlerMapping
- * 	<li>AnnotationMethodHandlerAdapter
- * 	<li>AnnotationMethodHandlerExceptionResolver
+ * <li>DefaultAnnotationHandlerMapping
+ * <li>AnnotationMethodHandlerAdapter
+ * <li>AnnotationMethodHandlerExceptionResolver
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -172,6 +165,18 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Test
 	public void emptyValueMapping() throws Exception {
 		initServletWithControllers(ControllerWithEmptyValueMapping.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.setContextPath("/foo");
+		request.setServletPath("");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("test", response.getContentAsString());
+	}
+
+	@Test
+	public void errorThrownFromHandlerMethod() throws Exception {
+		initServletWithControllers(ControllerWithErrorThrown.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		request.setContextPath("/foo");
@@ -1772,6 +1777,18 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Test
+	public void httpHeadExplicit() throws ServletException, IOException {
+		initServletWithControllers(ResponseEntityController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("HEAD", "/stores");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("v1", response.getHeader("h1"));
+	}
+
+	@Test
 	public void httpOptions() throws ServletException, IOException {
 		initServletWithControllers(ResponseEntityController.class);
 
@@ -1805,6 +1822,25 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@ExceptionHandler
 		public void myPath2(Exception ex, HttpServletResponse response) throws IOException {
 			response.getWriter().write(ex.getMessage());
+		}
+	}
+
+	@Controller
+	private static class ControllerWithErrorThrown {
+
+		@RequestMapping("")
+		public void myPath2(HttpServletResponse response) throws IOException {
+			throw new AssertionError("test");
+		}
+
+		@RequestMapping("/bar")
+		public void myPath3(HttpServletResponse response) throws IOException {
+			response.getWriter().write("testX");
+		}
+
+		@ExceptionHandler
+		public void myPath2(Error err, HttpServletResponse response) throws IOException {
+			response.getWriter().write(err.getMessage());
 		}
 	}
 
@@ -3075,6 +3111,16 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@RequestMapping(path = "/baz", method = RequestMethod.GET)
 		public ResponseEntity<String> baz() {
 			return ResponseEntity.ok().header("MyResponseHeader", "MyValue").body("body");
+		}
+
+		@RequestMapping(path = "/stores", method = RequestMethod.HEAD)
+		public ResponseEntity<Void> headResource() {
+			return ResponseEntity.ok().header("h1", "v1").build();
+		}
+
+		@RequestMapping(path = "/stores", method = RequestMethod.GET)
+		public ResponseEntity<String> getResource() {
+			return ResponseEntity.ok().body("body");
 		}
 	}
 

@@ -79,7 +79,9 @@ import org.springframework.web.util.WebUtils;
  * @see #setMethodParamNames
  * @see #setLogicalMappings
  * @see #setDefaultMethodName
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public class ParameterMethodNameResolver implements MethodNameResolver {
 
 	/**

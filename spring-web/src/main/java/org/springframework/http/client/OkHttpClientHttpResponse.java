@@ -25,11 +25,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
 /**
- * {@link ClientHttpResponse} implementation based on OkHttp.
+ * {@link ClientHttpResponse} implementation based on OkHttp 2.x.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
  * @since 4.2
+ * @see org.springframework.http.client.OkHttp3ClientHttpResponse
  */
 class OkHttpClientHttpResponse extends AbstractClientHttpResponse {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import org.springframework.cache.Cache;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 
@@ -45,7 +43,7 @@ import org.springframework.expression.Expression;
  * @author Stephane Nicoll
  * @since 3.1
  */
-class ExpressionEvaluator extends CachedExpressionEvaluator {
+class CacheOperationExpressionEvaluator extends CachedExpressionEvaluator {
 
 	/**
 	 * Indicate that there is no result variable.
@@ -62,8 +60,6 @@ class ExpressionEvaluator extends CachedExpressionEvaluator {
 	 */
 	public static final String RESULT_VARIABLE = "result";
 
-	// shared param discoverer since it caches data internally
-	private final ParameterNameDiscoverer paramNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	private final Map<ExpressionKey, Expression> keyCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
 
@@ -100,11 +96,11 @@ class ExpressionEvaluator extends CachedExpressionEvaluator {
 			Method method, Object[] args, Object target, Class<?> targetClass, Object result,
 			BeanFactory beanFactory) {
 
-		CacheExpressionRootObject rootObject = new CacheExpressionRootObject(caches,
-				method, args, target, targetClass);
+		CacheExpressionRootObject rootObject = new CacheExpressionRootObject(
+				caches, method, args, target, targetClass);
 		Method targetMethod = getTargetMethod(targetClass, method);
-		CacheEvaluationContext evaluationContext = new CacheEvaluationContext(rootObject,
-				targetMethod, args, this.paramNameDiscoverer);
+		CacheEvaluationContext evaluationContext = new CacheEvaluationContext(
+				rootObject, targetMethod, args, getParameterNameDiscoverer());
 		if (result == RESULT_UNAVAILABLE) {
 			evaluationContext.addUnavailableVariable(RESULT_VARIABLE);
 		}

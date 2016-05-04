@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,6 +220,9 @@ public abstract class MimeTypeUtils {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
 		}
 		String[] parts = StringUtils.tokenizeToStringArray(mimeType, ";");
+		if (parts.length == 0) {
+			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
+		}
 
 		String fullType = parts[0].trim();
 		// java.net.HttpURLConnection returns a *; q=.2 Accept header

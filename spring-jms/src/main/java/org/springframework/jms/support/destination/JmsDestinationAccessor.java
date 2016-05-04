@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.jms.support.destination;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
 import org.springframework.jms.support.JmsAccessor;
@@ -37,6 +39,20 @@ import org.springframework.util.Assert;
  * @see org.springframework.jms.core.JmsTemplate
  */
 public abstract class JmsDestinationAccessor extends JmsAccessor {
+
+	/**
+	 * Timeout value indicating that a receive operation should
+	 * check if a message is immediately available without blocking.
+	 * @since 4.3
+	 */
+	public static final long RECEIVE_TIMEOUT_NO_WAIT = -1;
+
+	/**
+	 * Timeout value indicating a blocking receive without timeout.
+	 * @since 4.3
+	 */
+	public static final long RECEIVE_TIMEOUT_INDEFINITE_WAIT = 0;
+
 
 	private DestinationResolver destinationResolver = new DynamicDestinationResolver();
 
@@ -96,6 +112,29 @@ public abstract class JmsDestinationAccessor extends JmsAccessor {
 	 */
 	protected Destination resolveDestinationName(Session session, String destinationName) throws JMSException {
 		return getDestinationResolver().resolveDestinationName(session, destinationName, isPubSubDomain());
+	}
+
+	/**
+	 * Actually receive a message from the given consumer.
+	 * @param consumer the JMS MessageConsumer to receive with
+	 * @param timeout the receive timeout (a negative value indicates
+	 * a no-wait receive; 0 indicates an indefinite wait attempt)
+	 * @return the JMS Message received, or {@code null} if none
+	 * @throws JMSException if thrown by JMS API methods
+	 * @since 4.3
+	 * @see #RECEIVE_TIMEOUT_NO_WAIT
+	 * @see #RECEIVE_TIMEOUT_INDEFINITE_WAIT
+	 */
+	protected Message receiveFromConsumer(MessageConsumer consumer, long timeout) throws JMSException {
+		if (timeout > 0) {
+			return consumer.receive(timeout);
+		}
+		else if (timeout < 0) {
+			return consumer.receiveNoWait();
+		}
+		else {
+			return consumer.receive();
+		}
 	}
 
 }

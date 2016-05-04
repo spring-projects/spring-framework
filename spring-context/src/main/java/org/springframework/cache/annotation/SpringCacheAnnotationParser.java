@@ -87,7 +87,10 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		if (!cachings.isEmpty()) {
 			ops = lazyInit(ops);
 			for (Caching caching : cachings) {
-				ops.addAll(parseCachingAnnotation(ae, cachingConfig, caching));
+				Collection<CacheOperation> cachingOps = parseCachingAnnotation(ae, cachingConfig, caching);
+				if (cachingOps != null) {
+					ops.addAll(cachingOps);
+				}
 			}
 		}
 

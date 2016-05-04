@@ -29,7 +29,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
@@ -107,7 +106,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	public org.springframework.jmx.export.metadata.ManagedOperationParameter[] getManagedOperationParameters(Method method)
 			throws InvalidMetadataException {
 
-		Set<ManagedOperationParameter> anns = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+		Set<ManagedOperationParameter> anns = AnnotationUtils.getRepeatableAnnotations(
 				method, ManagedOperationParameter.class, ManagedOperationParameters.class);
 		return copyPropertiesToBeanArray(anns, org.springframework.jmx.export.metadata.ManagedOperationParameter.class);
 	}
@@ -116,7 +115,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	public org.springframework.jmx.export.metadata.ManagedNotification[] getManagedNotifications(Class<?> clazz)
 			throws InvalidMetadataException {
 
-		Set<ManagedNotification> anns = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+		Set<ManagedNotification> anns = AnnotationUtils.getRepeatableAnnotations(
 				clazz, ManagedNotification.class, ManagedNotifications.class);
 		return copyPropertiesToBeanArray(anns, org.springframework.jmx.export.metadata.ManagedNotification.class);
 	}

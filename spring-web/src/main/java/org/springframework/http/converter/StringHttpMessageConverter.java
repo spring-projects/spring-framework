@@ -118,8 +118,8 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	private Charset getContentTypeCharset(MediaType contentType) {
-		if (contentType != null && contentType.getCharSet() != null) {
-			return contentType.getCharSet();
+		if (contentType != null && contentType.getCharset() != null) {
+			return contentType.getCharset();
 		}
 		else {
 			return this.getDefaultCharset();

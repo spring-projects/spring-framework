@@ -34,7 +34,6 @@ import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.util.ReflectionUtils;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -49,19 +48,8 @@ public class AnnotationCacheOperationSourceTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
-	private AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
+	private final AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
 
-
-	private Collection<CacheOperation> getOps(Class<?> target, String name, int expectedNumberOfOperations) {
-		Collection<CacheOperation> result = getOps(target, name);
-		assertEquals("Wrong number of operation(s) for '" + name + "'", expectedNumberOfOperations, result.size());
-		return result;
-	}
-
-	private Collection<CacheOperation> getOps(Class<?> target, String name) {
-		Method method = ReflectionUtils.findMethod(target, name);
-		return source.getCacheOperations(method, target);
-	}
 
 	@Test
 	public void singularAnnotation() throws Exception {
@@ -83,6 +71,11 @@ public class AnnotationCacheOperationSourceTests {
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
 		assertTrue(it.next() instanceof CacheEvictOperation);
+	}
+
+	@Test
+	public void emptyCaching() throws Exception {
+		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "emptyCaching", 0);
 	}
 
 	@Test
@@ -272,16 +265,35 @@ public class AnnotationCacheOperationSourceTests {
 		assertSharedConfig(cacheOperation, "classKeyGenerator", "classCacheManager", "", "classCacheName");
 	}
 
+
+	private Collection<CacheOperation> getOps(Class<?> target, String name, int expectedNumberOfOperations) {
+		Collection<CacheOperation> result = getOps(target, name);
+		assertEquals("Wrong number of operation(s) for '" + name + "'", expectedNumberOfOperations, result.size());
+		return result;
+	}
+
+	private Collection<CacheOperation> getOps(Class<?> target, String name) {
+		try {
+			Method method = target.getMethod(name);
+			return source.getCacheOperations(method, target);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
 	private void assertSharedConfig(CacheOperation actual, String keyGenerator, String cacheManager,
-									String cacheResolver, String... cacheNames) {
+			String cacheResolver, String... cacheNames) {
+
 		assertEquals("Wrong key manager",  keyGenerator, actual.getKeyGenerator());
 		assertEquals("Wrong cache manager", cacheManager, actual.getCacheManager());
 		assertEquals("Wrong cache resolver", cacheResolver, actual.getCacheResolver());
 		assertEquals("Wrong number of cache names", cacheNames.length, actual.getCacheNames().size());
-		Arrays.stream(cacheNames).forEach(
-			cacheName -> assertTrue("Cache '" + cacheName + "' not found in " + actual.getCacheNames(),
-				actual.getCacheNames().contains(cacheName)));
+		Arrays.stream(cacheNames).forEach(cacheName ->
+				assertTrue("Cache '" + cacheName + "' not found in " + actual.getCacheNames(),
+						actual.getCacheNames().contains(cacheName)));
 	}
+
 
 	private static class AnnotatedClass {
 
@@ -296,6 +308,10 @@ public class AnnotationCacheOperationSourceTests {
 
 		@Caching(cacheable = @Cacheable("test"), evict = @CacheEvict("test"))
 		public void caching() {
+		}
+
+		@Caching
+		public void emptyCaching() {
 		}
 
 		@Cacheable(cacheNames = "test", keyGenerator = "custom")
@@ -361,6 +377,7 @@ public class AnnotationCacheOperationSourceTests {
 		}
 	}
 
+
 	@CacheConfig(cacheNames = "classCacheName",
 			keyGenerator = "classKeyGenerator",
 			cacheManager = "classCacheManager", cacheResolver = "classCacheResolver")
@@ -383,6 +400,7 @@ public class AnnotationCacheOperationSourceTests {
 		}
 	}
 
+
 	@CacheConfigFoo
 	private static class AnnotatedClassWithCustomDefault {
 
@@ -390,6 +408,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void methodLevelCacheName() {
 		}
 	}
+
 
 	@CacheConfig(cacheNames = "classCacheName",
 			keyGenerator = "classKeyGenerator",
@@ -409,6 +428,7 @@ public class AnnotationCacheOperationSourceTests {
 		}
 	}
 
+
 	@CacheConfigFoo
 	@CacheConfig(cacheNames = "myCache") // multiple sources
 	private static class MultipleCacheConfig {
@@ -418,11 +438,13 @@ public class AnnotationCacheOperationSourceTests {
 		}
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@Cacheable("foo")
 	public @interface CacheableFoo {
 	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
@@ -430,11 +452,13 @@ public class AnnotationCacheOperationSourceTests {
 	public @interface CacheableFooCustomKeyGenerator {
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@Cacheable(cacheNames = "foo", cacheManager = "custom")
 	public @interface CacheableFooCustomCacheManager {
 	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
@@ -442,11 +466,13 @@ public class AnnotationCacheOperationSourceTests {
 	public @interface CacheableFooCustomCacheResolver {
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@CacheEvict("foo")
 	public @interface EvictFoo {
 	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
@@ -454,11 +480,15 @@ public class AnnotationCacheOperationSourceTests {
 	public @interface EvictBar {
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	@CacheConfig(keyGenerator = "classKeyGenerator", cacheManager = "classCacheManager", cacheResolver = "classCacheResolver")
+	@CacheConfig(keyGenerator = "classKeyGenerator",
+			cacheManager = "classCacheManager",
+			cacheResolver = "classCacheResolver")
 	public @interface CacheConfigFoo {
 	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD, ElementType.TYPE })
@@ -474,6 +504,7 @@ public class AnnotationCacheOperationSourceTests {
 		@AliasFor(annotation = Cacheable.class)
 		String key() default "";
 	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD, ElementType.TYPE })

@@ -293,7 +293,9 @@
 		<xsd:attribute name="method" type="xsd:string" use="required">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The name of the method to be invoked.
+	The name of the method to be invoked. The target method must expect no arguments.
+	It will typically have a void return type; if not, the returned value will be
+	ignored when called through the scheduler.
 				]]></xsd:documentation>
 				<xsd:appinfo>
 					<tool:annotation>

@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -99,8 +98,9 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param ex the target exception
 	 * @param request the current request
 	 */
+	@SuppressWarnings("deprecation")
 	@ExceptionHandler({
-			NoSuchRequestHandlingMethodException.class,
+			org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException.class,
 			HttpRequestMethodNotSupportedException.class,
 			HttpMediaTypeNotSupportedException.class,
 			HttpMediaTypeNotAcceptableException.class,
@@ -118,9 +118,9 @@ public abstract class ResponseEntityExceptionHandler {
 		})
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
 		HttpHeaders headers = new HttpHeaders();
-		if (ex instanceof NoSuchRequestHandlingMethodException) {
+		if (ex instanceof org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException) {
 			HttpStatus status = HttpStatus.NOT_FOUND;
-			return handleNoSuchRequestHandlingMethod((NoSuchRequestHandlingMethodException) ex, headers, status, request);
+			return handleNoSuchRequestHandlingMethod((org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException) ex, headers, status, request);
 		}
 		else if (ex instanceof HttpRequestMethodNotSupportedException) {
 			HttpStatus status = HttpStatus.METHOD_NOT_ALLOWED;
@@ -213,8 +213,10 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param status the selected response status
 	 * @param request the current request
 	 * @return a {@code ResponseEntity} instance
+	 * @deprecated as of 4.3, along with {@link org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException}
 	 */
-	protected ResponseEntity<Object> handleNoSuchRequestHandlingMethod(NoSuchRequestHandlingMethodException ex,
+	@Deprecated
+	protected ResponseEntity<Object> handleNoSuchRequestHandlingMethod(org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		pageNotFoundLogger.warn(ex.getMessage());

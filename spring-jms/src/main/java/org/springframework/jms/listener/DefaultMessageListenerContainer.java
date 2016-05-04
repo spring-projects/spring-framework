@@ -614,6 +614,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	@Override
 	public void stop(Runnable callback) throws JmsException {
 		synchronized (this.lifecycleMonitor) {
+			if (!isRunning() || this.stopCallback != null) {
+				// Not started, already stopped, or previous stop attempt in progress
+				// -> return immediately, no stop process to control anymore.
+				callback.run();
+				return;
+			}
 			this.stopCallback = callback;
 		}
 		stop();
@@ -989,7 +995,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 		else {
 			try {
-				Thread.sleep(interval);
+				synchronized (this.lifecycleMonitor) {
+					this.lifecycleMonitor.wait(interval);
+				}
 			}
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
@@ -1057,9 +1065,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			catch (Throwable ex) {
 				clearResources();
 				if (!this.lastMessageSucceeded) {
-					// We failed more than once in a row or on startup - sleep before
-					// first recovery attempt.
-					sleepBeforeRecoveryAttempt();
+					// We failed more than once in a row or on startup -
+					// wait before first recovery attempt.
+					waitBeforeRecoveryAttempt();
 				}
 				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
@@ -1214,11 +1222,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 		/**
 		 * Apply the back-off time once. In a regular scenario, the back-off is only applied if we
-		 * failed to recover with the broker. This additional sleep period avoids a burst retry
+		 * failed to recover with the broker. This additional wait period avoids a burst retry
 		 * scenario when the broker is actually up but something else if failing (i.e. listener
 		 * specific).
 		 */
-		private void sleepBeforeRecoveryAttempt() {
+		private void waitBeforeRecoveryAttempt() {
 			BackOffExecution execution = DefaultMessageListenerContainer.this.backOff.start();
 			applyBackOffTime(execution);
 		}

@@ -219,7 +219,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator
 	}
 
 	/**
-	 * Lookup variant that that returns the specified "defaultObject"
+	 * Lookup variant that returns the specified "defaultObject"
 	 * (if any) in case of lookup failure.
 	 * @return the located object, or the "defaultObject" as fallback
 	 * @throws NamingException in case of lookup failure without fallback

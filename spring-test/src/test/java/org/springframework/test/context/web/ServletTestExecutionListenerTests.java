@@ -173,7 +173,7 @@ public class ServletTestExecutionListenerTests {
 	}
 
 	private void assertRequestAttributesDoNotExist() {
-		assertNull("request attributes should not not exist", RequestContextHolder.getRequestAttributes());
+		assertNull("request attributes should not exist", RequestContextHolder.getRequestAttributes());
 	}
 
 	private void assertSetUpOutsideOfStelAttributeExists() {

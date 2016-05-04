@@ -52,7 +52,7 @@ public class TaskExecutorRegistration {
 	 * in {@link java.util.concurrent.ThreadPoolExecutor ThreadPoolExecutor}. When
 	 * this strategy is used, the {@link #maxPoolSize(int) maxPoolSize} is ignored.
 	 * <p>By default this is set to twice the value of
-	 * {@link Runtime#availableProcessors()}. In an an application where tasks do not
+	 * {@link Runtime#availableProcessors()}. In an application where tasks do not
 	 * block frequently, the number should be closer to or equal to the number of
 	 * available CPUs/cores.
 	 */

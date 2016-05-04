@@ -26,7 +26,7 @@ import org.aopalliance.aop.Advice;
  * in) joinpoints. Runtime joinpoints can be invocations, field
  * access, exceptions... 
  *
- * <p>This interface is not used directly. Use the the sub-interfaces
+ * <p>This interface is not used directly. Use the sub-interfaces
  * to intercept specific events. For instance, the following class
  * implements some specific interceptors in order to implement a
  * debugger:

@@ -76,8 +76,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
-import org.springframework.web.bind.annotation.support.HandlerMethodResolver;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -434,9 +432,10 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 
 	/**
-	 * Portlet-specific subclass of {@link HandlerMethodResolver}.
+	 * Portlet-specific subclass of {@code HandlerMethodResolver}.
 	 */
-	private static class PortletHandlerMethodResolver extends HandlerMethodResolver {
+	@SuppressWarnings("deprecation")
+	private static class PortletHandlerMethodResolver extends org.springframework.web.bind.annotation.support.HandlerMethodResolver {
 
 		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
 
@@ -545,11 +544,12 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 
 	/**
-	 * Portlet-specific subclass of {@link HandlerMethodInvoker}.
+	 * Portlet-specific subclass of {@code HandlerMethodInvoker}.
 	 */
-	private class PortletHandlerMethodInvoker extends HandlerMethodInvoker {
+	@SuppressWarnings("deprecation")
+	private class PortletHandlerMethodInvoker extends org.springframework.web.bind.annotation.support.HandlerMethodInvoker {
 
-		public PortletHandlerMethodInvoker(HandlerMethodResolver resolver) {
+		public PortletHandlerMethodInvoker(org.springframework.web.bind.annotation.support.HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore,
 					parameterNameDiscoverer, customArgumentResolvers, null);
 		}

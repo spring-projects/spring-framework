@@ -109,6 +109,31 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		testDefaultContainerFactoryConfiguration(context);
 	}
 
+	@Test
+	public void containerAreStartedByDefault() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsDefaultContainerFactoryConfig.class, DefaultBean.class);
+		JmsListenerContainerTestFactory factory =
+				context.getBean(JmsListenerContainerTestFactory.class);
+		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
+		assertTrue(container.isAutoStartup());
+		assertTrue(container.isStarted());
+	}
+
+	@Test
+	public void containerCanBeStarterViaTheRegistry() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsAutoStartupFalseConfig.class, DefaultBean.class);
+		JmsListenerContainerTestFactory factory =
+				context.getBean(JmsListenerContainerTestFactory.class);
+		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
+		assertFalse(container.isAutoStartup());
+		assertFalse(container.isStarted());
+		JmsListenerEndpointRegistry registry = context.getBean(JmsListenerEndpointRegistry.class);
+		registry.start();
+		assertTrue(container.isStarted());
+	}
+
 	@Override
 	@Test
 	public void jmsHandlerMethodFactoryConfiguration() throws JMSException {
@@ -162,7 +187,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	@SuppressWarnings("resource")
 	public void unknownFactory() {
 		thrown.expect(BeanCreationException.class);
-		thrown.expectMessage("customFactory"); // Not found
+		thrown.expectMessage("customFactory");  // not found
 		new AnnotationConfigApplicationContext(EnableJmsSampleConfig.class, CustomBean.class);
 	}
 
@@ -174,11 +199,11 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		assertEquals(0, defaultFactory.getListenerContainers().size());
 
-		context.getBean(LazyBean.class); // trigger lazy resolution
+		context.getBean(LazyBean.class);  // trigger lazy resolution
 		assertEquals(1, defaultFactory.getListenerContainers().size());
 		MessageListenerTestContainer container = defaultFactory.getListenerContainers().get(0);
 		assertTrue("Should have been started " + container, container.isStarted());
-		context.close(); // Close and stop the listeners
+		context.close();  // close and stop the listeners
 		assertTrue("Should have been stopped " + container, container.isStopped());
 	}
 
@@ -315,6 +340,24 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 
+	@Configuration
+	@EnableJms
+	static class EnableJmsAutoStartupFalseConfig implements JmsListenerConfigurer {
+
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			registrar.setContainerFactory(simpleFactory());
+		}
+
+		@Bean
+		public JmsListenerContainerTestFactory simpleFactory() {
+			JmsListenerContainerTestFactory factory = new JmsListenerContainerTestFactory();
+			factory.setAutoStartup(false);
+			return factory;
+		}
+	}
+
+
 	@Component
 	@Lazy
 	static class LazyBean {
@@ -336,6 +379,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		String concurrency() default "";
 	}
 
+
 	@JmsListener(destination = "billingQueue")
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface BillingQueueListener {
@@ -346,6 +390,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		@AliasFor(annotation = JmsListener.class)
 		String concurrency() default "";
 	}
+
 
 	@Component
 	static class ComposedJmsListenersBean {

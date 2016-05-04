@@ -1901,7 +1901,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR12803() throws Exception {
+	public void SPR12803() {
 		StandardEvaluationContext sec = new StandardEvaluationContext();
 		sec.setVariable("iterable", Collections.emptyList());
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -1910,7 +1910,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR12808() throws Exception {
+	public void SPR12808() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.DistanceEnforcer).from(#no)");
 		StandardEvaluationContext sec = new StandardEvaluationContext();
@@ -2123,9 +2123,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	private static enum ABC { A, B, C }
+	private enum ABC { A, B, C }
 
-	private static enum XYZ { X, Y, Z }
+	private enum XYZ { X, Y, Z }
 
 
 	public static class BooleanHolder {
@@ -2152,9 +2152,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	private static interface GenericInterface<T extends Number> {
+	private interface GenericInterface<T extends Number> {
 
-		public T getProperty();
+		T getProperty();
 	}
 
 
@@ -2179,9 +2179,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	public static interface StaticFinal {
+	public interface StaticFinal {
 
-		public static final String VALUE = "interfaceValue";
+		String VALUE = "interfaceValue";
 	}
 
 
@@ -2258,7 +2258,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	@SuppressWarnings({ "rawtypes", "serial" })
+	@SuppressWarnings({"rawtypes", "serial"})
 	public static class MapWithConstant extends HashMap {
 
 		public static final int X = 1;

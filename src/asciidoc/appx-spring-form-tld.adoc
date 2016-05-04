@@ -528,11 +528,6 @@ Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 | true
 | HTML Required Attribute
 
-| commandName
-| false
-| true
-| Name of the model attribute under which the form object is exposed. Defaults to 'command'.
-
 | cssClass
 | false
 | true

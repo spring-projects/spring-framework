@@ -19,16 +19,12 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRange;
-import org.springframework.http.HttpRangeResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -172,21 +168,6 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		mavContainer.setRequestHandled(true);
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
-
-		if (inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) &&
-				Resource.class.isAssignableFrom(returnValue.getClass())) {
-			try {
-				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
-				Resource bodyResource = (Resource) returnValue;
-				returnValue = new HttpRangeResource(httpRanges, bodyResource);
-				outputMessage.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-			}
-			catch (IllegalArgumentException ex) {
-				outputMessage.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
-				outputMessage.flush();
-				return;
-			}
-		}
 
 		// Try even with null return value. ResponseBodyAdvice could get involved.
 		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);

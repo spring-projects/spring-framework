@@ -308,7 +308,15 @@ public class AnnotatedElementUtilsTests {
 		assertTrue(isAnnotated(element, name));
 	}
 
-	@Ignore("Disabled until SPR-13554 is addressed")
+	/**
+	 * This test should never pass, simply because Spring does not support a hybrid
+	 * approach for annotation attribute overrides with transitive implicit aliases.
+	 * See SPR-13554 for details.
+	 * <p>Furthermore, if you choose to execute this test, it can fail for either
+	 * the first test class or the second one (with different exceptions), depending
+	 * on the order in which the JVM returns the attribute methods via reflection.
+	 */
+	@Ignore("Permanently disabled but left in place for illustrative purposes")
 	@Test
 	public void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation() {
 		for (Class<?> clazz : asList(HalfConventionBasedAndHalfAliasedComposedContextConfigClassV1.class,
@@ -586,8 +594,7 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void findMergedAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
-		AnnotationAttributes attributes = assertComponentScanAttributes(TestComponentScanClass.class,
-			"com.example.app.test");
+		AnnotationAttributes attributes = assertComponentScanAttributes(TestComponentScanClass.class, "com.example.app.test");
 
 		Filter[] excludeFilters = attributes.getAnnotationArray("excludeFilters", Filter.class);
 		assertNotNull(excludeFilters);
@@ -860,6 +867,10 @@ public class AnnotatedElementUtilsTests {
 		String[] locations();
 	}
 
+	/**
+	 * This hybrid approach for annotation attribute overrides with transitive implicit
+	 * aliases is unsupported. See SPR-13554 for details.
+	 */
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface HalfConventionBasedAndHalfAliasedComposedContextConfig {

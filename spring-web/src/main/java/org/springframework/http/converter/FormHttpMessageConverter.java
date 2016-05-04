@@ -202,7 +202,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
-		Charset charset = (contentType.getCharSet() != null ? contentType.getCharSet() : this.charset);
+		Charset charset = (contentType.getCharset() != null ? contentType.getCharset() : this.charset);
 		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
 
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
@@ -255,7 +255,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		Charset charset;
 		if (contentType != null) {
 			outputMessage.getHeaders().setContentType(contentType);
-			charset = contentType.getCharSet() != null ? contentType.getCharSet() : this.charset;
+			charset = contentType.getCharset() != null ? contentType.getCharset() : this.charset;
 		}
 		else {
 			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);

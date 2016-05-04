@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
+import kotlin.ranges.IntRange;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Test;
@@ -79,6 +80,7 @@ import static org.junit.Assert.*;
  *
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("deprecation")
 public class Jackson2ObjectMapperBuilderTests {
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -255,6 +257,10 @@ public class Jackson2ObjectMapperBuilderTests {
 
 		Optional<String> optional = Optional.of("test");
 		assertEquals("\"test\"", new String(objectMapper.writeValueAsBytes(optional), "UTF-8"));
+
+		// Kotlin module
+		IntRange range = new IntRange(1, 3);
+		assertEquals("{\"start\":1,\"end\":3}", new String(objectMapper.writeValueAsBytes(range), "UTF-8"));
 	}
 
 	@Test // SPR-12634
@@ -328,8 +334,8 @@ public class Jackson2ObjectMapperBuilderTests {
 		Class<?> target = String.class;
 		Class<?> mixInSource = Object.class;
 
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().mixIn(target,
-				mixInSource).build();
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modules()
+				.mixIn(target, mixInSource).build();
 
 		assertEquals(1, objectMapper.mixInCount());
 		assertSame(mixInSource, objectMapper.findMixInClassFor(target));
@@ -342,7 +348,8 @@ public class Jackson2ObjectMapperBuilderTests {
 		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
 		mixIns.put(target, mixInSource);
 
-		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().mixIns(mixIns).build();
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modules()
+				.mixIns(mixIns).build();
 
 		assertEquals(1, objectMapper.mixInCount());
 		assertSame(mixInSource, objectMapper.findMixInClassFor(target));

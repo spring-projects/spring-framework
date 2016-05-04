@@ -98,11 +98,10 @@ public abstract class MetaAnnotationUtils {
 	 * @return the corresponding annotation descriptor if the annotation was found;
 	 * otherwise {@code null}
 	 */
-	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(Class<?> clazz,
-			Set<Annotation> visited, Class<T> annotationType) {
+	private static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
+			Class<?> clazz, Set<Annotation> visited, Class<T> annotationType) {
 
 		Assert.notNull(annotationType, "Annotation type must not be null");
-
 		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
@@ -115,11 +114,11 @@ public abstract class MetaAnnotationUtils {
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
 		for (Annotation composedAnnotation : clazz.getDeclaredAnnotations()) {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(composedAnnotation) && visited.add(composedAnnotation)) {
-				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(composedAnnotation.annotationType(),
-					visited, annotationType);
+				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(
+						composedAnnotation.annotationType(), visited, annotationType);
 				if (descriptor != null) {
-					return new AnnotationDescriptor<T>(clazz, descriptor.getDeclaringClass(), composedAnnotation,
-						descriptor.getAnnotation());
+					return new AnnotationDescriptor<T>(
+							clazz, descriptor.getDeclaringClass(), composedAnnotation, descriptor.getAnnotation());
 				}
 			}
 		}
@@ -287,8 +286,8 @@ public abstract class MetaAnnotationUtils {
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
-			this.annotationAttributes = AnnotatedElementUtils.findMergedAnnotationAttributes(rootDeclaringClass,
-				annotation.annotationType().getName(), false, false);
+			this.annotationAttributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
+					rootDeclaringClass, annotation.annotationType().getName(), false, false);
 		}
 
 		public Class<?> getRootDeclaringClass() {
@@ -314,8 +313,8 @@ public abstract class MetaAnnotationUtils {
 		 */
 		@SuppressWarnings("unchecked")
 		public T synthesizeAnnotation() {
-			return AnnotationUtils.synthesizeAnnotation(getAnnotationAttributes(), (Class<T>) getAnnotationType(),
-				getRootDeclaringClass());
+			return AnnotationUtils.synthesizeAnnotation(
+					getAnnotationAttributes(), (Class<T>) getAnnotationType(), getRootDeclaringClass());
 		}
 
 		public Class<? extends Annotation> getAnnotationType() {

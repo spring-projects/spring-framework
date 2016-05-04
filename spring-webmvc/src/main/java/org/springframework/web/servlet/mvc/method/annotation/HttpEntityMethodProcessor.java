@@ -26,12 +26,9 @@ import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRange;
-import org.springframework.http.HttpRangeResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -184,9 +181,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			}
 		}
 
-		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
-			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
+			outputMessage.getServletResponse().setStatus(((ResponseEntity<?>) responseEntity).getStatusCodeValue());
 			HttpMethod method = inputMessage.getMethod();
 			boolean isGetOrHead = (HttpMethod.GET == method || HttpMethod.HEAD == method);
 			if (isGetOrHead && isResourceNotModified(inputMessage, outputMessage)) {
@@ -197,23 +193,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				return;
 			}
 		}
-		if (inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) &&
-				Resource.class.isAssignableFrom(body.getClass())) {
-			try {
-				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
-				Resource bodyResource = (Resource) body;
-				body = new HttpRangeResource(httpRanges, bodyResource);
-				outputMessage.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-			}
-			catch (IllegalArgumentException ex) {
-				outputMessage.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
-				outputMessage.flush();
-				return;
-			}
-		}
 
 		// Try even with null body. ResponseBodyAdvice could get involved.
-		writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
+		writeWithMessageConverters(responseEntity.getBody(), returnType, inputMessage, outputMessage);
 
 		// Ensure headers are flushed even if no body was written.
 		outputMessage.flush();

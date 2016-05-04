@@ -48,7 +48,9 @@ import org.springframework.web.bind.annotation.SessionAttributes;
  * @see org.springframework.web.bind.annotation.InitBinder
  * @see org.springframework.web.bind.annotation.ModelAttribute
  * @see org.springframework.web.bind.annotation.SessionAttributes
+ * @deprecated as of 4.3, in favor of the {@code HandlerMethod}-based MVC infrastructure
  */
+@Deprecated
 public class HandlerMethodResolver {
 
 	private final Set<Method> handlerMethods = new LinkedHashSet<Method>();

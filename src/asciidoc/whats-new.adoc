@@ -633,11 +633,13 @@ public @interface MyTestConfig {
   bean only defines one constructor.
 * `@Configuration` classes support constructor injection.
 * Any SpEL expression used to specify the `condition` of an `@EventListener` can
-  now refer to beans (i.e. `@beanName.method()`).
+  now refer to beans (e.g. `@beanName.method()`).
 * _Composed annotations_ can now override array attributes in meta-annotations
   with a single element of the component type of the array. For example, the
   `String[] path` attribute of `@RequestMapping` can be overridden with
   `String path` in a composed annotation.
+* `@Scheduled` and `@Schedules` may now be used as _meta-annotations_ to create
+  custom _composed annotations_ with attribute overrides.
 
 === Data Access Improvements
 
@@ -658,10 +660,14 @@ Spring 4.3 also improves the caching abstraction as follows:
   `@beanName.method()`).
 * `ConcurrentMapCacheManager` and `ConcurrentMapCache` now support the serialization
   of cache entries via a new `storeByValue` attribute.
+* `@Cacheable`, `@CacheEvict`, `@CachePut`, and `@Caching` may now be used as
+  _meta-annotations_ to create custom _composed annotations_ with attribute overrides.
 
 === JMS Improvements
 
-* `@SendTo` can now be specified at class-level to share a common reply destination.
+* `@SendTo` can now be specified at the class level to share a common reply destination.
+* `@JmsListener` and `@JmsListeners` may now be used as _meta-annotations_ to create
+  custom _composed annotations_ with attribute overrides.
 
 === Web Improvements
 
@@ -688,15 +694,21 @@ Spring 4.3 also improves the caching abstraction as follows:
 * New `SpringRunner` _alias_ for the `SpringJUnit4ClassRunner`.
 * An empty declaration of `@ContextConfiguration` can now be completely omitted if default
   XML files, Groovy scripts, or `@Configuration` classes are detected.
-* `@Transactional` test methods are no longer required to be `public` (in TestNG and JUnit 5).
-* `@BeforeTransaction` and `@AfterTransaction` methods are no longer required to be `public`.
+* `@Transactional` test methods are no longer required to be `public` (e.g., in TestNG and JUnit 5).
+* `@BeforeTransaction` and `@AfterTransaction` methods are no longer required to be `public`
+  and may now be declared on Java 8 based interface default methods.
+* The `ApplicationContext` cache in the _Spring TestContext Framework_ is now bounded with a
+  default maximum size of 32 and a _least recently used_ eviction policy. The maximum size
+  can be configured by setting a JVM system property or Spring property called
+  `spring.test.context.cache.maxSize`.
 * New `ContextCustomizer` API for customizing a test `ApplicationContext` _after_ bean
   definitions have been loaded into the context but _before_ the context has been refreshed.
   Customizers can be registered globally by third parties, foregoing the need to implement a
   custom `ContextLoader`.
+* `@Sql` and `@SqlGroup` may now be used as _meta-annotations_ to create custom _composed
+  annotations_ with attribute overrides.
 * Server-side Spring MVC Test supports expectations on response headers with multiple values.
 * Server-side Spring MVC Test parses form data request content and populates request parameters.
 * Client-side REST test support allows indicating how many times a request is expected and
   whether the order of declaration for expectations should be ignored (see <<spring-mvc-test-client>>).
 * Client-side REST Test supports expectations for form data in the request body.
-

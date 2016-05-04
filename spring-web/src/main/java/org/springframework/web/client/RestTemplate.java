@@ -51,6 +51,7 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.util.AbstractUriTemplateHandler;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriTemplateHandler;
 
@@ -234,6 +235,25 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	public ResponseErrorHandler getErrorHandler() {
 		return this.errorHandler;
+	}
+
+	/**
+	 * Configure default URI variable values. This is a shortcut for:
+	 * <pre class="code">
+	 *
+	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
+	 * handler.setDefaultUriVariables(...);
+	 *
+	 * RestTemplate restTemplate = new RestTemplate();
+	 * restTemplate.setUriTemplateHandler(handler);
+	 * </pre>
+	 * @param defaultUriVariables the default URI variable values
+	 * @since 4.3
+	 */
+	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+		Assert.isInstanceOf(AbstractUriTemplateHandler.class, this.uriTemplateHandler,
+				"Can only use this property in conjunction with an AbstractUriTemplateHandler.");
+		((AbstractUriTemplateHandler) this.uriTemplateHandler).setDefaultUriVariables(defaultUriVariables);
 	}
 
 	/**
@@ -735,7 +755,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			List<MediaType> supportedMediaTypes = messageConverter.getSupportedMediaTypes();
 			List<MediaType> result = new ArrayList<MediaType>(supportedMediaTypes.size());
 			for (MediaType supportedMediaType : supportedMediaTypes) {
-				if (supportedMediaType.getCharSet() != null) {
+				if (supportedMediaType.getCharset() != null) {
 					supportedMediaType =
 							new MediaType(supportedMediaType.getType(), supportedMediaType.getSubtype());
 				}
@@ -780,7 +800,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				if (!requestHeaders.isEmpty()) {
 					httpHeaders.putAll(requestHeaders);
 				}
-				if (httpHeaders.getContentLength() == -1) {
+				if (httpHeaders.getContentLength() < 0) {
 					httpHeaders.setContentLength(0L);
 				}
 			}

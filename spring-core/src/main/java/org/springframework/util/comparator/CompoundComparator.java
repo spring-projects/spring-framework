@@ -24,7 +24,7 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 /**
- * A comparator that chains a sequence of one or more more Comparators.
+ * A comparator that chains a sequence of one or more Comparators.
  *
  * <p>A compound comparator calls each Comparator in sequence until a single
  * Comparator returns a non-zero result, or the comparators are exhausted and

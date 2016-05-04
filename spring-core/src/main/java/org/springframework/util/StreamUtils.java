@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import java.nio.charset.Charset;
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Brian Clozel
  * @since 3.2.2
  * @see FileCopyUtils
  */
@@ -128,6 +129,62 @@ public abstract class StreamUtils {
 			byteCount += bytesRead;
 		}
 		out.flush();
+		return byteCount;
+	}
+
+	/**
+	 * Copy a range of content of the given InputStream to the given OutputStream.
+	 * <p>If the specified range exceeds the length of the InputStream, this copies
+	 * up to the end of the stream and returns the actual number of copied bytes.
+	 * <p>Leaves both streams open when done.
+	 * @param in the InputStream to copy from
+	 * @param out the OutputStream to copy to
+	 * @param start the position to start copying from
+	 * @param end the position to end copying
+	 * @return the number of bytes copied
+	 * @throws IOException in case of I/O errors
+	 * @since 4.3.0
+	 */
+	public static long copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
+		long skipped = in.skip(start);
+		if (skipped < start) {
+			throw new IOException("Skipped only " + skipped + " bytes out of " + start + " required.");
+		}
+		long bytesToCopy = end - start + 1;
+		byte buffer[] = new byte[StreamUtils.BUFFER_SIZE];
+		while (bytesToCopy > 0) {
+			int bytesRead = in.read(buffer);
+			if (bytesRead == -1) {
+				break;
+			}
+			else if (bytesRead <= bytesToCopy) {
+				out.write(buffer, 0, bytesRead);
+				bytesToCopy -= bytesRead;
+			}
+			else {
+				out.write(buffer, 0, (int) bytesToCopy);
+				bytesToCopy = 0;
+			}
+		}
+		return end - start + 1 - bytesToCopy;
+	}
+
+	/**
+	 * Drain the remaining content of the given InputStream.
+	 * Leaves the InputStream open when done.
+	 * @param in the InputStream to drain
+	 * @return the number of bytes read
+	 * @throws IOException in case of I/O errors
+	 * @since 4.3.0
+	 */
+	public static int drain(InputStream in) throws IOException {
+		Assert.notNull(in, "No InputStream specified");
+		byte[] buffer = new byte[BUFFER_SIZE];
+		int bytesRead = -1;
+		int byteCount = 0;
+		while ((bytesRead = in.read(buffer)) != -1) {
+			byteCount += bytesRead;
+		}
 		return byteCount;
 	}
 

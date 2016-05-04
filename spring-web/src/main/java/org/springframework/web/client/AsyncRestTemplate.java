@@ -44,7 +44,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
-import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.AbstractUriTemplateHandler;
 import org.springframework.web.util.UriTemplateHandler;
 
 /**
@@ -149,6 +149,26 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	 */
 	public ResponseErrorHandler getErrorHandler() {
 		return this.syncTemplate.getErrorHandler();
+	}
+
+	/**
+	 * Configure default URI variable values. This is a shortcut for:
+	 * <pre class="code">
+	 *
+	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
+	 * handler.setDefaultUriVariables(...);
+	 *
+	 * AsyncRestTemplate restTemplate = new AsyncRestTemplate();
+	 * restTemplate.setUriTemplateHandler(handler);
+	 * </pre>
+	 * @param defaultUriVariables the default URI variable values
+	 * @since 4.3
+	 */
+	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+		UriTemplateHandler handler = this.syncTemplate.getUriTemplateHandler();
+		Assert.isInstanceOf(AbstractUriTemplateHandler.class, handler,
+				"Can only use this property in conjunction with a DefaultUriTemplateHandler.");
+		((AbstractUriTemplateHandler) handler).setDefaultUriVariables(defaultUriVariables);
 	}
 
 	/**

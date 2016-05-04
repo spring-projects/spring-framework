@@ -972,13 +972,19 @@ public class DispatcherServlet extends FrameworkServlet {
 			catch (Exception ex) {
 				dispatchException = ex;
 			}
+			catch (Error err) {
+				// As of 4.3, we're processing Errors thrown from handler methods as well,
+				// making them available for @ExceptionHandler methods and other scenarios.
+				dispatchException = new NestedServletException("Handler dispatch failed", err);
+			}
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
 			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
 		}
 		catch (Error err) {
-			triggerAfterCompletionWithError(processedRequest, response, mappedHandler, err);
+			triggerAfterCompletion(processedRequest, response, mappedHandler,
+					new NestedServletException("Handler processing failed", err));
 		}
 		finally {
 			if (asyncManager.isConcurrentHandlingStarted()) {
@@ -1298,16 +1304,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response,
 			HandlerExecutionChain mappedHandler, Exception ex) throws Exception {
 
-		if (mappedHandler != null) {
-			mappedHandler.triggerAfterCompletion(request, response, ex);
-		}
-		throw ex;
-	}
-
-	private void triggerAfterCompletionWithError(HttpServletRequest request, HttpServletResponse response,
-			HandlerExecutionChain mappedHandler, Error error) throws Exception {
-
-		ServletException ex = new NestedServletException("Handler processing failed", error);
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, ex);
 		}

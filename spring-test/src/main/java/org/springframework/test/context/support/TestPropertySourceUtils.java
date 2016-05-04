@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -34,6 +35,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
@@ -157,12 +159,8 @@ public abstract class TestPropertySourceUtils {
 	/**
 	 * Add the {@link Properties} files from the given resource {@code locations}
 	 * to the {@link Environment} of the supplied {@code context}.
-	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
-	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
-	 * against the {@code Environment}.
-	 * <p>Each properties file will be converted to a {@link ResourcePropertySource}
-	 * that will be added to the {@link PropertySources} of the environment with
-	 * highest precedence.
+	 * <p>This method simply delegates to
+	 * {@link #addPropertiesFilesToEnvironment(ConfigurableEnvironment, ResourceLoader, String...)}.
 	 * @param context the application context whose environment should be updated;
 	 * never {@code null}
 	 * @param locations the resource locations of {@code Properties} files to add
@@ -170,22 +168,50 @@ public abstract class TestPropertySourceUtils {
 	 * @since 4.1.5
 	 * @see ResourcePropertySource
 	 * @see TestPropertySource#locations
+	 * @see #addPropertiesFilesToEnvironment(ConfigurableEnvironment, ResourceLoader, String...)
 	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 */
-	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context,
-			String... locations) {
+	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context, String... locations) {
 		Assert.notNull(context, "context must not be null");
 		Assert.notNull(locations, "locations must not be null");
+		addPropertiesFilesToEnvironment(context.getEnvironment(), context, locations);
+	}
+
+	/**
+	 * Add the {@link Properties} files from the given resource {@code locations}
+	 * to the supplied {@link ConfigurableEnvironment environment}.
+	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
+	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
+	 * against the {@code Environment}.
+	 * <p>Each properties file will be converted to a {@link ResourcePropertySource}
+	 * that will be added to the {@link PropertySources} of the environment with
+	 * highest precedence.
+	 * @param environment the environment to update; never {@code null}
+	 * @param resourceLoader the {@code ResourceLoader} to use to load each resource;
+	 * never {@code null}
+	 * @param locations the resource locations of {@code Properties} files to add
+	 * to the environment; potentially empty but never {@code null}
+	 * @since 4.3
+	 * @see ResourcePropertySource
+	 * @see TestPropertySource#locations
+	 * @see #addPropertiesFilesToEnvironment(ConfigurableApplicationContext, String...)
+	 * @throws IllegalStateException if an error occurs while processing a properties file
+	 */
+	public static void addPropertiesFilesToEnvironment(ConfigurableEnvironment environment,
+			ResourceLoader resourceLoader, String... locations) {
+
+		Assert.notNull(environment, "environment must not be null");
+		Assert.notNull(resourceLoader, "resourceLoader must not be null");
+		Assert.notNull(locations, "locations must not be null");
 		try {
-			ConfigurableEnvironment environment = context.getEnvironment();
 			for (String location : locations) {
 				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
-				Resource resource = context.getResource(resolvedLocation);
+				Resource resource = resourceLoader.getResource(resolvedLocation);
 				environment.getPropertySources().addFirst(new ResourcePropertySource(resource));
 			}
 		}
-		catch (IOException e) {
-			throw new IllegalStateException("Failed to add PropertySource to Environment", e);
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to add PropertySource to Environment", ex);
 		}
 	}
 

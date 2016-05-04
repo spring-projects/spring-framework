@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,15 +34,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents HTTP request and response headers, mapping string header names to list of string values.
+ * Represents HTTP request and response headers, mapping string header names to a list of string values.
  *
  * <p>In addition to the normal methods defined by {@link Map}, this class offers the following
  * convenience methods:
@@ -52,10 +53,11 @@ import org.springframework.util.StringUtils;
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
  *
- * <p>Inspired by {@link com.sun.net.httpserver.Headers}.
+ * <p>Inspired by {@code com.sun.net.httpserver.Headers}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 3.0
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
@@ -368,10 +370,16 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
 	private static final String[] DATE_FORMATS = new String[] {
-		"EEE, dd MMM yyyy HH:mm:ss zzz",
-		"EEE, dd-MMM-yy HH:mm:ss zzz",
-		"EEE MMM dd HH:mm:ss yyyy"
+			"EEE, dd MMM yyyy HH:mm:ss zzz",
+			"EEE, dd-MMM-yy HH:mm:ss zzz",
+			"EEE MMM dd HH:mm:ss yyyy"
 	};
+
+	/**
+	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match"
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
+	 */
+	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
@@ -460,7 +468,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Returns the value of the {@code Access-Control-Allow-Headers} response header.
 	 */
 	public List<String> getAccessControlAllowHeaders() {
-		return getFirstValueAsList(ACCESS_CONTROL_ALLOW_HEADERS);
+		return getValuesAsList(ACCESS_CONTROL_ALLOW_HEADERS);
 	}
 
 	/**
@@ -477,7 +485,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		List<HttpMethod> result = new ArrayList<HttpMethod>();
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
-			String[] tokens = value.split(",\\s*");
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",", true, true);
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
 				if (resolved != null) {
@@ -499,7 +507,23 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Access-Control-Allow-Origin} response header.
 	 */
 	public String getAccessControlAllowOrigin() {
-		return getFirst(ACCESS_CONTROL_ALLOW_ORIGIN);
+		return getFieldValues(ACCESS_CONTROL_ALLOW_ORIGIN);
+	}
+
+	protected String getFieldValues(String headerName) {
+		List<String> headerValues = this.headers.get(headerName);
+		if (headerValues != null) {
+			StringBuilder builder = new StringBuilder();
+			for (Iterator<String> iterator = headerValues.iterator(); iterator.hasNext(); ) {
+				String ifNoneMatch = iterator.next();
+				builder.append(ifNoneMatch);
+				if (iterator.hasNext()) {
+					builder.append(", ");
+				}
+			}
+			return builder.toString();
+		}
+		return null;
 	}
 
 	/**
@@ -513,7 +537,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Returns the value of the {@code Access-Control-Expose-Headers} response header.
 	 */
 	public List<String> getAccessControlExposeHeaders() {
-		return getFirstValueAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
+		return getValuesAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
 	}
 
 	/**
@@ -543,7 +567,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Returns the value of the {@code Access-Control-Request-Headers} request header.
 	 */
 	public List<String> getAccessControlRequestHeaders() {
-		return getFirstValueAsList(ACCESS_CONTROL_REQUEST_HEADERS);
+		return getValuesAsList(ACCESS_CONTROL_REQUEST_HEADERS);
 	}
 
 	/**
@@ -644,7 +668,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Cache-Control} header.
 	 */
 	public String getCacheControl() {
-		return getFirst(CACHE_CONTROL);
+		return getFieldValues(CACHE_CONTROL);
 	}
 
 	/**
@@ -665,7 +689,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Connection} header.
 	 */
 	public List<String> getConnection() {
-		return getFirstValueAsList(CONNECTION);
+		return getValuesAsList(CONNECTION);
 	}
 
 	/**
@@ -780,12 +804,65 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getExpires() {
-		try {
-			return getFirstDate(EXPIRES);
+		return getFirstDate(EXPIRES, false);
+	}
+
+	/**
+	 * Set the (new) value of the {@code If-Match} header.
+	 */
+	public void setIfMatch(String ifMatch) {
+		set(IF_MATCH, ifMatch);
+	}
+
+	/**
+	 * Set the (new) value of the {@code If-Match} header.
+	 */
+	public void setIfMatch(List<String> ifMatchList) {
+		set(IF_MATCH, toCommaDelimitedString(ifMatchList));
+	}
+
+	protected String toCommaDelimitedString(List<String> list) {
+		StringBuilder builder = new StringBuilder();
+		for (Iterator<String> iterator = list.iterator(); iterator.hasNext(); ) {
+			String ifNoneMatch = iterator.next();
+			builder.append(ifNoneMatch);
+			if (iterator.hasNext()) {
+				builder.append(", ");
+			}
 		}
-		catch (IllegalArgumentException ex) {
-			return -1;
+		return builder.toString();
+	}
+
+	/**
+	 * Return the value of the {@code If-Match} header.
+	 */
+	public List<String> getIfMatch() {
+		return getETagValuesAsList(IF_MATCH);
+	}
+
+	protected List<String> getETagValuesAsList(String headerName) {
+		List<String> values = get(headerName);
+		if (values != null) {
+			List<String> result = new ArrayList<String>();
+			for (String value : values) {
+				if (value != null) {
+					Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
+					while (matcher.find()) {
+						if ("*".equals(matcher.group())) {
+							result.add(matcher.group());
+						}
+						else {
+							result.add(matcher.group(1));
+						}
+					}
+					if(result.size() == 0) {
+						throw new IllegalArgumentException("Could not parse '" + headerName + "' value=" + value);
+					}
+				}
+			}
+			return result;
 		}
+		return Collections.emptyList();
 	}
 
 	/**
@@ -803,7 +880,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getIfModifiedSince() {
-		return getFirstDate(IF_MODIFIED_SINCE);
+		return getFirstDate(IF_MODIFIED_SINCE, false);
 	}
 
 	/**
@@ -820,35 +897,51 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		set(IF_NONE_MATCH, toCommaDelimitedString(ifNoneMatchList));
 	}
 
-	protected String toCommaDelimitedString(List<String> list) {
-		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-			String ifNoneMatch = iterator.next();
-			builder.append(ifNoneMatch);
-			if (iterator.hasNext()) {
-				builder.append(", ");
-			}
-		}
-		return builder.toString();
-	}
-
 	/**
 	 * Return the value of the {@code If-None-Match} header.
 	 */
 	public List<String> getIfNoneMatch() {
-		return getFirstValueAsList(IF_NONE_MATCH);
+		return getETagValuesAsList(IF_NONE_MATCH);
 	}
 
-	protected List<String> getFirstValueAsList(String header) {
-		List<String> result = new ArrayList<String>();
-		String value = getFirst(header);
-		if (value != null) {
-			String[] tokens = value.split(",\\s*");
-			for (String token : tokens) {
-				result.add(token);
+	/**
+	 * Return all values of a given header name,
+	 * even if this header is set multiple times.
+	 * @since 4.3.0
+	 */
+	public List<String> getValuesAsList(String headerName) {
+		List<String> values = get(headerName);
+		if (values != null) {
+			List<String> result = new ArrayList<String>();
+			for (String value : values) {
+				if (value != null) {
+					String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+					for (String token : tokens) {
+						result.add(token);
+					}
+				}
 			}
+			return result;
 		}
-		return result;
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Set the (new) value of the {@code If-Unmodified-Since} header.
+	 * <p>The date should be specified as the number of milliseconds since
+	 * January 1, 1970 GMT.
+	 */
+	public void setIfUnmodifiedSince(long ifUnmodifiedSince) {
+		setDate(IF_UNMODIFIED_SINCE, ifUnmodifiedSince);
+	}
+
+	/**
+	 * Return the value of the {@code If-Unmodified-Since} header.
+	 * <p>The date is returned as the number of milliseconds since
+	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 */
+	public long getIfUnmodifiedSince() {
+		return getFirstDate(IF_UNMODIFIED_SINCE, false);
 	}
 
 	/**
@@ -868,7 +961,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getLastModified() {
-		return getFirstDate(LAST_MODIFIED);
+		return getFirstDate(LAST_MODIFIED, false);
 	}
 
 	/**
@@ -963,31 +1056,56 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the request header names subject to content negotiation.
 	 */
 	public List<String> getVary() {
-		return getFirstValueAsList(VARY);
+		return getValuesAsList(VARY);
 	}
 
 	/**
 	 * Parse the first header value for the given header name as a date,
 	 * return -1 if there is no value, or raise {@link IllegalArgumentException}
 	 * if the value cannot be parsed as a date.
+	 * @param headerName the header name
+	 * @return the parsed date header, or -1 if none
 	 */
 	public long getFirstDate(String headerName) {
+		return getFirstDate(headerName, true);
+	}
+
+	/**
+	 * Parse the first header value for the given header name as a date,
+	 * return -1 if there is no value or also in case of an invalid value
+	 * (if {@code rejectInvalid=false}), or raise {@link IllegalArgumentException}
+	 * if the value cannot be parsed as a date.
+	 * @param headerName the header name
+	 * @param rejectInvalid whether to reject invalid values with an
+	 * {@link IllegalArgumentException} ({@code true}) or rather return -1
+	 * in that case ({@code false})
+	 * @return the parsed date header, or -1 if none (or invalid)
+ 	 */
+	private long getFirstDate(String headerName, boolean rejectInvalid) {
 		String headerValue = getFirst(headerName);
 		if (headerValue == null) {
+			// No header value sent at all
 			return -1;
 		}
-		for (String dateFormat : DATE_FORMATS) {
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
-			simpleDateFormat.setTimeZone(GMT);
-			try {
-				return simpleDateFormat.parse(headerValue).getTime();
-			}
-			catch (ParseException ex) {
-				// ignore
+		if (headerValue.length() >= 3) {
+			// Short "0" or "-1" like values are never valid HTTP date headers...
+			// Let's only bother with SimpleDateFormat parsing for long enough values.
+			for (String dateFormat : DATE_FORMATS) {
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+				simpleDateFormat.setTimeZone(GMT);
+				try {
+					return simpleDateFormat.parse(headerValue).getTime();
+				}
+				catch (ParseException ex) {
+					// ignore
+				}
 			}
 		}
-		throw new IllegalArgumentException("Cannot parse date value \"" + headerValue +
-				"\" for \"" + headerName + "\" header");
+		if (rejectInvalid) {
+			throw new IllegalArgumentException("Cannot parse date value \"" + headerValue +
+					"\" for \"" + headerName + "\" header");
+		}
+		return -1;
 	}
 
 	/**

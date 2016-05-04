@@ -157,7 +157,6 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the
 	 * class level
 	 */
-	@SuppressWarnings("serial")
 	private void executeSqlScripts(Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel)
 			throws Exception {
 		if (executionPhase != sql.executionPhase()) {

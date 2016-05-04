@@ -191,9 +191,9 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * Return FieldError arguments for a validation error on the given field.
 	 * Invoked for each violated constraint.
 	 * <p>The default implementation returns a first argument indicating the field name
-	 * (of type DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes).
-	 * Afterwards, it adds all actual constraint annotation attributes (i.e. excluding
-	 * "message", "groups" and "payload") in alphabetical order of their attribute names.
+	 * (see {@link #getResolvableField}). Afterwards, it adds all actual constraint
+	 * annotation attributes (i.e. excluding "message", "groups" and "payload") in
+	 * alphabetical order of their attribute names.
 	 * <p>Can be overridden to e.g. add further attributes from the constraint descriptor.
 	 * @param objectName the name of the target object
 	 * @param field the field that caused the binding error
@@ -205,8 +205,7 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 */
 	protected Object[] getArgumentsForConstraint(String objectName, String field, ConstraintDescriptor<?> descriptor) {
 		List<Object> arguments = new LinkedList<Object>();
-		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
-		arguments.add(new DefaultMessageSourceResolvable(codes, field));
+		arguments.add(getResolvableField(objectName, field));
 		// Using a TreeMap for alphabetical ordering of attribute names
 		Map<String, Object> attributesToExpose = new TreeMap<String, Object>();
 		for (Map.Entry<String, Object> entry : descriptor.getAttributes().entrySet()) {
@@ -221,6 +220,22 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 		}
 		arguments.addAll(attributesToExpose.values());
 		return arguments.toArray(new Object[arguments.size()]);
+	}
+
+	/**
+	 * Build a resolvable wrapper for the specified field, allowing to resolve the field's
+	 * name in a {@code MessageSource}.
+	 * <p>The default implementation returns a first argument indicating the field:
+	 * of type {@code DefaultMessageSourceResolvable}, with "objectName.field" and "field"
+	 * as codes, and with the plain field name as default message.
+	 * @param objectName the name of the target object
+	 * @param field the field that caused the binding error
+	 * @return a corresponding {@code MessageSourceResolvable} for the specified field
+	 * @since 4.3
+	 */
+	protected MessageSourceResolvable getResolvableField(String objectName, String field) {
+		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
+		return new DefaultMessageSourceResolvable(codes, field);
 	}
 
 	/**

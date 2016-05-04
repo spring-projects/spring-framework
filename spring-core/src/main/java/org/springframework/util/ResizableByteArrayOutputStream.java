@@ -23,7 +23,7 @@ import java.io.ByteArrayOutputStream;
  * <ul>
  * <li>has public {@link org.springframework.util.ResizableByteArrayOutputStream#grow(int)}
  * and {@link org.springframework.util.ResizableByteArrayOutputStream#resize(int)} methods
- * to get more control over the the size of the internal buffer</li>
+ * to get more control over the size of the internal buffer</li>
  * <li>has a higher initial capacity (256) by default</li>
  * </ul>
  *

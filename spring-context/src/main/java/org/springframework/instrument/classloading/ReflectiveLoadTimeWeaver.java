@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.DecoratingClassLoader;
+import org.springframework.core.OverridingClassLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -97,15 +99,14 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		this.classLoader = classLoader;
 		this.addTransformerMethod = ClassUtils.getMethodIfAvailable(
-				this.classLoader.getClass(), ADD_TRANSFORMER_METHOD_NAME,
-				new Class<?>[] {ClassFileTransformer.class});
+				this.classLoader.getClass(), ADD_TRANSFORMER_METHOD_NAME, ClassFileTransformer.class);
 		if (this.addTransformerMethod == null) {
 			throw new IllegalStateException(
 					"ClassLoader [" + classLoader.getClass().getName() + "] does NOT provide an " +
 					"'addTransformer(ClassFileTransformer)' method.");
 		}
 		this.getThrowawayClassLoaderMethod = ClassUtils.getMethodIfAvailable(
-				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME, new Class<?>[0]);
+				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME);
 		// getThrowawayClassLoader method is optional
 		if (this.getThrowawayClassLoaderMethod == null) {
 			if (logger.isInfoEnabled()) {
@@ -130,7 +131,10 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		if (this.getThrowawayClassLoaderMethod != null) {
-			return (ClassLoader) ReflectionUtils.invokeMethod(this.getThrowawayClassLoaderMethod, this.classLoader);
+			ClassLoader target = (ClassLoader)
+					ReflectionUtils.invokeMethod(this.getThrowawayClassLoaderMethod, this.classLoader);
+			return (target instanceof DecoratingClassLoader ? target :
+					new OverridingClassLoader(this.classLoader, target));
 		}
 		else {
 			return new SimpleThrowawayClassLoader(this.classLoader);

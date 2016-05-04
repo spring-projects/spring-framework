@@ -97,9 +97,10 @@ import org.springframework.util.StringUtils;
  * <p>When executing transactional tests, it is sometimes useful to be able to
  * execute certain <em>set up</em> or <em>tear down</em> code outside of a
  * transaction. {@code TransactionalTestExecutionListener} provides such
- * support for methods annotated with
- * {@link BeforeTransaction @BeforeTransaction} or
- * {@link AfterTransaction @AfterTransaction}.
+ * support for methods annotated with {@link BeforeTransaction @BeforeTransaction}
+ * or {@link AfterTransaction @AfterTransaction}. As of Spring Framework 4.3,
+ * {@code @BeforeTransaction} and {@code @AfterTransaction} may also be declared
+ * on Java 8 based interface default methods.
  *
  * <h3>Configuring a Transaction Manager</h3>
  * <p>{@code TransactionalTestExecutionListener} expects a
@@ -363,7 +364,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * Determine whether or not to rollback transactions by default for the
 	 * supplied {@linkplain TestContext test context}.
-	 * <p>Supports {@link Rollback @Rollback} or
+	 * <p>Supports {@link Rollback @Rollback}, {@link Commit @Commit}, or
 	 * {@link TransactionConfiguration @TransactionConfiguration} at the
 	 * class-level.
 	 * @param testContext the test context for which the default rollback flag
@@ -431,90 +432,23 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Gets all superclasses of the supplied {@link Class class}, including the
-	 * class itself. The ordering of the returned list will begin with the
-	 * supplied class and continue up the class hierarchy, excluding {@link Object}.
-	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#getSuperClasses(Class)} and
-	 * adapted.
-	 * @param clazz the class for which to retrieve the superclasses
-	 * @return all superclasses of the supplied class, excluding {@code Object}
-	 */
-	private List<Class<?>> getSuperClasses(Class<?> clazz) {
-		List<Class<?>> results = new ArrayList<Class<?>>();
-		Class<?> current = clazz;
-		while (current != null && Object.class != current) {
-			results.add(current);
-			current = current.getSuperclass();
-		}
-		return results;
-	}
-
-	/**
-	 * Gets all methods in the supplied {@link Class class} and its superclasses
+	 * Get all methods in the supplied {@link Class class} and its superclasses
 	 * which are annotated with the supplied {@code annotationType} but
 	 * which are not <em>shadowed</em> by methods overridden in subclasses.
-	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#getAnnotatedMethods(Class)}
-	 * and adapted.
+	 * <p>Default methods on interfaces are also detected.
 	 * @param clazz the class for which to retrieve the annotated methods
 	 * @param annotationType the annotation type for which to search
 	 * @return all annotated methods in the supplied class and its superclasses
+	 * as well as annotated interface default methods
 	 */
 	private List<Method> getAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
-		List<Method> results = new ArrayList<Method>();
-		for (Class<?> current : getSuperClasses(clazz)) {
-			for (Method method : current.getDeclaredMethods()) {
-				Annotation annotation = AnnotationUtils.getAnnotation(method, annotationType);
-				if (annotation != null && !isShadowed(method, results)) {
-					results.add(method);
-				}
+		List<Method> methods = new ArrayList<Method>(4);
+		for (Method method : ReflectionUtils.getUniqueDeclaredMethods(clazz)) {
+			if (AnnotationUtils.getAnnotation(method, annotationType) != null) {
+				methods.add(method);
 			}
 		}
-		return results;
-	}
-
-	/**
-	 * Determine if the supplied {@link Method method} is <em>shadowed</em> by
-	 * a method in the supplied {@link List list} of previous methods.
-	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, List)}.
-	 * @param method the method to check for shadowing
-	 * @param previousMethods the list of methods which have previously been processed
-	 * @return {@code true} if the supplied method is shadowed by a
-	 * method in the {@code previousMethods} list
-	 */
-	private boolean isShadowed(Method method, List<Method> previousMethods) {
-		for (Method each : previousMethods) {
-			if (isShadowed(method, each)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Determine if the supplied {@linkplain Method current method} is
-	 * <em>shadowed</em> by a {@linkplain Method previous method}.
-	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, Method)}.
-	 * @param current the current method
-	 * @param previous the previous method
-	 * @return {@code true} if the previous method shadows the current one
-	 */
-	private boolean isShadowed(Method current, Method previous) {
-		if (!previous.getName().equals(current.getName())) {
-			return false;
-		}
-		if (previous.getParameterTypes().length != current.getParameterTypes().length) {
-			return false;
-		}
-		for (int i = 0; i < previous.getParameterTypes().length; i++) {
-			if (!previous.getParameterTypes()[i].equals(current.getParameterTypes()[i])) {
-				return false;
-			}
-		}
-		return true;
+		return methods;
 	}
 
 	/**

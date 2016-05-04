@@ -39,14 +39,14 @@ public interface TcpConnection<P> extends Closeable {
 	ListenableFuture<Void> send(Message<P> message);
 
 	/**
-	 * Register a task to invoke after a period of of read inactivity.
+	 * Register a task to invoke after a period of read inactivity.
 	 * @param runnable the task to invoke
 	 * @param duration the amount of inactive time in milliseconds
 	 */
 	void onReadInactivity(Runnable runnable, long duration);
 
 	/**
-	 * Register a task to invoke after a period of of write inactivity.
+	 * Register a task to invoke after a period of write inactivity.
 	 * @param runnable the task to invoke
 	 * @param duration the amount of inactive time in milliseconds
 	 */

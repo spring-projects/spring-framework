@@ -3707,7 +3707,7 @@ Find below the custom `BeanPostProcessor` implementation class definition:
 
 		public Object postProcessAfterInitialization(Object bean,
 				String beanName) throws BeansException {
-			System.out.println("Bean ''" + beanName + "'' created : " + bean.toString());
+			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
 			return bean;
 		}
 
@@ -7499,7 +7499,7 @@ hierarchy of property sources. To explain fully, consider the following:
 ApplicationContext ctx = new GenericApplicationContext();
 Environment env = ctx.getEnvironment();
 boolean containsFoo = env.containsProperty("foo");
-System.out.println("Does my environment contain the ''foo'' property? " + containsFoo);
+System.out.println("Does my environment contain the 'foo' property? " + containsFoo);
 ----
 
 In the snippet above, we see a high-level way of asking Spring whether the `foo` property is
@@ -8208,11 +8208,42 @@ method signature to return the event that should be published, something like:
 	}
 ----
 
+NOTE: This feature is not supported for <<context-functionality-events-async,asynchronous
+listeners>>.
+
 This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` handled
 by the method above. If you need to publish several events, just return a `Collection` of
 events instead.
 
-Finally if you need the listener to be invoked before another one, just add the `@Order`
+[[context-functionality-events-async]]
+==== Asynchronous Listeners
+
+If you want a particular listener to process events asynchronously, simply reuse the
+<<scheduling-annotation-support-async,regular `@Async` support>>:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener
+	@Async
+	public void processBlackListEvent(BlackListEvent event) {
+		// BlackListEvent is processed in a separate thread
+	}
+----
+
+Be aware of the following limitations when using asynchronous events:
+
+. If the event listener throws an `Exception` it will not be propagated to the caller,
+  check `AsyncUncaughtExceptionHandler` for more details.
+. Such event listener cannot send replies. If you need to send another event as the
+  result of the processing, inject `ApplicationEventPublisher` to send the event
+  manually.
+
+
+[[context-functionality-events-order]]
+==== Ordering Listeners
+
+If you need the listener to be invoked before another one, just add the `@Order`
 annotation to the method declaration:
 
 [source,java,indent=0]

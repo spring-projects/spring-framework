@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,9 @@ import java.lang.annotation.Target;
  * @see org.springframework.test.context.jdbc.SqlConfig
  * @see org.springframework.test.context.jdbc.SqlConfig#transactionManager
  * @see org.springframework.test.context.ContextConfiguration
- * @deprecated As of Spring Framework 4.2, use {@code @Rollback} at the class
- * level and the {@code transactionManager} qualifier in {@code @Transactional}.
+ * @deprecated As of Spring Framework 4.2, use {@code @Rollback} or
+ * {@code @Commit} at the class level and the {@code transactionManager}
+ * qualifier in {@code @Transactional}.
  */
 @Deprecated
 @Documented

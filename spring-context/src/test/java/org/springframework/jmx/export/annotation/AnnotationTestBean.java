@@ -1,28 +1,22 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.jmx.export.annotation;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.jmx.IJmxTestBean;
-import org.springframework.jmx.export.annotation.AnnotationTestBean.MyManagedNotification;
 import org.springframework.jmx.support.MetricType;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +28,7 @@ import org.springframework.stereotype.Service;
 @ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
 		logFile = "jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
-@MyManagedNotification(notificationTypes = { "type.foo", "type.bar" })
+@ManagedNotification(name = "My Notification", notificationTypes = { "type.foo", "type.bar" })
 public class AnnotationTestBean implements IJmxTestBean {
 
 	private String name;
@@ -121,19 +115,6 @@ public class AnnotationTestBean implements IJmxTestBean {
 	@ManagedMetric
 	public int getCacheEntries() {
 		return 3;
-	}
-
-
-	@ManagedNotification(name = "My Notification", notificationTypes = {})
-	@Retention(RetentionPolicy.RUNTIME)
-	@Inherited
-	public static @interface MyManagedNotification {
-
-		@AliasFor(annotation = ManagedNotification.class)
-		String description() default "";
-
-		@AliasFor(annotation = ManagedNotification.class)
-		String[] notificationTypes();
 	}
 
 }

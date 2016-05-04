@@ -192,6 +192,16 @@ public class MediaType extends MimeType implements Serializable {
 	public final static String TEXT_HTML_VALUE = "text/html";
 
 	/**
+	 * Public constant media type for {@code text/markdown}.
+	 */
+	public final static MediaType TEXT_MARKDOWN;
+
+	/**
+	 * A String equivalent of {@link MediaType#TEXT_MARKDOWN}.
+	 */
+	public final static String TEXT_MARKDOWN_VALUE = "text/markdown";
+
+	/**
 	 * Public constant media type for {@code text/plain}.
 	 *  */
 	public final static MediaType TEXT_PLAIN;
@@ -230,6 +240,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_PNG = valueOf(IMAGE_PNG_VALUE);
 		MULTIPART_FORM_DATA = valueOf(MULTIPART_FORM_DATA_VALUE);
 		TEXT_HTML = valueOf(TEXT_HTML_VALUE);
+		TEXT_MARKDOWN = valueOf(TEXT_MARKDOWN_VALUE);
 		TEXT_PLAIN = valueOf(TEXT_PLAIN_VALUE);
 		TEXT_XML = valueOf(TEXT_XML_VALUE);
 	}

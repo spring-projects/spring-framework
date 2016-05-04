@@ -96,7 +96,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * dependency types - which the factory handles specifically - already filtered out)
 	 * @param bean the bean instance created, but whose properties have not yet been set
 	 * @param beanName the name of the bean
-	 * @return the actual property values to apply to to the given bean
+	 * @return the actual property values to apply to the given bean
 	 * (can be the passed-in PropertyValues instance), or {@code null}
 	 * to skip property population
 	 * @throws org.springframework.beans.BeansException in case of errors

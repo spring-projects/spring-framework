@@ -49,7 +49,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /**
  * Default implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver
@@ -101,13 +100,14 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
 			Object handler, Exception ex) {
 
 		try {
-			if (ex instanceof NoSuchRequestHandlingMethodException) {
-				return handleNoSuchRequestHandlingMethod((NoSuchRequestHandlingMethodException) ex, request, response,
-						handler);
+			if (ex instanceof org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException) {
+				return handleNoSuchRequestHandlingMethod((org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException) ex,
+						request, response, handler);
 			}
 			else if (ex instanceof HttpRequestMethodNotSupportedException) {
 				return handleHttpRequestMethodNotSupported((HttpRequestMethodNotSupportedException) ex, request,
@@ -180,8 +180,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 * at the time of the exception (for example, if multipart resolution failed)
 	 * @return an empty ModelAndView indicating the exception was handled
 	 * @throws IOException potentially thrown from response.sendError()
+	 * @deprecated as of 4.3, along with {@link org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException}
 	 */
-	protected ModelAndView handleNoSuchRequestHandlingMethod(NoSuchRequestHandlingMethodException ex,
+	@Deprecated
+	protected ModelAndView handleNoSuchRequestHandlingMethod(org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
 		pageNotFoundLogger.warn(ex.getMessage());

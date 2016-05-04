@@ -47,6 +47,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	private MethodParameter returnParamModelAndView;
 
+
 	@Before
 	public void setUp() throws Exception {
 		this.handler = new ModelAndViewMethodReturnValueHandler();
@@ -54,6 +55,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 		this.returnParamModelAndView = getReturnValueParam("modelAndView");
 	}
+
 
 	@Test
 	public void supportsReturnType() throws Exception {
@@ -143,7 +145,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		assertNotSame("RedirectAttributes should not be used if controller doesn't redirect", redirectAttributes, model);
 	}
 
-	@Test // SPR-14045
+	@Test  // SPR-14045
 	public void handleRedirectWithIgnoreDefaultModel() throws Exception {
 		mavContainer.setIgnoreDefaultModelOnRedirect(true);
 
@@ -162,6 +164,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		Method method = getClass().getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
+
 
 	@SuppressWarnings("unused")
 	ModelAndView modelAndView() {

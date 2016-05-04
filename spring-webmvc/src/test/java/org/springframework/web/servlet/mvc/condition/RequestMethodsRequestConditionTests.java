@@ -53,7 +53,7 @@ public class RequestMethodsRequestConditionTests {
 	@Test
 	public void getMatchingConditionWithHttpHead() {
 		testMatch(new RequestMethodsRequestCondition(HEAD), HEAD);
-		testMatch(new RequestMethodsRequestCondition(GET), HEAD);
+		testMatch(new RequestMethodsRequestCondition(GET), GET);
 		testNoMatch(new RequestMethodsRequestCondition(POST), HEAD);
 	}
 

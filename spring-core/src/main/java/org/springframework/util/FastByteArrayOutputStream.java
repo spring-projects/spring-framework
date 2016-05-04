@@ -53,7 +53,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	// The size, in bytes, to use when allocating the first byte[]
 	private final int initialBlockSize;
 
-	// The size, in bytes, to use when allocating the next next byte[]
+	// The size, in bytes, to use when allocating the next byte[]
 	private int nextBlockSize = 0;
 
 	// The number of bytes in previous buffers.
@@ -421,7 +421,8 @@ public class FastByteArrayOutputStream extends OutputStream {
 						System.arraycopy(this.currentBuffer, this.nextIndexInCurrentBuffer, b, off, bytesToCopy);
 						this.totalBytesRead += bytesToCopy;
 						this.nextIndexInCurrentBuffer += bytesToCopy;
-						return (bytesToCopy + read(b, off + bytesToCopy, len - bytesToCopy));
+						int remaining = read(b, off + bytesToCopy, len - bytesToCopy);
+						return bytesToCopy + Math.max(remaining, 0);
 					}
 					else {
 						if (this.buffersIterator.hasNext()) {

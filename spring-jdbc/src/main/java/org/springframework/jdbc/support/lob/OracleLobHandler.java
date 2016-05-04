@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -613,7 +613,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	/**
 	 * Internal callback interface for use with createLob.
 	 */
-	protected static interface LobCallback {
+	protected interface LobCallback {
 
 		/**
 		 * Populate the given BLOB or CLOB instance with content.

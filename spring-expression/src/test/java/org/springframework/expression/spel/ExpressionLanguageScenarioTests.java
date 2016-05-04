@@ -47,7 +47,7 @@ import static org.junit.Assert.*;
  * <li>Some basic type converters are included
  * <li>properties/methods/constructors are discovered and invoked using reflection
  * </ul>
- * The scenarios after that then how how to plug in extensions:<br>
+ * The scenarios after that then how to plug in extensions:<br>
  * <ul>
  * <li>Adding entries to the classpath that will be used to load types and define well known 'imports'
  * <li>Defining variables that are then accessible in the expression

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 
@@ -42,12 +40,10 @@ import org.springframework.expression.Expression;
  */
 class EventExpressionEvaluator extends CachedExpressionEvaluator {
 
-	// shared param discoverer since it caches data internally
-	private final ParameterNameDiscoverer paramNameDiscoverer = new DefaultParameterNameDiscoverer();
-
 	private final Map<ExpressionKey, Expression> conditionCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
 
 	private final Map<AnnotatedElementKey, Method> targetMethodCache = new ConcurrentHashMap<AnnotatedElementKey, Method>(64);
+
 
 	/**
 	 * Create the suitable {@link EvaluationContext} for the specified event handling
@@ -58,8 +54,8 @@ class EventExpressionEvaluator extends CachedExpressionEvaluator {
 
 		Method targetMethod = getTargetMethod(targetClass, method);
 		EventExpressionRootObject root = new EventExpressionRootObject(event, args);
-		MethodBasedEvaluationContext evaluationContext =
-				new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
+		MethodBasedEvaluationContext evaluationContext = new MethodBasedEvaluationContext(
+				root, targetMethod, args, getParameterNameDiscoverer());
 		if (beanFactory != null) {
 			evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
 		}

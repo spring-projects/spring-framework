@@ -21,8 +21,8 @@ package org.springframework.cache.interceptor;
  *
  * <p>Does not provide a way to transmit checked exceptions but
  * provide a special exception that should be used to wrap any
- * exception that was thrown by the underlying invocation. Callers
- * are expected to handle this issue type specifically.
+ * exception that was thrown by the underlying invocation.
+ * Callers are expected to handle this issue type specifically.
  *
  * @author Stephane Nicoll
  * @since 4.1
@@ -38,8 +38,9 @@ public interface CacheOperationInvoker {
 	 */
 	Object invoke() throws ThrowableWrapper;
 
+
 	/**
-	 * Wrap any exception thrown while invoking {@link #invoke()}
+	 * Wrap any exception thrown while invoking {@link #invoke()}.
 	 */
 	@SuppressWarnings("serial")
 	class ThrowableWrapper extends RuntimeException {

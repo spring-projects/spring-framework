@@ -170,7 +170,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 
 		String format = (String) model.get(this.formatKey);
 		if (format == null) {
-			throw new IllegalArgumentException("No format format found in model");
+			throw new IllegalArgumentException("No format found in model");
 		}
 
 		if (logger.isDebugEnabled()) {

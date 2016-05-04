@@ -75,6 +75,7 @@ import org.springframework.util.StringUtils;
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>: support for other Java 8 types like {@link java.util.Optional}</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>: support for Kotlin classes and data classes</li>
  * </ul>
  *
  * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
@@ -745,6 +746,18 @@ public class Jackson2ObjectMapperBuilder {
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-joda not available
+			}
+		}
+
+		// Kotlin present?
+		if (ClassUtils.isPresent("kotlin.Unit", this.moduleClassLoader)) {
+			try {
+				Class<? extends Module> kotlinModule = (Class<? extends Module>)
+						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);
+				objectMapper.registerModule(BeanUtils.instantiate(kotlinModule));
+			}
+			catch (ClassNotFoundException ex) {
+				// jackson-module-kotlin not available
 			}
 		}
 	}

@@ -84,6 +84,8 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 	private final EventLoopGroup eventLoopGroup;
 
+	private final Environment environment;
+
 	private final TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory;
 
 	private final List<TcpClient<Message<P>, Message<P>>> tcpClients =
@@ -108,12 +110,13 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		// Reactor 2.0.5 requires NioEventLoopGroup vs 2.0.6+ requires EventLoopGroup
 		final NioEventLoopGroup nioEventLoopGroup = initEventLoopGroup();
 		this.eventLoopGroup = nioEventLoopGroup;
+		this.environment = new Environment(new SynchronousDispatcherConfigReader());
 
 		this.tcpClientSpecFactory = new TcpClientFactory<Message<P>, Message<P>>() {
 			@Override
 			public TcpClientSpec<Message<P>, Message<P>> apply(TcpClientSpec<Message<P>, Message<P>> spec) {
 				return spec
-						.env(new Environment(new SynchronousDispatcherConfigReader()))
+						.env(environment)
 						.codec(codec)
 						.connect(host, port)
 						.options(createClientSocketOptions());
@@ -139,6 +142,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		Assert.notNull(tcpClientSpecFactory, "'tcpClientClientFactory' must not be null");
 		this.tcpClientSpecFactory = tcpClientSpecFactory;
 		this.eventLoopGroup = null;
+		this.environment = null;
 	}
 
 
@@ -163,7 +167,8 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	public ListenableFuture<Void> connect(final TcpConnectionHandler<P> connectionHandler) {
 		Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
 
-		TcpClient<Message<P>, Message<P>> tcpClient;
+		final TcpClient<Message<P>, Message<P>> tcpClient;
+		Runnable cleanupTask;
 		synchronized (this.tcpClients) {
 			if (this.stopping) {
 				IllegalStateException ex = new IllegalStateException("Shutting down.");
@@ -172,9 +177,18 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 			}
 			tcpClient = NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE, this.tcpClientSpecFactory);
 			this.tcpClients.add(tcpClient);
+			cleanupTask = new Runnable() {
+				@Override
+				public void run() {
+					synchronized (tcpClients) {
+						tcpClients.remove(tcpClient);
+					}
+				}
+			};
 		}
 
-		Promise<Void> promise = tcpClient.start(new MessageChannelStreamHandler<P>(connectionHandler));
+		Promise<Void> promise = tcpClient.start(
+				new MessageChannelStreamHandler<P>(connectionHandler, cleanupTask));
 
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(
 				promise.onError(new Consumer<Throwable>() {
@@ -191,7 +205,8 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
 		Assert.notNull(strategy, "ReconnectStrategy must not be null");
 
-		TcpClient<Message<P>, Message<P>> tcpClient;
+		final TcpClient<Message<P>, Message<P>> tcpClient;
+		Runnable cleanupTask;
 		synchronized (this.tcpClients) {
 			if (this.stopping) {
 				IllegalStateException ex = new IllegalStateException("Shutting down.");
@@ -200,10 +215,18 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 			}
 			tcpClient = NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE, this.tcpClientSpecFactory);
 			this.tcpClients.add(tcpClient);
+			cleanupTask = new Runnable() {
+				@Override
+				public void run() {
+					synchronized (tcpClients) {
+						tcpClients.remove(tcpClient);
+					}
+				}
+			};
 		}
 
 		Stream<Tuple2<InetSocketAddress, Integer>> stream = tcpClient.start(
-				new MessageChannelStreamHandler<P>(connectionHandler),
+				new MessageChannelStreamHandler<P>(connectionHandler, cleanupTask),
 				new ReactorReconnectAdapter(strategy));
 
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(stream.next().after());
@@ -249,6 +272,16 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 			});
 			promise = eventLoopPromise;
 		}
+
+		if (this.environment != null) {
+			promise.onComplete(new Consumer<Promise<Void>>() {
+				@Override
+				public void accept(Promise<Void> voidPromise) {
+					environment.shutdown();
+				}
+			});
+		}
+
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 	}
 
@@ -278,8 +311,11 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 		private final TcpConnectionHandler<P> connectionHandler;
 
-		public MessageChannelStreamHandler(TcpConnectionHandler<P> connectionHandler) {
+		private final Runnable cleanupTask;
+
+		public MessageChannelStreamHandler(TcpConnectionHandler<P> connectionHandler, Runnable cleanupTask) {
 			this.connectionHandler = connectionHandler;
+			this.cleanupTask = cleanupTask;
 		}
 
 		@Override
@@ -290,6 +326,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 					.finallyDo(new Consumer<Signal<Message<P>>>() {
 						@Override
 						public void accept(Signal<Message<P>> signal) {
+							cleanupTask.run();
 							if (signal.isOnError()) {
 								connectionHandler.handleFailure(signal.getThrowable());
 							}

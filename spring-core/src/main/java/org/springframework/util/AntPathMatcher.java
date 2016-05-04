@@ -317,34 +317,42 @@ public class AntPathMatcher implements PathMatcher {
 		char[] pathChars = path.toCharArray();
 		int pos = 0;
 		for (String pattDir : pattDirs) {
-			int count = countStartsWith(pathChars, pos, this.pathSeparator, false);
-			pos += (count == this.pathSeparator.length() ? count : 0);
-			count = countStartsWith(pathChars, pos, pattDir, true);
-			if (count < pattDir.length()) {
-				if (count > 0) {
+			int skipped = skipSeparator(path, pos, this.pathSeparator);
+			pos += skipped;
+			skipped = skipSegment(pathChars, pos, pattDir);
+			if (skipped < pattDir.length()) {
+				if (skipped > 0) {
 					return true;
 				}
 				return (pattDir.length() > 0) && isWildcardChar(pattDir.charAt(0));
 			}
-			pos += count;
+			pos += skipped;
 		}
 		return true;
 	}
 
-	private int countStartsWith(char[] chars, int pos, String prefix, boolean stopOnWildcard) {
-		int count = 0;
+	private int skipSegment(char[] chars, int pos, String prefix) {
+		int skipped = 0;
 		for (char c : prefix.toCharArray()) {
-			if (stopOnWildcard && isWildcardChar(c)) {
-				return count;
+			if (isWildcardChar(c)) {
+				return skipped;
 			}
-			if (pos + count >= chars.length) {
+			else if (pos + skipped >= chars.length) {
 				return 0;
 			}
-			if (chars[pos + count] == c) {
-				count++;
+			else if (chars[pos + skipped] == c) {
+				skipped++;
 			}
 		}
-		return count;
+		return skipped;
+	}
+
+	private int skipSeparator(String path, int pos, String separator) {
+		int skipped = 0;
+		while (path.startsWith(separator, pos + skipped)) {
+			skipped += separator.length();
+		}
+		return skipped;
 	}
 
 	private boolean isWildcardChar(char c) {

@@ -66,8 +66,8 @@ public class StringMessageConverter extends AbstractMessageConverter {
 	}
 
 	private Charset getContentTypeCharset(MimeType mimeType) {
-		if (mimeType != null && mimeType.getCharSet() != null) {
-			return mimeType.getCharSet();
+		if (mimeType != null && mimeType.getCharset() != null) {
+			return mimeType.getCharset();
 		}
 		else {
 			return this.defaultCharset;

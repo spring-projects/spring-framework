@@ -172,7 +172,7 @@ public class WebSocketHttpHeaders extends HttpHeaders {
 			return Collections.emptyList();
 		}
 		else if (values.size() == 1) {
-			return getFirstValueAsList(SEC_WEBSOCKET_PROTOCOL);
+			return getValuesAsList(SEC_WEBSOCKET_PROTOCOL);
 		}
 		else {
 			return values;

@@ -25,7 +25,9 @@ import org.springframework.stereotype.Controller;
  *
  * @author Juergen Hoeller
  * @since 2.5.3
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 class AnnotationControllerTypePredicate extends ControllerTypePredicate {
 
 	@Override

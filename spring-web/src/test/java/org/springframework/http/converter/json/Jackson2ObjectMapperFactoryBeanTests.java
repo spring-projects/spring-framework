@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ import static org.junit.Assert.*;
  * @author Sebastien Deleuze
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public class Jackson2ObjectMapperFactoryBeanTests {
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
@@ -285,6 +286,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
 		mixIns.put(target, mixinSource);
 
+		this.factory.setModules(Collections.emptyList());
 		this.factory.setMixIns(mixIns);
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();

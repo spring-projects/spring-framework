@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import org.springframework.test.context.MergedContextConfiguration;
  * TestContext Framework</em>.
  *
  * <p>A {@code ContextCache} maintains a cache of {@code ApplicationContexts}
- * keyed by {@link MergedContextConfiguration} instances.
+ * keyed by {@link MergedContextConfiguration} instances, potentially
+ * configured with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize
+ * maximum size} and a custom eviction policy.
  *
  * <h3>Rationale</h3>
  * <p>Context caching can have significant performance benefits if context
@@ -40,6 +42,7 @@ import org.springframework.test.context.MergedContextConfiguration;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 4.2
+ * @see ContextCacheUtils#retrieveMaxCacheSize()
  */
 public interface ContextCache {
 
@@ -48,6 +51,24 @@ public interface ContextCache {
 	 * statistics.
 	 */
 	public static final String CONTEXT_CACHE_LOGGING_CATEGORY = "org.springframework.test.context.cache";
+
+	/**
+	 * The default maximum size of the context cache: {@value #DEFAULT_MAX_CONTEXT_CACHE_SIZE}.
+	 * @see #MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME
+	 */
+	public static final int DEFAULT_MAX_CONTEXT_CACHE_SIZE = 32;
+
+	/**
+	 * System property used to configure the maximum size of the {@link ContextCache}
+	 * as a positive integer.
+	 * <p>May alternatively be configured via
+	 * {@link org.springframework.core.SpringProperties SpringProperties}.
+	 * <p>Note that implementations of {@code ContextCache} are not required
+	 * to support a maximum cache size. Consult the documentation of the
+	 * corresponding implementation for details.
+	 * @see #DEFAULT_MAX_CONTEXT_CACHE_SIZE
+	 */
+	public static final String MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME = "spring.test.context.cache.maxSize";
 
 
 	/**
@@ -59,8 +80,8 @@ public interface ContextCache {
 
 	/**
 	 * Obtain a cached {@code ApplicationContext} for the given key.
-	 * <p>The {@link #getHitCount() hit} and {@link #getMissCount() miss} counts
-	 * must be updated accordingly.
+	 * <p>The {@linkplain #getHitCount() hit} and {@linkplain #getMissCount() miss}
+	 * counts must be updated accordingly.
 	 * @param key the context key (never {@code null})
 	 * @return the corresponding {@code ApplicationContext} instance, or {@code null}
 	 * if not found in the cache
@@ -70,7 +91,7 @@ public interface ContextCache {
 
 	/**
 	 * Explicitly add an {@code ApplicationContext} instance to the cache
-	 * under the given key.
+	 * under the given key, potentially honoring a custom eviction policy.
 	 * @param key the context key (never {@code null})
 	 * @param context the {@code ApplicationContext} instance (never {@code null})
 	 */
@@ -80,9 +101,10 @@ public interface ContextCache {
 	 * Remove the context with the given key from the cache and explicitly
 	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#close() close}
 	 * it if it is an instance of {@code ConfigurableApplicationContext}.
-	 * <p>Generally speaking, this method should be called if the state of
-	 * a singleton bean has been modified, potentially affecting future
-	 * interaction with the context.
+	 * <p>Generally speaking, this method should be called to properly evict
+	 * a context from the cache (e.g., due to a custom eviction policy) or if
+	 * the state of a singleton bean has been modified, potentially affecting
+	 * future interaction with the context.
 	 * <p>In addition, the semantics of the supplied {@code HierarchyMode} must
 	 * be honored. See the Javadoc for {@link HierarchyMode} for details.
 	 * @param key the context key; never {@code null}
