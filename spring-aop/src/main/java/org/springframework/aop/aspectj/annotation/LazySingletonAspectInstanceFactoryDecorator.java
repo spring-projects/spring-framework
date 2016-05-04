@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,13 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 
 
 	@Override
-	public synchronized Object getAspectInstance() {
+	public Object getAspectInstance() {
 		if (this.materialized == null) {
-			synchronized (this) {
+			Object mutex = this;
+			if (this.maaif instanceof BeanFactoryAspectInstanceFactory) {
+				mutex = ((BeanFactoryAspectInstanceFactory) this.maaif).getAspectCreationMutex();
+			}
+			synchronized (mutex) {
 				if (this.materialized == null) {
 					this.materialized = this.maaif.getAspectInstance();
 				}
