@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,8 +198,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 					new MethodIntrospector.MetadataLookup<Set<JmsListener>>() {
 						@Override
 						public Set<JmsListener> inspect(Method method) {
-							Set<JmsListener> listenerMethods =
-									AnnotationUtils.getRepeatableAnnotations(method, JmsListener.class, JmsListeners.class);
+							Set<JmsListener> listenerMethods = AnnotationUtils.getRepeatableAnnotations(
+									method, JmsListener.class, JmsListeners.class);
 							return (!listenerMethods.isEmpty() ? listenerMethods : null);
 						}
 					});
@@ -293,15 +293,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 		}
 	}
 
-	/**
-	 * Resolve the specified value if possible.
-	 * @see ConfigurableBeanFactory#resolveEmbeddedValue
-	 */
 	private String resolve(String value) {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).resolveEmbeddedValue(value);
-		}
-		return value;
+		return (this.beanFactory instanceof ConfigurableBeanFactory ?
+				((ConfigurableBeanFactory) this.beanFactory).resolveEmbeddedValue(value) : value);
 	}
 
 
