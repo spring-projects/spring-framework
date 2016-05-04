@@ -110,9 +110,9 @@ public class ChannelSendOperatorTests {
 		IllegalStateException error = new IllegalStateException("boo");
 		Flux<String> publisher = Flux.generate(() -> 0, (idx , subscriber) -> {
 			int i = ++idx;
-			subscriber.onNext(String.valueOf(i));
+			subscriber.tryEmit(String.valueOf(i));
 			if (i == 3) {
-				subscriber.onError(error);
+				subscriber.fail(error);
 			}
 			return i;
 		});

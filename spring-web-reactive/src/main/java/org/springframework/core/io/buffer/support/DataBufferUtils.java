@@ -30,7 +30,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSource;
-import reactor.core.publisher.GenerateOutput;
+import reactor.core.subscriber.SignalEmitter;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -175,8 +175,8 @@ public abstract class DataBufferUtils {
 	}
 
 	private static class ReadableByteChannelGenerator
-			implements BiFunction<ReadableByteChannel, GenerateOutput<DataBuffer>,
-			ReadableByteChannel> {
+			implements BiFunction<ReadableByteChannel, SignalEmitter<DataBuffer>,
+						ReadableByteChannel> {
 
 		private final DataBufferAllocator allocator;
 
@@ -189,7 +189,7 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public ReadableByteChannel apply(ReadableByteChannel
-				channel, GenerateOutput<DataBuffer>	sub) {
+				channel, SignalEmitter<DataBuffer>	sub) {
 			try {
 				ByteBuffer byteBuffer = ByteBuffer.allocate(chunkSize);
 				int read;
@@ -200,7 +200,7 @@ public abstract class DataBufferUtils {
 					try {
 						dataBuffer.write(byteBuffer);
 						release = false;
-						sub.onNext(dataBuffer);
+						sub.emit(dataBuffer);
 					}
 					finally {
 						if (release) {
@@ -209,11 +209,11 @@ public abstract class DataBufferUtils {
 					}
 				}
 				else {
-					sub.onComplete();
+					sub.complete();
 				}
 			}
 			catch (IOException ex) {
-				sub.onError(ex);
+				sub.fail(ex);
 			}
 			return channel;
 		}
