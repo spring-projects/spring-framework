@@ -82,10 +82,10 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.core.env.PropertySource
  * @see org.springframework.context.annotation.PropertySource
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
 public @interface TestPropertySource {
 
 	/**

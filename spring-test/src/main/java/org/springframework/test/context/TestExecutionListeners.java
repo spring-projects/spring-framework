@@ -42,10 +42,10 @@ import org.springframework.core.annotation.AliasFor;
  * @see TestContextManager
  * @see ContextConfiguration
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
 public @interface TestExecutionListeners {
 
 	/**

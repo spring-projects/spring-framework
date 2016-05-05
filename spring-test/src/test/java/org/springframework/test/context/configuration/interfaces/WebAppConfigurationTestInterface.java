@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.sample.beans;
+package org.springframework.test.context.configuration.interfaces;
 
-public class Employee extends TestBean {
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.configuration.interfaces.WebAppConfigurationTestInterface.Config;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-	private String co;
+/**
+ * @author Sam Brannen
+ * @since 4.3
+ */
+@WebAppConfiguration
+@ContextConfiguration(classes = Config.class)
+interface WebAppConfigurationTestInterface {
 
-	public Employee() {
-	}
-
-	public Employee(String name) {
-		super(name);
-	}
-
-	public String getCompany() {
-		return co;
-	}
-
-	public void setCompany(String co) {
-		this.co = co;
+	@Configuration
+	static class Config {
+		/* no user beans required for these tests */
 	}
 
 }

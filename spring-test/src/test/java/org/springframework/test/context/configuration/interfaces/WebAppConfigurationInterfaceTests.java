@@ -14,25 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.sample.beans;
+package org.springframework.test.context.configuration.interfaces;
 
-public class Employee extends TestBean {
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-	private String co;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.context.WebApplicationContext;
 
-	public Employee() {
-	}
+import static org.junit.Assert.*;
 
-	public Employee(String name) {
-		super(name);
-	}
+/**
+ * @author Sam Brannen
+ * @since 4.3
+ */
+@RunWith(SpringRunner.class)
+public class WebAppConfigurationInterfaceTests implements WebAppConfigurationTestInterface {
 
-	public String getCompany() {
-		return co;
-	}
+	@Autowired
+	WebApplicationContext wac;
 
-	public void setCompany(String co) {
-		this.co = co;
+
+	@Test
+	public void wacLoaded() {
+		assertNotNull(wac);
 	}
 
 }

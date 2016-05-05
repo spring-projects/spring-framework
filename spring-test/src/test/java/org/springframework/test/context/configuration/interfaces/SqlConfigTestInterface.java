@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.sample.beans;
+package org.springframework.test.context.configuration.interfaces;
 
-public class Employee extends TestBean {
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.EmptyDatabaseConfig;
+import org.springframework.test.context.jdbc.SqlConfig;
 
-	private String co;
-
-	public Employee() {
-	}
-
-	public Employee(String name) {
-		super(name);
-	}
-
-	public String getCompany() {
-		return co;
-	}
-
-	public void setCompany(String co) {
-		this.co = co;
-	}
-
+/**
+ * @author Sam Brannen
+ * @since 4.3
+ */
+@ContextConfiguration(classes = EmptyDatabaseConfig.class)
+@DirtiesContext
+@SqlConfig(commentPrefix = "`", blockCommentStartDelimiter = "#$", blockCommentEndDelimiter = "$#", separator = "@@")
+interface SqlConfigTestInterface {
 }

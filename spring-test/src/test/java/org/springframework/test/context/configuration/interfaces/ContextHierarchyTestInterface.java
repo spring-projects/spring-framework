@@ -14,25 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.tests.sample.beans;
+package org.springframework.test.context.configuration.interfaces;
 
-public class Employee extends TestBean {
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
+import org.springframework.test.context.hierarchies.standard.SingleTestClassWithTwoLevelContextHierarchyTests;
 
-	private String co;
-
-	public Employee() {
-	}
-
-	public Employee(String name) {
-		super(name);
-	}
-
-	public String getCompany() {
-		return co;
-	}
-
-	public void setCompany(String co) {
-		this.co = co;
-	}
-
+/**
+ * @author Sam Brannen
+ * @since 4.3
+ */
+@ContextHierarchy({
+	@ContextConfiguration(classes = SingleTestClassWithTwoLevelContextHierarchyTests.ParentConfig.class),
+	@ContextConfiguration(classes = SingleTestClassWithTwoLevelContextHierarchyTests.ChildConfig.class) })
+interface ContextHierarchyTestInterface {
 }

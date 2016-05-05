@@ -54,6 +54,7 @@ public class TransactionalTestExecutionListenerTests {
 
 	private final TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
 
+		@Override
 		protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
 			return tm;
 		}
@@ -351,6 +352,16 @@ public class TransactionalTestExecutionListenerTests {
 	@Test
 	public void isRollbackWithClassLevelRollbackViaMetaAnnotation() throws Exception {
 		assertIsRollback(ClassLevelRollbackViaMetaAnnotationTestCase.class, false);
+	}
+
+	@Test
+	public void isRollbackWithClassLevelRollbackWithExplicitValueOnTestInterface() throws Exception {
+		assertIsRollback(ClassLevelRollbackWithExplicitValueOnTestInterfaceTestCase.class, false);
+	}
+
+	@Test
+	public void isRollbackWithClassLevelRollbackViaMetaAnnotationOnTestInterface() throws Exception {
+		assertIsRollback(ClassLevelRollbackViaMetaAnnotationOnTestInterfaceTestCase.class, false);
 	}
 
 	@Test
@@ -707,6 +718,27 @@ public class TransactionalTestExecutionListenerTests {
 
 	@Commit
 	static class ClassLevelRollbackViaMetaAnnotationTestCase {
+
+		public void test() {
+		}
+	}
+
+	@Rollback(false)
+	interface RollbackFalseTestInterface {
+	}
+
+	static class ClassLevelRollbackWithExplicitValueOnTestInterfaceTestCase implements RollbackFalseTestInterface {
+
+		public void test() {
+		}
+	}
+
+	@Commit
+	interface RollbackFalseViaMetaAnnotationTestInterface {
+	}
+
+	static class ClassLevelRollbackViaMetaAnnotationOnTestInterfaceTestCase
+			implements RollbackFalseViaMetaAnnotationTestInterface {
 
 		public void test() {
 		}

@@ -14,71 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.hierarchies.standard;
+package org.springframework.test.context.configuration.interfaces;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextHierarchy;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Sam Brannen
- * @since 3.2.2
+ * @since 4.3
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextHierarchy({
-	@ContextConfiguration(classes = SingleTestClassWithTwoLevelContextHierarchyTests.ParentConfig.class),
-	@ContextConfiguration(classes = SingleTestClassWithTwoLevelContextHierarchyTests.ChildConfig.class) })
-public class SingleTestClassWithTwoLevelContextHierarchyTests {
-
-	@Configuration
-	public static class ParentConfig {
-
-		@Bean
-		public String foo() {
-			return "foo";
-		}
-
-		@Bean
-		public String baz() {
-			return "baz-parent";
-		}
-	}
-
-	@Configuration
-	public static class ChildConfig {
-
-		@Bean
-		public String bar() {
-			return "bar";
-		}
-
-		@Bean
-		public String baz() {
-			return "baz-child";
-		}
-	}
-
+@RunWith(SpringRunner.class)
+public class ContextHierarchyInterfaceTests implements ContextHierarchyTestInterface {
 
 	@Autowired
-	private String foo;
+	String foo;
 
 	@Autowired
-	private String bar;
+	String bar;
 
 	@Autowired
-	private String baz;
+	String baz;
 
 	@Autowired
-	private ApplicationContext context;
+	ApplicationContext context;
 
 
 	@Test
