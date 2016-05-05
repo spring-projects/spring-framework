@@ -30,11 +30,15 @@ public class CacheEvictOperation extends CacheOperation {
 	private final boolean beforeInvocation;
 
 
+	/**
+	 * @since 4.3
+	 */
 	public CacheEvictOperation(CacheEvictOperation.Builder b) {
 		super(b);
 		this.cacheWide = b.cacheWide;
 		this.beforeInvocation = b.beforeInvocation;
 	}
+
 
 	public boolean isCacheWide() {
 		return this.cacheWide;

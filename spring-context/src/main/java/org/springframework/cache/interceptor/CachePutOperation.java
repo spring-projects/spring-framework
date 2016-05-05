@@ -29,10 +29,14 @@ public class CachePutOperation extends CacheOperation {
 	private final String unless;
 
 
+	/**
+	 * @since 4.3
+	 */
 	public CachePutOperation(CachePutOperation.Builder b) {
 		super(b);
 		this.unless = b.unless;
 	}
+
 
 	public String getUnless() {
 		return this.unless;

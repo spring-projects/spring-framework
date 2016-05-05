@@ -49,6 +49,9 @@ public abstract class CacheOperation implements BasicOperation {
 	private final String toString;
 
 
+	/**
+	 * @since 4.3
+	 */
 	protected CacheOperation(Builder b) {
 		this.name = b.name;
 		this.cacheNames = b.cacheNames;
@@ -74,21 +77,17 @@ public abstract class CacheOperation implements BasicOperation {
 		return this.key;
 	}
 
-
 	public String getKeyGenerator() {
 		return this.keyGenerator;
 	}
-
 
 	public String getCacheManager() {
 		return this.cacheManager;
 	}
 
-
 	public String getCacheResolver() {
 		return this.cacheResolver;
 	}
-
 
 	public String getCondition() {
 		return this.condition;
