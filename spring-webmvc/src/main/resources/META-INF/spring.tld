@@ -464,4 +464,11 @@
         <function-signature>org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.MethodArgumentBuilder fromMappingName(java.lang.String)</function-signature>
     </function>
 
+	<function>
+		<description>Helps to render the response of a Spring MVC controller method.</description>
+		<name>mvcInclude</name>
+		<function-class>org.springframework.web.servlet.mvc.method.annotation.MvcIncludeBuilder</function-class>
+		<function-signature>org.springframework.web.servlet.mvc.method.annotation.MvcIncludeBuilder fromPath(java.lang.String)</function-signature>
+	</function>
+
 </taglib>
