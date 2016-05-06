@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.resource;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.hamcrest.Matchers;
@@ -47,6 +44,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.HandlerMapping;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for ResourceHttpRequestHandler.
@@ -97,6 +96,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
@@ -112,6 +113,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 		assertEquals(0, this.response.getContentAsByteArray().length);
 	}
 
@@ -134,6 +137,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("no-store", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -147,6 +152,8 @@ public class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals("\"versionString\"", this.response.getHeader("ETag"));
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -163,6 +170,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertTrue(dateHeaderAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -181,6 +190,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertTrue(dateHeaderAsLong("Expires") <= System.currentTimeMillis());
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(dateHeaderAsLong("Last-Modified") / 1000, resourceLastModified("test/foo.css") / 1000);
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -192,6 +203,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.html"));
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -204,6 +217,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("testalternatepath/baz.css"));
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
@@ -455,6 +470,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(2, this.response.getContentLength());
 		assertEquals("bytes 0-1/10", this.response.getHeader("Content-Range"));
 		assertEquals("So", this.response.getContentAsString());
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -468,6 +485,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(1, this.response.getContentLength());
 		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
 		assertEquals(".", this.response.getContentAsString());
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -481,6 +500,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(1, this.response.getContentLength());
 		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
 		assertEquals(".", this.response.getContentAsString());
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -494,6 +515,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(1, this.response.getContentLength());
 		assertEquals("bytes 9-9/10", this.response.getHeader("Content-Range"));
 		assertEquals(".", this.response.getContentAsString());
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -507,6 +530,8 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(10, this.response.getContentLength());
 		assertEquals("bytes 0-9/10", this.response.getHeader("Content-Range"));
 		assertEquals("Some text.", this.response.getContentAsString());
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
@@ -517,6 +542,8 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals(416, this.response.getStatus());
 		assertEquals("bytes */10", this.response.getHeader("Content-Range"));
+		assertEquals("bytes", this.response.getHeader("Accept-Ranges"));
+		assertEquals(1, this.response.getHeaders("Accept-Ranges").size());
 	}
 
 	@Test
