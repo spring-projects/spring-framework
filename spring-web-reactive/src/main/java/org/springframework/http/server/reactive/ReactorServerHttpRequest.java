@@ -17,14 +17,12 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
 import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -90,7 +88,9 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.channel.receive().map(allocator::wrap);
+		return this.channel.receive()
+		                   .retain() //FIXME Rogue reference holding
+		                   .map(allocator::wrap);
 	}
 
 }
