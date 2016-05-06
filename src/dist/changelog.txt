@@ -3,6 +3,28 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.17 (2016-05-06)
+-------------------------------------
+fixed AbstractRequestLoggingFilter appends null query string (SPR-14244)
+fixed Deadlock possible with AspectJ aspects and multi-threading (SPR-14241)
+fixed NPE thrown when calling methods with an empty @Caching annotation (SPR-14162)
+fixed @RequestHeader HttpHeaders fails with NPE against null header value (SPR-14091)
+fixed ModelAndView is replaced when a RedirectView is used (SPR-14045)
+fixed Scripted beans not updated after a script compilation error in getScriptedObjectType (SPR-14007)
+fixed TimerManagerTaskScheduler.TimerScheduledFuture.getDelay is inverted (SPR-13977)
+fixed AbstractMarshaller's DocumentBuilderFactory instance may be used by several threads simultaneously (SPR-13935)
+fixed ReflectiveMethodResolver chooses parent class over child for static methods (SPR-13918)
+fixed NullPointerException while building error message in InvocableHandlerMethod (SPR-13917)
+fixed Handle RejectedExecutionException in WebAsyncManager (SPR-13836)
+improved MVC config path config options (SPR-14186)
+improved local resolution of Quartz XSD (SPR-13706)
+improved SimpleTriggerFactoryBean and CronTriggerFactoryBean usage without jobDetail (SPR-13604)
+improved XML example javadoc of @EnableScheduling (SPR-14145)
+improved documentation example of MessageSource (SPR-14003)
+improved documentation of ResponseEntityExceptionHandler.handleExceptionInternal (SPR-13869)
+improved documentation at section 17.4 Handler mappings (SPR-13832)
+
+
 Changes in version 3.2.16 (2015-12-17)
 -------------------------------------
 
