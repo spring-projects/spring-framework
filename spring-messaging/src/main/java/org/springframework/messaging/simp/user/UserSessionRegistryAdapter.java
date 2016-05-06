@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -31,9 +30,9 @@ import org.springframework.util.CollectionUtils;
  * Due to the more limited information available, methods such as
  * {@link #getUsers()} and {@link #findSubscriptions} are not supported.
  *
- * <p>As of 4.2 this adapter is used only in applications that explicitly
+ * <p>As of 4.2, this adapter is used only in applications that explicitly
  * register a custom {@code UserSessionRegistry} bean by overriding
- * {@link AbstractMessageBrokerConfiguration#userSessionRegistry()}.
+ * {@link org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration#userSessionRegistry()}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -67,8 +66,8 @@ public class UserSessionRegistryAdapter implements SimpUserRegistry {
 
 
 	/**
-	 * Expose the only information available from a UserSessionRegistry (name
-	 * and session id's) as a {@code SimpUser}.
+	 * Expose the only information available from a UserSessionRegistry
+	 * (name and session id's) as a {@code SimpUser}.
 	 */
 	private static class SimpUserAdapter implements SimpUser {
 
@@ -105,9 +104,10 @@ public class UserSessionRegistryAdapter implements SimpUserRegistry {
 		}
 	}
 
+
 	/**
-	 * Expose the only information available from a UserSessionRegistry (session
-	 * id's but no subscriptions) as a {@code SimpSession}.
+	 * Expose the only information available from a UserSessionRegistry
+	 * (session ids but no subscriptions) as a {@code SimpSession}.
 	 */
 	private static class SimpSessionAdapter implements SimpSession {
 
