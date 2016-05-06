@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceRegion;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -64,7 +64,7 @@ public abstract class HttpRange {
 	 * information contained in the current {@code HttpRange}.
 	 * @param resource the {@code Resource} to select the region from
 	 * @return the selected region of the given {@code Resource}
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public ResourceRegion toResourceRegion(Resource resource) {
 		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...

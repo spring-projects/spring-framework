@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io;
-
-import static org.mockito.Mockito.mock;
+package org.springframework.core.io.support;
 
 import org.junit.Test;
+
+import org.springframework.core.io.Resource;
+
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for the {@link ResourceRegion} class.
@@ -41,4 +43,5 @@ public class ResourceRegionTests {
 	public void shouldThrowExceptionForNegativeCount() {
 		new ResourceRegion(mock(Resource.class), 0, -1);
 	}
+
 }

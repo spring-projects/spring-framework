@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http;
 
 import java.io.IOException;
@@ -22,13 +23,13 @@ import java.util.List;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.ResourceRegion;
+import org.springframework.core.io.support.ResourceRegion;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link HttpRange}.

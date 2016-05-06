@@ -16,9 +16,6 @@
 
 package org.springframework.http.converter;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -30,12 +27,15 @@ import org.junit.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceRegion;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.StringUtils;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for {@link ResourceRegionHttpMessageConverter} class.

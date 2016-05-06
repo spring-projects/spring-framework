@@ -23,7 +23,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-import org.springframework.core.io.ResourceRegion;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -33,16 +33,42 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can write a single {@link ResourceRegion ResourceRegion},
+ * Implementation of {@link HttpMessageConverter} that can write a single {@link ResourceRegion},
  * or Collections of {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
- * @since 4.3.0
+ * @since 4.3
  */
 public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
 	public ResourceRegionHttpMessageConverter() {
 		super(MediaType.ALL);
+	}
+
+
+	@Override
+	protected boolean supports(Class<?> clazz) {
+		// should not be called as we override canRead/canWrite
+		return false;
+	}
+
+	@Override
+	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+		return false;
+	}
+
+	@Override
+	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		return null;
+	}
+
+	@Override
+	protected ResourceRegion readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		return null;
 	}
 
 	@Override
@@ -152,6 +178,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		print(out, "--" + boundaryString + "--");
 	}
 
+
 	private static void println(OutputStream os) throws IOException {
 		os.write('\r');
 		os.write('\n');
@@ -159,30 +186,6 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 
 	private static void print(OutputStream os, String buf) throws IOException {
 		os.write(buf.getBytes("US-ASCII"));
-	}
-
-	@Override
-	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		return false;
-	}
-
-	@Override
-	protected boolean supports(Class<?> clazz) {
-		// should not be called as we override canRead/canWrite
-		return false;
-	}
-
-
-	@Override
-	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-		return null;
-	}
-
-	@Override
-	protected ResourceRegion readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-		return null;
 	}
 
 }
