@@ -17,7 +17,6 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -90,7 +89,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * override existing request encodings
 	 * @param forceResponseEncoding whether the specified encoding is supposed to
 	 * override existing response encodings
-	 * @since 4.3.0
+	 * @since 4.3
 	 * @see #setEncoding
 	 * @see #setForceRequestEncoding(boolean)
 	 * @see #setForceResponseEncoding(boolean)
@@ -101,6 +100,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 		this.forceRequestEncoding = forceRequestEncoding;
 		this.forceResponseEncoding = forceResponseEncoding;
 	}
+
 
 	/**
 	 * Set the encoding to use for requests. This encoding will be passed into a
@@ -115,9 +115,10 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 	/**
 	 * Return the configured encoding for requests and/or responses
+	 * @since 4.3
 	 */
 	public String getEncoding() {
-		return encoding;
+		return this.encoding;
 	}
 
 	/**
@@ -144,7 +145,7 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * {@link javax.servlet.http.HttpServletRequest#getCharacterEncoding()}
 	 * returns a non-null value. Switch this to "true" to enforce the specified
 	 * encoding in any case.
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public void setForceRequestEncoding(boolean forceRequestEncoding) {
 		this.forceRequestEncoding = forceRequestEncoding;
@@ -152,9 +153,10 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 
 	/**
 	 * Return whether the encoding should be forced on requests
+	 * @since 4.3
 	 */
 	public boolean isForceRequestEncoding() {
-		return forceRequestEncoding;
+		return this.forceRequestEncoding;
 	}
 
 	/**
@@ -163,29 +165,33 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 * <p>Default is "false", i.e. do not modify the encoding.
 	 * Switch this to "true" to enforce the specified encoding
 	 * for responses in any case.
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public void setForceResponseEncoding(boolean forceResponseEncoding) {
 		this.forceResponseEncoding = forceResponseEncoding;
 	}
 
 	/**
-	 * Return whether the encoding should be forced on responses
+	 * Return whether the encoding should be forced on responses.
+	 * @since 4.3
 	 */
 	public boolean isForceResponseEncoding() {
-		return forceResponseEncoding;
+		return this.forceResponseEncoding;
 	}
+
 
 	@Override
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		if (this.encoding != null) {
-			if (this.forceRequestEncoding || request.getCharacterEncoding() == null) {
-				request.setCharacterEncoding(this.encoding);
+
+		String encoding = getEncoding();
+		if (encoding != null) {
+			if (isForceRequestEncoding() || request.getCharacterEncoding() == null) {
+				request.setCharacterEncoding(encoding);
 			}
-			if (this.forceResponseEncoding) {
-				response.setCharacterEncoding(this.encoding);
+			if (isForceResponseEncoding()) {
+				response.setCharacterEncoding(encoding);
 			}
 		}
 		filterChain.doFilter(request, response);

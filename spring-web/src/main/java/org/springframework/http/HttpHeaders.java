@@ -907,7 +907,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Return all values of a given header name,
 	 * even if this header is set multiple times.
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public List<String> getValuesAsList(String headerName) {
 		List<String> values = get(headerName);
