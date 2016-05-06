@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.PatternMatchUtils;
 import org.springframework.web.reactive.View;
 
 
@@ -60,6 +61,8 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements Initial
 	private String prefix = "";
 
 	private String suffix = "";
+
+	private String[] viewNames;
 
 
 	/**
@@ -120,6 +123,25 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements Initial
 		return this.suffix;
 	}
 
+	/**
+	 * Set the view names (or name patterns) that can be handled by this
+	 * {@link org.springframework.web.reactive.ViewResolver}. View names can
+	 * contain simple wildcards such that 'my*', '*Report' and '*Repo*' will
+	 * all match the view name 'myReport'.
+	 * @see #canHandle
+	 */
+	public void setViewNames(String... viewNames) {
+		this.viewNames = viewNames;
+	}
+
+	/**
+	 * Return the view names (or name patterns) that can be handled by this
+	 * {@link org.springframework.web.reactive.ViewResolver}.
+	 */
+	protected String[] getViewNames() {
+		return this.viewNames;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -131,6 +153,9 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements Initial
 
 	@Override
 	public Mono<View> resolveViewName(String viewName, Locale locale) {
+		if (!canHandle(viewName, locale)) {
+			return Mono.empty();
+		}
 		AbstractUrlBasedView urlBasedView = createUrlBasedView(viewName);
 		View view = applyLifecycleMethods(viewName, urlBasedView);
 		try {
@@ -139,6 +164,22 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements Initial
 		catch (Exception ex) {
 			return Mono.error(ex);
 		}
+	}
+
+	/**
+	 * Indicates whether or not this
+	 * {@link org.springframework.web.reactive.ViewResolver} can handle the
+	 * supplied view name. If not, an empty result is returned. The default
+	 * implementation checks against the configured {@link #setViewNames
+	 * view names}.
+	 * @param viewName the name of the view to retrieve
+	 * @param locale the Locale to retrieve the view for
+	 * @return whether this resolver applies to the specified view
+	 * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)
+	 */
+	protected boolean canHandle(String viewName, Locale locale) {
+		String[] viewNames = getViewNames();
+		return (viewNames == null || PatternMatchUtils.simpleMatch(viewNames, viewName));
 	}
 
 	/**
