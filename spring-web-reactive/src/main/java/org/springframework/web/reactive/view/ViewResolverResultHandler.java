@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
@@ -59,6 +60,7 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 		Assert.notEmpty(resolvers, "At least one ViewResolver is required.");
 		Assert.notNull(service, "'conversionService' is required.");
 		this.viewResolvers.addAll(resolvers);
+		AnnotationAwareOrderComparator.sort(this.viewResolvers);
 		this.conversionService = service;
 	}
 

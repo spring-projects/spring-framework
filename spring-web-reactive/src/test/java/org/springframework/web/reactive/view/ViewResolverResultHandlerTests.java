@@ -35,6 +35,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 import rx.Single;
 
+import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
@@ -190,6 +191,23 @@ public class ViewResolverResultHandlerTests {
 				assertThat(ex.getMessage(), endsWith("neither returned a view name nor a View object")));
 	}
 
+	@Test
+	public void ordered() throws Exception {
+		TestViewResolver resolver1 = new TestViewResolver();
+		TestViewResolver resolver2 = new TestViewResolver();
+		List<ViewResolver> resolvers = Arrays.asList(resolver1, resolver2);
+
+		resolver1.setOrder(2);
+		resolver2.setOrder(1);
+
+		ViewResolverResultHandler resultHandler =
+				new ViewResolverResultHandler(resolvers, this.conversionService);
+
+		assertEquals(Arrays.asList(resolver2, resolver1), resultHandler.getViewResolvers());
+	}
+
+
+
 	private TestSubscriber<Void> handle(HandlerResultHandler handler, Object value, ResolvableType type) {
 		HandlerResult result = new HandlerResult(new Object(), value, type, this.model);
 		Mono<Void> mono = handler.handleResult(this.exchange, result);
@@ -210,10 +228,21 @@ public class ViewResolverResultHandlerTests {
 	}
 
 
-	private static class TestViewResolver implements ViewResolver {
+	private static class TestViewResolver implements ViewResolver, Ordered {
 
 		private final Map<String, View> views = new HashMap<>();
 
+		private int order = Ordered.LOWEST_PRECEDENCE;
+
+
+		public void setOrder(int order) {
+			this.order = order;
+		}
+
+		@Override
+		public int getOrder() {
+			return this.order;
+		}
 
 		public TestViewResolver addView(TestView view) {
 			this.views.put(view.getName(), view);
@@ -225,6 +254,7 @@ public class ViewResolverResultHandlerTests {
 			View view = this.views.get(viewName);
 			return Mono.justOrEmpty(view);
 		}
+
 	}
 
 	public static final class TestView implements View {
