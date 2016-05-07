@@ -31,12 +31,11 @@ public class MvcInclude
     public String execute() throws ServletException, IOException
     {
         RequestDispatcher dispatcher = request.getRequest().getRequestDispatcher(path);
-        ByteArrayServletOutputStream outputStream = new ByteArrayServletOutputStream();
-        ResponseIncludeWrapper wrappedResponse = new ResponseIncludeWrapper(response,outputStream);
+        ResponseIncludeWrapper wrappedResponse = new ResponseIncludeWrapper(response, request, request.getServletContext());
         dispatcher.include(request,wrappedResponse);
-        wrappedResponse.flushOutputStreamOrWriter();
+        wrappedResponse.flushBuffer();
 
-        return outputStream.getBuffer().toString(response.getCharacterEncoding());
+        return wrappedResponse.getContent();
     }
 
 }
