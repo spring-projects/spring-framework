@@ -47,7 +47,7 @@ import org.springframework.core.Ordered;
  *     public CacheManager cacheManager() {
  *         // configure and return an implementation of Spring's CacheManager SPI
  *         SimpleCacheManager cacheManager = new SimpleCacheManager();
- *         cacheManager.addCaches(Arrays.asList(new ConcurrentMapCache("default")));
+ *         cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("default")));
  *         return cacheManager;
  *     }
  * }</pre>
@@ -117,7 +117,7 @@ import org.springframework.core.Ordered;
  *     public CacheManager cacheManager() {
  *         // configure and return an implementation of Spring's CacheManager SPI
  *         SimpleCacheManager cacheManager = new SimpleCacheManager();
- *         cacheManager.addCaches(Arrays.asList(new ConcurrentMapCache("default")));
+ *         cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("default")));
  *         return cacheManager;
  *     }
  *
