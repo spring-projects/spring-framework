@@ -1,15 +1,31 @@
+/*
+ * Copyright 2002-2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.servlet.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
+import java.nio.charset.CharacterCodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -17,21 +33,31 @@ import java.util.TimeZone;
 
 /**
  * Response wrapper used for server side include of handler methods.
- * Response data for the included handler method is captured by a {@link ByteArrayServletOutputStream}
+ *
+ * <p>Inspired by the similar implementations of Apache Tomcat project (  org.apache.catalina.ssi.ResponseIncludeWrapper )
+ * and Grails Framework ( org.grails.web.util.IncludeResponseWrapper )
+ * Some parts kindly copied.</p>
+ *
+ * <p>Response data for the included handler method is captured by a in-memory buffer.
  * Included response has its own <code>content-type</code> and <code>last-modified</code> values.
  * <code>content-type</code> resolution falls back to the wrapped response if not set manually.{@see getContentType}
+ * </p>
  *
- * Similarly, most of the properties of the original response can not be changed by the included methods while the following
- * actions are possible for a included handler method:
+ * <p>Similarly, most of the properties of the original response can not be changed by the included methods while the following
+ * actions are possible for a included handler method:</p>
+ * <ul>
+ * <li>Redirect the original response</li>
+ * <li>Add/set headers on the original response except the <code>content-type</code> and <code>last-modified</code> headers</li>
+ * <li>Set status of the original response</li>
+ * <li>Send error to the original response</li>
+ * </ul>
  *
- * - Redirect the original response
- * - Add/set headers on the original response except the <code>content-type</code> and <code>last-modified</code> headers
- * - Set status of the original response
- * - Send error to the original response
+ * <p>To get the response stream as text, <code>getContent()</code> method must be used.</p>
  *
- * To get the response stream as text, <code>getContent()</code> method must be used.
- *
- * @Author Cagatay Kalan
+ * @author Bip Thelin
+ * @author David Becker
+ * @author Graeme Rocher
+ * @author Cagatay Kalan
  * @Since 4.3.0
  *
  *
@@ -39,9 +65,12 @@ import java.util.TimeZone;
 public class ResponseIncludeWrapper extends HttpServletResponseWrapper
 {
 
-    protected ByteArrayServletOutputStream captureServletOutputStream;
-    protected ByteArrayServletOutputStream servletOutputStream;
+    protected OutputStream captureOutputStream;
+    protected OutputStream outputStream;
     protected PrintWriter printWriter;
+    protected StreamByteBuffer buffer;
+    protected StreamByteBuffer captureBuffer;
+    protected ServletOutputStream sos;
 
     private static final String CONTENT_TYPE = "content-type";
     private static final String LAST_MODIFIED = "last-modified";
@@ -51,8 +80,7 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     protected long lastModified = -1;
     private String contentType;
 
-    private final ServletContext context;
-    private final HttpServletRequest request;
+
 
 
     private final HttpServletResponse responseDelegate;
@@ -65,12 +93,10 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
         RFC1123_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    public ResponseIncludeWrapper(HttpServletResponse response, HttpServletRequest request, ServletContext context)
+    public ResponseIncludeWrapper(HttpServletResponse response)
     {
         super(response);
         this.responseDelegate = response;
-        this.request = request;
-        this.context = context;
     }
 
     /**
@@ -112,9 +138,9 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
      */
     public void flushOutputStreamOrWriter() throws IOException
     {
-        if (servletOutputStream != null)
+        if (outputStream != null)
         {
-            servletOutputStream.flush();
+            outputStream.flush();
         }
         if (printWriter != null)
         {
@@ -133,15 +159,37 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     @Override
     public PrintWriter getWriter() throws java.io.IOException
     {
-        if (servletOutputStream == null)
+        if (buffer == null)
         {
-            if (printWriter == null)
+            if (captureBuffer == null)
             {
-                if (captureServletOutputStream == null)
-                    captureServletOutputStream = new ByteArrayServletOutputStream();
+
+                captureBuffer = new StreamByteBuffer();
+                captureOutputStream = captureBuffer.getOutputStream();
+
+                sos = new ServletOutputStream()
+                {
+                    @Override
+                    public boolean isReady()
+                    {
+                        return false;
+                    }
+
+                    @Override
+                    public void setWriteListener(WriteListener writeListener)
+                    {
+
+                    }
+
+                    @Override
+                    public void write(int b) throws IOException
+                    {
+                        captureOutputStream.write(b);
+                    }
+                };
                 setCharacterEncoding(getCharacterEncoding());
                 printWriter = new PrintWriter(
-                        new OutputStreamWriter(captureServletOutputStream,
+                        new OutputStreamWriter(sos,
                                 getCharacterEncoding()));
             }
             return printWriter;
@@ -160,13 +208,35 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     @Override
     public ServletOutputStream getOutputStream() throws java.io.IOException
     {
-        if (printWriter == null)
+        if (captureBuffer == null)
         {
-            if (servletOutputStream == null)
+            if (buffer == null)
             {
-                servletOutputStream = new ByteArrayServletOutputStream();
+                buffer = new StreamByteBuffer();
+                outputStream = buffer.getOutputStream();
+
+                sos = new ServletOutputStream()
+                {
+                    @Override
+                    public boolean isReady()
+                    {
+                        return false;
+                    }
+
+                    @Override
+                    public void setWriteListener(WriteListener writeListener)
+                    {
+
+                    }
+
+                    @Override
+                    public void write(int b) throws IOException
+                    {
+                        outputStream.write(b);
+                    }
+                };
             }
-            return servletOutputStream;
+            return sos;
         }
         throw new IllegalStateException();
     }
@@ -232,9 +302,9 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     public void resetBuffer()
     {
         if (printWriter != null)
-            captureServletOutputStream.getBuffer().reset();
-        else if (servletOutputStream != null)
-            servletOutputStream.getBuffer().reset();
+            captureBuffer.reset();
+        else if (outputStream != null)
+            buffer.reset();
 
     }
 
@@ -251,10 +321,12 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     }
 
 
-    public String getContent() throws UnsupportedEncodingException
+    public String getContent() throws CharacterCodingException
     {
         return getContent(null);
     }
+
+
 
     /**
      * Gets the textual content of the included response by reading the response buffer with
@@ -266,25 +338,28 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
      * @return Content of the included response.
      * @throws UnsupportedEncodingException
      */
-    public String getContent(String encoding) throws UnsupportedEncodingException
+    public String getContent(String encoding) throws CharacterCodingException
     {
-        ByteArrayOutputStream bos = null;
-        if (printWriter != null)
-            bos = captureServletOutputStream.getBuffer();
-        else if (servletOutputStream != null)
-            bos = servletOutputStream.getBuffer();
 
-        if (encoding == null)
-        {
-            encoding = getCharacterEncoding();
-        }
 
-        if (bos != null)
-            return bos.toString(encoding != null ? encoding : "UTF-8");
+        encoding = encoding != null ? encoding : getCharacterEncoding();
+        if (encoding == null) encoding = "UTF-8";
 
+        StreamByteBuffer buffer = getCurrentBuffer();
+        if (buffer != null)
+            return buffer.readAsString(encoding);
         return "";
 
 
+    }
+
+    protected StreamByteBuffer getCurrentBuffer() {
+        return captureBuffer != null ? captureBuffer : buffer;
+    }
+
+    public InputStream getInputStream() {
+        StreamByteBuffer buffer = getCurrentBuffer();
+        return buffer == null ? new ByteArrayInputStream(new byte[0]) : buffer.getInputStream();
     }
 
     /**
