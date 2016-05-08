@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -18,9 +17,24 @@ import java.util.TimeZone;
 
 /**
  * Response wrapper used for server side include of handler methods.
+ * Response data for the included handler method is captured by a {@link ByteArrayServletOutputStream}
+ * Included response has its own <code>content-type</code> and <code>last-modified</code> values.
+ * <code>content-type</code> resolution falls back to the wrapped response if not set manually.{@see getContentType}
+ *
+ * Similarly, most of the properties of the original response can not be changed by the included methods while the following
+ * actions are possible for a included handler method:
+ *
+ * - Redirect the original response
+ * - Add/set headers on the original response except the <code>content-type</code> and <code>last-modified</code> headers
+ * - Set status of the original response
+ * - Send error to the original response
+ *
+ * To get the response stream as text, <code>getContent()</code> method must be used.
  *
  * @Author Cagatay Kalan
- * @Since 4.3
+ * @Since 4.3.0
+ *
+ *
  */
 public class ResponseIncludeWrapper extends HttpServletResponseWrapper
 {
@@ -40,6 +54,9 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     private final ServletContext context;
     private final HttpServletRequest request;
 
+
+    private final HttpServletResponse responseDelegate;
+
     private static final Log logger = LogFactory.getLog(ResponseIncludeWrapper.class);
 
     static
@@ -51,6 +68,7 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     public ResponseIncludeWrapper(HttpServletResponse response, HttpServletRequest request, ServletContext context)
     {
         super(response);
+        this.responseDelegate = response;
         this.request = request;
         this.context = context;
     }
@@ -76,19 +94,13 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
      * Returns the value of the <code>content-type</code> header field.
      *
      * @return the content type of the resource referenced by this
-     *   <code>ResponseIncludeWrapper</code>, or <code>null</code> if not known.
+     *   <code>ResponseIncludeWrapper</code>, or the content type of the original response if no content type
+     *   set on this instance
      */
     @Override
     public String getContentType() {
         if (contentType == null) {
-            String url = request.getRequestURI();
-            String mime = context.getMimeType(url);
-            if (mime != null) {
-                setContentType(mime);
-            } else {
-                // return a safe value
-                setContentType("application/x-octet-stream");
-            }
+            setContentType(_getResponse().getContentType());
         }
         return contentType;
     }
@@ -160,21 +172,29 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     }
 
 
+    /**
+     * Redirects to wrapped response to a new location
+     * @param location
+     * @throws IOException
+     */
     @Override
     public void sendRedirect(String location) throws IOException
     {
-        if (isCommitted()) throw new IllegalStateException("Response already committed.");
         _getResponse().sendRedirect(location);
     }
 
 
+    /**
+     * We need to store the original response in a separate field because during included request procecessing,
+     * servlet container may wrap the response with its own implementation which prevents delegating actions to it.
+     * Tomcat for instance, wraps the response with a ApplicationHttpResponse which prevents actions like sending redirects,
+     * setting headers and etc. Because of that, we can not use the getResponse() for those actions.
+     *
+     * @return the original response wrapped by this instance.
+     */
     private HttpServletResponse _getResponse()
     {
-        HttpServletResponse response = (HttpServletResponse) getResponse();
-        while (response instanceof HttpServletResponseWrapper) {
-            response = (HttpServletResponse) ((HttpServletResponseWrapper)response).getResponse();
-        }
-        return response;
+        return responseDelegate;
     }
 
     @Override
@@ -184,6 +204,12 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
         resetBuffer();
     }
 
+    /**
+     * Delegates to the sendError method of the wrapped response.
+     * @param sc status code
+     * @param msg status message
+     * @throws IOException
+     */
     @Override
     public void sendError(int sc, String msg) throws IOException
     {
@@ -191,11 +217,16 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
         resetBuffer();
     }
 
+    /**
+     * Delegates to the setStatus method of the wrapped response.
+     * @param status status code
+     */
     @Override
     public void setStatus(int status)
     {
         _getResponse().setStatus(status);
     }
+
 
     @Override
     public void resetBuffer()
@@ -219,11 +250,22 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
         flushOutputStreamOrWriter();
     }
 
+
     public String getContent() throws UnsupportedEncodingException
     {
         return getContent(null);
     }
 
+    /**
+     * Gets the textual content of the included response by reading the response buffer with
+     * the given encoding.
+     *
+     * @param encoding Character encoding to be used when converting stream data to text output.
+     * If null, character encoding of the wrapped response is used. If character encoding of the
+     * wrapped response is also null, then "UTF-8" is used.
+     * @return Content of the included response.
+     * @throws UnsupportedEncodingException
+     */
     public String getContent(String encoding) throws UnsupportedEncodingException
     {
         ByteArrayOutputStream bos = null;
@@ -246,25 +288,26 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
     }
 
     /**
-     * Sets the value of the <code>content-type</code> header field.
-     *
-     * @param mime a mime type
+     * Sets the value of the <code>content-type</code> value.
+     * It does not affect the <code>content-type</code> of the wrapped response.
+     * @param contentType
      */
     @Override
-    public void setContentType(String mime)
+    public void setContentType(String contentType)
     {
-        contentType = mime;
-        if (contentType != null)
-        {
-            getResponse().setContentType(contentType);
-        }
+        this.contentType = contentType;
     }
 
 
+    /**
+     * Sets the <code>last-modified</code> header of this instance.
+     * It does not affect the <code>last-modified</code> header of the wrapped response.
+     * @param name
+     * @param value
+     */
     @Override
     public void addDateHeader(String name, long value)
     {
-        super.addDateHeader(name, value);
         String lname = name.toLowerCase(Locale.ENGLISH);
         if (lname.equals(LAST_MODIFIED))
         {
@@ -272,10 +315,15 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
         }
     }
 
+    /**
+     * For <code>content-type</code> and <code>last-modified</code> headers,it stores the local values
+     * on this instance. For other headers, header is added to the wrapped response.
+     * @param name
+     * @param value
+     */
     @Override
     public void addHeader(String name, String value)
     {
-        super.addHeader(name, value);
         String lname = name.toLowerCase(Locale.ENGLISH);
         if (lname.equals(LAST_MODIFIED))
         {
@@ -292,13 +340,20 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
         } else if (lname.equals(CONTENT_TYPE))
         {
             contentType = value;
+        } else {
+            _getResponse().addHeader(name,value);
         }
     }
 
+    /**
+     * Sets <code>last-modified</code> value of this instance.It does not affect
+     * the <code>last-modified</code> header of the wrapped response.
+     * @param name
+     * @param value
+     */
     @Override
     public void setDateHeader(String name, long value)
     {
-        super.setDateHeader(name, value);
         String lname = name.toLowerCase(Locale.ENGLISH);
         if (lname.equals(LAST_MODIFIED))
         {
@@ -306,10 +361,15 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
         }
     }
 
+    /**
+     * For <code>content-type</code> and <code>last-modified</code> headers,it sets the local values
+     * on this instance. For other headers, header is set on the wrapped response.
+     * @param name
+     * @param value
+     */
     @Override
     public void setHeader(String name, String value)
     {
-        super.setHeader(name, value);
         String lname = name.toLowerCase(Locale.ENGLISH);
         if (lname.equals(LAST_MODIFIED))
         {
@@ -326,20 +386,39 @@ public class ResponseIncludeWrapper extends HttpServletResponseWrapper
         } else if (lname.equals(CONTENT_TYPE))
         {
             contentType = value;
+        } else {
+            _getResponse().setHeader(name,value);
         }
     }
 
+    /**
+     * Adds the cookie to the wrapped instance.This way, included responses can
+     * add cookies to the parent response.
+     * @param cookie
+     */
     @Override
     public void addCookie(Cookie cookie)
     {
         _getResponse().addCookie(cookie);
     }
 
+    /**
+     * Sets the integer header on the wrapped response.
+     * @param name
+     * @param value
+     */
     @Override
     public void addIntHeader(String name, int value)
     {
         _getResponse().addIntHeader(name,value);
     }
 
-
+    /**
+     * @return commit status of the wrapped response.
+     */
+    @Override
+    public boolean isCommitted()
+    {
+        return _getResponse().isCommitted();
+    }
 }

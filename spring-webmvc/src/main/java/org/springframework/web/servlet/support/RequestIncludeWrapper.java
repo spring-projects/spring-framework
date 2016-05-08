@@ -26,7 +26,13 @@ public class RequestIncludeWrapper extends HttpServletRequestWrapper
 
     public RequestIncludeWrapper(HttpServletRequest request)
     {
-        this(request,false);
+
+        this(request,null);
+    }
+
+    public RequestIncludeWrapper(HttpServletRequest request, Map<String, String[]> parameterMap)
+    {
+        this(request,parameterMap,false);
     }
 
     /**
@@ -41,7 +47,6 @@ public class RequestIncludeWrapper extends HttpServletRequestWrapper
     }
 
     /**
-
      * @param request
      * Wrapped request
      * @param parameterMap

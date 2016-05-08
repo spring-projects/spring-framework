@@ -456,19 +456,45 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
+	<tag>
+		<name>include</name>
+		<tag-class>org.springframework.web.servlet.tags.IncludeTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<description>Set path of the web resource to be included.</description>
+			<name>path</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Set if the current request parameters should be used in the included request.Default is 'false'.</description>
+			<name>includeRequestParams</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Set all custom request params as a Map.</description>
+			<name>params</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description>Set HTML escaping for this tag, as a boolean value. Overrides the
+				default HTML escaping setting for the current page.</description>
+			<name>htmlEscape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
 
-    <function>
+
+	<function>
         <description>Helps to prepare a URL to a Spring MVC controller method.</description>
         <name>mvcUrl</name>
         <function-class>org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder</function-class>
         <function-signature>org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.MethodArgumentBuilder fromMappingName(java.lang.String)</function-signature>
     </function>
 
-	<function>
-		<description>Helps to render the response of a Spring MVC controller method.</description>
-		<name>mvcInclude</name>
-		<function-class>org.springframework.web.servlet.mvc.method.annotation.MvcIncludeBuilder</function-class>
-		<function-signature>org.springframework.web.servlet.mvc.method.annotation.MvcIncludeBuilder fromPath(java.lang.String)</function-signature>
-	</function>
+
 
 </taglib>
