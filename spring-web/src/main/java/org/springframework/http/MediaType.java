@@ -170,6 +170,16 @@ public class MediaType extends MimeType implements Serializable {
 	 * A String equivalent of {@link MediaType#IMAGE_PNG}.
 	 */
 	public final static String IMAGE_PNG_VALUE = "image/png";
+	
+	/**
+	 * Public constant media type for {@code image/svg+xml}.
+	 */
+	public final static MediaType IMAGE_SVG;
+
+	/**
+	 * A String equivalent of {@link MediaType#IMAGE_SVG}.
+	 */
+	public final static String IMAGE_SVG_VALUE = "image/svg+xml";
 
 	/**
 	 * Public constant media type for {@code multipart/form-data}.
@@ -238,6 +248,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_GIF = valueOf(IMAGE_GIF_VALUE);
 		IMAGE_JPEG = valueOf(IMAGE_JPEG_VALUE);
 		IMAGE_PNG = valueOf(IMAGE_PNG_VALUE);
+		IMAGE_SVG = valueOf(IMAGE_SVG_VALUE);
 		MULTIPART_FORM_DATA = valueOf(MULTIPART_FORM_DATA_VALUE);
 		TEXT_HTML = valueOf(TEXT_HTML_VALUE);
 		TEXT_MARKDOWN = valueOf(TEXT_MARKDOWN_VALUE);
