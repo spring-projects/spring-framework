@@ -17,13 +17,16 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -142,8 +145,30 @@ public final class MockMvcWebConnection implements WebConnection {
 			httpServletResponse = getResponse(requestBuilder);
 			forwardedUrl = httpServletResponse.getForwardedUrl();
 		}
+		storeCookies(webRequest, httpServletResponse.getCookies());
 
 		return new MockWebResponseBuilder(startTime, webRequest, httpServletResponse).build();
+	}
+
+	private void storeCookies(WebRequest webRequest, javax.servlet.http.Cookie[] cookies) {
+		if (cookies == null) {
+			return;
+		}
+		Date now = new Date();
+		CookieManager cookieManager = webClient.getCookieManager();
+		for (javax.servlet.http.Cookie cookie : cookies) {
+			if (cookie.getDomain() == null) {
+				cookie.setDomain(webRequest.getUrl().getHost());
+			}
+			Cookie toManage = MockWebResponseBuilder.createCookie(cookie);
+			Date expires = toManage.getExpires();
+			if (expires == null || expires.after(now)) {
+				cookieManager.addCookie(toManage);
+			}
+			else {
+				cookieManager.removeCookie(toManage);
+			}
+		}
 	}
 
 	private MockHttpServletResponse getResponse(RequestBuilder requestBuilder) throws IOException {
@@ -182,5 +207,4 @@ public final class MockMvcWebConnection implements WebConnection {
 			throw new IllegalArgumentException("contextPath '" + contextPath + "' must not end with '/'.");
 		}
 	}
-
 }

@@ -112,6 +112,10 @@ final class MockWebResponseBuilder {
 	}
 
 	private String valueOfCookie(Cookie cookie) {
+		return createCookie(cookie).toString();
+	}
+
+	static com.gargoylesoftware.htmlunit.util.Cookie createCookie(Cookie cookie) {
 		Date expires = null;
 		if (cookie.getMaxAge() > -1) {
 			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);
@@ -125,7 +129,6 @@ final class MockWebResponseBuilder {
 		if(cookie.isHttpOnly()) {
 			result.setAttribute("httponly", "true");
 		}
-		return new com.gargoylesoftware.htmlunit.util.Cookie(result).toString();
+		return new com.gargoylesoftware.htmlunit.util.Cookie(result);
 	}
-
 }
