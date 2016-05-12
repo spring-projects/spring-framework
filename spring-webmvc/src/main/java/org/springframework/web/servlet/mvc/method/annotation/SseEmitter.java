@@ -152,7 +152,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 		SseEventBuilder id(String id);
 
 		/**
-		 * Add an SSE "event" line.
+		 * Add an SSE "retry" line.
 		 */
 		SseEventBuilder reconnectTime(long reconnectTimeMillis);
 
