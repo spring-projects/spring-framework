@@ -88,6 +88,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final Message<byte[]> HEARTBEAT_MESSAGE;
 
+	/**
+	 * A heartbeat is setup once a CONNECTED frame is received which contains
+	 * the heartbeat settings we need. If we don't receive CONNECTED within
+	 * a minute, the connection is closed proactively.
+	 */
+	private static final int MAX_TIME_TO_CONNECTED_FRAME = 60 * 1000;
+
+
 
 	static {
 		EMPTY_TASK.run();
@@ -567,6 +575,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.debug("TCP connection opened in session=" + getSessionId());
 			}
 			this.tcpConnection = connection;
+			this.tcpConnection.onReadInactivity(new Runnable() {
+				@Override
+				public void run() {
+					if (tcpConnection != null && !isStompConnected) {
+						handleTcpConnectionFailure("No CONNECTED frame received in " +
+								MAX_TIME_TO_CONNECTED_FRAME + " ms.", null);
+					}
+				}
+			}, MAX_TIME_TO_CONNECTED_FRAME);
 			connection.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
 		}
 
