@@ -231,7 +231,10 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 				matches.add(match);
 			}
 		}
-		Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
+		if (matches.size() > 1) {
+			Collections.sort(matches, this.pathMatcher.getPatternComparator(lookupPath));
+		}
+		
 		return matches;
 	}
 
