@@ -200,7 +200,7 @@ public abstract class DataBufferUtils {
 					try {
 						dataBuffer.write(byteBuffer);
 						release = false;
-						sub.emit(dataBuffer);
+						sub.next(dataBuffer);
 					}
 					finally {
 						if (release) {
