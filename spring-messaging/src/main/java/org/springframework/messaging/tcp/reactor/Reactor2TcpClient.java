@@ -168,7 +168,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
 
 		final TcpClient<Message<P>, Message<P>> tcpClient;
-		Runnable cleanupTask;
+		final Runnable cleanupTask;
 		synchronized (this.tcpClients) {
 			if (this.stopping) {
 				IllegalStateException ex = new IllegalStateException("Shutting down.");
@@ -194,6 +194,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 				promise.onError(new Consumer<Throwable>() {
 					@Override
 					public void accept(Throwable ex) {
+						cleanupTask.run();
 						connectionHandler.afterConnectFailure(ex);
 					}
 				})
