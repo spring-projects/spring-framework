@@ -23,14 +23,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -40,7 +36,6 @@ import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
-import org.springframework.jdbc.core.metadata.TableMetaDataContext;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -57,28 +52,10 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public abstract class AbstractJdbcInsert {
-
-	/** Logger available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
-
-	/** Lower-level class used to execute SQL */
-	private final JdbcTemplate jdbcTemplate;
-
-	/** Context used to retrieve and manage database metadata */
-	private final TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
-
-	/** List of columns objects to be used in insert statement */
-	private final List<String> declaredColumns = new ArrayList<>();
+public abstract class AbstractJdbcInsert extends AbstractSimpleSql {
 
 	/** The names of the columns holding the generated key */
 	private String[] generatedKeyNames = new String[0];
-
-	/**
-	 * Has this operation been compiled? Compilation means at least checking
-	 * that a DataSource or JdbcTemplate has been provided.
-	 */
-	private volatile boolean compiled = false;
 
 	/** The generated string used for insert statement */
 	private String insertString = "";
@@ -86,13 +63,12 @@ public abstract class AbstractJdbcInsert {
 	/** The SQL type information for the insert columns */
 	private int[] insertTypes = new int[0];
 
-
 	/**
 	 * Constructor to be used when initializing using a {@link DataSource}.
 	 * @param dataSource the DataSource to be used
 	 */
 	protected AbstractJdbcInsert(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		super(dataSource);
 	}
 
 	/**
@@ -100,89 +76,9 @@ public abstract class AbstractJdbcInsert {
 	 * @param jdbcTemplate the JdbcTemplate to use
 	 */
 	protected AbstractJdbcInsert(JdbcTemplate jdbcTemplate) {
-		Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
-		this.jdbcTemplate = jdbcTemplate;
+		super(jdbcTemplate);
 	}
 
-
-	//-------------------------------------------------------------------------
-	// Methods dealing with configuration properties
-	//-------------------------------------------------------------------------
-
-	/**
-	 * Get the configured {@link JdbcTemplate}.
-	 */
-	public JdbcTemplate getJdbcTemplate() {
-		return this.jdbcTemplate;
-	}
-
-	/**
-	 * Set the name of the table for this insert.
-	 */
-	public void setTableName(@Nullable String tableName) {
-		checkIfConfigurationModificationIsAllowed();
-		this.tableMetaDataContext.setTableName(tableName);
-	}
-
-	/**
-	 * Get the name of the table for this insert.
-	 */
-	@Nullable
-	public String getTableName() {
-		return this.tableMetaDataContext.getTableName();
-	}
-
-	/**
-	 * Set the name of the schema for this insert.
-	 */
-	public void setSchemaName(@Nullable String schemaName) {
-		checkIfConfigurationModificationIsAllowed();
-		this.tableMetaDataContext.setSchemaName(schemaName);
-	}
-
-	/**
-	 * Get the name of the schema for this insert.
-	 */
-	@Nullable
-	public String getSchemaName() {
-		return this.tableMetaDataContext.getSchemaName();
-	}
-
-	/**
-	 * Set the name of the catalog for this insert.
-	 */
-	public void setCatalogName(@Nullable String catalogName) {
-		checkIfConfigurationModificationIsAllowed();
-		this.tableMetaDataContext.setCatalogName(catalogName);
-	}
-
-	/**
-	 * Get the name of the catalog for this insert.
-	 */
-	@Nullable
-	public String getCatalogName() {
-		return this.tableMetaDataContext.getCatalogName();
-	}
-
-	/**
-	 * Set the names of the columns to be used.
-	 */
-	public void setColumnNames(List<String> columnNames) {
-		checkIfConfigurationModificationIsAllowed();
-		this.declaredColumns.clear();
-		this.declaredColumns.addAll(columnNames);
-	}
-
-	/**
-	 * Get the names of the columns used.
-	 */
-	public List<String> getColumnNames() {
-		return Collections.unmodifiableList(this.declaredColumns);
-	}
-
-	/**
-	 * Specify the name of a single generated key column.
-	 */
 	public void setGeneratedKeyName(String generatedKeyName) {
 		checkIfConfigurationModificationIsAllowed();
 		this.generatedKeyNames = new String[] {generatedKeyName};
@@ -204,22 +100,6 @@ public abstract class AbstractJdbcInsert {
 	}
 
 	/**
-	 * Specify whether the parameter metadata for the call should be used.
-	 * The default is {@code true}.
-	 */
-	public void setAccessTableColumnMetaData(boolean accessTableColumnMetaData) {
-		this.tableMetaDataContext.setAccessTableColumnMetaData(accessTableColumnMetaData);
-	}
-
-	/**
-	 * Specify whether the default for including synonyms should be changed.
-	 * The default is {@code false}.
-	 */
-	public void setOverrideIncludeSynonymsDefault(boolean override) {
-		this.tableMetaDataContext.setOverrideIncludeSynonymsDefault(override);
-	}
-
-	/**
 	 * Get the insert string to be used.
 	 */
 	public String getInsertString() {
@@ -237,33 +117,6 @@ public abstract class AbstractJdbcInsert {
 	//-------------------------------------------------------------------------
 	// Methods handling compilation issues
 	//-------------------------------------------------------------------------
-
-	/**
-	 * Compile this JdbcInsert using provided parameters and meta data plus other settings.
-	 * This finalizes the configuration for this object and subsequent attempts to compile are
-	 * ignored. This will be implicitly called the first time an un-compiled insert is executed.
-	 * @throws InvalidDataAccessApiUsageException if the object hasn't been correctly initialized,
-	 * for example if no DataSource has been provided
-	 */
-	public synchronized final void compile() throws InvalidDataAccessApiUsageException {
-		if (!isCompiled()) {
-			if (getTableName() == null) {
-				throw new InvalidDataAccessApiUsageException("Table name is required");
-			}
-			try {
-				this.jdbcTemplate.afterPropertiesSet();
-			}
-			catch (IllegalArgumentException ex) {
-				throw new InvalidDataAccessApiUsageException(ex.getMessage());
-			}
-			compileInternal();
-			this.compiled = true;
-			if (logger.isDebugEnabled()) {
-				logger.debug("JdbcInsert for table [" + getTableName() + "] compiled");
-			}
-		}
-	}
-
 	/**
 	 * Delegate method to perform the actual compilation.
 	 * <p>Subclasses can override this template method to perform  their own compilation.
@@ -280,45 +133,6 @@ public abstract class AbstractJdbcInsert {
 		}
 		onCompileInternal();
 	}
-
-	/**
-	 * Hook method that subclasses may override to react to compilation.
-	 * <p>This implementation is empty.
-	 */
-	protected void onCompileInternal() {
-	}
-
-	/**
-	 * Is this operation "compiled"?
-	 * @return whether this operation is compiled and ready to use
-	 */
-	public boolean isCompiled() {
-		return this.compiled;
-	}
-
-	/**
-	 * Check whether this operation has been compiled already;
-	 * lazily compile it if not already compiled.
-	 * <p>Automatically called by {@code validateParameters}.
-	 */
-	protected void checkCompiled() {
-		if (!isCompiled()) {
-			logger.debug("JdbcInsert not compiled before execution - invoking compile");
-			compile();
-		}
-	}
-
-	/**
-	 * Method to check whether we are allowed to make any configuration changes at this time.
-	 * If the class has been compiled, then no further changes to the configuration are allowed.
-	 */
-	protected void checkIfConfigurationModificationIsAllowed() {
-		if (isCompiled()) {
-			throw new InvalidDataAccessApiUsageException(
-					"Configuration can't be altered once the class has been compiled or used");
-		}
-	}
-
 
 	//-------------------------------------------------------------------------
 	// Methods handling execution

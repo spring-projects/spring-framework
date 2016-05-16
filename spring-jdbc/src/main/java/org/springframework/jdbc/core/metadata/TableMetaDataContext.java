@@ -205,12 +205,23 @@ public class TableMetaDataContext {
 	 * @param parameterSource the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
-		List<Object> values = new ArrayList<>();
+		return matchInParameterValues(parameterSource, this.tableColumns);
+	}
+
+
+	/**
+	 * Match the provided column names and values with the list of columns used.
+	 *
+	 * @param parameterSource the parameter names and values
+	 * @param targetColumns
+	 */
+	public List<Object> matchInParameterValues(SqlParameterSource parameterSource, List<String> targetColumns) {
+		List<Object> values = new ArrayList<Object>();
 		// for parameter source lookups we need to provide caseinsensitive lookup support since the
 		// database metadata is not necessarily providing case sensitive column names
 		Map<String, String> caseInsensitiveParameterNames =
 				SqlParameterSourceUtils.extractCaseInsensitiveParameterNames(parameterSource);
-		for (String column : this.tableColumns) {
+		for (String column : targetColumns) {
 			if (parameterSource.hasValue(column)) {
 				values.add(SqlParameterSourceUtils.getTypedValue(parameterSource, column));
 			}
@@ -245,12 +256,22 @@ public class TableMetaDataContext {
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
-		List<Object> values = new ArrayList<>();
-		Map<String, Object> source = new LinkedHashMap<>(inParameters.size());
+		return matchInParameterValues(inParameters, this.tableColumns);
+	}
+
+	/**
+	 * Match the provided column names and values.
+	 *
+	 * @param inParameters the parameter names and values
+	 * @param targetColumns the names of target columns
+	 */
+	public List<Object> matchInParameterValues(Map<String, ?> inParameters, List<String> targetColumns) {
+		List<Object> values = new ArrayList<Object>();
+		Map<String, Object> source = new LinkedHashMap<String, Object>(inParameters.size());
 		for (String key : inParameters.keySet()) {
 			source.put(key.toLowerCase(), inParameters.get(key));
 		}
-		for (String column : this.tableColumns) {
+		for (String column : targetColumns) {
 			values.add(source.get(column.toLowerCase()));
 		}
 		return values;
@@ -305,12 +326,61 @@ public class TableMetaDataContext {
 		return insertStatement.toString();
 	}
 
+
+	/**
+	 * Build the update string based on configuration and metadata information
+	 *
+	 * @return the update string to be used
+	 */
+	public String createUpdateString(List<String> restrictingColumns) {
+		StringBuilder updateStatement = new StringBuilder();
+		updateStatement.append("UPDATE ");
+		if (this.getSchemaName() != null) {
+			updateStatement.append(this.getSchemaName());
+			updateStatement.append(".");
+		}
+		updateStatement.append(this.getTableName());
+		updateStatement.append(" SET ");
+		int columnCount = 0;
+		for (String columnName : getTableColumns()) {
+			columnCount++;
+			if (columnCount > 1) {
+				updateStatement.append(", ");
+			}
+			updateStatement.append(columnName);
+			updateStatement.append(" = ? ");
+		}
+		if (restrictingColumns.size() > 0) {
+			updateStatement.append(" WHERE ");
+			columnCount = 0;
+			for (String columnName : restrictingColumns) {
+				columnCount++;
+				if (columnCount > 1) {
+					updateStatement.append(" AND ");
+				}
+				updateStatement.append(columnName);
+				updateStatement.append(" = ? ");
+			}
+		}
+		return updateStatement.toString();
+	}
+
 	/**
 	 * Build the array of {@link java.sql.Types} based on configuration and metadata information
 	 * @return the array of types to be used
 	 */
 	public int[] createInsertTypes() {
-		int[] types = new int[getTableColumns().size()];
+		return createColumnTypes(getTableColumns());
+	}
+
+	/**
+	 * Build the array of {@link java.sql.Types} based on metadata information
+	 *
+	 * @param columns the names of columns to get types.
+	 * @return the array of types to be used
+	 */
+	public int[] createColumnTypes(List<String> columns) {
+		int[] types = new int[columns.size()];
 		List<TableParameterMetaData> parameters = obtainMetaDataProvider().getTableParameterMetaData();
 		Map<String, TableParameterMetaData> parameterMap =
 				new LinkedHashMap<>(parameters.size());
@@ -318,7 +388,7 @@ public class TableMetaDataContext {
 			parameterMap.put(tpmd.getParameterName().toUpperCase(), tpmd);
 		}
 		int typeIndx = 0;
-		for (String column : getTableColumns()) {
+		for (String column : columns) {
 			if (column == null) {
 				types[typeIndx] = SqlTypeValue.TYPE_UNKNOWN;
 			}
