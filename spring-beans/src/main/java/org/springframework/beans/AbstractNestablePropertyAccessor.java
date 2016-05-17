@@ -943,7 +943,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					}
 					String key = propertyName.substring(keyStart + PROPERTY_KEY_PREFIX.length(), keyEnd);
 					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
-						key = key.substring(1, key.length() - 1);
+						if (key.length() > 1) {
+							key = key.substring(1, key.length() - 1);
+						}
 					}
 					keys.add(key);
 					searchIndex = keyEnd + PROPERTY_KEY_SUFFIX.length();
