@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 
 import org.springframework.http.HttpHeaders;
@@ -185,22 +187,31 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	protected void sendTextMessage(TextMessage message) throws IOException {
-		getNativeSession().getRemote().sendString(message.getPayload());
+		getRemoteEndpoint().sendString(message.getPayload());
 	}
 
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
-		getNativeSession().getRemote().sendBytes(message.getPayload());
+		getRemoteEndpoint().sendBytes(message.getPayload());
 	}
 
 	@Override
 	protected void sendPingMessage(PingMessage message) throws IOException {
-		getNativeSession().getRemote().sendPing(message.getPayload());
+		getRemoteEndpoint().sendPing(message.getPayload());
 	}
 
 	@Override
 	protected void sendPongMessage(PongMessage message) throws IOException {
-		getNativeSession().getRemote().sendPong(message.getPayload());
+		getRemoteEndpoint().sendPong(message.getPayload());
+	}
+
+	private RemoteEndpoint getRemoteEndpoint() throws IOException {
+		try {
+			return getNativeSession().getRemote();
+		}
+		catch (WebSocketException ex) {
+			throw new IOException("Unable to obtain RemoteEndpoint in session=" + getId(), ex);
+		}
 	}
 
 	@Override
