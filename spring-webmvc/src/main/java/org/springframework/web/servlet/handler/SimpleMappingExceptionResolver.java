@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juan Carlos García
  * @since 22.11.2003
  * @see org.springframework.web.servlet.DispatcherServlet
  */
@@ -243,6 +244,8 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 				deepest = depth;
 				dominantMapping = exceptionMapping;
 				viewName = exceptionMappings.getProperty(exceptionMapping);
+			} else if (ex.getCause() instanceof Exception) {
+				return findMatchingViewName(exceptionMappings, (Exception) ex.getCause());
 			}
 		}
 		if (viewName != null && logger.isDebugEnabled()) {
