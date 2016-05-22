@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,14 @@ import org.springframework.core.annotation.AliasFor;
  * <p>Types that carry this annotation are treated as controller advice where
  * {@link ExceptionHandler @ExceptionHandler} methods assume
  * {@link ResponseBody @ResponseBody} semantics by default.
+ *
+ * <p><b>NOTE:</b> {@code @RestControllerAdvice} is processed if an appropriate
+ * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
+ * {@code RequestMappingHandlerMapping}-{@code RequestMappingHandlerAdapter} pair
+ * which are the default in the MVC Java config and the MVC namespace.
+ * In particular {@code @RestControllerAdvice} is not supported with the
+ * {@code DefaultAnnotationHandlerMapping}-{@code AnnotationMethodHandlerAdapter}
+ * pair both of which are also deprecated.
  *
  * @author Rossen Stoyanchev
  * @since 4.3

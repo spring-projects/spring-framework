@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,20 @@ import java.lang.annotation.Target;
 import org.springframework.stereotype.Controller;
 
 /**
- * A convenience annotation that is itself annotated with {@link Controller @Controller}
- * and {@link ResponseBody @ResponseBody}.
+ * A convenience annotation that is itself annotated with
+ * {@link Controller @Controller} and {@link ResponseBody @ResponseBody}.
  * <p>
  * Types that carry this annotation are treated as controllers where
  * {@link RequestMapping @RequestMapping} methods assume
  * {@link ResponseBody @ResponseBody} semantics by default.
+ *
+ * <p><b>NOTE:</b> {@code @RestController} is processed if an appropriate
+ * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
+ * {@code RequestMappingHandlerMapping}-{@code RequestMappingHandlerAdapter}
+ * pair which are the default in the MVC Java config and the MVC namespace.
+ * In particular {@code @RestController} is not supported with the
+ * {@code DefaultAnnotationHandlerMapping}-{@code AnnotationMethodHandlerAdapter}
+ * pair both of which are also deprecated.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
