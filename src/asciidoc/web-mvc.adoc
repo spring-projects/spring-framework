@@ -1026,8 +1026,8 @@ All matrix variables may be obtained in a Map:
 
 	@RequestMapping(path = "/owners/{ownerId}/pets/{petId}", method = RequestMethod.GET)
 	public void findPet(
-			@MatrixVariable Map<String, String> matrixVars,
-			@MatrixVariable(pathVar="petId"") Map<String, String> petMatrixVars) {
+			@MatrixVariable MultiValueMap<String, String> matrixVars,
+			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
 		// petMatrixVars: ["q" : 11, "s" : 23]

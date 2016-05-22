@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		Map<String, String> map = (Map<String, String>) this.resolver.resolveArgument(
 				this.paramMap, this.mavContainer, this.webRequest, null);
 
-		assertEquals(Arrays.asList("red", "green", "blue"), map.get("colors"));
+		assertEquals("red", map.get("colors"));
 
 		@SuppressWarnings("unchecked")
 		MultiValueMap<String, String> multivalueMap = (MultiValueMap<String, String>) this.resolver.resolveArgument(
@@ -131,7 +131,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		Map<String, String> mapAll = (Map<String, String>) this.resolver.resolveArgument(
 				this.paramMap, this.mavContainer, this.webRequest, null);
 
-		assertEquals(Arrays.asList("red", "purple", "yellow", "orange"), mapAll.get("colors"));
+		assertEquals("red", mapAll.get("colors"));
 	}
 
 	@Test
