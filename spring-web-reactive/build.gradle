@@ -30,6 +30,7 @@ ext {
 	springVersion = '4.3.0.BUILD-SNAPSHOT'
 	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
+	rxJavaVersion = '1.1.1'		// See issue #103
 	tomcatVersion = '8.5.2'
 	jettyVersion = '9.3.8.v20160314'
 	nettyVersion = '4.1.0.CR6'
@@ -96,8 +97,10 @@ dependencies {
 	compile "commons-logging:commons-logging:1.2"
 
 	optional "org.springframework:spring-context-support:${springVersion}" // for FreeMarker
-	optional 'io.reactivex:rxjava:1.1.0'
-	optional "io.reactivex:rxnetty-http:0.5.2-SNAPSHOT"
+	optional 'io.reactivex:rxjava:${rxJavaVersion}'
+	optional ("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+		exclude group: 'io.reactivex', module: 'rxjava'
+	}
 	optional "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
 	optional "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 	optional "io.projectreactor:reactor-netty:${reactorNettyVersion}"
