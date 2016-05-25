@@ -71,7 +71,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/x-www-form-urlencoded}.
-	 *  */
+	 */
 	public final static MediaType APPLICATION_FORM_URLENCODED;
 
 	/**
@@ -103,7 +103,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
-	 *  */
+	 */
 	public final static MediaType APPLICATION_OCTET_STREAM;
 
 	/**
@@ -113,7 +113,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/pdf}.
-	 *  */
+	 */
 	public final static MediaType APPLICATION_PDF;
 
 	/**
@@ -123,7 +123,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/xhtml+xml}.
-	 *  */
+	 */
 	public final static MediaType APPLICATION_XHTML_XML;
 
 	/**
@@ -173,7 +173,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code multipart/form-data}.
-	 *  */
+	 */
 	public final static MediaType MULTIPART_FORM_DATA;
 
 	/**
@@ -183,7 +183,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code text/html}.
-	 *  */
+	 */
 	public final static MediaType TEXT_HTML;
 
 	/**
@@ -203,7 +203,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code text/plain}.
-	 *  */
+	 */
 	public final static MediaType TEXT_PLAIN;
 
 	/**
@@ -213,7 +213,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code text/xml}.
-	 *  */
+	 */
 	public final static MediaType TEXT_XML;
 
 	/**
