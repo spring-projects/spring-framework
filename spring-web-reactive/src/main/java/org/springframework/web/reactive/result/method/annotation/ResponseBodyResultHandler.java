@@ -126,23 +126,25 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	@SuppressWarnings("unchecked")
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
-		Optional<Object> value = result.getReturnValue();
-		if (!value.isPresent()) {
-			return Mono.empty();
-		}
-
 		Publisher<?> publisher;
 		ResolvableType elementType;
 		ResolvableType returnType = result.getReturnValueType();
+
 		if (this.conversionService.canConvert(returnType.getRawClass(), Publisher.class)) {
-			publisher = this.conversionService.convert(value.get(), Publisher.class);
+			Optional<Object> optionalValue = result.getReturnValue();
+			if (optionalValue.isPresent()) {
+				publisher = this.conversionService.convert(optionalValue.get(), Publisher.class);
+			}
+			else {
+				publisher = Mono.empty();
+			}
 			elementType = returnType.getGeneric(0);
 			if (Void.class.equals(elementType.getRawClass())) {
 				return Mono.from((Publisher<Void>)publisher);
 			}
 		}
 		else {
-			publisher = Mono.just(value.get());
+			publisher = Mono.justOrEmpty(result.getReturnValue());
 			elementType = returnType;
 		}
 
