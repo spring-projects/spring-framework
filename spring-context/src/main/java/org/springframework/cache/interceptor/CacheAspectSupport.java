@@ -16,20 +16,8 @@
 
 package org.springframework.cache.interceptor;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -50,6 +38,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Base class for caching aspects, such as the {@link CacheInterceptor}
@@ -94,6 +92,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	private CacheResolver cacheResolver;
 
 	private BeanFactory beanFactory;
+
+	private CacheResultWrapperManager cacheResultWrapperManager = new CacheResultWrapperManager();
 
 	private boolean initialized = false;
 
@@ -332,7 +332,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return targetClass;
 	}
 
-	private Object execute(final CacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {
+	private Object execute(final CacheOperationInvoker invoker, Method method, final CacheOperationContexts contexts) {
 		// Special handling of synchronized invocation
 		if (contexts.isSynchronized()) {
 			CacheOperationContext context = contexts.get(CacheableOperation.class).iterator().next();
@@ -368,7 +368,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		Cache.ValueWrapper cacheHit = findCachedItem(contexts.get(CacheableOperation.class));
 
 		// Collect puts from any @Cacheable miss, if no cached item is found
-		List<CachePutRequest> cachePutRequests = new LinkedList<>();
+		final List<CachePutRequest> cachePutRequests = new LinkedList<>();
 		if (cacheHit == null) {
 			collectPutRequests(contexts.get(CacheableOperation.class),
 					CacheOperationExpressionEvaluator.NO_RESULT, cachePutRequests);
@@ -380,32 +380,42 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		if (cacheHit != null && cachePutRequests.isEmpty() && !hasCachePut(contexts)) {
 			// If there are no put requests, just use the cache hit
 			cacheValue = cacheHit.get();
-			if (method.getReturnType() == Optional.class &&
-					(cacheValue == null || cacheValue.getClass() != Optional.class)) {
-				returnValue = Optional.ofNullable(cacheValue);
-			}
-			else {
-				returnValue = cacheValue;
-			}
+			returnValue = cacheResultWrapperManager.wrap(method.getReturnType(), cacheValue);
+			updateCache(cacheValue, contexts, cachePutRequests);
 		}
 		else {
+			// TODO: cacheValue = ObjectUtils.unwrapOptional(returnValue); use this to wrap/unwrap
+
 			// Invoke the method if we don't have a cache hit
 			returnValue = invokeOperation(invoker);
-			cacheValue = ObjectUtils.unwrapOptional(returnValue);
+
+			cacheResultWrapperManager.asyncUnwrap(returnValue, new AsyncWrapResult(new AsyncWrapResult.CallBack() {
+				@Override
+				public void onValue(Object cacheValue) {
+					updateCache(cacheValue, contexts, cachePutRequests);
+				}
+
+				@Override
+				public void onError(Throwable throwable) {
+					// Nothing to do, I think...
+				}
+			}));
 		}
 
+		return returnValue;
+	}
+
+	private void updateCache(Object cacheValue, CacheOperationContexts contexts, List<CachePutRequest> cachePutRequests) {
 		// Collect any explicit @CachePuts
 		collectPutRequests(contexts.get(CachePutOperation.class), cacheValue, cachePutRequests);
 
 		// Process any collected put requests, either from @CachePut or a @Cacheable miss
 		for (CachePutRequest cachePutRequest : cachePutRequests) {
-			cachePutRequest.apply(cacheValue);
-		}
+      cachePutRequest.apply(cacheValue);
+    }
 
 		// Process any late evictions
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), false, cacheValue);
-
-		return returnValue;
 	}
 
 	private boolean hasCachePut(CacheOperationContexts contexts) {
