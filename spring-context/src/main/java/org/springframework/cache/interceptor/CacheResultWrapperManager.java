@@ -49,7 +49,6 @@ public class CacheResultWrapperManager {
   }
 
   public Object asyncUnwrap(Object valueWrapped, AsyncWrapResult asyncResult) {
-    System.out.println("valueWrapped = " + valueWrapped);
     if(valueWrapped != null) {
       CacheResultWrapper unwrapper = unwrapperByClass.get(valueWrapped.getClass());
 
