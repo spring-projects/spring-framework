@@ -16,37 +16,44 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+
 /**
+ * Unit tests for {@link ResponseBodyResultHandler}.
+ *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class ResponseBodyResultHandlerTests {
 
 
 	@Test
 	public void supports() throws NoSuchMethodException {
-		ResponseBodyResultHandler handler = new ResponseBodyResultHandler(Collections.singletonList(
-				new CodecHttpMessageConverter<String>(new StringEncoder(), null)),
-				new DefaultConversionService());
+		ResponseBodyResultHandler handler = createResultHandler(new StringEncoder());
 		TestController controller = new TestController();
 
-		HandlerMethod hm = new HandlerMethod(controller,TestController.class.getMethod("notAnnotated"));
+		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("notAnnotated"));
 		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
 		assertFalse(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
 
@@ -58,6 +65,21 @@ public class ResponseBodyResultHandlerTests {
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
 		assertTrue(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
 	}
+
+	@Test
+	public void defaultOrder() throws Exception {
+		ResponseBodyResultHandler handler = createResultHandler(new StringEncoder());
+		assertEquals(0, handler.getOrder());
+	}
+
+
+	private ResponseBodyResultHandler createResultHandler(Encoder<?>... encoders) {
+		List<HttpMessageConverter<?>> converters = Arrays.stream(encoders)
+				.map(encoder -> new CodecHttpMessageConverter<>(encoder, null))
+				.collect(Collectors.toList());
+		return new ResponseBodyResultHandler(converters, new DefaultConversionService());
+	}
+
 
 
 	@SuppressWarnings("unused")

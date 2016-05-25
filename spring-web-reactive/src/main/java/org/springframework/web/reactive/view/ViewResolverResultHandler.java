@@ -53,7 +53,7 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 
 	private final ConversionService conversionService;
 
-	private int order = Integer.MAX_VALUE;
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
 	public ViewResolverResultHandler(List<ViewResolver> resolvers, ConversionService service) {
@@ -87,17 +87,17 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 	@Override
 	public boolean supports(HandlerResult result) {
 		Class<?> clazz = result.getReturnValueType().getRawClass();
-		if (isViewNameOrViewReference(clazz)) {
+		if (isStringOrViewReference(clazz)) {
 			return true;
 		}
 		if (this.conversionService.canConvert(clazz, Mono.class)) {
 			clazz = result.getReturnValueType().getGeneric(0).getRawClass();
-			return isViewNameOrViewReference(clazz);
+			return isStringOrViewReference(clazz);
 		}
 		return false;
 	}
 
-	private boolean isViewNameOrViewReference(Class<?> clazz) {
+	private boolean isStringOrViewReference(Class<?> clazz) {
 		return (CharSequence.class.isAssignableFrom(clazz) || View.class.isAssignableFrom(clazz));
 	}
 

@@ -19,10 +19,8 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +38,6 @@ import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
@@ -50,6 +47,10 @@ import org.springframework.web.server.ServerWebExchange;
 
 
 /**
+ * {@code HandlerResultHandler} that handles return values from methods annotated
+ * with {@code @ResponseBody} writing to the body of the request or response with
+ * an {@link HttpMessageConverter}.
+ *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  * @author Sebastien Deleuze
@@ -57,47 +58,48 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered {
 
-	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
+	private static final MediaType MEDIA_TYPE_APPLICATION_ALL = new MediaType("application");
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
 	private final ConversionService conversionService;
 
-	private final List<MediaType> allMediaTypes;
+	private final List<MediaType> supportedMediaTypes;
 
-	private final Map<HttpMessageConverter<?>, List<MediaType>> mediaTypesByEncoder;
+	private int order = 0;
 
-	private int order = 0; // TODO: should be MAX_VALUE
 
+	/**
+	 * Constructor with message converters and conversion service.
+	 * @param messageConverters converters for writing the response body with
+	 * @param conversionService for converting to Flux and Mono from other reactive types
+	 */
 	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> messageConverters,
-			ConversionService service) {
+			ConversionService conversionService) {
+
 		Assert.notEmpty(messageConverters, "At least one message converter is required.");
-		Assert.notNull(service, "'conversionService' is required.");
+		Assert.notNull(conversionService, "'conversionService' is required.");
 		this.messageConverters = messageConverters;
-		this.conversionService = service;
-		this.allMediaTypes = getAllMediaTypes(messageConverters);
-		this.mediaTypesByEncoder = getMediaTypesByConverter(messageConverters);
+		this.conversionService = conversionService;
+		this.supportedMediaTypes = initSupportedMediaTypes(messageConverters);
 	}
 
-	private static List<MediaType> getAllMediaTypes(
-			List<HttpMessageConverter<?>> messageConverters) {
+	private static List<MediaType> initSupportedMediaTypes(List<HttpMessageConverter<?>> converters) {
 		Set<MediaType> set = new LinkedHashSet<>();
-		messageConverters.forEach(
-				converter -> set.addAll(converter.getWritableMediaTypes()));
+		converters.forEach(converter -> set.addAll(converter.getWritableMediaTypes()));
 		List<MediaType> result = new ArrayList<>(set);
 		MediaType.sortBySpecificity(result);
 		return Collections.unmodifiableList(result);
 	}
 
-	private static Map<HttpMessageConverter<?>, List<MediaType>> getMediaTypesByConverter(
-			List<HttpMessageConverter<?>> converters) {
-		Map<HttpMessageConverter<?>, List<MediaType>> result =
-				new HashMap<>(converters.size());
-		converters.forEach(converter -> result
-				.put(converter, converter.getWritableMediaTypes()));
-		return Collections.unmodifiableMap(result);
-	}
 
+	/**
+	 * Set the order for this result handler relative to others.
+	 * <p>By default this is set to 0 and is generally save to be ahead of other
+	 * result handlers since it only gets involved if the method (or class) is
+	 * annotated with {@code @ResponseBody}.
+	 * @param order the order
+	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -144,27 +146,23 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			elementType = returnType;
 		}
 
-		List<MediaType> compatibleMediaTypes =
-				getCompatibleMediaTypes(exchange.getRequest(), elementType);
+		ServerHttpRequest request = exchange.getRequest();
+		List<MediaType> compatibleMediaTypes = getCompatibleMediaTypes(request, elementType);
 		if (compatibleMediaTypes.isEmpty()) {
-			return Mono.error(new NotAcceptableStatusException(
-					getProducibleMediaTypes(elementType)));
+			List<MediaType> supported = getProducibleMediaTypes(elementType);
+			return Mono.error(new NotAcceptableStatusException(supported));
 		}
 
-		Optional<MediaType> selectedMediaType = selectBestMediaType(compatibleMediaTypes);
-
-		if (selectedMediaType.isPresent()) {
-			HttpMessageConverter<?> converter =
-					resolveEncoder(elementType, selectedMediaType.get());
+		MediaType bestMediaType = selectBestMediaType(compatibleMediaTypes);
+		if (bestMediaType != null) {
+			HttpMessageConverter<?> converter = resolveEncoder(elementType, bestMediaType);
 			if (converter != null) {
 				ServerHttpResponse response = exchange.getResponse();
-				return converter.write((Publisher) publisher, elementType,
-						selectedMediaType.get(),
-								response);
+				return converter.write((Publisher) publisher, elementType, bestMediaType, response);
 			}
 		}
 
-		return Mono.error(new NotAcceptableStatusException(this.allMediaTypes));
+		return Mono.error(new NotAcceptableStatusException(this.supportedMediaTypes));
 	}
 
 	private List<MediaType> getCompatibleMediaTypes(ServerHttpRequest request,
@@ -174,11 +172,12 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(elementType);
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
-		for (MediaType acceptableMediaType : acceptableMediaTypes) {
-			compatibleMediaTypes.addAll(producibleMediaTypes.stream().
-					filter(acceptableMediaType::isCompatibleWith).
-					map(producibleType -> getMostSpecificMediaType(acceptableMediaType,
-							producibleType)).collect(Collectors.toList()));
+		for (MediaType acceptable : acceptableMediaTypes) {
+			for (MediaType producible : producibleMediaTypes) {
+				if (acceptable.isCompatibleWith(producible)) {
+					compatibleMediaTypes.add(getMostSpecificMediaType(acceptable, producible));
+				}
+			}
 		}
 
 		List<MediaType> result = new ArrayList<>(compatibleMediaTypes);
@@ -191,44 +190,37 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return (mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes);
 	}
 
-	private Optional<MediaType> selectBestMediaType(
-			List<MediaType> compatibleMediaTypes) {
+	private List<MediaType> getProducibleMediaTypes(ResolvableType type) {
+		return this.messageConverters.stream()
+				.filter(converter -> converter.canWrite(type, null))
+				.flatMap(converter -> converter.getWritableMediaTypes().stream())
+				.collect(Collectors.collectingAndThen(Collectors.toList(), result -> {
+					if (result.isEmpty()) {
+						result.add(MediaType.ALL);
+					}
+					return result;
+				}));
+	}
+
+	private MediaType getMostSpecificMediaType(MediaType acceptable, MediaType producible) {
+		producible = producible.copyQualityValue(acceptable);
+		Comparator<MediaType> comparator = MediaType.SPECIFICITY_COMPARATOR;
+		return (comparator.compare(acceptable, producible) <= 0 ? acceptable : producible);
+	}
+
+	private MediaType selectBestMediaType(List<MediaType> compatibleMediaTypes) {
 		for (MediaType mediaType : compatibleMediaTypes) {
 			if (mediaType.isConcrete()) {
-				return Optional.of(mediaType);
+				return mediaType;
 			}
-			else if (mediaType.equals(MediaType.ALL) ||
-					mediaType.equals(MEDIA_TYPE_APPLICATION)) {
-				return Optional.of(MediaType.APPLICATION_OCTET_STREAM);
+			else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION_ALL)) {
+				return MediaType.APPLICATION_OCTET_STREAM;
 			}
 		}
-		return Optional.empty();
+		return null;
 	}
 
-	private List<MediaType> getProducibleMediaTypes(ResolvableType type) {
-		List<MediaType> result = this.messageConverters.stream()
-				.filter(converter -> converter.canWrite(type, null))
-				.flatMap(encoder -> this.mediaTypesByEncoder.get(encoder).stream())
-				.collect(Collectors.toList());
-		if (result.isEmpty()) {
-			result.add(MediaType.ALL);
-		}
-
-		return result;
-	}
-
-	/**
-	 * Return the more specific of the acceptable and the producible media types
-	 * with the q-value of the former.
-	 */
-	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
-		produceType = produceType.copyQualityValue(acceptType);
-		Comparator<MediaType> comparator = MediaType.SPECIFICITY_COMPARATOR;
-		return (comparator.compare(acceptType, produceType) <= 0 ? acceptType : produceType);
-	}
-
-	private HttpMessageConverter<?> resolveEncoder(ResolvableType type,
-			MediaType mediaType) {
+	private HttpMessageConverter<?> resolveEncoder(ResolvableType type, MediaType mediaType) {
 		for (HttpMessageConverter<?> converter : this.messageConverters) {
 			if (converter.canWrite(type, mediaType)) {
 				return converter;

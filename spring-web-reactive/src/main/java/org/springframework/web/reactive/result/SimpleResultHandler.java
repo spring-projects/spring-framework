@@ -42,9 +42,9 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 
-	private int order = Ordered.LOWEST_PRECEDENCE;
-
 	private ConversionService conversionService;
+
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
 	public SimpleResultHandler() {
