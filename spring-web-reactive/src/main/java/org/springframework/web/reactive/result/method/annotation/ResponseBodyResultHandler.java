@@ -42,6 +42,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
+import org.springframework.web.reactive.accept.ContentTypeResolver;
+import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -64,23 +66,44 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	private final ConversionService conversionService;
 
+	private final ContentTypeResolver contentTypeResolver;
+
 	private final List<MediaType> supportedMediaTypes;
 
 	private int order = 0;
 
 
 	/**
-	 * Constructor with message converters and conversion service.
+	 * Constructor with message converters and a {@code ConversionService} only
+	 * and creating a {@link HeaderContentTypeResolver}, i.e. using Accept header
+	 * to determine the requested content type.
+	 *
+	 * @param converters converters for writing the response body with
+	 * @param conversionService for converting to Flux and Mono from other reactive types
+	 */
+	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> converters,
+			ConversionService conversionService) {
+
+		this(converters, conversionService, new HeaderContentTypeResolver());
+	}
+
+	/**
+	 * Constructor with message converters, a {@code ConversionService}, and a
+	 * {@code ContentTypeResolver}.
+	 *
 	 * @param messageConverters converters for writing the response body with
 	 * @param conversionService for converting to Flux and Mono from other reactive types
 	 */
 	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> messageConverters,
-			ConversionService conversionService) {
+			ConversionService conversionService, ContentTypeResolver contentTypeResolver) {
 
 		Assert.notEmpty(messageConverters, "At least one message converter is required.");
 		Assert.notNull(conversionService, "'conversionService' is required.");
+		Assert.notNull(contentTypeResolver, "'contentTypeResolver' is required.");
+
 		this.messageConverters = messageConverters;
 		this.conversionService = conversionService;
+		this.contentTypeResolver = contentTypeResolver;
 		this.supportedMediaTypes = initSupportedMediaTypes(messageConverters);
 	}
 
@@ -149,10 +172,13 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		}
 
 		ServerHttpRequest request = exchange.getRequest();
-		List<MediaType> compatibleMediaTypes = getCompatibleMediaTypes(request, elementType);
+		List<MediaType> compatibleMediaTypes = getCompatibleMediaTypes(exchange, elementType);
 		if (compatibleMediaTypes.isEmpty()) {
-			List<MediaType> supported = getProducibleMediaTypes(elementType);
-			return Mono.error(new NotAcceptableStatusException(supported));
+			if (result.getReturnValue().isPresent()) {
+				List<MediaType> mediaTypes = getProducibleMediaTypes(elementType);
+				return Mono.error(new NotAcceptableStatusException(mediaTypes));
+			}
+			return Mono.empty();
 		}
 
 		MediaType bestMediaType = selectBestMediaType(compatibleMediaTypes);
@@ -167,10 +193,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return Mono.error(new NotAcceptableStatusException(this.supportedMediaTypes));
 	}
 
-	private List<MediaType> getCompatibleMediaTypes(ServerHttpRequest request,
+	private List<MediaType> getCompatibleMediaTypes(ServerWebExchange exchange,
 			ResolvableType elementType) {
 
-		List<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(request);
+		List<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(exchange);
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(elementType);
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
@@ -187,8 +213,8 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return result;
 	}
 
-	private List<MediaType> getAcceptableMediaTypes(ServerHttpRequest request) {
-		List<MediaType> mediaTypes = request.getHeaders().getAccept();
+	private List<MediaType> getAcceptableMediaTypes(ServerWebExchange exchange) {
+		List<MediaType> mediaTypes = this.contentTypeResolver.resolveMediaTypes(exchange);
 		return (mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes);
 	}
 

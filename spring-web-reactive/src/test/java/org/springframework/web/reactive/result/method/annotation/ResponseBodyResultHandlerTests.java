@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,23 +27,36 @@ import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.server.reactive.MockServerHttpRequest;
+import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.HandlerResultHandler;
+import org.springframework.web.reactive.accept.ContentTypeResolver;
+import org.springframework.web.reactive.accept.FixedContentTypeResolver;
+import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 
 /**
  * Unit tests for {@link ResponseBodyResultHandler}.
- *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
@@ -50,7 +65,7 @@ public class ResponseBodyResultHandlerTests {
 
 	@Test
 	public void supports() throws NoSuchMethodException {
-		ResponseBodyResultHandler handler = createResultHandler(new StringEncoder());
+		ResponseBodyResultHandler handler = createHandler(new StringEncoder());
 		TestController controller = new TestController();
 
 		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("notAnnotated"));
@@ -68,18 +83,42 @@ public class ResponseBodyResultHandlerTests {
 
 	@Test
 	public void defaultOrder() throws Exception {
-		ResponseBodyResultHandler handler = createResultHandler(new StringEncoder());
+		ResponseBodyResultHandler handler = createHandler(new StringEncoder());
 		assertEquals(0, handler.getOrder());
 	}
 
+	@Test
+	public void contentTypeResolver() throws Exception {
+		MediaType contentType = MediaType.APPLICATION_JSON_UTF8;
+		ContentTypeResolver resolver = new FixedContentTypeResolver(contentType);
+		HandlerResultHandler handler = createHandler(resolver, new StringEncoder(), new JacksonJsonEncoder());
 
-	private ResponseBodyResultHandler createResultHandler(Encoder<?>... encoders) {
+		ServerWebExchange exchange = createExchange("/foo");
+		HandlerResult result = new HandlerResult(new Object(), "fooValue", ResolvableType.forClass(String.class));
+		handler.handleResult(exchange, result).get();
+
+		assertEquals(contentType, exchange.getResponse().getHeaders().getContentType());
+	}
+
+
+	private ResponseBodyResultHandler createHandler(Encoder<?>... encoders) {
+		return createHandler(new HeaderContentTypeResolver(), encoders);
+	}
+
+	private ResponseBodyResultHandler createHandler(ContentTypeResolver resolver,
+			Encoder<?>... encoders) {
+
 		List<HttpMessageConverter<?>> converters = Arrays.stream(encoders)
 				.map(encoder -> new CodecHttpMessageConverter<>(encoder, null))
 				.collect(Collectors.toList());
-		return new ResponseBodyResultHandler(converters, new DefaultConversionService());
+		return new ResponseBodyResultHandler(converters, new DefaultConversionService(), resolver);
 	}
 
+	private ServerWebExchange createExchange(String path) throws URISyntaxException {
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
+		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+	}
 
 
 	@SuppressWarnings("unused")

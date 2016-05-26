@@ -406,14 +406,11 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@Bean
 		public ResponseBodyResultHandler responseBodyResultHandler() {
-			List<HttpMessageConverter<?>> converters =
-					Arrays.asList(new ResourceHttpMessageConverter(),
-							new CodecHttpMessageConverter<ByteBuffer>(
-									new ByteBufferEncoder(), new ByteBufferDecoder()),
-							new CodecHttpMessageConverter<String>(new StringEncoder(),
-									new StringDecoder()),
-							new CodecHttpMessageConverter<Object>(
-									new JacksonJsonEncoder(), new JacksonJsonDecoder()));
+			List<HttpMessageConverter<?>> converters = Arrays.asList(
+					new ResourceHttpMessageConverter(),
+					new CodecHttpMessageConverter<>(new ByteBufferEncoder(), new ByteBufferDecoder()),
+					new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder()),
+					new CodecHttpMessageConverter<>(new JacksonJsonEncoder(), new JacksonJsonDecoder()));
 			ResponseBodyResultHandler resultHandler =
 					new ResponseBodyResultHandler(converters, conversionService());
 			resultHandler.setOrder(1);
