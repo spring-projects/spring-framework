@@ -389,8 +389,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			// Invoke the method if we don't have a cache hit
 			Object originalReturnValue = invokeOperation(invoker);
 
-			returnValue = cacheResultWrapperManager.asyncUnwrap(originalReturnValue, new
-					AsyncWrapResult(new AsyncWrapResult.CallBack() {
+			returnValue = cacheResultWrapperManager.asyncUnwrap(originalReturnValue, new AsyncWrapResult(new AsyncWrapResult.CallBack() {
 				@Override
 				public void onValue(Object cacheValue) {
 					updateCache(cacheValue, contexts, cachePutRequests);
@@ -412,8 +411,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		// Process any collected put requests, either from @CachePut or a @Cacheable miss
 		for (CachePutRequest cachePutRequest : cachePutRequests) {
-      cachePutRequest.apply(cacheValue);
-    }
+		  cachePutRequest.apply(cacheValue);
+		}
 
 		// Process any late evictions
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), false, cacheValue);
