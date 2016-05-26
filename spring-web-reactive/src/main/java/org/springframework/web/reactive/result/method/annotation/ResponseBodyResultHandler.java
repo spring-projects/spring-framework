@@ -182,10 +182,11 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 		MediaType bestMediaType = selectBestMediaType(compatibleMediaTypes);
 		if (bestMediaType != null) {
-			HttpMessageConverter<?> converter = resolveEncoder(elementType, bestMediaType);
-			if (converter != null) {
-				ServerHttpResponse response = exchange.getResponse();
-				return converter.write((Publisher) publisher, elementType, bestMediaType, response);
+			for (HttpMessageConverter<?> converter : this.messageConverters) {
+				if (converter.canWrite(elementType, bestMediaType)) {
+					ServerHttpResponse response = exchange.getResponse();
+					return converter.write((Publisher) publisher, elementType, bestMediaType, response);
+				}
 			}
 		}
 
@@ -244,15 +245,6 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			}
 			else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION_ALL)) {
 				return MediaType.APPLICATION_OCTET_STREAM;
-			}
-		}
-		return null;
-	}
-
-	private HttpMessageConverter<?> resolveEncoder(ResolvableType type, MediaType mediaType) {
-		for (HttpMessageConverter<?> converter : this.messageConverters) {
-			if (converter.canWrite(type, mediaType)) {
-				return converter;
 			}
 		}
 		return null;
