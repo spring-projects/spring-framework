@@ -17,6 +17,7 @@ package org.springframework.web.reactive.result.view;
 
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.Duration;
@@ -54,10 +55,8 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.hamcrest.CoreMatchers.endsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -82,10 +81,7 @@ public class ViewResolutionResultHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
-		this.response = new MockServerHttpResponse();
-		WebSessionManager sessionManager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, this.response, sessionManager);
+		this.exchange = createExchange("/path");
 		this.model = new ExtendedModelMap().addAttribute("id", "123");
 		this.conversionService = new DefaultConversionService();
 		this.conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
@@ -116,7 +112,7 @@ public class ViewResolutionResultHandlerTests {
 		TestView view = new TestView("account");
 		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(handler, view, ResolvableType.forClass(View.class));
+		handle(this.exchange, handler, view, ResolvableType.forClass(View.class));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
@@ -127,7 +123,7 @@ public class ViewResolutionResultHandlerTests {
 		TestView view = new TestView("account");
 		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(handler, Mono.just(view), methodReturnType("handleMonoView"));
+		handle(this.exchange, handler, Mono.just(view), methodReturnType("handleMonoView"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
@@ -139,7 +135,7 @@ public class ViewResolutionResultHandlerTests {
 		TestViewResolver resolver = new TestViewResolver().addView(view);
 		List<ViewResolver> resolvers = Collections.singletonList(resolver);
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(handler, "account", ResolvableType.forClass(String.class));
+		handle(this.exchange, handler, "account", ResolvableType.forClass(String.class));
 
 		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
 		subscriber.bindTo(this.response.getBody())
@@ -152,7 +148,7 @@ public class ViewResolutionResultHandlerTests {
 		TestViewResolver resolver = new TestViewResolver().addView(view);
 		List<ViewResolver> resolvers = Collections.singletonList(resolver);
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(handler, Mono.just("account"), methodReturnType("handleMonoString"));
+		handle(this.exchange, handler, Mono.just("account"), methodReturnType("handleMonoString"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
@@ -166,7 +162,7 @@ public class ViewResolutionResultHandlerTests {
 		TestViewResolver resolver2 = new TestViewResolver().addView(view2);
 		List<ViewResolver> resolvers = Arrays.asList(resolver1, resolver2);
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(handler, "profile", ResolvableType.forClass(String.class));
+		handle(this.exchange, handler, "profile", ResolvableType.forClass(String.class));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("profile: {id=123}", asString(buf)));
@@ -176,19 +172,32 @@ public class ViewResolutionResultHandlerTests {
 	public void viewNameWithNoMatch() throws Exception {
 		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		TestSubscriber<Void> subscriber = handle(handler, "account", ResolvableType.forClass(String.class));
+		TestSubscriber<Void> subscriber = handle(this.exchange, handler, "account", ResolvableType.forClass(String.class));
 
 		subscriber.assertNoValues();
 	}
 
 	@Test
 	public void viewNameNotSpecified() throws Exception {
-		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
+		TestView view = new TestView("account");
+		TestViewResolver resolver = new TestViewResolver().addView(view);
+		List<ViewResolver> resolvers = Collections.singletonList(resolver);
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		TestSubscriber<Void> subscriber = handle(handler, null, ResolvableType.forClass(String.class));
 
-		subscriber.assertErrorWith(ex ->
-				assertThat(ex.getMessage(), endsWith("neither returned a view name nor a View object")));
+		ServerWebExchange exchange = createExchange("/account");
+		handle(exchange, handler, null, ResolvableType.forClass(String.class));
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+
+		exchange = createExchange("/account/");
+		handle(exchange, handler, null, ResolvableType.forClass(String.class));
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+
+		exchange = createExchange("/account.123");
+		handle(exchange, handler, null, ResolvableType.forClass(String.class));
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
 	}
 
 	@Test
@@ -196,13 +205,9 @@ public class ViewResolutionResultHandlerTests {
 		TestView view = new TestView("account");
 		TestViewResolver resolver = new TestViewResolver().addView(view);
 		List<ViewResolver> resolvers = Collections.singletonList(resolver);
-		HandlerResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService) {
-			@Override
-			protected String getDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
-				return "account";
-			}
-		};
-		handle(handler, Mono.empty(), methodReturnType("handleMonoString"));
+		HandlerResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
+		ServerWebExchange exchange = createExchange("/account");
+		handle(exchange, handler, Mono.empty(), methodReturnType("handleMonoString"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
@@ -225,10 +230,18 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 
+	private ServerWebExchange createExchange(String path) throws URISyntaxException {
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
+		this.response = new MockServerHttpResponse();
+		WebSessionManager sessionManager = new DefaultWebSessionManager();
+		return new DefaultServerWebExchange(request, this.response, sessionManager);
+	}
 
-	private TestSubscriber<Void> handle(HandlerResultHandler handler, Object value, ResolvableType type) {
+	private TestSubscriber<Void> handle(ServerWebExchange exchange, HandlerResultHandler handler,
+			Object value, ResolvableType type) {
+
 		HandlerResult result = new HandlerResult(new Object(), value, type, this.model);
-		Mono<Void> mono = handler.handleResult(this.exchange, result);
+		Mono<Void> mono = handler.handleResult(exchange, result);
 		TestSubscriber<Void> subscriber = new TestSubscriber<>();
 		return subscriber.bindTo(mono).await(Duration.ofSeconds(1));
 	}

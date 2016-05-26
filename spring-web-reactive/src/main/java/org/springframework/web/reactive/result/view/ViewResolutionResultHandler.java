@@ -30,9 +30,11 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.HttpRequestPathHelper;
 
 
 /**
@@ -53,6 +55,8 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 	private final ConversionService conversionService;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
+
+	private final HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
 
 
 	/**
@@ -180,7 +184,14 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 	}
 
 	protected String getDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
-		return null;
+		String path = this.pathHelper.getLookupPathForRequest(exchange);
+		if (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+		if (path.endsWith("/")) {
+			path = path.substring(0, path.length() - 1);
+		}
+		return StringUtils.stripFilenameExtension(path);
 	}
 
 }
