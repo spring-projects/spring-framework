@@ -5095,7 +5095,7 @@ means requests are allowed to come in any order. Here is an example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder().build();
+	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder(true).build();
 ----
 
 Even with unordered requests by default each request is allowed to execute once only.

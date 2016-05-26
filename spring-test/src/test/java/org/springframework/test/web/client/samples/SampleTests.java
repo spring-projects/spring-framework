@@ -49,7 +49,7 @@ public class SampleTests {
 	@Before
 	public void setup() {
 		this.restTemplate = new RestTemplate();
-		this.mockServer = MockRestServiceServer.bindTo(this.restTemplate).ignoreExpectOrder().build();
+		this.mockServer = MockRestServiceServer.bindTo(this.restTemplate).ignoreExpectOrder(true).build();
 	}
 
 	@Test
@@ -125,10 +125,11 @@ public class SampleTests {
 			.andRespond(withSuccess("8", MediaType.TEXT_PLAIN));
 
 		@SuppressWarnings("unused")
-		String result = this.restTemplate.getForObject("/number", String.class);
-		// result == "1"
+		String result1 = this.restTemplate.getForObject("/number", String.class);
+		// result1 == "1"
 
-		result = this.restTemplate.getForObject("/number", String.class);
+		@SuppressWarnings("unused")
+		String result2 = this.restTemplate.getForObject("/number", String.class);
 		// result == "2"
 
 		try {
