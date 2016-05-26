@@ -1,4 +1,4 @@
-package org.springframework.web.reactive;
+package org.springframework.web.reactive.result.view;
 
 import java.util.Locale;
 
@@ -10,11 +10,11 @@ import reactor.core.publisher.Mono;
  *
  * <p>The process of view resolution is driven through a ViewResolver-based
  * {@code HandlerResultHandler} implementation called
- * {@link org.springframework.web.reactive.view.ViewResolverResultHandler
+ * {@link org.springframework.web.reactive.result.view.ViewResolverResultHandler
  * ViewResolverResultHandler}.
  *
  * @author Rossen Stoyanchev
- * @see org.springframework.web.reactive.view.ViewResolverResultHandler
+ * @see org.springframework.web.reactive.result.view.ViewResolverResultHandler
 
  */
 public interface ViewResolver {

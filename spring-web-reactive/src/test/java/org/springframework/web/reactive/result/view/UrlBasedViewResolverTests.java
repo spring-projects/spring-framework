@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.view;
+package org.springframework.web.reactive.result.view;
 
 import java.util.Locale;
 import java.util.Map;
@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.web.reactive.View;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertNotNull;

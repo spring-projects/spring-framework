@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.view.freemarker;
+package org.springframework.web.reactive.result.view.freemarker;
 
 import java.io.IOException;
 import java.util.List;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.view;
+package org.springframework.web.reactive.result.view;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,8 +31,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.View;
-import org.springframework.web.reactive.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 
@@ -81,8 +79,7 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 		return this.order;
 	}
 
-
-	// TODO: @ModelAttribute return value, declared Object return value (either String or View)
+	// TODO: Add support for model-related return value (Model, ModelAndView, @ModelAttribute)
 
 	@Override
 	public boolean supports(HandlerResult result) {

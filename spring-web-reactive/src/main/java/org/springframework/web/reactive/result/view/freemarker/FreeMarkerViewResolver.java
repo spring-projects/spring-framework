@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.view.freemarker;
+package org.springframework.web.reactive.result.view.freemarker;
 
-import org.springframework.web.reactive.view.UrlBasedViewResolver;
+import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 
 /**
  * A {@code ViewResolver} for resolving {@link FreeMarkerView} instances, i.e.

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.view;
+package org.springframework.web.reactive.result.view;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,6 @@ import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.ViewResolver;
 
 /**
  * Base class for {@code ViewResolver} implementations with shared properties.
@@ -33,7 +32,7 @@ import org.springframework.web.reactive.ViewResolver;
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-public abstract class ViewResolverSupport implements ViewResolver, ApplicationContextAware, Ordered {
+public abstract class ViewResolverSupport implements ApplicationContextAware, Ordered {
 
 	public static final MediaType DEFAULT_CONTENT_TYPE = MediaType.parseMediaType("text/html;charset=UTF-8");
 

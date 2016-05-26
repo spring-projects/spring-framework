@@ -75,16 +75,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.ViewResolver;
 import org.springframework.web.reactive.result.SimpleResultHandler;
-import org.springframework.web.reactive.view.ViewResolverResultHandler;
-import org.springframework.web.reactive.view.freemarker.FreeMarkerConfigurer;
-import org.springframework.web.reactive.view.freemarker.FreeMarkerViewResolver;
+import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.reactive.result.view.ViewResolverResultHandler;
+import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 
 /**
+ * Integration tests with {@code @RequestMapping} methods.
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Stephane Maldini

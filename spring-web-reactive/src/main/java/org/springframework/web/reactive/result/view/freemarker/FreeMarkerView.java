@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.view.freemarker;
+package org.springframework.web.reactive.result.view.freemarker;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -36,7 +36,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.web.reactive.view.AbstractUrlBasedView;
+import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.server.ServerWebExchange;
 
 /**

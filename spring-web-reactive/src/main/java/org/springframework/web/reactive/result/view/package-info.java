@@ -1,4 +1,4 @@
 /**
  * Support for result handling through view resolution.
  */
-package org.springframework.web.reactive.view;
+package org.springframework.web.reactive.result.view;
