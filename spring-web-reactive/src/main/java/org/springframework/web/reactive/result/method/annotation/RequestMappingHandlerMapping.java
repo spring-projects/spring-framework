@@ -26,8 +26,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolverBuilder;
-import org.springframework.web.reactive.accept.ContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
@@ -48,7 +48,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useTrailingSlashMatch = true;
 
-	private ContentTypeResolver contentTypeResolver = new CompositeContentTypeResolverBuilder().build();
+	private RequestedContentTypeResolver contentTypeResolver = new RequestedContentTypeResolverBuilder().build();
 
 	private StringValueResolver embeddedValueResolver;
 
@@ -70,7 +70,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	/**
 	 * Whether suffix pattern matching should work only against path extensions
-	 * explicitly registered with the configured {@link ContentTypeResolver}. This
+	 * explicitly registered with the configured {@link RequestedContentTypeResolver}. This
 	 * is generally recommended to reduce ambiguity and to avoid issues such as
 	 * when a "." appears in the path for other reasons.
 	 * <p>By default this is set to "true".
@@ -90,11 +90,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Set the {@link ContentTypeResolver} to use to determine requested media types.
+	 * Set the {@link RequestedContentTypeResolver} to use to determine requested media types.
 	 * If not set, the default constructor is used.
 	 */
-	public void setContentTypeResolver(ContentTypeResolver contentTypeResolver) {
-		Assert.notNull(contentTypeResolver, "'ContentTypeResolver' must not be null");
+	public void setContentTypeResolver(RequestedContentTypeResolver contentTypeResolver) {
+		Assert.notNull(contentTypeResolver, "'contentTypeResolver' must not be null");
 		this.contentTypeResolver = contentTypeResolver;
 	}
 
@@ -139,9 +139,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Return the configured {@link ContentTypeResolver}.
+	 * Return the configured {@link RequestedContentTypeResolver}.
 	 */
-	public ContentTypeResolver getContentTypeResolver() {
+	public RequestedContentTypeResolver getContentTypeResolver() {
 		return this.contentTypeResolver;
 	}
 

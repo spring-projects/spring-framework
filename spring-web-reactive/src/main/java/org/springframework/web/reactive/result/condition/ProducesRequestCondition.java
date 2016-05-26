@@ -27,8 +27,8 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolverBuilder;
-import org.springframework.web.reactive.accept.ContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -52,7 +52,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 	private final List<ProduceMediaTypeExpression> expressions;
 
-	private final ContentTypeResolver contentTypeResolver;
+	private final RequestedContentTypeResolver contentTypeResolver;
 
 
 	/**
@@ -83,7 +83,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * @param headers expressions with syntax defined by {@link RequestMapping#headers()}
 	 * @param resolver used to determine requested content type
 	 */
-	public ProducesRequestCondition(String[] produces, String[] headers, ContentTypeResolver resolver) {
+	public ProducesRequestCondition(String[] produces, String[] headers, RequestedContentTypeResolver resolver) {
 		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
 		Collections.sort(this.expressions);
 		this.contentTypeResolver = (resolver != null ? resolver : new HeaderContentTypeResolver());
@@ -93,12 +93,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * Private constructor with already parsed media type expressions.
 	 */
 	private ProducesRequestCondition(Collection<ProduceMediaTypeExpression> expressions,
-			ContentTypeResolver resolver) {
+			RequestedContentTypeResolver resolver) {
 
 		this.expressions = new ArrayList<>(expressions);
 		Collections.sort(this.expressions);
 		this.contentTypeResolver = (resolver != null ?
-				resolver : new CompositeContentTypeResolverBuilder().build());
+				resolver : new RequestedContentTypeResolverBuilder().build());
 	}
 
 

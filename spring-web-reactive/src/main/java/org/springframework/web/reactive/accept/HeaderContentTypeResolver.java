@@ -23,11 +23,11 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link ContentTypeResolver} that checks the 'Accept' request header.
+ * A {@link RequestedContentTypeResolver} that checks the 'Accept' request header.
  *
  * @author Rossen Stoyanchev
  */
-public class HeaderContentTypeResolver implements ContentTypeResolver {
+public class HeaderContentTypeResolver implements RequestedContentTypeResolver {
 
 	@Override
 	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {

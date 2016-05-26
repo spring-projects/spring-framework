@@ -27,7 +27,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link ContentTypeResolver} that extracts the media type lookup key from a
+ * A {@link RequestedContentTypeResolver} that extracts the media type lookup key from a
  * known query parameter named "format" by default.
  *s
  * @author Rossen Stoyanchev

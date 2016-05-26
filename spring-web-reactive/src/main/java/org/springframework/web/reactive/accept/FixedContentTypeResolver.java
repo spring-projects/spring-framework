@@ -23,11 +23,11 @@ import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link ContentTypeResolver} that resolves to a fixed list of media types.
+ * A {@link RequestedContentTypeResolver} that resolves to a fixed list of media types.
  *
  * @author Rossen Stoyanchev
  */
-public class FixedContentTypeResolver implements ContentTypeResolver {
+public class FixedContentTypeResolver implements RequestedContentTypeResolver {
 
 	private final List<MediaType> mediaTypes;
 

@@ -16,18 +16,17 @@
 
 package org.springframework.web.reactive.accept;
 
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
 
 /**
- * An extension of {@link ContentTypeResolver} that maintains a mapping between
+ * An extension of {@link RequestedContentTypeResolver} that maintains a mapping between
  * keys (e.g. file extension, query parameter) and media types.
  *
  * @author Rossen Stoyanchev
  */
-public interface MappingContentTypeResolver extends ContentTypeResolver {
+public interface MappingContentTypeResolver extends RequestedContentTypeResolver {
 
 	/**
 	 * Resolve the given media type to a list of path extensions.

@@ -81,7 +81,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	}
 
 
-	// ContentTypeResolver implementation
+	// RequestedContentTypeResolver implementation
 
 	@Override
 	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange)

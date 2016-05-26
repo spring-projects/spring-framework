@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
- * Unit tests for {@link CompositeContentTypeResolverBuilder}.
+ * Unit tests for {@link RequestedContentTypeResolverBuilder}.
  *
  * @author Rossen Stoyanchev
  */
@@ -43,7 +43,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test
 	public void defaultSettings() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder().build();
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 
 		ServerWebExchange exchange = createExchange("/flower.gif");
 
@@ -70,7 +70,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test
 	public void favorPath() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
 				.favorPathExtension(true)
 				.mediaType("foo", new MediaType("application", "foo"))
 				.mediaType("bar", new MediaType("application", "bar"))
@@ -90,7 +90,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test
 	public void favorPathWithJafTurnedOff() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
 				.favorPathExtension(true)
 				.useJaf(false)
 				.build();
@@ -104,7 +104,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test(expected = NotAcceptableStatusException.class) // SPR-10170
 	public void favorPathWithIgnoreUnknownPathExtensionTurnedOff() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
 				.favorPathExtension(true)
 				.ignoreUnknownPathExtensions(false)
 				.build();
@@ -117,7 +117,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test
 	public void favorParameter() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
 				.favorParameter(true)
 				.mediaType("json", MediaType.APPLICATION_JSON)
 				.build();
@@ -131,7 +131,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test(expected = NotAcceptableStatusException.class) // SPR-10170
 	public void favorParameterWithUnknownMediaType() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
 				.favorParameter(true)
 				.build();
 
@@ -143,7 +143,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test
 	public void ignoreAcceptHeader() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
 				.ignoreAcceptHeader(true)
 				.build();
 
@@ -155,7 +155,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test // SPR-10513
 	public void setDefaultContentType() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
 				.defaultContentType(MediaType.APPLICATION_JSON)
 				.build();
 
@@ -172,7 +172,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 	@Test // SPR-12286
 	public void setDefaultContentTypeWithStrategy() throws Exception {
-		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
+		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder()
 				.defaultContentTypeResolver(new FixedContentTypeResolver(MediaType.APPLICATION_JSON))
 				.build();
 

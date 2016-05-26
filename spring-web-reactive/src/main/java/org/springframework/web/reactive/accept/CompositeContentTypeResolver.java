@@ -27,7 +27,7 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * A {@link ContentTypeResolver} that contains and delegates to a list of other
+ * A {@link RequestedContentTypeResolver} that contains and delegates to a list of other
  * resolvers.
  *
  * <p>Also an implementation of {@link MappingContentTypeResolver} that delegates
@@ -38,10 +38,10 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class CompositeContentTypeResolver implements MappingContentTypeResolver {
 
-	private final List<ContentTypeResolver> resolvers = new ArrayList<>();
+	private final List<RequestedContentTypeResolver> resolvers = new ArrayList<>();
 
 
-	public CompositeContentTypeResolver(List<ContentTypeResolver> resolvers) {
+	public CompositeContentTypeResolver(List<RequestedContentTypeResolver> resolvers) {
 		Assert.notEmpty(resolvers, "At least one resolver is expected.");
 		this.resolvers.addAll(resolvers);
 	}
@@ -50,18 +50,18 @@ public class CompositeContentTypeResolver implements MappingContentTypeResolver 
 	/**
 	 * Return a read-only list of the configured resolvers.
 	 */
-	public List<ContentTypeResolver> getResolvers() {
+	public List<RequestedContentTypeResolver> getResolvers() {
 		return Collections.unmodifiableList(this.resolvers);
 	}
 
 	/**
-	 * Return the first {@link ContentTypeResolver} of the given type.
+	 * Return the first {@link RequestedContentTypeResolver} of the given type.
 	 * @param resolverType the resolver type
 	 * @return the first matching resolver or {@code null}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends ContentTypeResolver> T findResolver(Class<T> resolverType) {
-		for (ContentTypeResolver resolver : this.resolvers) {
+	public <T extends RequestedContentTypeResolver> T findResolver(Class<T> resolverType) {
+		for (RequestedContentTypeResolver resolver : this.resolvers) {
 			if (resolverType.isInstance(resolver)) {
 				return (T) resolver;
 			}
@@ -72,7 +72,7 @@ public class CompositeContentTypeResolver implements MappingContentTypeResolver 
 
 	@Override
 	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
-		for (ContentTypeResolver resolver : this.resolvers) {
+		for (RequestedContentTypeResolver resolver : this.resolvers) {
 			List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 			if (mediaTypes.isEmpty() || (mediaTypes.size() == 1 && mediaTypes.contains(MediaType.ALL))) {
 				continue;
@@ -85,7 +85,7 @@ public class CompositeContentTypeResolver implements MappingContentTypeResolver 
 	@Override
 	public Set<String> getKeysFor(MediaType mediaType) {
 		Set<String> result = new LinkedHashSet<>();
-		for (ContentTypeResolver resolver : this.resolvers) {
+		for (RequestedContentTypeResolver resolver : this.resolvers) {
 			if (resolver instanceof MappingContentTypeResolver)
 			result.addAll(((MappingContentTypeResolver) resolver).getKeysFor(mediaType));
 		}
@@ -95,7 +95,7 @@ public class CompositeContentTypeResolver implements MappingContentTypeResolver 
 	@Override
 	public Set<String> getKeys() {
 		Set<String> result = new LinkedHashSet<>();
-		for (ContentTypeResolver resolver : this.resolvers) {
+		for (RequestedContentTypeResolver resolver : this.resolvers) {
 			if (resolver instanceof MappingContentTypeResolver)
 				result.addAll(((MappingContentTypeResolver) resolver).getKeys());
 		}

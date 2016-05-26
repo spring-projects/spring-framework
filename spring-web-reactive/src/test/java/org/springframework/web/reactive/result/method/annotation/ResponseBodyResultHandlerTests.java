@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.accept.ContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.FixedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
@@ -90,7 +90,7 @@ public class ResponseBodyResultHandlerTests {
 	@Test
 	public void contentTypeResolver() throws Exception {
 		MediaType contentType = MediaType.APPLICATION_JSON_UTF8;
-		ContentTypeResolver resolver = new FixedContentTypeResolver(contentType);
+		RequestedContentTypeResolver resolver = new FixedContentTypeResolver(contentType);
 		HandlerResultHandler handler = createHandler(resolver, new StringEncoder(), new JacksonJsonEncoder());
 
 		ServerWebExchange exchange = createExchange("/foo");
@@ -105,7 +105,7 @@ public class ResponseBodyResultHandlerTests {
 		return createHandler(new HeaderContentTypeResolver(), encoders);
 	}
 
-	private ResponseBodyResultHandler createHandler(ContentTypeResolver resolver,
+	private ResponseBodyResultHandler createHandler(RequestedContentTypeResolver resolver,
 			Encoder<?>... encoders) {
 
 		List<HttpMessageConverter<?>> converters = Arrays.stream(encoders)

@@ -22,10 +22,11 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
+ * Strategy for resolving the requested media types for a {@code ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
  */
-public interface ContentTypeResolver {
+public interface RequestedContentTypeResolver {
 
 	/**
 	 * Resolve the given request to a list of requested media types. The returned
@@ -36,6 +37,7 @@ public interface ContentTypeResolver {
 	 *
 	 * @throws NotAcceptableStatusException if the requested media types is invalid
 	 */
-	List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException;
+	List<MediaType> resolveMediaTypes(ServerWebExchange exchange)
+			throws NotAcceptableStatusException;
 
 }

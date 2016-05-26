@@ -42,7 +42,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.accept.ContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -66,7 +66,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	private final ConversionService conversionService;
 
-	private final ContentTypeResolver contentTypeResolver;
+	private final RequestedContentTypeResolver contentTypeResolver;
 
 	private final List<MediaType> supportedMediaTypes;
 
@@ -89,13 +89,13 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	/**
 	 * Constructor with message converters, a {@code ConversionService}, and a
-	 * {@code ContentTypeResolver}.
+	 * {@code RequestedContentTypeResolver}.
 	 *
 	 * @param messageConverters converters for writing the response body with
 	 * @param conversionService for converting to Flux and Mono from other reactive types
 	 */
 	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> messageConverters,
-			ConversionService conversionService, ContentTypeResolver contentTypeResolver) {
+			ConversionService conversionService, RequestedContentTypeResolver contentTypeResolver) {
 
 		Assert.notEmpty(messageConverters, "At least one message converter is required.");
 		Assert.notNull(conversionService, "'conversionService' is required.");

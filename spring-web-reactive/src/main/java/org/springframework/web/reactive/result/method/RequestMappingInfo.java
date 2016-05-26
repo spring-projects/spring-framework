@@ -21,7 +21,7 @@ import java.util.Set;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.reactive.accept.ContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.HeadersRequestCondition;
@@ -468,7 +468,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		@Override
 		public RequestMappingInfo build() {
-			ContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
+			RequestedContentTypeResolver contentTypeResolver = this.options.getContentTypeResolver();
 
 			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
 					this.paths, this.options.getPathHelper(), this.options.getPathMatcher(),
@@ -504,7 +504,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private boolean registeredSuffixPatternMatch = false;
 
-		private ContentTypeResolver contentTypeResolver;
+		private RequestedContentTypeResolver contentTypeResolver;
 
 		/**
 		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.
@@ -577,7 +577,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * from the configured {@code contentTypeResolver}.
 		 */
 		public Set<String> getFileExtensions() {
-			ContentTypeResolver resolver = getContentTypeResolver();
+			RequestedContentTypeResolver resolver = getContentTypeResolver();
 			if (useRegisteredSuffixPatternMatch() && resolver != null) {
 				if (resolver instanceof MappingContentTypeResolver) {
 					return ((MappingContentTypeResolver) resolver).getKeys();
@@ -590,11 +590,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Set the ContentNegotiationManager to use for the ProducesRequestCondition.
 		 * <p>By default this is not set.
 		 */
-		public void setContentTypeResolver(ContentTypeResolver resolver) {
+		public void setContentTypeResolver(RequestedContentTypeResolver resolver) {
 			this.contentTypeResolver = resolver;
 		}
 
-		public ContentTypeResolver getContentTypeResolver() {
+		public RequestedContentTypeResolver getContentTypeResolver() {
 			return this.contentTypeResolver;
 		}
 	}

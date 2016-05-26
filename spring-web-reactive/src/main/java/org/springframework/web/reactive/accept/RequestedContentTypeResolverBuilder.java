@@ -28,7 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Factory to create a {@link CompositeContentTypeResolver} and configure it with
- * one or more {@link ContentTypeResolver} instances with build style methods.
+ * one or more {@link RequestedContentTypeResolver} instances with build style methods.
  * The following table shows methods, resulting strategy instances, and if in
  * use by default:
  *
@@ -60,7 +60,7 @@ import org.springframework.util.CollectionUtils;
  * </tr>
  * <tr>
  *     <td>{@link #defaultContentTypeResolver}</td>
- *     <td>{@link ContentTypeResolver}</td>
+ *     <td>{@link RequestedContentTypeResolver}</td>
  *     <td>Not set</td>
  * </tr>
  * </table>
@@ -79,7 +79,7 @@ import org.springframework.util.CollectionUtils;
  *
  * @author Rossen Stoyanchev
  */
-public class CompositeContentTypeResolverBuilder {
+public class RequestedContentTypeResolverBuilder {
 
 	private boolean favorPathExtension = true;
 
@@ -95,7 +95,7 @@ public class CompositeContentTypeResolverBuilder {
 
 	private String parameterName = "format";
 
-	private ContentTypeResolver contentTypeResolver;
+	private RequestedContentTypeResolver contentTypeResolver;
 
 
 	/**
@@ -105,7 +105,7 @@ public class CompositeContentTypeResolverBuilder {
 	 * for {@code /hotels.pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the 'Accept' header.
 	 */
-	public CompositeContentTypeResolverBuilder favorPathExtension(boolean favorPathExtension) {
+	public RequestedContentTypeResolverBuilder favorPathExtension(boolean favorPathExtension) {
 		this.favorPathExtension = favorPathExtension;
 		return this;
 	}
@@ -121,7 +121,7 @@ public class CompositeContentTypeResolverBuilder {
 	 * resolve path extensions. To change this behavior see {@link #useJaf}.
 	 * @param mediaTypes media type mappings
 	 */
-	public CompositeContentTypeResolverBuilder mediaTypes(Map<String, MediaType> mediaTypes) {
+	public RequestedContentTypeResolverBuilder mediaTypes(Map<String, MediaType> mediaTypes) {
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			for (Map.Entry<String, MediaType> entry : mediaTypes.entrySet()) {
 				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
@@ -134,7 +134,7 @@ public class CompositeContentTypeResolverBuilder {
 	/**
 	 * Alternative to {@link #mediaTypes} to add a single mapping.
 	 */
-	public CompositeContentTypeResolverBuilder mediaType(String key, MediaType mediaType) {
+	public RequestedContentTypeResolverBuilder mediaType(String key, MediaType mediaType) {
 		this.mediaTypes.put(key, mediaType);
 		return this;
 	}
@@ -146,7 +146,7 @@ public class CompositeContentTypeResolverBuilder {
 	 * there is no match.
 	 * <p>By default this is set to {@code true}.
 	 */
-	public CompositeContentTypeResolverBuilder ignoreUnknownPathExtensions(boolean ignore) {
+	public RequestedContentTypeResolverBuilder ignoreUnknownPathExtensions(boolean ignore) {
 		this.ignoreUnknownPathExtensions = ignore;
 		return this;
 	}
@@ -158,7 +158,7 @@ public class CompositeContentTypeResolverBuilder {
 	 * <p>By default this is not set in which case
 	 * {@code PathExtensionContentNegotiationStrategy} will use JAF if available.
 	 */
-	public CompositeContentTypeResolverBuilder useJaf(boolean useJaf) {
+	public RequestedContentTypeResolverBuilder useJaf(boolean useJaf) {
 		this.useJaf = useJaf;
 		return this;
 	}
@@ -170,7 +170,7 @@ public class CompositeContentTypeResolverBuilder {
 	 * <p>By default this is set to {@code false}.
 	 * @see #parameterName
 	 */
-	public CompositeContentTypeResolverBuilder favorParameter(boolean favorParameter) {
+	public RequestedContentTypeResolverBuilder favorParameter(boolean favorParameter) {
 		this.favorParameter = favorParameter;
 		return this;
 	}
@@ -179,7 +179,7 @@ public class CompositeContentTypeResolverBuilder {
 	 * Set the query parameter name to use when {@link #favorParameter} is on.
 	 * <p>The default parameter name is {@code "format"}.
 	 */
-	public CompositeContentTypeResolverBuilder parameterName(String parameterName) {
+	public RequestedContentTypeResolverBuilder parameterName(String parameterName) {
 		Assert.notNull(parameterName, "parameterName is required");
 		this.parameterName = parameterName;
 		return this;
@@ -189,7 +189,7 @@ public class CompositeContentTypeResolverBuilder {
 	 * Whether to disable checking the 'Accept' request header.
 	 * <p>By default this value is set to {@code false}.
 	 */
-	public CompositeContentTypeResolverBuilder ignoreAcceptHeader(boolean ignoreAcceptHeader) {
+	public RequestedContentTypeResolverBuilder ignoreAcceptHeader(boolean ignoreAcceptHeader) {
 		this.ignoreAcceptHeader = ignoreAcceptHeader;
 		return this;
 	}
@@ -199,25 +199,25 @@ public class CompositeContentTypeResolverBuilder {
 	 * <p>By default this is not set.
 	 * @see #defaultContentTypeResolver
 	 */
-	public CompositeContentTypeResolverBuilder defaultContentType(MediaType contentType) {
+	public RequestedContentTypeResolverBuilder defaultContentType(MediaType contentType) {
 		this.contentTypeResolver = new FixedContentTypeResolver(contentType);
 		return this;
 	}
 
 	/**
-	 * Set a custom {@link ContentTypeResolver} to use to determine
+	 * Set a custom {@link RequestedContentTypeResolver} to use to determine
 	 * the content type to use when no content type is requested.
 	 * <p>By default this is not set.
 	 * @see #defaultContentType
 	 */
-	public CompositeContentTypeResolverBuilder defaultContentTypeResolver(ContentTypeResolver resolver) {
+	public RequestedContentTypeResolverBuilder defaultContentTypeResolver(RequestedContentTypeResolver resolver) {
 		this.contentTypeResolver = resolver;
 		return this;
 	}
 
 
-	public CompositeContentTypeResolver build() {
-		List<ContentTypeResolver> resolvers = new ArrayList<>();
+	public RequestedContentTypeResolver build() {
+		List<RequestedContentTypeResolver> resolvers = new ArrayList<>();
 
 		if (this.favorPathExtension) {
 			PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver(this.mediaTypes);
