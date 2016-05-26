@@ -54,4 +54,9 @@ public interface RequestExpectationManager {
 	 */
 	void verify();
 
+	/**
+	 * Reset the internal state removing all expectations and recorded requests.
+	 */
+	void reset();
+
 }

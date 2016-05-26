@@ -71,4 +71,10 @@ public class SimpleRequestExpectationManager extends AbstractRequestExpectationM
 		throw createUnexpectedRequestError(request);
 	}
 
+	@Override
+	public void reset() {
+		super.reset();
+		this.expectationIterator = null;
+		this.repeatExpectations.reset();
+	}
 }

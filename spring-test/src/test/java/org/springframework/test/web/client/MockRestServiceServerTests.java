@@ -15,11 +15,14 @@
  */
 package org.springframework.test.web.client;
 
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.test.web.client.MockRestServiceServer.MockRestServiceServerBuilder;
 import org.springframework.web.client.RestTemplate;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -29,27 +32,59 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class MockRestServiceServerTests {
 
+	private RestTemplate restTemplate = new RestTemplate();
+
+
 	@Test
 	public void buildMultipleTimes() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(restTemplate);
+		MockRestServiceServerBuilder builder = MockRestServiceServer.bindTo(this.restTemplate);
 
 		MockRestServiceServer server = builder.build();
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
-		restTemplate.getForObject("/foo", Void.class);
+		this.restTemplate.getForObject("/foo", Void.class);
 		server.verify();
 
 		server = builder.ignoreExpectOrder(true).build();
 		server.expect(requestTo("/foo")).andRespond(withSuccess());
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		restTemplate.getForObject("/bar", Void.class);
-		restTemplate.getForObject("/foo", Void.class);
+		this.restTemplate.getForObject("/bar", Void.class);
+		this.restTemplate.getForObject("/foo", Void.class);
 		server.verify();
 
 		server = builder.build();
 		server.expect(requestTo("/bar")).andRespond(withSuccess());
-		restTemplate.getForObject("/bar", Void.class);
+		this.restTemplate.getForObject("/bar", Void.class);
+		server.verify();
+	}
+
+	@Test
+	public void resetAndReuseServer() throws Exception {
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();
+
+		server.expect(requestTo("/foo")).andRespond(withSuccess());
+		this.restTemplate.getForObject("/foo", Void.class);
+		server.verify();
+		server.reset();
+
+		server.expect(requestTo("/bar")).andRespond(withSuccess());
+		this.restTemplate.getForObject("/bar", Void.class);
+		server.verify();
+	}
+
+	@Test
+	public void resetAndReuseServerWithUnorderedExpectationManager() throws Exception {
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
+				.ignoreExpectOrder(true).build();
+
+		server.expect(requestTo("/foo")).andRespond(withSuccess());
+		this.restTemplate.getForObject("/foo", Void.class);
+		server.verify();
+		server.reset();
+
+		server.expect(requestTo("/foo")).andRespond(withSuccess());
+		server.expect(requestTo("/bar")).andRespond(withSuccess());
+		this.restTemplate.getForObject("/bar", Void.class);
+		this.restTemplate.getForObject("/foo", Void.class);
 		server.verify();
 	}
 

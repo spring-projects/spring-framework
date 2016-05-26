@@ -133,6 +133,12 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 		return new AssertionError(message + getRequestDetails());
 	}
 
+	@Override
+	public void reset() {
+		this.expectations.clear();
+		this.requests.clear();
+	}
+
 
 	/**
 	 * Helper class to manage a group of request expectations. It helps with
@@ -174,6 +180,10 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 				}
 			}
 			return null;
+		}
+
+		public void reset() {
+			this.expectations.clear();
 		}
 	}
 

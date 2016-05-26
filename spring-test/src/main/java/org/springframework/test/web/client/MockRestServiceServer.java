@@ -121,6 +121,13 @@ public class MockRestServiceServer {
 		this.expectationManager.verify();
 	}
 
+	/**
+	 * Reset the internal state removing all expectations and recorded requests.
+	 */
+	public void reset() {
+		this.expectationManager.reset();
+	}
+
 
 	/**
 	 * Return a builder for a {@code MockRestServiceServer} that should be used
