@@ -47,13 +47,13 @@ public class TableMetaDataContext {
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** name of procedure to call **/
+	/** name of table for this context **/
 	private String tableName;
 
-	/** name of catalog for call **/
+	/** name of catalog for this context **/
 	private String catalogName;
 
-	/** name of schema for call **/
+	/** name of schema for this context **/
 	private String schemaName;
 
 	/** List of columns objects to be used in this context */
