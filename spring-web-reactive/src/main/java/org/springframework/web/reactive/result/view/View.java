@@ -55,6 +55,6 @@ public interface View {
 	 * @param exchange the current exchange
 	 * @return the output stream
 	 */
-	Flux<DataBuffer> render(HandlerResult result, Optional<MediaType> contentType, ServerWebExchange exchange);
+	Flux<DataBuffer> render(HandlerResult result, MediaType contentType, ServerWebExchange exchange);
 
 }

@@ -121,7 +121,7 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 
 		return returnValueMono.then(returnValue -> {
 			if (returnValue instanceof View) {
-				Flux<DataBuffer> body = ((View) returnValue).render(result, Optional.empty(), exchange);
+				Flux<DataBuffer> body = ((View) returnValue).render(result, null, exchange);
 				return exchange.getResponse().setBody(body);
 			}
 			else if (returnValue instanceof CharSequence) {
@@ -131,7 +131,7 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 						.concatMap(resolver -> resolver.resolveViewName(viewName, locale))
 						.next()
 						.then(view -> {
-							Flux<DataBuffer> body = view.render(result, Optional.empty(), exchange);
+							Flux<DataBuffer> body = view.render(result, null, exchange);
 							return exchange.getResponse().setBody(body);
 						});
 			}

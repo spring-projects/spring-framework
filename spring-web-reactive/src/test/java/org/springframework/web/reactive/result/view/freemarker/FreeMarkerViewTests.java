@@ -127,7 +127,7 @@ public class FreeMarkerViewTests {
 		ModelMap model = new ExtendedModelMap();
 		model.addAttribute("hello", "hi FreeMarker");
 		HandlerResult result = new HandlerResult(new Object(), "", ResolvableType.NONE, model);
-		Flux<DataBuffer> flux = view.render(result, Optional.empty(), this.exchange);
+		Flux<DataBuffer> flux = view.render(result, null, this.exchange);
 
 		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
 		subscriber.bindTo(flux).assertValuesWith(dataBuffer ->

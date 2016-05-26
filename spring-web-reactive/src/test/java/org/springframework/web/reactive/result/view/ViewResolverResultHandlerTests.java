@@ -277,9 +277,7 @@ public class ViewResolverResultHandlerTests {
 		}
 
 		@Override
-		public Flux<DataBuffer> render(HandlerResult result, Optional<MediaType> contentType,
-				ServerWebExchange exchange) {
-
+		public Flux<DataBuffer> render(HandlerResult result, MediaType mediaType, ServerWebExchange exchange) {
 			String value = this.name + ": " + result.getModel().toString();
 			assertNotNull(value);
 			return Flux.just(asDataBuffer(value));

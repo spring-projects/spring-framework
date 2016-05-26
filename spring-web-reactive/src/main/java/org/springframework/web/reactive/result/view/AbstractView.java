@@ -114,15 +114,15 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * @return
 	 */
 	@Override
-	public Flux<DataBuffer> render(HandlerResult result, Optional<MediaType> contentType,
+	public Flux<DataBuffer> render(HandlerResult result, MediaType contentType,
 			ServerWebExchange exchange) {
 
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view with model " + result.getModel());
 		}
 
-		if (contentType.isPresent()) {
-			exchange.getResponse().getHeaders().setContentType(contentType.get());
+		if (contentType != null) {
+			exchange.getResponse().getHeaders().setContentType(contentType);
 		}
 
 		Map<String, Object> mergedModel = getModelAttributes(result, exchange);
