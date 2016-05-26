@@ -92,7 +92,8 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	 * {@code RequestedContentTypeResolver}.
 	 *
 	 * @param messageConverters converters for writing the response body with
-	 * @param conversionService for converting to Flux and Mono from other reactive types
+	 * @param conversionService for converting other reactive types (e.g.
+	 * rx.Observable, rx.Single, etc.) to Flux or Mono
 	 */
 	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> messageConverters,
 			ConversionService conversionService, RequestedContentTypeResolver contentTypeResolver) {

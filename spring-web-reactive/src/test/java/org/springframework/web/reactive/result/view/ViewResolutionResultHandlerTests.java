@@ -63,10 +63,10 @@ import static org.mockito.Mockito.mock;
 
 
 /**
- * Unit tests for {@link ViewResolverResultHandler}.
+ * Unit tests for {@link ViewResolutionResultHandler}.
  * @author Rossen Stoyanchev
  */
-public class ViewResolverResultHandlerTests {
+public class ViewResolutionResultHandlerTests {
 
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -107,7 +107,7 @@ public class ViewResolverResultHandlerTests {
 		ResolvableType returnType = ResolvableType.forMethodParameter(method, -1);
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.model);
 		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolverResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
 		assertTrue(handler.supports(result));
 	}
 
@@ -115,7 +115,7 @@ public class ViewResolverResultHandlerTests {
 	public void viewReference() throws Exception {
 		TestView view = new TestView("account");
 		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolverResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
 		handle(handler, view, ResolvableType.forClass(View.class));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
@@ -126,7 +126,7 @@ public class ViewResolverResultHandlerTests {
 	public void viewReferenceMono() throws Exception {
 		TestView view = new TestView("account");
 		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolverResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
 		handle(handler, Mono.just(view), methodReturnType("handleMonoView"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
@@ -138,7 +138,7 @@ public class ViewResolverResultHandlerTests {
 		TestView view = new TestView("account");
 		TestViewResolver resolver = new TestViewResolver().addView(view);
 		List<ViewResolver> resolvers = Collections.singletonList(resolver);
-		ViewResolverResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
 		handle(handler, "account", ResolvableType.forClass(String.class));
 
 		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
@@ -151,7 +151,7 @@ public class ViewResolverResultHandlerTests {
 		TestView view = new TestView("account");
 		TestViewResolver resolver = new TestViewResolver().addView(view);
 		List<ViewResolver> resolvers = Collections.singletonList(resolver);
-		ViewResolverResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
 		handle(handler, Mono.just("account"), methodReturnType("handleMonoString"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
@@ -165,7 +165,7 @@ public class ViewResolverResultHandlerTests {
 		TestViewResolver resolver1 = new TestViewResolver().addView(view1);
 		TestViewResolver resolver2 = new TestViewResolver().addView(view2);
 		List<ViewResolver> resolvers = Arrays.asList(resolver1, resolver2);
-		ViewResolverResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
 		handle(handler, "profile", ResolvableType.forClass(String.class));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
@@ -175,7 +175,7 @@ public class ViewResolverResultHandlerTests {
 	@Test
 	public void viewNameWithNoMatch() throws Exception {
 		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolverResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
 		TestSubscriber<Void> subscriber = handle(handler, "account", ResolvableType.forClass(String.class));
 
 		subscriber.assertNoValues();
@@ -184,7 +184,7 @@ public class ViewResolverResultHandlerTests {
 	@Test
 	public void viewNameNotSpecified() throws Exception {
 		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolverResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
 		TestSubscriber<Void> subscriber = handle(handler, null, ResolvableType.forClass(String.class));
 
 		subscriber.assertErrorWith(ex ->
@@ -196,7 +196,7 @@ public class ViewResolverResultHandlerTests {
 		TestView view = new TestView("account");
 		TestViewResolver resolver = new TestViewResolver().addView(view);
 		List<ViewResolver> resolvers = Collections.singletonList(resolver);
-		HandlerResultHandler handler = new ViewResolverResultHandler(resolvers, this.conversionService) {
+		HandlerResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService) {
 			@Override
 			protected String getDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
 				return "account";
@@ -218,8 +218,8 @@ public class ViewResolverResultHandlerTests {
 		resolver1.setOrder(2);
 		resolver2.setOrder(1);
 
-		ViewResolverResultHandler resultHandler =
-				new ViewResolverResultHandler(resolvers, this.conversionService);
+		ViewResolutionResultHandler resultHandler =
+				new ViewResolutionResultHandler(resolvers, this.conversionService);
 
 		assertEquals(Arrays.asList(resolver2, resolver1), resultHandler.getViewResolvers());
 	}

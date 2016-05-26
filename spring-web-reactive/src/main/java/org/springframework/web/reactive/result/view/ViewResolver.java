@@ -10,11 +10,11 @@ import reactor.core.publisher.Mono;
  *
  * <p>The process of view resolution is driven through a ViewResolver-based
  * {@code HandlerResultHandler} implementation called
- * {@link org.springframework.web.reactive.result.view.ViewResolverResultHandler
- * ViewResolverResultHandler}.
+ * {@link ViewResolutionResultHandler
+ * ViewResolutionResultHandler}.
  *
  * @author Rossen Stoyanchev
- * @see org.springframework.web.reactive.result.view.ViewResolverResultHandler
+ * @see ViewResolutionResultHandler
 
  */
 public interface ViewResolver {

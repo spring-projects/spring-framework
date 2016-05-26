@@ -36,17 +36,17 @@ import org.springframework.web.server.ServerWebExchange;
 
 
 /**
- * {@code HandlerResultHandler} that resolves a String return value from a
- * handler to a {@link View} which is then used to render the response.
- * A handler may also return a {@code View} instance and/or async variants that
- * provide a String view name or a {@code View}.
+ * {@code HandlerResultHandler} that performs view resolution by resolving a
+ * {@link View} instance first and then rendering the response with it.
+ * If the return value is a String, the configured {@link ViewResolver}s will
+ * be consulted to resolve that to a {@link View} instance.
  *
- * <p>This result handler should be ordered after others that may also interpret
- * a String return value for example in combination with {@code @ResponseBody}.
+ * <p>This result handler should be ordered late relative to other result
+ * handlers. See {@link #setOrder(int)} for more details.
  *
  * @author Rossen Stoyanchev
  */
-public class ViewResolverResultHandler implements HandlerResultHandler, Ordered {
+public class ViewResolutionResultHandler implements HandlerResultHandler, Ordered {
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
@@ -55,7 +55,12 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
-	public ViewResolverResultHandler(List<ViewResolver> resolvers, ConversionService service) {
+	/**
+	 * Constructor with {@code ViewResolver}s tand a {@code ConversionService}.
+	 * @param resolvers the resolver to use
+	 * @param service for converting other reactive types (e.g. rx.Single) to Mono
+	 */
+	public ViewResolutionResultHandler(List<ViewResolver> resolvers, ConversionService service) {
 		Assert.notEmpty(resolvers, "At least one ViewResolver is required.");
 		Assert.notNull(service, "'conversionService' is required.");
 		this.viewResolvers.addAll(resolvers);
