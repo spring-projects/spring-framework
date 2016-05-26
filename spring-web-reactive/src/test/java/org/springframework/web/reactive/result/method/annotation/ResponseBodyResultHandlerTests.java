@@ -19,8 +19,12 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.print.attribute.standard.Media;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -40,6 +44,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -88,7 +93,7 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 	@Test
-	public void contentTypeResolver() throws Exception {
+	public void usesContentTypeResolver() throws Exception {
 		MediaType contentType = MediaType.APPLICATION_JSON_UTF8;
 		RequestedContentTypeResolver resolver = new FixedContentTypeResolver(contentType);
 		HandlerResultHandler handler = createHandler(resolver, new StringEncoder(), new JacksonJsonEncoder());
@@ -98,6 +103,20 @@ public class ResponseBodyResultHandlerTests {
 		handler.handleResult(exchange, result).get();
 
 		assertEquals(contentType, exchange.getResponse().getHeaders().getContentType());
+	}
+
+	@Test
+	public void detectsProducibleMediaTypesAttribute() throws Exception {
+		ServerWebExchange exchange = createExchange("/foo");
+		Set<MediaType> mediaTypes = Collections.singleton(MediaType.APPLICATION_JSON);
+		exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
+
+		HandlerResultHandler handler = createHandler(new StringEncoder(), new JacksonJsonEncoder());
+
+		HandlerResult result = new HandlerResult(new Object(), "fooValue", ResolvableType.forClass(String.class));
+		handler.handleResult(exchange, result).get();
+
+		assertEquals(MediaType.APPLICATION_JSON, exchange.getResponse().getHeaders().getContentType());
 	}
 
 

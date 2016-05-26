@@ -35,15 +35,15 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -171,11 +171,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			elementType = returnType;
 		}
 
-		ServerHttpRequest request = exchange.getRequest();
 		List<MediaType> compatibleMediaTypes = getCompatibleMediaTypes(exchange, elementType);
 		if (compatibleMediaTypes.isEmpty()) {
 			if (result.getReturnValue().isPresent()) {
-				List<MediaType> mediaTypes = getProducibleMediaTypes(elementType);
+				List<MediaType> mediaTypes = getProducibleMediaTypes(exchange, elementType);
 				return Mono.error(new NotAcceptableStatusException(mediaTypes));
 			}
 			return Mono.empty();
@@ -197,13 +196,13 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			ResolvableType elementType) {
 
 		List<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(exchange);
-		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(elementType);
+		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(exchange, elementType);
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
 		for (MediaType acceptable : acceptableMediaTypes) {
 			for (MediaType producible : producibleMediaTypes) {
 				if (acceptable.isCompatibleWith(producible)) {
-					compatibleMediaTypes.add(getMostSpecificMediaType(acceptable, producible));
+					compatibleMediaTypes.add(selectMoreSpecificMediaType(acceptable, producible));
 				}
 			}
 		}
@@ -218,19 +217,21 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return (mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes);
 	}
 
-	private List<MediaType> getProducibleMediaTypes(ResolvableType type) {
-		return this.messageConverters.stream()
-				.filter(converter -> converter.canWrite(type, null))
-				.flatMap(converter -> converter.getWritableMediaTypes().stream())
-				.collect(Collectors.collectingAndThen(Collectors.toList(), result -> {
-					if (result.isEmpty()) {
-						result.add(MediaType.ALL);
-					}
-					return result;
-				}));
+	private List<MediaType> getProducibleMediaTypes(ServerWebExchange exchange, ResolvableType type) {
+		Optional<?> optional = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		if (optional.isPresent()) {
+			Set<MediaType> mediaTypes = (Set<MediaType>) optional.get();
+			return new ArrayList<>(mediaTypes);
+		}
+		else {
+			return this.messageConverters.stream()
+					.filter(converter -> converter.canWrite(type, null))
+					.flatMap(converter -> converter.getWritableMediaTypes().stream())
+					.collect(Collectors.toList());
+		}
 	}
 
-	private MediaType getMostSpecificMediaType(MediaType acceptable, MediaType producible) {
+	private MediaType selectMoreSpecificMediaType(MediaType acceptable, MediaType producible) {
 		producible = producible.copyQualityValue(acceptable);
 		Comparator<MediaType> comparator = MediaType.SPECIFICITY_COMPARATOR;
 		return (comparator.compare(acceptable, producible) <= 0 ? acceptable : producible);
