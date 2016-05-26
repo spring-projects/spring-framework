@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -109,25 +110,29 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
-		Mono<?> returnValueMono;
-		if (this.conversionService.canConvert(result.getReturnValueType().getRawClass(), Mono.class)) {
-			returnValueMono = this.conversionService.convert(result.getReturnValue().get(), Mono.class);
-		}
-		else if (result.getReturnValue().isPresent()) {
-			returnValueMono = Mono.just(result.getReturnValue().get());
-		}
-		else {
-			Optional<String> viewName = getDefaultViewName(result, exchange);
-			if (viewName.isPresent()) {
-				returnValueMono = Mono.just(viewName.get());
+		Mono<Object> mono;
+		ResolvableType elementType;
+		ResolvableType returnType = result.getReturnValueType();
+
+		if (this.conversionService.canConvert(returnType.getRawClass(), Mono.class)) {
+			Optional<Object> optionalValue = result.getReturnValue();
+			if (optionalValue.isPresent()) {
+				Mono<?> convertedMono = this.conversionService.convert(optionalValue.get(), Mono.class);
+				mono = convertedMono.map(o -> o);
 			}
 			else {
-				returnValueMono = Mono.error(new IllegalStateException("Handler [" + result.getHandler() + "] " +
-						"neither returned a view name nor a View object"));
+				mono = Mono.empty();
 			}
+			elementType = returnType.getGeneric(0);
+		}
+		else {
+			mono = Mono.justOrEmpty(result.getReturnValue());
+			elementType = returnType;
 		}
 
-		return returnValueMono.then(returnValue -> {
+		mono = mono.otherwiseIfEmpty(handleMissingReturnValue(exchange, result, elementType));
+
+		return mono.then(returnValue -> {
 			if (returnValue instanceof View) {
 				Flux<DataBuffer> body = ((View) returnValue).render(result, null, exchange);
 				return exchange.getResponse().setBody(body);
@@ -144,15 +149,33 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 						});
 			}
 			else {
-				// Should not happen
-				return Mono.error(new IllegalStateException(
-						"Unexpected return value: " + returnValue.getClass()));
+				// Eventually for model-related return values (should not happen now)
+				return Mono.error(new IllegalStateException("Unexpected return value"));
 			}
 		});
 	}
 
-	protected Optional<String> getDefaultViewName(HandlerResult result, ServerWebExchange exchange) {
-		return Optional.empty();
+	private Mono<Object> handleMissingReturnValue(ServerWebExchange exchange, HandlerResult result,
+			ResolvableType elementType) {
+
+		if (isStringOrViewReference(elementType.getRawClass())) {
+			String defaultViewName = getDefaultViewName(exchange, result);
+			if (defaultViewName != null) {
+				return Mono.just(defaultViewName);
+			}
+			else {
+				return Mono.error(new IllegalStateException("Handler [" + result.getHandler() + "] " +
+						"neither returned a view name nor a View object"));
+			}
+		}
+		else {
+			// Eventually for model-related return values (should not happen now)
+			return Mono.error(new IllegalStateException("Unexpected return value type"));
+		}
+	}
+
+	protected String getDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
+		return null;
 	}
 
 }
