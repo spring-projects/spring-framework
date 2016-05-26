@@ -80,7 +80,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.resolver = new RequestHeaderMethodArgumentResolver(conversionService, context.getBeanFactory());
 
 		@SuppressWarnings("ConfusingArgumentToVarargsMethod")
-		Method method = ReflectionUtils.findMethod(getClass(), "params", null);
+		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
 		this.paramNamedDefaultValueStringHeader = new SynthesizingMethodParameter(method, 0);
 		this.paramNamedValueStringArray = new SynthesizingMethodParameter(method, 1);
 		this.paramSystemProperty = new SynthesizingMethodParameter(method, 2);
@@ -190,6 +190,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void dateConversion() throws Exception {
 		String rfc1123val = "Thu, 21 Apr 2016 17:11:08 +0100";
 		this.exchange.getRequest().getHeaders().add("name", rfc1123val);
