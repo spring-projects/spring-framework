@@ -70,6 +70,14 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 		return Collections.unmodifiableList(this.viewResolvers);
 	}
 
+	/**
+	 * Set the order for this result handler relative to others.
+	 * <p>By default this is set to {@link Ordered#LOWEST_PRECEDENCE} and
+	 * generally needs to be used late in the order since it interprets any
+	 * String return value as a view name while others may interpret the same
+	 * otherwise based on annotations (e.g. for {@code @ResponseBody}).
+	 * @param order the order
+	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -79,7 +87,7 @@ public class ViewResolverResultHandler implements HandlerResultHandler, Ordered 
 		return this.order;
 	}
 
-	// TODO: Add support for model-related return value (Model, ModelAndView, @ModelAttribute)
+	// TODO: Support for Model, ModelAndView, @ModelAttribute, Object with no method annotations
 
 	@Override
 	public boolean supports(HandlerResult result) {

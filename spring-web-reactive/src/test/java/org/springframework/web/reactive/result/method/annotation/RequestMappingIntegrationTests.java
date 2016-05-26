@@ -415,25 +415,18 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 					new CodecHttpMessageConverter<>(new ByteBufferEncoder(), new ByteBufferDecoder()),
 					new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder()),
 					new CodecHttpMessageConverter<>(new JacksonJsonEncoder(), new JacksonJsonDecoder()));
-			ResponseBodyResultHandler resultHandler =
-					new ResponseBodyResultHandler(converters, conversionService());
-			resultHandler.setOrder(1);
-			return resultHandler;
+			return new ResponseBodyResultHandler(converters, conversionService());
 		}
 
 		@Bean
 		public SimpleResultHandler simpleHandlerResultHandler() {
-			SimpleResultHandler resultHandler = new SimpleResultHandler(conversionService());
-			resultHandler.setOrder(2);
-			return resultHandler;
+			return new SimpleResultHandler(conversionService());
 		}
 
 		@Bean
 		public ViewResolverResultHandler viewResolverResultHandler() {
 			List<ViewResolver> resolvers = Collections.singletonList(freeMarkerViewResolver());
-			ViewResolverResultHandler resultHandler = new ViewResolverResultHandler(resolvers, conversionService());
-			resultHandler.setOrder(3);
-			return resultHandler;
+			return new ViewResolverResultHandler(resolvers, conversionService());
 		}
 
 		@Bean

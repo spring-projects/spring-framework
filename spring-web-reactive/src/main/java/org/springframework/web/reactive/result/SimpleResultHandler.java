@@ -56,6 +56,13 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 	}
 
 
+	/**
+	 * Set the order for this result handler relative to others.
+	 * <p>By default this is set to {@link Ordered#LOWEST_PRECEDENCE} and is
+	 * generally safe to use late in the order since it looks specifically for
+	 * {@code void} or async return types parameterized by {@code void}.
+	 * @param order the order
+	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
