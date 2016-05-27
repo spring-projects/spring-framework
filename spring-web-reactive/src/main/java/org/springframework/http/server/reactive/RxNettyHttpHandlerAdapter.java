@@ -24,7 +24,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.converter.RxJava1ObservableConverter;
 import rx.Observable;
 
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -41,13 +41,13 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 
 	@Override
 	public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-		NettyDataBufferAllocator allocator =
-				new NettyDataBufferAllocator(response.unsafeNettyChannel().alloc());
+		NettyDataBufferFactory dataBufferFactory =
+				new NettyDataBufferFactory(response.unsafeNettyChannel().alloc());
 
 		RxNettyServerHttpRequest adaptedRequest =
-				new RxNettyServerHttpRequest(request, allocator);
+				new RxNettyServerHttpRequest(request, dataBufferFactory);
 		RxNettyServerHttpResponse adaptedResponse =
-				new RxNettyServerHttpResponse(response, allocator);
+				new RxNettyServerHttpResponse(response, dataBufferFactory);
 		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
 		return RxJava1ObservableConverter.from(result);
 	}

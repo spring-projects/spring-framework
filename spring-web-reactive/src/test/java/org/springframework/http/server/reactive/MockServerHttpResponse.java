@@ -23,8 +23,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -44,7 +44,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private Publisher<DataBuffer> body;
 
-	private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
+	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
 
 	@Override
@@ -86,8 +86,8 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public DataBufferAllocator allocator() {
-		return this.allocator;
+	public DataBufferFactory dataBufferFactory() {
+		return this.dataBufferFactory;
 	}
 
 }

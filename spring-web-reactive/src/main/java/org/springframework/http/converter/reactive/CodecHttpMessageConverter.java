@@ -28,7 +28,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -128,9 +128,9 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		if (headers.getContentType() == null) {
 			headers.setContentType(contentType);
 		}
-		DataBufferAllocator allocator = outputMessage.allocator();
+		DataBufferFactory dataBufferFactory = outputMessage.dataBufferFactory();
 		Flux<DataBuffer> body =
-				this.encoder.encode(inputStream, allocator, type, contentType);
+				this.encoder.encode(inputStream, dataBufferFactory, type, contentType);
 		return outputMessage.setBody(body);
 	}
 }

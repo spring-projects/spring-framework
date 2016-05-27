@@ -32,20 +32,20 @@ import static org.junit.Assert.assertTrue;
 public class PooledDataBufferTests {
 
 	@Parameterized.Parameter
-	public DataBufferAllocator allocator;
+	public DataBufferFactory dataBufferFactory;
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Object[][] buffers() {
 
 		return new Object[][]{
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(true))},
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false))},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(true))},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(false))}};
+				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))},
+				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))},
+				{new NettyDataBufferFactory(new PooledByteBufAllocator(true))},
+				{new NettyDataBufferFactory(new PooledByteBufAllocator(false))}};
 	}
 
 	private PooledDataBuffer createDataBuffer(int capacity) {
-		return (PooledDataBuffer) allocator.allocateBuffer(capacity);
+		return (PooledDataBuffer) dataBufferFactory.allocateBuffer(capacity);
 	}
 
 	@Test

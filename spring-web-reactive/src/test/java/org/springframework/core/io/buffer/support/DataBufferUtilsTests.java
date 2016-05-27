@@ -45,7 +45,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.toURI();
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.allocator, 4);
+		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.dataBufferFactory, 4);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(flux).
@@ -63,7 +63,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.toURI();
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.allocator, 3);
+		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.dataBufferFactory, 3);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(flux).
@@ -81,7 +81,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		InputStream is = DataBufferUtilsTests.class
 				.getResourceAsStream("DataBufferUtilsTests.txt");
 
-		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.allocator, 4);
+		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.dataBufferFactory, 4);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(flux).

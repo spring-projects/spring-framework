@@ -29,7 +29,7 @@ import rx.Observable;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBuffer;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
@@ -45,8 +45,8 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	private final HttpServerResponse<ByteBuf> response;
 
 	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response,
-			NettyDataBufferAllocator allocator) {
-		super(allocator);
+			NettyDataBufferFactory dataBufferFactory) {
+		super(dataBufferFactory);
 		Assert.notNull("'response', response must not be null.");
 
 		this.response = response;

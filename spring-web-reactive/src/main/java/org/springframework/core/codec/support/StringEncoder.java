@@ -24,7 +24,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
 
 /**
@@ -50,7 +50,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends String> inputStream,
-			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
+			DataBufferFactory dataBufferFactory, ResolvableType type, MimeType mimeType,
 			Object... hints) {
 		Charset charset;
 		if (mimeType != null && mimeType.getCharSet() != null) {
@@ -61,7 +61,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 		}
 		return Flux.from(inputStream).map(s -> {
 			byte[] bytes = s.getBytes(charset);
-			DataBuffer dataBuffer = allocator.allocateBuffer(bytes.length);
+			DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(bytes.length);
 			dataBuffer.write(bytes);
 			return dataBuffer;
 		});

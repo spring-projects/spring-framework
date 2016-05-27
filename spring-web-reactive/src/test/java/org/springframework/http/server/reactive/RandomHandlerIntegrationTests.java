@@ -27,8 +27,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.boot.ReactorHttpServer;
@@ -48,7 +48,7 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 
 	private final RandomHandler handler = new RandomHandler();
 
-	private final DataBufferAllocator allocator = new DefaultDataBufferAllocator();
+	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
 
 	@Override
@@ -146,7 +146,7 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 		private DataBuffer randomBuffer(int size) {
 			byte[] bytes = new byte[size];
 			rnd.nextBytes(bytes);
-			DataBuffer buffer = allocator.allocateBuffer(size);
+			DataBuffer buffer = dataBufferFactory.allocateBuffer(size);
 			buffer.write(bytes);
 			return buffer;
 		}

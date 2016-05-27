@@ -37,8 +37,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -59,7 +59,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
 	// (i.e. 'false' as constructor argument)
-	private DataBufferAllocator allocator = new DefaultDataBufferAllocator(false);
+	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
@@ -69,9 +69,9 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		this.handler = handler;
 	}
 
-	public void setAllocator(DataBufferAllocator allocator) {
-		Assert.notNull(allocator, "'allocator' must not be null");
-		this.allocator = allocator;
+	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		this.dataBufferFactory = dataBufferFactory;
 	}
 
 	public void setBufferSize(int bufferSize) {
@@ -87,7 +87,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		ServletAsyncContextSynchronizer synchronizer = new ServletAsyncContextSynchronizer(context);
 
 		RequestBodyPublisher requestBody =
-				new RequestBodyPublisher(synchronizer, allocator, bufferSize);
+				new RequestBodyPublisher(synchronizer, dataBufferFactory, bufferSize);
 		requestBody.registerListener();
 		ServletServerHttpRequest request =
 				new ServletServerHttpRequest(servletRequest, requestBody);
@@ -96,7 +96,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				new ResponseBodySubscriber(synchronizer, bufferSize);
 		responseBody.registerListener();
 		ServletServerHttpResponse response =
-				new ServletServerHttpResponse(servletResponse, allocator,
+				new ServletServerHttpResponse(servletResponse, dataBufferFactory,
 						publisher -> Mono
 								.from(subscriber -> publisher.subscribe(responseBody)));
 
@@ -149,14 +149,14 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		private final ServletAsyncContextSynchronizer synchronizer;
 
-		private final DataBufferAllocator allocator;
+		private final DataBufferFactory dataBufferFactory;
 
 		private final byte[] buffer;
 
 		public RequestBodyPublisher(ServletAsyncContextSynchronizer synchronizer,
-				DataBufferAllocator allocator, int bufferSize) {
+				DataBufferFactory dataBufferFactory, int bufferSize) {
 			this.synchronizer = synchronizer;
-			this.allocator = allocator;
+			this.dataBufferFactory = dataBufferFactory;
 			this.buffer = new byte[bufferSize];
 		}
 
@@ -204,7 +204,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 						break;
 					}
 					else if (read > 0) {
-						DataBuffer dataBuffer = allocator.allocateBuffer(read);
+						DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(read);
 						dataBuffer.write(buffer, 0, read);
 
 						publishOnNext(dataBuffer);

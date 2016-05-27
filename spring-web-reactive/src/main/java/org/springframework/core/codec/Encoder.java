@@ -23,7 +23,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
 
 /**
@@ -46,14 +46,14 @@ public interface Encoder<T> {
 	/**
 	 * Encode an input stream of {@code T} to an output {@link DataBuffer} stream.
 	 * @param inputStream the input stream to process.
-	 * @param allocator a buffer allocator used to create the output
+	 * @param dataBufferFactory a buffer factory used to create the output
 	 * @param type the stream element type to process.
 	 * @param mimeType the mime type to process.
 	 * @param hints Additional information about how to do decode, optional.
 	 * @return the output stream
 	 */
 	Flux<DataBuffer> encode(Publisher<? extends T> inputStream,
-			DataBufferAllocator allocator, ResolvableType type,
+			DataBufferFactory dataBufferFactory, ResolvableType type,
 			MimeType mimeType, Object... hints);
 
 	/**

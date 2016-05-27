@@ -27,7 +27,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 
@@ -133,7 +133,7 @@ public class ServerHttpResponseTests {
 
 
 	private DataBuffer wrap(String a) {
-		return new DefaultDataBufferAllocator().wrap(ByteBuffer.wrap(a.getBytes(UTF_8)));
+		return new DefaultDataBufferFactory().wrap(ByteBuffer.wrap(a.getBytes(UTF_8)));
 	}
 
 
@@ -146,7 +146,7 @@ public class ServerHttpResponseTests {
 		private final List<DataBuffer> content = new ArrayList<>();
 
 		public TestServerHttpResponse() {
-			super(new DefaultDataBufferAllocator());
+			super(new DefaultDataBufferFactory());
 		}
 
 		@Override

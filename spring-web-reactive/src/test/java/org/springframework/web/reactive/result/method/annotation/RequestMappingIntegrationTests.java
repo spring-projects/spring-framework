@@ -53,8 +53,8 @@ import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converte
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -82,9 +82,7 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigu
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 /**
@@ -384,7 +382,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	@SuppressWarnings("unused")
 	static class FrameworkConfig {
 
-		private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
+		private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
 
 		@Bean
@@ -432,7 +430,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@Bean
 		public ViewResolver freeMarkerViewResolver() {
 			FreeMarkerViewResolver viewResolver = new FreeMarkerViewResolver("", ".ftl");
-			viewResolver.setBufferAllocator(this.allocator);
+			viewResolver.setBufferAllocator(this.dataBufferFactory);
 			return viewResolver;
 		}
 
@@ -485,9 +483,9 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/raw")
 		public Publisher<ByteBuffer> rawResponseBody() {
-			DataBufferAllocator allocator = new DefaultDataBufferAllocator();
+			DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
-			return encoder.encode(Mono.just(new Person("Robert")), allocator,
+			return encoder.encode(Mono.just(new Person("Robert")), dataBufferFactory,
 					ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON).map(DataBuffer::asByteBuffer);
 		}
 

@@ -50,7 +50,8 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 	public void write() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 
-		Flux<DataBuffer> output = this.encoder.encode(source, this.allocator, null, null);
+		Flux<DataBuffer> output =
+				this.encoder.encode(source, this.dataBufferFactory, null, null);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(output).

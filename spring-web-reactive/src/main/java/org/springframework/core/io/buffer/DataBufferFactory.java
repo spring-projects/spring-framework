@@ -19,13 +19,13 @@ package org.springframework.core.io.buffer;
 import java.nio.ByteBuffer;
 
 /**
- * A factory for {@link DataBuffer}s, allowing for allocation of heap-based and direct
- * data buffers.
+ * A factory for {@link DataBuffer}s, allowing for allocation and wrapping of data
+ * buffers.
  *
  * @author Arjen Poutsma
  * @see DataBuffer
  */
-public interface DataBufferAllocator {
+public interface DataBufferFactory {
 
 	/**
 	 * Allocates a data buffer of a default initial capacity. Depending on the underlying

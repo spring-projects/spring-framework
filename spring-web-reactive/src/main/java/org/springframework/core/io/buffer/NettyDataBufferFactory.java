@@ -25,24 +25,24 @@ import io.netty.buffer.Unpooled;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of the {@code DataBufferAllocator} interface based on a Netty
+ * Implementation of the {@code DataBufferFactory} interface based on a Netty
  * {@link ByteBufAllocator}.
  *
  * @author Arjen Poutsma
  * @see io.netty.buffer.PooledByteBufAllocator
  * @see io.netty.buffer.UnpooledByteBufAllocator
  */
-public class NettyDataBufferAllocator implements DataBufferAllocator {
+public class NettyDataBufferFactory implements DataBufferFactory {
 
 	private final ByteBufAllocator byteBufAllocator;
 
 	/**
-	 * Creates a new {@code NettyDataBufferAllocator} based on the given allocator.
-	 * @param byteBufAllocator the allocator to use
+	 * Creates a new {@code NettyDataBufferFactory} based on the given factory.
+	 * @param byteBufAllocator the factory to use
 	 * @see io.netty.buffer.PooledByteBufAllocator
 	 * @see io.netty.buffer.UnpooledByteBufAllocator
 	 */
-	public NettyDataBufferAllocator(ByteBufAllocator byteBufAllocator) {
+	public NettyDataBufferFactory(ByteBufAllocator byteBufAllocator) {
 		Assert.notNull(byteBufAllocator, "'byteBufAllocator' must not be null");
 
 		this.byteBufAllocator = byteBufAllocator;
@@ -77,6 +77,6 @@ public class NettyDataBufferAllocator implements DataBufferAllocator {
 
 	@Override
 	public String toString() {
-		return "NettyDataBufferAllocator (" + this.byteBufAllocator + ")";
+		return "NettyDataBufferFactory (" + this.byteBufAllocator + ")";
 	}
 }

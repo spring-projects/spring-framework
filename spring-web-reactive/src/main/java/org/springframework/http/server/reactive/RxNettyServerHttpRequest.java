@@ -27,7 +27,7 @@ import reactor.core.publisher.Flux;
 import rx.Observable;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -45,13 +45,13 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerRequest<ByteBuf> request;
 
-	private final NettyDataBufferAllocator allocator;
+	private final NettyDataBufferFactory dataBufferFactory;
 
 	public RxNettyServerHttpRequest(HttpServerRequest<ByteBuf> request,
-			NettyDataBufferAllocator allocator) {
+			NettyDataBufferFactory dataBufferFactory) {
 		Assert.notNull("'request', request must not be null");
-		Assert.notNull(allocator, "'allocator' must not be null");
-		this.allocator = allocator;
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		this.dataBufferFactory = dataBufferFactory;
 		this.request = request;
 	}
 
@@ -93,7 +93,8 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		Observable<DataBuffer> content = this.request.getContent().map(allocator::wrap);
+		Observable<DataBuffer> content =
+				this.request.getContent().map(dataBufferFactory::wrap);
 		content = content.concatWith(Observable.empty()); // See GH issue #58
 		return RxJava1ObservableConverter.from(content);
 	}

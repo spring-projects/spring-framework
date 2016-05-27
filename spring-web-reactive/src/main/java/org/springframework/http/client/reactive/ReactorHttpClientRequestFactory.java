@@ -20,9 +20,6 @@ import java.net.URI;
 
 import reactor.io.netty.http.HttpClient;
 
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;

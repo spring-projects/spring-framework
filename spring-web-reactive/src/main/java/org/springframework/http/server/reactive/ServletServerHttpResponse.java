@@ -29,7 +29,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -49,9 +49,9 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 	private final Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter;
 
 	public ServletServerHttpResponse(HttpServletResponse response,
-			DataBufferAllocator allocator,
+			DataBufferFactory dataBufferFactory,
 			Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter) {
-		super(allocator);
+		super(dataBufferFactory);
 		Assert.notNull(response, "'response' must not be null");
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.response = response;

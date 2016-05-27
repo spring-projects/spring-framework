@@ -34,7 +34,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -48,22 +48,22 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	private final HttpHandler delegate;
 
-	// TODO: use UndertowDBA when introduced
-	private final DataBufferAllocator allocator;
+	private final DataBufferFactory dataBufferFactory;
 
 	public UndertowHttpHandlerAdapter(HttpHandler delegate,
-			DataBufferAllocator allocator) {
+			DataBufferFactory dataBufferFactory) {
 		Assert.notNull(delegate, "'delegate' is required");
-		Assert.notNull(allocator, "'allocator' must not be null");
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		this.delegate = delegate;
-		this.allocator = allocator;
+		this.dataBufferFactory = dataBufferFactory;
 	}
 
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
 
-		RequestBodyPublisher requestBody = new RequestBodyPublisher(exchange, allocator);
+		RequestBodyPublisher requestBody =
+				new RequestBodyPublisher(exchange, dataBufferFactory);
 		requestBody.registerListener();
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, requestBody);
 
@@ -74,7 +74,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		ServerHttpResponse response =
 				new UndertowServerHttpResponse(exchange, responseChannel,
 				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBody)),
-				allocator);
+						dataBufferFactory);
 
 		this.delegate.handle(request, response).subscribe(new Subscriber<Void>() {
 
@@ -115,16 +115,16 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		private final StreamSourceChannel requestChannel;
 
-		private final DataBufferAllocator allocator;
+		private final DataBufferFactory dataBufferFactory;
 
 		private final PooledByteBuffer pooledByteBuffer;
 
 		public RequestBodyPublisher(HttpServerExchange exchange,
-				DataBufferAllocator allocator) {
+				DataBufferFactory dataBufferFactory) {
 			this.requestChannel = exchange.getRequestChannel();
 			this.pooledByteBuffer =
 					exchange.getConnection().getByteBufferPool().allocate();
-			this.allocator = allocator;
+			this.dataBufferFactory = dataBufferFactory;
 		}
 
 		public void registerListener() {
@@ -175,7 +175,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 						}
 						else {
 							byteBuffer.flip();
-							DataBuffer dataBuffer = allocator.wrap(byteBuffer);
+							DataBuffer dataBuffer = dataBufferFactory.wrap(byteBuffer);
 							publishOnNext(dataBuffer);
 						}
 					}

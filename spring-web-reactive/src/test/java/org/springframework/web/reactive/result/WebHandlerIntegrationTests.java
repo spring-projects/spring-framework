@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -141,7 +141,8 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	}
 
 	private static DataBuffer asDataBuffer(String text) {
-		return new DefaultDataBufferAllocator().allocateBuffer().write(text.getBytes(StandardCharsets.UTF_8));
+		return new DefaultDataBufferFactory().allocateBuffer()
+				.write(text.getBytes(StandardCharsets.UTF_8));
 	}
 
 	private static class FooHandler implements WebHandler {

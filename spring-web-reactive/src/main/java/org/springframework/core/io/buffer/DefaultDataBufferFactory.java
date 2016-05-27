@@ -21,18 +21,18 @@ import java.nio.ByteBuffer;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of the {@code DataBufferAllocator} interface. Allows for
+ * Default implementation of the {@code DataBufferFactory} interface. Allows for
  * specification of the default initial capacity at construction time, as well as whether
  * heap-based or direct buffers are to be preferred.
  *
  * @author Arjen Poutsma
  */
-public class DefaultDataBufferAllocator implements DataBufferAllocator {
+public class DefaultDataBufferFactory implements DataBufferFactory {
 
 	/**
 	 * The default capacity when none is specified.
-	 * @see #DefaultDataBufferAllocator()
-	 * @see #DefaultDataBufferAllocator(boolean)
+	 * @see #DefaultDataBufferFactory()
+	 * @see #DefaultDataBufferFactory(boolean)
 	 */
 	public static final int DEFAULT_INITIAL_CAPACITY = 256;
 
@@ -42,30 +42,30 @@ public class DefaultDataBufferAllocator implements DataBufferAllocator {
 	private final int defaultInitialCapacity;
 
 	/**
-	 * Creates a new {@code DefaultDataBufferAllocator} with default settings.
+	 * Creates a new {@code DefaultDataBufferFactory} with default settings.
 	 */
-	public DefaultDataBufferAllocator() {
+	public DefaultDataBufferFactory() {
 		this(false);
 	}
 
 	/**
-	 * Creates a new {@code DefaultDataBufferAllocator}, indicating whether direct buffers
+	 * Creates a new {@code DefaultDataBufferFactory}, indicating whether direct buffers
 	 * should be created by {@link #allocateBuffer()} and {@link #allocateBuffer(int)}.
 	 * @param preferDirect {@code true} if direct buffers are to be preferred; {@code
 	 * false} otherwise
 	 */
-	public DefaultDataBufferAllocator(boolean preferDirect) {
+	public DefaultDataBufferFactory(boolean preferDirect) {
 		this(preferDirect, DEFAULT_INITIAL_CAPACITY);
 	}
 
 	/**
-	 * Creates a new {@code DefaultDataBufferAllocator}, indicating whether direct buffers
+	 * Creates a new {@code DefaultDataBufferFactory}, indicating whether direct buffers
 	 * should be created by {@link #allocateBuffer()} and {@link #allocateBuffer(int)},
 	 * and what the capacity is to be used for {@link #allocateBuffer()}.
 	 * @param preferDirect {@code true} if direct buffers are to be preferred; {@code
 	 * false} otherwise
 	 */
-	public DefaultDataBufferAllocator(boolean preferDirect, int defaultInitialCapacity) {
+	public DefaultDataBufferFactory(boolean preferDirect, int defaultInitialCapacity) {
 		Assert.isTrue(defaultInitialCapacity > 0,
 				"'defaultInitialCapacity' should be larger than 0");
 		this.preferDirect = preferDirect;

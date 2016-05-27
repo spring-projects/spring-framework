@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
@@ -23,7 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -40,14 +41,14 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpChannel channel;
 
-	private final NettyDataBufferAllocator allocator;
+	private final NettyDataBufferFactory dataBufferFactory;
 
 	public ReactorServerHttpRequest(HttpChannel request,
-			NettyDataBufferAllocator allocator) {
+			NettyDataBufferFactory dataBufferFactory) {
 		Assert.notNull("'request' must not be null");
-		Assert.notNull(allocator, "'allocator' must not be null");
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		this.channel = request;
-		this.allocator = allocator;
+		this.dataBufferFactory = dataBufferFactory;
 	}
 
 
@@ -90,7 +91,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	public Flux<DataBuffer> getBody() {
 		return this.channel.receive()
 		                   .retain() //FIXME Rogue reference holding
-		                   .map(allocator::wrap);
+				.map(dataBufferFactory::wrap);
 	}
 
 }

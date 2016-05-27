@@ -31,8 +31,8 @@ import reactor.core.publisher.Mono;
 import rx.Observable;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -44,7 +44,7 @@ import org.springframework.http.HttpMethod;
  */
 public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 
-	private final NettyDataBufferAllocator allocator;
+	private final NettyDataBufferFactory dataBufferFactory;
 
 	private final HttpMethod httpMethod;
 
@@ -52,17 +52,17 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 
 	private Observable<ByteBuf> body;
 
-
-	public RxNettyClientHttpRequest(HttpMethod httpMethod, URI uri, HttpHeaders headers, NettyDataBufferAllocator allocator) {
+	public RxNettyClientHttpRequest(HttpMethod httpMethod, URI uri, HttpHeaders headers,
+			NettyDataBufferFactory dataBufferFactory) {
 		super(headers);
 		this.httpMethod = httpMethod;
 		this.uri = uri;
-		this.allocator = allocator;
+		this.dataBufferFactory = dataBufferFactory;
 	}
 
 	@Override
-	public DataBufferAllocator allocator() {
-		return this.allocator;
+	public DataBufferFactory dataBufferFactory() {
+		return this.dataBufferFactory;
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 	public Mono<Void> setBody(Publisher<DataBuffer> body) {
 
 		this.body = RxJava1ObservableConverter.from(Flux.from(body)
-				.map(b -> allocator.wrap(b.asByteBuffer()).getNativeBuffer()));
+				.map(b -> dataBufferFactory.wrap(b.asByteBuffer()).getNativeBuffer()));
 
 		return Mono.empty();
 	}
@@ -126,8 +126,8 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 						}
 					})
 					.flatMap(resp -> resp)
-					.next()
-					.map(response -> new RxNettyClientHttpResponse(response, this.allocator));
+					.next().map(response -> new RxNettyClientHttpResponse(response,
+							this.dataBufferFactory));
 		}
 		catch (IllegalArgumentException exc) {
 			return Mono.error(exc);

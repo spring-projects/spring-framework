@@ -62,8 +62,8 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 		Mono<Resource> source = Mono.just(resource);
 
-		Flux<DataBuffer> output = this.encoder
-				.encode(source, this.allocator, ResolvableType.forClass(Resource.class),
+		Flux<DataBuffer> output = this.encoder.encode(source, this.dataBufferFactory,
+				ResolvableType.forClass(Resource.class),
 						null);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();

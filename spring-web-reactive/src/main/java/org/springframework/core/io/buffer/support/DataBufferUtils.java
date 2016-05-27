@@ -34,7 +34,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.subscriber.SignalEmitter;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.util.Assert;
 
@@ -59,34 +59,34 @@ public abstract class DataBufferUtils {
 	 * Reads the given {@code InputStream} into a {@code Flux} of
 	 * {@code DataBuffer}s. Closes the stream when the flux inputStream terminated.
 	 * @param inputStream the input stream to read from
-	 * @param allocator the allocator to create data buffers with
+	 * @param dataBufferFactory the factory to create data buffers with
 	 * @param bufferSize the maximum size of the data buffers
 	 * @return a flux of data buffers read from the given channel
 	 */
 	public static Flux<DataBuffer> read(InputStream inputStream,
-			DataBufferAllocator allocator, int bufferSize) {
+			DataBufferFactory dataBufferFactory, int bufferSize) {
 		Assert.notNull(inputStream, "'inputStream' must not be null");
-		Assert.notNull(allocator, "'allocator' must not be null");
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 
 		ReadableByteChannel channel = Channels.newChannel(inputStream);
-		return read(channel, allocator, bufferSize);
+		return read(channel, dataBufferFactory, bufferSize);
 	}
 
 	/**
 	 * Reads the given {@code ReadableByteChannel} into a {@code Flux} of
 	 * {@code DataBuffer}s. Closes the channel when the flux is terminated.
 	 * @param channel the channel to read from
-	 * @param allocator the allocator to create data buffers with
+	 * @param dataBufferFactory the factory to create data buffers with
 	 * @param bufferSize the maximum size of the data buffers
 	 * @return a flux of data buffers read from the given channel
 	 */
 	public static Flux<DataBuffer> read(ReadableByteChannel channel,
-			DataBufferAllocator allocator, int bufferSize) {
+			DataBufferFactory dataBufferFactory, int bufferSize) {
 		Assert.notNull(channel, "'channel' must not be null");
-		Assert.notNull(allocator, "'allocator' must not be null");
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 
 		return Flux.generate(() -> channel,
-				new ReadableByteChannelGenerator(allocator, bufferSize),
+				new ReadableByteChannelGenerator(dataBufferFactory, bufferSize),
 				CLOSE_CONSUMER);
 	}
 
@@ -194,12 +194,13 @@ public abstract class DataBufferUtils {
 			implements BiFunction<ReadableByteChannel, SignalEmitter<DataBuffer>,
 						ReadableByteChannel> {
 
-		private final DataBufferAllocator allocator;
+		private final DataBufferFactory dataBufferFactory;
 
 		private final int chunkSize;
 
-		public ReadableByteChannelGenerator(DataBufferAllocator allocator, int chunkSize) {
-			this.allocator = allocator;
+		public ReadableByteChannelGenerator(DataBufferFactory dataBufferFactory,
+				int chunkSize) {
+			this.dataBufferFactory = dataBufferFactory;
 			this.chunkSize = chunkSize;
 		}
 
@@ -212,7 +213,7 @@ public abstract class DataBufferUtils {
 				if ((read = channel.read(byteBuffer)) > 0) {
 					byteBuffer.flip();
 					boolean release = true;
-					DataBuffer dataBuffer = this.allocator.allocateBuffer(read);
+					DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(read);
 					try {
 						dataBuffer.write(byteBuffer);
 						release = false;

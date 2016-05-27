@@ -59,7 +59,7 @@ public class StringEncoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void write() throws InterruptedException {
 		Flux<String> output = Flux.from(
-				this.encoder.encode(Flux.just("foo"), this.allocator, null, null))
+				this.encoder.encode(Flux.just("foo"), this.dataBufferFactory, null, null))
 						.map(chunk -> {
 							byte[] b = new byte[chunk.readableByteCount()];
 							chunk.read(b);

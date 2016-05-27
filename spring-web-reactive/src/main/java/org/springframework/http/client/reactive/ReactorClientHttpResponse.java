@@ -22,8 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.io.netty.http.HttpInbound;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -39,19 +38,19 @@ import org.springframework.util.MultiValueMap;
  */
 public class ReactorClientHttpResponse implements ClientHttpResponse {
 
-	private final DataBufferAllocator allocator;
+	private final DataBufferFactory dataBufferFactory;
 
 	private final HttpInbound channel;
 
-
-	public ReactorClientHttpResponse(HttpInbound channel, DataBufferAllocator allocator) {
-		this.allocator = allocator;
+	public ReactorClientHttpResponse(HttpInbound channel,
+			DataBufferFactory dataBufferFactory) {
+		this.dataBufferFactory = dataBufferFactory;
 		this.channel = channel;
 	}
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return channel.receiveByteBuffer().map(allocator::wrap);
+		return channel.receiveByteBuffer().map(dataBufferFactory::wrap);
 	}
 
 	@Override

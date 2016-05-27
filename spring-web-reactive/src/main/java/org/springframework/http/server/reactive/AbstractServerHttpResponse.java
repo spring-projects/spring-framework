@@ -25,7 +25,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
@@ -55,19 +55,19 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final List<Supplier<? extends Mono<Void>>> beforeCommitActions = new ArrayList<>(4);
 
-	private final DataBufferAllocator allocator;
+	private final DataBufferFactory dataBufferFactory;
 
-	public AbstractServerHttpResponse(DataBufferAllocator allocator) {
-		Assert.notNull(allocator, "'allocator' must not be null");
+	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 
-		this.allocator = allocator;
+		this.dataBufferFactory = dataBufferFactory;
 		this.headers = new HttpHeaders();
 		this.cookies = new LinkedMultiValueMap<String, ResponseCookie>();
 	}
 
 	@Override
-	public final DataBufferAllocator allocator() {
-		return this.allocator;
+	public final DataBufferFactory dataBufferFactory() {
+		return this.dataBufferFactory;
 	}
 
 	@Override

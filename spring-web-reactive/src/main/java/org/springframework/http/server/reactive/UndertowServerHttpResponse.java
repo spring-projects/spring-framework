@@ -33,7 +33,7 @@ import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
@@ -57,8 +57,8 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
 			StreamSinkChannel responseChannel,
 			Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter,
-			DataBufferAllocator allocator) {
-		super(allocator);
+			DataBufferFactory dataBufferFactory) {
+		super(dataBufferFactory);
 		Assert.notNull(exchange, "'exchange' is required.");
 		Assert.notNull(responseChannel, "'responseChannel' must not be null");
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");

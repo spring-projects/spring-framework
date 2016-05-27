@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.lang.reflect.Method;
@@ -40,7 +41,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
@@ -55,9 +56,7 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 
@@ -253,7 +252,7 @@ public class ViewResolutionResultHandlerTests {
 
 	private static DataBuffer asDataBuffer(String value) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(UTF_8));
-		return new DefaultDataBufferAllocator().wrap(byteBuffer);
+		return new DefaultDataBufferFactory().wrap(byteBuffer);
 	}
 
 	private static String asString(DataBuffer dataBuffer) {

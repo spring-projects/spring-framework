@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,8 +28,8 @@ import reactor.core.publisher.Flux;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
@@ -48,7 +48,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 
 	private final List<MediaType> mediaTypes = new ArrayList<>(4);
 
-	private DataBufferAllocator bufferAllocator = new DefaultDataBufferAllocator();
+	private DataBufferFactory bufferAllocator = new DefaultDataBufferFactory();
 
 	private ApplicationContext applicationContext;
 
@@ -79,19 +79,19 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	}
 
 	/**
-	 * Configure the {@link DataBufferAllocator} to use for write I/O.
-	 * <p>By default this is set to {@link DefaultDataBufferAllocator}.
-	 * @param bufferAllocator the allocator to use
+	 * Configure the {@link DataBufferFactory} to use for write I/O.
+	 * <p>By default this is set to {@link DefaultDataBufferFactory}.
+	 * @param bufferAllocator the factory to use
 	 */
-	public void setBufferAllocator(DataBufferAllocator bufferAllocator) {
+	public void setBufferAllocator(DataBufferFactory bufferAllocator) {
 		Assert.notNull(bufferAllocator, "'bufferAllocator' is required.");
 		this.bufferAllocator = bufferAllocator;
 	}
 
 	/**
-	 * Return the configured buffer allocator, never {@code null}.
+	 * Return the configured buffer factory, never {@code null}.
 	 */
-	public DataBufferAllocator getBufferAllocator() {
+	public DataBufferFactory getBufferAllocator() {
 		return this.bufferAllocator;
 	}
 

@@ -34,7 +34,7 @@ import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -62,9 +62,7 @@ import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -162,7 +160,7 @@ public class DispatcherHandlerErrorTests {
 	public void notAcceptable() throws Exception {
 		this.request.setUri(new URI("/request-body"));
 		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		DataBuffer buffer = new DefaultDataBufferAllocator().allocateBuffer()
+		DataBuffer buffer = new DefaultDataBufferFactory().allocateBuffer()
 				.write("body".getBytes("UTF-8"));
 		this.request.setBody(Mono.just(buffer));
 

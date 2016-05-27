@@ -29,7 +29,7 @@ import reactor.core.publisher.Mono;
 import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -48,8 +48,8 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	private final HttpChannel channel;
 
 	public ReactorServerHttpResponse(HttpChannel response,
-			DataBufferAllocator allocator) {
-		super(allocator);
+			DataBufferFactory dataBufferFactory) {
+		super(dataBufferFactory);
 		Assert.notNull("'response' must not be null.");
 		this.channel = response;
 	}

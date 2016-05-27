@@ -30,14 +30,14 @@ import org.springframework.util.ObjectUtils;
 /**
  * Default implementation of the {@link DataBuffer} interface that uses a {@link
  * ByteBuffer} internally, with separate read and write positions. Constructed
- * using the {@link DefaultDataBufferAllocator}.
+ * using the {@link DefaultDataBufferFactory}.
  *
  * @author Arjen Poutsma
- * @see DefaultDataBufferAllocator
+ * @see DefaultDataBufferFactory
  */
 public class DefaultDataBuffer implements DataBuffer {
 
-	private final DefaultDataBufferAllocator allocator;
+	private final DefaultDataBufferFactory dataBufferFactory;
 
 	private ByteBuffer byteBuffer;
 
@@ -51,27 +51,28 @@ public class DefaultDataBuffer implements DataBuffer {
 	 * ByteBuffer#position() position} of the given buffer.
 	 * @param byteBuffer the buffer to base this buffer on
 	 */
-	DefaultDataBuffer(ByteBuffer byteBuffer, DefaultDataBufferAllocator allocator) {
-		this(byteBuffer, byteBuffer.position(), byteBuffer.position(), allocator);
+	DefaultDataBuffer(ByteBuffer byteBuffer, DefaultDataBufferFactory dataBufferFactory) {
+		this(byteBuffer, byteBuffer.position(), byteBuffer.position(), dataBufferFactory);
 	}
 
-	DefaultDataBuffer(ByteBuffer byteBuffer, int readPosition, int writePosition, DefaultDataBufferAllocator allocator) {
+	DefaultDataBuffer(ByteBuffer byteBuffer, int readPosition, int writePosition,
+			DefaultDataBufferFactory dataBufferFactory) {
 		Assert.notNull(byteBuffer, "'byteBuffer' must not be null");
 		Assert.isTrue(readPosition >= 0, "'readPosition' must be 0 or higher");
 		Assert.isTrue(writePosition >= 0, "'writePosition' must be 0 or higher");
 		Assert.isTrue(readPosition <= writePosition,
 				"'readPosition' must be smaller than or equal to 'writePosition'");
-		Assert.notNull(allocator, "'allocator' must not be null");
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 
 		this.byteBuffer = byteBuffer;
 		this.readPosition = readPosition;
 		this.writePosition = writePosition;
-		this.allocator = allocator;
+		this.dataBufferFactory = dataBufferFactory;
 	}
 
 	@Override
-	public DefaultDataBufferAllocator allocator() {
-		return this.allocator;
+	public DefaultDataBufferFactory factory() {
+		return this.dataBufferFactory;
 	}
 
 	/**
@@ -219,7 +220,7 @@ public class DefaultDataBuffer implements DataBuffer {
 			this.byteBuffer.position(index);
 			ByteBuffer slice = this.byteBuffer.slice();
 			slice.limit(length);
-			return new SlicedDefaultDataBuffer(slice, 0, length, this.allocator);
+			return new SlicedDefaultDataBuffer(slice, 0, length, this.dataBufferFactory);
 		}
 		finally {
 			this.byteBuffer.position(oldPosition);
@@ -337,8 +338,8 @@ public class DefaultDataBuffer implements DataBuffer {
 	private static class SlicedDefaultDataBuffer extends DefaultDataBuffer {
 
 		SlicedDefaultDataBuffer(ByteBuffer byteBuffer, int readPosition,
-				int writePosition, DefaultDataBufferAllocator allocator) {
-			super(byteBuffer, readPosition, writePosition, allocator);
+				int writePosition, DefaultDataBufferFactory dataBufferFactory) {
+			super(byteBuffer, readPosition, writePosition, dataBufferFactory);
 		}
 
 		@Override

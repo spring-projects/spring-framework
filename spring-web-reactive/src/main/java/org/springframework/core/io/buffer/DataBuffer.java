@@ -29,10 +29,10 @@ import java.util.function.IntPredicate;
 public interface DataBuffer {
 
 	/**
-	 * Returns the {@link DataBufferAllocator} that created this buffer.
-	 * @return the creating buffer allocator
+	 * Returns the {@link DataBufferFactory} that created this buffer.
+	 * @return the creating buffer factory
 	 */
-	DataBufferAllocator allocator();
+	DataBufferFactory factory();
 
 	/**
 	 * Returns the index of the first byte in this buffer that matches the given

@@ -29,7 +29,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -64,21 +64,24 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream,
-			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
+			DataBufferFactory dataBufferFactory, ResolvableType type, MimeType mimeType,
 			Object... hints) {
 		if (inputStream instanceof Mono) {
 			// single object
-			return Flux.from(inputStream).map(value -> serialize(value, allocator));
+			return Flux.from(inputStream)
+					.map(value -> serialize(value, dataBufferFactory));
 		}
 		else {
 			// array
-			Mono<DataBuffer> startArray = Mono.just(allocator.wrap(START_ARRAY_BUFFER));
-			Flux<DataBuffer> arraySeparators = Mono.just(allocator.wrap(SEPARATOR_BUFFER))
-			                                       .repeat();
-			Mono<DataBuffer> endArray = Mono.just(allocator.wrap(END_ARRAY_BUFFER));
+			Mono<DataBuffer> startArray =
+					Mono.just(dataBufferFactory.wrap(START_ARRAY_BUFFER));
+			Flux<DataBuffer> arraySeparators =
+					Mono.just(dataBufferFactory.wrap(SEPARATOR_BUFFER)).repeat();
+			Mono<DataBuffer> endArray =
+					Mono.just(dataBufferFactory.wrap(END_ARRAY_BUFFER));
 
-			Flux<DataBuffer> serializedObjects =
-					Flux.from(inputStream).map(value -> serialize(value, allocator));
+			Flux<DataBuffer> serializedObjects = Flux.from(inputStream)
+					.map(value -> serialize(value, dataBufferFactory));
 
 			Flux<DataBuffer> array = Flux.zip(serializedObjects, arraySeparators)
 					.flatMap(tuple -> Flux.just(tuple.getT1(), tuple.getT2()));
@@ -89,8 +92,8 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 		}
 	}
 
-	private DataBuffer serialize(Object value, DataBufferAllocator allocator) {
-		DataBuffer buffer = allocator.allocateBuffer();
+	private DataBuffer serialize(Object value, DataBufferFactory dataBufferFactory) {
+		DataBuffer buffer = dataBufferFactory.allocateBuffer();
 		OutputStream outputStream = buffer.asOutputStream();
 		try {
 			this.mapper.writeValue(outputStream, value);

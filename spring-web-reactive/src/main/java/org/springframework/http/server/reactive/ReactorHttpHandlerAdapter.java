@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 import reactor.io.ipc.ChannelHandler;
 import reactor.io.netty.http.HttpChannel;
 
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -39,13 +39,13 @@ public class ReactorHttpHandlerAdapter
 
 	@Override
 	public Mono<Void> apply(HttpChannel channel) {
-		NettyDataBufferAllocator allocator =
-				new NettyDataBufferAllocator(channel.delegate().alloc());
+		NettyDataBufferFactory dataBufferFactory =
+				new NettyDataBufferFactory(channel.delegate().alloc());
 
 		ReactorServerHttpRequest adaptedRequest =
-				new ReactorServerHttpRequest(channel, allocator);
+				new ReactorServerHttpRequest(channel, dataBufferFactory);
 		ReactorServerHttpResponse adaptedResponse =
-				new ReactorServerHttpResponse(channel, allocator);
+				new ReactorServerHttpResponse(channel, dataBufferFactory);
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse);
 	}
 

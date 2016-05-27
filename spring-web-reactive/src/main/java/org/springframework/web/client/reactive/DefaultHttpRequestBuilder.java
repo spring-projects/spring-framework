@@ -16,7 +16,6 @@
 
 package org.springframework.web.client.reactive;
 
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +29,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -150,10 +148,9 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 					.findFirst();
 
 			if (messageEncoder.isPresent()) {
-				DataBufferAllocator allocator = request.allocator();
 				request.setBody(messageEncoder.get()
-						.encode(this.contentPublisher, allocator, requestBodyType,
-								mediaType));
+						.encode(this.contentPublisher, request.dataBufferFactory(),
+								requestBodyType, mediaType));
 			}
 			else {
 				throw new WebClientException("Can't write request body " +

@@ -18,7 +18,7 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -30,10 +30,10 @@ import org.springframework.util.Assert;
  */
 public class RxNettyHttpClientRequestFactory implements ClientHttpRequestFactory {
 
-	private final NettyDataBufferAllocator allocator;
+	private final NettyDataBufferFactory dataBufferFactory;
 
-	public RxNettyHttpClientRequestFactory(NettyDataBufferAllocator allocator) {
-		this.allocator = allocator;
+	public RxNettyHttpClientRequestFactory(NettyDataBufferFactory dataBufferFactory) {
+		this.dataBufferFactory = dataBufferFactory;
 	}
 
 	@Override
@@ -42,6 +42,7 @@ public class RxNettyHttpClientRequestFactory implements ClientHttpRequestFactory
 		Assert.notNull(uri, "request URI is required");
 		Assert.notNull(headers, "request headers are required");
 
-		return new RxNettyClientHttpRequest(httpMethod, uri, headers, this.allocator);
+		return new RxNettyClientHttpRequest(httpMethod, uri, headers,
+				this.dataBufferFactory);
 	}
 }

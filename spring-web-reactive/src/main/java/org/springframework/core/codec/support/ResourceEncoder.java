@@ -24,7 +24,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
@@ -59,10 +59,11 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	}
 
 	@Override
-	protected Flux<DataBuffer> encode(Resource resource, DataBufferAllocator allocator,
+	protected Flux<DataBuffer> encode(Resource resource,
+			DataBufferFactory dataBufferFactory,
 			ResolvableType type, MimeType mimeType, Object... hints) throws IOException {
 		InputStream is = resource.getInputStream();
-		return DataBufferUtils.read(is, allocator, bufferSize);
+		return DataBufferUtils.read(is, dataBufferFactory, bufferSize);
 	}
 
 }

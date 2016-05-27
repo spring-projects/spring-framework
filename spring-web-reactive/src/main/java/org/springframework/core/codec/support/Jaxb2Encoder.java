@@ -27,7 +27,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -61,10 +61,10 @@ public class Jaxb2Encoder extends AbstractSingleValueEncoder<Object> {
 	}
 
 	@Override
-	protected Flux<DataBuffer> encode(Object value, DataBufferAllocator allocator,
+	protected Flux<DataBuffer> encode(Object value, DataBufferFactory dataBufferFactory,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 		try {
-			DataBuffer buffer = allocator.allocateBuffer(1024);
+			DataBuffer buffer = dataBufferFactory.allocateBuffer(1024);
 			OutputStream outputStream = buffer.asOutputStream();
 			Class<?> clazz = ClassUtils.getUserClass(value);
 			Marshaller marshaller = jaxbContexts.createMarshaller(clazz);

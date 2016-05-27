@@ -29,7 +29,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.MimeType;
 
@@ -131,7 +131,7 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 					return Flux.error(new IllegalStateException("object length exceeds " +
 							maxObjectLength + ": " + this.writerIndex + " bytes discarded"));
 				}
-				DataBufferAllocator allocator = b.allocator();
+				DataBufferFactory dataBufferFactory = b.factory();
 				for (/* use current index */; this.index < this.writerIndex; this.index++) {
 					byte c = this.input.getByte(this.index);
 					if (this.state == ST_DECODING_NORMAL) {
@@ -143,7 +143,7 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 							ByteBuf json = extractObject(this.input, this.input.readerIndex(),
 									this.index + 1 - this.input.readerIndex());
 							if (json != null) {
-								chunks.add(allocator.wrap(json.nioBuffer()));
+								chunks.add(dataBufferFactory.wrap(json.nioBuffer()));
 							}
 
 							// The JSON object/array was extracted => discard the bytes from
@@ -177,7 +177,7 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 									idxNoSpaces + 1 - this.input.readerIndex());
 
 							if (json != null) {
-								chunks.add(allocator.wrap(json.nioBuffer()));
+								chunks.add(dataBufferFactory.wrap(json.nioBuffer()));
 							}
 
 							this.input.readerIndex(this.index + 1);

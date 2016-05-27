@@ -21,7 +21,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
 
 /**
@@ -37,13 +37,13 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
 	@Override
 	public final Flux<DataBuffer> encode(Publisher<? extends T> inputStream,
-			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
+			DataBufferFactory dataBufferFactory, ResolvableType type, MimeType mimeType,
 			Object... hints) {
 		return Flux.from(inputStream).
 				take(1).
 				concatMap(t -> {
 					try {
-						return encode(t, allocator, type, mimeType);
+						return encode(t, dataBufferFactory, type, mimeType);
 					}
 					catch (Exception ex) {
 						return Flux.error(ex);
@@ -54,14 +54,14 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 	/**
 	 * Encodes {@code T} to an output {@link DataBuffer} stream.
 	 * @param t the value to process
-	 * @param allocator a buffer allocator used to create the output
+	 * @param dataBufferFactory a buffer factory used to create the output
 	 * @param type the stream element type to process
 	 * @param mimeType the mime type to process
 	 * @param hints Additional information about how to do decode, optional
 	 * @return the output stream
 	 * @throws Exception in case of errors
 	 */
-	protected abstract Flux<DataBuffer> encode(T t, DataBufferAllocator allocator,
+	protected abstract Flux<DataBuffer> encode(T t, DataBufferFactory dataBufferFactory,
 			ResolvableType type, MimeType mimeType, Object... hints) throws Exception;
 
 

@@ -23,7 +23,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -45,10 +45,10 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends ByteBuffer> inputStream,
-			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
+			DataBufferFactory dataBufferFactory, ResolvableType type, MimeType mimeType,
 			Object... hints) {
 
-		return Flux.from(inputStream).map(allocator::wrap);
+		return Flux.from(inputStream).map(dataBufferFactory::wrap);
 	}
 
 }

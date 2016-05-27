@@ -37,28 +37,28 @@ import static org.junit.Assert.assertEquals;
 public abstract class AbstractDataBufferAllocatingTestCase {
 
 	@Parameterized.Parameter
-	public DataBufferAllocator allocator;
+	public DataBufferFactory dataBufferFactory;
 
 	@Parameterized.Parameters(name = "{0}")
-	public static Object[][] allocators() {
+	public static Object[][] dataBufferFactories() {
 		return new Object[][]{
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(true))},
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false))},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(true))},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(false))},
-				{new DefaultDataBufferAllocator(true)},
-				{new DefaultDataBufferAllocator(false)}
+				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(true))},
+				{new NettyDataBufferFactory(new UnpooledByteBufAllocator(false))},
+				{new NettyDataBufferFactory(new PooledByteBufAllocator(true))},
+				{new NettyDataBufferFactory(new PooledByteBufAllocator(false))},
+				{new DefaultDataBufferFactory(true)},
+				{new DefaultDataBufferFactory(false)}
 
 		};
 	}
 
 	protected DataBuffer createDataBuffer(int capacity) {
-		return this.allocator.allocateBuffer(capacity);
+		return this.dataBufferFactory.allocateBuffer(capacity);
 	}
 
 	protected DataBuffer stringBuffer(String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = this.allocator.allocateBuffer(bytes.length);
+		DataBuffer buffer = this.dataBufferFactory.allocateBuffer(bytes.length);
 		buffer.write(bytes);
 		return buffer;
 	}

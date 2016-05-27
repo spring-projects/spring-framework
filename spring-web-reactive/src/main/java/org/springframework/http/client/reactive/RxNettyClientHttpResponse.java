@@ -24,7 +24,7 @@ import reactor.core.converter.RxJava1ObservableConverter;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -46,14 +46,14 @@ public class RxNettyClientHttpResponse implements ClientHttpResponse {
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
 
-	private final NettyDataBufferAllocator allocator;
+	private final NettyDataBufferFactory dataBufferFactory;
 
 
 	public RxNettyClientHttpResponse(HttpClientResponse<ByteBuf> response,
-			NettyDataBufferAllocator allocator) {
+			NettyDataBufferFactory dataBufferFactory) {
 		Assert.notNull("'request', request must not be null");
-		Assert.notNull(allocator, "'allocator' must not be null");
-		this.allocator = allocator;
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		this.dataBufferFactory = dataBufferFactory;
 		this.response = response;
 		this.headers = new HttpHeaders();
 		this.response.headerIterator().forEachRemaining(e -> this.headers.set(e.getKey().toString(), e.getValue().toString()));
@@ -84,7 +84,8 @@ public class RxNettyClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return RxJava1ObservableConverter.from(this.response.getContent().map(allocator::wrap));
+		return RxJava1ObservableConverter
+				.from(this.response.getContent().map(dataBufferFactory::wrap));
 	}
 
 	@Override
