@@ -58,6 +58,10 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
 
+	@SuppressWarnings("ThrowableInstanceNeverThrown")
+	private static final Exception HANDLER_NOT_FOUND_EXCEPTION =
+			new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
+
 
 	private List<HandlerMapping> handlerMappings;
 
@@ -78,7 +82,6 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 				context, HandlerMapping.class, true, false);
 
 		this.handlerMappings = new ArrayList<>(mappingBeans.values());
-		this.handlerMappings.add(new NotFoundHandlerMapping());
 		AnnotationAwareOrderComparator.sort(this.handlerMappings);
 
 		Map<String, HandlerAdapter> adapterBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
@@ -104,6 +107,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 		return Flux.fromIterable(this.handlerMappings)
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
+				.otherwiseIfEmpty(Mono.error(HANDLER_NOT_FOUND_EXCEPTION))
 				.then(handler -> invokeHandler(exchange, handler))
 				.then(result -> handleResult(exchange, result));
 	}
@@ -130,20 +134,6 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 			}
 		}
 		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
-	}
-
-
-	private static class NotFoundHandlerMapping implements HandlerMapping {
-
-		@SuppressWarnings("ThrowableInstanceNeverThrown")
-		private static final Exception HANDLER_NOT_FOUND_EXCEPTION =
-				new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
-
-
-		@Override
-		public Mono<Object> getHandler(ServerWebExchange exchange) {
-			return Mono.error(HANDLER_NOT_FOUND_EXCEPTION);
-		}
 	}
 
 }
