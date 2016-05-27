@@ -151,6 +151,7 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 				return Flux.fromIterable(getViewResolvers())
 						.concatMap(resolver -> resolver.resolveViewName(viewName, locale))
 						.next()
+						.otherwiseIfEmpty(handleUnresolvedViewName(viewName))
 						.then(view -> {
 							Flux<DataBuffer> body = view.render(result, null, exchange);
 							return exchange.getResponse().setBody(body);
@@ -199,6 +200,11 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 			path = path.substring(0, path.length() - 1);
 		}
 		return StringUtils.stripFilenameExtension(path);
+	}
+
+	private Mono<View> handleUnresolvedViewName(String viewName) {
+		return Mono.error(new IllegalStateException(
+				"Could not resolve view with name '" + viewName + "'."));
 	}
 
 }

@@ -154,9 +154,8 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void viewNameUnresolved() throws Exception {
-		TestSubscriber<Void> subscriber = handle("/path", "account", ResolvableType.forClass(String.class));
-
-		subscriber.assertNoValues();
+		handle("/path", "account", ResolvableType.forClass(String.class))
+				.assertErrorMessage("Could not resolve view with name 'account'.");
 	}
 
 	@Test
