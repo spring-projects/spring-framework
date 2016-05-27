@@ -65,7 +65,6 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 	 * @param service for converting other reactive types (e.g. rx.Single) to Mono
 	 */
 	public ViewResolutionResultHandler(List<ViewResolver> resolvers, ConversionService service) {
-		Assert.notEmpty(resolvers, "At least one ViewResolver is required.");
 		Assert.notNull(service, "'conversionService' is required.");
 		this.viewResolvers.addAll(resolvers);
 		AnnotationAwareOrderComparator.sort(this.viewResolvers);
@@ -183,6 +182,14 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 		}
 	}
 
+	/**
+	 * Translate the given request into a default view name. This is useful when
+	 * the application leaves the view name unspecified.
+	 * <p>The default implementation strips the leading and trailing slash from
+	 * the as well as any extension and uses that as the view name.
+	 * @return the default view name to use; if {@code null} is returned
+	 * processing will result in an IllegalStateException.
+	 */
 	protected String getDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
 		String path = this.pathHelper.getLookupPathForRequest(exchange);
 		if (path.startsWith("/")) {

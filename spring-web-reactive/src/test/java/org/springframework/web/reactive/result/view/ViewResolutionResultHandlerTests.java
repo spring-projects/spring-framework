@@ -59,7 +59,6 @@ import org.springframework.web.server.session.WebSessionManager;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
-
 /**
  * Unit tests for {@link ViewResolutionResultHandler}.
  * @author Rossen Stoyanchev
@@ -71,8 +70,6 @@ public class ViewResolutionResultHandlerTests {
 
 	private MockServerHttpResponse response;
 
-	private ServerWebExchange exchange;
-
 	private ModelMap model;
 
 	private DefaultConversionService conversionService;
@@ -80,7 +77,6 @@ public class ViewResolutionResultHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.exchange = createExchange("/path");
 		this.model = new ExtendedModelMap().addAttribute("id", "123");
 		this.conversionService = new DefaultConversionService();
 		this.conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
@@ -97,6 +93,99 @@ public class ViewResolutionResultHandlerTests {
 		testSupports("handleSingleView", null);
 	}
 
+	@Test
+	public void order() throws Exception {
+		TestViewResolver resolver1 = new TestViewResolver();
+		TestViewResolver resolver2 = new TestViewResolver();
+		resolver1.setOrder(2);
+		resolver2.setOrder(1);
+
+		assertEquals(Arrays.asList(resolver2, resolver1),
+				new ViewResolutionResultHandler(Arrays.asList(resolver1, resolver2), this.conversionService)
+						.getViewResolvers());
+	}
+
+	@Test
+	public void viewReference() throws Exception {
+		Object value = new TestView("account");
+		handle("/path", value, ResolvableType.forClass(View.class));
+
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+	}
+
+	@Test
+	public void viewReferenceInMono() throws Exception {
+		Object value = Mono.just(new TestView("account"));
+		handle("/path", value, returnTypeFor("handleMonoView"));
+
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+	}
+
+	@Test
+	public void viewName() throws Exception {
+		Object value = "account";
+		handle("/path", value, ResolvableType.forClass(String.class), new TestViewResolver("account"));
+
+		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
+		subscriber.bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+	}
+
+	@Test
+	public void viewNameInMono() throws Exception {
+		Object value = Mono.just("account");
+		handle("/path", value, returnTypeFor("handleMonoString"), new TestViewResolver("account"));
+
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+	}
+
+	@Test
+	public void viewNameWithMultipleResolvers() throws Exception {
+		String value = "profile";
+		handle("/path", value, ResolvableType.forClass(String.class),
+				new TestViewResolver("account"), new TestViewResolver("profile"));
+
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("profile: {id=123}", asString(buf)));
+	}
+
+	@Test
+	public void viewNameUnresolved() throws Exception {
+		TestSubscriber<Void> subscriber = handle("/path", "account", ResolvableType.forClass(String.class));
+
+		subscriber.assertNoValues();
+	}
+
+	@Test
+	public void viewNameIsNull() throws Exception {
+		ViewResolver resolver = new TestViewResolver("account");
+
+		handle("/account", null, ResolvableType.forClass(String.class), resolver);
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+
+		handle("/account/", null, ResolvableType.forClass(String.class), resolver);
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+
+		handle("/account.123", null, ResolvableType.forClass(String.class), resolver);
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+	}
+
+	@Test
+	public void viewNameIsEmptyMono() throws Exception {
+		Object value = Mono.empty();
+		handle("/account", value, returnTypeFor("handleMonoString"), new TestViewResolver("account"));
+
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+	}
+
+
 	private void testSupports(String methodName, Object returnValue) throws NoSuchMethodException {
 		Method method = TestController.class.getMethod(methodName);
 		ResolvableType returnType = ResolvableType.forMethodParameter(method, -1);
@@ -106,146 +195,25 @@ public class ViewResolutionResultHandlerTests {
 		assertTrue(handler.supports(result));
 	}
 
-	@Test
-	public void viewReference() throws Exception {
-		TestView view = new TestView("account");
-		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(this.exchange, handler, view, ResolvableType.forClass(View.class));
+	private TestSubscriber<Void> handle(String path, Object value, ResolvableType type,
+			ViewResolver... resolvers) throws URISyntaxException {
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
-	}
+		List<ViewResolver> resolverList = Arrays.asList(resolvers);
+		HandlerResultHandler handler = new ViewResolutionResultHandler(resolverList, this.conversionService);
+		HandlerResult handlerResult = new HandlerResult(new Object(), value, type, this.model);
 
-	@Test
-	public void viewReferenceMono() throws Exception {
-		TestView view = new TestView("account");
-		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(this.exchange, handler, Mono.just(view), methodReturnType("handleMonoView"));
-
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
-	}
-
-	@Test
-	public void viewName() throws Exception {
-		TestView view = new TestView("account");
-		TestViewResolver resolver = new TestViewResolver().addView(view);
-		List<ViewResolver> resolvers = Collections.singletonList(resolver);
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(this.exchange, handler, "account", ResolvableType.forClass(String.class));
-
-		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
-		subscriber.bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
-	}
-
-	@Test
-	public void viewNameMono() throws Exception {
-		TestView view = new TestView("account");
-		TestViewResolver resolver = new TestViewResolver().addView(view);
-		List<ViewResolver> resolvers = Collections.singletonList(resolver);
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(this.exchange, handler, Mono.just("account"), methodReturnType("handleMonoString"));
-
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
-	}
-
-	@Test
-	public void viewNameWithMultipleResolvers() throws Exception {
-		TestView view1 = new TestView("account");
-		TestView view2 = new TestView("profile");
-		TestViewResolver resolver1 = new TestViewResolver().addView(view1);
-		TestViewResolver resolver2 = new TestViewResolver().addView(view2);
-		List<ViewResolver> resolvers = Arrays.asList(resolver1, resolver2);
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		handle(this.exchange, handler, "profile", ResolvableType.forClass(String.class));
-
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("profile: {id=123}", asString(buf)));
-	}
-
-	@Test
-	public void viewNameWithNoMatch() throws Exception {
-		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		TestSubscriber<Void> subscriber = handle(this.exchange, handler, "account", ResolvableType.forClass(String.class));
-
-		subscriber.assertNoValues();
-	}
-
-	@Test
-	public void viewNameNotSpecified() throws Exception {
-		TestView view = new TestView("account");
-		TestViewResolver resolver = new TestViewResolver().addView(view);
-		List<ViewResolver> resolvers = Collections.singletonList(resolver);
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-
-		ServerWebExchange exchange = createExchange("/account");
-		handle(exchange, handler, null, ResolvableType.forClass(String.class));
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
-
-		exchange = createExchange("/account/");
-		handle(exchange, handler, null, ResolvableType.forClass(String.class));
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
-
-		exchange = createExchange("/account.123");
-		handle(exchange, handler, null, ResolvableType.forClass(String.class));
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
-	}
-
-	@Test
-	public void viewNameMonoEmpty() throws Exception {
-		TestView view = new TestView("account");
-		TestViewResolver resolver = new TestViewResolver().addView(view);
-		List<ViewResolver> resolvers = Collections.singletonList(resolver);
-		HandlerResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		ServerWebExchange exchange = createExchange("/account");
-		handle(exchange, handler, Mono.empty(), methodReturnType("handleMonoString"));
-
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
-	}
-
-
-	@Test
-	public void ordered() throws Exception {
-		TestViewResolver resolver1 = new TestViewResolver();
-		TestViewResolver resolver2 = new TestViewResolver();
-		List<ViewResolver> resolvers = Arrays.asList(resolver1, resolver2);
-
-		resolver1.setOrder(2);
-		resolver2.setOrder(1);
-
-		ViewResolutionResultHandler resultHandler =
-				new ViewResolutionResultHandler(resolvers, this.conversionService);
-
-		assertEquals(Arrays.asList(resolver2, resolver1), resultHandler.getViewResolvers());
-	}
-
-
-	private ServerWebExchange createExchange(String path) throws URISyntaxException {
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
 		this.response = new MockServerHttpResponse();
 		WebSessionManager sessionManager = new DefaultWebSessionManager();
-		return new DefaultServerWebExchange(request, this.response, sessionManager);
-	}
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, this.response, sessionManager);
 
-	private TestSubscriber<Void> handle(ServerWebExchange exchange, HandlerResultHandler handler,
-			Object value, ResolvableType type) {
+		Mono<Void> mono = handler.handleResult(exchange, handlerResult);
 
-		HandlerResult result = new HandlerResult(new Object(), value, type, this.model);
-		Mono<Void> mono = handler.handleResult(exchange, result);
 		TestSubscriber<Void> subscriber = new TestSubscriber<>();
 		return subscriber.bindTo(mono).await(Duration.ofSeconds(1));
 	}
 
-	private ResolvableType methodReturnType(String methodName, Class<?>... args) throws NoSuchMethodException {
+	private ResolvableType returnTypeFor(String methodName, Class<?>... args) throws NoSuchMethodException {
 		Method method = TestController.class.getDeclaredMethod(methodName, args);
 		return ResolvableType.forMethodReturnType(method);
 	}
@@ -270,6 +238,10 @@ public class ViewResolutionResultHandlerTests {
 		private int order = Ordered.LOWEST_PRECEDENCE;
 
 
+		public TestViewResolver(String... viewNames) {
+			Arrays.stream(viewNames).forEach(name -> this.views.put(name, new TestView(name)));
+		}
+
 		public void setOrder(int order) {
 			this.order = order;
 		}
@@ -277,11 +249,6 @@ public class ViewResolutionResultHandlerTests {
 		@Override
 		public int getOrder() {
 			return this.order;
-		}
-
-		public TestViewResolver addView(TestView view) {
-			this.views.put(view.getName(), view);
-			return this;
 		}
 
 		@Override
