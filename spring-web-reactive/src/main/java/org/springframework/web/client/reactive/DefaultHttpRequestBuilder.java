@@ -149,7 +149,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
 			if (messageEncoder.isPresent()) {
 				request.setBody(messageEncoder.get()
-						.encode(this.contentPublisher, request.dataBufferFactory(),
+						.encode(this.contentPublisher, request.bufferFactory(),
 								requestBodyType, mediaType));
 			}
 			else {

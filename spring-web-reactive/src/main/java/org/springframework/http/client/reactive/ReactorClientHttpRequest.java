@@ -63,7 +63,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
-	public DataBufferFactory dataBufferFactory() {
+	public DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
 	}
 

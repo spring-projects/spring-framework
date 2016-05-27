@@ -128,7 +128,7 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		if (headers.getContentType() == null) {
 			headers.setContentType(contentType);
 		}
-		DataBufferFactory dataBufferFactory = outputMessage.dataBufferFactory();
+		DataBufferFactory dataBufferFactory = outputMessage.bufferFactory();
 		Flux<DataBuffer> body =
 				this.encoder.encode(inputStream, dataBufferFactory, type, contentType);
 		return outputMessage.setBody(body);

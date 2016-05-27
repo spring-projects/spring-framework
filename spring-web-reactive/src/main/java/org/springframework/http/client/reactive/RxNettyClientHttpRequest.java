@@ -61,7 +61,7 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
-	public DataBufferFactory dataBufferFactory() {
+	public DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
 	}
 

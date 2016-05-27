@@ -86,7 +86,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public DataBufferFactory dataBufferFactory() {
+	public DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
 	}
 

@@ -66,7 +66,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public final DataBufferFactory dataBufferFactory() {
+	public final DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
 	}
 

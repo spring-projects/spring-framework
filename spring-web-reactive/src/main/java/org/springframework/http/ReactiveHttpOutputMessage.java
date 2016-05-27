@@ -54,6 +54,6 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * @return a buffer factory
 	 * @see #setBody(Publisher)
 	 */
-	DataBufferFactory dataBufferFactory();
+	DataBufferFactory bufferFactory();
 
 }
