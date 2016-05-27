@@ -16,6 +16,7 @@
 
 package org.springframework.core.codec.support;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -91,9 +92,9 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 		else {
 			Mono<DataBuffer> singleBuffer = flux.reduce(DataBuffer::write);
 			return singleBuffer.
-					map(DataBuffer::asInputStream).
-					flatMap(is -> {
+					flatMap(dataBuffer -> {
 						try {
+							InputStream is = dataBuffer.asInputStream();
 							XMLEventReader eventReader =
 									inputFactory.createXMLEventReader(is);
 							return Flux
@@ -101,6 +102,9 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 						}
 						catch (XMLStreamException ex) {
 							return Mono.error(ex);
+						}
+						finally {
+							DataBufferUtils.release(dataBuffer);
 						}
 					});
 		}

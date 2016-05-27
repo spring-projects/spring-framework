@@ -18,18 +18,16 @@ package org.springframework.core.codec.support;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.converter.RxJava1SingleConverter;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
-import rx.Single;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -62,48 +60,36 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void decode() throws InterruptedException {
+		this.decoder = new StringDecoder(false);
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
 		Flux<String> output =
 				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertValues("foobarbaz");
+		testSubscriber.bindTo(output).
+				assertNoError().
+				assertComplete().
+				assertValues("foo", "bar", "baz");
 	}
 
 	@Test
-	public void decodeDoNotBuffer() throws InterruptedException {
-		StringDecoder decoder = new StringDecoder(false);
-		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
+	public void decodeNewLine() throws InterruptedException {
+		DataBuffer fooBar = stringBuffer("\nfoo\r\nbar\r");
+		DataBuffer baz = stringBuffer("\nbaz");
+		Flux<DataBuffer> source = Flux.just(fooBar, baz);
 		Flux<String> output =
 				decoder.decode(source, ResolvableType.forClass(String.class), null);
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertValues("foo", "bar");
+		testSubscriber.bindTo(output).
+				assertNoError().
+				assertComplete().
+				assertValues("foo", "bar", "baz");
 	}
 
-	@Test
-	public void decodeMono() throws InterruptedException {
-		Flux<DataBuffer> source =
-				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
-		Mono<String> mono = Mono.from(this.decoder.decode(source,
-				ResolvableType.forClassWithGenerics(Mono.class, String.class),
-				MediaType.TEXT_PLAIN));
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(mono).assertValues("foobarbaz");
-	}
-
-	@Test
-	public void decodeSingle() throws InterruptedException {
-		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
-		Single<String> single = RxJava1SingleConverter.from(this.decoder.decode(source,
-				ResolvableType.forClassWithGenerics(Single.class, String.class),
-				MediaType.TEXT_PLAIN));
-		String result = single.toBlocking().value();
-		assertEquals("foobar", result);
-	}
 
 	@Test
 	public void decodeEmpty() throws InterruptedException {
-		Mono<DataBuffer> source = Mono.just(stringBuffer(""));
+		Flux<DataBuffer> source = Flux.just(stringBuffer(""));
 		Flux<String> output =
 				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();

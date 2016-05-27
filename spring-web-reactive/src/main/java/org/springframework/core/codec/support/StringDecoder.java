@@ -19,6 +19,7 @@ package org.springframework.core.codec.support;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -32,11 +33,9 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * Decode from a bytes stream to a String stream.
  *
- * <p>By default, this decoder will buffer the received elements into a single
- * {@code ByteBuffer} and will emit a single {@code String} once the stream of
- * elements is complete. This behavior can be turned off using an constructor
- * argument but the {@code Subcriber} should pay attention to split characters
- * issues.
+ * <p>By default, this decoder will split the received {@link DataBuffer}s along newline
+ * characters ({@code \r\n}), but this can be changed by passing {@code false} as
+ * constructor argument.
  *
  * @author Sebastien Deleuze
  * @author Brian Clozel
@@ -48,13 +47,12 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	private final boolean reduceToSingleBuffer;
+	private final boolean splitOnNewline;
 
 	/**
 	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
 	 *
-	 * <p>By default, this decoder will buffer bytes and
-	 * emit a single String as a result.
+	 * <p>By default, this decoder will split along new lines.
 	 */
 	public StringDecoder() {
 		this(true);
@@ -63,12 +61,12 @@ public class StringDecoder extends AbstractDecoder<String> {
 	/**
 	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
 	 *
-	 * @param reduceToSingleBuffer whether this decoder should buffer all received items
-	 * and decode a single consolidated String or re-emit items as they are provided
+	 * @param splitOnNewline whether this decoder should split the received data buffers
+	 * along newline characters
 	 */
-	public StringDecoder(boolean reduceToSingleBuffer) {
+	public StringDecoder(boolean splitOnNewline) {
 		super(new MimeType("text", "*", DEFAULT_CHARSET), MimeTypeUtils.ALL);
-		this.reduceToSingleBuffer = reduceToSingleBuffer;
+		this.splitOnNewline = splitOnNewline;
 	}
 
 	@Override
@@ -81,8 +79,12 @@ public class StringDecoder extends AbstractDecoder<String> {
 	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream);
-		if (this.reduceToSingleBuffer) {
-			inputFlux = Flux.from(inputFlux.reduce(DataBuffer::write));
+		if (this.splitOnNewline) {
+			inputFlux = inputFlux.flatMap(dataBuffer -> {
+				List<DataBuffer> tokens =
+						DataBufferUtils.tokenize(dataBuffer, b -> b == '\n' || b == '\r');
+				return Flux.fromIterable(tokens);
+			});
 		}
 		Charset charset = getCharset(mimeType);
 		return inputFlux.map(dataBuffer -> {
@@ -93,8 +95,8 @@ public class StringDecoder extends AbstractDecoder<String> {
 	}
 
 	private Charset getCharset(MimeType mimeType) {
-		if (mimeType != null && mimeType.getCharSet() != null) {
-			return mimeType.getCharSet();
+		if (mimeType != null && mimeType.getCharset() != null) {
+			return mimeType.getCharset();
 		}
 		else {
 			return DEFAULT_CHARSET;
