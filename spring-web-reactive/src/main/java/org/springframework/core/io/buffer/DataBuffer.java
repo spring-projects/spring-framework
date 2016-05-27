@@ -19,6 +19,7 @@ package org.springframework.core.io.buffer;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.function.IntPredicate;
 
 /**
  * Basic abstraction over byte buffers.
@@ -34,12 +35,22 @@ public interface DataBuffer {
 	DataBufferAllocator allocator();
 
 	/**
-	 * Gets the byte at the specified index.
-	 * @param index the index
-	 * @return the byte at the specified index
-	 * @throws IndexOutOfBoundsException if the given index is out of bounds
+	 * Returns the index of the first byte in this buffer that matches the given
+	 * predicate.
+	 * @param predicate the predicate to match
+	 * @return the index of the first byte that matches {@code predicate}; or {@code -1}
+	 * if none match
 	 */
-	byte get(int index);
+	int indexOf(IntPredicate predicate);
+
+	/**
+	 * Returns the index of the last byte in this buffer that matches the given
+	 * predicate.
+	 * @param predicate the predicate to match
+	 * @return the index of the last byte that matches {@code predicate}; or {@code -1}
+	 * if none match
+	 */
+	int lastIndexOf(IntPredicate predicate);
 
 	/**
 	 * Returns the number of bytes that can be read from this data buffer.
@@ -114,10 +125,21 @@ public interface DataBuffer {
 	DataBuffer write(ByteBuffer... buffers);
 
 	/**
+	 * Creates a new {@code DataBuffer} whose contents is a shared subsequence of this
+	 * data buffer's content.  Data between this data buffer and the returned buffer is
+	 * shared; though changes in the returned buffer's position will not be reflected
+	 * in the reading nor writing position of this data buffer.
+	 * @param index the index at which to start the slice
+	 * @param length the length of the slice
+	 * @return the specified slice of this data buffer
+	 */
+	DataBuffer slice(int index, int length);
+
+	/**
 	 * Exposes this buffer's bytes as a {@link ByteBuffer}. Data between this {@code
 	 * DataBuffer} and the returned {@code ByteBuffer} is shared; though changes in the
 	 * returned buffer's {@linkplain ByteBuffer#position() position} will not be reflected
-	 * in the position(s) of this data buffer.
+	 * in the reading nor writing position of this data buffer.
 	 * @return this data buffer as a byte buffer
 	 */
 	ByteBuffer asByteBuffer();

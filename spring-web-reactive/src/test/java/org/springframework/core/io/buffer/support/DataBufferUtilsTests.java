@@ -19,8 +19,10 @@ package org.springframework.core.io.buffer.support;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -29,6 +31,7 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -103,7 +106,25 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				assertComplete().
 				assertValuesWith(stringConsumer("foo"), stringConsumer("ba"));
 
-		release(bar, baz);
+		release(baz);
+	}
+
+	@Test
+	public void tokenize() {
+		DataBuffer dataBuffer = stringBuffer("-foo--bar-");
+
+		List<DataBuffer> results = DataBufferUtils.tokenize(dataBuffer, b -> b == '-');
+		assertEquals(2, results.size());
+
+		DataBuffer result = results.get(0);
+		String value = DataBufferTestUtils.dumpString(result, StandardCharsets.UTF_8);
+		assertEquals("foo", value);
+
+		result = results.get(1);
+		value = DataBufferTestUtils.dumpString(result, StandardCharsets.UTF_8);
+		assertEquals("bar", value);
+
+		results.stream().forEach(b -> release(b));
 	}
 
 

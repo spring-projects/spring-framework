@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -82,8 +83,25 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	@Override
-	public byte get(int index) {
-		return this.byteBuffer.get(index);
+	public int indexOf(IntPredicate predicate) {
+		for (int i = 0; i < readableByteCount(); i++) {
+			byte b = this.byteBuffer.get(i);
+			if (predicate.test(b)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	@Override
+	public int lastIndexOf(IntPredicate predicate) {
+		for (int i = readableByteCount() - 1; i >= 0; i--) {
+			byte b = this.byteBuffer.get(i);
+			if (predicate.test(b)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	@Override
@@ -120,14 +138,16 @@ public class DefaultDataBuffer implements DataBuffer {
 	 */
 	private <T> T readInternal(Function<ByteBuffer, T> function) {
 		this.byteBuffer.position(this.readPosition);
-		T result = function.apply(this.byteBuffer);
-		this.readPosition = this.byteBuffer.position();
-		return result;
+		try {
+			return function.apply(this.byteBuffer);
+		}
+		finally {
+			this.readPosition = this.byteBuffer.position();
+		}
 	}
 
 	@Override
 	public DefaultDataBuffer write(byte b) {
-
 		ensureExtraCapacity(1);
 		writeInternal(buffer -> buffer.put(b));
 
@@ -184,9 +204,27 @@ public class DefaultDataBuffer implements DataBuffer {
 	 */
 	private <T> T writeInternal(Function<ByteBuffer, T> function) {
 		this.byteBuffer.position(this.writePosition);
-		T result = function.apply(this.byteBuffer);
-		this.writePosition = this.byteBuffer.position();
-		return result;
+		try {
+			return function.apply(this.byteBuffer);
+		}
+		finally {
+			this.writePosition = this.byteBuffer.position();
+		}
+	}
+
+	@Override
+	public DataBuffer slice(int index, int length) {
+		int oldPosition = this.byteBuffer.position();
+		try {
+			this.byteBuffer.position(index);
+			ByteBuffer slice = this.byteBuffer.slice();
+			slice.limit(length);
+			return new SlicedDefaultDataBuffer(slice, 0, length, this.allocator);
+		}
+		finally {
+			this.byteBuffer.position(oldPosition);
+		}
+
 	}
 
 	@Override
@@ -214,7 +252,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		}
 	}
 
-	private void grow(int minCapacity) {
+	void grow(int minCapacity) {
 		ByteBuffer oldBuffer = this.byteBuffer;
 		ByteBuffer newBuffer =
 				(oldBuffer.isDirect() ? ByteBuffer.allocateDirect(minCapacity) :
@@ -226,6 +264,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		this.byteBuffer = newBuffer;
 		oldBuffer.clear();
 	}
+
 
 	@Override
 	public int hashCode() {
@@ -292,6 +331,20 @@ public class DefaultDataBuffer implements DataBuffer {
 		public void write(byte[] bytes, int off, int len) throws IOException {
 			ensureExtraCapacity(len);
 			writeInternal(buffer -> buffer.put(bytes, off, len));
+		}
+	}
+
+	private static class SlicedDefaultDataBuffer extends DefaultDataBuffer {
+
+		SlicedDefaultDataBuffer(ByteBuffer byteBuffer, int readPosition,
+				int writePosition, DefaultDataBufferAllocator allocator) {
+			super(byteBuffer, readPosition, writePosition, allocator);
+		}
+
+		@Override
+		void grow(int minCapacity) {
+			throw new UnsupportedOperationException(
+					"Growing the capacity of a sliced buffer is not supported");
 		}
 	}
 }

@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.function.IntPredicate;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
@@ -68,8 +69,15 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
-	public byte get(int index) {
-		return this.byteBuf.getByte(index);
+	public int indexOf(IntPredicate predicate) {
+		IntPredicate negated = predicate.negate();
+		return this.byteBuf.forEachByte(negated::test);
+	}
+
+	@Override
+	public int lastIndexOf(IntPredicate predicate) {
+		IntPredicate negated = predicate.negate();
+		return this.byteBuf.forEachByteDesc(negated::test);
 	}
 
 	@Override
@@ -167,6 +175,12 @@ public class NettyDataBuffer implements PooledDataBuffer {
 	}
 
 	@Override
+	public DataBuffer slice(int index, int length) {
+		ByteBuf slice = this.byteBuf.slice(index, length);
+		return new NettyDataBuffer(slice, this.allocator);
+	}
+
+	@Override
 	public ByteBuffer asByteBuffer() {
 		return this.byteBuf.nioBuffer();
 	}
@@ -183,8 +197,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 
 	@Override
 	public PooledDataBuffer retain() {
-		this.byteBuf.retain();
-		return this;
+		return new NettyDataBuffer(this.byteBuf.retain(), allocator);
 	}
 
 	@Override
