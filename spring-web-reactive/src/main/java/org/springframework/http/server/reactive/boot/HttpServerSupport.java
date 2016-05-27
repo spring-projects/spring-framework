@@ -17,23 +17,37 @@
 package org.springframework.http.server.reactive.boot;
 
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.util.SocketUtils;
 
 /**
  * @author Rossen Stoyanchev
  */
 public class HttpServerSupport {
 
+	private String host = "0.0.0.0";
+
 	private int port = -1;
 
 	private HttpHandler httpHandler;
 
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public String getHost() {
+		return host;
+	}
 
 	public void setPort(int port) {
 		this.port = port;
 	}
 
 	public int getPort() {
+		if(this.port == -1) {
+			this.port = SocketUtils.findAvailableTcpPort(8080);
+		}
 		return this.port;
 	}
 

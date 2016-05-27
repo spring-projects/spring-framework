@@ -44,8 +44,7 @@ public class UndertowHttpServer extends HttpServerSupport implements HttpServer 
 		Assert.notNull(getHttpHandler());
 		HttpHandler handler =
 				new UndertowHttpHandlerAdapter(getHttpHandler(), dataBufferFactory);
-		int port = (getPort() != -1 ? getPort() : 8080);
-		this.server = Undertow.builder().addHttpListener(port, "localhost")
+		this.server = Undertow.builder().addHttpListener(getPort(), getHost())
 				.setHandler(handler).build();
 	}
 

@@ -20,6 +20,7 @@ import java.io.File;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Tomcat;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -46,11 +47,8 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		if (getPort() == -1) {
-			setPort(SocketUtils.findAvailableTcpPort(8080));
-		}
-
 		this.tomcatServer = new Tomcat();
+		this.tomcatServer.setHostname(getHost());
 		this.tomcatServer.setPort(getPort());
 
 		Assert.notNull(getHttpHandler());

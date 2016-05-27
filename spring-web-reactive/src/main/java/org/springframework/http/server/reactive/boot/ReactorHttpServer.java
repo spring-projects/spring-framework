@@ -39,9 +39,7 @@ public class ReactorHttpServer extends HttpServerSupport
 
 		Assert.notNull(getHttpHandler());
 		this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
-
-		this.reactorServer = (getPort() != -1 ? reactor.io.netty.http.HttpServer.create(getPort()) :
-				reactor.io.netty.http.HttpServer.create());
+		this.reactorServer = reactor.io.netty.http.HttpServer.create(getHost(), getPort());
 	}
 
 	@Override

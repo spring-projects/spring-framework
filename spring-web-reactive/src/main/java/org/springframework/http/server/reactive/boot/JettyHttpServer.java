@@ -24,7 +24,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.Assert;
-import org.springframework.util.SocketUtils;
 
 /**
  * @author Rossen Stoyanchev
@@ -44,10 +43,6 @@ public class JettyHttpServer extends HttpServerSupport implements InitializingBe
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		if (getPort() == -1) {
-			setPort(SocketUtils.findAvailableTcpPort(8080));
-		}
-
 		this.jettyServer = new Server();
 
 		Assert.notNull(getHttpHandler());
@@ -59,6 +54,7 @@ public class JettyHttpServer extends HttpServerSupport implements InitializingBe
 		contextHandler.addServlet(servletHolder, "/");
 
 		ServerConnector connector = new ServerConnector(this.jettyServer);
+		connector.setHost(getHost());
 		connector.setPort(getPort());
 		this.jettyServer.addConnector(connector);
 	}

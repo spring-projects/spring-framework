@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive.boot;
 
+import java.net.InetSocketAddress;
+
 import io.netty.buffer.ByteBuf;
 
 import org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter;
@@ -38,9 +40,8 @@ public class RxNettyHttpServer extends HttpServerSupport implements HttpServer {
 		Assert.notNull(getHttpHandler());
 		this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler());
 
-		this.rxNettyServer = (getPort() != -1 ?
-				io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort()) :
-				io.reactivex.netty.protocol.http.server.HttpServer.newServer());
+		this.rxNettyServer = io.reactivex.netty.protocol.http.server.HttpServer
+				.newServer(new InetSocketAddress(getHost(), getPort()));
 	}
 
 

@@ -26,6 +26,8 @@ import org.springframework.http.server.reactive.HttpHandler;
  */
 public interface HttpServer extends InitializingBean, Lifecycle {
 
+	void setHost(String host);
+
 	void setPort(int port);
 
 	void setHandler(HttpHandler handler);
