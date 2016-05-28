@@ -15,22 +15,31 @@
  */
 package org.springframework.web.reactive.result.view;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.core.Conventions;
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.server.ServerWebExchange;
@@ -38,10 +47,22 @@ import org.springframework.web.util.HttpRequestPathHelper;
 
 
 /**
- * {@code HandlerResultHandler} that performs view resolution by resolving a
- * {@link View} instance first and then rendering the response with it.
- * If the return value is a String, the configured {@link ViewResolver}s will
- * be consulted to resolve that to a {@link View} instance.
+ * {@code HandlerResultHandler} that encapsulates the view resolution algorithm
+ * supporting the following return types:
+ * <ul>
+ *     <li>String-based view name
+ *     <li>Reference to a {@link View}
+ *     <li>{@link Model}
+ *     <li>{@link Map}
+ *     <li>Return types annotated with {@code @ModelAttribute}
+ *     <li>{@link BeanUtils#isSimpleProperty Non-simple} return types are
+ *     treated as a model attribute
+ * </ul>
+ *
+ * <p>A String-based view name is resolved through the configured
+ * {@link ViewResolver} instances into a {@link View} to use for rendering.
+ * If a view is left unspecified (e.g. by returning {@code null} or a
+ * model-related return value), a default view name is selected.
  *
  * <p>This result handler should be ordered late relative to other result
  * handlers. See {@link #setOrder(int)} for more details.
@@ -96,51 +117,72 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 		return this.order;
 	}
 
-	// TODO: Support for Model, ModelAndView, @ModelAttribute, Object with no method annotations
-
 	@Override
 	public boolean supports(HandlerResult result) {
 		Class<?> clazz = result.getReturnValueType().getRawClass();
-		if (isStringOrViewReference(clazz)) {
+		if (hasModelAttributeAnnotation(result)) {
+			return true;
+		}
+		if (isSupportedType(clazz)) {
 			return true;
 		}
 		if (this.conversionService.canConvert(clazz, Mono.class)) {
 			clazz = result.getReturnValueType().getGeneric(0).getRawClass();
-			return isStringOrViewReference(clazz);
+			return isSupportedType(clazz);
 		}
 		return false;
 	}
 
-	private boolean isStringOrViewReference(Class<?> clazz) {
-		return (CharSequence.class.isAssignableFrom(clazz) || View.class.isAssignableFrom(clazz));
+	private boolean hasModelAttributeAnnotation(HandlerResult result) {
+		if (result.getHandler() instanceof HandlerMethod) {
+			MethodParameter returnType = ((HandlerMethod) result.getHandler()).getReturnType();
+			if (returnType.hasMethodAnnotation(ModelAttribute.class)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean isSupportedType(Class<?> clazz) {
+		return (CharSequence.class.isAssignableFrom(clazz) || View.class.isAssignableFrom(clazz) ||
+				Model.class.isAssignableFrom(clazz) || Map.class.isAssignableFrom(clazz) ||
+				!BeanUtils.isSimpleProperty(clazz));
 	}
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
-		Mono<Object> mono;
+		Mono<Object> valueMono;
 		ResolvableType elementType;
 		ResolvableType returnType = result.getReturnValueType();
 
 		if (this.conversionService.canConvert(returnType.getRawClass(), Mono.class)) {
 			Optional<Object> optionalValue = result.getReturnValue();
 			if (optionalValue.isPresent()) {
-				Mono<?> convertedMono = this.conversionService.convert(optionalValue.get(), Mono.class);
-				mono = convertedMono.map(o -> o);
+				Mono<?> converted = this.conversionService.convert(optionalValue.get(), Mono.class);
+				valueMono = converted.map(o -> o);
 			}
 			else {
-				mono = Mono.empty();
+				valueMono = Mono.empty();
 			}
 			elementType = returnType.getGeneric(0);
 		}
 		else {
-			mono = Mono.justOrEmpty(result.getReturnValue());
+			valueMono = Mono.justOrEmpty(result.getReturnValue());
 			elementType = returnType;
 		}
 
-		mono = mono.otherwiseIfEmpty(handleMissingReturnValue(exchange, result, elementType));
+		Mono<Object> viewMono;
+		if (isViewReturnType(result, elementType)) {
+			viewMono = valueMono.otherwiseIfEmpty(selectDefaultViewName(exchange, result));
+		}
+		else {
+			viewMono = valueMono.map(value -> updateModel(result, value))
+					.defaultIfEmpty(result.getModel())
+					.then(model -> selectDefaultViewName(exchange, result));
+		}
 
-		return mono.then(returnValue -> {
+		return viewMono.then(returnValue -> {
 			if (returnValue instanceof View) {
 				Flux<DataBuffer> body = ((View) returnValue).render(result, null, exchange);
 				return exchange.getResponse().setBody(body);
@@ -158,28 +200,26 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 						});
 			}
 			else {
-				// Eventually for model-related return values (should not happen now)
+				// Should not happen
 				return Mono.error(new IllegalStateException("Unexpected return value"));
 			}
 		});
 	}
 
-	private Mono<Object> handleMissingReturnValue(ServerWebExchange exchange, HandlerResult result,
-			ResolvableType elementType) {
+	private boolean isViewReturnType(HandlerResult result, ResolvableType elementType) {
+		Class<?> clazz = elementType.getRawClass();
+		return (View.class.isAssignableFrom(clazz) ||
+				(CharSequence.class.isAssignableFrom(clazz) && !hasModelAttributeAnnotation(result)));
+	}
 
-		if (isStringOrViewReference(elementType.getRawClass())) {
-			String defaultViewName = getDefaultViewName(exchange, result);
-			if (defaultViewName != null) {
-				return Mono.just(defaultViewName);
-			}
-			else {
-				return Mono.error(new IllegalStateException("Handler [" + result.getHandler() + "] " +
-						"neither returned a view name nor a View object"));
-			}
+	private Mono<Object> selectDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
+		String defaultViewName = getDefaultViewName(exchange, result);
+		if (defaultViewName != null) {
+			return Mono.just(defaultViewName);
 		}
 		else {
-			// Eventually for model-related return values (should not happen now)
-			return Mono.error(new IllegalStateException("Unexpected return value type"));
+			return Mono.error(new IllegalStateException("Handler [" + result.getHandler() + "] " +
+					"neither returned a view name nor a View object"));
 		}
 	}
 
@@ -191,6 +231,7 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 	 * @return the default view name to use; if {@code null} is returned
 	 * processing will result in an IllegalStateException.
 	 */
+	@SuppressWarnings("UnusedParameters")
 	protected String getDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
 		String path = this.pathHelper.getLookupPathForRequest(exchange);
 		if (path.startsWith("/")) {
@@ -200,6 +241,49 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 			path = path.substring(0, path.length() - 1);
 		}
 		return StringUtils.stripFilenameExtension(path);
+	}
+
+	private Object updateModel(HandlerResult result, Object value) {
+		if (value instanceof Model) {
+			result.getModel().addAllAttributes(((Model) value).asMap());
+		}
+		else if (value instanceof Map) {
+			//noinspection unchecked
+			result.getModel().addAllAttributes((Map<String, ?>) value);
+		}
+		else if (result.getHandler() instanceof HandlerMethod) {
+			MethodParameter returnType = ((HandlerMethod) result.getHandler()).getReturnType();
+			String name = getNameForReturnValue(value, returnType);
+			result.getModel().addAttribute(name, value);
+		}
+		else {
+			result.getModel().addAttribute(value);
+		}
+		return value;
+	}
+
+	/**
+	 * Derive the model attribute name for the given return value using one of:
+	 * <ol>
+	 * <li>The method {@code ModelAttribute} annotation value
+	 * <li>The declared return type if it is more specific than {@code Object}
+	 * <li>The actual return value type
+	 * </ol>
+	 * @param returnValue the value returned from a method invocation
+	 * @param returnType the return type of the method
+	 * @return the model name, never {@code null} nor empty
+	 */
+	private static String getNameForReturnValue(Object returnValue, MethodParameter returnType) {
+		ModelAttribute annotation = returnType.getMethodAnnotation(ModelAttribute.class);
+		if (annotation != null && StringUtils.hasText(annotation.value())) {
+			return annotation.value();
+		}
+		else {
+			Method method = returnType.getMethod();
+			Class<?> containingClass = returnType.getContainingClass();
+			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);
+			return Conventions.getVariableNameForReturnType(method, resolvedType, returnValue);
+		}
 	}
 
 	private Mono<View> handleUnresolvedViewName(String viewName) {

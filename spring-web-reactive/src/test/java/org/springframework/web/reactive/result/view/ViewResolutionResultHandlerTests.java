@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.view;
 
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.Duration;
@@ -38,6 +37,8 @@ import rx.Single;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -48,7 +49,10 @@ import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.server.ServerWebExchange;
@@ -56,7 +60,10 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -65,32 +72,30 @@ import static org.mockito.Mockito.mock;
  */
 public class ViewResolutionResultHandlerTests {
 
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
-
-
 	private MockServerHttpResponse response;
 
 	private ModelMap model;
-
-	private DefaultConversionService conversionService;
 
 
 	@Before
 	public void setUp() throws Exception {
 		this.model = new ExtendedModelMap().addAttribute("id", "123");
-		this.conversionService = new DefaultConversionService();
-		this.conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
 	}
 
 
 	@Test
 	public void supportsWithNullReturnValue() throws Exception {
-		testSupports("handleString", null);
-		testSupports("handleView", null);
-		testSupports("handleMonoString", null);
-		testSupports("handleMonoView", null);
-		testSupports("handleSingleString", null);
-		testSupports("handleSingleView", null);
+		testSupports("handleString", true);
+		testSupports("handleView", true);
+		testSupports("handleMonoString", true);
+		testSupports("handleMonoView", true);
+		testSupports("handleSingleString", true);
+		testSupports("handleSingleView", true);
+		testSupports("handleModel", true);
+		testSupports("handleMap", true);
+		testSupports("handleModelAttributeAnnotation", true);
+		testSupports("handleTestBean", true);
+		testSupports("handleInteger", false);
 	}
 
 	@Test
@@ -100,15 +105,15 @@ public class ViewResolutionResultHandlerTests {
 		resolver1.setOrder(2);
 		resolver2.setOrder(1);
 
-		assertEquals(Arrays.asList(resolver2, resolver1),
-				new ViewResolutionResultHandler(Arrays.asList(resolver1, resolver2), this.conversionService)
-						.getViewResolvers());
+		assertEquals(Arrays.asList(resolver2, resolver1), new ViewResolutionResultHandler(
+				Arrays.asList(resolver1, resolver2), new DefaultConversionService())
+				.getViewResolvers());
 	}
 
 	@Test
 	public void viewReference() throws Exception {
 		Object value = new TestView("account");
-		handle("/path", value, ResolvableType.forClass(View.class));
+		handle("/path", value, "handleView");
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
@@ -117,7 +122,7 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void viewReferenceInMono() throws Exception {
 		Object value = Mono.just(new TestView("account"));
-		handle("/path", value, returnTypeFor("handleMonoView"));
+		handle("/path", value, "handleMonoView");
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
@@ -126,7 +131,7 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void viewName() throws Exception {
 		Object value = "account";
-		handle("/path", value, ResolvableType.forClass(String.class), new TestViewResolver("account"));
+		handle("/path", value, "handleString", new TestViewResolver("account"));
 
 		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
 		subscriber.bindTo(this.response.getBody())
@@ -136,7 +141,7 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void viewNameInMono() throws Exception {
 		Object value = Mono.just("account");
-		handle("/path", value, returnTypeFor("handleMonoString"), new TestViewResolver("account"));
+		handle("/path", value, "handleMonoString", new TestViewResolver("account"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
@@ -145,7 +150,7 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void viewNameWithMultipleResolvers() throws Exception {
 		String value = "profile";
-		handle("/path", value, ResolvableType.forClass(String.class),
+		handle("/path", value, "handleString",
 				new TestViewResolver("account"), new TestViewResolver("profile"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
@@ -154,7 +159,7 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void viewNameUnresolved() throws Exception {
-		handle("/path", "account", ResolvableType.forClass(String.class))
+		handle("/path", "account", "handleString")
 				.assertErrorMessage("Could not resolve view with name 'account'.");
 	}
 
@@ -162,15 +167,15 @@ public class ViewResolutionResultHandlerTests {
 	public void viewNameIsNull() throws Exception {
 		ViewResolver resolver = new TestViewResolver("account");
 
-		handle("/account", null, ResolvableType.forClass(String.class), resolver);
+		handle("/account", null, "handleString", resolver);
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
 
-		handle("/account/", null, ResolvableType.forClass(String.class), resolver);
+		handle("/account/", null, "handleString", resolver);
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
 
-		handle("/account.123", null, ResolvableType.forClass(String.class), resolver);
+		handle("/account.123", null, "handleString", resolver);
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
 	}
@@ -178,28 +183,75 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void viewNameIsEmptyMono() throws Exception {
 		Object value = Mono.empty();
-		handle("/account", value, returnTypeFor("handleMonoString"), new TestViewResolver("account"));
+		handle("/account", value, "handleMonoString", new TestViewResolver("account"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
 	}
 
+	@Test
+	public void model() throws Exception {
+		Model value = new ExtendedModelMap().addAttribute("name", "Joe");
+		handle("/account", value, "handleModel", new TestViewResolver("account"));
 
-	private void testSupports(String methodName, Object returnValue) throws NoSuchMethodException {
-		Method method = TestController.class.getMethod(methodName);
-		ResolvableType returnType = ResolvableType.forMethodParameter(method, -1);
-		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, this.model);
-		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, this.conversionService);
-		assertTrue(handler.supports(result));
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}", asString(buf)));
 	}
 
-	private TestSubscriber<Void> handle(String path, Object value, ResolvableType type,
-			ViewResolver... resolvers) throws URISyntaxException {
+	@Test
+	public void map() throws Exception {
+		Map<String, String> value = Collections.singletonMap("name", "Joe");
+		handle("/account", value, "handleMap", new TestViewResolver("account"));
+
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}", asString(buf)));
+	}
+
+	@Test
+	public void modelAttributeAnnotation() throws Exception {
+		String value = "Joe";
+		handle("/account", value, "handleModelAttributeAnnotation", new TestViewResolver("account"));
+
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}", asString(buf)));
+	}
+
+	@Test
+	public void testBean() throws Exception {
+		Object value = new TestBean("Joe");
+		handle("/account", value, "handleTestBean", new TestViewResolver("account"));
+
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("account: {id=123, testBean=TestBean[name=Joe]}", asString(buf)));
+	}
+
+
+	private void testSupports(String methodName, boolean supports) throws NoSuchMethodException {
+		Method method = TestController.class.getMethod(methodName);
+		ResolvableType returnType = ResolvableType.forMethodParameter(method, -1);
+		HandlerResult result = new HandlerResult(new Object(), null, returnType, this.model);
+		List<ViewResolver> resolvers = Collections.singletonList(mock(ViewResolver.class));
+		ConfigurableConversionService conversionService = new DefaultConversionService();
+		conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, conversionService);
+		if (supports) {
+			assertTrue(handler.supports(result));
+		}
+		else {
+			assertFalse(handler.supports(result));
+		}
+	}
+
+	private TestSubscriber<Void> handle(String path, Object value, String methodName,
+			ViewResolver... resolvers) throws Exception {
 
 		List<ViewResolver> resolverList = Arrays.asList(resolvers);
-		HandlerResultHandler handler = new ViewResolutionResultHandler(resolverList, this.conversionService);
-		HandlerResult handlerResult = new HandlerResult(new Object(), value, type, this.model);
+		ConversionService conversionService = new DefaultConversionService();
+		HandlerResultHandler handler = new ViewResolutionResultHandler(resolverList, conversionService);
+		Method method = TestController.class.getMethod(methodName);
+		HandlerMethod handlerMethod = new HandlerMethod(new TestController(), method);
+		ResolvableType type = ResolvableType.forMethodReturnType(method);
+		HandlerResult handlerResult = new HandlerResult(handlerMethod, value, type, this.model);
 
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
 		this.response = new MockServerHttpResponse();
@@ -212,13 +264,8 @@ public class ViewResolutionResultHandlerTests {
 		return subscriber.bindTo(mono).await(Duration.ofSeconds(1));
 	}
 
-	private ResolvableType returnTypeFor(String methodName, Class<?>... args) throws NoSuchMethodException {
-		Method method = TestController.class.getDeclaredMethod(methodName, args);
-		return ResolvableType.forMethodReturnType(method);
-	}
-
 	private static DataBuffer asDataBuffer(String value) {
-		ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(UTF_8));
+		ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(Charset.forName("UTF-8")));
 		return new DefaultDataBufferFactory().wrap(byteBuffer);
 	}
 
@@ -226,7 +273,7 @@ public class ViewResolutionResultHandlerTests {
 		ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
 		final byte[] bytes = new byte[byteBuffer.remaining()];
 		byteBuffer.get(bytes);
-		return new String(bytes, UTF_8);
+		return new String(bytes, Charset.forName("UTF-8"));
 	}
 
 
@@ -309,6 +356,45 @@ public class ViewResolutionResultHandlerTests {
 
 		public Single<View> handleSingleView() {
 			return null;
+		}
+
+		public Model handleModel() {
+			return null;
+		}
+
+		public Map<String, String> handleMap() {
+			return null;
+		}
+
+		@ModelAttribute("name")
+		public String handleModelAttributeAnnotation() {
+			return null;
+		}
+
+		public TestBean handleTestBean() {
+			return null;
+		}
+
+		public int handleInteger() {
+			return 0;
+		}
+	}
+
+	private static class TestBean {
+
+		private final String name;
+
+		public TestBean(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		@Override
+		public String toString() {
+			return "TestBean[name=" + this.name + "]";
 		}
 	}
 
