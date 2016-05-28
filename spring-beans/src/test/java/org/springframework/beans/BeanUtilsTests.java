@@ -31,6 +31,7 @@ import org.springframework.core.io.ResourceEditor;
 import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.TestStringGenericBean;
 
 import static org.junit.Assert.*;
 
@@ -196,6 +197,16 @@ public final class BeanUtilsTests {
 		assertEquals(target.getName(), "name");
 		assertTrue(target.getFlag1());
 		assertTrue(target.getFlag2());
+	}
+
+	@Test
+	public void testCopyPropertiesWithGenericProperty() throws Exception {
+		TestStringGenericBean tb = new TestStringGenericBean();
+		tb.setName("bla");
+		TestBean tb2 = new TestBean();
+		assertTrue("Name empty", tb2.getName()== null);
+		BeanUtils.copyProperties(tb, tb2);
+		assertTrue("Name copied", tb2.getName().equals(tb.getName()));
 	}
 
 	@Test
