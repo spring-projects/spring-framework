@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     public MyBean myBean() {
  *         // instantiate and configure MyBean obj
  *         return obj;
- *     }</pre>
+ *     }
+ * </pre>
  *
  * <h3>Bean Names</h3>
  *
@@ -55,7 +56,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     public MyBean myBean() {
  *         // instantiate and configure MyBean obj
  *         return obj;
- *     }</pre>
+ *     }
+ * </pre>
  *
  * <h3>Scope, DependsOn, Primary, and Lazy</h3>
  *
@@ -70,7 +72,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     public MyBean myBean() {
  *         // instantiate and configure MyBean obj
  *         return obj;
- *     }</pre>
+ *     }
+ * </pre>
  *
  * <h3>{@code @Bean} Methods in {@code @Configuration} Classes</h3>
  *
@@ -87,14 +90,17 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * <pre class="code">
  * &#064;Configuration
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public FooService fooService() {
  *         return new FooService(fooRepository());
  *     }
+ *
  *     &#064;Bean
  *     public FooRepository fooRepository() {
  *         return new JdbcFooRepository(dataSource());
  *     }
+ *
  *     // ...
  * }</pre>
  *
@@ -152,7 +158,8 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  *     &#064;Bean
  *     public static PropertyPlaceholderConfigurer ppc() {
  *         // instantiate, configure and return ppc ...
- *     }</pre>
+ *     }
+ * </pre>
  *
  * By marking this method as {@code static}, it can be invoked without causing instantiation of its
  * declaring {@code @Configuration} class, thus avoiding the above-mentioned lifecycle conflicts.
@@ -191,6 +198,13 @@ public @interface Bean {
 
 	/**
 	 * Are dependencies to be injected via convention-based autowiring by name or type?
+	 * <p>Note that this autowire mode is just about externally driven autowiring based
+	 * on bean property setter methods by convention, analogous to XML bean definitions.
+	 * <p>The default mode does allow for annotation-driven autowiring. "no" refers to
+	 * externally driven autowiring only, not affecting any autowiring demands that the
+	 * bean class itself expresses through annotations.
+	 * @see Autowire#BY_NAME
+	 * @see Autowire#BY_TYPE
 	 */
 	Autowire autowire() default Autowire.NO;
 
