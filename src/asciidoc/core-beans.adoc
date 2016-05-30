@@ -437,6 +437,16 @@ you are using Spring AOP it helps a lot when applying advice to a set of beans r
 by name.
 ****
 
+[NOTE]
+====
+With component scanning in the classpath, Spring generates bean names for unnamed
+components, following the rules above: essentially, taking the simple class name
+and turning its initial character to lower-case. However, in the (unusual) special
+case when there is more than one character and both the first and second characters
+are upper case, the original casing gets preserved. These are the same rules as
+defined by `java.beans.Introspector.decapitalize` (which Spring is using here).
+====
+
 
 [[beans-beanname-alias]]
 ==== Aliasing a bean outside the bean definition
@@ -1719,7 +1729,7 @@ then nested `constructor-arg` elements.
 
 Let's review the examples from <<beans-constructor-injection>> with the `c:` namespace:
 
-[source,java,indent=0]
+[source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1753,7 +1763,7 @@ For the rare cases where the constructor argument names are not available (usual
 the bytecode was compiled without debugging information), one can use fallback to the
 argument indexes:
 
-[source,java,indent=0]
+[source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<!-- c-namespace index declaration -->
@@ -2561,7 +2571,7 @@ The Spring container creates a new instance of the `AppPreferences` bean by usin
 `appPreferences` bean is scoped at the `ServletContext` level, stored as a regular
 `ServletContext` attribute. This is somewhat similar to a Spring singleton bean but
 differs in two important ways: It is a singleton per `ServletContext`, not per Spring
-'ApplicationContext' (or which there may be several in any given web application),
+'ApplicationContext' (for which there may be several in any given web application),
 and it is actually exposed and therefore visible as a `ServletContext` attribute.
 
 
@@ -3707,7 +3717,7 @@ Find below the custom `BeanPostProcessor` implementation class definition:
 
 		public Object postProcessAfterInitialization(Object bean,
 				String beanName) throws BeansException {
-			System.out.println("Bean ''" + beanName + "'' created : " + bean.toString());
+			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
 			return bean;
 		}
 
@@ -5414,7 +5424,7 @@ resolving expression text.
 The `@Bean` methods in a Spring component are processed differently than their
 counterparts inside a Spring `@Configuration` class. The difference is that `@Component`
 classes are not enhanced with CGLIB to intercept the invocation of methods and fields.
-CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods 
+CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods
 in `@Configuration` classes creates bean metadata references to collaborating objects;
 such methods are __not__ invoked with normal Java semantics but rather go through the
 container in order to provide the usual lifecycle management and proxying of Spring
@@ -5798,8 +5808,8 @@ It is very common to use `@Component` without specifying a name for the componen
 	}
 ----
 
-When using `@Named`, it is possible to use
-component-scanning in the exact same way as when using Spring annotations:
+When using `@Named`, it is possible to use component scanning in the exact same way
+as when using Spring annotations:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5810,6 +5820,12 @@ component-scanning in the exact same way as when using Spring annotations:
     	...
 	}
 ----
+
+[NOTE]
+====
+In contrast to `@Component`, the JSR-330 `@Named` annotation is not composable.
+Please use Spring's stereotype model for building custom component annotations.
+====
 
 
 
@@ -7460,7 +7476,7 @@ hierarchy of property sources. To explain fully, consider the following:
 ApplicationContext ctx = new GenericApplicationContext();
 Environment env = ctx.getEnvironment();
 boolean containsFoo = env.containsProperty("foo");
-System.out.println("Does my environment contain the ''foo'' property? " + containsFoo);
+System.out.println("Does my environment contain the 'foo' property? " + containsFoo);
 ----
 
 In the snippet above, we see a high-level way of asking Spring whether the `foo` property is
