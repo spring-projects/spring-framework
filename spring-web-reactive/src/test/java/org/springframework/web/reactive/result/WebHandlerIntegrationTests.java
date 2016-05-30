@@ -150,7 +150,7 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		@Override
 		public Mono<Void> handle(ServerWebExchange exchange) {
 			DataBuffer buffer = asDataBuffer("foo");
-			return exchange.getResponse().setBody(Flux.just(buffer));
+			return exchange.getResponse().writeWith(Flux.just(buffer));
 		}
 	}
 
@@ -159,7 +159,7 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		@Override
 		public Mono<Void> handle(ServerWebExchange exchange) {
 			DataBuffer buffer = asDataBuffer("bar");
-			return exchange.getResponse().setBody(Flux.just(buffer));
+			return exchange.getResponse().writeWith(Flux.just(buffer));
 		}
 	}
 

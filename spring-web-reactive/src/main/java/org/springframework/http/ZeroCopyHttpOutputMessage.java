@@ -30,13 +30,13 @@ import reactor.core.publisher.Mono;
 public interface ZeroCopyHttpOutputMessage extends ReactiveHttpOutputMessage {
 
 	/**
-	 * Set the body of the message to the given {@link File} which will be
-	 * used to write to the underlying HTTP layer.
+	 * Use the given {@link File} to write the body of the message to the underlying
+	 * HTTP layer.
 	 * @param file the file to transfer
 	 * @param position the position within the file from which the transfer is to begin
 	 * @param count the number of bytes to be transferred
 	 * @return a publisher that indicates completion or error.
 	 */
-	Mono<Void> setBody(File file, long position, long count);
+	Mono<Void> writeWith(File file, long position, long count);
 
 }

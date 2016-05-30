@@ -131,7 +131,7 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 			});
 
 			response.getHeaders().setContentLength(RESPONSE_SIZE);
-			return response.setBody(multipleChunks());
+			return response.writeWith(multipleChunks());
 		}
 
 		private Publisher<DataBuffer> singleChunk() {

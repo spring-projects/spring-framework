@@ -84,7 +84,7 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 				File logoFile = logo.getFile();
 				zeroCopyResponse.getHeaders().setContentType(MediaType.IMAGE_PNG);
 				zeroCopyResponse.getHeaders().setContentLength(logoFile.length());
-				return zeroCopyResponse.setBody(logoFile, 0, logoFile.length());
+				return zeroCopyResponse.writeWith(logoFile, 0, logoFile.length());
 
 			}
 			catch (Throwable ex) {

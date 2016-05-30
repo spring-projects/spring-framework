@@ -89,9 +89,9 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Mono<Void> setBody(Publisher<DataBuffer> publisher) {
+	public Mono<Void> writeWith(Publisher<DataBuffer> publisher) {
 		return new ChannelSendOperator<>(publisher, writePublisher ->
-						applyBeforeCommit().then(() -> setBodyInternal(writePublisher)));
+						applyBeforeCommit().then(() -> writeWithInternal(writePublisher)));
 	}
 
 	protected Mono<Void> applyBeforeCommit() {
@@ -128,9 +128,9 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	/**
 	 * Implement this method to write to the underlying the response.
-	 * @param publisher the publisher to write with
+	 * @param body the publisher to write with
 	 */
-	protected abstract Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher);
+	protected abstract Mono<Void> writeWithInternal(Publisher<DataBuffer> body);
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {

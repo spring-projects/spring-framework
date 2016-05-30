@@ -68,7 +68,7 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
+	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
 		return this.responseBodyWriter.apply(publisher);
 	}
 

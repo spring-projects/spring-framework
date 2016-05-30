@@ -93,7 +93,7 @@ public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Reso
 						(ZeroCopyHttpOutputMessage) outputMessage;
 
 				return zeroCopyResponse
-						.setBody(file.get(), (long) 0, file.get().length());
+						.writeWith(file.get(), (long) 0, file.get().length());
 			}
 		}
 

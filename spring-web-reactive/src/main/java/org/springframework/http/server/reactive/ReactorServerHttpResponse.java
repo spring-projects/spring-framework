@@ -65,7 +65,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
+	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
 		return this.channel.send(Flux.from(publisher).map(this::toByteBuf));
 	}
 
@@ -105,7 +105,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	public Mono<Void> setBody(File file, long position, long count) {
+	public Mono<Void> writeWith(File file, long position, long count) {
 		return applyBeforeCommit().then(() -> {
 			return this.channel.sendFile(file, position, count);
 		});

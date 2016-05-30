@@ -63,7 +63,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
+	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
 		Observable<ByteBuf> content =
 				RxJava1ObservableConverter.from(publisher).map(this::toByteBuf);
 		Observable<Void> completion = this.response.write(content);
@@ -114,7 +114,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	
 
 	@Override
-	public Mono<Void> setBody(File file, long position, long count) {
+	public Mono<Void> writeWith(File file, long position, long count) {
 		Channel channel = this.response.unsafeNettyChannel();
 
 		HttpResponse httpResponse =

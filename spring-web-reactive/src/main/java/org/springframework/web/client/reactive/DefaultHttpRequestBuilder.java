@@ -148,7 +148,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 					.findFirst();
 
 			if (messageEncoder.isPresent()) {
-				request.setBody(messageEncoder.get()
+				request.writeWith(messageEncoder.get()
 						.encode(this.contentPublisher, request.bufferFactory(),
 								requestBodyType, mediaType));
 			}

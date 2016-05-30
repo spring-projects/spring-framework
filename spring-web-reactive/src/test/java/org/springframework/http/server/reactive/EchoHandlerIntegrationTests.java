@@ -67,7 +67,7 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.setBody(request.getBody());
+			return response.writeWith(request.getBody());
 		}
 	}
 }

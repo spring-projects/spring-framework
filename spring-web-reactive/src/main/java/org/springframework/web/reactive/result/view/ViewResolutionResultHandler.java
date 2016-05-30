@@ -185,7 +185,7 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 		return viewMono.then(returnValue -> {
 			if (returnValue instanceof View) {
 				Flux<DataBuffer> body = ((View) returnValue).render(result, null, exchange);
-				return exchange.getResponse().setBody(body);
+				return exchange.getResponse().writeWith(body);
 			}
 			else if (returnValue instanceof CharSequence) {
 				String viewName = returnValue.toString();
@@ -196,7 +196,7 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 						.otherwiseIfEmpty(handleUnresolvedViewName(viewName))
 						.then(view -> {
 							Flux<DataBuffer> body = view.render(result, null, exchange);
-							return exchange.getResponse().setBody(body);
+							return exchange.getResponse().writeWith(body);
 						});
 			}
 			else {

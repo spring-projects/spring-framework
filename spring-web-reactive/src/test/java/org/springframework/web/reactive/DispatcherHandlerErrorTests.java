@@ -162,7 +162,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		DataBuffer buffer = new DefaultDataBufferFactory().allocateBuffer()
 				.write("body".getBytes("UTF-8"));
-		this.request.setBody(Mono.just(buffer));
+		this.request.writeWith(Mono.just(buffer));
 
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
@@ -173,7 +173,7 @@ public class DispatcherHandlerErrorTests {
 	@Test
 	public void requestBodyError() throws Exception {
 		this.request.setUri(new URI("/request-body"));
-		this.request.setBody(Mono.error(EXCEPTION));
+		this.request.writeWith(Mono.error(EXCEPTION));
 
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);

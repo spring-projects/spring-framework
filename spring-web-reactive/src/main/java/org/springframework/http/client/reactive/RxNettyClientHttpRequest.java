@@ -77,7 +77,7 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 	 * @see #execute()
 	 */
 	@Override
-	public Mono<Void> setBody(Publisher<DataBuffer> body) {
+	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
 
 		this.body = RxJava1ObservableConverter.from(Flux.from(body)
 				.map(b -> dataBufferFactory.wrap(b.asByteBuffer()).getNativeBuffer()));

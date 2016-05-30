@@ -89,7 +89,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	 * @see #execute()
 	 */
 	@Override
-	public Mono<Void> setBody(Publisher<DataBuffer> body) {
+	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
 
 		this.body = Flux.from(body).map(this::toByteBuf);
 		return Mono.empty();

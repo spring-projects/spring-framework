@@ -79,12 +79,12 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
+	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
 		return this.responseBodyWriter.apply(publisher);
 	}
 
 	@Override
-	public Mono<Void> setBody(File file, long position, long count) {
+	public Mono<Void> writeWith(File file, long position, long count) {
 		writeHeaders();
 		writeCookies();
 		try {

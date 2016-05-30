@@ -19,6 +19,7 @@ import java.net.URI;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
@@ -96,7 +97,8 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 		return this.body;
 	}
 
-	public void setBody(Publisher<DataBuffer> body) {
+	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
 		this.body = Flux.from(body);
+		return this.body.then();
 	}
 }

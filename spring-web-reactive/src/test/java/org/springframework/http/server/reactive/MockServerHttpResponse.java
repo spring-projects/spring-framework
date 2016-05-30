@@ -71,7 +71,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Mono<Void> setBody(Publisher<DataBuffer> body) {
+	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
 		this.body = body;
 		return Flux.from(this.body).then();
 	}

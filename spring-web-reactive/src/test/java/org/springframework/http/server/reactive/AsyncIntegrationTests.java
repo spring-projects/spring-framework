@@ -65,7 +65,7 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.setBody(Flux.just("h", "e", "l", "l", "o")
+			return response.writeWith(Flux.just("h", "e", "l", "l", "o")
 			                            .useTimer(Timer.global())
 			                            .delay(Duration.ofMillis(100))
 			                            .publishOn(asyncGroup)
