@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 	}
 
 	private void registerDefaultValues(Class<?> annotationClass) {
-		// Only do further scanning for public annotations; we'd run into
+		// Only do defaults scanning for public annotations; we'd run into
 		// IllegalAccessExceptions otherwise, and we don't want to mess with
 		// accessibility in a SecurityManager environment.
 		if (Modifier.isPublic(annotationClass.getModifiers())) {
