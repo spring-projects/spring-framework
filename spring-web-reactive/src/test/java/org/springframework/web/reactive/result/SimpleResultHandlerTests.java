@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import rx.Observable;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
@@ -35,41 +36,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Unit tests for {@link SimpleResultHandler}.
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class SimpleResultHandlerTests {
-
-	@Test
-	public void supports() throws NoSuchMethodException {
-
-		SimpleResultHandler resultHandler = new SimpleResultHandler();
-		TestController controller = new TestController();
-
-		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("voidReturnValue"));
-		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("streamVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		// Reactor Flux is a Publisher
-		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("observableVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("completableFutureVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(resultHandler.supports(createHandlerResult(hm, type)));
-	}
 
 	@Test
 	public void supportsWithConversionService() throws NoSuchMethodException {
@@ -77,6 +48,7 @@ public class SimpleResultHandlerTests {
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addConverter(new ReactiveStreamsToCompletableFutureConverter());
 		conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
+
 		SimpleResultHandler resultHandler = new SimpleResultHandler(conversionService);
 		TestController controller = new TestController();
 

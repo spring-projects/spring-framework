@@ -26,7 +26,12 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
@@ -60,10 +65,8 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	@Override
 	protected HttpHandler createHttpHandler() {
 
-		StaticApplicationContext wac = new StaticApplicationContext();
-		wac.registerSingleton("handlerMapping", TestSimpleUrlHandlerMapping.class);
-		wac.registerSingleton("handlerAdapter", SimpleHandlerAdapter.class);
-		wac.registerSingleton("resultHandler", SimpleResultHandler.class);
+		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
+		wac.register(WebConfig.class);
 		wac.refresh();
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler();
@@ -170,6 +173,26 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 			exchange.getResponse().getHeaders().add("foo", "bar");
 			return Mono.empty();
 		}
+	}
+
+	@Configuration
+	static class WebConfig {
+
+		@Bean
+		public TestSimpleUrlHandlerMapping handlerMapping() {
+			return new TestSimpleUrlHandlerMapping();
+		}
+
+		@Bean
+		public SimpleHandlerAdapter handlerAdapter() {
+			return new SimpleHandlerAdapter();
+		}
+
+		@Bean
+		public SimpleResultHandler resultHandler() {
+			return new SimpleResultHandler(new DefaultConversionService());
+		}
+
 	}
 
 }

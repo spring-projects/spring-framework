@@ -47,9 +47,6 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
-	public SimpleResultHandler() {
-	}
-
 	public SimpleResultHandler(ConversionService conversionService) {
 		Assert.notNull(conversionService, "'conversionService' is required.");
 		this.conversionService = conversionService;
@@ -76,18 +73,14 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 	@Override
 	public boolean supports(HandlerResult result) {
 		ResolvableType type = result.getReturnValueType();
-		return (type != null && (Void.TYPE.equals(type.getRawClass()) || isConvertibleToVoidPublisher(type)));
-	}
-
-	private boolean isConvertibleToVoidPublisher(ResolvableType type) {
-		return (isConvertibleToPublisher(type) &&
-				Void.class.isAssignableFrom(type.getGeneric(0).getRawClass()));
-	}
-
-	private boolean isConvertibleToPublisher(ResolvableType type) {
-		Class<?> clazz = type.getRawClass();
-		return (Publisher.class.isAssignableFrom(clazz) ||
-				((this.conversionService != null) && this.conversionService.canConvert(clazz, Publisher.class)));
+		if (Void.TYPE.equals(type.getRawClass())) {
+			return true;
+		}
+		if (this.conversionService.canConvert(type.getRawClass(), Publisher.class)) {
+			Class<?> clazz = result.getReturnValueType().getGeneric(0).getRawClass();
+			return Void.class.equals(clazz);
+		}
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
