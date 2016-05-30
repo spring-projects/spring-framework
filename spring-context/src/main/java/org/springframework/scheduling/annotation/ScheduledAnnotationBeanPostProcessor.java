@@ -302,8 +302,11 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
 
-			Set<ScheduledTask> tasks =
-					new LinkedHashSet<ScheduledTask>(4);
+			Set<ScheduledTask> tasks = this.scheduledTasks.get(bean);
+			if (tasks == null) {
+				tasks = new LinkedHashSet<ScheduledTask>(4);
+				this.scheduledTasks.put(bean, tasks);
+			}
 
 			// Determine initial delay
 			long initialDelay = scheduled.initialDelay();
@@ -397,7 +400,6 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 			// Check whether we had any attribute set
 			Assert.isTrue(processedSchedule, errorMessage);
-			this.scheduledTasks.put(bean, tasks);
 		}
 		catch (IllegalArgumentException ex) {
 			throw new IllegalStateException(
