@@ -437,6 +437,16 @@ you are using Spring AOP it helps a lot when applying advice to a set of beans r
 by name.
 ****
 
+[NOTE]
+====
+With component scanning in the classpath, Spring generates bean names for unnamed
+components, following the rules above: essentially, taking the simple class name
+and turning its initial character to lower-case. However, in the (unusual) special
+case when there is more than one character and both the first and second characters
+are upper case, the original casing gets preserved. These are the same rules as
+defined by `java.beans.Introspector.decapitalize` (which Spring is using here).
+====
+
 
 [[beans-beanname-alias]]
 ==== Aliasing a bean outside the bean definition
@@ -5825,8 +5835,8 @@ It is very common to use `@Component` without specifying a name for the componen
 	}
 ----
 
-When using `@Named`, it is possible to use
-component-scanning in the exact same way as when using Spring annotations:
+When using `@Named`, it is possible to use component scanning in the exact same way
+as when using Spring annotations:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5837,6 +5847,12 @@ component-scanning in the exact same way as when using Spring annotations:
     	...
 	}
 ----
+
+[NOTE]
+====
+In contrast to `@Component`, the JSR-330 `@Named` annotation is not composable.
+Please use Spring's stereotype model for building custom component annotations.
+====
 
 
 

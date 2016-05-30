@@ -6498,7 +6498,7 @@ reference is provided for managing those methods annotated with `@Scheduled`.
 
 [[scheduling-annotation-support-scheduled]]
 ==== The @Scheduled Annotation
-The @Scheduled annotation can be added to a method along with trigger metadata. For
+The `@Scheduled` annotation can be added to a method along with trigger metadata. For
 example, the following method would be invoked every 5 seconds with a fixed delay,
 meaning that the period will be measured from the completion time of each preceding
 invocation.
@@ -6562,13 +6562,15 @@ Context, then those would typically have been provided through dependency inject
 
 [NOTE]
 ====
-Make sure that you are not initializing multiple instances of the same @Scheduled
+As of Spring Framework 4.3, `@Scheduled` methods are supported on beans of any scope.
+
+Make sure that you are not initializing multiple instances of the same `@Scheduled`
 annotation class at runtime, unless you do want to schedule callbacks to each such
-instance. Related to this, make sure that you do not use @Configurable on bean classes
-which are annotated with @Scheduled and registered as regular Spring beans with the
-container: You would get double initialization otherwise, once through the container and
-once through the @Configurable aspect, with the consequence of each @Scheduled method
-being invoked twice.
+instance. Related to this, make sure that you do not use `@Configurable` on bean
+classes which are annotated with `@Scheduled` and registered as regular Spring beans
+with the container: You would get double initialization otherwise, once through the
+container and once through the `@Configurable` aspect, with the consequence of each
+`@Scheduled` method being invoked twice.
 ====
 
 
@@ -6619,8 +6621,8 @@ asynchronous execution so that the caller can perform other tasks prior to calli
 ----
 
 `@Async` can not be used in conjunction with lifecycle callbacks such as
-`@PostConstruct`. To asynchronously initialize Spring beans you currently have to use a
-separate initializing Spring bean that invokes the `@Async` annotated method on the
+`@PostConstruct`. To asynchronously initialize Spring beans you currently have to use
+a separate initializing Spring bean that invokes the `@Async` annotated method on the
 target then.
 
 [source,java,indent=0]
@@ -6635,7 +6637,7 @@ target then.
 
 	}
 
-	public class SampleBeanInititalizer {
+	public class SampleBeanInitializer {
 
 		private final SampleBean bean;
 
@@ -6650,6 +6652,14 @@ target then.
 
 	}
 ----
+
+[NOTE]
+====
+There is no direct XML equivalent for `@Async` since such methods should be designed
+for asynchronous execution in the first place, not externally re-declared to be async.
+However, you may manually set up Spring's `AsyncExecutionInterceptor` with Spring AOP,
+in combination with a custom pointcut.
+====
 
 
 
