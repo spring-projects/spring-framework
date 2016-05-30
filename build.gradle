@@ -55,12 +55,12 @@ configure(allprojects) { project ->
 	ext.jackson2Version      = "2.7.4"
 	ext.jasperreportsVersion = "6.2.1"
 	ext.javamailVersion      = "1.5.5"
-	ext.jettyVersion         = "9.3.8.v20160314"
-	ext.jodaVersion          = "2.9.3"
+	ext.jettyVersion         = "9.3.9.v20160517"
+	ext.jodaVersion          = "2.9.4"
 	ext.jrubyVersion         = "1.7.25"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.1.0.CR7"
+	ext.nettyVersion         = "4.1.0.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.okhttp3Version       = "3.2.0"
 	ext.openjpaVersion       = "2.4.1"
@@ -73,7 +73,7 @@ configure(allprojects) { project ->
 	ext.testngVersion        = "6.9.10"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.33"
+	ext.tomcatVersion        = "8.5.2"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.3.22.Final"
 	ext.xmlunitVersion       = "1.6"
@@ -290,7 +290,7 @@ project("spring-core") {
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
 	def cglibVersion = "3.2.2"
-	def objenesisVersion = "2.2"
+	def objenesisVersion = "2.3"
 
 	configurations {
 		jarjar
@@ -486,7 +486,7 @@ project("spring-context") {
 		optional("org.beanshell:bsh:2.0b4")
 		optional("org.jruby:jruby:${jrubyVersion}")
 		testCompile("javax.inject:javax.inject-tck:1")
-		testCompile("org.javamoney:moneta:1.0")
+		testCompile("org.javamoney:moneta:1.1")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("org.apache.commons:commons-pool2:2.4.2")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")

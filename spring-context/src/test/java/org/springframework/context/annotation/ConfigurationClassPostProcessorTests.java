@@ -1063,17 +1063,27 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
-	public interface DefaultMethodsConfig {
+	public interface BaseInterface {
 
-		@Bean
-		default ServiceBean serviceBean() {
-			return provider().getServiceBean();
-		}
+		ServiceBean serviceBean();
+	}
+
+	public interface BaseDefaultMethods extends BaseInterface {
 
 		@Bean
 		default ServiceBeanProvider provider() {
 			return new ServiceBeanProvider();
 		}
+
+		@Bean
+		@Override
+		default ServiceBean serviceBean() {
+			return provider().getServiceBean();
+		}
+	}
+
+	public interface DefaultMethodsConfig extends BaseDefaultMethods {
+
 	}
 
 	@Configuration

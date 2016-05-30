@@ -48,4 +48,10 @@ public class UnorderedRequestExpectationManager extends AbstractRequestExpectati
 		throw createUnexpectedRequestError(request);
 	}
 
+	@Override
+	public void reset() {
+		super.reset();
+		this.remainingExpectations.reset();
+	}
+
 }

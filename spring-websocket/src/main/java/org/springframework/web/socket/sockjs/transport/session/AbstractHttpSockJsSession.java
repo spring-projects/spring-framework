@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,8 +196,18 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		this.uri = request.getURI();
 		this.handshakeHeaders = request.getHeaders();
 		this.principal = request.getPrincipal();
-		this.localAddress = request.getLocalAddress();
-		this.remoteAddress = request.getRemoteAddress();
+		try {
+			this.localAddress = request.getLocalAddress();
+		}
+		catch (Exception ex) {
+			// Ignore
+		}
+		try {
+			this.remoteAddress = request.getRemoteAddress();
+		}
+		catch (Exception ex) {
+			// Ignore
+		}
 
 		synchronized (this.responseLock) {
 			try {

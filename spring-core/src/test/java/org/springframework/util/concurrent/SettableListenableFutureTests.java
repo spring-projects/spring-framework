@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.*;
@@ -35,12 +34,8 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class SettableListenableFutureTests {
 
-	private SettableListenableFuture<String> settableListenableFuture;
+	private final SettableListenableFuture<String> settableListenableFuture = new SettableListenableFuture<String>();
 
-	@Before
-	public void setUp() {
-		settableListenableFuture = new SettableListenableFuture<String>();
-	}
 
 	@Test
 	public void validateInitialValues() {
@@ -77,6 +72,20 @@ public class SettableListenableFutureTests {
 	}
 
 	@Test
+	public void throwsSetErrorWrappedInExecutionException() throws ExecutionException, InterruptedException {
+		Throwable exception = new OutOfMemoryError();
+		boolean wasSet = settableListenableFuture.setException(exception);
+		assertTrue(wasSet);
+		try {
+			settableListenableFuture.get();
+			fail("Expected ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertThat(ex.getCause(), equalTo(exception));
+		}
+	}
+
+	@Test
 	public void setValueTriggersCallback() {
 		String string = "hello";
 		final String[] callbackHolder = new String[1];
@@ -85,7 +94,6 @@ public class SettableListenableFutureTests {
 			public void onSuccess(String result) {
 				callbackHolder[0] = result;
 			}
-
 			@Override
 			public void onFailure(Throwable ex) {
 				fail("Expected onSuccess() to be called");
@@ -104,7 +112,6 @@ public class SettableListenableFutureTests {
 			public void onSuccess(String result) {
 				callbackHolder[0] = result;
 			}
-
 			@Override
 			public void onFailure(Throwable ex) {
 				fail("Expected onSuccess() to be called");
@@ -124,7 +131,6 @@ public class SettableListenableFutureTests {
 			public void onSuccess(String result) {
 				fail("Expected onFailure() to be called");
 			}
-
 			@Override
 			public void onFailure(Throwable ex) {
 				callbackHolder[0] = ex;
@@ -143,7 +149,6 @@ public class SettableListenableFutureTests {
 			public void onSuccess(String result) {
 				fail("Expected onFailure() to be called");
 			}
-
 			@Override
 			public void onFailure(Throwable ex) {
 				callbackHolder[0] = ex;
@@ -322,6 +327,7 @@ public class SettableListenableFutureTests {
 		verifyNoMoreInteractions(callback);
 	}
 
+
 	private static class InterruptableSettableListenableFuture extends SettableListenableFuture<String> {
 
 		private boolean interrupted = false;
@@ -335,4 +341,5 @@ public class SettableListenableFutureTests {
 			return interrupted;
 		}
 	}
+
 }

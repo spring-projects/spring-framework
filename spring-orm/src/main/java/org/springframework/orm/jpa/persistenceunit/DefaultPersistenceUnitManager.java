@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -553,8 +553,20 @@ public class DefaultPersistenceUnitManager
 				scannedUnit.addMappingFileName(mappingFileName);
 			}
 		}
-		else if (useOrmXmlForDefaultPersistenceUnit()) {
-			scannedUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
+		else {
+			Resource ormXml = getOrmXmlForDefaultPersistenceUnit();
+			if (ormXml != null) {
+				scannedUnit.addMappingFileName(DEFAULT_ORM_XML_RESOURCE);
+				if (scannedUnit.getPersistenceUnitRootUrl() == null) {
+					try {
+						scannedUnit.setPersistenceUnitRootUrl(
+								PersistenceUnitReader.determinePersistenceUnitRootUrl(ormXml));
+					}
+					catch (IOException ex) {
+						logger.debug("Failed to determine persistence unit root URL from orm.xml location", ex);
+					}
+				}
+			}
 		}
 
 		return scannedUnit;
@@ -593,27 +605,27 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Determine whether to register JPA's default "META-INF/orm.xml" with
-	 * Spring's default persistence unit, if any.
-	 * <p>Checks whether a "META-INF/orm.xml" file exists in the classpath and
-	 * uses it if it is not co-located with a "META-INF/persistence.xml" file.
+	 * Determine JPA's default "META-INF/orm.xml" resource for use with Spring's default
+	 * persistence unit, if any.
+	 * <p>Checks whether a "META-INF/orm.xml" file exists in the classpath and uses it
+	 * if it is not co-located with a "META-INF/persistence.xml" file.
 	 */
-	private boolean useOrmXmlForDefaultPersistenceUnit() {
+	private Resource getOrmXmlForDefaultPersistenceUnit() {
 		Resource ormXml = this.resourcePatternResolver.getResource(
 				this.defaultPersistenceUnitRootLocation + DEFAULT_ORM_XML_RESOURCE);
 		if (ormXml.exists()) {
 			try {
 				Resource persistenceXml = ormXml.createRelative(PERSISTENCE_XML_FILENAME);
 				if (!persistenceXml.exists()) {
-					return true;
+					return ormXml;
 				}
 			}
 			catch (IOException ex) {
 				// Cannot resolve relative persistence.xml file - let's assume it's not there.
-				return true;
+				return ormXml;
 			}
 		}
-		return false;
+		return null;
 	}
 
 
