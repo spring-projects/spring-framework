@@ -57,7 +57,7 @@ public class ServerHttpResponseTests {
 	}
 
 	@Test
-	public void writeWithWithComplete() throws Exception {
+	public void writeWithError() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		IllegalStateException error = new IllegalStateException("boo");
 		response.writeWith(Flux.error(error)).otherwise(ex -> Mono.empty()).get();
