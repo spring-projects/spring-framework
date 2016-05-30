@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,6 +194,19 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		assertEquals("x", accessor.getPropertyValue("object.name"));
 	}
 
+	@Test
+	public void incompletelyQuotedKeyLeadsToPropertyException() {
+		TestBean target = new TestBean();
+		try {
+			BeanWrapper accessor = createAccessor(target);
+			accessor.setPropertyValue("[']", "foobar");
+			fail("Should throw exception on invalid property");
+		}
+		catch (NotWritablePropertyException ex) {
+			assertNull(ex.getPossibleMatches());
+		}
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class GetterBean {
@@ -211,6 +224,7 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 			return name;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class IntelliBean {

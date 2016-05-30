@@ -800,7 +800,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	/**
 	 * Recursively navigate to return a property accessor for the nested property path.
-	 * @param propertyPath property property path, which may be nested
+	 * @param propertyPath property path, which may be nested
 	 * @return a property accessor for the target bean
 	 */
 	@SuppressWarnings("unchecked")  // avoid nested generic
@@ -942,7 +942,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						actualName = propertyName.substring(0, keyStart);
 					}
 					String key = propertyName.substring(keyStart + PROPERTY_KEY_PREFIX.length(), keyEnd);
-					if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith("\"") && key.endsWith("\""))) {
+					if (key.length() > 1 && (key.startsWith("'") && key.endsWith("'")) ||
+							(key.startsWith("\"") && key.endsWith("\""))) {
 						key = key.substring(1, key.length() - 1);
 					}
 					keys.add(key);
