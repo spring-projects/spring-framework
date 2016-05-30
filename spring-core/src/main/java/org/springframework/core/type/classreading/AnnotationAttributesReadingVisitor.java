@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,30 +72,41 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 		else {
 			attributes.add(0, this.attributes);
 		}
-		Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>();
+		Set<Annotation> visited = new LinkedHashSet<Annotation>();
 		Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
 		if (!ObjectUtils.isEmpty(metaAnnotations)) {
 			for (Annotation metaAnnotation : metaAnnotations) {
 				if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
-					recursivelyCollectMetaAnnotations(metaAnnotationTypeNames, metaAnnotation);
+					recursivelyCollectMetaAnnotations(visited, metaAnnotation);
 				}
 			}
 		}
 		if (this.metaAnnotationMap != null) {
+			Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>(visited.size());
+			for (Annotation ann : visited) {
+				metaAnnotationTypeNames.add(ann.annotationType().getName());
+			}
 			this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 		}
 	}
 
-	private void recursivelyCollectMetaAnnotations(Set<String> visited, Annotation annotation) {
-		String annotationName = annotation.annotationType().getName();
-		if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && visited.add(annotationName)) {
-			// Only do further scanning for public annotations; we'd run into
-			// IllegalAccessExceptions otherwise, and we don't want to mess with
-			// accessibility in a SecurityManager environment.
-			if (Modifier.isPublic(annotation.annotationType().getModifiers())) {
-				this.attributesMap.add(annotationName, AnnotationUtils.getAnnotationAttributes(annotation, false, true));
+	private void recursivelyCollectMetaAnnotations(Set<Annotation> visited, Annotation annotation) {
+		if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) && visited.add(annotation)) {
+			try {
+				// Only do attribute scanning for public annotations; we'd run into
+				// IllegalAccessExceptions otherwise, and we don't want to mess with
+				// accessibility in a SecurityManager environment.
+				if (Modifier.isPublic(annotation.annotationType().getModifiers())) {
+					String annotationName = annotation.annotationType().getName();
+					this.attributesMap.add(annotationName, AnnotationUtils.getAnnotationAttributes(annotation, false, true));
+				}
 				for (Annotation metaMetaAnnotation : annotation.annotationType().getAnnotations()) {
 					recursivelyCollectMetaAnnotations(visited, metaMetaAnnotation);
+				}
+			}
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to introspect meta-annotations on [" + annotation + "]: " + ex);
 				}
 			}
 		}
