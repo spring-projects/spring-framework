@@ -42,6 +42,8 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 
 	private final List<Locale> supportedLocales = new ArrayList<Locale>();
 
+	private Locale defaultLocale;
+
 
 	/**
 	 * Configure supported locales to check against the requested locales
@@ -65,9 +67,32 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 		return this.supportedLocales;
 	}
 
+	/**
+	 * Configure a fixed default locale to fall back on if the request does not
+	 * have an "Accept-Language" header.
+	 * <p>By default this is not set in which case when there is "Accept-Lanaguage"
+	 * header, the default locale for the server is used as defined in
+	 * {@link HttpServletRequest#getLocale()}.
+	 * @param defaultLocale the default locale to use
+	 * @since 4.3
+	 */
+	public void setDefaultLocale(Locale defaultLocale) {
+		this.defaultLocale = defaultLocale;
+	}
+
+	/**
+	 * The configured default locale.
+	 */
+	public Locale getDefaultLocale() {
+		return this.defaultLocale;
+	}
+
 
 	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
+		if (getDefaultLocale() != null  && request.getHeader("Accept-Language") == null) {
+			return getDefaultLocale();
+		}
 		Locale locale = request.getLocale();
 		if (!isSupportedLocale(locale)) {
 			locale = findSupportedLocale(request, locale);
