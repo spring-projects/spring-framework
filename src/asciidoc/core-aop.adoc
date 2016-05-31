@@ -438,7 +438,7 @@ be &&'ed, ||'ed, and ! (negated) too.
 ====
 Please note that the '++bean++' PCD is __only__ supported in Spring AOP - and __not__ in
 native AspectJ weaving. It is a Spring-specific extension to the standard PCDs that
-AspectJ defines.
+AspectJ defines and therefore not available for aspects declared in the `@Aspect` model.
 
 The '++bean++' PCD operates at the __instance__ level (building on the Spring bean name
 concept) rather than at the type level only (which is what weaving-based AOP is limited
@@ -2884,10 +2884,9 @@ A `@Transactional` annotation on a class specifies the default transaction seman
 the execution of any __public__ operation in the class.
 
 A `@Transactional` annotation on a method within the class overrides the default
-transaction semantics given by the class annotation (if present). Methods with `public`,
-`protected`, and default visibility may all be annotated. Annotating `protected` and
-default visibility methods directly is the only way to get transaction demarcation for
-the execution of such methods.
+transaction semantics given by the class annotation (if present). Methods of any
+visibility may be annotated, including private methods. Annotating non-public methods
+directly is the only way to get transaction demarcation for the execution of such methods.
 
 [TIP]
 ====

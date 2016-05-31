@@ -900,7 +900,7 @@ public class AnnotatedElementUtils {
 
 		try {
 			return searchWithGetSemantics(element, annotationType, annotationName, containerType, processor,
-				new HashSet<AnnotatedElement>(), 0);
+					new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);

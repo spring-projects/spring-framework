@@ -1749,7 +1749,7 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * <p>If the supplied throwable is an {@link AnnotationConfigurationException},
+	 * If the supplied throwable is an {@link AnnotationConfigurationException},
 	 * it will be cast to an {@code AnnotationConfigurationException} and thrown,
 	 * allowing it to propagate to the caller.
 	 * <p>Otherwise, this method does nothing.

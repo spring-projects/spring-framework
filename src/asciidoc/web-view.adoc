@@ -331,7 +331,7 @@ Example code is shown below for the `personFormV`/`personFormF` views configured
 			<@spring.bind "myModelObject.name"/>
 			<input type="text"
 				name="${spring.status.expression}"
-				value="${spring.status.value?default("")}"/><br>
+				value="${spring.status.value?html}"/><br>
 			<#list spring.status.errorMessages as error> <b>${error}</b> <br> </#list>
 			<br>
 			...

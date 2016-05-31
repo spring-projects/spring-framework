@@ -36,7 +36,7 @@ configure(allprojects) { project ->
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.2"
 	ext.ehcachejcacheVersion = "1.0.1"
-	ext.ehcache3Version      = "3.0.0"
+	ext.ehcache3Version      = "3.0.1"
 	ext.ejbVersion           = "3.0"
 	ext.fileuploadVersion    = "1.3.1"
 	ext.freemarkerVersion    = "2.3.23"
@@ -285,12 +285,12 @@ project("spring-build-src") {
 project("spring-core") {
 	description = "Spring Core"
 
-	// As of Spring 4.0.3, spring-core includes asm 5.0 and repackages cglib 3.2, inlining
-	// both into the spring-core jar. cglib 3.2 itself depends on asm 5.0 and is therefore
+	// As of Spring 4.0.3, spring-core includes asm 5.x and repackages cglib 3.2, inlining
+	// both into the spring-core jar. cglib 3.2 itself depends on asm 5.x and is therefore
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
 	def cglibVersion = "3.2.2"
-	def objenesisVersion = "2.3"
+	def objenesisVersion = "2.4"
 
 	configurations {
 		jarjar

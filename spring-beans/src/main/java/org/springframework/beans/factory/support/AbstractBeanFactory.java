@@ -1509,7 +1509,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					// the bean... just in case some of its metadata changed in the meantime.
 					clearMergedBeanDefinition(beanName);
 
-					this.alreadyCreated.add(beanName);
+					this.alreadyCreated.add(beanName);\
 				}
 			}
 		}

@@ -202,6 +202,19 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		assertEquals("x", accessor.getPropertyValue("object.name"));
 	}
 
+	@Test
+	public void incompletelyQuotedKeyLeadsToPropertyException() {
+		TestBean target = new TestBean();
+		try {
+			BeanWrapper accessor = createAccessor(target);
+			accessor.setPropertyValue("[']", "foobar");
+			fail("Should throw exception on invalid property");
+		}
+		catch (NotWritablePropertyException ex) {
+			assertNull(ex.getPossibleMatches());
+		}
+	}
+
 
 	@SuppressWarnings("unused")
 	private interface AliasedProperty {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * (adapting them to an internal null holder value)
 	 * @param serialization the {@link SerializationDelegate} to use
 	 * to serialize cache entry or {@code null} to store the reference
+	 * @since 4.3
 	 */
 	protected ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store,
 			boolean allowNullValues, SerializationDelegate serialization) {
@@ -107,13 +108,15 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 		this.serialization = serialization;
 	}
 
+
 	/**
 	 * Return whether this cache stores a copy of each entry ({@code true}) or
 	 * a reference ({@code false}, default). If store by value is enabled, each
 	 * entry in the cache must be serializable.
+	 * @since 4.3
 	 */
 	public final boolean isStoreByValue() {
-		return this.serialization != null;
+		return (this.serialization != null);
 	}
 
 	@Override
