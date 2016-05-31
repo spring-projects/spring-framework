@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -111,10 +112,10 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * @param contentType the content type selected to render with which should
 	 * match one of the {@link #getSupportedMediaTypes() supported media types}.
 	 * @param exchange the current exchange
-	 * @return
+	 * @return {@code Mono} to represent when and if rendering succeeds
 	 */
 	@Override
-	public Flux<DataBuffer> render(HandlerResult result, MediaType contentType,
+	public Mono<Void> render(HandlerResult result, MediaType contentType,
 			ServerWebExchange exchange) {
 
 		if (logger.isTraceEnabled()) {
@@ -151,8 +152,9 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * @param renderAttributes combined output Map (never {@code null}),
 	 * with dynamic values taking precedence over static attributes
 	 * @param exchange current exchange
+	 * @return {@code Mono} to represent when and if rendering succeeds
 	 */
-	protected abstract Flux<DataBuffer> renderInternal(Map<String, Object> renderAttributes,
+	protected abstract Mono<Void> renderInternal(Map<String, Object> renderAttributes,
 			ServerWebExchange exchange);
 
 

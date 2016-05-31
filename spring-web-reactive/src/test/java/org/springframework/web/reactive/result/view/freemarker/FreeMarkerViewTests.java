@@ -19,14 +19,12 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Locale;
-import java.util.Optional;
 
 import freemarker.template.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.context.ApplicationContextException;
@@ -46,7 +44,6 @@ import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Rossen Stoyanchev
@@ -59,6 +56,8 @@ public class FreeMarkerViewTests {
 
 
 	private ServerWebExchange exchange;
+
+	private MockServerHttpResponse response;
 
 	private GenericApplicationContext context;
 
@@ -83,7 +82,7 @@ public class FreeMarkerViewTests {
 		fv.setApplicationContext(this.context);
 
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
-		MockServerHttpResponse response = new MockServerHttpResponse();
+		this.response = new MockServerHttpResponse();
 		WebSessionManager manager = new DefaultWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, response, manager);
 	}
@@ -127,10 +126,10 @@ public class FreeMarkerViewTests {
 		ModelMap model = new ExtendedModelMap();
 		model.addAttribute("hello", "hi FreeMarker");
 		HandlerResult result = new HandlerResult(new Object(), "", ResolvableType.NONE, model);
-		Flux<DataBuffer> flux = view.render(result, null, this.exchange);
+		view.render(result, null, this.exchange);
 
 		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
-		subscriber.bindTo(flux).assertValuesWith(dataBuffer ->
+		subscriber.bindTo(this.response.getBody()).assertValuesWith(dataBuffer ->
 					assertEquals("<html><body>hi FreeMarker</body></html>", asString(dataBuffer)));
 	}
 

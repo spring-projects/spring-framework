@@ -48,6 +48,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -324,10 +325,11 @@ public class ViewResolutionResultHandlerTests {
 		}
 
 		@Override
-		public Flux<DataBuffer> render(HandlerResult result, MediaType mediaType, ServerWebExchange exchange) {
+		public Mono<Void> render(HandlerResult result, MediaType mediaType, ServerWebExchange exchange) {
 			String value = this.name + ": " + result.getModel().toString();
 			assertNotNull(value);
-			return Flux.just(asDataBuffer(value));
+			ServerHttpResponse response = exchange.getResponse();
+			return response.writeWith(Flux.just(asDataBuffer(value)));
 		}
 	}
 

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
@@ -53,8 +54,8 @@ public interface View {
 	 * @param contentType the content type selected to render with which should
 	 * match one of the {@link #getSupportedMediaTypes() supported media types}.
 	 * @param exchange the current exchange
-	 * @return the output stream
+	 * @return {@code Mono} to represent when and if rendering succeeds
 	 */
-	Flux<DataBuffer> render(HandlerResult result, MediaType contentType, ServerWebExchange exchange);
+	Mono<Void> render(HandlerResult result, MediaType contentType, ServerWebExchange exchange);
 
 }

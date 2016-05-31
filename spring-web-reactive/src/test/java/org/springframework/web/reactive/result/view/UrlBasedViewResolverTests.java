@@ -63,8 +63,8 @@ public class UrlBasedViewResolverTests {
 		}
 
 		@Override
-		protected Flux<DataBuffer> renderInternal(Map<String, Object> attributes, ServerWebExchange exchange) {
-			return Flux.empty();
+		protected Mono<Void> renderInternal(Map<String, Object> attributes, ServerWebExchange exchange) {
+			return Mono.empty();
 		}
 	}
 

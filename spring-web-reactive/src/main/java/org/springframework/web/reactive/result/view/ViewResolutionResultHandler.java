@@ -34,7 +34,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -184,8 +183,7 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 
 		return viewMono.then(returnValue -> {
 			if (returnValue instanceof View) {
-				Flux<DataBuffer> body = ((View) returnValue).render(result, null, exchange);
-				return exchange.getResponse().writeWith(body);
+				return ((View) returnValue).render(result, null, exchange);
 			}
 			else if (returnValue instanceof CharSequence) {
 				String viewName = returnValue.toString();
@@ -194,10 +192,7 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 						.concatMap(resolver -> resolver.resolveViewName(viewName, locale))
 						.next()
 						.otherwiseIfEmpty(handleUnresolvedViewName(viewName))
-						.then(view -> {
-							Flux<DataBuffer> body = view.render(result, null, exchange);
-							return exchange.getResponse().writeWith(body);
-						});
+						.then(view -> view.render(result, null, exchange));
 			}
 			else {
 				// Should not happen
