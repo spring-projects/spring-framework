@@ -65,6 +65,7 @@ public final class MockMvcWebConnection implements WebConnection {
 
 	private WebClient webClient;
 
+
 	/**
 	 * Create a new instance that assumes the context path of the application
 	 * is {@code ""} (i.e., the root context).
@@ -127,6 +128,27 @@ public final class MockMvcWebConnection implements WebConnection {
 		this(mockMvc, new WebClient(), contextPath);
 	}
 
+	/**
+	 * Validate the supplied {@code contextPath}.
+	 * <p>If the value is not {@code null}, it must conform to
+	 * {@link javax.servlet.http.HttpServletRequest#getContextPath()} which
+	 * states that it can be an empty string and otherwise must start with
+	 * a "/" character and not end with a "/" character.
+	 * @param contextPath the path to validate
+	 */
+	static void validateContextPath(String contextPath) {
+		if (contextPath == null || "".equals(contextPath)) {
+			return;
+		}
+		if (!contextPath.startsWith("/")) {
+			throw new IllegalArgumentException("contextPath '" + contextPath + "' must start with '/'.");
+		}
+		if (contextPath.endsWith("/")) {
+			throw new IllegalArgumentException("contextPath '" + contextPath + "' must not end with '/'.");
+		}
+	}
+
+
 	public void setWebClient(WebClient webClient) {
 		Assert.notNull(webClient, "WebClient must not be null");
 		this.webClient = webClient;
@@ -150,12 +172,24 @@ public final class MockMvcWebConnection implements WebConnection {
 		return new MockWebResponseBuilder(startTime, webRequest, httpServletResponse).build();
 	}
 
+	private MockHttpServletResponse getResponse(RequestBuilder requestBuilder) throws IOException {
+		ResultActions resultActions;
+		try {
+			resultActions = this.mockMvc.perform(requestBuilder);
+		}
+		catch (Exception ex) {
+			throw new IOException(ex);
+		}
+
+		return resultActions.andReturn().getResponse();
+	}
+
 	private void storeCookies(WebRequest webRequest, javax.servlet.http.Cookie[] cookies) {
 		if (cookies == null) {
 			return;
 		}
 		Date now = new Date();
-		CookieManager cookieManager = webClient.getCookieManager();
+		CookieManager cookieManager = this.webClient.getCookieManager();
 		for (javax.servlet.http.Cookie cookie : cookies) {
 			if (cookie.getDomain() == null) {
 				cookie.setDomain(webRequest.getUrl().getHost());
@@ -171,40 +205,8 @@ public final class MockMvcWebConnection implements WebConnection {
 		}
 	}
 
-	private MockHttpServletResponse getResponse(RequestBuilder requestBuilder) throws IOException {
-		ResultActions resultActions;
-		try {
-			resultActions = this.mockMvc.perform(requestBuilder);
-		}
-		catch (Exception ex) {
-			throw new IOException(ex);
-		}
-
-		return resultActions.andReturn().getResponse();
-	}
-
 	@Override
 	public void close() {
 	}
 
-
-	/**
-	 * Validate the supplied {@code contextPath}.
-	 * <p>If the value is not {@code null}, it must conform to
-	 * {@link javax.servlet.http.HttpServletRequest#getContextPath()} which
-	 * states that it can be an empty string and otherwise must start with
-	 * a "/" character and not end with a "/" character.
-	 * @param contextPath the path to validate
-	 */
-	static void validateContextPath(String contextPath) {
-		if (contextPath == null || "".equals(contextPath)) {
-			return;
-		}
-		if (!contextPath.startsWith("/")) {
-			throw new IllegalArgumentException("contextPath '" + contextPath + "' must start with '/'.");
-		}
-		if (contextPath.endsWith("/")) {
-			throw new IllegalArgumentException("contextPath '" + contextPath + "' must not end with '/'.");
-		}
-	}
 }
