@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -58,6 +59,8 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 
 	private MockHttpServletResponse response;
 
+	private HttpHeaders headers = new HttpHeaders();
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -68,6 +71,8 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 		this.request = new MockHttpServletRequest("GET", "/path");
 		this.response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(this.request, this.response);
+
+		this.headers.add("foo", "bar");
 
 		AsyncWebRequest asyncWebRequest = new StandardServletAsyncWebRequest(this.request, this.response);
 		WebAsyncUtils.getAsyncManager(this.webRequest).setAsyncWebRequest(asyncWebRequest);
@@ -140,6 +145,14 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 		assertEquals(204, this.response.getStatus());
 	}
 
+	@Test
+	public void responseEntityWithHeadersAndNoContent() throws Exception {
+		MethodParameter returnType = returnType(TestController.class, "handleResponseEntity");
+		ResponseEntity<?> emitter = ResponseEntity.noContent().headers(headers).build();
+		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
+
+		assertEquals(this.response.getHeaders("foo"), this.headers.get("foo"));
+	}
 
 	private MethodParameter returnType(Class<?> clazz, String methodName) throws NoSuchMethodException {
 		Method method = clazz.getDeclaredMethod(methodName);

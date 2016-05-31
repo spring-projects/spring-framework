@@ -74,6 +74,8 @@ public class StreamingResponseBodyReturnValueHandler implements HandlerMethodRet
 			returnValue = responseEntity.getBody();
 			if (returnValue == null) {
 				mavContainer.setRequestHandled(true);
+				// Ensure headers are flushed
+				outputMessage.flush();
 				return;
 			}
 		}
