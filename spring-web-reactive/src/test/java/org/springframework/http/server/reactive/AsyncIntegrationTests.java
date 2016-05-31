@@ -21,11 +21,10 @@ import java.time.Duration;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
-import reactor.core.publisher.Computations;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Timer;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -42,7 +41,7 @@ import static org.junit.Assert.assertThat;
  */
 public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private final Scheduler asyncGroup = Computations.parallel();
+	private final Scheduler asyncGroup = Schedulers.parallel();
 
 	private final DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
@@ -66,7 +65,7 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.writeWith(Flux.just("h", "e", "l", "l", "o")
-			                            .useTimer(Timer.global())
+			                            .useTimer(Schedulers.timer())
 			                            .delay(Duration.ofMillis(100))
 			                            .publishOn(asyncGroup)
 					.collect(dataBufferFactory::allocateBuffer, (buffer, str) -> buffer.write(str.getBytes())));
