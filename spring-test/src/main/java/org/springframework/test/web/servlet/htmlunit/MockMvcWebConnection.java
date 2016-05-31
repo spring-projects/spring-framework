@@ -17,13 +17,16 @@
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -61,6 +64,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	private final String contextPath;
 
 	private WebClient webClient;
+
 
 	/**
 	 * Create a new instance that assumes the context path of the application
@@ -124,45 +128,6 @@ public final class MockMvcWebConnection implements WebConnection {
 		this(mockMvc, new WebClient(), contextPath);
 	}
 
-	public void setWebClient(WebClient webClient) {
-		Assert.notNull(webClient, "WebClient must not be null");
-		this.webClient = webClient;
-	}
-
-
-	public WebResponse getResponse(WebRequest webRequest) throws IOException {
-		long startTime = System.currentTimeMillis();
-		HtmlUnitRequestBuilder requestBuilder = new HtmlUnitRequestBuilder(this.sessions, this.webClient, webRequest);
-		requestBuilder.setContextPath(this.contextPath);
-
-		MockHttpServletResponse httpServletResponse = getResponse(requestBuilder);
-		String forwardedUrl = httpServletResponse.getForwardedUrl();
-		while (forwardedUrl != null) {
-			requestBuilder.setForwardPostProcessor(new ForwardRequestPostProcessor(forwardedUrl));
-			httpServletResponse = getResponse(requestBuilder);
-			forwardedUrl = httpServletResponse.getForwardedUrl();
-		}
-
-		return new MockWebResponseBuilder(startTime, webRequest, httpServletResponse).build();
-	}
-
-	private MockHttpServletResponse getResponse(RequestBuilder requestBuilder) throws IOException {
-		ResultActions resultActions;
-		try {
-			resultActions = this.mockMvc.perform(requestBuilder);
-		}
-		catch (Exception ex) {
-			throw new IOException(ex);
-		}
-
-		return resultActions.andReturn().getResponse();
-	}
-
-	@Override
-	public void close() {
-	}
-
-
 	/**
 	 * Validate the supplied {@code contextPath}.
 	 * <p>If the value is not {@code null}, it must conform to
@@ -181,6 +146,67 @@ public final class MockMvcWebConnection implements WebConnection {
 		if (contextPath.endsWith("/")) {
 			throw new IllegalArgumentException("contextPath '" + contextPath + "' must not end with '/'.");
 		}
+	}
+
+
+	public void setWebClient(WebClient webClient) {
+		Assert.notNull(webClient, "WebClient must not be null");
+		this.webClient = webClient;
+	}
+
+
+	public WebResponse getResponse(WebRequest webRequest) throws IOException {
+		long startTime = System.currentTimeMillis();
+		HtmlUnitRequestBuilder requestBuilder = new HtmlUnitRequestBuilder(this.sessions, this.webClient, webRequest);
+		requestBuilder.setContextPath(this.contextPath);
+
+		MockHttpServletResponse httpServletResponse = getResponse(requestBuilder);
+		String forwardedUrl = httpServletResponse.getForwardedUrl();
+		while (forwardedUrl != null) {
+			requestBuilder.setForwardPostProcessor(new ForwardRequestPostProcessor(forwardedUrl));
+			httpServletResponse = getResponse(requestBuilder);
+			forwardedUrl = httpServletResponse.getForwardedUrl();
+		}
+		storeCookies(webRequest, httpServletResponse.getCookies());
+
+		return new MockWebResponseBuilder(startTime, webRequest, httpServletResponse).build();
+	}
+
+	private MockHttpServletResponse getResponse(RequestBuilder requestBuilder) throws IOException {
+		ResultActions resultActions;
+		try {
+			resultActions = this.mockMvc.perform(requestBuilder);
+		}
+		catch (Exception ex) {
+			throw new IOException(ex);
+		}
+
+		return resultActions.andReturn().getResponse();
+	}
+
+	private void storeCookies(WebRequest webRequest, javax.servlet.http.Cookie[] cookies) {
+		if (cookies == null) {
+			return;
+		}
+		Date now = new Date();
+		CookieManager cookieManager = this.webClient.getCookieManager();
+		for (javax.servlet.http.Cookie cookie : cookies) {
+			if (cookie.getDomain() == null) {
+				cookie.setDomain(webRequest.getUrl().getHost());
+			}
+			Cookie toManage = MockWebResponseBuilder.createCookie(cookie);
+			Date expires = toManage.getExpires();
+			if (expires == null || expires.after(now)) {
+				cookieManager.addCookie(toManage);
+			}
+			else {
+				cookieManager.removeCookie(toManage);
+			}
+		}
+	}
+
+	@Override
+	public void close() {
 	}
 
 }
