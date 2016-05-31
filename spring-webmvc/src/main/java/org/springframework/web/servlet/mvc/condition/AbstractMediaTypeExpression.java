@@ -16,13 +16,10 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -68,20 +65,6 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 	public boolean isNegated() {
 		return this.isNegated;
 	}
-
-
-	public final boolean match(HttpServletRequest request) {
-		try {
-			boolean match = matchMediaType(request);
-			return (!this.isNegated ? match : !match);
-		}
-		catch (HttpMediaTypeException ex) {
-			return false;
-		}
-	}
-
-	protected abstract boolean matchMediaType(HttpServletRequest request) throws HttpMediaTypeException;
-
 
 	@Override
 	public int compareTo(AbstractMediaTypeExpression other) {

@@ -49,6 +49,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 	private final static ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
 
+	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
+
 
 	private final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
 			Collections.singletonList(new ProduceMediaTypeExpression("*/*"));
@@ -187,25 +189,29 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		if (isEmpty()) {
 			return this;
 		}
+		List<MediaType> acceptedMediaTypes;
+		try {
+			acceptedMediaTypes = getAcceptedMediaTypes(request);
+		}
+		catch (HttpMediaTypeException ex) {
+			return null;
+		}
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<ProduceMediaTypeExpression>(expressions);
 		for (Iterator<ProduceMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
 			ProduceMediaTypeExpression expression = iterator.next();
-			if (!expression.match(request)) {
+			if (!expression.match(acceptedMediaTypes)) {
 				iterator.remove();
 			}
 		}
 		if (!result.isEmpty()) {
 			return new ProducesRequestCondition(result, this.contentNegotiationManager);
 		}
-		try {
-			if (getAcceptedMediaTypes(request).contains(MediaType.ALL)) {
-				return new ProducesRequestCondition();
-			}
+		else if (acceptedMediaTypes.contains(MediaType.ALL)) {
+			return EMPTY_CONDITION;
 		}
-		catch (HttpMediaTypeException ex) {
-			// Ignore
+		else {
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -314,9 +320,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			super(expression);
 		}
 
-		@Override
-		protected boolean matchMediaType(HttpServletRequest request) throws HttpMediaTypeNotAcceptableException {
-			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(request);
+		public final boolean match(List<MediaType> acceptedMediaTypes) {
+			boolean match = matchMediaType(acceptedMediaTypes);
+			return (!isNegated() ? match : !match);
+		}
+
+		private boolean matchMediaType(List<MediaType> acceptedMediaTypes) {
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
 				if (getMediaType().isCompatibleWith(acceptedMediaType)) {
 					return true;
