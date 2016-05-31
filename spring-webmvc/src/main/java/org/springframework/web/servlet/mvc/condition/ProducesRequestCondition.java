@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
+import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -193,7 +194,18 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 				iterator.remove();
 			}
 		}
-		return (result.isEmpty()) ? null : new ProducesRequestCondition(result, this.contentNegotiationManager);
+		if (!result.isEmpty()) {
+			return new ProducesRequestCondition(result, this.contentNegotiationManager);
+		}
+		try {
+			if (getAcceptedMediaTypes(request).contains(MediaType.ALL)) {
+				return new ProducesRequestCondition();
+			}
+		}
+		catch (HttpMediaTypeException ex) {
+			// Ignore
+		}
+		return null;
 	}
 
 	/**
