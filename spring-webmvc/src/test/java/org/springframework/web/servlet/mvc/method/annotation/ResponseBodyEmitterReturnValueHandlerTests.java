@@ -21,6 +21,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.*
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -184,11 +185,12 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	@Test
 	public void responseEntitySseNoContent() throws Exception {
 		MethodParameter returnType = returnType("handleResponseEntitySse");
-		ResponseEntity<?> entity = ResponseEntity.noContent().build();
+		ResponseEntity<?> entity = ResponseEntity.noContent().header("foo", "bar").build();
 		handleReturnValue(entity, returnType);
 
 		assertFalse(this.request.isAsyncStarted());
 		assertEquals(204, this.response.getStatus());
+		assertEquals(Collections.singletonList("bar"), this.response.getHeaders("foo"));
 	}
 
 	private void handleReturnValue(Object returnValue, MethodParameter returnType) throws Exception {

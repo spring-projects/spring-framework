@@ -137,6 +137,7 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 			returnValue = responseEntity.getBody();
 			if (returnValue == null) {
 				mavContainer.setRequestHandled(true);
+				outputMessage.flush();
 				return;
 			}
 		}
