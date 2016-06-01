@@ -30,7 +30,7 @@ ext {
 	springVersion = '4.3.0.BUILD-SNAPSHOT'
 	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
-	rxJavaVersion = '1.1.1'		// See issue #103
+	rxJavaVersion = '1.1.5'
 	tomcatVersion = '8.5.2'
 	jettyVersion = '9.3.8.v20160314'
 	nettyVersion = '4.1.0.CR6'
