@@ -70,7 +70,7 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	/**
 	 * Configure a fixed default locale to fall back on if the request does not
 	 * have an "Accept-Language" header.
-	 * <p>By default this is not set in which case when there is "Accept-Lanaguage"
+	 * <p>By default this is not set in which case when there is "Accept-Language"
 	 * header, the default locale for the server is used as defined in
 	 * {@link HttpServletRequest#getLocale()}.
 	 * @param defaultLocale the default locale to use
@@ -81,7 +81,8 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	}
 
 	/**
-	 * The configured default locale.
+	 * The configured default locale, if any.
+	 * @since 4.3
 	 */
 	public Locale getDefaultLocale() {
 		return this.defaultLocale;

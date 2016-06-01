@@ -24,14 +24,11 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition.ProduceMediaTypeExpression;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ProducesRequestCondition}.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -329,6 +326,7 @@ public class ProducesRequestConditionTests {
 		result = condition.getMatchingCondition(request);
 		assertNull(result);
 	}
+
 
 	private void assertConditions(ProducesRequestCondition condition, String... expected) {
 		Collection<ProduceMediaTypeExpression> expressions = condition.getContent();
