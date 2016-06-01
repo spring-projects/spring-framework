@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Unit tests for {@link ForwardedHeaderFilter}.
  * @author Rossen Stoyanchev
+ * @author Eddú Meléndez
  */
 public class ForwardedHeaderFilterTests {
 
@@ -170,6 +171,41 @@ public class ForwardedHeaderFilterTests {
 		assertEquals("bar", actual.getHeader("foo"));
 	}
 
+	@Test
+	public void requestUriWithForwardedPrefix() throws Exception {
+		this.request.addHeader("X-Forwarded-Prefix", "/prefix");
+		this.request.setRequestURI("/mvc-showcase");
+
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
+	}
+
+	@Test
+	public void requestUriWithForwardedPrefixTrailingSlash() throws Exception {
+		this.request.addHeader("X-Forwarded-Prefix", "/prefix/");
+		this.request.setRequestURI("/mvc-showcase");
+
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
+	}
+
+	@Test
+	public void contextPathWithForwardedPrefix() throws Exception {
+		this.request.addHeader("X-Forwarded-Prefix", "/prefix");
+		this.request.setContextPath("/mvc-showcase");
+
+		String actual = filterAndGetContextPath();
+		assertEquals("/prefix/mvc-showcase", actual);
+	}
+
+	@Test
+	public void contextPathWithForwardedPrefixTrailingSlash() throws Exception {
+		this.request.addHeader("X-Forwarded-Prefix", "/prefix/");
+		this.request.setContextPath("/mvc-showcase");
+
+		String actual = filterAndGetContextPath();
+		assertEquals("/prefix/mvc-showcase", actual);
+	}
 
 	private String filterAndGetContextPath() throws ServletException, IOException {
 		return filterAndGetWrappedRequest().getContextPath();
