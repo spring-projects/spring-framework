@@ -65,14 +65,14 @@ public class WebClientIntegrationTests {
 				.perform(get(baseUrl.toString()))
 				.extract(headers());
 
-		TestSubscriber<HttpHeaders> ts = new TestSubscriber<>();
-		result.subscribe(ts);
-		ts.awaitAndAssertNextValuesWith(
-				httpHeaders -> {
-					assertEquals(MediaType.TEXT_PLAIN, httpHeaders.getContentType());
-					assertEquals(13L, httpHeaders.getContentLength());
-				}
-		).assertComplete();
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValuesWith(
+					httpHeaders -> {
+						assertEquals(MediaType.TEXT_PLAIN, httpHeaders.getContentType());
+						assertEquals(13L, httpHeaders.getContentLength());
+					})
+				.assertComplete();
 
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -92,9 +92,10 @@ public class WebClientIntegrationTests {
 				.extract(body(String.class));
 
 
-		TestSubscriber<String> ts = new TestSubscriber<>();
-		result.subscribe(ts);
-		ts.awaitAndAssertNextValues("Hello Spring!").assertComplete();
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValues("Hello Spring!")
+				.assertComplete();
 
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -114,12 +115,12 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.TEXT_PLAIN))
 				.extract(response(String.class));
 
-		TestSubscriber<ResponseEntity<String>> ts = new TestSubscriber<>();
-		result.subscribe(ts);
-		ts.awaitAndAssertNextValuesWith((Consumer<ResponseEntity<String>>) response -> {
-			assertEquals(200, response.getStatusCode().value());
-			assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
-			assertEquals("Hello Spring!", response.getBody());
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValuesWith((Consumer<ResponseEntity<String>>) response -> {
+					assertEquals(200, response.getStatusCode().value());
+					assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
+					assertEquals("Hello Spring!", response.getBody());
 		});
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -140,9 +141,10 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(body(String.class));
 
-		TestSubscriber<String> ts = new TestSubscriber<>();
-		result.subscribe(ts);
-		ts.awaitAndAssertNextValues(content).assertComplete();
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValues(content)
+				.assertComplete();
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
 		assertEquals("/json", request.getPath());
@@ -161,9 +163,10 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(body(Pojo.class));
 
-		TestSubscriber<Pojo> ts = new TestSubscriber<>();
-		result.subscribe(ts);
-		ts.awaitAndAssertNextValuesWith(p -> assertEquals("barbar", p.getBar())).assertComplete();
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValuesWith(p -> assertEquals("barbar", p.getBar()))
+				.assertComplete();
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
 		assertEquals("/pojo", request.getPath());
@@ -182,12 +185,13 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(bodyStream(Pojo.class));
 
-		TestSubscriber<Pojo> ts = new TestSubscriber<>();
-		result.subscribe(ts);
-		ts.awaitAndAssertNextValuesWith(
-				p -> assertThat(p.getBar(), Matchers.is("bar1")),
-				p -> assertThat(p.getBar(), Matchers.is("bar2"))
-		).assertValueCount(2).assertComplete();
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValuesWith(
+					p -> assertThat(p.getBar(), Matchers.is("bar1")),
+					p -> assertThat(p.getBar(), Matchers.is("bar2")))
+				.assertValueCount(2)
+				.assertComplete();
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
 		assertEquals("/pojos", request.getPath());
@@ -206,14 +210,14 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(responseStream(Pojo.class));
 
-		TestSubscriber<ResponseEntity<Flux<Pojo>>> ts = new TestSubscriber<>();
-		result.subscribe(ts);
-		ts.awaitAndAssertNextValuesWith(
-				response -> {
-					assertEquals(200, response.getStatusCode().value());
-					assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
-				}
-		).assertComplete();
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValuesWith(
+					response -> {
+						assertEquals(200, response.getStatusCode().value());
+						assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
+					})
+				.assertComplete();
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
 		assertEquals("/pojos", request.getPath());
@@ -234,9 +238,10 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(body(Pojo.class));
 
-		TestSubscriber<Pojo> ts = new TestSubscriber<>();
-		result.subscribe(ts);
-		ts.awaitAndAssertNextValuesWith(p -> assertEquals("BARBAR", p.getBar())).assertComplete();
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValuesWith(p -> assertEquals("BARBAR", p.getBar()))
+				.assertComplete();
 
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -257,11 +262,11 @@ public class WebClientIntegrationTests {
 				.perform(get(baseUrl.toString()))
 				.extract(body(String.class));
 
-
-		TestSubscriber<String> ts = new TestSubscriber<>();
-		result.subscribe(ts);
 		// TODO: error message should be converted to a ClientException
-		ts.await().assertError();
+		TestSubscriber
+				.subscribe(result)
+				.await()
+				.assertError();
 
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());

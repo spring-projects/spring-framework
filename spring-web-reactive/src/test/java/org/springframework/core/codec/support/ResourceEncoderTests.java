@@ -66,8 +66,10 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 				ResolvableType.forClass(Resource.class),
 						null);
 
-		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertNoError().assertComplete()
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
 				.assertValuesWith(stringConsumer(s));
 
 	}

@@ -65,11 +65,11 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
 		Flux<String> output =
 				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).
-				assertNoError().
-				assertComplete().
-				assertValues("foo", "bar", "baz");
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertValues("foo", "bar", "baz");
 	}
 
 	@Test
@@ -79,21 +79,21 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> source = Flux.just(fooBar, baz);
 		Flux<String> output =
 				decoder.decode(source, ResolvableType.forClass(String.class), null);
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).
-				assertNoError().
-				assertComplete().
-				assertValues("foo", "bar", "baz");
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertValues("foo", "bar", "baz");
 	}
-
 
 	@Test
 	public void decodeEmpty() throws InterruptedException {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(""));
 		Flux<String> output =
 				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertValues("");
+		TestSubscriber
+				.subscribe(output)
+				.assertValues("");
 	}
 
 }

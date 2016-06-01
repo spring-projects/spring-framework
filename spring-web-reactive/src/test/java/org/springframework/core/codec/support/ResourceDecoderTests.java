@@ -64,11 +64,11 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Resource> result = this.decoder
 				.decode(source, ResolvableType.forClass(Resource.class), null);
 
-		TestSubscriber<Resource> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(result).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(resource -> {
+		TestSubscriber
+				.subscribe(result)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(resource -> {
 					try {
 						byte[] bytes =
 								StreamUtils.copyToByteArray(resource.getInputStream());

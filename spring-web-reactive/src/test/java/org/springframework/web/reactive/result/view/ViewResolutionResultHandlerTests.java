@@ -120,7 +120,7 @@ public class ViewResolutionResultHandlerTests {
 		Object value = new TestView("account");
 		handle("/path", value, "handleView");
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -130,7 +130,7 @@ public class ViewResolutionResultHandlerTests {
 		Object value = Mono.just(new TestView("account"));
 		handle("/path", value, "handleMonoView");
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -140,8 +140,8 @@ public class ViewResolutionResultHandlerTests {
 		Object value = "account";
 		handle("/path", value, "handleString", new TestViewResolver("account"));
 
-		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
-		subscriber.bindTo(this.response.getBody())
+		TestSubscriber
+				.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -151,7 +151,7 @@ public class ViewResolutionResultHandlerTests {
 		Object value = Mono.just("account");
 		handle("/path", value, "handleMonoString", new TestViewResolver("account"));
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -162,7 +162,7 @@ public class ViewResolutionResultHandlerTests {
 		handle("/path", value, "handleString",
 				new TestViewResolver("account"), new TestViewResolver("profile"));
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("profile: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -178,17 +178,17 @@ public class ViewResolutionResultHandlerTests {
 		ViewResolver resolver = new TestViewResolver("account");
 
 		handle("/account", null, "handleString", resolver);
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 
 		handle("/account/", null, "handleString", resolver);
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 
 		handle("/account.123", null, "handleString", resolver);
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -198,7 +198,7 @@ public class ViewResolutionResultHandlerTests {
 		Object value = Mono.empty();
 		handle("/account", value, "handleMonoString", new TestViewResolver("account"));
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -208,7 +208,7 @@ public class ViewResolutionResultHandlerTests {
 		Model value = new ExtendedModelMap().addAttribute("name", "Joe");
 		handle("/account", value, "handleModel", new TestViewResolver("account"));
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -218,7 +218,7 @@ public class ViewResolutionResultHandlerTests {
 		Map<String, String> value = Collections.singletonMap("name", "Joe");
 		handle("/account", value, "handleMap", new TestViewResolver("account"));
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -228,7 +228,7 @@ public class ViewResolutionResultHandlerTests {
 		String value = "Joe";
 		handle("/account", value, "handleModelAttributeAnnotation", new TestViewResolver("account"));
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -238,7 +238,7 @@ public class ViewResolutionResultHandlerTests {
 		Object value = new TestBean("Joe");
 		handle("/account", value, "handleTestBean", new TestViewResolver("account"));
 
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("account: {id=123, testBean=TestBean[name=Joe]}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -258,7 +258,7 @@ public class ViewResolutionResultHandlerTests {
 				Collections.singletonList(jsonView));
 
 		assertEquals(MediaType.APPLICATION_JSON, this.response.getHeaders().getContentType());
-		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals("defaultView: {id=123}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
@@ -315,8 +315,7 @@ public class ViewResolutionResultHandlerTests {
 
 		Mono<Void> mono = handler.handleResult(exchange, handlerResult);
 
-		TestSubscriber<Void> subscriber = new TestSubscriber<>();
-		return subscriber.bindTo(mono).await(Duration.ofSeconds(1));
+		return TestSubscriber.subscribe(mono).await(Duration.ofSeconds(1));
 	}
 
 

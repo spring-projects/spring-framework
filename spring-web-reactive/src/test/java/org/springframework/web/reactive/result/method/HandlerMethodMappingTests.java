@@ -38,7 +38,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.reactive.result.method.AbstractHandlerMethodMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
@@ -103,9 +102,9 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
 
-		TestSubscriber<Object> subscriber = new TestSubscriber<>();
-		result.subscribeWith(subscriber);
-		subscriber.assertError(IllegalStateException.class);
+		TestSubscriber
+				.subscribe(result)
+				.assertError(IllegalStateException.class);
 	}
 
 	@Test

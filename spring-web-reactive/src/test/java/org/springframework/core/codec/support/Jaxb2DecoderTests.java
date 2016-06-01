@@ -88,11 +88,11 @@ public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 				.decode(Flux.just(stringBuffer(POJO_ROOT)), null, null);
 		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
-		TestSubscriber<List<XMLEvent>> resultSubscriber = new TestSubscriber<>();
-		resultSubscriber.bindTo(result).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(events -> {
+		TestSubscriber
+				.subscribe(result)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(events -> {
 					assertEquals(8, events.size());
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
@@ -113,11 +113,11 @@ public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 				.decode(Flux.just(stringBuffer(POJO_CHILD)), null, null);
 		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
-		TestSubscriber<List<XMLEvent>> resultSubscriber = new TestSubscriber<>();
-		resultSubscriber.bindTo(result).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(events -> {
+		TestSubscriber
+				.subscribe(result)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(events -> {
 					assertEquals(8, events.size());
 					assertStartElement(events.get(0), "pojo");
 					assertStartElement(events.get(1), "foo");
@@ -161,14 +161,11 @@ public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Object> output =
 				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
 
-		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
-
-		testSubscriber.bindTo(output).
-				assertNoError().
-				assertComplete().
-				assertValues(new Pojo("foofoo", "barbar")
-
-				);
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertValues(new Pojo("foofoo", "barbar"));
 	}
 
 	@Test
@@ -177,14 +174,11 @@ public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Object> output = this.decoder
 				.decode(source, ResolvableType.forClass(TypePojo.class), null);
 
-		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
-
-		testSubscriber.bindTo(output).
-				assertNoError().
-				assertComplete().
-				assertValues(new TypePojo("foofoo", "barbar")
-
-				);
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertValues(new TypePojo("foofoo", "barbar"));
 	}
 
 	@Test
@@ -193,14 +187,11 @@ public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Object> output =
 				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
 
-		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
-
-		testSubscriber.bindTo(output).
-				assertNoError().
-				assertComplete().
-				assertValues(new Pojo("foo", "bar"), new Pojo("foofoo", "barbar")
-
-				);
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertValues(new Pojo("foo", "bar"), new Pojo("foofoo", "barbar"));
 	}
 
 	@Test
@@ -209,14 +200,11 @@ public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Object> output = this.decoder
 				.decode(source, ResolvableType.forClass(TypePojo.class), null);
 
-		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
-
-		testSubscriber.bindTo(output).
-				assertNoError().
-				assertComplete().
-				assertValues(new TypePojo("foo", "bar"), new TypePojo("foofoo", "barbar")
-
-				);
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertValues(new TypePojo("foo", "bar"), new TypePojo("foofoo", "barbar"));
 	}
 
 	@Test

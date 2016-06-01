@@ -172,7 +172,8 @@ public class HttpMessageConverterViewTests {
 
 		this.view.render(result, MediaType.APPLICATION_JSON, exchange);
 
-		new TestSubscriber<DataBuffer>().bindTo(response.getBody())
+		TestSubscriber
+				.subscribe(response.getBody())
 				.assertValuesWith(buf -> assertEquals("{\"foo\":\"foo\",\"bar\":\"bar\"}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}

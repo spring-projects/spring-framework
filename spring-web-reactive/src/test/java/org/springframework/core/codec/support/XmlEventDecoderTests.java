@@ -46,11 +46,11 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<XMLEvent> events =
 				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null);
 
-		TestSubscriber<XMLEvent> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(events).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(e -> assertTrue(e.isStartDocument()),
+		TestSubscriber
+				.subscribe(events)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(e -> assertTrue(e.isStartDocument()),
 						e -> assertStartElement(e, "pojo"),
 						e -> assertStartElement(e, "foo"),
 						e -> assertCharacters(e, "foofoo"),
@@ -68,11 +68,11 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<XMLEvent> events =
 				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null);
 
-		TestSubscriber<XMLEvent> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(events).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(e -> assertTrue(e.isStartDocument()),
+		TestSubscriber
+				.subscribe(events)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(e -> assertTrue(e.isStartDocument()),
 						e -> assertStartElement(e, "pojo"),
 						e -> assertStartElement(e, "foo"),
 						e -> assertCharacters(e, "foofoo"),
@@ -97,6 +97,5 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		assertTrue(event.isCharacters());
 		assertEquals(expectedData, event.asCharacters().getData());
 	}
-
 
 }

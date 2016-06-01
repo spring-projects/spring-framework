@@ -184,9 +184,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void notFound() throws Exception {
 		Mono<Object> mono = resolver.resolveArgument(paramNamedValueStringArray, null, this.exchange);
-		TestSubscriber<Object> subscriber = new TestSubscriber<>();
-		mono.subscribeWith(subscriber);
-		subscriber.assertError(ServerWebInputException.class);
+		TestSubscriber
+				.subscribe(mono)
+				.assertError(ServerWebInputException.class);
 	}
 
 	@Test

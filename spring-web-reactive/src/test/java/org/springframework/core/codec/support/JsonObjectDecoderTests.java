@@ -38,8 +38,8 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<String> output =
 				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output)
+		TestSubscriber
+				.subscribe(output)
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
 	}
 
@@ -50,8 +50,8 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				stringBuffer(", \"bar\": \"barbar\"}"));
 		Flux<String> output =
 				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output)
+		TestSubscriber
+				.subscribe(output)
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
 	}
 
@@ -62,8 +62,8 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
 				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output)
+		TestSubscriber
+				.subscribe(output)
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
 							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
 	}
@@ -76,8 +76,8 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
 				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output)
+		TestSubscriber
+				.subscribe(output)
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
 							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
 	}

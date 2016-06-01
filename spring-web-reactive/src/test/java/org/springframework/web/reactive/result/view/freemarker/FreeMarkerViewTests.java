@@ -128,11 +128,11 @@ public class FreeMarkerViewTests {
 		HandlerResult result = new HandlerResult(new Object(), "", ResolvableType.NONE, model);
 		view.render(result, null, this.exchange);
 
-		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
-		subscriber.bindTo(this.response.getBody()).assertValuesWith(dataBuffer ->
+		TestSubscriber
+				.subscribe(this.response.getBody())
+				.assertValuesWith(dataBuffer ->
 					assertEquals("<html><body>hi FreeMarker</body></html>", asString(dataBuffer)));
 	}
-
 
 
 	private static String asString(DataBuffer dataBuffer) {

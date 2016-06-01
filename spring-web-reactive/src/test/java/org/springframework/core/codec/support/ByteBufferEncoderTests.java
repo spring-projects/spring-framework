@@ -64,8 +64,8 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> output = this.encoder.encode(source, this.dataBufferFactory,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null);
-		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output)
+		TestSubscriber
+				.subscribe(output)
 				.assertValuesWith(b -> {
 					byte[] buf = new byte[3];
 					b.read(buf);

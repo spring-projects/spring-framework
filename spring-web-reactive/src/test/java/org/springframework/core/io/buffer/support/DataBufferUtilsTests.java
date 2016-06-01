@@ -47,11 +47,12 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.dataBufferFactory, 4);
 
-		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(flux).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(stringConsumer("foo\n"), stringConsumer("bar\n"),
+		TestSubscriber
+				.subscribe(flux)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(
+						stringConsumer("foo\n"), stringConsumer("bar\n"),
 						stringConsumer("baz\n"), stringConsumer("qux\n"));
 
 		assertFalse(channel.isOpen());
@@ -65,11 +66,12 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.dataBufferFactory, 3);
 
-		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(flux).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(stringConsumer("foo"), stringConsumer("\nba"),
+		TestSubscriber
+				.subscribe(flux)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(
+						stringConsumer("foo"), stringConsumer("\nba"),
 						stringConsumer("r\nb"), stringConsumer("az\n"),
 						stringConsumer("qux"), stringConsumer("\n"));
 
@@ -83,11 +85,12 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.dataBufferFactory, 4);
 
-		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(flux).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(stringConsumer("foo\n"), stringConsumer("bar\n"),
+		TestSubscriber
+				.subscribe(flux)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(
+						stringConsumer("foo\n"), stringConsumer("bar\n"),
 						stringConsumer("baz\n"), stringConsumer("qux\n"));
 	}
 
@@ -100,11 +103,11 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
 
-		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(result).
-				assertNoError().
-				assertComplete().
-				assertValuesWith(stringConsumer("foo"), stringConsumer("ba"));
+		TestSubscriber
+				.subscribe(result)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(stringConsumer("foo"), stringConsumer("ba"));
 
 		release(baz);
 	}

@@ -116,9 +116,9 @@ public class CookieValueMethodArgumentResolverTests {
 	@Test
 	public void notFound() {
 		Mono<Object> mono = resolver.resolveArgument(this.cookieParameter, null, this.exchange);
-		TestSubscriber<Object> subscriber = new TestSubscriber<>();
-		mono.subscribeWith(subscriber);
-		subscriber.assertError(ServerWebInputException.class);
+		TestSubscriber
+				.subscribe(mono)
+				.assertError(ServerWebInputException.class);
 	}
 
 

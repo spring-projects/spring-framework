@@ -96,9 +96,9 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 	public void resolve() throws Exception {
 		MethodParameter param = initMethodParameter(0);
 		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
-		TestSubscriber<Object> subscriber = new TestSubscriber<>();
-		mono.subscribeWith(subscriber);
-		subscriber.assertError(ServerWebInputException.class);
+		TestSubscriber
+				.subscribe(mono)
+				.assertError(ServerWebInputException.class);
 
 		Foo foo = new Foo();
 		this.exchange.getAttributes().put("foo", foo);

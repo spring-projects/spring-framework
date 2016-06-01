@@ -149,9 +149,9 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void missingRequestParam() throws Exception {
 		Mono<Object> mono = this.resolver.resolveArgument(paramNamedStringArray, null, this.exchange);
-		TestSubscriber<Object> subscriber = new TestSubscriber<>();
-		mono.subscribeWith(subscriber);
-		subscriber.assertError(ServerWebInputException.class);
+		TestSubscriber
+				.subscribe(mono)
+				.assertError(ServerWebInputException.class);
 	}
 
 	@Test

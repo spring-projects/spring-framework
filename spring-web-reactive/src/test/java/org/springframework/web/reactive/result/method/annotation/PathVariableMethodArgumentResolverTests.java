@@ -98,9 +98,9 @@ public class PathVariableMethodArgumentResolverTests {
 	@Test
 	public void handleMissingValue() throws Exception {
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, new ModelMap(), this.exchange);
-		TestSubscriber<Object> subscriber = new TestSubscriber<>();
-		mono.subscribeWith(subscriber);
-		subscriber.assertError(ServerErrorException.class);
+		TestSubscriber
+				.subscribe(mono)
+				.assertError(ServerErrorException.class);
 	}
 
 	@SuppressWarnings("unused")

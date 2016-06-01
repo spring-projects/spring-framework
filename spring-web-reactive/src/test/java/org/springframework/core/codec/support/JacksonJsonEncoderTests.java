@@ -53,11 +53,11 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 		Flux<DataBuffer> output =
 				this.encoder.encode(source, this.dataBufferFactory, null, null);
 
-		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).
-				assertComplete().
-				assertNoError().
-				assertValuesWith(stringConsumer("["),
+		TestSubscriber
+				.subscribe(output)
+				.assertComplete()
+				.assertNoError()
+				.assertValuesWith(stringConsumer("["),
 						stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"),
 						stringConsumer(","),
 						stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"),

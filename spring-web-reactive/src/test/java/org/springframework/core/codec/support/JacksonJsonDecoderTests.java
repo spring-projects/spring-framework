@@ -47,8 +47,9 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<Object> output =
 				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
-		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertValues(new Pojo("foofoo", "barbar"));
+		TestSubscriber
+				.subscribe(output)
+				.assertValues(new Pojo("foofoo", "barbar"));
 	}
 
 }

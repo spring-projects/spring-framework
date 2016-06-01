@@ -66,8 +66,9 @@ public class StringEncoderTests extends AbstractDataBufferAllocatingTestCase {
 							DataBufferUtils.release(chunk);
 							return new String(b, StandardCharsets.UTF_8);
 		});
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertValues("foo");
+		TestSubscriber
+				.subscribe(output)
+				.assertValues("foo");
 	}
 
 }

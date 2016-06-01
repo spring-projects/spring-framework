@@ -56,9 +56,10 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<ByteBuffer> output = this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null);
-		TestSubscriber<ByteBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertNoError().assertComplete()
-				.assertValues(ByteBuffer.wrap("foo".getBytes()),
-						ByteBuffer.wrap("bar".getBytes()));
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertValues(ByteBuffer.wrap("foo".getBytes()), ByteBuffer.wrap("bar".getBytes()));
 	}
 }

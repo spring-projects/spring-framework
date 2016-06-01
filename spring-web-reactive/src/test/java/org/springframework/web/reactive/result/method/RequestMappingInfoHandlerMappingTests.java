@@ -160,9 +160,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.registerHandler(new UserController());
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		TestSubscriber<Object> subscriber = new TestSubscriber<>();
-		mono.subscribeWith(subscriber);
-		subscriber.assertError(NotAcceptableStatusException.class);
+		TestSubscriber
+				.subscribe(mono)
+				.assertError(NotAcceptableStatusException.class);
 	}
 
 	// SPR-8462
@@ -357,12 +357,12 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer)  {
-		TestSubscriber<Object> subscriber = new TestSubscriber<>();
-		mono.subscribeWith(subscriber);
-		subscriber.assertErrorWith(ex -> {
-			assertEquals(exceptionClass, ex.getClass());
-			consumer.accept((T) ex);
-		});
+		TestSubscriber
+				.subscribe(mono)
+				.assertErrorWith(ex -> {
+					assertEquals(exceptionClass, ex.getClass());
+					consumer.accept((T) ex);
+				});
 	}
 
 	@SuppressWarnings("ConstantConditions")
