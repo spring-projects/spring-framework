@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Unit tests for {@link ForwardedHeaderFilter}.
  * @author Rossen Stoyanchev
+ * @author Eddú Meléndez
  */
 public class ForwardedHeaderFilterTests {
 
@@ -176,8 +177,7 @@ public class ForwardedHeaderFilterTests {
 		this.request.setRequestURI("/mvc-showcase");
 
 		HttpServletRequest actual = filterAndGetWrappedRequest();
-		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL()
-				.toString());
+		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
 	}
 
 	@Test
@@ -186,8 +186,7 @@ public class ForwardedHeaderFilterTests {
 		this.request.setRequestURI("/mvc-showcase");
 
 		HttpServletRequest actual = filterAndGetWrappedRequest();
-		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL()
-				.toString());
+		assertEquals("http://localhost/prefix/mvc-showcase", actual.getRequestURL().toString());
 	}
 
 	@Test

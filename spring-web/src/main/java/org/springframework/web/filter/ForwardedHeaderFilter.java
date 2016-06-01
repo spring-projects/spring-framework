@@ -39,13 +39,14 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 
+
 /**
  * Filter that wraps the request in order to override its
  * {@link HttpServletRequest#getServerName() getServerName()},
  * {@link HttpServletRequest#getServerPort() getServerPort()},
  * {@link HttpServletRequest#getScheme() getScheme()}, and
  * {@link HttpServletRequest#isSecure() isSecure()} methods with values derived
- * from "Fowarded" or "X-Forwarded-*" headers. In effect the wrapped request
+ * from "Forwarded" or "X-Forwarded-*" headers. In effect the wrapped request
  * reflects the client-originated protocol and address.
  *
  * @author Rossen Stoyanchev
@@ -57,11 +58,12 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	private static final Set<String> FORWARDED_HEADER_NAMES;
 
 	static {
-		FORWARDED_HEADER_NAMES = new HashSet<String>(4);
+		FORWARDED_HEADER_NAMES = new HashSet<String>(5);
 		FORWARDED_HEADER_NAMES.add("Forwarded");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Host");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Port");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Proto");
+		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 	}
 
 
@@ -133,6 +135,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final Map<String, List<String>> headers;
 
+
 		public ForwardedHeaderRequestWrapper(HttpServletRequest request, ContextPathHelper pathHelper) {
 			super(request);
 
@@ -145,30 +148,21 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.host = uriComponents.getHost();
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 
-			this.contextPath = contextPath(request, pathHelper);
-			this.requestUri = requestUri(request, pathHelper);
+			this.contextPath = initContextPath(request, pathHelper);
+			this.requestUri = initRequestUri(request, pathHelper);
 			this.requestUrl = initRequestUrl(this.scheme, this.host, port, this.requestUri);
-
 			this.headers = initHeaders(request);
 		}
 
-		private static String contextPath(HttpServletRequest request, ContextPathHelper pathHelper) {
+
+		private static String initContextPath(HttpServletRequest request, ContextPathHelper pathHelper) {
 			String contextPath = (pathHelper != null ? pathHelper.getContextPath(request) : request.getContextPath());
 			return prependForwardedPrefix(request, contextPath);
 		}
 
-		private static String requestUri(HttpServletRequest request, ContextPathHelper pathHelper) {
+		private static String initRequestUri(HttpServletRequest request, ContextPathHelper pathHelper) {
 			String requestUri = (pathHelper != null ? pathHelper.getRequestUri(request) : request.getRequestURI());
 			return prependForwardedPrefix(request, requestUri);
-		}
-
-		private static String prependForwardedPrefix(HttpServletRequest request, String value) {
-			String header = request.getHeader("X-Forwarded-Prefix");
-			if (StringUtils.hasText(header)) {
-				value = header + value;
-			}
-			UriComponents uriComponents = UriComponentsBuilder.fromUriString(value).build();
-			return uriComponents.toUriString();
 		}
 
 		private static StringBuffer initRequestUrl(String scheme, String host, int port, String path) {
@@ -193,6 +187,17 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 				headers.remove(name);
 			}
 			return headers;
+		}
+
+		private static String prependForwardedPrefix(HttpServletRequest request, String value) {
+			String header = request.getHeader("X-Forwarded-Prefix");
+			if (StringUtils.hasText(header)) {
+				while (header.endsWith("/")) {
+					header = header.substring(0, header.length() - 1);
+				}
+				value = header + value;
+			}
+			return value;
 		}
 
 
