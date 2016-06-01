@@ -43,7 +43,7 @@ import org.springframework.web.server.ServerWebExchange;
 public interface View {
 
 	/**
-	 * Return the list of media types this encoder supports.
+	 * Return the list of media types this View supports, or an empty list.
 	 */
 	List<MediaType> getSupportedMediaTypes();
 

@@ -34,16 +34,19 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
+import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.result.ContentNegotiatingResultHandlerSupport;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.HttpRequestPathHelper;
-
 
 /**
  * {@code HandlerResultHandler} that encapsulates the view resolution algorithm
@@ -63,32 +66,46 @@ import org.springframework.web.util.HttpRequestPathHelper;
  * If a view is left unspecified (e.g. by returning {@code null} or a
  * model-related return value), a default view name is selected.
  *
- * <p>This result handler should be ordered late relative to other result
- * handlers. See {@link #setOrder(int)} for more details.
+ * <p>By default this resolver is ordered at {@link Ordered#LOWEST_PRECEDENCE}
+ * and generally needs to be late in the order since it interprets any String
+ * return value as a view name while others may interpret the same otherwise
+ * based on annotations (e.g. for {@code @ResponseBody}).
  *
  * @author Rossen Stoyanchev
  */
-public class ViewResolutionResultHandler implements HandlerResultHandler, Ordered {
+public class ViewResolutionResultHandler extends ContentNegotiatingResultHandlerSupport
+		implements HandlerResultHandler, Ordered {
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
-	private final ConversionService conversionService;
-
-	private int order = Ordered.LOWEST_PRECEDENCE;
+	private final List<View> defaultViews = new ArrayList<>(4);
 
 	private final HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
 
 
 	/**
+	 * Constructor with {@code ViewResolver}s and a {@code ConversionService} only
+	 * and creating a {@link HeaderContentTypeResolver}, i.e. using Accept header
+	 * to determine the requested content type.
+	 * @param resolvers the resolver to use
+	 * @param conversionService for converting other reactive types (e.g. rx.Single) to Mono
+	 */
+	public ViewResolutionResultHandler(List<ViewResolver> resolvers, ConversionService conversionService) {
+		this(resolvers, conversionService, new HeaderContentTypeResolver());
+	}
+
+	/**
 	 * Constructor with {@code ViewResolver}s tand a {@code ConversionService}.
 	 * @param resolvers the resolver to use
-	 * @param service for converting other reactive types (e.g. rx.Single) to Mono
+	 * @param conversionService for converting other reactive types (e.g. rx.Single) to Mono
+	 * @param contentTypeResolver for resolving the requested content type
 	 */
-	public ViewResolutionResultHandler(List<ViewResolver> resolvers, ConversionService service) {
-		Assert.notNull(service, "'conversionService' is required.");
+	public ViewResolutionResultHandler(List<ViewResolver> resolvers, ConversionService conversionService,
+			RequestedContentTypeResolver contentTypeResolver) {
+
+		super(conversionService, contentTypeResolver);
 		this.viewResolvers.addAll(resolvers);
 		AnnotationAwareOrderComparator.sort(this.viewResolvers);
-		this.conversionService = service;
 	}
 
 
@@ -100,20 +117,18 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 	}
 
 	/**
-	 * Set the order for this result handler relative to others.
-	 * <p>By default this is set to {@link Ordered#LOWEST_PRECEDENCE} and
-	 * generally needs to be used late in the order since it interprets any
-	 * String return value as a view name while others may interpret the same
-	 * otherwise based on annotations (e.g. for {@code @ResponseBody}).
-	 * @param order the order
+	 * Set the default views to consider always when resolving view names and
+	 * trying to satisfy the best matching content type.
 	 */
-	public void setOrder(int order) {
-		this.order = order;
+	public void setDefaultViews(List<View> defaultViews) {
+		this.defaultViews.clear();
+		if (defaultViews != null) {
+			this.defaultViews.addAll(defaultViews);
+		}
 	}
 
-	@Override
-	public int getOrder() {
-		return this.order;
+	public List<View> getDefaultViews() {
+		return this.defaultViews;
 	}
 
 	@Override
@@ -125,7 +140,7 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 		if (isSupportedType(clazz)) {
 			return true;
 		}
-		if (this.conversionService.canConvert(clazz, Mono.class)) {
+		if (getConversionService().canConvert(clazz, Mono.class)) {
 			clazz = result.getReturnValueType().getGeneric(0).getRawClass();
 			return isSupportedType(clazz);
 		}
@@ -155,10 +170,10 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 		ResolvableType elementType;
 		ResolvableType returnType = result.getReturnValueType();
 
-		if (this.conversionService.canConvert(returnType.getRawClass(), Mono.class)) {
+		if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
 			Optional<Object> optionalValue = result.getReturnValue();
 			if (optionalValue.isPresent()) {
-				Mono<?> converted = this.conversionService.convert(optionalValue.get(), Mono.class);
+				Mono<?> converted = getConversionService().convert(optionalValue.get(), Mono.class);
 				valueMono = converted.map(o -> o);
 			}
 			else {
@@ -188,11 +203,8 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 			else if (returnValue instanceof CharSequence) {
 				String viewName = returnValue.toString();
 				Locale locale = Locale.getDefault(); // TODO
-				return Flux.fromIterable(getViewResolvers())
-						.concatMap(resolver -> resolver.resolveViewName(viewName, locale))
-						.next()
-						.otherwiseIfEmpty(handleUnresolvedViewName(viewName))
-						.then(view -> view.render(result, null, exchange));
+				return resolveViewAndRender(viewName, locale, result, exchange);
+
 			}
 			else {
 				// Should not happen
@@ -281,9 +293,39 @@ public class ViewResolutionResultHandler implements HandlerResultHandler, Ordere
 		}
 	}
 
-	private Mono<View> handleUnresolvedViewName(String viewName) {
-		return Mono.error(new IllegalStateException(
-				"Could not resolve view with name '" + viewName + "'."));
+	private Mono<? extends Void> resolveViewAndRender(String viewName, Locale locale,
+			HandlerResult result, ServerWebExchange exchange) {
+
+		return Flux.fromIterable(getViewResolvers())
+				.concatMap(resolver -> resolver.resolveViewName(viewName, locale))
+				.switchIfEmpty(Mono.error(
+						new IllegalStateException(
+								"Could not resolve view with name '" + viewName + "'.")))
+				.asList()
+				.then(views -> {
+					views.addAll(getDefaultViews());
+
+					List<MediaType> producibleTypes = getProducibleMediaTypes(views);
+					MediaType bestMediaType = selectMediaType(exchange, producibleTypes);
+
+					if (bestMediaType != null) {
+						for (View view : views) {
+							for (MediaType supported : view.getSupportedMediaTypes()) {
+								if (supported.isCompatibleWith(bestMediaType)) {
+									return view.render(result, bestMediaType, exchange);
+								}
+							}
+						}
+					}
+
+					return Mono.error(new NotAcceptableStatusException(producibleTypes));
+				});
+	}
+
+	private List<MediaType> getProducibleMediaTypes(List<View> views) {
+		List<MediaType> result = new ArrayList<>();
+		views.forEach(view -> result.addAll(view.getSupportedMediaTypes()));
+		return result;
 	}
 
 }

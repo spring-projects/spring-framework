@@ -47,7 +47,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
@@ -55,7 +54,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.HandlerResultHandler;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
@@ -73,6 +72,8 @@ import static org.mockito.Mockito.mock;
  */
 public class ViewResolutionResultHandlerTests {
 
+	private MockServerHttpRequest request;
+
 	private MockServerHttpResponse response;
 
 	private ModelMap model;
@@ -81,6 +82,8 @@ public class ViewResolutionResultHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.model = new ExtendedModelMap().addAttribute("id", "123");
+		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		this.response = new MockServerHttpResponse();
 	}
 
 
@@ -101,8 +104,8 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void order() throws Exception {
-		TestViewResolver resolver1 = new TestViewResolver();
-		TestViewResolver resolver2 = new TestViewResolver();
+		TestViewResolver resolver1 = new TestViewResolver(new String[] {});
+		TestViewResolver resolver2 = new TestViewResolver(new String[] {});
 		resolver1.setOrder(2);
 		resolver2.setOrder(1);
 
@@ -226,6 +229,36 @@ public class ViewResolutionResultHandlerTests {
 				.assertValuesWith(buf -> assertEquals("account: {id=123, testBean=TestBean[name=Joe]}", asString(buf)));
 	}
 
+	@Test
+	public void selectBestMediaType() throws Exception {
+		TestView htmlView = new TestView("account");
+		htmlView.setMediaTypes(Collections.singletonList(MediaType.TEXT_HTML));
+
+		TestView jsonView = new TestView("defaultView");
+		jsonView.setMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+		handle("/account", "account", "handleString",
+				Collections.singletonList(new TestViewResolver(htmlView)),
+				Collections.singletonList(jsonView));
+
+		assertEquals(MediaType.APPLICATION_JSON, this.response.getHeaders().getContentType());
+		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("defaultView: {id=123}", asString(buf)));
+	}
+
+	@Test
+	public void selectBestMediaTypeNotAcceptable() throws Exception {
+		TestView htmlView = new TestView("account");
+		htmlView.setMediaTypes(Collections.singletonList(MediaType.TEXT_HTML));
+
+		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+		handle("/account", "account", "handleString", new TestViewResolver(htmlView))
+				.assertError(NotAcceptableStatusException.class);
+
+	}
 
 	private void testSupports(String methodName, boolean supports) throws NoSuchMethodException {
 		Method method = TestController.class.getMethod(methodName);
@@ -246,18 +279,24 @@ public class ViewResolutionResultHandlerTests {
 	private TestSubscriber<Void> handle(String path, Object value, String methodName,
 			ViewResolver... resolvers) throws Exception {
 
-		List<ViewResolver> resolverList = Arrays.asList(resolvers);
+		return handle(path, value, methodName, Arrays.asList(resolvers), Collections.emptyList());
+	}
+
+	private TestSubscriber<Void> handle(String path, Object value, String methodName,
+			List<ViewResolver> resolvers, List<View> defaultViews) throws Exception {
+
 		ConversionService conversionService = new DefaultConversionService();
-		HandlerResultHandler handler = new ViewResolutionResultHandler(resolverList, conversionService);
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, conversionService);
+		handler.setDefaultViews(defaultViews);
+
 		Method method = TestController.class.getMethod(methodName);
 		HandlerMethod handlerMethod = new HandlerMethod(new TestController(), method);
 		ResolvableType type = ResolvableType.forMethodReturnType(method);
 		HandlerResult handlerResult = new HandlerResult(handlerMethod, value, type, this.model);
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
-		this.response = new MockServerHttpResponse();
+		this.request.setUri(new URI(path));
 		WebSessionManager sessionManager = new DefaultWebSessionManager();
-		ServerWebExchange exchange = new DefaultServerWebExchange(request, this.response, sessionManager);
+		ServerWebExchange exchange = new DefaultServerWebExchange(this.request, this.response, sessionManager);
 
 		Mono<Void> mono = handler.handleResult(exchange, handlerResult);
 
@@ -289,6 +328,10 @@ public class ViewResolutionResultHandlerTests {
 			Arrays.stream(viewNames).forEach(name -> this.views.put(name, new TestView(name)));
 		}
 
+		public TestViewResolver(TestView... views) {
+			Arrays.stream(views).forEach(view -> this.views.put(view.getName(), view));
+		}
+
 		public void setOrder(int order) {
 			this.order = order;
 		}
@@ -310,6 +353,8 @@ public class ViewResolutionResultHandlerTests {
 
 		private final String name;
 
+		private List<MediaType> mediaTypes = Collections.singletonList(MediaType.TEXT_PLAIN);
+
 
 		public TestView(String name) {
 			this.name = name;
@@ -319,9 +364,13 @@ public class ViewResolutionResultHandlerTests {
 			return this.name;
 		}
 
+		public void setMediaTypes(List<MediaType> mediaTypes) {
+			this.mediaTypes = mediaTypes;
+		}
+
 		@Override
 		public List<MediaType> getSupportedMediaTypes() {
-			return null;
+			return this.mediaTypes;
 		}
 
 		@Override
@@ -329,6 +378,9 @@ public class ViewResolutionResultHandlerTests {
 			String value = this.name + ": " + result.getModel().toString();
 			assertNotNull(value);
 			ServerHttpResponse response = exchange.getResponse();
+			if (mediaType != null) {
+				response.getHeaders().setContentType(mediaType);
+			}
 			return response.writeWith(Flux.just(asDataBuffer(value)));
 		}
 	}
