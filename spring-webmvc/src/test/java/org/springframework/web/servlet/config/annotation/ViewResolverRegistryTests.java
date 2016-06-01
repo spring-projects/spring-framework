@@ -99,9 +99,7 @@ public class ViewResolverRegistryTests {
 
 	@Test
 	public void customViewResolver() {
-		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
-		viewResolver.setPrefix("/");
-		viewResolver.setSuffix(".jsp");
+		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver("/", ".jsp");
 		this.registry.viewResolver(viewResolver);
 		assertSame(viewResolver, this.registry.getViewResolvers().get(0));
 	}

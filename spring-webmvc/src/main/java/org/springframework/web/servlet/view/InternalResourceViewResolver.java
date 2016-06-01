@@ -66,6 +66,19 @@ public class InternalResourceViewResolver extends UrlBasedViewResolver {
 		setViewClass(viewClass);
 	}
 
+	/**
+	 * A convenience constructor that allows for specifying {@link #setPrefix prefix}
+	 * and {@link #setSuffix suffix} as constructor arguments.
+	 * @param prefix the prefix that gets prepended to view names when building a URL
+	 * @param suffix the suffix that gets appended to view names when building a URL
+	 * @since 4.3
+	 */
+	public InternalResourceViewResolver(String prefix, String suffix) {
+		this();
+		setPrefix(prefix);
+		setSuffix(suffix);
+	}
+
 
 	/**
 	 * This resolver requires {@link InternalResourceView}.

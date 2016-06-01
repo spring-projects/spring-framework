@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -382,6 +382,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
 							beanName + "' since it is not stored in an AbstractBeanDefinition subclass");
 				}
+				else if (logger.isWarnEnabled() && beanFactory.containsSingleton(beanName)) {
+					logger.warn("Cannot enhance @Configuration bean definition '" + beanName +
+							"' since its singleton instance has been created too early. The typical cause " +
+							"is a non-static @Bean method with a BeanDefinitionRegistryPostProcessor " +
+							"return type: Consider declaring such methods as 'static'.");
+				}
 				configBeanDefs.put(beanName, (AbstractBeanDefinition) beanDef);
 			}
 		}
@@ -397,11 +403,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			try {
 				// Set enhanced subclass of the user-specified bean class
 				Class<?> configClass = beanDef.resolveBeanClass(this.beanClassLoader);
-				Class<?> enhancedClass = enhancer.enhance(configClass);
+				Class<?> enhancedClass = enhancer.enhance(configClass, this.beanClassLoader);
 				if (configClass != enhancedClass) {
 					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("Replacing bean definition '%s' existing class name '%s' " +
-								"with enhanced class name '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
+						logger.debug(String.format("Replacing bean definition '%s' existing class '%s' with " +
+								"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 					}
 					beanDef.setBeanClass(enhancedClass);
 				}

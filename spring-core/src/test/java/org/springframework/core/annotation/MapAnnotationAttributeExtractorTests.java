@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
+import org.springframework.core.annotation.AnnotationUtilsTests.RequestMethod;
+import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.core.annotation.AnnotationUtilsTests.*;
 
 /**
  * Unit tests for {@link MapAnnotationAttributeExtractor}.
@@ -38,6 +41,7 @@ import static org.junit.Assert.*;
  * @author Sam Brannen
  * @since 4.2.1
  */
+@SuppressWarnings("serial")
 public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnnotationAttributeExtractorTestCase {
 
 	@Before
@@ -46,7 +50,6 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 	}
 
 	@Test
-	@SuppressWarnings("serial")
 	public void enrichAndValidateAttributesWithImplicitAliasesAndMinimalAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		Map<String, Object> expectedAttributes = new HashMap<String, Object>() {{
@@ -64,7 +67,6 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 	}
 
 	@Test
-	@SuppressWarnings("serial")
 	public void enrichAndValidateAttributesWithImplicitAliases() {
 		Map<String, Object> attributes = new HashMap<String, Object>() {{
 			put("groovyScript", "groovy!");
@@ -82,6 +84,31 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 		}};
 
 		assertEnrichAndValidateAttributes(attributes, expectedAttributes);
+	}
+
+	@Test
+	public void enrichAndValidateAttributesWithSingleElementThatOverridesAnArray() {
+		// @formatter:off
+		Map<String, Object> attributes = new HashMap<String, Object>() {{
+			// Intentionally storing 'value' as a single String instead of an array.
+			// put("value", asArray("/foo"));
+			put("value", "/foo");
+			put("name", "test");
+		}};
+
+		Map<String, Object> expected = new HashMap<String, Object>() {{
+			put("value", asArray("/foo"));
+			put("path", asArray("/foo"));
+			put("name", "test");
+			put("method", new RequestMethod[0]);
+		}};
+		// @formatter:on
+
+		MapAnnotationAttributeExtractor extractor = new MapAnnotationAttributeExtractor(attributes, WebMapping.class, null);
+		Map<String, Object> enriched = extractor.getSource();
+
+		assertEquals("attribute map size", expected.size(), enriched.size());
+		expected.forEach((attr, expectedValue) -> assertThat("for attribute '" + attr + "'", enriched.get(attr), is(expectedValue)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -114,8 +141,7 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 		Map<String, Object> enriched = extractor.getSource();
 
 		assertEquals("attribute map size", expected.size(), enriched.size());
-		expected.keySet().stream().forEach( attr ->
-			assertThat("for attribute '" + attr + "'", enriched.get(attr), is(expected.get(attr))));
+		expected.forEach((attr, expectedValue) -> assertThat("for attribute '" + attr + "'", enriched.get(attr), is(expectedValue)));
 	}
 
 	@Override

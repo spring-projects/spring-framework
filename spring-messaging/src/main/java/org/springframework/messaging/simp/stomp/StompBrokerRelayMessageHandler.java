@@ -60,7 +60,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  *
  * <p>This class also automatically opens a default "system" TCP connection to the message
  * broker that is used for sending messages that originate from the server application (as
- * opposed to from a client). Such messages are are not associated with any client and
+ * opposed to from a client). Such messages are not associated with any client and
  * therefore do not have a session id header. The "system" connection is effectively
  * shared and cannot be used to receive messages. Several properties are provided to
  * configure the "system" connection including:
@@ -87,6 +87,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private static final long HEARTBEAT_MULTIPLIER = 3;
 
 	private static final Message<byte[]> HEARTBEAT_MESSAGE;
+
+	/**
+	 * A heartbeat is setup once a CONNECTED frame is received which contains
+	 * the heartbeat settings we need. If we don't receive CONNECTED within
+	 * a minute, the connection is closed proactively.
+	 */
+	private static final int MAX_TIME_TO_CONNECTED_FRAME = 60 * 1000;
+
 
 
 	static {
@@ -567,6 +575,15 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.debug("TCP connection opened in session=" + getSessionId());
 			}
 			this.tcpConnection = connection;
+			this.tcpConnection.onReadInactivity(new Runnable() {
+				@Override
+				public void run() {
+					if (tcpConnection != null && !isStompConnected) {
+						handleTcpConnectionFailure("No CONNECTED frame received in " +
+								MAX_TIME_TO_CONNECTED_FRAME + " ms.", null);
+					}
+				}
+			}, MAX_TIME_TO_CONNECTED_FRAME);
 			connection.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
 		}
 

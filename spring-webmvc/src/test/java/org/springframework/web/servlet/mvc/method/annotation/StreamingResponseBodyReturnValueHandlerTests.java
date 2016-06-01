@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,9 @@
  */
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -38,6 +35,10 @@ import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -74,6 +75,7 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 		this.request.setAsyncSupported(true);
 	}
 
+
 	@Test
 	public void supportsReturnType() throws Exception {
 		assertTrue(this.handler.supportsReturnType(returnType(TestController.class, "handle")));
@@ -88,13 +90,9 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 		CountDownLatch latch = new CountDownLatch(1);
 
 		MethodParameter returnType = returnType(TestController.class, "handle");
-		StreamingResponseBody streamingBody = new StreamingResponseBody() {
-
-			@Override
-			public void writeTo(OutputStream outputStream) throws IOException {
-				outputStream.write("foo".getBytes(Charset.forName("UTF-8")));
-				latch.countDown();
-			}
+		StreamingResponseBody streamingBody = outputStream -> {
+			outputStream.write("foo".getBytes(Charset.forName("UTF-8")));
+			latch.countDown();
 		};
 		this.handler.handleReturnValue(streamingBody, returnType, this.mavContainer, this.webRequest);
 
@@ -111,13 +109,9 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 
 		MethodParameter returnType = returnType(TestController.class, "handleResponseEntity");
 		ResponseEntity<StreamingResponseBody> emitter = ResponseEntity.ok().header("foo", "bar")
-				.body(new StreamingResponseBody() {
-
-					@Override
-					public void writeTo(OutputStream outputStream) throws IOException {
-						outputStream.write("foo".getBytes(Charset.forName("UTF-8")));
-						latch.countDown();
-					}
+				.body(outputStream -> {
+					outputStream.write("foo".getBytes(Charset.forName("UTF-8")));
+					latch.countDown();
 				});
 		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
 
@@ -140,6 +134,14 @@ public class StreamingResponseBodyReturnValueHandlerTests {
 		assertEquals(204, this.response.getStatus());
 	}
 
+	@Test
+	public void responseEntityWithHeadersAndNoContent() throws Exception {
+		ResponseEntity<?> emitter = ResponseEntity.noContent().header("foo", "bar").build();
+		MethodParameter returnType = returnType(TestController.class, "handleResponseEntity");
+		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
+
+		assertEquals(Collections.singletonList("bar"), this.response.getHeaders("foo"));
+	}
 
 	private MethodParameter returnType(Class<?> clazz, String methodName) throws NoSuchMethodException {
 		Method method = clazz.getDeclaredMethod(methodName);

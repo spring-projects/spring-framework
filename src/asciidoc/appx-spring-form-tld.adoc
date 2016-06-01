@@ -15,6 +15,7 @@ http://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict[DTD].
 
 This appendix describes the `spring-form.tld` tag library.
 
+* <<spring-form.tld.button>>
 * <<spring-form.tld.checkbox>>
 * <<spring-form.tld.checkboxes>>
 * <<spring-form.tld.errors>>
@@ -526,11 +527,6 @@ Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 | false
 | true
 | HTML Required Attribute
-
-| commandName
-| false
-| true
-| Name of the model attribute under which the form object is exposed. Defaults to 'command'.
 
 | cssClass
 | false

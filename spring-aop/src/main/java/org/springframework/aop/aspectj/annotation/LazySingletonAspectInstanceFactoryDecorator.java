@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.io.Serializable;
+
 import org.springframework.util.Assert;
 
 /**
@@ -25,7 +27,8 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  */
-public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwareAspectInstanceFactory {
+@SuppressWarnings("serial")
+public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwareAspectInstanceFactory, Serializable {
 
 	private final MetadataAwareAspectInstanceFactory maaif;
 
@@ -43,9 +46,9 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 
 
 	@Override
-	public synchronized Object getAspectInstance() {
+	public Object getAspectInstance() {
 		if (this.materialized == null) {
-			synchronized (this) {
+			synchronized (this.maaif.getAspectCreationMutex()) {
 				if (this.materialized == null) {
 					this.materialized = this.maaif.getAspectInstance();
 				}
@@ -66,6 +69,11 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	@Override
 	public AspectMetadata getAspectMetadata() {
 		return this.maaif.getAspectMetadata();
+	}
+
+	@Override
+	public Object getAspectCreationMutex() {
+		return this.maaif.getAspectCreationMutex();
 	}
 
 	@Override

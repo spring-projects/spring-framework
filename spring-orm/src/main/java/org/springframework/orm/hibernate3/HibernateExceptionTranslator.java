@@ -39,7 +39,9 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  * @see SessionFactoryUtils#convertHibernateAccessException(HibernateException)
  * @see SQLExceptionTranslator
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class HibernateExceptionTranslator implements PersistenceExceptionTranslator {
 
 	private SQLExceptionTranslator jdbcExceptionTranslator;

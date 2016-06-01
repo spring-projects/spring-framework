@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * {@link org.springframework.messaging.handler.annotation.SendTo @SendTo} to the
  * method declaration.
  *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
+ *
  * @author Stephane Nicoll
  * @since 4.1
  * @see EnableJms
@@ -111,7 +114,8 @@ public @interface JmsListener {
 	String selector() default "";
 
 	/**
-	 * The concurrency limits for the listener, if any.
+	 * The concurrency limits for the listener, if any. Overrides the value defined
+	 * by the container factory used to create the listener container.
 	 * <p>The concurrency limits can be a "lower-upper" String &mdash; for example,
 	 * "5-10" &mdash; or a simple upper limit String &mdash; for example, "10", in
 	 * which case the lower limit will be 1.

@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.support;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
 /**
  * Implementation of {@link org.springframework.web.servlet.HandlerMapping} that
@@ -36,7 +35,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  * <li>{@code HomeController} -> {@code /home*}</li>
  * </ul>
  *
- * <p>For {@link MultiActionController MultiActionControllers} and {@code @Controller}
+ * <p>For {@code MultiActionController MultiActionControllers} and {@code @Controller}
  * beans, a similar mapping is registered, except that all sub-paths are registered
  * using the trailing wildcard pattern {@code /*}. For example:
  * <ul>
@@ -44,7 +43,7 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  * <li>{@code CatalogController} -> {@code /catalog}, {@code /catalog/*}</li>
  * </ul>
  *
- * <p>For {@link MultiActionController} it is often useful to use
+ * <p>For {@code MultiActionController} it is often useful to use
  * this mapping strategy in conjunction with the
  * {@link org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver}.
  *
@@ -56,7 +55,9 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
  * @since 2.0
  * @see org.springframework.web.servlet.mvc.Controller
  * @see org.springframework.web.servlet.mvc.multiaction.MultiActionController
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public class ControllerClassNameHandlerMapping extends AbstractControllerUrlHandlerMapping {
 
 	/**

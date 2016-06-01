@@ -150,8 +150,9 @@ public class WebAsyncManagerTests {
 		try {
 			this.asyncManager.startCallableProcessing(task);
 			fail("Expected Exception");
-		}catch(Exception e) {
-			assertEquals(exception, e);
+		}
+		catch (Exception ex) {
+			assertEquals(exception, ex);
 		}
 
 		assertFalse(this.asyncManager.hasConcurrentResult());
@@ -162,7 +163,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startCallableProcessingPreProcessException() throws Exception {
-
 		Callable<Object> task = new StubCallable(21);
 		Exception exception = new Exception();
 
@@ -183,7 +183,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startCallableProcessingPostProcessException() throws Exception {
-
 		Callable<Object> task = new StubCallable(21);
 		Exception exception = new Exception();
 
@@ -205,7 +204,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startCallableProcessingPostProcessContinueAfterException() throws Exception {
-
 		Callable<Object> task = new StubCallable(21);
 		Exception exception = new Exception();
 
@@ -231,7 +229,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startCallableProcessingWithAsyncTask() throws Exception {
-
 		AsyncTaskExecutor executor = mock(AsyncTaskExecutor.class);
 		given(this.asyncWebRequest.getNativeRequest(HttpServletRequest.class)).willReturn(this.servletRequest);
 
@@ -259,7 +256,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startDeferredResultProcessing() throws Exception {
-
 		DeferredResult<String> deferredResult = new DeferredResult<String>(1000L);
 		String concurrentResult = "abc";
 
@@ -282,7 +278,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startDeferredResultProcessingBeforeConcurrentHandlingException() throws Exception {
-
 		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 		Exception exception = new Exception();
 
@@ -295,7 +290,7 @@ public class WebAsyncManagerTests {
 			this.asyncManager.startDeferredResultProcessing(deferredResult);
 			fail("Expected Exception");
 		}
-		catch(Exception success) {
+		catch (Exception success) {
 			assertEquals(exception, success);
 		}
 
@@ -328,7 +323,6 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startDeferredResultProcessingPostProcessException() throws Exception {
-
 		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 		Exception exception = new Exception();
 
@@ -371,6 +365,7 @@ public class WebAsyncManagerTests {
 		verify(this.asyncWebRequest).dispatch();
 	}
 
+
 	private final class StubCallable implements Callable<Object> {
 
 		private Object value;
@@ -387,6 +382,7 @@ public class WebAsyncManagerTests {
 			return this.value;
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class SyncTaskExecutor extends SimpleAsyncTaskExecutor {

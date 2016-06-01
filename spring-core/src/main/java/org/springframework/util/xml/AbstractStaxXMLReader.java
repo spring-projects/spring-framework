@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * Abstract base class for SAX {@code XMLReader} implementations that use StAX as a basis.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @see #setContentHandler(org.xml.sax.ContentHandler)
  * @see #setDTDHandler(org.xml.sax.DTDHandler)
@@ -57,6 +58,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	private Boolean isStandalone;
 
 	private final Map<String, String> namespaces = new LinkedHashMap<String, String>();
+
 
 	@Override
 	public boolean getFeature(String name) throws SAXNotRecognizedException, SAXNotSupportedException {
@@ -170,12 +172,13 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	}
 
 	/**
-	 * Template-method that parses the StAX reader passed at construction-time.
+	 * Template method that parses the StAX reader passed at construction-time.
 	 */
 	protected abstract void parseInternal() throws SAXException, XMLStreamException;
 
+
 	/**
-	 * Starts the prefix mapping for the given prefix.
+	 * Start the prefix mapping for the given prefix.
 	 * @see org.xml.sax.ContentHandler#startPrefixMapping(String, String)
 	 */
 	protected void startPrefixMapping(String prefix, String namespace) throws SAXException {
@@ -186,57 +189,58 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 			if (!StringUtils.hasLength(namespace)) {
 				return;
 			}
-			if (!namespace.equals(namespaces.get(prefix))) {
+			if (!namespace.equals(this.namespaces.get(prefix))) {
 				getContentHandler().startPrefixMapping(prefix, namespace);
-				namespaces.put(prefix, namespace);
+				this.namespaces.put(prefix, namespace);
 			}
 		}
 	}
 
 	/**
-	 * Ends the prefix mapping for the given prefix.
+	 * End the prefix mapping for the given prefix.
 	 * @see org.xml.sax.ContentHandler#endPrefixMapping(String)
 	 */
 	protected void endPrefixMapping(String prefix) throws SAXException {
 		if (getContentHandler() != null) {
-			if (namespaces.containsKey(prefix)) {
+			if (this.namespaces.containsKey(prefix)) {
 				getContentHandler().endPrefixMapping(prefix);
-				namespaces.remove(prefix);
+				this.namespaces.remove(prefix);
 			}
 		}
 	}
 
+
 	/**
-	 * Implementation of the {@code Locator} interface that is based on a StAX {@code Location}.
+	 * Implementation of the {@code Locator} interface based on a given StAX {@code Location}.
 	 * @see Locator
 	 * @see Location
 	 */
 	private static class StaxLocator implements Locator {
 
-		private Location location;
+		private final Location location;
 
-		protected StaxLocator(Location location) {
+		public StaxLocator(Location location) {
 			this.location = location;
 		}
 
 		@Override
 		public String getPublicId() {
-			return location.getPublicId();
+			return this.location.getPublicId();
 		}
 
 		@Override
 		public String getSystemId() {
-			return location.getSystemId();
+			return this.location.getSystemId();
 		}
 
 		@Override
 		public int getLineNumber() {
-			return location.getLineNumber();
+			return this.location.getLineNumber();
 		}
 
 		@Override
 		public int getColumnNumber() {
-			return location.getColumnNumber();
+			return this.location.getColumnNumber();
 		}
 	}
 

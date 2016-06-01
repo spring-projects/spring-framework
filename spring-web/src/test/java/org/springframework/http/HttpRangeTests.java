@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.support.ResourceRegion;
+
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link HttpRange}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class HttpRangeTests {
 
@@ -98,6 +108,41 @@ public class HttpRangeTests {
 		ranges.add(HttpRange.createByteRange(9500));
 		ranges.add(HttpRange.createSuffixRange(500));
 		assertEquals("Invalid Range header", "bytes=0-499, 9500-, -500", HttpRange.toString(ranges));
+	}
+
+	@Test
+	public void toResourceRegion() {
+		byte[] bytes = "Spring Framework".getBytes(Charset.forName("UTF-8"));
+		ByteArrayResource resource = new ByteArrayResource(bytes);
+		HttpRange range = HttpRange.createByteRange(0, 5);
+		ResourceRegion region = range.toResourceRegion(resource);
+		assertEquals(resource, region.getResource());
+		assertEquals(0L, region.getPosition());
+		assertEquals(6L, region.getCount());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void toResourceRegionInputStreamResource() {
+		InputStreamResource resource = mock(InputStreamResource.class);
+		HttpRange range = HttpRange.createByteRange(0, 9);
+		range.toResourceRegion(resource);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void toResourceRegionIllegalLength() {
+		ByteArrayResource resource = mock(ByteArrayResource.class);
+		given(resource.contentLength()).willReturn(-1L);
+		HttpRange range = HttpRange.createByteRange(0, 9);
+		range.toResourceRegion(resource);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("unchecked")
+	public void toResourceRegionExceptionLength() {
+		ByteArrayResource resource = mock(ByteArrayResource.class);
+		given(resource.contentLength()).willThrow(IOException.class);
+		HttpRange range = HttpRange.createByteRange(0, 9);
+		range.toResourceRegion(resource);
 	}
 
 }

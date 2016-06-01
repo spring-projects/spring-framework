@@ -48,7 +48,8 @@ public class DuplicateBeanIdTests {
 		try {
 			reader.loadBeanDefinitions(new ClassPathResource("DuplicateBeanIdTests-sameLevel-context.xml", this.getClass()));
 			fail("expected parsing exception due to duplicate ids in same nesting level");
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			// expected
 		}
 	}

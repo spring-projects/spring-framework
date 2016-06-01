@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,8 @@ public class AntPathMatcher implements PathMatcher {
 
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
 
+	private static final char[] WILDCARD_CHARS = { '*', '?', '{' };
+
 
 	private String pathSeparator;
 
@@ -81,7 +83,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	private boolean caseSensitive = true;
 
-	private boolean trimTokens = true;
+	private boolean trimTokens = false;
 
 	private volatile Boolean cachePatterns;
 
@@ -188,6 +190,10 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		String[] pattDirs = tokenizePattern(pattern);
+		if (fullMatch && this.caseSensitive && !isPotentialMatch(path, pattDirs)) {
+			return false;
+		}
+
 		String[] pathDirs = tokenizePath(path);
 
 		int pattIdxStart = 0;
@@ -305,6 +311,59 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		return true;
+	}
+
+	private boolean isPotentialMatch(String path, String[] pattDirs) {
+		if (!this.trimTokens) {
+			char[] pathChars = path.toCharArray();
+			int pos = 0;
+			for (String pattDir : pattDirs) {
+				int skipped = skipSeparator(path, pos, this.pathSeparator);
+				pos += skipped;
+				skipped = skipSegment(pathChars, pos, pattDir);
+				if (skipped < pattDir.length()) {
+					if (skipped > 0) {
+						return true;
+					}
+					return (pattDir.length() > 0) && isWildcardChar(pattDir.charAt(0));
+				}
+				pos += skipped;
+			}
+		}
+		return true;
+	}
+
+	private int skipSegment(char[] chars, int pos, String prefix) {
+		int skipped = 0;
+		for (char c : prefix.toCharArray()) {
+			if (isWildcardChar(c)) {
+				return skipped;
+			}
+			else if (pos + skipped >= chars.length) {
+				return 0;
+			}
+			else if (chars[pos + skipped] == c) {
+				skipped++;
+			}
+		}
+		return skipped;
+	}
+
+	private int skipSeparator(String path, int pos, String separator) {
+		int skipped = 0;
+		while (path.startsWith(separator, pos + skipped)) {
+			skipped += separator.length();
+		}
+		return skipped;
+	}
+
+	private boolean isWildcardChar(char c) {
+		for (char candidate : WILDCARD_CHARS) {
+			if (c == candidate) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

@@ -276,7 +276,7 @@ Spring 4.1 also improves its own caching abstraction significantly:
   common settings to be shared at the class level **without** enabling any cache operation.
 * Better exception handling of cached methods using `CacheErrorHandler`
 
-Spring 4.1 also has a breaking change in the `CacheInterface` as a new `putIfAbsent`
+Spring 4.1 also has a breaking change in the `Cache` interface as a new `putIfAbsent`
 method has been added.
 
 === Web Improvements
@@ -622,3 +622,93 @@ public @interface MyTestConfig {
   support for date header formatting via the `getDateHeader` and `setDateHeader`
   methods.
 
+
+
+[[new-in-4.3]]
+== New Features and Enhancements in Spring Framework 4.3
+
+=== Core Container Improvements
+
+* It is no longer necessary to specify the `@Autowired` annotation if the target
+  bean only defines one constructor.
+* `@Configuration` classes support constructor injection.
+* Any SpEL expression used to specify the `condition` of an `@EventListener` can
+  now refer to beans (e.g. `@beanName.method()`).
+* _Composed annotations_ can now override array attributes in meta-annotations
+  with a single element of the component type of the array. For example, the
+  `String[] path` attribute of `@RequestMapping` can be overridden with
+  `String path` in a composed annotation.
+* `@Scheduled` and `@Schedules` may now be used as _meta-annotations_ to create
+  custom _composed annotations_ with attribute overrides.
+
+=== Data Access Improvements
+
+* `jdbc:initialize-database` and `jdbc:embedded-database` support a configurable
+  separator to be applied to each script.
+
+=== Caching Improvements
+
+Spring 4.3 allows concurrent calls on a given key to be synchronized so that the
+value is only computed once. This is an opt-in feature that should be enabled via
+the new `sync` attribute on `@Cacheable`. This features introduces a breaking
+change in the `Cache` interface as a `get(Object key, Callable<T> valueLoader)`
+method has been added.
+
+Spring 4.3 also improves the caching abstraction as follows:
+
+* SpEL expressions in caches-related annotations can now refer to beans (i.e.
+  `@beanName.method()`).
+* `ConcurrentMapCacheManager` and `ConcurrentMapCache` now support the serialization
+  of cache entries via a new `storeByValue` attribute.
+* `@Cacheable`, `@CacheEvict`, `@CachePut`, and `@Caching` may now be used as
+  _meta-annotations_ to create custom _composed annotations_ with attribute overrides.
+
+=== JMS Improvements
+
+* `@SendTo` can now be specified at the class level to share a common reply destination.
+* `@JmsListener` and `@JmsListeners` may now be used as _meta-annotations_ to create
+  custom _composed annotations_ with attribute overrides.
+
+=== Web Improvements
+
+* Built-in support for <<mvc-ann-requestmapping-head-options,HTTP HEAD and HTTP OPTIONS>>.
+* New `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping`
+  _composed annotations_ for `@RequestMapping`.
+* New `@RequestScope`, `@SessionScope`, and `@ApplicationScope` _composed annotations_ for web scopes.
+* New `@RestControllerAdvice` annotation with combined `@ControllerAdvice` with `@ResponseBody` semantics.
+* `@ResponseStatus` is now supported at the class level and inherited by all methods.
+* New `@SessionAttribute` annotation for access to session attributes (see <<mvc-ann-sessionattrib-global, example>>).
+* New `@RequestAttribute` annotation for access to request attributes (see <<mvc-ann-requestattrib, example>>).
+* `@ModelAttribute` allows preventing data binding via `binding=false` attribute (see <<mvc-ann-modelattrib-method-args, reference>>).
+* Static resource handling uses the configured `ContentNegotiationManager` for media type determination.
+* `RestTemplate` and `AsyncRestTemplate` support strict URI variable encoding via `DefaultUriTemplateHandler`.
+* `AsyncRestTemplate` supports request interception.
+
+=== WebSocket Messaging Improvements
+
+* `@SendTo` and `@SendToUser` can now be specified at class-level to share a common destination.
+
+=== Testing Improvements
+
+* The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.
+* New `SpringRunner` _alias_ for the `SpringJUnit4ClassRunner`.
+* An empty declaration of `@ContextConfiguration` can now be completely omitted if default
+  XML files, Groovy scripts, or `@Configuration` classes are detected.
+* `@Transactional` test methods are no longer required to be `public` (e.g., in TestNG and JUnit 5).
+* `@BeforeTransaction` and `@AfterTransaction` methods are no longer required to be `public`
+  and may now be declared on Java 8 based interface default methods.
+* The `ApplicationContext` cache in the _Spring TestContext Framework_ is now bounded with a
+  default maximum size of 32 and a _least recently used_ eviction policy. The maximum size
+  can be configured by setting a JVM system property or Spring property called
+  `spring.test.context.cache.maxSize`.
+* New `ContextCustomizer` API for customizing a test `ApplicationContext` _after_ bean
+  definitions have been loaded into the context but _before_ the context has been refreshed.
+  Customizers can be registered globally by third parties, foregoing the need to implement a
+  custom `ContextLoader`.
+* `@Sql` and `@SqlGroup` may now be used as _meta-annotations_ to create custom _composed
+  annotations_ with attribute overrides.
+* Server-side Spring MVC Test supports expectations on response headers with multiple values.
+* Server-side Spring MVC Test parses form data request content and populates request parameters.
+* Client-side REST test support allows indicating how many times a request is expected and
+  whether the order of declaration for expectations should be ignored (see <<spring-mvc-test-client>>).
+* Client-side REST Test supports expectations for form data in the request body.

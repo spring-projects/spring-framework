@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,6 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
 		if (initialRequest) {
 			writeFrame(SockJsFrame.openFrame());
-			resetRequest();
 		}
 		else if (!getMessageCache().isEmpty()) {
 			flushCache();
@@ -77,6 +76,11 @@ public class PollingSockJsSession extends AbstractHttpSockJsSession {
 		SockJsMessageCodec messageCodec = getSockJsServiceConfig().getMessageCodec();
 		SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, messages);
 		writeFrame(frame);
+	}
+
+	@Override
+	protected void writeFrame(SockJsFrame frame) throws SockJsTransportFailureException {
+		super.writeFrame(frame);
 		resetRequest();
 	}
 

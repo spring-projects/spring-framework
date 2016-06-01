@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.*
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -51,13 +52,11 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 	private ResponseBodyEmitterReturnValueHandler handler;
 
-	private ModelAndViewContainer mavContainer;
-
-	private NativeWebRequest webRequest;
-
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
+
+	private NativeWebRequest webRequest;
 
 
 	@Before
@@ -67,8 +66,6 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 				new StringHttpMessageConverter(), new MappingJackson2HttpMessageConverter());
 
 		this.handler = new ResponseBodyEmitterReturnValueHandler(converters);
-		this.mavContainer = new ModelAndViewContainer();
-
 		this.request = new MockHttpServletRequest();
 		this.response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(this.request, this.response);
@@ -80,18 +77,19 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 	@Test
 	public void supportsReturnType() throws Exception {
-		assertTrue(this.handler.supportsReturnType(returnType(TestController.class, "handle")));
-		assertTrue(this.handler.supportsReturnType(returnType(TestController.class, "handleSse")));
-		assertTrue(this.handler.supportsReturnType(returnType(TestController.class, "handleResponseEntity")));
-		assertFalse(this.handler.supportsReturnType(returnType(TestController.class, "handleResponseEntityString")));
-		assertFalse(this.handler.supportsReturnType(returnType(TestController.class, "handleResponseEntityParameterized")));
+		assertTrue(this.handler.supportsReturnType(returnType("handle")));
+		assertTrue(this.handler.supportsReturnType(returnType("handleSse")));
+		assertTrue(this.handler.supportsReturnType(returnType("handleResponseEntity")));
+		assertFalse(this.handler.supportsReturnType(returnType("handleResponseEntityString")));
+		assertFalse(this.handler.supportsReturnType(returnType("handleResponseEntityParameterized")));
+		assertFalse(this.handler.supportsReturnType(returnType("handleRawResponseEntity")));
 	}
 
 	@Test
 	public void responseBodyEmitter() throws Exception {
-		MethodParameter returnType = returnType(TestController.class, "handle");
+		MethodParameter returnType = returnType("handle");
 		ResponseBodyEmitter emitter = new ResponseBodyEmitter();
-		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
+		handleReturnValue(emitter, returnType);
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals("", this.response.getContentAsString());
@@ -133,8 +131,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		emitter.onTimeout(mock(Runnable.class));
 		emitter.onCompletion(mock(Runnable.class));
 
-		MethodParameter returnType = returnType(TestController.class, "handle");
-		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
+		MethodParameter returnType = returnType("handle");
+		handleReturnValue(emitter, returnType);
 
 		verify(asyncWebRequest).setTimeout(19000L);
 		verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
@@ -144,9 +142,9 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 	@Test
 	public void sseEmitter() throws Exception {
-		MethodParameter returnType = returnType(TestController.class, "handleSse");
+		MethodParameter returnType = returnType("handleSse");
 		SseEmitter emitter = new SseEmitter();
-		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
+		handleReturnValue(emitter, returnType);
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals(200, this.response.getStatus());
@@ -174,9 +172,9 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 	@Test
 	public void responseEntitySse() throws Exception {
-		MethodParameter returnType = returnType(TestController.class, "handleResponseEntitySse");
-		ResponseEntity<SseEmitter> emitter = ResponseEntity.ok().header("foo", "bar").body(new SseEmitter());
-		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
+		MethodParameter returnType = returnType("handleResponseEntitySse");
+		ResponseEntity<SseEmitter> entity = ResponseEntity.ok().header("foo", "bar").body(new SseEmitter());
+		handleReturnValue(entity, returnType);
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals(200, this.response.getStatus());
@@ -186,17 +184,22 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 	@Test
 	public void responseEntitySseNoContent() throws Exception {
-		MethodParameter returnType = returnType(TestController.class, "handleResponseEntitySse");
-		ResponseEntity<?> emitter = ResponseEntity.noContent().build();
-		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
+		MethodParameter returnType = returnType("handleResponseEntitySse");
+		ResponseEntity<?> entity = ResponseEntity.noContent().header("foo", "bar").build();
+		handleReturnValue(entity, returnType);
 
 		assertFalse(this.request.isAsyncStarted());
 		assertEquals(204, this.response.getStatus());
+		assertEquals(Collections.singletonList("bar"), this.response.getHeaders("foo"));
 	}
 
+	private void handleReturnValue(Object returnValue, MethodParameter returnType) throws Exception {
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		this.handler.handleReturnValue(returnValue, returnType, mavContainer, this.webRequest);
+	}
 
-	private MethodParameter returnType(Class<?> clazz, String methodName) throws NoSuchMethodException {
-		Method method = clazz.getDeclaredMethod(methodName);
+	private MethodParameter returnType(String methodName) throws NoSuchMethodException {
+		Method method = TestController.class.getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
 
@@ -226,6 +229,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		}
 
 		private ResponseEntity<AtomicReference<String>> handleResponseEntityParameterized() {
+			return null;
+		}
+
+		private ResponseEntity handleRawResponseEntity() {
 			return null;
 		}
 

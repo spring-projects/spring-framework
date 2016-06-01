@@ -17,7 +17,6 @@
 package org.springframework.web.socket.config.annotation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -29,9 +28,9 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
-import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.sockjs.SockJsService;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
@@ -148,8 +147,7 @@ public class WebSocketHandlerRegistrationTests {
 		assertEquals(handler, mapping.webSocketHandler);
 		assertEquals("/foo/**", mapping.path);
 		assertNotNull(mapping.sockJsService);
-		assertEquals(Arrays.asList("http://mydomain1.com"),
-				mapping.sockJsService.getAllowedOrigins());
+		assertTrue(mapping.sockJsService.getAllowedOrigins().contains("http://mydomain1.com"));
 		List<HandshakeInterceptor> interceptors = mapping.sockJsService.getHandshakeInterceptors();
 		assertEquals(interceptor, interceptors.get(0));
 		assertEquals(OriginHandshakeInterceptor.class, interceptors.get(1).getClass());
@@ -218,6 +216,7 @@ public class WebSocketHandlerRegistrationTests {
 		}
 	}
 
+
 	private static class Mapping {
 
 		private final WebSocketHandler webSocketHandler;
@@ -229,7 +228,6 @@ public class WebSocketHandlerRegistrationTests {
 		private final HandshakeInterceptor[] interceptors;
 
 		private final DefaultSockJsService sockJsService;
-
 
 		public Mapping(WebSocketHandler handler, String path, SockJsService sockJsService) {
 			this.webSocketHandler = handler;

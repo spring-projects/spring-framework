@@ -58,7 +58,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
 					@Override
 					public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-						if(bean instanceof TestBean) {
+						if (bean instanceof TestBean) {
 							((TestBean) bean).getFriends().add("myFriend");
 						}
 						return bean;

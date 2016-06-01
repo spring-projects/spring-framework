@@ -184,8 +184,10 @@ public class VelocityMacroTests {
 			if (tokens[i].equals("URL")) assertEquals("/springtest/aftercontext.html", tokens[i + 1]);
 			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM2")) assertEquals("<input type=\"text\" id=\"name\" name=\"name\" value=\"Darren\" class=\"myCssClass\">", tokens[i + 1]);
-			if (tokens[i].equals("FORM3")) assertEquals("<textarea id=\"name\" name=\"name\" >Darren</textarea>", tokens[i + 1]);
-			if (tokens[i].equals("FORM4")) assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>Darren</textarea>", tokens[i + 1]);
+			if (tokens[i].equals("FORM3")) assertEquals("<textarea id=\"name\" name=\"name\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM3")) assertEquals("Darren</textarea>", tokens[i + 2]);
+			if (tokens[i].equals("FORM4")) assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>", tokens[i + 1]);
+			if (tokens[i].equals("FORM4")) assertEquals("Darren</textarea>", tokens[i + 2]);
 			//TODO verify remaining output (fix whitespace)
 			if (tokens[i].equals("FORM9")) assertEquals("<input type=\"password\" id=\"name\" name=\"name\" value=\"\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM10")) assertEquals("<input type=\"hidden\" id=\"name\" name=\"name\" value=\"Darren\" >", tokens[i + 1]);
@@ -248,7 +250,8 @@ public class VelocityMacroTests {
 
 		for (int i = 0; i < tokens.length; i++) {
 			if (tokens[i].equals("FORM1")) assertEquals("<input type=\"text\" id=\"spouses0.name\" name=\"spouses[0].name\" value=\"Fred\" >", tokens[i + 1]); //
-			if (tokens[i].equals("FORM2")) assertEquals("<textarea id=\"spouses0.name\" name=\"spouses[0].name\" >Fred</textarea>", tokens[i + 1]);
+			if (tokens[i].equals("FORM2")) assertEquals("<textarea id=\"spouses0.name\" name=\"spouses[0].name\" >", tokens[i + 1]);
+			if (tokens[i].equals("FORM2")) assertEquals("Fred</textarea>", tokens[i + 2]);
 			if (tokens[i].equals("FORM3")) assertEquals("<select id=\"spouses0.name\" name=\"spouses[0].name\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM4")) assertEquals("<select multiple=\"multiple\" id=\"spouses\" name=\"spouses\" >", tokens[i + 1]);
 			if (tokens[i].equals("FORM5")) assertEquals("<input type=\"radio\" name=\"spouses[0].name\" value=\"Darren\"", tokens[i + 1]);

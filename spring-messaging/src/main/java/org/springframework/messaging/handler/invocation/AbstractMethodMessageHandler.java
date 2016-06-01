@@ -33,21 +33,21 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
-import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.MessagingAdviceBean;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
@@ -60,12 +60,26 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
  * exceptions raised during message handling.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  * @param <T> the type of the Object that contains information mapping a
  * {@link org.springframework.messaging.handler.HandlerMethod} to incoming messages
  */
 public abstract class AbstractMethodMessageHandler<T>
 		implements MessageHandler, ApplicationContextAware, InitializingBean {
+
+	/**
+	 * Bean name prefix for target beans behind scoped proxies. Used to exclude those
+	 * targets from handler method detection, in favor of the corresponding proxies.
+	 * <p>We're not checking the autowire-candidate status here, which is how the
+	 * proxy target filtering problem is being handled at the autowiring level,
+	 * since autowire-candidate may have been turned to {@code false} for other
+	 * reasons, while still expecting the bean to be eligible for handler methods.
+	 * <p>Originally defined in {@link org.springframework.aop.scope.ScopedProxyUtils}
+	 * but duplicated here to avoid a hard dependency on the spring-aop module.
+	 */
+	private static final String SCOPED_TARGET_NAME_PREFIX = "scopedTarget.";
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -217,8 +231,20 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 
 		for (String beanName : this.applicationContext.getBeanNamesForType(Object.class)) {
-			if (isHandler(this.applicationContext.getType(beanName))){
-				detectHandlerMethods(beanName);
+			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+				Class<?> beanType = null;
+				try {
+					beanType = getApplicationContext().getType(beanName);
+				}
+				catch (Throwable ex) {
+					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not resolve target class for bean with name '" + beanName + "'", ex);
+					}
+				}
+				if (beanType != null && isHandler(beanType)) {
+					detectHandlerMethods(beanName);
+				}
 			}
 		}
 	}
@@ -250,22 +276,24 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * so register it with the extracted mapping information.
 	 * @param handler the handler to check, either an instance of a Spring bean name
 	 */
-	protected final void detectHandlerMethods(Object handler) {
+	protected final void detectHandlerMethods(final Object handler) {
 		Class<?> handlerType = (handler instanceof String ?
 				this.applicationContext.getType((String) handler) : handler.getClass());
-
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 
-		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new ReflectionUtils.MethodFilter() {
-			@Override
-			public boolean matches(Method method) {
-				return getMappingForMethod(method, userType) != null;
-			}
-		});
+		Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
+				new MethodIntrospector.MetadataLookup<T>() {
+					@Override
+					public T inspect(Method method) {
+						return getMappingForMethod(method, userType);
+					}
+				});
 
-		for (Method method : methods) {
-			T mapping = getMappingForMethod(method, userType);
-			registerHandlerMethod(handler, method, mapping);
+		if (logger.isDebugEnabled()) {
+			logger.debug(methods.size() + " message handler methods found on " + userType + ": " + methods);
+		}
+		for (Map.Entry<Method, T> entry : methods.entrySet()) {
+			registerHandlerMethod(handler, entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -277,7 +305,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
-
 	/**
 	 * Register a handler method and its unique mapping.
 	 * @param handler the bean name of the handler or the handler instance
@@ -287,6 +314,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * under the same mapping
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+		Assert.notNull(mapping, "Mapping must not be null");
 		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
 		HandlerMethod oldHandlerMethod = this.handlerMethods.get(mapping);
 
@@ -428,7 +456,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		for (T mapping : mappingsToCheck) {
 			T match = getMatchingMapping(mapping, message);
 			if (match != null) {
-				matches.add(new Match(match, handlerMethods.get(mapping)));
+				matches.add(new Match(match, this.handlerMethods.get(mapping)));
 			}
 		}
 	}
@@ -441,6 +469,11 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @return the match or {@code null} if there is no match
 	 */
 	protected abstract T getMatchingMapping(T mapping, Message<?> message);
+
+
+	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
+		logger.debug("No matching methods.");
+	}
 
 	/**
 	 * Return a comparator for sorting matching mappings.
@@ -507,8 +540,6 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 	}
 
-	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType);
-
 	/**
 	 * Find an {@code @MessageExceptionHandler} method for the given exception.
 	 * The default implementation searches methods in the class hierarchy of the
@@ -547,9 +578,8 @@ public abstract class AbstractMethodMessageHandler<T>
 		return null;
 	}
 
-	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
-		logger.debug("No matching methods.");
-	}
+	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(
+			Class<?> beanType);
 
 	@Override
 	public String toString() {
@@ -593,6 +623,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			return this.comparator.compare(match1.mapping, match2.mapping);
 		}
 	}
+
 
 	private class ReturnValueListenableFutureCallback implements ListenableFutureCallback<Object> {
 

@@ -102,7 +102,9 @@ import org.springframework.util.StringUtils;
  * @see #setJtaTransactionManager
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implements BeanClassLoaderAware {
 
 	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =
@@ -519,7 +521,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		}
 		if (this.lobHandler != null) {
 			// Make given LobHandler available for SessionFactory configuration.
-			// Do early because because mapping resource might refer to custom types.
+			// Do early because mapping resource might refer to custom types.
 			configTimeLobHandlerHolder.set(this.lobHandler);
 		}
 
@@ -752,7 +754,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 	/**
-	 * To be implemented by subclasses that want to to register further mappings
+	 * To be implemented by subclasses that want to register further mappings
 	 * on the Configuration object after this FactoryBean registered its specified
 	 * mappings.
 	 * <p>Invoked <i>before</i> the {@code Configuration.buildMappings()} call,
@@ -765,7 +767,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 	/**
-	 * To be implemented by subclasses that want to to perform custom
+	 * To be implemented by subclasses that want to perform custom
 	 * post-processing of the Configuration object after this FactoryBean
 	 * performed its default initialization.
 	 * <p>Invoked <i>after</i> the {@code Configuration.buildMappings()} call,
@@ -871,7 +873,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
 						String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
@@ -917,7 +918,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect, false);
 						getConfiguration().validateSchema(dialect, metadata);
@@ -955,7 +955,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			new HibernateCallback<Object>() {
 				@Override
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					@SuppressWarnings("deprecation")
 					Connection con = session.connection();
 					String[] sql = getConfiguration().generateDropSchemaScript(dialect);
 					executeSchemaScript(con, sql);
@@ -993,7 +992,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
 						executeSchemaScript(con, sql);

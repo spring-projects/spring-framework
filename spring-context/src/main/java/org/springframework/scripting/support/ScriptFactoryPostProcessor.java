@@ -381,7 +381,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * If the {@link BeanDefinition} has a
 	 * {@link org.springframework.core.AttributeAccessor metadata attribute}
 	 * under the key {@link #REFRESH_CHECK_DELAY_ATTRIBUTE} which is a valid {@link Number}
-	 * type, then this value is used. Otherwise, the the {@link #defaultRefreshCheckDelay}
+	 * type, then this value is used. Otherwise, the {@link #defaultRefreshCheckDelay}
 	 * value is used.
 	 * @param beanDefinition the BeanDefinition to check
 	 * @return the refresh check delay

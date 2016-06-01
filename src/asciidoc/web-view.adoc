@@ -34,12 +34,12 @@ is another view technology, supported by Spring. This template engine is a templ
 aimed at generating XML-like markup (XML, XHTML, HTML5, ...​), but that can be used to generate any
 text based content.
 
-This requires Groovy 2.3.1+ on the the classpath.
+This requires Groovy 2.3.1+ on the classpath.
 
 [[view-groovymarkup-configuration]]
 === Configuration
 
-Configuring the Groovy Markup Teplate Engine is quite easy:
+Configuring the Groovy Markup Template Engine is quite easy:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -292,13 +292,10 @@ directly, the files are called spring.vm / spring.ftl and are in the packages
 
 [[view-simple-binding]]
 ==== Simple binding
-In your html forms (vm / ftl templates) that act as the 'formView' for a Spring form
+In your HTML forms (vm / ftl templates) which act as a form view for a Spring MVC
 controller, you can use code similar to the following to bind to field values and
 display error messages for each input field in similar fashion to the JSP equivalent.
-Note that the name of the command object is "command" by default, but can be overridden
-in your MVC configuration by setting the 'commandName' bean property on your form
-controller. Example code is shown below for the `personFormV` and `personFormF` views
-configured earlier;
+Example code is shown below for the `personFormV`/`personFormF` views configured earlier:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -308,7 +305,7 @@ configured earlier;
 		...
 		<form action="" method="POST">
 			Name:
-			#springBind( "command.name" )
+			#springBind("myModelObject.name")
 			<input type="text"
 				name="${status.expression}"
 				value="$!status.value"/><br>
@@ -331,10 +328,10 @@ configured earlier;
 		...
 		<form action="" method="POST">
 			Name:
-			<@spring.bind "command.name"/>
+			<@spring.bind "myModelObject.name"/>
 			<input type="text"
 				name="${spring.status.expression}"
-				value="${spring.status.value?default("")}"/><br>
+				value="${spring.status.value?html}"/><br>
 			<#list spring.status.errorMessages as error> <b>${error}</b> <br> </#list>
 			<br>
 			...
@@ -818,7 +815,7 @@ The preceding JSP assumes that the variable name of the form backing object is
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<form:form commandName="user">
+	<form:form modelAttribute="user">
 		<table>
 			<tr>
 				<td>First Name:</td>

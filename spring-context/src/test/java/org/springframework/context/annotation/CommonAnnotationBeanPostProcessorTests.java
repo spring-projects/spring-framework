@@ -560,6 +560,11 @@ public class CommonAnnotationBeanPostProcessorTests {
 				assertFalse(((AnnotatedInitDestroyBean) bean).destroyCalled);
 			}
 		}
+
+		@Override
+		public boolean requiresDestruction(Object bean) {
+			return true;
+		}
 	}
 
 

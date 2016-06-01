@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.5
  * @see ReflectionUtils
+ * @see AopTestUtils
  */
 public class ReflectionTestUtils {
 
@@ -137,6 +138,9 @@ public class ReflectionTestUtils {
 	 * Set the {@linkplain Field field} with the given {@code name}/{@code type}
 	 * on the provided {@code targetObject}/{@code targetClass} to the supplied
 	 * {@code value}.
+	 * <p>If the supplied {@code targetObject} is a <em>proxy</em>, it will
+	 * be {@linkplain AopTestUtils#getUltimateTargetObject unwrapped} allowing
+	 * the field to be set on the ultimate target of the proxy.
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to set {@code protected},
@@ -150,33 +154,36 @@ public class ReflectionTestUtils {
 	 * @param value the value to set
 	 * @param type the type of the field to set; may be {@code null} if
 	 * {@code name} is specified
+	 * @since 4.2
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
 	 * @see ReflectionUtils#setField(Field, Object, Object)
-	 * @since 4.2
+	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	public static void setField(Object targetObject, Class<?> targetClass, String name, Object value, Class<?> type) {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
+		Object ultimateTarget = (targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
+
 		if (targetClass == null) {
-			targetClass = targetObject.getClass();
+			targetClass = ultimateTarget.getClass();
 		}
 
 		Field field = ReflectionUtils.findField(targetClass, name, type);
 		if (field == null) {
 			throw new IllegalArgumentException(String.format(
 					"Could not find field '%s' of type [%s] on target object [%s] or target class [%s]", name, type,
-					targetObject, targetClass));
+					ultimateTarget, targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Setting field '%s' of type [%s] on target object [%s] or target class [%s] to value [%s]", name, type,
-					targetObject, targetClass, value));
+					ultimateTarget, targetClass, value));
 		}
 		ReflectionUtils.makeAccessible(field);
-		ReflectionUtils.setField(field, targetObject, value);
+		ReflectionUtils.setField(field, ultimateTarget, value);
 	}
 
 	/**
@@ -213,6 +220,9 @@ public class ReflectionTestUtils {
 	/**
 	 * Get the value of the {@linkplain Field field} with the given {@code name}
 	 * from the provided {@code targetObject}/{@code targetClass}.
+	 * <p>If the supplied {@code targetObject} is a <em>proxy</em>, it will
+	 * be {@linkplain AopTestUtils#getUltimateTargetObject unwrapped} allowing
+	 * the field to be retrieved from the ultimate target of the proxy.
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to get {@code protected},
@@ -229,28 +239,31 @@ public class ReflectionTestUtils {
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
 	 * @see ReflectionUtils#getField(Field, Object)
+	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	public static Object getField(Object targetObject, Class<?> targetClass, String name) {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
+		Object ultimateTarget = (targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
+
 		if (targetClass == null) {
-			targetClass = targetObject.getClass();
+			targetClass = ultimateTarget.getClass();
 		}
 
 		Field field = ReflectionUtils.findField(targetClass, name);
 		if (field == null) {
 			throw new IllegalArgumentException(
 				String.format("Could not find field '%s' on target object [%s] or target class [%s]", name,
-						targetObject, targetClass));
+					ultimateTarget, targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Getting field '%s' from target object [%s] or target class [%s]", name,
-					targetObject, targetClass));
+					ultimateTarget, targetClass));
 		}
 		ReflectionUtils.makeAccessible(field);
-		return ReflectionUtils.getField(field, targetObject);
+		return ReflectionUtils.getField(field, ultimateTarget);
 	}
 
 	/**

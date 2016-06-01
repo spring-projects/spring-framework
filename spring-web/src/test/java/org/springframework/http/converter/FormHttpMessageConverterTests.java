@@ -261,7 +261,7 @@ public class FormHttpMessageConverterTests {
 		@Override
 		public String getCharacterEncoding() {
 			MediaType type = this.outputMessage.getHeaders().getContentType();
-			return (type != null && type.getCharSet() != null ? type.getCharSet().name() : null);
+			return (type != null && type.getCharset() != null ? type.getCharset().name() : null);
 		}
 
 		@Override

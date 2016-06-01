@@ -325,7 +325,8 @@ public class StompCodecTests {
 		this.decoder.apply(buffer);
 		if (consumer.arguments.isEmpty()) {
 			return null;
-		} else {
+		}
+		else {
 			return consumer.arguments.get(0);
 		}
 	}

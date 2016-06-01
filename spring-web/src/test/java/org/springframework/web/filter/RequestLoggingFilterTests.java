@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -34,19 +33,14 @@ import org.springframework.util.FileCopyUtils;
 import static org.junit.Assert.*;
 
 /**
- * Test for {@link AbstractRequestLoggingFilter} and sub classes.
+ * Test for {@link AbstractRequestLoggingFilter} and subclasses.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
 public class RequestLoggingFilterTests {
 
-	private MyRequestLoggingFilter filter;
-
-
-	@Before
-	public void createFilter() throws Exception {
-		filter = new MyRequestLoggingFilter();
-	}
+	private final MyRequestLoggingFilter filter = new MyRequestLoggingFilter();
 
 
 	@Test
@@ -70,23 +64,39 @@ public class RequestLoggingFilterTests {
 	}
 
 	@Test
-	public void queryString() throws Exception {
+	public void queryStringIncluded() throws Exception {
 		filter.setIncludeQueryString(true);
 
-		final MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		request.setQueryString("booking=42");
 
 		FilterChain filterChain = new NoOpFilterChain();
-
 		filter.doFilter(request, response, filterChain);
 
 		assertNotNull(filter.beforeRequestMessage);
-		assertTrue(filter.beforeRequestMessage.contains("uri=/hotels?booking=42"));
+		assertTrue(filter.beforeRequestMessage.contains("[uri=/hotels?booking=42]"));
 
 		assertNotNull(filter.afterRequestMessage);
-		assertTrue(filter.afterRequestMessage.contains("uri=/hotels?booking=42"));
+		assertTrue(filter.afterRequestMessage.contains("[uri=/hotels?booking=42]"));
+	}
+
+	@Test
+	public void noQueryStringAvailable() throws Exception {
+		filter.setIncludeQueryString(true);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/hotels");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		FilterChain filterChain = new NoOpFilterChain();
+		filter.doFilter(request, response, filterChain);
+
+		assertNotNull(filter.beforeRequestMessage);
+		assertTrue(filter.beforeRequestMessage.contains("[uri=/hotels]"));
+
+		assertNotNull(filter.afterRequestMessage);
+		assertTrue(filter.afterRequestMessage.contains("[uri=/hotels]"));
 	}
 
 	@Test
@@ -98,8 +108,8 @@ public class RequestLoggingFilterTests {
 
 		final byte[] requestBody = "Hello World".getBytes("UTF-8");
 		request.setContent(requestBody);
-		FilterChain filterChain = new FilterChain() {
 
+		FilterChain filterChain = new FilterChain() {
 			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
@@ -124,8 +134,8 @@ public class RequestLoggingFilterTests {
 
 		final String requestBody = "Hello World";
 		request.setContent(requestBody.getBytes("UTF-8"));
-		FilterChain filterChain = new FilterChain() {
 
+		FilterChain filterChain = new FilterChain() {
 			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
@@ -151,8 +161,8 @@ public class RequestLoggingFilterTests {
 
 		final byte[] requestBody = "Hello World".getBytes("UTF-8");
 		request.setContent(requestBody);
-		FilterChain filterChain = new FilterChain() {
 
+		FilterChain filterChain = new FilterChain() {
 			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {

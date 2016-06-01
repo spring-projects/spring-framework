@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,30 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy,
 		this(new HeaderContentNegotiationStrategy());
 	}
 
+
+	/**
+	 * Return the configured content negotiation strategies.
+	 * @since 3.2.16
+	 */
+	public List<ContentNegotiationStrategy> getStrategies() {
+		return this.strategies;
+	}
+
+	/**
+	 * Find a {@code ContentNegotiationStrategy} of the given type.
+	 * @param strategyType the strategy type
+	 * @return the first matching strategy or {@code null}.
+	 * @since 4.3
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends ContentNegotiationStrategy> T getStrategy(Class<T> strategyType) {
+		for (ContentNegotiationStrategy strategy : getStrategies()) {
+			if (strategyType.isInstance(strategy)) {
+				return (T) strategy;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Register more {@code MediaTypeFileExtensionResolver} instances in addition

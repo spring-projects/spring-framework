@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
@@ -158,12 +159,8 @@ public abstract class TestPropertySourceUtils {
 	/**
 	 * Add the {@link Properties} files from the given resource {@code locations}
 	 * to the {@link Environment} of the supplied {@code context}.
-	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
-	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
-	 * against the {@code Environment}.
-	 * <p>Each properties file will be converted to a {@link ResourcePropertySource}
-	 * that will be added to the {@link PropertySources} of the environment with
-	 * highest precedence.
+	 * <p>This method simply delegates to
+	 * {@link #addPropertiesFilesToEnvironment(ConfigurableEnvironment, ResourceLoader, String...)}.
 	 * @param context the application context whose environment should be updated;
 	 * never {@code null}
 	 * @param locations the resource locations of {@code Properties} files to add
@@ -171,22 +168,50 @@ public abstract class TestPropertySourceUtils {
 	 * @since 4.1.5
 	 * @see ResourcePropertySource
 	 * @see TestPropertySource#locations
+	 * @see #addPropertiesFilesToEnvironment(ConfigurableEnvironment, ResourceLoader, String...)
 	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 */
-	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context,
-			String[] locations) {
+	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context, String... locations) {
 		Assert.notNull(context, "context must not be null");
 		Assert.notNull(locations, "locations must not be null");
+		addPropertiesFilesToEnvironment(context.getEnvironment(), context, locations);
+	}
+
+	/**
+	 * Add the {@link Properties} files from the given resource {@code locations}
+	 * to the supplied {@link ConfigurableEnvironment environment}.
+	 * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)
+	 * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}
+	 * against the {@code Environment}.
+	 * <p>Each properties file will be converted to a {@link ResourcePropertySource}
+	 * that will be added to the {@link PropertySources} of the environment with
+	 * highest precedence.
+	 * @param environment the environment to update; never {@code null}
+	 * @param resourceLoader the {@code ResourceLoader} to use to load each resource;
+	 * never {@code null}
+	 * @param locations the resource locations of {@code Properties} files to add
+	 * to the environment; potentially empty but never {@code null}
+	 * @since 4.3
+	 * @see ResourcePropertySource
+	 * @see TestPropertySource#locations
+	 * @see #addPropertiesFilesToEnvironment(ConfigurableApplicationContext, String...)
+	 * @throws IllegalStateException if an error occurs while processing a properties file
+	 */
+	public static void addPropertiesFilesToEnvironment(ConfigurableEnvironment environment,
+			ResourceLoader resourceLoader, String... locations) {
+
+		Assert.notNull(environment, "environment must not be null");
+		Assert.notNull(resourceLoader, "resourceLoader must not be null");
+		Assert.notNull(locations, "locations must not be null");
 		try {
-			ConfigurableEnvironment environment = context.getEnvironment();
 			for (String location : locations) {
 				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
-				Resource resource = context.getResource(resolvedLocation);
+				Resource resource = resourceLoader.getResource(resolvedLocation);
 				environment.getPropertySources().addFirst(new ResourcePropertySource(resource));
 			}
 		}
-		catch (IOException e) {
-			throw new IllegalStateException("Failed to add PropertySource to Environment", e);
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to add PropertySource to Environment", ex);
 		}
 	}
 
@@ -204,7 +229,7 @@ public abstract class TestPropertySourceUtils {
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
 	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
-			String[] inlinedProperties) {
+			String... inlinedProperties) {
 		Assert.notNull(context, "context must not be null");
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		addInlinedPropertiesToEnvironment(context.getEnvironment(), inlinedProperties);
@@ -226,7 +251,7 @@ public abstract class TestPropertySourceUtils {
 	 * @see TestPropertySource#properties
 	 * @see #convertInlinedPropertiesToMap
 	 */
-	public static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String[] inlinedProperties) {
+	public static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String... inlinedProperties) {
 		Assert.notNull(environment, "environment must not be null");
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		if (!ObjectUtils.isEmpty(inlinedProperties)) {
@@ -234,9 +259,13 @@ public abstract class TestPropertySourceUtils {
 				logger.debug("Adding inlined properties to environment: "
 						+ ObjectUtils.nullSafeToString(inlinedProperties));
 			}
-			MapPropertySource ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME,
-				convertInlinedPropertiesToMap(inlinedProperties));
-			environment.getPropertySources().addFirst(ps);
+			MapPropertySource ps = (MapPropertySource) environment.getPropertySources().get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
+			if (ps == null) {
+				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME,
+						new LinkedHashMap<String, Object>());
+				environment.getPropertySources().addFirst(ps);
+			}
+			ps.getSource().putAll(convertInlinedPropertiesToMap(inlinedProperties));
 		}
 	}
 
@@ -257,7 +286,7 @@ public abstract class TestPropertySourceUtils {
 	 * a given inlined property contains multiple key-value pairs
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
-	public static Map<String, Object> convertInlinedPropertiesToMap(String[] inlinedProperties) {
+	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 

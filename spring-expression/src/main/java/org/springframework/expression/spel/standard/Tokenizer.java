@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,12 +182,12 @@ class Tokenizer {
 						}
 						break;
 					case '&':
-						if (!isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
-							throw new InternalParseException(new SpelParseException(
-									this.expressionString, this.pos, SpelMessage.MISSING_CHARACTER,
-									"&"));
+						if (isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
+							pushPairToken(TokenKind.SYMBOLIC_AND);
 						}
-						pushPairToken(TokenKind.SYMBOLIC_AND);
+						else {
+							pushCharToken(TokenKind.FACTORY_BEAN_REF);
+						}
 						break;
 					case '|':
 						if (!isTwoCharToken(TokenKind.SYMBOLIC_OR)) {

@@ -210,7 +210,8 @@ public class AnnotationAsyncExecutionAspectTests {
 		public synchronized void waitForCompletion() {
 			try {
 				wait(WAIT_TIME);
-			} catch (InterruptedException e) {
+			}
+			catch (InterruptedException ex) {
 				fail("Didn't finish the async job in " + WAIT_TIME + " milliseconds");
 			}
 		}

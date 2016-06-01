@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,16 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 
 /**
- * Enables Spring's annotation-driven cache management capability, similar to
- * the support found in Spring's {@code <cache:*>} XML namespace. To be used together
+ * Enables Spring's annotation-driven cache management capability, similar to the
+ * support found in Spring's {@code <cache:*>} XML namespace. To be used together
  * with @{@link org.springframework.context.annotation.Configuration Configuration}
  * classes as follows:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableCaching
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public MyService myService() {
  *         // configure and return a class having &#064;Cacheable methods
@@ -45,18 +47,22 @@ import org.springframework.core.Ordered;
  *     public CacheManager cacheManager() {
  *         // configure and return an implementation of Spring's CacheManager SPI
  *         SimpleCacheManager cacheManager = new SimpleCacheManager();
- *         cacheManager.addCaches(Arrays.asList(new ConcurrentMapCache("default")));
+ *         cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("default")));
  *         return cacheManager;
  *     }
  * }</pre>
  *
  * <p>For reference, the example above can be compared to the following Spring XML
  * configuration:
+ *
  * <pre class="code">
  * {@code
  * <beans>
+ *
  *     <cache:annotation-driven/>
+ *
  *     <bean id="myService" class="com.foo.MyService"/>
+ *
  *     <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
  *         <property name="caches">
  *             <set>
@@ -66,8 +72,10 @@ import org.springframework.core.Ordered;
  *             </set>
  *         </property>
  *     </bean>
+ *
  * </beans>
  * }</pre>
+ *
  * In both of the scenarios above, {@code @EnableCaching} and {@code
  * <cache:annotation-driven/>} are responsible for registering the necessary Spring
  * components that power annotation-driven cache management, such as the
@@ -90,12 +98,14 @@ import org.springframework.core.Ordered;
  *
  * <p>For those that wish to establish a more direct relationship between
  * {@code @EnableCaching} and the exact cache manager bean to be used,
- * the {@link CachingConfigurer} callback interface may be implemented - notice the
- * the {@code @Override}-annotated methods below:
+ * the {@link CachingConfigurer} callback interface may be implemented.
+ * Notice the {@code @Override}-annotated methods below:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableCaching
  * public class AppConfig extends CachingConfigurerSupport {
+ *
  *     &#064;Bean
  *     public MyService myService() {
  *         // configure and return a class having &#064;Cacheable methods
@@ -107,7 +117,7 @@ import org.springframework.core.Ordered;
  *     public CacheManager cacheManager() {
  *         // configure and return an implementation of Spring's CacheManager SPI
  *         SimpleCacheManager cacheManager = new SimpleCacheManager();
- *         cacheManager.addCaches(Arrays.asList(new ConcurrentMapCache("default")));
+ *         cacheManager.setCaches(Arrays.asList(new ConcurrentMapCache("default")));
  *         return cacheManager;
  *     }
  *
@@ -118,6 +128,7 @@ import org.springframework.core.Ordered;
  *         return new MyKeyGenerator();
  *     }
  * }</pre>
+ *
  * This approach may be desirable simply because it is more explicit, or it may be
  * necessary in order to distinguish between two {@code CacheManager} beans present in the
  * same container.

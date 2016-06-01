@@ -36,7 +36,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 import java.util.ArrayList;
 import java.util.List;
 /**
- * An abstract base class class for configuring STOMP over WebSocket/SockJS endpoints.
+ * An abstract base class for configuring STOMP over WebSocket/SockJS endpoints.
  *
  * @author Rossen Stoyanchev
  * @since 4.0

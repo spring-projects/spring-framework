@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 package org.springframework.util.concurrent;
 
 /**
- * Defines the contract for success callbacks that accept the result of a
- * {@link ListenableFuture}.
+ * Success callback for a {@link ListenableFuture}.
  *
  * @author Sebastien Deleuze
  * @since 4.1
@@ -26,7 +25,8 @@ package org.springframework.util.concurrent;
 public interface SuccessCallback<T> {
 
 	/**
-	 * Called when the {@link ListenableFuture} successfully completes.
+	 * Called when the {@link ListenableFuture} completes with success.
+	 * <p>Note that Exceptions raised by this method are ignored.
 	 * @param result the result
 	 */
 	void onSuccess(T result);

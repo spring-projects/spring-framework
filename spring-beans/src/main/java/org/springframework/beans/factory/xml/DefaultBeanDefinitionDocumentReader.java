@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,6 +129,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				String[] specifiedProfiles = StringUtils.tokenizeToStringArray(
 						profileSpec, BeanDefinitionParserDelegate.MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 				if (!getReaderContext().getEnvironment().acceptsProfiles(specifiedProfiles)) {
+					if (logger.isInfoEnabled()) {
+						logger.info("Skipped XML bean definition file due to specified profiles [" + profileSpec +
+								"] not matching: " + getReaderContext().getResource());
+					}
 					return;
 				}
 			}

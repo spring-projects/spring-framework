@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,6 @@ public class CronSequenceGenerator {
 		this.timeZone = timeZone;
 		parse(expression);
 	}
-
 
 	/**
 	 * Return the cron pattern that this sequence generator has been built for.
@@ -262,7 +261,7 @@ public class CronSequenceGenerator {
 	 */
 	private void parse(String expression) throws IllegalArgumentException {
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
-		if (fields.length != 6) {
+		if (!areValidCronFields(fields)) {
 			throw new IllegalArgumentException(String.format(
 					"Cron expression must consist of 6 fields (found %d in \"%s\")", fields.length, expression));
 		}
@@ -380,6 +379,23 @@ public class CronSequenceGenerator {
 					field + "' in expression \"" + this.expression + "\"");
 		}
 		return result;
+	}
+
+
+	/**
+	 * Determine whether the specified expression represents a valid cron pattern.
+	 * <p>Specifically, this method verifies that the expression contains six
+	 * fields separated by single spaces.
+	 * @param expression the expression to evaluate
+	 * @return {@code true} if the given expression is a valid cron expression
+	 */
+	public static boolean isValidExpression(String expression) {
+		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
+		return areValidCronFields(fields);
+	}
+
+	private static boolean areValidCronFields(String[] fields) {
+		return (fields != null && fields.length == 6);
 	}
 
 

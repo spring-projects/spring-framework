@@ -36,7 +36,7 @@ final class _TestTypes { }
 
 
 /**
- * Aspect used as part of before before advice binding tests and
+ * Aspect used as part of before advice binding tests and
  * serves as base class for a number of more specialized test aspects.
  *
  * @author Adrian Colyer

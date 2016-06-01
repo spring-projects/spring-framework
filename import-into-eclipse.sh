@@ -42,7 +42,7 @@ read
 # - generates metadata for all subprojects
 # - skips metadata gen for the root project (-x :eclipse) to work
 #   around Eclipse's inability to import hierarchical project structures
-COMMAND="./gradlew cleanEclipse :spring-oxm:compileTestJava eclipse -x :eclipse"
+COMMAND="./gradlew --no-daemon cleanEclipse :spring-oxm:compileTestJava eclipse -x :eclipse"
 
 cat <<EOM
 
@@ -84,7 +84,7 @@ EOM
 
 read
 
-COMMAND="./gradlew :eclipse"
+COMMAND="./gradlew --no-daemon :eclipse"
 
 cat <<EOM
 

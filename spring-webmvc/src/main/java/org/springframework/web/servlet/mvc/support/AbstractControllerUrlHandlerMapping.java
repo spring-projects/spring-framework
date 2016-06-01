@@ -31,7 +31,9 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * @since 2.5.3
  * @see ControllerClassNameHandlerMapping
  * @see ControllerBeanNameHandlerMapping
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetectingUrlHandlerMapping  {
 
 	private ControllerTypePredicate predicate = new AnnotationControllerTypePredicate();

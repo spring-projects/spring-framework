@@ -162,9 +162,11 @@ public final class PortletWrappingControllerTests {
 		public void processAction(ActionRequest request, ActionResponse response) throws PortletException {
 			if (request.getParameter("test") != null) {
 				response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, "myPortlet-action");
-			} else if (request.getParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME) != null) {
+			}
+			else if (request.getParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME) != null) {
 				response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, getPortletConfig().getPortletName());
-			} else {
+			}
+			else {
 				throw new IllegalArgumentException("no request parameters");
 			}
 		}

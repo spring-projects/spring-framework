@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,12 +226,22 @@ public class HandlerMethod {
 	 * if no annotation can be found on the given method itself.
 	 * <p>Also supports <em>merged</em> composed annotations with attribute
 	 * overrides as of Spring Framework 4.2.2.
-	 * @param annotationType the type of annotation to introspect the method for.
+	 * @param annotationType the type of annotation to introspect the method for
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
+	}
+
+	/**
+	 * Return whether the parameter is declared with the given annotation type.
+	 * @param annotationType the annotation type to look for
+	 * @since 4.3
+	 * @see AnnotatedElementUtils#hasAnnotation
+	 */
+	public <A extends Annotation> boolean hasMethodAnnotation(Class<A> annotationType) {
+		return AnnotatedElementUtils.hasAnnotation(this.method, annotationType);
 	}
 
 	/**
@@ -245,6 +255,15 @@ public class HandlerMethod {
 			handler = this.beanFactory.getBean(beanName);
 		}
 		return new HandlerMethod(this, handler);
+	}
+
+	/**
+	 * Return a short representation of this handler method for log message purposes.
+	 * @since 4.3
+	 */
+	public String getShortLogMessage() {
+		int args = this.method.getParameterTypes().length;
+		return getBeanType().getName() + "#" + this.method.getName() + "[" + args + " args]";
 	}
 
 
@@ -280,6 +299,10 @@ public class HandlerMethod {
 			super(HandlerMethod.this.bridgedMethod, index);
 		}
 
+		protected HandlerMethodParameter(HandlerMethodParameter original) {
+			super(original);
+		}
+
 		@Override
 		public Class<?> getContainingClass() {
 			return HandlerMethod.this.getBeanType();
@@ -288,6 +311,16 @@ public class HandlerMethod {
 		@Override
 		public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 			return HandlerMethod.this.getMethodAnnotation(annotationType);
+		}
+
+		@Override
+		public <T extends Annotation> boolean hasMethodAnnotation(Class<T> annotationType) {
+			return HandlerMethod.this.hasMethodAnnotation(annotationType);
+		}
+
+		@Override
+		public HandlerMethodParameter clone() {
+			return new HandlerMethodParameter(this);
 		}
 	}
 
@@ -304,9 +337,19 @@ public class HandlerMethod {
 			this.returnValue = returnValue;
 		}
 
+		protected ReturnValueMethodParameter(ReturnValueMethodParameter original) {
+			super(original);
+			this.returnValue = original.returnValue;
+		}
+
 		@Override
 		public Class<?> getParameterType() {
 			return (this.returnValue != null ? this.returnValue.getClass() : super.getParameterType());
+		}
+
+		@Override
+		public ReturnValueMethodParameter clone() {
+			return new ReturnValueMethodParameter(this);
 		}
 	}
 

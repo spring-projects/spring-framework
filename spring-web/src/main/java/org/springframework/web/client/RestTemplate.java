@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -51,6 +51,7 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.util.AbstractUriTemplateHandler;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriTemplateHandler;
 
@@ -237,8 +238,31 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
-	 * Set a custom {@link UriTemplateHandler} for expanding URI templates.
-	 * <p>By default, RestTemplate uses {@link DefaultUriTemplateHandler}.
+	 * Configure default URI variable values. This is a shortcut for:
+	 * <pre class="code">
+	 *
+	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
+	 * handler.setDefaultUriVariables(...);
+	 *
+	 * RestTemplate restTemplate = new RestTemplate();
+	 * restTemplate.setUriTemplateHandler(handler);
+	 * </pre>
+	 * @param defaultUriVariables the default URI variable values
+	 * @since 4.3
+	 */
+	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+		Assert.isInstanceOf(AbstractUriTemplateHandler.class, this.uriTemplateHandler,
+				"Can only use this property in conjunction with an AbstractUriTemplateHandler.");
+		((AbstractUriTemplateHandler) this.uriTemplateHandler).setDefaultUriVariables(defaultUriVariables);
+	}
+
+	/**
+	 * Configure the {@link UriTemplateHandler} to use to expand URI templates.
+	 * By default the {@link DefaultUriTemplateHandler} is used which relies on
+	 * Spring's URI template support and exposes several useful properties that
+	 * customize its behavior for encoding and for prepending a common base URL.
+	 * An alternative implementation may be used to plug an external URI
+	 * template library.
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {
@@ -603,8 +627,11 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 		}
 		catch (IOException ex) {
+			String resource = url.toString();
+			String query = url.getRawQuery();
+			resource = (query != null ? resource.substring(0, resource.indexOf(query) - 1) : resource);
 			throw new ResourceAccessException("I/O error on " + method.name() +
-					" request for \"" + url + "\":" + ex.getMessage(), ex);
+					" request for \"" + resource + "\": " + ex.getMessage(), ex);
 		}
 		finally {
 			if (response != null) {
@@ -717,8 +744,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				if (!allSupportedMediaTypes.isEmpty()) {
 					MediaType.sortBySpecificity(allSupportedMediaTypes);
 					if (logger.isDebugEnabled()) {
-						logger.debug("Setting request Accept header to " +
-								allSupportedMediaTypes);
+						logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
 					}
 					request.getHeaders().setAccept(allSupportedMediaTypes);
 				}
@@ -729,7 +755,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			List<MediaType> supportedMediaTypes = messageConverter.getSupportedMediaTypes();
 			List<MediaType> result = new ArrayList<MediaType>(supportedMediaTypes.size());
 			for (MediaType supportedMediaType : supportedMediaTypes) {
-				if (supportedMediaType.getCharSet() != null) {
+				if (supportedMediaType.getCharset() != null) {
 					supportedMediaType =
 							new MediaType(supportedMediaType.getType(), supportedMediaType.getSubtype());
 				}
@@ -774,17 +800,40 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				if (!requestHeaders.isEmpty()) {
 					httpHeaders.putAll(requestHeaders);
 				}
-				if (httpHeaders.getContentLength() == -1) {
+				if (httpHeaders.getContentLength() < 0) {
 					httpHeaders.setContentLength(0L);
 				}
 			}
 			else {
 				Object requestBody = this.requestEntity.getBody();
-				Class<?> requestType = requestBody.getClass();
+				Class<?> requestBodyClass = requestBody.getClass();
+				Type requestBodyType = (this.requestEntity instanceof RequestEntity ?
+						((RequestEntity<?>)this.requestEntity).getType() : requestBodyClass);
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
 				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
-					if (messageConverter.canWrite(requestType, requestContentType)) {
+					if (messageConverter instanceof GenericHttpMessageConverter) {
+						GenericHttpMessageConverter<Object> genericMessageConverter = (GenericHttpMessageConverter<Object>) messageConverter;
+						if (genericMessageConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
+							if (!requestHeaders.isEmpty()) {
+								httpRequest.getHeaders().putAll(requestHeaders);
+							}
+							if (logger.isDebugEnabled()) {
+								if (requestContentType != null) {
+									logger.debug("Writing [" + requestBody + "] as \"" + requestContentType +
+											"\" using [" + messageConverter + "]");
+								}
+								else {
+									logger.debug("Writing [" + requestBody + "] using [" + messageConverter + "]");
+								}
+
+							}
+							genericMessageConverter.write(
+									requestBody, requestBodyType, requestContentType, httpRequest);
+							return;
+						}
+					}
+					else if (messageConverter.canWrite(requestBodyClass, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
 							httpRequest.getHeaders().putAll(requestHeaders);
 						}
@@ -804,7 +853,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 				}
 				String message = "Could not write request: no suitable HttpMessageConverter found for request type [" +
-						requestType.getName() + "]";
+						requestBodyClass.getName() + "]";
 				if (requestContentType != null) {
 					message += " and content type [" + requestContentType + "]";
 				}

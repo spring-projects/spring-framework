@@ -2796,6 +2796,9 @@ as follow to automatically send a response:
 	}
 ----
 
+TIP: If you have several `@JmsListener`-annotated methods, you can also place the `@SendTo`
+annotation at class-level to share a default reply destination.
+
 If you need to set additional headers in a transport-independent manner, you could return a
 `Message` instead, something like:
 
@@ -3504,6 +3507,9 @@ marked with the `ManagedOperation` annotation and each property you wish to expo
 be marked with the `ManagedAttribute` annotation. When marking properties you can omit
 either the annotation of the getter or the setter to create a write-only or read-only
 attribute respectively.
+
+NOTE: A `ManagedResource` annotated bean must be public as well as the methods exposing
+an operation or an attribute.
 
 The example below shows the annotated version of the `JmxTestBean` class that you saw
 earlier:
@@ -6001,7 +6007,7 @@ along with an inline image.
 	helper.setTo("test@host.com");
 
 	// use the true flag to indicate the text included is HTML
-	helper.setText("<html><body><img src=''cid:identifier1234''></body></html>", true);
+	helper.setText("<html><body><img src='cid:identifier1234'></body></html>", true);
 
 	// let's include the infamous windows Sample file (this time copied to c:/)
 	FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
@@ -6492,7 +6498,7 @@ reference is provided for managing those methods annotated with `@Scheduled`.
 
 [[scheduling-annotation-support-scheduled]]
 ==== The @Scheduled Annotation
-The @Scheduled annotation can be added to a method along with trigger metadata. For
+The `@Scheduled` annotation can be added to a method along with trigger metadata. For
 example, the following method would be invoked every 5 seconds with a fixed delay,
 meaning that the period will be measured from the completion time of each preceding
 invocation.
@@ -6556,13 +6562,15 @@ Context, then those would typically have been provided through dependency inject
 
 [NOTE]
 ====
-Make sure that you are not initializing multiple instances of the same @Scheduled
+As of Spring Framework 4.3, `@Scheduled` methods are supported on beans of any scope.
+
+Make sure that you are not initializing multiple instances of the same `@Scheduled`
 annotation class at runtime, unless you do want to schedule callbacks to each such
-instance. Related to this, make sure that you do not use @Configurable on bean classes
-which are annotated with @Scheduled and registered as regular Spring beans with the
-container: You would get double initialization otherwise, once through the container and
-once through the @Configurable aspect, with the consequence of each @Scheduled method
-being invoked twice.
+instance. Related to this, make sure that you do not use `@Configurable` on bean
+classes which are annotated with `@Scheduled` and registered as regular Spring beans
+with the container: You would get double initialization otherwise, once through the
+container and once through the `@Configurable` aspect, with the consequence of each
+`@Scheduled` method being invoked twice.
 ====
 
 
@@ -6613,8 +6621,8 @@ asynchronous execution so that the caller can perform other tasks prior to calli
 ----
 
 `@Async` can not be used in conjunction with lifecycle callbacks such as
-`@PostConstruct`. To asynchronously initialize Spring beans you currently have to use a
-separate initializing Spring bean that invokes the `@Async` annotated method on the
+`@PostConstruct`. To asynchronously initialize Spring beans you currently have to use
+a separate initializing Spring bean that invokes the `@Async` annotated method on the
 target then.
 
 [source,java,indent=0]
@@ -6629,7 +6637,7 @@ target then.
 
 	}
 
-	public class SampleBeanInititalizer {
+	public class SampleBeanInitializer {
 
 		private final SampleBean bean;
 
@@ -6644,6 +6652,14 @@ target then.
 
 	}
 ----
+
+[NOTE]
+====
+There is no direct XML equivalent for `@Async` since such methods should be designed
+for asynchronous execution in the first place, not externally re-declared to be async.
+However, you may manually set up Spring's `AsyncExecutionInterceptor` with Spring AOP,
+in combination with a custom pointcut.
+====
 
 
 
@@ -7360,7 +7376,7 @@ message is surrounded by quotes. Below are the changes that I (the author) make 
 
 		public String getMessage() {
 			// change the implementation to surround the message in quotes
-			return "''" + this.message + "''"
+			return "'" + this.message + "'"
 		}
 
 		public void setMessage(String message) {
@@ -7767,7 +7783,7 @@ will want to do with this callback, and you can see an example of doing that bel
 			DelegatingMetaClass metaClass = new DelegatingMetaClass(goo.getMetaClass()) {
 
 				public Object invokeMethod(Object object, String methodName, Object[] arguments) {
-					System.out.println("Invoking ''" + methodName + "''.");
+					System.out.println("Invoking '" + methodName + "'.");
 					return super.invokeMethod(object, methodName, arguments);
 				}
 			};
@@ -8160,6 +8176,7 @@ materialized by the `org.springframework.cache.Cache` and
 There are <<cache-store-configuration,a few implementations>> of that abstraction
 available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
 http://ehcache.org/[EhCache], Gemfire cache,
+https://github.com/ben-manes/caffeine/wiki[Caffeine],
 https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
 JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
 other cache stores/providers.
@@ -8462,10 +8479,10 @@ conditional computations:
 
 | __argument name__
 | evaluation context
-| Name of any of the method argument. If for some reason the names are not available
-  (ex: no debug information), the argument names are also available under the `a<#arg>`
+| Name of any of the method arguments. If for some reason the names are not available
+  (e.g. no debug information), the argument names are also available under the `#a<#arg>`
   where __#arg__ stands for the argument index (starting from 0).
-| `iban` or `a0` (one can also use `p0` or `p<#arg>` notation as an alias).
+| `#iban` or `#a0` (one can also use `#p0` or `#p<#arg>` notation as an alias).
 
 | result
 | evaluation context
@@ -8553,10 +8570,8 @@ and thus requires a result.
 
 There are cases when multiple annotations of the same type, such as `@CacheEvict` or
 `@CachePut` need to be specified, for example because the condition or the key
-expression is different between different caches. Unfortunately Java does not support
-such declarations however there is a workaround - using an __enclosing__ annotation, in
-this case, `@Caching`. `@Caching` allows multiple nested `@Cacheable`, `@CachePut` and
-`@CacheEvict` to be used on the same method:
+expression is different between different caches. `@Caching` allows multiple nested
+`@Cacheable`, `@CachePut` and `@CacheEvict` to be used on the same method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -8814,7 +8829,7 @@ up its declaration at runtime and understands its meaning. Note that as mentione
 === JCache (JSR-107) annotations
 
 Since the Spring Framework 4.1, the caching abstraction fully supports the JCache
-standard annotations: these are `@CacheResult`, `@CacheEvict`, `@CacheRemove` and
+standard annotations: these are `@CacheResult`, `@CachePut`, `@CacheRemove` and
 `@CacheRemoveAll` as well as the `@CacheDefaults`, `@CacheKey` and `@CacheValue`
 companions. These annotations can be used right the way without migrating your
 cache store to JSR-107: the internal implementation uses Spring's caching abstraction
@@ -8996,7 +9011,7 @@ we did in the example above by defining the target cache through the `cache:defi
 
 [[cache-store-configuration]]
 === Configuring the cache storage
-Out of the box, the cache abstraction provides several storages integration. To use
+Out of the box, the cache abstraction provides several storage integration. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
 controls and manages ++Cache++s and can be used to retrieve these for storage.
 
@@ -9053,6 +9068,42 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 This setup bootstraps the ehcache library inside Spring IoC (through the `ehcache` bean) which
 is then wired into the dedicated `CacheManager` implementation. Note the entire
 ehcache-specific configuration is read from `ehcache.xml`.
+
+[[cache-store-configuration-caffeine]]
+==== Caffeine Cache
+
+Caffeine is a Java 8 rewrite of Guava's cache and its implementation is located under
+`org.springframework.cache.caffeine` package and provides access to several features
+of Caffeine.
+
+Configuring a `CacheManager` that creates the cache on demand is straightforward:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager"
+	      class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
+----
+
+It is also possible to provide the caches to use explicitly. In that case, only those
+will be made available by the manager:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
+		<property name="caches">
+			<set>
+				<value>default</value>
+				<value>books</value>
+			</set>
+		</property>
+	</bean>
+----
+
+The Caffeine `CacheManager` also supports customs `Caffeine` and `CacheLoader`. See
+the https://github.com/ben-manes/caffeine/wiki[Caffeine documentation] for more
+information about those.
 
 [[cache-store-configuration-guava]]
 ==== Guava Cache

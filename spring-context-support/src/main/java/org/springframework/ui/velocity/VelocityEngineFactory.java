@@ -69,7 +69,9 @@ import org.springframework.util.StringUtils;
  * @see VelocityEngineFactoryBean
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
  * @see org.apache.velocity.app.VelocityEngine
+ * @deprecated as of Spring 4.3, in favor of FreeMarker
  */
+@Deprecated
 public class VelocityEngineFactory {
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -338,7 +340,7 @@ public class VelocityEngineFactory {
 	}
 
 	/**
-	 * To be implemented by subclasses that want to to perform custom
+	 * To be implemented by subclasses that want to perform custom
 	 * post-processing of the VelocityEngine after this FactoryBean
 	 * performed its default configuration (but before VelocityEngine.init).
 	 * <p>Called by {@code createVelocityEngine()}.

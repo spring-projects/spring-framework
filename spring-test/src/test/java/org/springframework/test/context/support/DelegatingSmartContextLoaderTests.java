@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,17 +54,6 @@ public class DelegatingSmartContextLoaderTests {
 	}
 
 	// --- SmartContextLoader - processContextConfiguration() ------------------
-
-	@Test
-	public void processContextConfigurationWithoutLocationsAndConfigurationClassesForBogusTestClass() {
-		expectedException.expect(IllegalStateException.class);
-		expectedException.expectMessage(startsWith("Neither"));
-		expectedException.expectMessage(containsString("was able to detect defaults"));
-
-		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(getClass(),
-			EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, null, true, ContextLoader.class);
-		loader.processContextConfiguration(configAttributes);
-	}
 
 	@Test
 	public void processContextConfigurationWithDefaultXmlConfigGeneration() {

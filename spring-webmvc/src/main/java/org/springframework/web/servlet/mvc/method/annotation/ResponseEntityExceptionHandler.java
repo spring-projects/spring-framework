@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,35 +46,34 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A convenient base class for {@link ControllerAdvice @ControllerAdvice} classes
  * that wish to provide centralized exception handling across all
  * {@code @RequestMapping} methods through {@code @ExceptionHandler} methods.
  *
- * <p>This base class provides an {@code @ExceptionHandler} method for handling standard
- * Spring MVC exceptions that returns a {@code ResponseEntity} to be written with
- * {@link HttpMessageConverter message converters}. This is in contrast to
+ * <p>This base class provides an {@code @ExceptionHandler} method for handling
+ * internal Spring MVC exceptions. This method returns a {@code ResponseEntity}
+ * for writing to the response with a {@link HttpMessageConverter message converter}.
+ * in contrast to
  * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
- * DefaultHandlerExceptionResolver} which returns a {@code ModelAndView} instead.
+ * DefaultHandlerExceptionResolver} which returns a
+ * {@link org.springframework.web.servlet.ModelAndView ModelAndView}.
  *
- * <p>If there is no need to write error content to the response body, or if using
- * view resolution (e.g., via {@code ContentNegotiatingViewResolver}), then use
- * {@code DefaultHandlerExceptionResolver} instead.
+ * <p>If there is no need to write error content to the response body, or when
+ * using view resolution (e.g., via {@code ContentNegotiatingViewResolver}),
+ * then {@code DefaultHandlerExceptionResolver} is good enough.
  *
  * <p>Note that in order for an {@code @ControllerAdvice} sub-class to be
  * detected, {@link ExceptionHandlerExceptionResolver} must be configured.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
- *
  * @see #handleException(Exception, WebRequest)
  * @see org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
  */
 public abstract class ResponseEntityExceptionHandler {
-
-	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * Log category to use when no mapped handler is found for a request.
@@ -83,10 +82,15 @@ public abstract class ResponseEntityExceptionHandler {
 	public static final String PAGE_NOT_FOUND_LOG_CATEGORY = "org.springframework.web.servlet.PageNotFound";
 
 	/**
-	 * Additional logger to use when no mapped handler is found for a request.
+	 * Specific logger to use when no mapped handler is found for a request.
 	 * @see #PAGE_NOT_FOUND_LOG_CATEGORY
 	 */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
+
+	/**
+	 * Common logger for use in subclasses.
+	 */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 
 	/**
@@ -94,8 +98,9 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param ex the target exception
 	 * @param request the current request
 	 */
+	@SuppressWarnings("deprecation")
 	@ExceptionHandler({
-			NoSuchRequestHandlingMethodException.class,
+			org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException.class,
 			HttpRequestMethodNotSupportedException.class,
 			HttpMediaTypeNotSupportedException.class,
 			HttpMediaTypeNotAcceptableException.class,
@@ -112,12 +117,10 @@ public abstract class ResponseEntityExceptionHandler {
 			NoHandlerFoundException.class
 		})
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
-
 		HttpHeaders headers = new HttpHeaders();
-
-		if (ex instanceof NoSuchRequestHandlingMethodException) {
+		if (ex instanceof org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException) {
 			HttpStatus status = HttpStatus.NOT_FOUND;
-			return handleNoSuchRequestHandlingMethod((NoSuchRequestHandlingMethodException) ex, headers, status, request);
+			return handleNoSuchRequestHandlingMethod((org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException) ex, headers, status, request);
 		}
 		else if (ex instanceof HttpRequestMethodNotSupportedException) {
 			HttpStatus status = HttpStatus.METHOD_NOT_ALLOWED;
@@ -184,20 +187,21 @@ public abstract class ResponseEntityExceptionHandler {
 
 	/**
 	 * A single place to customize the response body of all Exception types.
-	 * <p>This method returns {@code null} by default.
+	 * <p>The default implementation sets the {@link WebUtils#ERROR_EXCEPTION_ATTRIBUTE}
+	 * request attribute and creates a {@link ResponseEntity} from the given
+	 * body, headers, and status.
 	 * @param ex the exception
-	 * @param body the body to use for the response
-	 * @param headers the headers to be written to the response
-	 * @param status the selected response status
+	 * @param body the body for the response
+	 * @param headers the headers for the response
+	 * @param status the response status
 	 * @param request the current request
 	 */
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
-			request.setAttribute("javax.servlet.error.exception", ex, WebRequest.SCOPE_REQUEST);
+			request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
 		}
-
 		return new ResponseEntity<Object>(body, headers, status);
 	}
 
@@ -209,8 +213,10 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param status the selected response status
 	 * @param request the current request
 	 * @return a {@code ResponseEntity} instance
+	 * @deprecated as of 4.3, along with {@link org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException}
 	 */
-	protected ResponseEntity<Object> handleNoSuchRequestHandlingMethod(NoSuchRequestHandlingMethodException ex,
+	@Deprecated
+	protected ResponseEntity<Object> handleNoSuchRequestHandlingMethod(org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		pageNotFoundLogger.warn(ex.getMessage());
@@ -237,7 +243,6 @@ public abstract class ResponseEntityExceptionHandler {
 		if (!supportedMethods.isEmpty()) {
 			headers.setAllow(supportedMethods);
 		}
-
 		return handleExceptionInternal(ex, null, headers, status, request);
 	}
 
@@ -438,8 +443,8 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @return a {@code ResponseEntity} instance
 	 * @since 4.0
 	 */
-	protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex, HttpHeaders headers,
-	                                                     HttpStatus status, WebRequest request) {
+	protected ResponseEntity<Object> handleNoHandlerFoundException(
+			NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		return handleExceptionInternal(ex, null, headers, status, request);
 	}

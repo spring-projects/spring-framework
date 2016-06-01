@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,25 +30,29 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.hamcrest.Matchers;
-
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  */
 public class HttpHeadersTests {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
+
+	@Test
+	public void getFirst() {
+		headers.add(HttpHeaders.CACHE_CONTROL, "max-age=1000, public");
+		headers.add(HttpHeaders.CACHE_CONTROL, "s-maxage=1000");
+		assertThat(headers.getFirst(HttpHeaders.CACHE_CONTROL), is("max-age=1000, public"));
+	}
 
 	@Test
 	public void accept() {
@@ -138,6 +142,29 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void ifMatch() {
+		String ifMatch = "\"v2.6\"";
+		headers.setIfMatch(ifMatch);
+		assertEquals("Invalid If-Match header", ifMatch, headers.getIfMatch().get(0));
+		assertEquals("Invalid If-Match header", "\"v2.6\"", headers.getFirst("If-Match"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void ifMatchIllegalHeader() {
+		headers.setIfMatch("Illegal");
+		headers.getIfMatch();
+	}
+
+	@Test
+	public void ifMatchMultipleHeaders() {
+		headers.add(HttpHeaders.IF_MATCH, "\"v2,0\"");
+		headers.add(HttpHeaders.IF_MATCH, "W/\"v2,1\", \"v2,2\"");
+		assertEquals("Invalid If-Match header", "\"v2,0\"", headers.get(HttpHeaders.IF_MATCH).get(0));
+		assertEquals("Invalid If-Match header", "W/\"v2,1\", \"v2,2\"", headers.get(HttpHeaders.IF_MATCH).get(1));
+		assertThat(headers.getIfMatch(), Matchers.contains("\"v2,0\"", "W/\"v2,1\"", "\"v2,2\""));
+	}
+
+	@Test
 	public void ifNoneMatch() {
 		String ifNoneMatch = "\"v2.6\"";
 		headers.setIfNoneMatch(ifNoneMatch);
@@ -146,15 +173,23 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void ifNoneMatchWildCard() {
+		String ifNoneMatch = "*";
+		headers.setIfNoneMatch(ifNoneMatch);
+		assertEquals("Invalid If-None-Match header", ifNoneMatch, headers.getIfNoneMatch().get(0));
+		assertEquals("Invalid If-None-Match header", "*", headers.getFirst("If-None-Match"));
+	}
+
+	@Test
 	public void ifNoneMatchList() {
 		String ifNoneMatch1 = "\"v2.6\"";
-		String ifNoneMatch2 = "\"v2.7\"";
+		String ifNoneMatch2 = "\"v2.7\", \"v2.8\"";
 		List<String> ifNoneMatchList = new ArrayList<String>(2);
 		ifNoneMatchList.add(ifNoneMatch1);
 		ifNoneMatchList.add(ifNoneMatch2);
 		headers.setIfNoneMatch(ifNoneMatchList);
-		assertEquals("Invalid If-None-Match header", ifNoneMatchList, headers.getIfNoneMatch());
-		assertEquals("Invalid If-None-Match header", "\"v2.6\", \"v2.7\"", headers.getFirst("If-None-Match"));
+		assertThat(headers.getIfNoneMatch(), Matchers.contains("\"v2.6\"", "\"v2.7\"", "\"v2.8\""));
+		assertEquals("Invalid If-None-Match header", "\"v2.6\", \"v2.7\", \"v2.8\"", headers.getFirst("If-None-Match"));
 	}
 
 	@Test
@@ -215,9 +250,7 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
 	}
 
-	// SPR-10648 (example is from INT-3063)
-
-	@Test
+	@Test  // SPR-10648 (example is from INT-3063)
 	public void expiresInvalidDate() {
 		headers.set("Expires", "-1");
 		assertEquals(-1, headers.getExpires());
@@ -234,6 +267,18 @@ public class HttpHeadersTests {
 				headers.getFirst("if-modified-since"));
 	}
 
+	@Test  // SPR-14144
+	public void invalidIfModifiedSinceHeader() {
+		headers.set(HttpHeaders.IF_MODIFIED_SINCE, "0");
+		assertEquals(-1, headers.getIfModifiedSince());
+
+		headers.set(HttpHeaders.IF_MODIFIED_SINCE, "-1");
+		assertEquals(-1, headers.getIfModifiedSince());
+
+		headers.set(HttpHeaders.IF_MODIFIED_SINCE, "XXX");
+		assertEquals(-1, headers.getIfModifiedSince());
+	}
+
 	@Test
 	public void pragma() {
 		String pragma = "no-cache";
@@ -248,6 +293,13 @@ public class HttpHeadersTests {
 		headers.setCacheControl(cacheControl);
 		assertEquals("Invalid Cache-Control header", cacheControl, headers.getCacheControl());
 		assertEquals("Invalid Cache-Control header", "no-cache", headers.getFirst("cache-control"));
+	}
+
+	@Test
+	public void cacheControlAllValues() {
+		headers.add(HttpHeaders.CACHE_CONTROL, "max-age=1000, public");
+		headers.add(HttpHeaders.CACHE_CONTROL, "s-maxage=1000");
+		assertThat(headers.getCacheControl(), is("max-age=1000, public, s-maxage=1000"));
 	}
 
 	@Test
@@ -283,6 +335,16 @@ public class HttpHeadersTests {
 		headers.setAccessControlAllowHeaders(Arrays.asList("header1", "header2"));
 		allowedHeaders = headers.getAccessControlAllowHeaders();
 		assertEquals(allowedHeaders, Arrays.asList("header1", "header2"));
+	}
+
+	@Test
+	public void accessControlAllowHeadersMultipleValues() {
+		List<String> allowedHeaders = headers.getAccessControlAllowHeaders();
+		assertThat(allowedHeaders, Matchers.emptyCollectionOf(String.class));
+		headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "header1, header2");
+		headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "header3");
+		allowedHeaders = headers.getAccessControlAllowHeaders();
+		assertEquals(Arrays.asList("header1", "header2", "header3"), allowedHeaders);
 	}
 
 	@Test

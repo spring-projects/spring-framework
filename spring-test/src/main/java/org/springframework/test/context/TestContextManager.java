@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@code TestContextManager} is the main entry point into the <em>Spring
@@ -37,18 +38,18 @@ import org.springframework.util.Assert;
  *
  * <ul>
  * <li>{@link #beforeTestClass() before test class execution}: prior to any
- * <em>before class methods</em> of a particular testing framework (e.g., JUnit
- * 4's {@link org.junit.BeforeClass @BeforeClass})</li>
+ * <em>before class callbacks</em> of a particular testing framework (e.g.,
+ * JUnit 4's {@link org.junit.BeforeClass @BeforeClass})</li>
  * <li>{@link #prepareTestInstance(Object) test instance preparation}:
  * immediately following instantiation of the test instance</li>
  * <li>{@link #beforeTestMethod(Object, Method) before test method execution}:
- * prior to any <em>before methods</em> of a particular testing framework (e.g.,
- * JUnit 4's {@link org.junit.Before @Before})</li>
+ * prior to any <em>before method callbacks</em> of a particular testing framework
+ * (e.g., JUnit 4's {@link org.junit.Before @Before})</li>
  * <li>{@link #afterTestMethod(Object, Method, Throwable) after test method
- * execution}: after any <em>after methods</em> of a particular testing
+ * execution}: after any <em>after method callbacks</em> of a particular testing
  * framework (e.g., JUnit 4's {@link org.junit.After @After})</li>
  * <li>{@link #afterTestClass() after test class execution}: after any
- * <em>after class methods</em> of a particular testing framework (e.g., JUnit
+ * <em>after class callbacks</em> of a particular testing framework (e.g., JUnit
  * 4's {@link org.junit.AfterClass @AfterClass})</li>
  * </ul>
  *
@@ -78,7 +79,6 @@ import org.springframework.util.Assert;
  * @see TestExecutionListeners
  * @see ContextConfiguration
  * @see ContextHierarchy
- * @see org.springframework.test.context.transaction.TransactionConfiguration
  */
 public class TestContextManager {
 
@@ -124,7 +124,7 @@ public class TestContextManager {
 	/**
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
 	 */
-	protected final TestContext getTestContext() {
+	public final TestContext getTestContext() {
 		return this.testContext;
 	}
 
@@ -194,10 +194,12 @@ public class TestContextManager {
 			try {
 				testExecutionListener.beforeTestClass(getTestContext());
 			}
-			catch (Exception ex) {
-				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
-						"] to process 'before class' callback for test class [" + testClass + "]", ex);
-				throw ex;
+			catch (Throwable ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+							"] to process 'before class' callback for test class [" + testClass + "]", ex);
+				}
+				ReflectionUtils.rethrowException(ex);
 			}
 		}
 	}
@@ -227,10 +229,12 @@ public class TestContextManager {
 			try {
 				testExecutionListener.prepareTestInstance(getTestContext());
 			}
-			catch (Exception ex) {
-				logger.error("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
-						"] to prepare test instance [" + testInstance + "]", ex);
-				throw ex;
+			catch (Throwable ex) {
+				if (logger.isErrorEnabled()) {
+					logger.error("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+							"] to prepare test instance [" + testInstance + "]", ex);
+				}
+				ReflectionUtils.rethrowException(ex);
 			}
 		}
 	}
@@ -264,11 +268,13 @@ public class TestContextManager {
 			try {
 				testExecutionListener.beforeTestMethod(getTestContext());
 			}
-			catch (Exception ex) {
-				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
-						"] to process 'before' execution of test method [" + testMethod + "] for test instance [" +
-						testInstance + "]", ex);
-				throw ex;
+			catch (Throwable ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+							"] to process 'before' execution of test method [" + testMethod + "] for test instance [" +
+							testInstance + "]", ex);
+				}
+				ReflectionUtils.rethrowException(ex);
 			}
 		}
 	}
@@ -305,24 +311,26 @@ public class TestContextManager {
 		}
 		getTestContext().updateState(testInstance, testMethod, exception);
 
-		Exception afterTestMethodException = null;
+		Throwable afterTestMethodException = null;
 		// Traverse the TestExecutionListeners in reverse order to ensure proper
 		// "wrapper"-style execution of listeners.
 		for (TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
 			try {
 				testExecutionListener.afterTestMethod(getTestContext());
 			}
-			catch (Exception ex) {
-				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
-						"] to process 'after' execution for test: method [" + testMethod + "], instance [" +
-						testInstance + "], exception [" + exception + "]", ex);
+			catch (Throwable ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+							"] to process 'after' execution for test: method [" + testMethod + "], instance [" +
+							testInstance + "], exception [" + exception + "]", ex);
+				}
 				if (afterTestMethodException == null) {
 					afterTestMethodException = ex;
 				}
 			}
 		}
 		if (afterTestMethodException != null) {
-			throw afterTestMethodException;
+			ReflectionUtils.rethrowException(afterTestMethodException);
 		}
 	}
 
@@ -347,23 +355,25 @@ public class TestContextManager {
 		}
 		getTestContext().updateState(null, null, null);
 
-		Exception afterTestClassException = null;
+		Throwable afterTestClassException = null;
 		// Traverse the TestExecutionListeners in reverse order to ensure proper
 		// "wrapper"-style execution of listeners.
 		for (TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
 			try {
 				testExecutionListener.afterTestClass(getTestContext());
 			}
-			catch (Exception ex) {
-				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
-						"] to process 'after class' callback for test class [" + testClass + "]", ex);
-				if (afterTestClassException == null) {
-					afterTestClassException = ex;
+			catch (Throwable ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
+							"] to process 'after class' callback for test class [" + testClass + "]", ex);
+					if (afterTestClassException == null) {
+						afterTestClassException = ex;
+					}
 				}
 			}
 		}
 		if (afterTestClassException != null) {
-			throw afterTestClassException;
+			ReflectionUtils.rethrowException(afterTestClassException);
 		}
 	}
 

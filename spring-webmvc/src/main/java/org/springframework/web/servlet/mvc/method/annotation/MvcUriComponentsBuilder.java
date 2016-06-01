@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -57,7 +58,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -304,7 +304,7 @@ public class MvcUriComponentsBuilder {
 	 * <p>Note that it's not necessary to specify all arguments. Only the ones
 	 * required to prepare the URL, mainly {@code @RequestParam} and {@code @PathVariable}).
 	 * @param mappingName the mapping name
-	 * @return a builder to to prepare the URI String
+	 * @return a builder to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
 	 * if there is no unique match
 	 * @since 4.1
@@ -321,7 +321,7 @@ public class MvcUriComponentsBuilder {
 	 * @param builder the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
 	 * @param name the mapping name
-	 * @return a builder to to prepare the URI String
+	 * @return a builder to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
 	 * if there is no unique match
 	 * @since 4.2
@@ -406,7 +406,7 @@ public class MvcUriComponentsBuilder {
 
 	private static UriComponentsBuilder getBaseUrlToUse(UriComponentsBuilder baseUrl) {
 		if (baseUrl != null) {
-			return (UriComponentsBuilder) baseUrl.clone();
+			return baseUrl.cloneBuilder();
 		}
 		else {
 			return ServletUriComponentsBuilder.fromCurrentServletMapping();
@@ -454,7 +454,7 @@ public class MvcUriComponentsBuilder {
 				return (name.equals(methodName) && argLength == args.length);
 			}
 		};
-		Set<Method> methods = HandlerMethodSelector.selectMethods(controllerType, selector);
+		Set<Method> methods = MethodIntrospector.selectMethods(controllerType, selector);
 		if (methods.size() == 1) {
 			return methods.iterator().next();
 		}

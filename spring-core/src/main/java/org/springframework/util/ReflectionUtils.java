@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,11 @@ public abstract class ReflectionUtils {
 	 * @see #isCglibRenamedMethod
 	 */
 	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
+
+	private static final Method[] NO_METHODS = {};
+
+	private static final Field[] NO_FIELDS = {};
+
 
 	/**
 	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
@@ -110,7 +115,7 @@ public abstract class ReflectionUtils {
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to set
 	 * @param target the target object on which to set the field
-	 * @param value the value to set; may be {@code null}
+	 * @param value the value to set (may be {@code null})
 	 */
 	public static void setField(Field field, Object target, Object value) {
 		try {
@@ -260,7 +265,8 @@ public abstract class ReflectionUtils {
 	 * checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of an
 	 * InvocationTargetException with such a root cause. Throws an
-	 * IllegalStateException with an appropriate message else.
+	 * IllegalStateException with an appropriate message or
+	 * UndeclaredThrowableException otherwise.
 	 * @param ex the reflection exception to handle
 	 */
 	public static void handleReflectionException(Exception ex) {
@@ -283,7 +289,7 @@ public abstract class ReflectionUtils {
 	 * Handle the given invocation target exception. Should only be called if no
 	 * checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of such a root
-	 * cause. Throws an IllegalStateException else.
+	 * cause. Throws an UndeclaredThrowableException otherwise.
 	 * @param ex the invocation target exception to handle
 	 */
 	public static void handleInvocationTargetException(InvocationTargetException ex) {
@@ -292,12 +298,12 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Rethrow the given {@link Throwable exception}, which is presumably the
-	 * <em>target exception</em> of an {@link InvocationTargetException}. Should
-	 * only be called if no checked exception is expected to be thrown by the
-	 * target method.
-	 * <p>Rethrows the underlying exception cast to an {@link RuntimeException} or
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown
+	 * by the target method.
+	 * <p>Rethrows the underlying exception cast to a {@link RuntimeException} or
 	 * {@link Error} if appropriate; otherwise, throws an
-	 * {@link IllegalStateException}.
+	 * {@link UndeclaredThrowableException}.
 	 * @param ex the exception to rethrow
 	 * @throws RuntimeException the rethrown exception
 	 */
@@ -313,12 +319,12 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Rethrow the given {@link Throwable exception}, which is presumably the
-	 * <em>target exception</em> of an {@link InvocationTargetException}. Should
-	 * only be called if no checked exception is expected to be thrown by the
-	 * target method.
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown
+	 * by the target method.
 	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
 	 * {@link Error} if appropriate; otherwise, throws an
-	 * {@link IllegalStateException}.
+	 * {@link UndeclaredThrowableException}.
 	 * @param ex the exception to rethrow
 	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */
@@ -334,8 +340,8 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Determine whether the given method explicitly declares the given
-	 * exception or one of its superclasses, which means that an exception of
-	 * that type can be propagated as-is within a reflective invocation.
+	 * exception or one of its superclasses, which means that an exception
+	 * of that type can be propagated as-is within a reflective invocation.
 	 * @param method the declaring method
 	 * @param exceptionType the exception to throw
 	 * @return {@code true} if the exception can be thrown as-is;
@@ -617,7 +623,7 @@ public abstract class ReflectionUtils {
 			else {
 				result = declaredMethods;
 			}
-			declaredMethodsCache.put(clazz, result);
+			declaredMethodsCache.put(clazz, (result.length == 0 ? NO_METHODS : result));
 		}
 		return result;
 	}
@@ -705,7 +711,7 @@ public abstract class ReflectionUtils {
 		Field[] result = declaredFieldsCache.get(clazz);
 		if (result == null) {
 			result = clazz.getDeclaredFields();
-			declaredFieldsCache.put(clazz, result);
+			declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
 		}
 		return result;
 	}
@@ -734,6 +740,15 @@ public abstract class ReflectionUtils {
 				field.set(dest, srcValue);
 			}
 		}, COPYABLE_FIELDS);
+	}
+
+	/**
+	 * Clear the internal method/field cache.
+	 * @since 4.2.4
+	 */
+	public static void clearCache() {
+		declaredMethodsCache.clear();
+		declaredFieldsCache.clear();
 	}
 
 
@@ -792,7 +807,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
-	public static FieldFilter COPYABLE_FIELDS = new FieldFilter() {
+	public static final FieldFilter COPYABLE_FIELDS = new FieldFilter() {
 
 		@Override
 		public boolean matches(Field field) {
@@ -804,7 +819,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods.
 	 */
-	public static MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
+	public static final MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {
@@ -817,7 +832,7 @@ public abstract class ReflectionUtils {
 	 * Pre-built MethodFilter that matches all non-bridge methods
 	 * which are not declared on {@code java.lang.Object}.
 	 */
-	public static MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
+	public static final MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {

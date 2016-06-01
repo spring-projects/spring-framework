@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1356,7 +1356,7 @@ public class ServletAnnotationControllerTests {
 		request.addHeader("Accept", "application/json, text/javascript, */*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("Invalid response status code", "application/json", response.getHeader("Content-Type"));
+		assertEquals("Invalid response status code", "application/json;charset=ISO-8859-1", response.getHeader("Content-Type"));
 	}
 
 	@Test
@@ -1770,7 +1770,7 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("application/json", response.getHeader("Content-Type"));
+		assertEquals("application/json;charset=ISO-8859-1", response.getHeader("Content-Type"));
 		assertEquals("homeJson", response.getContentAsString());
 	}
 
@@ -1965,6 +1965,17 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 		assertEquals("1-2", response.getContentAsString());
 	}
+
+	@Test
+	public void httpOptions() throws ServletException, IOException {
+		initServlet(ResponseEntityController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/foo");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		servlet.service(request, response);
+		assertEquals(404, response.getStatus());
+	}
+
 
 	public static class ListEditorRegistrar implements PropertyEditorRegistrar {
 

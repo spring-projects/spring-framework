@@ -131,7 +131,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 			initialize(mappedClass);
 		}
 		else {
-			if (!this.mappedClass.equals(mappedClass)) {
+			if (this.mappedClass != mappedClass) {
 				throw new InvalidDataAccessApiUsageException("The mapped class can not be reassigned to map to " +
 						mappedClass + " since it is already providing mapping for " + this.mappedClass);
 			}

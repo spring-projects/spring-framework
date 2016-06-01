@@ -49,13 +49,17 @@ import static org.springframework.tests.Matchers.*;
  */
 public class SimpleJdbcCallTests {
 
+	private Connection connection;
+
+	private DatabaseMetaData databaseMetaData;
+
+	private DataSource dataSource;
+
+	private CallableStatement callableStatement;
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private Connection connection;
-	private DatabaseMetaData databaseMetaData;
-	private DataSource dataSource;
-	private CallableStatement callableStatement;
 
 	@Before
 	public void setUp() throws Exception {
@@ -66,6 +70,7 @@ public class SimpleJdbcCallTests {
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 		given(dataSource.getConnection()).willReturn(connection);
 	}
+
 
 	@Test
 	public void testNoSuchStoredProcedure() throws Exception {

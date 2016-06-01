@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.util.Assert;
@@ -207,14 +206,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (StringUtils.hasText(condition)) {
 			Assert.notNull(this.evaluator, "EventExpressionEvaluator must no be null");
 			EvaluationContext evaluationContext = this.evaluator.createEvaluationContext(
-					event, this.targetClass, this.method, args);
+					event, this.targetClass, this.method, args, this.applicationContext);
 			return this.evaluator.condition(condition, this.methodKey, evaluationContext);
 		}
 		return true;
 	}
 
 	protected <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
-		return AnnotationUtils.findAnnotation(this.method, annotationType);
+		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}
 
 	/**
@@ -302,7 +301,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
 			String msg = "The event listener method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual bean instance '" +
+					"' is not an instance of the actual bean class '" +
 					targetBeanClass.getName() + "'. If the bean requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(getInvocationErrorMessage(targetBean, msg, args));

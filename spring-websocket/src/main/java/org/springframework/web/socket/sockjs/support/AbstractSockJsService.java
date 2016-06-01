@@ -18,13 +18,15 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
 
@@ -56,7 +58,7 @@ import org.springframework.web.util.WebUtils;
  * path resolution and handling of static SockJS requests (e.g. "/info", "/iframe.html",
  * etc). Sub-classes must handle session URLs (i.e. transport-specific requests).
  *
- * By default, only same origin requests are allowed. Use {@link #setAllowedOrigins(List)}
+ * By default, only same origin requests are allowed. Use {@link #setAllowedOrigins}
  * to specify a list of allowed origins (a list containing "*" will allow all origins).
  *
  * @author Rossen Stoyanchev
@@ -94,9 +96,9 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private boolean webSocketEnabled = true;
 
-	private final List<String> allowedOrigins = new ArrayList<String>();
-
 	private boolean suppressCors = false;
+
+	protected final Set<String> allowedOrigins = new LinkedHashSet<String>();
 
 
 	public AbstractSockJsService(TaskScheduler scheduler) {
@@ -275,35 +277,6 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 	/**
-	 * Configure allowed {@code Origin} header values. This check is mostly
-	 * designed for browsers. There is nothing preventing other types of client
-	 * to modify the {@code Origin} header value.
-	 * <p>When SockJS is enabled and origins are restricted, transport types
-	 * that do not allow to check request origin (JSONP and Iframe based
-	 * transports) are disabled. As a consequence, IE 6 to 9 are not supported
-	 * when origins are restricted.
-	 * <p>Each provided allowed origin must have a scheme, and optionally a port
-	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
-	 * string may also be "*" in which case all origins are allowed.
-	 * @since 4.1.2
-	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
-	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
-	 */
-	public void setAllowedOrigins(List<String> allowedOrigins) {
-		Assert.notNull(allowedOrigins, "Allowed origin List must not be null");
-		this.allowedOrigins.clear();
-		this.allowedOrigins.addAll(allowedOrigins);
-	}
-
-	/**
-	 * @since 4.1.2
-	 * @see #setAllowedOrigins(List)
-	 */
-	public List<String> getAllowedOrigins() {
-		return Collections.unmodifiableList(this.allowedOrigins);
-	}
-
-	/**
 	 * This option can be used to disable automatic addition of CORS headers for
 	 * SockJS requests.
 	 * <p>The default value is "false".
@@ -319,6 +292,35 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 */
 	public boolean shouldSuppressCors() {
 		return this.suppressCors;
+	}
+
+	/**
+	 * Configure allowed {@code Origin} header values. This check is mostly
+	 * designed for browsers. There is nothing preventing other types of client
+	 * to modify the {@code Origin} header value.
+	 * <p>When SockJS is enabled and origins are restricted, transport types
+	 * that do not allow to check request origin (JSONP and Iframe based
+	 * transports) are disabled. As a consequence, IE 6 to 9 are not supported
+	 * when origins are restricted.
+	 * <p>Each provided allowed origin must have a scheme, and optionally a port
+	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
+	 * string may also be "*" in which case all origins are allowed.
+	 * @since 4.1.2
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
+	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
+	 */
+	public void setAllowedOrigins(Collection<String> allowedOrigins) {
+		Assert.notNull(allowedOrigins, "Allowed origins Collection must not be null");
+		this.allowedOrigins.clear();
+		this.allowedOrigins.addAll(allowedOrigins);
+	}
+
+	/**
+	 * @since 4.1.2
+	 * @see #setAllowedOrigins
+	 */
+	public Collection<String> getAllowedOrigins() {
+		return Collections.unmodifiableSet(this.allowedOrigins);
 	}
 
 
@@ -465,24 +467,11 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		String path = request.getURI().getPath();
 		int index = path.lastIndexOf('/') + 1;
 		String filename = path.substring(index);
-		return filename.indexOf(';') == -1;
+		return (filename.indexOf(';') == -1);
 	}
 
-	/**
-	 * Handle request for raw WebSocket communication, i.e. without any SockJS message framing.
-	 */
-	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request,
-			ServerHttpResponse response, WebSocketHandler webSocketHandler) throws IOException;
-
-	/**
-	 * Handle a SockJS session URL (i.e. transport-specific request).
-	 */
-	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
-			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
-
-
-	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response,
-			HttpMethod... httpMethods) throws IOException {
+	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response, HttpMethod... httpMethods)
+			throws IOException {
 
 		if (WebUtils.isSameOrigin(request)) {
 			return true;
@@ -529,6 +518,19 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	}
 
 
+	/**
+	 * Handle request for raw WebSocket communication, i.e. without any SockJS message framing.
+	 */
+	protected abstract void handleRawWebSocketRequest(ServerHttpRequest request,
+			ServerHttpResponse response, WebSocketHandler webSocketHandler) throws IOException;
+
+	/**
+	 * Handle a SockJS session URL (i.e. transport-specific request).
+	 */
+	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
+			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
+
+
 	private interface SockJsRequestHandler {
 
 		void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException;
@@ -542,17 +544,17 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			if (HttpMethod.GET.equals(request.getMethod())) {
+			if (HttpMethod.GET == request.getMethod()) {
 				addNoCacheHeaders(response);
 				if (checkOrigin(request, response)) {
 					response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
-					String content = String.format(INFO_CONTENT, random.nextInt(),
-							isSessionCookieNeeded(), isWebSocketEnabled());
+					String content = String.format(
+							INFO_CONTENT, random.nextInt(), isSessionCookieNeeded(), isWebSocketEnabled());
 					response.getBody().write(content.getBytes());
 				}
 
 			}
-			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {
+			else if (HttpMethod.OPTIONS == request.getMethod()) {
 				if (checkOrigin(request, response)) {
 					addCacheHeaders(response);
 					response.setStatusCode(HttpStatus.NO_CONTENT);

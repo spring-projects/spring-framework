@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.PathMatcher;
@@ -315,8 +316,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (getBrokerRegistry().getUserRegistryBroadcast() == null) {
 			return new NoOpMessageHandler();
 		}
-		return new UserRegistryMessageHandler(userRegistry(), brokerMessagingTemplate(),
-				getBrokerRegistry().getUserRegistryBroadcast(), messageBrokerTaskScheduler());
+		SimpUserRegistry userRegistry = userRegistry();
+		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry);
+		return new UserRegistryMessageHandler((MultiServerUserRegistry) userRegistry,
+				brokerMessagingTemplate(), getBrokerRegistry().getUserRegistryBroadcast(),
+				messageBrokerTaskScheduler());
 	}
 
 	// Expose alias for 4.1 compatibility
@@ -380,6 +384,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
 		}
+		resolver.setPathMatcher(getBrokerRegistry().getPathMatcher());
 		return resolver;
 	}
 

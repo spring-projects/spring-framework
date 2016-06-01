@@ -1,27 +1,27 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.test.web.servlet.htmlunit;
+
+import com.gargoylesoftware.htmlunit.WebClient;
 
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.gargoylesoftware.htmlunit.WebClient;
 
 /**
  * {@code MockMvcWebClientBuilder} simplifies the creation of an HtmlUnit
@@ -56,6 +56,7 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	protected MockMvcWebClientBuilder(WebApplicationContext context, MockMvcConfigurer configurer) {
 		super(context, configurer);
 	}
+
 
 	/**
 	 * Create a new {@code MockMvcWebClientBuilder} based on the supplied
@@ -104,8 +105,8 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	 * @see #build()
 	 */
 	public MockMvcWebClientBuilder withDelegate(WebClient webClient) {
-		Assert.notNull(webClient, "webClient must not be null");
-		webClient.setWebConnection(createConnection(webClient.getWebConnection()));
+		Assert.notNull(webClient, "WebClient must not be null");
+		webClient.setWebConnection(createConnection(webClient));
 		this.webClient = webClient;
 		return this;
 	}

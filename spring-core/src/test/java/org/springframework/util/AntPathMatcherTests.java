@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ public class AntPathMatcherTests {
 		// test exact matching
 		assertTrue(pathMatcher.match("test", "test"));
 		assertTrue(pathMatcher.match("/test", "/test"));
+		assertTrue(pathMatcher.match("http://example.org", "http://example.org")); // SPR-14141
 		assertFalse(pathMatcher.match("/test.jpg", "test.jpg"));
 		assertFalse(pathMatcher.match("test", "/test"));
 		assertFalse(pathMatcher.match("/test", "test"));
@@ -128,9 +129,19 @@ public class AntPathMatcherTests {
 
 		assertFalse(pathMatcher.match("/x/x/**/bla", "/x/x/x/"));
 
+		assertTrue(pathMatcher.match("/foo/bar/**", "/foo/bar")) ;
+
 		assertTrue(pathMatcher.match("", ""));
 
 		assertTrue(pathMatcher.match("/{bla}.*", "/testing.html"));
+	}
+
+	// SPR-14247
+	@Test
+	public void matchWithTrimTokensEnabled() throws Exception {
+		pathMatcher.setTrimTokens(true);
+
+		assertTrue(pathMatcher.match("/foo/bar", "/foo /bar"));
 	}
 
 	@Test
@@ -418,8 +429,8 @@ public class AntPathMatcherTests {
 		assertEquals("/*.html", pathMatcher.combine("/**", "/*.html"));
 		assertEquals("/*.html", pathMatcher.combine("/*", "/*.html"));
 		assertEquals("/*.html", pathMatcher.combine("/*.*", "/*.html"));
-		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));	// SPR-8858
-		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));	// SPR-7970
+		assertEquals("/{foo}/bar", pathMatcher.combine("/{foo}", "/bar"));    // SPR-8858
+		assertEquals("/user/user", pathMatcher.combine("/user", "/user"));    // SPR-7970
 		assertEquals("/{foo:.*[^0-9].*}/edit/", pathMatcher.combine("/{foo:.*[^0-9].*}", "/edit/")); // SPR-10062
 		assertEquals("/1.0/foo/test", pathMatcher.combine("/1.0", "/foo/test")); // SPR-10554
 		assertEquals("/hotel", pathMatcher.combine("/", "/hotel")); // SPR-12975
@@ -454,8 +465,8 @@ public class AntPathMatcherTests {
 
 		// SPR-10550
 		assertEquals(-1, comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/**"));
-		assertEquals(1, comparator.compare("/**","/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
-		assertEquals(0, comparator.compare("/**","/**"));
+		assertEquals(1, comparator.compare("/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
+		assertEquals(0, comparator.compare("/**", "/**"));
 
 		assertEquals(-1, comparator.compare("/hotels/{hotel}", "/hotels/*"));
 		assertEquals(1, comparator.compare("/hotels/*", "/hotels/{hotel}"));
@@ -618,10 +629,42 @@ public class AntPathMatcherTests {
 		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
 
 		for (int i = 0; i < 65536; i++) {
-			pathMatcher.match("test" + i, "test");
+			pathMatcher.match("test" + i, "test" + i);
 		}
 		// Cache keeps being alive due to the explicit cache setting
 		assertTrue(pathMatcher.stringMatcherCache.size() > 65536);
+	}
+
+	@Test
+	public void preventCreatingStringMatchersIfPathDoesNotStartsWithPatternPrefix() {
+		pathMatcher.setCachePatterns(true);
+		assertEquals(0, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test?", "test");
+		assertEquals(1, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test?", "best");
+		pathMatcher.match("test/*", "view/test.jpg");
+		pathMatcher.match("test/**/test.jpg", "view/test.jpg");
+		pathMatcher.match("test/{name}.jpg", "view/test.jpg");
+		assertEquals(1, pathMatcher.stringMatcherCache.size());
+	}
+
+	@Test
+	public void creatingStringMatchersIfPatternPrefixCannotDetermineIfPathMatch() {
+		pathMatcher.setCachePatterns(true);
+		assertEquals(0, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test", "testian");
+		pathMatcher.match("test?", "testFf");
+		pathMatcher.match("test/*", "test/dir/name.jpg");
+		pathMatcher.match("test/{name}.jpg", "test/lorem.jpg");
+		pathMatcher.match("bla/**/test.jpg", "bla/test.jpg");
+		pathMatcher.match("**/{name}.jpg", "test/lorem.jpg");
+		pathMatcher.match("/**/{name}.jpg", "/test/lorem.jpg");
+		pathMatcher.match("/*/dir/{name}.jpg", "/*/dir/lorem.jpg");
+
+		assertEquals(7, pathMatcher.stringMatcherCache.size());
 	}
 
 	@Test

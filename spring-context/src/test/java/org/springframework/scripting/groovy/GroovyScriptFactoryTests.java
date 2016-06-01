@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -445,8 +445,7 @@ public class GroovyScriptFactoryTests {
 		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
-	@Test
-	// Test for SPR-6268
+	@Test  // SPR-6268
 	public void testRefreshableFromTagProxyTargetClass() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd-proxy-target-class.xml",
 				getClass());
@@ -464,8 +463,7 @@ public class GroovyScriptFactoryTests {
 		assertNotNull(AnnotationUtils.findAnnotation(messenger.getClass(), Component.class));
 	}
 
-	@Test
-	// Test for SPR-6268
+	@Test  // SPR-6268
 	public void testProxyTargetClassNotAllowedIfNotGroovy() throws Exception {
 		try {
 			new ClassPathXmlApplicationContext("jruby-with-xsd-proxy-target-class.xml", getClass());

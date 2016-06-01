@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,10 @@ import org.springframework.http.HttpStatus;
  * use of a {@code reason} unsuitable for REST APIs. For such cases it is
  * preferable to use a {@link org.springframework.http.ResponseEntity} as
  * a return type and avoid the use of {@code @ResponseStatus} altogether.
+ *
+ * <p>Note that a controller class may also be annotated with
+ * {@code @ResponseStatus} and is then inherited by all {@code @RequestMapping}
+ * methods.
  *
  * @author Arjen Poutsma
  * @author Sam Brannen

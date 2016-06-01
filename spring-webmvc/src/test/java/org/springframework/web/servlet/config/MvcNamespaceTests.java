@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
 
@@ -145,6 +146,7 @@ import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
 /**
@@ -343,17 +345,21 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResources() throws Exception {
-		loadBeanDefinitions("mvc-config-resources.xml", 10);
+		loadBeanDefinitions("mvc-config-resources.xml", 20);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
 
+		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
+		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
+
 		ResourceHttpRequestHandler handler = appContext.getBean(ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
+		assertSame(manager, handler.getContentNegotiationManager());
 
-		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
-		assertNotNull(mapping);
-		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, mapping.getOrder());
+		SimpleUrlHandlerMapping resourceMapping = appContext.getBean(SimpleUrlHandlerMapping.class);
+		assertNotNull(resourceMapping);
+		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, resourceMapping.getOrder());
 
 		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertNotNull(beanNameMapping);
@@ -362,15 +368,19 @@ public class MvcNamespaceTests {
 		ResourceUrlProvider urlProvider = appContext.getBean(ResourceUrlProvider.class);
 		assertNotNull(urlProvider);
 
-		MappedInterceptor mappedInterceptor = appContext.getBean(MappedInterceptor.class);
-		assertNotNull(urlProvider);
-		assertEquals(ResourceUrlProviderExposingInterceptor.class, mappedInterceptor.getInterceptor().getClass());
+		Map<String, MappedInterceptor> beans = appContext.getBeansOfType(MappedInterceptor.class);
+		List<Class<?>> interceptors = beans.values().stream()
+				.map(mappedInterceptor -> mappedInterceptor.getInterceptor().getClass())
+				.collect(Collectors.toList());
+		assertThat(interceptors, containsInAnyOrder(ConversionServiceExposingInterceptor.class,
+				ResourceUrlProviderExposingInterceptor.class));
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setRequestURI("/resources/foo.css");
 		request.setMethod("GET");
 
-		HandlerExecutionChain chain = mapping.getHandler(request);
+		HandlerExecutionChain chain = resourceMapping.getHandler(request);
+		assertNotNull(chain);
 		assertTrue(chain.getHandler() instanceof ResourceHttpRequestHandler);
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -842,6 +852,7 @@ public class MvcNamespaceTests {
 		ContentNegotiationManager manager = (ContentNegotiationManager) accessor.getPropertyValue(beanName);
 		assertNotNull(manager);
 		assertSame(manager, this.appContext.getBean(ContentNegotiationManager.class));
+		assertSame(manager, this.appContext.getBean("mvcContentNegotiationManager"));
 	}
 
 	@Test

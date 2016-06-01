@@ -211,6 +211,7 @@ public abstract class CommonsFileUploadSupport {
 		if (encoding != null && !encoding.equals(fileUpload.getHeaderEncoding())) {
 			actualFileUpload = newFileUpload(getFileItemFactory());
 			actualFileUpload.setSizeMax(fileUpload.getSizeMax());
+			actualFileUpload.setFileSizeMax(fileUpload.getFileSizeMax());
 			actualFileUpload.setHeaderEncoding(encoding);
 		}
 
@@ -303,7 +304,7 @@ public abstract class CommonsFileUploadSupport {
 			return defaultEncoding;
 		}
 		MediaType contentType = MediaType.parseMediaType(contentTypeHeader);
-		Charset charset = contentType.getCharSet();
+		Charset charset = contentType.getCharset();
 		return (charset != null ? charset.name() : defaultEncoding);
 	}
 

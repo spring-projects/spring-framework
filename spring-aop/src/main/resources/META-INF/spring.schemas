@@ -6,4 +6,5 @@ http\://www.springframework.org/schema/aop/spring-aop-3.2.xsd=org/springframewor
 http\://www.springframework.org/schema/aop/spring-aop-4.0.xsd=org/springframework/aop/config/spring-aop-4.0.xsd
 http\://www.springframework.org/schema/aop/spring-aop-4.1.xsd=org/springframework/aop/config/spring-aop-4.1.xsd
 http\://www.springframework.org/schema/aop/spring-aop-4.2.xsd=org/springframework/aop/config/spring-aop-4.2.xsd
-http\://www.springframework.org/schema/aop/spring-aop.xsd=org/springframework/aop/config/spring-aop-4.2.xsd
+http\://www.springframework.org/schema/aop/spring-aop-4.3.xsd=org/springframework/aop/config/spring-aop-4.3.xsd
+http\://www.springframework.org/schema/aop/spring-aop.xsd=org/springframework/aop/config/spring-aop-4.3.xsd

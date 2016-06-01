@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,7 @@ public class ServletRequestAttributesTests {
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY));
 	}
 
 	@Test
@@ -89,11 +88,11 @@ public class ServletRequestAttributesTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
 		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY));
 	}
 
 	@Test
@@ -104,8 +103,7 @@ public class ServletRequestAttributesTests {
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY));
 	}
 
 	@Test
@@ -115,11 +113,11 @@ public class ServletRequestAttributesTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setSession(session);
 		ServletRequestAttributes attrs = new ServletRequestAttributes(request);
+		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_GLOBAL_SESSION));
 		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY));
 	}
 
 	@Test

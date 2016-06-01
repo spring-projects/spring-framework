@@ -305,7 +305,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, Object[] args) {
+	public boolean matches(Method method, Class<?> targetClass, Object... args) {
 		checkReadyToMatch();
 		ShadowMatch shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
 		ShadowMatch originalShadowMatch = getShadowMatch(method, method);

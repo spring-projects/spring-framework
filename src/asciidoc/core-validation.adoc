@@ -349,7 +349,7 @@ the properties of instantiated `Companies` and `Employees`:
 Spring uses the concept of `PropertyEditors` to effect the conversion between an
 `Object` and a `String`. If you think about it, it sometimes might be handy to be able
 to represent properties in a different way than the object itself. For example, a `Date`
-can be represented in a human readable way (as the `String` ' `2007-14-09`'), while
+can be represented in a human readable way (as the `String` `'2007-14-09'`), while
 we're still able to convert the human readable form back to the original date (or even
 better: convert any date entered in a human readable form, back to `Date` objects). This
 behavior can be achieved by __registering custom editors__, of type
@@ -1317,7 +1317,7 @@ See <<mvc-config-conversion>> in the Spring MVC chapter.
 [[format-configuring-formatting-globaldatetimeformat]]
 == Configuring a global date & time format
 By default, date and time fields that are not annotated with `@DateTimeFormat` are
-converted from strings using the the `DateFormat.SHORT` style. If you prefer, you can
+converted from strings using the `DateFormat.SHORT` style. If you prefer, you can
 change this by defining your own global format.
 
 You will need to ensure that Spring does not register default formatters, and instead

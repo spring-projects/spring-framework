@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,9 +116,10 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.MISSING_CONSTRUCTOR_ARGS, spe.getMessageCode());
 			assertEquals(10, spe.getPosition());
 		}
@@ -127,9 +128,10 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(3,");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS, spe.getMessageCode());
 			assertEquals(10, spe.getPosition());
 		}
@@ -138,9 +140,10 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(3");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS, spe.getMessageCode());
 			assertEquals(10, spe.getPosition());
 		}
@@ -149,9 +152,10 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("new String(");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.RUN_OUT_OF_ARGUMENTS, spe.getMessageCode());
 			assertEquals(10, spe.getPosition());
 		}
@@ -160,9 +164,10 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("\"abc");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, spe.getMessageCode());
 			assertEquals(0, spe.getPosition());
 		}
@@ -171,9 +176,10 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw("'abc");
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(SpelMessage.NON_TERMINATING_QUOTED_STRING, spe.getMessageCode());
 			assertEquals(0, spe.getPosition());
 		}
@@ -274,7 +280,8 @@ public class SpelParserTests {
 		try {
 			new SpelExpressionParser().parseRaw("\"double quote: \\\"\\\".\"");
 			fail("Should have failed");
-		} catch (SpelParseException spe) {
+		}
+		catch (SpelParseException spe) {
 			assertEquals(17, spe.getPosition());
 			assertEquals(SpelMessage.UNEXPECTED_ESCAPE_CHAR, spe.getMessageCode());
 		}
@@ -401,9 +408,10 @@ public class SpelParserTests {
 			Object o = expr.getValue();
 			assertEquals(value, o);
 			assertEquals(type, o.getClass());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			fail(ex.getMessage());
 		}
 	}
 
@@ -412,9 +420,10 @@ public class SpelParserTests {
 			SpelExpressionParser parser = new SpelExpressionParser();
 			parser.parseRaw(expression);
 			fail();
-		} catch (ParseException e) {
-			assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException) e;
+		}
+		catch (ParseException ex) {
+			assertTrue(ex instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) ex;
 			assertEquals(expectedMessage, spe.getMessageCode());
 		}
 	}

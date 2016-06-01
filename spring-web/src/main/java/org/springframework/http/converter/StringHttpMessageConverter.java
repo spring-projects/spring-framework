@@ -42,8 +42,6 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
 
 
-	private final Charset defaultCharset;
-
 	private final List<Charset> availableCharsets;
 
 	private boolean writeAcceptCharset = true;
@@ -62,8 +60,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	 * type does not specify one.
 	 */
 	public StringHttpMessageConverter(Charset defaultCharset) {
-		super(new MediaType("text", "plain", defaultCharset), MediaType.ALL);
-		this.defaultCharset = defaultCharset;
+		super(defaultCharset, MediaType.TEXT_PLAIN, MediaType.ALL);
 		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
 	}
 
@@ -121,11 +118,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	private Charset getContentTypeCharset(MediaType contentType) {
-		if (contentType != null && contentType.getCharSet() != null) {
-			return contentType.getCharSet();
+		if (contentType != null && contentType.getCharset() != null) {
+			return contentType.getCharset();
 		}
 		else {
-			return this.defaultCharset;
+			return this.getDefaultCharset();
 		}
 	}
 

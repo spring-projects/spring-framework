@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -862,6 +862,7 @@ public class DispatcherServletTests {
 		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "OPTIONS", "/foo");
 		MockHttpServletResponse response = spy(new MockHttpServletResponse());
 		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.setDispatchOptionsRequest(false);
 		servlet.service(request, response);
 		verify(response, never()).getHeader(anyString()); // SPR-10341
 		assertThat(response.getHeader("Allow"), equalTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH"));

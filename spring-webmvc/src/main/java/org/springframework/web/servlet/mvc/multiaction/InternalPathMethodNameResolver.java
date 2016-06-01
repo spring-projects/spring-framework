@@ -35,7 +35,9 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
-*/
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
+ */
+@Deprecated
 public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolver {
 
 	private String prefix = "";
@@ -97,7 +99,7 @@ public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolve
 
 	/**
 	 * Extract the handler method name from the given request URI.
-	 * Delegates to {@code WebUtils.extractViewNameFromUrlPath(String)}.
+	 * Delegates to {@code WebUtils.extractFilenameFromUrlPath(String)}.
 	 * @param uri the request URI (e.g. "/index.html")
 	 * @return the extracted URI filename (e.g. "index")
 	 * @see org.springframework.web.util.WebUtils#extractFilenameFromUrlPath

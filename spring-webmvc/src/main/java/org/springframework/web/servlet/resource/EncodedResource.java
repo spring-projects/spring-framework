@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.resource;
 
 import org.springframework.core.io.Resource;
-
 
 /**
  * Interface for a resource descriptor that describes the encoding
@@ -39,6 +38,6 @@ public interface EncodedResource extends Resource {
 	 * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.2.1">HTTP/1.1: Semantics
 	 * and Content, section 3.1.2.1</a>
 	 */
-	public String getContentEncoding();
+	String getContentEncoding();
 
 }

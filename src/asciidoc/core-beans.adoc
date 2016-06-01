@@ -437,6 +437,16 @@ you are using Spring AOP it helps a lot when applying advice to a set of beans r
 by name.
 ****
 
+[NOTE]
+====
+With component scanning in the classpath, Spring generates bean names for unnamed
+components, following the rules above: essentially, taking the simple class name
+and turning its initial character to lower-case. However, in the (unusual) special
+case when there is more than one character and both the first and second characters
+are upper case, the original casing gets preserved. These are the same rules as
+defined by `java.beans.Introspector.decapitalize` (which Spring is using here).
+====
+
 
 [[beans-beanname-alias]]
 ==== Aliasing a bean outside the bean definition
@@ -1397,10 +1407,17 @@ so-called __inner bean__.
 	</bean>
 ----
 
-An inner bean definition does not require a defined id or name; the container ignores
-these values. It also ignores the `scope` flag. Inner beans are __always__ anonymous and
-they are __always__ created with the outer bean. It is __not__ possible to inject inner
-beans into collaborating beans other than into the enclosing bean.
+An inner bean definition does not require a defined id or name; if specified, the container
+does not use such a value as an identifier. The container also ignores the `scope` flag on
+creation: Inner beans are __always__ anonymous and they are __always__ created with the outer
+bean. It is __not__ possible to inject inner beans into collaborating beans other than into
+the enclosing bean or to access them independently.
+
+As a corner case, it is possible to receive destruction callbacks from a custom scope, e.g.
+for a request-scoped inner bean contained within a singleton bean: The creation of the inner
+bean instance will be tied to its containing bean, but destruction callbacks allow it to
+participate in the request scope's lifecycle. This is not a common scenario; inner beans
+typically simply share their containing bean's scope.
 
 
 [[beans-collection-elements]]
@@ -1712,7 +1729,7 @@ then nested `constructor-arg` elements.
 
 Let's review the examples from <<beans-constructor-injection>> with the `c:` namespace:
 
-[source,java,indent=0]
+[source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<beans xmlns="http://www.springframework.org/schema/beans"
@@ -1746,7 +1763,7 @@ For the rare cases where the constructor argument names are not available (usual
 the bytecode was compiled without debugging information), one can use fallback to the
 argument indexes:
 
-[source,java,indent=0]
+[source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<!-- c-namespace index declaration -->
@@ -2554,7 +2571,7 @@ The Spring container creates a new instance of the `AppPreferences` bean by usin
 `appPreferences` bean is scoped at the `ServletContext` level, stored as a regular
 `ServletContext` attribute. This is somewhat similar to a Spring singleton bean but
 differs in two important ways: It is a singleton per `ServletContext`, not per Spring
-'ApplicationContext' (or which there may be several in any given web application),
+'ApplicationContext' (for which there may be several in any given web application),
 and it is actually exposed and therefore visible as a `ServletContext` attribute.
 
 
@@ -3700,7 +3717,7 @@ Find below the custom `BeanPostProcessor` implementation class definition:
 
 		public Object postProcessAfterInitialization(Object bean,
 				String beanName) throws BeansException {
-			System.out.println("Bean ''" + beanName + "'' created : " + bean.toString());
+			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
 			return bean;
 		}
 
@@ -4161,7 +4178,40 @@ references and values even when you use the class outside of a container.
 [[beans-autowired-annotation]]
 === @Autowired
 
-As expected, you can apply the `@Autowired` annotation to "traditional" setter methods:
+[NOTE]
+====
+JSR 330's `@Inject` annotation can be used in place of Spring's `@Autowired` annotation
+in the examples below. See <<beans-standard-annotations,here>> for more details.
+====
+
+You can apply the `@Autowired` annotation to constructors:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class MovieRecommender {
+
+		private final CustomerPreferenceDao customerPreferenceDao;
+
+		@Autowired
+		public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
+			this.customerPreferenceDao = customerPreferenceDao;
+		}
+
+		// ...
+
+	}
+----
+
+[NOTE]
+====
+As of Spring Framework 4.3, the `@Autowired` constructor is no longer necessary if the
+target bean only defines one constructor. If several constructors are available, at
+least one must be annotated to teach the container which one it has to use.
+====
+
+As expected, you can also apply the `@Autowired` annotation to "traditional" setter
+methods:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4179,12 +4229,6 @@ As expected, you can apply the `@Autowired` annotation to "traditional" setter m
 
 	}
 ----
-
-[NOTE]
-====
-JSR 330's `@Inject` annotation can be used in place of Spring's `@Autowired` annotation
-in the examples below. See <<beans-standard-annotations,here>> for more details.
-====
 
 You can also apply the annotation to methods with arbitrary names and/or multiple
 arguments:
@@ -4210,17 +4254,17 @@ arguments:
 	}
 ----
 
-You can apply `@Autowired` to constructors and fields:
+You can apply `@Autowired` to fields as well and even mix it with constructors:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	public class MovieRecommender {
 
+		private final CustomerPreferenceDao customerPreferenceDao;
+
 		@Autowired
 		private MovieCatalog movieCatalog;
-
-		private CustomerPreferenceDao customerPreferenceDao;
 
 		@Autowired
 		public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
@@ -4427,7 +4471,7 @@ The corresponding bean definitions appear as follows.
 
 		<context:annotation-config/>
 
-		<bean class="example.SimpleMovieCatalog" **primary=true**>
+		<bean class="example.SimpleMovieCatalog" **primary="true"**>
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
@@ -4625,7 +4669,7 @@ demonstrated in the following example.
 		</bean>
 
 		<bean class="example.SimpleMovieCatalog">
-			**_<qualifier type="example.Genre" value="Comedy"/>**
+			**<qualifier type="example.Genre" value="Comedy"/>**
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
@@ -5407,7 +5451,7 @@ resolving expression text.
 The `@Bean` methods in a Spring component are processed differently than their
 counterparts inside a Spring `@Configuration` class. The difference is that `@Component`
 classes are not enhanced with CGLIB to intercept the invocation of methods and fields.
-CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods 
+CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods
 in `@Configuration` classes creates bean metadata references to collaborating objects;
 such methods are __not__ invoked with normal Java semantics but rather go through the
 container in order to provide the usual lifecycle management and proxying of Spring
@@ -5791,8 +5835,8 @@ It is very common to use `@Component` without specifying a name for the componen
 	}
 ----
 
-When using `@Named`, it is possible to use
-component-scanning in the exact same way as when using Spring annotations:
+When using `@Named`, it is possible to use component scanning in the exact same way
+as when using Spring annotations:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5803,6 +5847,12 @@ component-scanning in the exact same way as when using Spring annotations:
     	...
 	}
 ----
+
+[NOTE]
+====
+In contrast to `@Component`, the JSR-330 `@Named` annotation is not composable.
+Please use Spring's stereotype model for building custom component annotations.
+====
 
 
 
@@ -6754,8 +6804,12 @@ work on the configuration class itself since it is being created as a bean insta
 	@Configuration
 	public class RepositoryConfig {
 
+		private final DataSource dataSource;
+
 		@Autowired
-		private DataSource dataSource;
+		public RepositoryConfig(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
 
 		@Bean
 		public AccountRepository accountRepository() {
@@ -6782,6 +6836,14 @@ work on the configuration class itself since it is being created as a bean insta
 		transferService.transfer(100.00, "A123", "C456");
 	}
 ----
+
+[TIP]
+====
+Constructor injection in `@Configuration` classes is only supported as of Spring
+Framework 4.3. Note also that there is no need to specify `@Autowired` if the target
+bean defines only one constructor; in the example above, `@Autowired` is not necessary
+on the `RepositoryConfig` constructor.
+====
 
 .[[beans-java-injecting-imported-beans-fq]]Fully-qualifying imported beans for ease of navigation
 --
@@ -7453,7 +7515,7 @@ hierarchy of property sources. To explain fully, consider the following:
 ApplicationContext ctx = new GenericApplicationContext();
 Environment env = ctx.getEnvironment();
 boolean containsFoo = env.containsProperty("foo");
-System.out.println("Does my environment contain the ''foo'' property? " + containsFoo);
+System.out.println("Does my environment contain the 'foo' property? " + containsFoo);
 ----
 
 In the snippet above, we see a high-level way of asking Spring whether the `foo` property is
@@ -7473,7 +7535,7 @@ is populated with additional default property sources including servlet config a
 context parameters. {api-spring-framework}/web/portlet/context/StandardPortletEnvironment.html[`StandardPortletEnvironment`]
 similarly has access to portlet config and portlet context parameters as property sources.
 Both can optionally enable a {api-spring-framework}/jndi/JndiPropertySource.html[`JndiPropertySource`].
-See Javadoc for details.
+See the javadocs for details.
 ====
 
 Concretely, when using the `StandardEnvironment`, the call to `env.containsProperty("foo")`
@@ -7485,7 +7547,16 @@ runtime.
 The search performed is hierarchical. By default, system properties have precedence over
 environment variables, so if the `foo` property happens to be set in both places during
 a call to `env.getProperty("foo")`, the system property value will 'win' and be returned
-preferentially over the environment variable.
+preferentially over the environment variable. Note that property values will not get merged
+but rather completely overridden by a preceding entry.
+
+For a common `StandardServletEnvironment`, the full hierarchy looks as follows, with the
+highest-precedence entries at the top:
+* ServletConfig parameters (if applicable, e.g. in case of a `DispatcherServlet` context)
+* ServletContext parameters (web.xml context-param entries)
+* JNDI environment variables ("java:comp/env/" entries)
+* JVM system properties ("-D" command-line arguments)
+* JVM system environment (operating system environment variables)
 ====
 
 Most importantly, the entire mechanism is configurable. Perhaps you have a custom source
@@ -7723,7 +7794,7 @@ are...
 [subs="verbatim,quotes"]
 ----
 	# in exceptions.properties
-	argument.required=The '{0}' argument is required.
+	argument.required=The {0} argument is required.
 ----
 
 A program to execute the `MessageSource` functionality is shown in the next example.
@@ -7804,7 +7875,7 @@ The resulting output from the invocation of the `execute()` method will be...
 The userDao argument is required.
 ----
 
-With regard to internationalization (i18n), Spring's various `MessageResource`
+With regard to internationalization (i18n), Spring's various `MessageSource`
 implementations follow the same locale resolution and fallback rules as the standard JDK
 `ResourceBundle`. In short, and continuing with the example `messageSource` defined
 previously, if you want to resolve messages against the British (`en-GB`) locale, you
@@ -7819,7 +7890,7 @@ resolved is specified manually.
 [subs="verbatim,quotes"]
 ----
 # in exceptions_en_GB.properties
-argument.required=Ebagum lad, the '{0}' argument is required, I say, required.
+argument.required=Ebagum lad, the {0} argument is required, I say, required.
 ----
 
 [source,java,indent=0]
@@ -8131,10 +8202,10 @@ available to the context so one can use them for conditional event processing:
 
 | __argument name__
 | evaluation context
-| Name of any of the method argument. If for some reason the names are not available
-  (ex: no debug information), the argument names are also available under the `a<#arg>`
+| Name of any of the method arguments. If for some reason the names are not available
+  (e.g. no debug information), the argument names are also available under the `#a<#arg>`
   where __#arg__ stands for the argument index (starting from 0).
-| `iban` or `a0` (one can also use `p0` or `p<#arg>` notation as an alias).
+| `#iban` or `#a0` (one can also use `#p0` or `#p<#arg>` notation as an alias).
 |===
 
 Note that `#root.event` allows you to access to the underlying event, even if your method
@@ -8153,11 +8224,42 @@ method signature to return the event that should be published, something like:
 	}
 ----
 
+NOTE: This feature is not supported for <<context-functionality-events-async,asynchronous
+listeners>>.
+
 This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` handled
 by the method above. If you need to publish several events, just return a `Collection` of
 events instead.
 
-Finally if you need the listener to be invoked before another one, just add the `@Order`
+[[context-functionality-events-async]]
+==== Asynchronous Listeners
+
+If you want a particular listener to process events asynchronously, simply reuse the
+<<scheduling-annotation-support-async,regular `@Async` support>>:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener
+	@Async
+	public void processBlackListEvent(BlackListEvent event) {
+		// BlackListEvent is processed in a separate thread
+	}
+----
+
+Be aware of the following limitations when using asynchronous events:
+
+. If the event listener throws an `Exception` it will not be propagated to the caller,
+  check `AsyncUncaughtExceptionHandler` for more details.
+. Such event listener cannot send replies. If you need to send another event as the
+  result of the processing, inject `ApplicationEventPublisher` to send the event
+  manually.
+
+
+[[context-functionality-events-order]]
+==== Ordering Listeners
+
+If you need the listener to be invoked before another one, just add the `@Order`
 annotation to the method declaration:
 
 [source,java,indent=0]
@@ -8470,4 +8572,3 @@ utility class
 locator that is described in this
 https://spring.io/blog/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/[Spring
 team blog entry].
-

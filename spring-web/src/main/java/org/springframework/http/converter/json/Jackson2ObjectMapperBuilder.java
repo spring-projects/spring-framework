@@ -47,6 +47,8 @@ import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
+import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.beans.BeanUtils;
@@ -70,12 +72,13 @@ import org.springframework.util.StringUtils;
  * detected on the classpath:
  * <ul>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk7">jackson-datatype-jdk7</a>: support for Java 7 types like {@link java.nio.file.Path}</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>: support for other Java 8 types like {@link java.util.Optional}</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-module-kotlin">jackson-module-kotlin</a>: support for Kotlin classes and data classes</li>
  * </ul>
  *
- * <p>Tested against Jackson 2.2, 2.3, 2.4, 2.5, 2.6; compatible with Jackson 2.0 and higher.
+ * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
@@ -126,6 +129,8 @@ public class Jackson2ObjectMapperBuilder {
 	private HandlerInstantiator handlerInstantiator;
 
 	private ApplicationContext applicationContext;
+
+	private Boolean defaultUseWrapper;
 
 
 	/**
@@ -393,6 +398,16 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Define if a wrapper will be used for indexed (List, array) properties or not by
+	 * default (only applies to {@link XmlMapper}).
+	 * @since 4.3
+	 */
+	public Jackson2ObjectMapperBuilder defaultUseWrapper(boolean defaultUseWrapper) {
+		this.defaultUseWrapper = defaultUseWrapper;
+		return this;
+	}
+
+	/**
 	 * Specify features to enable.
 	 * @see com.fasterxml.jackson.core.JsonParser.Feature
 	 * @see com.fasterxml.jackson.core.JsonGenerator.Feature
@@ -547,7 +562,8 @@ public class Jackson2ObjectMapperBuilder {
 	public <T extends ObjectMapper> T build() {
 		ObjectMapper mapper;
 		if (this.createXmlMapper) {
-			mapper = new XmlObjectMapperInitializer().create();
+			mapper = (this.defaultUseWrapper == null ? new XmlObjectMapperInitializer().create()
+					: new XmlObjectMapperInitializer().create(this.defaultUseWrapper));
 		}
 		else {
 			mapper = new ObjectMapper();
@@ -561,7 +577,6 @@ public class Jackson2ObjectMapperBuilder {
 	 * settings. This can be applied to any number of {@code ObjectMappers}.
 	 * @param objectMapper the ObjectMapper to configure
 	 */
-	@SuppressWarnings("deprecation")
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
@@ -609,13 +624,11 @@ public class Jackson2ObjectMapperBuilder {
 		}
 
 		if (this.filters != null) {
-			// Deprecated as of Jackson 2.6, but just in favor of a fluent variant.
-			objectMapper.setFilters(this.filters);
+			objectMapper.setFilterProvider(this.filters);
 		}
 
 		for (Class<?> target : this.mixIns.keySet()) {
-			// Deprecated as of Jackson 2.5, but just in favor of a fluent variant.
-			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
+			objectMapper.addMixIn(target, this.mixIns.get(target));
 		}
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
@@ -720,15 +733,7 @@ public class Jackson2ObjectMapperBuilder {
 				objectMapper.registerModule(BeanUtils.instantiate(javaTimeModule));
 			}
 			catch (ClassNotFoundException ex) {
-				// jackson-datatype-jsr310 not available or older than 2.6
-				try {
-					Class<? extends Module> jsr310Module = (Class<? extends Module>)
-							ClassUtils.forName("com.fasterxml.jackson.datatype.jsr310.JSR310Module", this.moduleClassLoader);
-					objectMapper.registerModule(BeanUtils.instantiate(jsr310Module));
-				}
-				catch (ClassNotFoundException ex2) {
-					// OK, jackson-datatype-jsr310 not available at all...
-				}
+				// jackson-datatype-jsr310 not available
 			}
 		}
 
@@ -741,6 +746,18 @@ public class Jackson2ObjectMapperBuilder {
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-joda not available
+			}
+		}
+
+		// Kotlin present?
+		if (ClassUtils.isPresent("kotlin.Unit", this.moduleClassLoader)) {
+			try {
+				Class<? extends Module> kotlinModule = (Class<? extends Module>)
+						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);
+				objectMapper.registerModule(BeanUtils.instantiate(kotlinModule));
+			}
+			catch (ClassNotFoundException ex) {
+				// jackson-module-kotlin not available
 			}
 		}
 	}
@@ -768,11 +785,21 @@ public class Jackson2ObjectMapperBuilder {
 	private static class XmlObjectMapperInitializer {
 
 		public ObjectMapper create() {
+			return new XmlMapper(xmlInputFactory());
+		}
+
+		public ObjectMapper create(boolean defaultUseWrapper) {
+			JacksonXmlModule module = new JacksonXmlModule();
+			module.setDefaultUseWrapper(defaultUseWrapper);
+			return new XmlMapper(new XmlFactory(xmlInputFactory()), module);
+		}
+
+		private static final XMLInputFactory xmlInputFactory() {
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 			inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
-			return new XmlMapper(inputFactory);
+			return inputFactory;
 		}
 
 		private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {

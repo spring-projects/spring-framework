@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -54,8 +55,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	protected static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
 	protected static final String FORM_CHARSET = "UTF-8";
-
-	private static final String METHOD_POST = "POST";
 
 
 	private final HttpServletRequest servletRequest;
@@ -84,15 +83,18 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.servletRequest.getMethod());
+		return HttpMethod.resolve(this.servletRequest.getMethod());
 	}
 
 	@Override
 	public URI getURI() {
 		try {
-			return new URI(this.servletRequest.getScheme(), null, this.servletRequest.getServerName(),
-					this.servletRequest.getServerPort(), this.servletRequest.getRequestURI(),
-					this.servletRequest.getQueryString(), null);
+			StringBuffer url = this.servletRequest.getRequestURL();
+			String query = this.servletRequest.getQueryString();
+			if (StringUtils.hasText(query)) {
+				url.append('?').append(query);
+			}
+			return new URI(url.toString());
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);
@@ -103,6 +105,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
+
 			for (Enumeration<?> headerNames = this.servletRequest.getHeaderNames(); headerNames.hasMoreElements();) {
 				String headerName = (String) headerNames.nextElement();
 				for (Enumeration<?> headerValues = this.servletRequest.getHeaders(headerName);
@@ -111,33 +114,41 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					this.headers.add(headerName, headerValue);
 				}
 			}
+
 			// HttpServletRequest exposes some headers as properties: we should include those if not already present
-			MediaType contentType = this.headers.getContentType();
-			if (contentType == null) {
-				String requestContentType = this.servletRequest.getContentType();
-				if (StringUtils.hasLength(requestContentType)) {
-					contentType = MediaType.parseMediaType(requestContentType);
-					this.headers.setContentType(contentType);
+			try {
+				MediaType contentType = this.headers.getContentType();
+				if (contentType == null) {
+					String requestContentType = this.servletRequest.getContentType();
+					if (StringUtils.hasLength(requestContentType)) {
+						contentType = MediaType.parseMediaType(requestContentType);
+						this.headers.setContentType(contentType);
+					}
+				}
+				if (contentType != null && contentType.getCharset() == null) {
+					String requestEncoding = this.servletRequest.getCharacterEncoding();
+					if (StringUtils.hasLength(requestEncoding)) {
+						Charset charSet = Charset.forName(requestEncoding);
+						Map<String, String> params = new LinkedCaseInsensitiveMap<String>();
+						params.putAll(contentType.getParameters());
+						params.put("charset", charSet.toString());
+						MediaType newContentType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
+						this.headers.setContentType(newContentType);
+					}
 				}
 			}
-			if (contentType != null && contentType.getCharSet() == null) {
-				String requestEncoding = this.servletRequest.getCharacterEncoding();
-				if (StringUtils.hasLength(requestEncoding)) {
-					Charset charSet = Charset.forName(requestEncoding);
-					Map<String, String> params = new LinkedCaseInsensitiveMap<String>();
-					params.putAll(contentType.getParameters());
-					params.put("charset", charSet.toString());
-					MediaType newContentType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
-					this.headers.setContentType(newContentType);
-				}
+			catch (InvalidMediaTypeException ex) {
+				// Ignore: simply not exposing an invalid content type in HttpHeaders...
 			}
-			if (this.headers.getContentLength() == -1) {
+
+			if (this.headers.getContentLength() < 0) {
 				int requestContentLength = this.servletRequest.getContentLength();
 				if (requestContentLength != -1) {
 					this.headers.setContentLength(requestContentLength);
 				}
 			}
 		}
+
 		return this.headers;
 	}
 
@@ -166,18 +177,30 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 	}
 
-	private boolean isFormPost(HttpServletRequest request) {
-		return (request.getContentType() != null && request.getContentType().contains(FORM_CONTENT_TYPE) &&
-				METHOD_POST.equalsIgnoreCase(request.getMethod()));
+	@Override
+	public ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response) {
+		if (this.asyncRequestControl == null) {
+			Assert.isInstanceOf(ServletServerHttpResponse.class, response);
+			ServletServerHttpResponse servletServerResponse = (ServletServerHttpResponse) response;
+			this.asyncRequestControl = new ServletServerHttpAsyncRequestControl(this, servletServerResponse);
+		}
+		return this.asyncRequestControl;
+	}
+
+
+	private static boolean isFormPost(HttpServletRequest request) {
+		String contentType = request.getContentType();
+		return (contentType != null && contentType.contains(FORM_CONTENT_TYPE) &&
+				HttpMethod.POST.matches(request.getMethod()));
 	}
 
 	/**
 	 * Use {@link javax.servlet.ServletRequest#getParameterMap()} to reconstruct the
 	 * body of a form 'POST' providing a predictable outcome as opposed to reading
-	 * from the body, which can fail if any other code has used ServletRequest
-	 * to access a parameter thus causing the input stream to be "consumed".
+	 * from the body, which can fail if any other code has used the ServletRequest
+	 * to access a parameter, thus causing the input stream to be "consumed".
 	 */
-	private InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
+	private static InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 
@@ -203,16 +226,6 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		writer.flush();
 
 		return new ByteArrayInputStream(bos.toByteArray());
-	}
-
-	@Override
-	public ServerHttpAsyncRequestControl getAsyncRequestControl(ServerHttpResponse response) {
-		if (this.asyncRequestControl == null) {
-			Assert.isInstanceOf(ServletServerHttpResponse.class, response);
-			ServletServerHttpResponse servletServerResponse = (ServletServerHttpResponse) response;
-			this.asyncRequestControl = new ServletServerHttpAsyncRequestControl(this, servletServerResponse);
-		}
-		return this.asyncRequestControl;
 	}
 
 }

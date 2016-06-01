@@ -440,7 +440,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 		if (bytes.length == 0 || getContentType() == null || !isReadableContentType()) {
 			return contentType;
 		}
-		Charset charset = getContentType().getCharSet();
+		Charset charset = getContentType().getCharset();
 		charset = (charset != null ? charset : StompDecoder.UTF8_CHARSET);
 		return (bytes.length < 80) ?
 				contentType + " payload=" + new String(bytes, charset) :

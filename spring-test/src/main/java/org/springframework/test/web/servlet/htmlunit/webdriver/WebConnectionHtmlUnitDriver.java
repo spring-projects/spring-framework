@@ -1,29 +1,28 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.util.Assert;
-
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
 
 /**
  * {@code WebConnectionHtmlUnitDriver} enables configuration of the
@@ -43,11 +42,11 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	private WebClient webClient;
 
 
-	public WebConnectionHtmlUnitDriver(BrowserVersion browserVersion) {
-		super(browserVersion);
+	public WebConnectionHtmlUnitDriver() {
 	}
 
-	public WebConnectionHtmlUnitDriver() {
+	public WebConnectionHtmlUnitDriver(BrowserVersion browserVersion) {
+		super(browserVersion);
 	}
 
 	public WebConnectionHtmlUnitDriver(boolean enableJavascript) {
@@ -58,13 +57,12 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 		super(capabilities);
 	}
 
+
 	/**
-	 * Modify the supplied {@link WebClient} and retain a reference to it
-	 * so that its {@link WebConnection} is {@linkplain #getWebConnection
-	 * accessible} for later use.
-	 * <p>Delegates to {@link HtmlUnitDriver#modifyWebClient(WebClient)}
-	 * for default behavior and to {@link #modifyWebClientInternal(WebClient)}
-	 * for further customization.
+	 * Modify the supplied {@link WebClient} and retain a reference to it so that its
+	 * {@link WebConnection} is {@linkplain #getWebConnection accessible} for later use.
+	 * <p>Delegates to {@link HtmlUnitDriver#modifyWebClient} for default behavior
+	 * and to {@link #modifyWebClientInternal} for further customization.
 	 * @param webClient the client to modify
 	 * @return the modified client
 	 * @see HtmlUnitDriver#modifyWebClient(WebClient)
@@ -79,8 +77,7 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 
 	/**
 	 * Modify the supplied {@link WebClient}.
-	 * <p>The default implementation simply returns the supplied client
-	 * unmodified.
+	 * <p>The default implementation simply returns the supplied client unmodified.
 	 * <p>Subclasses can override this method to customize the {@code WebClient}
 	 * that the {@link HtmlUnitDriver} uses.
 	 * @param webClient the client to modify
@@ -91,20 +88,28 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	}
 
 	/**
+	 * Return the current {@link WebClient}.
+	 * @since 4.3
+	 */
+	public WebClient getWebClient() {
+		return this.webClient;
+	}
+
+	/**
+	 * Set the {@link WebConnection} to be used with the {@link WebClient}.
+	 * @param webConnection the {@code WebConnection} to use (never {@code null})
+	 */
+	public void setWebConnection(WebConnection webConnection) {
+		Assert.notNull(webConnection, "WebConnection must not be null");
+		this.webClient.setWebConnection(webConnection);
+	}
+
+	/**
 	 * Access the current {@link WebConnection} for the {@link WebClient}.
 	 * @return the current {@code WebConnection}
 	 */
 	public WebConnection getWebConnection() {
 		return this.webClient.getWebConnection();
-	}
-
-	/**
-	 * Set the {@link WebConnection} to be used with the {@link WebClient}.
-	 * @param webConnection the {@code WebConnection} to use; never {@code null}
-	 */
-	public void setWebConnection(WebConnection webConnection) {
-		Assert.notNull(webConnection, "WebConnection must not be null");
-		this.webClient.setWebConnection(webConnection);
 	}
 
 }

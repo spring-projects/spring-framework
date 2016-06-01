@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -108,8 +110,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return (AnnotationUtils.findAnnotation(returnType.getContainingClass(), ResponseBody.class) != null ||
-				returnType.getMethodAnnotation(ResponseBody.class) != null);
+		return (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), ResponseBody.class) ||
+				returnType.hasMethodAnnotation(ResponseBody.class));
 	}
 
 	/**
@@ -146,12 +148,16 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 		Object arg = readWithMessageConverters(inputMessage, methodParam, paramType);
 		if (arg == null) {
-			if (methodParam.getParameterAnnotation(RequestBody.class).required()) {
+			if (checkRequired(methodParam)) {
 				throw new HttpMessageNotReadableException("Required request body is missing: " +
 						methodParam.getMethod().toGenericString());
 			}
 		}
 		return arg;
+	}
+
+	protected boolean checkRequired(MethodParameter methodParam) {
+		return methodParam.getParameterAnnotation(RequestBody.class).required();
 	}
 
 	@Override
@@ -160,9 +166,11 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
 		mavContainer.setRequestHandled(true);
+		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
+		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
 		// Try even with null return value. ResponseBodyAdvice could get involved.
-		writeWithMessageConverters(returnValue, returnType, webRequest);
+		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);
 	}
 
 }

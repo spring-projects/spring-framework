@@ -46,7 +46,9 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setLobHandler
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class BlobSerializableType extends AbstractLobType {
 
 	/**

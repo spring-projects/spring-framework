@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,16 +93,59 @@ public class SystemEnvironmentPropertySourceTests {
 	@Test
 	public void withUppercase() {
 		envMap.put("A_KEY", "a_value");
+		envMap.put("A_LONG_KEY", "a_long_value");
+		envMap.put("A_DOT.KEY", "a_dot_value");
+		envMap.put("A_HYPHEN-KEY", "a_hyphen_value");
 
 		assertThat(ps.containsProperty("A_KEY"), equalTo(true));
 		assertThat(ps.containsProperty("A.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A-KEY"), equalTo(true));
 		assertThat(ps.containsProperty("a_key"), equalTo(true));
 		assertThat(ps.containsProperty("a.key"), equalTo(true));
+		assertThat(ps.containsProperty("a-key"), equalTo(true));
+		assertThat(ps.containsProperty("A_LONG_KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A.LONG.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A-LONG-KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A.LONG-KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A-LONG.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A_long_KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A.long.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A-long-KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A.long-KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A-long.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A_DOT.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A-DOT.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A_dot.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A-dot.KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A_HYPHEN-KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A.HYPHEN-KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A_hyphen-KEY"), equalTo(true));
+		assertThat(ps.containsProperty("A.hyphen-KEY"), equalTo(true));
 
-		assertThat(ps.getProperty("A_KEY"), equalTo((Object)"a_value"));
-		assertThat(ps.getProperty("A.KEY"), equalTo((Object)"a_value"));
-		assertThat(ps.getProperty("a_key"), equalTo((Object)"a_value"));
-		assertThat(ps.getProperty("a.key"), equalTo((Object)"a_value"));
+		assertThat(ps.getProperty("A_KEY"), equalTo("a_value"));
+		assertThat(ps.getProperty("A.KEY"), equalTo("a_value"));
+		assertThat(ps.getProperty("A-KEY"), equalTo("a_value"));
+		assertThat(ps.getProperty("a_key"), equalTo("a_value"));
+		assertThat(ps.getProperty("a.key"), equalTo("a_value"));
+		assertThat(ps.getProperty("a-key"), equalTo("a_value"));
+		assertThat(ps.getProperty("A_LONG_KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A.LONG.KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A-LONG-KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A.LONG-KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A-LONG.KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A_long_KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A.long.KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A-long-KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A.long-KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A-long.KEY"), equalTo("a_long_value"));
+		assertThat(ps.getProperty("A_DOT.KEY"), equalTo("a_dot_value"));
+		assertThat(ps.getProperty("A-DOT.KEY"), equalTo("a_dot_value"));
+		assertThat(ps.getProperty("A_dot.KEY"), equalTo("a_dot_value"));
+		assertThat(ps.getProperty("A-dot.KEY"), equalTo("a_dot_value"));
+		assertThat(ps.getProperty("A_HYPHEN-KEY"), equalTo("a_hyphen_value"));
+		assertThat(ps.getProperty("A.HYPHEN-KEY"), equalTo("a_hyphen_value"));
+		assertThat(ps.getProperty("A_hyphen-KEY"), equalTo("a_hyphen_value"));
+		assertThat(ps.getProperty("A.hyphen-KEY"), equalTo("a_hyphen_value"));
 	}
 
 	@Test

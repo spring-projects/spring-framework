@@ -178,4 +178,23 @@ abstract class MvcNamespaceUtils {
 		return new RuntimeBeanReference(CORS_CONFIGURATION_BEAN_NAME);
 	}
 
+	/**
+	 * Find the {@code ContentNegotiationManager} bean created by or registered
+	 * with the {@code annotation-driven} element.
+	 * @return a bean definition, bean reference, or null.
+	 */
+	public static Object getContentNegotiationManager(ParserContext context) {
+		String name = AnnotationDrivenBeanDefinitionParser.HANDLER_MAPPING_BEAN_NAME;
+		if (context.getRegistry().containsBeanDefinition(name)) {
+			BeanDefinition handlerMappingBeanDef = context.getRegistry().getBeanDefinition(name);
+			return handlerMappingBeanDef.getPropertyValues().get("contentNegotiationManager");
+		}
+		name = AnnotationDrivenBeanDefinitionParser.CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
+		if (context.getRegistry().containsBeanDefinition(name)) {
+			return new RuntimeBeanReference(name);
+		}
+		return null;
+	}
+
+
 }

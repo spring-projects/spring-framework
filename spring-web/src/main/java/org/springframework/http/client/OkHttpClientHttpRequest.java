@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,36 +18,24 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.StringUtils;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
- * {@link ClientHttpRequest} implementation that uses OkHttp to execute requests.
+ * {@link ClientHttpRequest} implementation that uses OkHttp 2.x to execute requests.
  *
  * <p>Created via the {@link OkHttpClientHttpRequestFactory}.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
  * @since 4.2
+ * @see org.springframework.http.client.OkHttp3ClientHttpRequest
  */
-class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
-		implements ClientHttpRequest {
+class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final OkHttpClient client;
 
@@ -73,73 +61,11 @@ class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
 		return this.uri;
 	}
 
-	@Override
-	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers,
-			byte[] content) throws IOException {
-
-		MediaType contentType = getContentType(headers);
-		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
-
-		URL url = this.uri.toURL();
-		String methodName = this.method.name();
-		Request.Builder builder = new Request.Builder().url(url).method(methodName, body);
-
-		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-			String headerName = entry.getKey();
-			for (String headerValue : entry.getValue()) {
-				builder.addHeader(headerName, headerValue);
-			}
-		}
-		Request request = builder.build();
-
-		return new OkHttpListenableFuture(this.client.newCall(request));
-	}
-
-	private MediaType getContentType(HttpHeaders headers) {
-		String rawContentType = headers.getFirst("Content-Type");
-		return (StringUtils.hasText(rawContentType) ? MediaType.parse(rawContentType) : null);
-	}
 
 	@Override
-	public ClientHttpResponse execute() throws IOException {
-		try {
-			return executeAsync().get();
-		}
-		catch (InterruptedException ex) {
-			throw new IOException(ex.getMessage(), ex);
-		}
-		catch (ExecutionException ex) {
-			Throwable cause = ex.getCause();
-			if (cause instanceof IOException) {
-				throw (IOException) cause;
-			}
-			throw new IOException(cause.getMessage(), cause);
-		}
-	}
-
-
-	private static class OkHttpListenableFuture extends SettableListenableFuture<ClientHttpResponse> {
-
-	    private final Call call;
-
-	    public OkHttpListenableFuture(Call call) {
-	        this.call = call;
-	        this.call.enqueue(new Callback() {
-				@Override
-		        public void onResponse(Response response) {
-			        set(new OkHttpClientHttpResponse(response));
-		        }
-		        @Override
-		        public void onFailure(Request request, IOException ex) {
-			        setException(ex);
-		        }
-	        });
-	    }
-
-	    @Override
-	    protected void interruptTask() {
-	        this.call.cancel();
-	    }
+	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] content) throws IOException {
+		Request request = OkHttpClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
+		return new OkHttpClientHttpResponse(this.client.newCall(request).execute());
 	}
 
 }

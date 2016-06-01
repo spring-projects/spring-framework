@@ -93,6 +93,25 @@ public class GuavaCache extends AbstractValueAdaptingCache {
 		return super.get(key);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T get(Object key, final Callable<T> valueLoader) {
+		try {
+			return (T) fromStoreValue(this.cache.get(key, new Callable<Object>() {
+				@Override
+				public Object call() throws Exception {
+					return toStoreValue(valueLoader.call());
+				}
+			}));
+		}
+		catch (ExecutionException ex) {
+			throw new ValueRetrievalException(key, valueLoader, ex.getCause());
+		}
+		catch (UncheckedExecutionException ex) {
+			throw new ValueRetrievalException(key, valueLoader, ex.getCause());
+		}
+	}
+
 	@Override
 	protected Object lookup(Object key) {
 		return this.cache.getIfPresent(key);

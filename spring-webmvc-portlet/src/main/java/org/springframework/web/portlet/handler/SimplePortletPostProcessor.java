@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.portlet.handler;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -36,8 +35,9 @@ import org.springframework.web.portlet.context.PortletConfigAware;
 import org.springframework.web.portlet.context.PortletContextAware;
 
 /**
- * Bean post-processor that applies initialization and destruction callbacks
- * to beans that implement the Portlet interface.
+ * {@link org.springframework.beans.factory.config.BeanPostProcessor}
+ * that applies initialization and destruction callbacks to beans that
+ * implement the {@link javax.portlet.Portlet} interface.
  *
  * <p>After initialization of the bean instance, the Portlet {@code init}
  * method will be called with a PortletConfig that contains the bean name
@@ -51,15 +51,16 @@ import org.springframework.web.portlet.context.PortletContextAware;
  * supposed to be configured like any other Spring bean, that is, through
  * constructor arguments or bean properties.
  *
- * <p>For reuse of a Portlet implementation in a plain Portlet container and as
- * a bean in a Spring context, consider deriving from Spring's GenericPortletBean
- * base class that applies Portlet initialization parameters as bean properties,
- * supporting both initialization styles.
+ * <p>For reuse of a Portlet implementation in a plain Portlet container
+ * and as a bean in a Spring context, consider deriving from Spring's
+ * {@link org.springframework.web.portlet.GenericPortletBean} base class that
+ * applies Portlet initialization parameters as bean properties, supporting
+ * both the standard Portlet and the Spring bean initialization style.
  *
  * <p><b>Alternatively, consider wrapping a Portlet with Spring's
- * PortletWrappingController.</b> This is particularly appropriate for
- * existing Portlet classes, allowing to specify Portlet initialization
- * parameters etc.
+ * {@link org.springframework.web.portlet.mvc.PortletWrappingController}.</b>
+ * This is particularly appropriate for existing Portlet classes,
+ * allowing to specify Portlet initialization parameters etc.
  *
  * @author Juergen Hoeller
  * @author John A. Lewis
@@ -132,6 +133,11 @@ public class SimplePortletPostProcessor
 		}
 	}
 
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return (bean instanceof Portlet);
+	}
+
 
 	/**
 	 * Internal implementation of the PortletConfig interface, to be passed
@@ -168,7 +174,7 @@ public class SimplePortletPostProcessor
 
 		@Override
 		public Enumeration<String> getInitParameterNames() {
-			return Collections.enumeration(new HashSet<String>());
+			return Collections.enumeration(Collections.<String>emptySet());
 		}
 
 		@Override
@@ -178,7 +184,7 @@ public class SimplePortletPostProcessor
 
 		@Override
 		public Enumeration<String> getPublicRenderParameterNames() {
-			return Collections.enumeration(new HashSet<String>());
+			return Collections.enumeration(Collections.<String>emptySet());
 		}
 
 		@Override
@@ -188,17 +194,17 @@ public class SimplePortletPostProcessor
 
 		@Override
 		public Enumeration<QName> getPublishingEventQNames() {
-			return Collections.enumeration(new HashSet<QName>());
+			return Collections.enumeration(Collections.<QName>emptySet());
 		}
 
 		@Override
 		public Enumeration<QName> getProcessingEventQNames() {
-			return Collections.enumeration(new HashSet<QName>());
+			return Collections.enumeration(Collections.<QName>emptySet());
 		}
 
 		@Override
 		public Enumeration<Locale> getSupportedLocales() {
-			return Collections.enumeration(new HashSet<Locale>());
+			return Collections.enumeration(Collections.<Locale>emptySet());
 		}
 
 		@Override

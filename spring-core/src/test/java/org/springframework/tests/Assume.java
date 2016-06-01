@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-
 import org.junit.AssumptionViolatedException;
 
 import org.springframework.util.ClassUtils;
@@ -33,38 +32,8 @@ import static org.junit.Assume.*;
  * conditions hold {@code true}. If the assumption fails, it means the test should be
  * skipped.
  *
- * <p>For example, if a set of tests require at least JDK 1.7 it can use
- * {@code Assume#atLeast(JavaVersion.JAVA_17)} as shown below:
- *
- * <pre class="code">
- * public void MyTests {
- *
- *   &#064;BeforeClass
- *   public static void assumptions() {
- *       Assume.atLeast(JavaVersion.JAVA_17);
- *   }
- *
- *   // ... all the test methods that require at least JDK 1.7
- * }
- * </pre>
- *
- * If only a single test requires at least JDK 1.7 it can use the
- * {@code Assume#atLeast(JavaVersion.JAVA_17)} as shown below:
- *
- * <pre class="code">
- * public void MyTests {
- *
- *   &#064;Test
- *   public void requiresJdk17 {
- *       Assume.atLeast(JavaVersion.JAVA_17);
- *       // ... perform the actual test
- *   }
- * }
- * </pre>
- *
- * In addition to assumptions based on the JDK version, tests can be categorized into
- * {@link TestGroup}s. Active groups are enabled using the 'testGroups' system property,
- * usually activated from the gradle command line:
+ * Tests can be categorized into {@link TestGroup}s. Active groups are enabled using
+ * the 'testGroups' system property, usually activated from the gradle command line:
  * <pre>
  * gradle test -PtestGroups="performance"
  * </pre>
@@ -76,7 +45,6 @@ import static org.junit.Assume.*;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 3.2
- * @see #atLeast(JavaVersion)
  * @see #group(TestGroup)
  * @see #group(TestGroup, Executable)
  */
@@ -86,26 +54,13 @@ public abstract class Assume {
 
 
 	/**
-	 * Assume that a minimum {@link JavaVersion} is running.
-	 * @param version the minimum version for the test to run
-	 * @throws AssumptionViolatedException if the assumption fails
-	 */
-	public static void atLeast(JavaVersion version) {
-		if (!JavaVersion.runningVersion().isAtLeast(version)) {
-			throw new AssumptionViolatedException("Requires JDK " + version + " but running "
-					+ JavaVersion.runningVersion());
-		}
-	}
-
-	/**
 	 * Assume that a particular {@link TestGroup} has been specified.
 	 * @param group the group that must be specified
 	 * @throws AssumptionViolatedException if the assumption fails
 	 */
 	public static void group(TestGroup group) {
 		if (!GROUPS.contains(group)) {
-			throw new AssumptionViolatedException("Requires unspecified group " + group
-					+ " from " + GROUPS);
+			throw new AssumptionViolatedException("Requires unspecified group " + group + " from " + GROUPS);
 		}
 	}
 
@@ -154,11 +109,13 @@ public abstract class Assume {
 		}
 	}
 
+
 	/**
 	 * @since 4.2
 	 */
 	@FunctionalInterface
-	public static interface Executable {
+	public interface Executable {
+
 		void execute() throws Exception;
 	}
 

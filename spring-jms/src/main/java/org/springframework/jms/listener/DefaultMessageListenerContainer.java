@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 
 	private Executor taskExecutor;
 
-	private BackOff backOff = createDefaultBackOff(DEFAULT_RECOVERY_INTERVAL);
+	private BackOff backOff = new FixedBackOff(DEFAULT_RECOVERY_INTERVAL, Long.MAX_VALUE);
 
 	private int cacheLevel = CACHE_AUTO;
 
@@ -196,6 +196,8 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	private int registeredWithDestination = 0;
 
 	private volatile boolean recovering = false;
+
+	private volatile boolean interrupted = false;
 
 	private Runnable stopCallback;
 
@@ -229,6 +231,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * attempt to recover.
 	 * <p>The {@link #setRecoveryInterval(long) recovery interval} is ignored
 	 * when this property is set.
+	 * @since 4.1
 	 */
 	public void setBackOff(BackOff backOff) {
 		this.backOff = backOff;
@@ -244,7 +247,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * @see #handleListenerSetupFailure
 	 */
 	public void setRecoveryInterval(long recoveryInterval) {
-		this.backOff = createDefaultBackOff(recoveryInterval);
+		this.backOff = new FixedBackOff(recoveryInterval, Long.MAX_VALUE);
 	}
 
 	/**
@@ -611,6 +614,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	@Override
 	public void stop(Runnable callback) throws JmsException {
 		synchronized (this.lifecycleMonitor) {
+			if (!isRunning() || this.stopCallback != null) {
+				// Not started, already stopped, or previous stop attempt in progress
+				// -> return immediately, no stop process to control anymore.
+				callback.run();
+				return;
+			}
 			this.stopCallback = callback;
 		}
 		stop();
@@ -892,6 +901,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 		finally {
 			this.recovering = false;
+			this.interrupted = false;
 		}
 	}
 
@@ -941,7 +951,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 				StringBuilder msg = new StringBuilder();
 				msg.append("Stopping container for destination '")
 						.append(getDestinationDescription())
-						.append("' - back off policy does not allow ").append("for further attempts.");
+						.append("': back-off policy does not allow ").append("for further attempts.");
 				logger.error(msg.toString());
 				stop();
 			}
@@ -968,30 +978,36 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Apply the next back off time using the specified {@link BackOffExecution}.
-	 * <p>Return {@code true} if the back off period has been applied and a new
+	 * Apply the next back-off time using the specified {@link BackOffExecution}.
+	 * <p>Return {@code true} if the back-off period has been applied and a new
 	 * attempt to recover should be made, {@code false} if no further attempt
 	 * should be made.
+	 * @since 4.1
 	 */
 	protected boolean applyBackOffTime(BackOffExecution execution) {
+		if (this.recovering && this.interrupted) {
+			// Interrupted right before and still failing... give up.
+			return false;
+		}
 		long interval = execution.nextBackOff();
 		if (interval == BackOffExecution.STOP) {
 			return false;
 		}
 		else {
 			try {
-				Thread.sleep(interval);
+				synchronized (this.lifecycleMonitor) {
+					this.lifecycleMonitor.wait(interval);
+				}
 			}
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
 				Thread.currentThread().interrupt();
+				if (this.recovering) {
+					this.interrupted = true;
+				}
 			}
+			return true;
 		}
-		return true;
-	}
-
-	private FixedBackOff createDefaultBackOff(long interval) {
-		return new FixedBackOff(interval, Long.MAX_VALUE);
 	}
 
 	/**
@@ -1049,9 +1065,9 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 			catch (Throwable ex) {
 				clearResources();
 				if (!this.lastMessageSucceeded) {
-					// We failed more than once in a row or on startup - sleep before
-					// first recovery attempt.
-					sleepBeforeRecoveryAttempt();
+					// We failed more than once in a row or on startup -
+					// wait before first recovery attempt.
+					waitBeforeRecoveryAttempt();
 				}
 				this.lastMessageSucceeded = false;
 				boolean alreadyRecovered = false;
@@ -1205,12 +1221,12 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 
 		/**
-		 * Apply the back off time once. In a regular scenario, the back off is only applied if we
-		 * failed to recover with the broker. This additional sleep period avoids a burst retry
+		 * Apply the back-off time once. In a regular scenario, the back-off is only applied if we
+		 * failed to recover with the broker. This additional wait period avoids a burst retry
 		 * scenario when the broker is actually up but something else if failing (i.e. listener
 		 * specific).
 		 */
-		private void sleepBeforeRecoveryAttempt() {
+		private void waitBeforeRecoveryAttempt() {
 			BackOffExecution execution = DefaultMessageListenerContainer.this.backOff.start();
 			applyBackOffTime(execution);
 		}

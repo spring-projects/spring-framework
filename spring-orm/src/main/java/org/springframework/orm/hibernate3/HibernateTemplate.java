@@ -104,8 +104,9 @@ import org.springframework.util.Assert;
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.orm.hibernate3.support.OpenSessionInViewFilter
  * @see org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
-@SuppressWarnings("deprecation")
+@Deprecated
 public class HibernateTemplate extends HibernateAccessor implements HibernateOperations {
 
 	private boolean allowCreate = true;

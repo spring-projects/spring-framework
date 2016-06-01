@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.springframework.test.context.junit4.statements;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import org.junit.Assume;
+import org.junit.AssumptionViolatedException;
 import org.junit.runners.model.Statement;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.annotation.IfProfileValue;
 import org.springframework.test.annotation.ProfileValueUtils;
 import org.springframework.util.Assert;
@@ -64,6 +64,7 @@ public class ProfileValueChecker extends Statement {
 		this.testMethod = testMethod;
 	}
 
+
 	/**
 	 * Determine if the test specified by arguments to the
 	 * {@linkplain #ProfileValueChecker constructor} is <em>enabled</em> in
@@ -76,27 +77,24 @@ public class ProfileValueChecker extends Statement {
 	 * will simply evaluate the next {@link Statement} in the execution chain.
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Class)
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment(Method, Class)
-	 * @see org.junit.Assume
+	 * @throws AssumptionViolatedException if the test is disabled
+	 * @throws Throwable if evaluation of the next statement fails
 	 */
 	@Override
 	public void evaluate() throws Throwable {
 		if (this.testMethod == null) {
 			if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.testClass)) {
-				// Invoke assumeTrue() with false to avoid direct reference to JUnit's
-				// AssumptionViolatedException which exists in two packages as of JUnit 4.12.
-				Annotation ann = AnnotationUtils.findAnnotation(this.testClass, IfProfileValue.class);
-				Assume.assumeTrue(String.format(
+				Annotation ann = AnnotatedElementUtils.findMergedAnnotation(this.testClass, IfProfileValue.class);
+				throw new AssumptionViolatedException(String.format(
 						"Profile configured via [%s] is not enabled in this environment for test class [%s].",
-						ann, this.testClass.getName()), false);
+						ann, this.testClass.getName()));
 			}
 		}
 		else {
 			if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.testMethod, this.testClass)) {
-				// Invoke assumeTrue() with false to avoid direct reference to JUnit's
-				// AssumptionViolatedException which exists in two packages as of JUnit 4.12.
-				Assume.assumeTrue(String.format(
+				throw new AssumptionViolatedException(String.format(
 						"Profile configured via @IfProfileValue is not enabled in this environment for test method [%s].",
-						this.testMethod), false);
+						this.testMethod));
 			}
 		}
 

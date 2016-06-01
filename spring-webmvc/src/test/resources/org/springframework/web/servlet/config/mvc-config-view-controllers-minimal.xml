@@ -6,11 +6,10 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
+	<mvc:view-controller path="/path" view-name="home"/>
 
-	<mvc:view-controller path="/path" view-name="home" />
+	<mvc:redirect-view-controller path="/old" redirect-url="/new"/>
 
-	<mvc:redirect-view-controller path="/old" redirect-url="/new" />
-
-	<mvc:status-controller path="/bad" status-code="404" />
+	<mvc:status-controller path="/bad" status-code="404"/>
 
 </beans>

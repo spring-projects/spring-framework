@@ -43,6 +43,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -73,12 +74,20 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	/* Extensions associated with the built-in message converters */
 	private static final Set<String> WHITELISTED_EXTENSIONS = new HashSet<String>(Arrays.asList(
-			"txt", "text", "json", "xml", "atom", "rss", "png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
+			"txt", "text", "yml", "properties", "csv",
+			"json", "xml", "atom", "rss",
+			"png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
+
+	private static final Set<String> WHITELISTED_MEDIA_BASE_TYPES = new HashSet<String>(
+			Arrays.asList("audio", "image", "video"));
 
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
+	private final PathExtensionContentNegotiationStrategy pathStrategy;
+
 	private final Set<String> safeExtensions = new HashSet<String>();
+
 
 
 	/**
@@ -106,8 +115,15 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		super(converters, requestResponseBodyAdvice);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
+		this.pathStrategy = initPathStrategy(this.contentNegotiationManager);
 		this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
 		this.safeExtensions.addAll(WHITELISTED_EXTENSIONS);
+	}
+
+	private static PathExtensionContentNegotiationStrategy initPathStrategy(ContentNegotiationManager manager) {
+		Class<PathExtensionContentNegotiationStrategy> clazz = PathExtensionContentNegotiationStrategy.class;
+		PathExtensionContentNegotiationStrategy strategy = manager.getStrategy(clazz);
+		return (strategy != null ? strategy : new PathExtensionContentNegotiationStrategy());
 	}
 
 
@@ -135,7 +151,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	/**
 	 * Writes the given return type to the given output message.
-	 * @param returnValue the value to write to the output message
+	 * @param value the value to write to the output message
 	 * @param returnType the type of the value
 	 * @param inputMessage the input messages. Used to inspect the {@code Accept} header.
 	 * @param outputMessage the output message to write to
@@ -144,18 +160,25 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * the request cannot be met by the message converters
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> void writeWithMessageConverters(T returnValue, MethodParameter returnType,
+	protected <T> void writeWithMessageConverters(T value, MethodParameter returnType,
 			ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
-		Class<?> returnValueClass = getReturnValueType(returnValue, returnType);
-		Type returnValueType = getGenericType(returnType);
+		Class<?> clazz = getReturnValueType(value, returnType);
+		Type type = getGenericType(returnType);
+
+		if (value != null && value instanceof CharSequence) {
+			clazz = String.class;
+			type = String.class;
+			value = (T) value.toString();
+		}
+
 		HttpServletRequest servletRequest = inputMessage.getServletRequest();
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(servletRequest);
-		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass, returnValueType);
+		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, clazz, type);
 
-		if (returnValue != null && producibleMediaTypes.isEmpty()) {
-			throw new IllegalArgumentException("No converter found for return value of type: " + returnValueClass);
+		if (value != null && producibleMediaTypes.isEmpty()) {
+			throw new IllegalArgumentException("No converter found for return value of type: " + clazz);
 		}
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
@@ -167,7 +190,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 		if (compatibleMediaTypes.isEmpty()) {
-			if (returnValue != null) {
+			if (value != null) {
 				throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
 			}
 			return;
@@ -192,33 +215,33 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 				if (messageConverter instanceof GenericHttpMessageConverter) {
-					if (((GenericHttpMessageConverter<T>) messageConverter).canWrite(returnValueType,
-							returnValueClass, selectedMediaType)) {
-						returnValue = (T) getAdvice().beforeBodyWrite(returnValue, returnType, selectedMediaType,
+					if (((GenericHttpMessageConverter<T>) messageConverter).canWrite(type,
+							clazz, selectedMediaType)) {
+						value = (T) getAdvice().beforeBodyWrite(value, returnType, selectedMediaType,
 								(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
 								inputMessage, outputMessage);
-						if (returnValue != null) {
+						if (value != null) {
 							addContentDispositionHeader(inputMessage, outputMessage);
-							((GenericHttpMessageConverter<T>) messageConverter).write(returnValue,
-									returnValueType, selectedMediaType, outputMessage);
+							((GenericHttpMessageConverter<T>) messageConverter).write(value,
+									type, selectedMediaType, outputMessage);
 							if (logger.isDebugEnabled()) {
-								logger.debug("Written [" + returnValue + "] as \"" +
+								logger.debug("Written [" + value + "] as \"" +
 										selectedMediaType + "\" using [" + messageConverter + "]");
 							}
 						}
 						return;
 					}
 				}
-				else if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
-					returnValue = (T) getAdvice().beforeBodyWrite(returnValue, returnType, selectedMediaType,
+				else if (messageConverter.canWrite(clazz, selectedMediaType)) {
+					value = (T) getAdvice().beforeBodyWrite(value, returnType, selectedMediaType,
 							(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
 							inputMessage, outputMessage);
-					if (returnValue != null) {
+					if (value != null) {
 						addContentDispositionHeader(inputMessage, outputMessage);
-						((HttpMessageConverter<T>) messageConverter).write(returnValue,
+						((HttpMessageConverter<T>) messageConverter).write(value,
 								selectedMediaType, outputMessage);
 						if (logger.isDebugEnabled()) {
-							logger.debug("Written [" + returnValue + "] as \"" +
+							logger.debug("Written [" + value + "] as \"" +
 									selectedMediaType + "\" using [" + messageConverter + "]");
 						}
 					}
@@ -227,7 +250,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
-		if (returnValue != null) {
+		if (value != null) {
 			throw new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes);
 		}
 	}
@@ -360,7 +383,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 
 		if (!safeExtension(servletRequest, ext) || !safeExtension(servletRequest, extInPathParams)) {
-			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=f.txt");
+			headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=f.txt");
 		}
 	}
 
@@ -373,19 +396,42 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (this.safeExtensions.contains(extension)) {
 			return true;
 		}
+		String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+		if (pattern != null && pattern.endsWith("." + extension)) {
+			return true;
+		}
 		if (extension.equals("html")) {
-			String name = HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
-			String pattern = (String) request.getAttribute(name);
-			if (pattern != null && pattern.endsWith(".html")) {
-				return true;
-			}
-			name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+			String name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 			Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(name);
 			if (!CollectionUtils.isEmpty(mediaTypes) && mediaTypes.contains(MediaType.TEXT_HTML)) {
 				return true;
 			}
 		}
-		return false;
+		return safeMediaTypesForExtension(extension);
+	}
+
+	private boolean safeMediaTypesForExtension(String extension) {
+		List<MediaType> mediaTypes = null;
+		try {
+			mediaTypes = this.pathStrategy.resolveMediaTypeKey(null, extension);
+		}
+		catch (HttpMediaTypeNotAcceptableException e) {
+			// Ignore
+		}
+		if (CollectionUtils.isEmpty(mediaTypes)) {
+			return false;
+		}
+		for (MediaType mediaType : mediaTypes) {
+			if (!safeMediaType(mediaType)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean safeMediaType(MediaType mediaType) {
+		return (WHITELISTED_MEDIA_BASE_TYPES.contains(mediaType.getType()) ||
+				mediaType.getSubtype().endsWith("+xml"));
 	}
 
 }

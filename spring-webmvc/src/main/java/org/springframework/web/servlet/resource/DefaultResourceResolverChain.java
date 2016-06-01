@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
-
 
 /**
  * A default implementation of {@link ResourceResolverChain} for invoking a list
@@ -53,6 +52,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 		if (resolver == null) {
 			return null;
 		}
+
 		try {
 			return resolver.resolveResource(request, requestPath, locations, this);
 		}
@@ -67,6 +67,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 		if (resolver == null) {
 			return null;
 		}
+
 		try {
 			return resolver.resolveUrlPath(resourcePath, locations, this);
 		}
@@ -76,14 +77,12 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	}
 
 	private ResourceResolver getNext() {
-
 		Assert.state(this.index <= this.resolvers.size(),
-				"Current index exceeds the number of configured ResourceResolver's");
+				"Current index exceeds the number of configured ResourceResolvers");
 
 		if (this.index == (this.resolvers.size() - 1)) {
 			return null;
 		}
-
 		this.index++;
 		return this.resolvers.get(this.index);
 	}

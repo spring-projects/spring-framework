@@ -1,17 +1,17 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.test.web.servlet.htmlunit;
@@ -34,6 +34,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.gargoylesoftware.htmlunit.CookieManager;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
+
 import org.springframework.beans.Mergeable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -45,11 +50,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.gargoylesoftware.htmlunit.CookieManager;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 /**
  * Internal class used to transform a {@link WebRequest} into a
@@ -91,9 +91,9 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	 * {@link MockHttpServletRequest}; never {@code null}
 	 */
 	public HtmlUnitRequestBuilder(Map<String, MockHttpSession> sessions, WebClient webClient, WebRequest webRequest) {
-		Assert.notNull(sessions, "sessions map must not be null");
-		Assert.notNull(webClient, "webClient must not be null");
-		Assert.notNull(webRequest, "webRequest must not be null");
+		Assert.notNull(sessions, "Sessions Map must not be null");
+		Assert.notNull(webClient, "WebClient must not be null");
+		Assert.notNull(webRequest, "WebRequest must not be null");
 
 		this.sessions = sessions;
 		this.webClient = webClient;
@@ -360,18 +360,23 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	private void params(MockHttpServletRequest request, UriComponents uriComponents) {
 		for (Entry<String, List<String>> entry : uriComponents.getQueryParams().entrySet()) {
 			String name = entry.getKey();
+			String urlDecodedName = urlDecode(name);
 			for (String value : entry.getValue()) {
-				try {
-					value = (value != null ? URLDecoder.decode(value, "UTF-8") : "");
-					request.addParameter(name, value);
-				}
-				catch (UnsupportedEncodingException e) {
-					throw new RuntimeException(e);
-				}
+				value = (value != null ? urlDecode(value) : "");
+				request.addParameter(urlDecodedName, value);
 			}
 		}
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
 			request.addParameter(param.getName(), param.getValue());
+		}
+	}
+
+	private String urlDecode(String value) {
+		try {
+			return URLDecoder.decode(value, "UTF-8");
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

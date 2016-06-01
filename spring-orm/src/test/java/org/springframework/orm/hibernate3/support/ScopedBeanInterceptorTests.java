@@ -27,7 +27,9 @@ import static org.junit.Assert.*;
  * Unit tests for {@link ScopedBeanInterceptor}.
  *
  * @author Costin Leau
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class ScopedBeanInterceptorTests {
 
 	private final ScopedBeanInterceptor interceptor = new ScopedBeanInterceptor();

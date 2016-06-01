@@ -49,7 +49,8 @@ public class StandardTypeLocatorTests {
 		try {
 			locator.findType("URL");
 			fail("Should have failed");
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
 			assertEquals(SpelMessage.TYPE_NOT_FOUND,sEx.getMessageCode());
 		}

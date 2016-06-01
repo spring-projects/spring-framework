@@ -80,13 +80,7 @@ public class RunAfterTestClassCallbacks extends Statement {
 			errors.add(ex);
 		}
 
-		if (errors.isEmpty()) {
-			return;
-		}
-		if (errors.size() == 1) {
-			throw errors.get(0);
-		}
-		throw new MultipleFailureException(errors);
+		MultipleFailureException.assertEmpty(errors);
 	}
 
 }

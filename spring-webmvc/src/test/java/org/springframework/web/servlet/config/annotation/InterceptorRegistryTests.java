@@ -90,7 +90,7 @@ public class InterceptorRegistryTests {
 		this.registry.addInterceptor(this.interceptor1).addPathPatterns("/path1/**").excludePathPatterns("/path1/secret");
 		this.registry.addInterceptor(this.interceptor2).addPathPatterns("/path2");
 
-		assertEquals(Arrays.asList(this.interceptor1), getInterceptorsForPath("/path1"));
+		assertEquals(Arrays.asList(this.interceptor1), getInterceptorsForPath("/path1/test"));
 		assertEquals(Arrays.asList(this.interceptor2), getInterceptorsForPath("/path2"));
 		assertEquals(Collections.emptyList(), getInterceptorsForPath("/path1/secret"));
 	}

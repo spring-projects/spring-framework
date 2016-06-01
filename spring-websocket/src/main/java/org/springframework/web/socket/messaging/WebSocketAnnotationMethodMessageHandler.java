@@ -28,6 +28,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.web.method.ControllerAdviceBean;
 
+
 /**
  * A sub-class of {@link SimpAnnotationMethodMessageHandler} to provide support
  * for {@link org.springframework.web.bind.annotation.ControllerAdvice
@@ -38,8 +39,9 @@ import org.springframework.web.method.ControllerAdviceBean;
  */
 public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
 
-	public WebSocketAnnotationMethodMessageHandler(SubscribableChannel clientInChannel, MessageChannel clientOutChannel,
-			SimpMessageSendingOperations brokerTemplate) {
+
+	public WebSocketAnnotationMethodMessageHandler(SubscribableChannel clientInChannel,
+			MessageChannel clientOutChannel, SimpMessageSendingOperations brokerTemplate) {
 
 		super(clientInChannel, clientOutChannel, brokerTemplate);
 	}
@@ -58,9 +60,9 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for @MessageExceptionHandler mappings: " + getApplicationContext());
 		}
-		List<ControllerAdviceBean> controllerAdvice = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-		AnnotationAwareOrderComparator.sort(controllerAdvice);
-		initMessagingAdviceCache(MessagingControllerAdviceBean.createFromList(controllerAdvice));
+		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
+		AnnotationAwareOrderComparator.sort(beans);
+		initMessagingAdviceCache(MessagingControllerAdviceBean.createFromList(beans));
 	}
 
 	private void initMessagingAdviceCache(List<MessagingAdviceBean> beans) {
@@ -68,8 +70,8 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 			return;
 		}
 		for (MessagingAdviceBean bean : beans) {
-			Class<?> beanType = bean.getBeanType();
-			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(beanType);
+			Class<?> type = bean.getBeanType();
+			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(type);
 			if (resolver.hasExceptionMappings()) {
 				registerExceptionHandlerAdvice(bean, resolver);
 				logger.info("Detected @MessageExceptionHandler methods in " + bean);
@@ -89,12 +91,12 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 			this.adviceBean = adviceBean;
 		}
 
-		public static List<MessagingAdviceBean> createFromList(List<ControllerAdviceBean> controllerAdvice) {
-			List<MessagingAdviceBean> messagingAdvice = new ArrayList<MessagingAdviceBean>(controllerAdvice.size());
-			for (ControllerAdviceBean bean : controllerAdvice) {
-				messagingAdvice.add(new MessagingControllerAdviceBean(bean));
+		public static List<MessagingAdviceBean> createFromList(List<ControllerAdviceBean> beans) {
+			List<MessagingAdviceBean> result = new ArrayList<MessagingAdviceBean>(beans.size());
+			for (ControllerAdviceBean bean : beans) {
+				result.add(new MessagingControllerAdviceBean(bean));
 			}
-			return messagingAdvice;
+			return result;
 		}
 
 		@Override

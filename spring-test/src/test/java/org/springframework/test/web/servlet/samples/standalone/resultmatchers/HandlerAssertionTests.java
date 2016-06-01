@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,23 @@ import java.lang.reflect.Method;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
 /**
- * Examples of expectations on the handler or handler method that executed the request.
- *
- * <p>Note that in most cases "handler" is synonymous with "controller".
- * For example an {@code @Controller} is a kind of handler.
+ * Examples of expectations on the controller type and controller method.
  *
  * @author Rossen Stoyanchev
  */
@@ -50,6 +53,11 @@ public class HandlerAssertionTests {
 	@Test
 	public void testHandlerType() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().handlerType(SimpleController.class));
+	}
+
+	@Test
+	public void testMethodCall() throws Exception {
+		this.mockMvc.perform(get("/")).andExpect(handler().methodCall(on(SimpleController.class).handle()));
 	}
 
 	@Test
@@ -72,12 +80,14 @@ public class HandlerAssertionTests {
 	}
 
 
+
 	@Controller
-	private static class SimpleController {
+	static class SimpleController {
 
 		@RequestMapping("/")
-		public String handle() {
-			return "view";
+		@ResponseBody
+		public ResponseEntity<Void> handle() {
+			return ResponseEntity.ok().build();
 		}
 	}
 }

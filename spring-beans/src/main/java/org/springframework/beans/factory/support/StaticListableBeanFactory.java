@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.support;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -59,7 +59,31 @@ import org.springframework.util.StringUtils;
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	/** Map from bean name to bean instance */
-	private final Map<String, Object> beans = new HashMap<String, Object>();
+	private final Map<String, Object> beans;
+
+
+	/**
+	 * Create a regular {@code StaticListableBeanFactory}, to be populated
+	 * with singleton bean instances through {@link #addBean} calls.
+	 */
+	public StaticListableBeanFactory() {
+		this.beans = new LinkedHashMap<String, Object>();
+	}
+
+	/**
+	 * Create a {@code StaticListableBeanFactory} wrapping the given {@code Map}.
+	 * <p>Note that the given {@code Map} may be pre-populated with beans;
+	 * or new, still allowing for beans to be registered via {@link #addBean};
+	 * or {@link java.util.Collections#emptyMap()} for a dummy factory which
+	 * enforces operating against an empty set of beans.
+	 * @param beans a {@code Map} for holding this factory's beans, with the
+	 * bean name String as key and the corresponding singleton object as value
+	 * @since 4.3
+	 */
+	public StaticListableBeanFactory(Map<String, Object> beans) {
+		Assert.notNull(beans, "Beans Map must not be null");
+		this.beans = beans;
+	}
 
 
 	/**
@@ -265,7 +289,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			throws BeansException {
 
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
-		Map<String, T> matches = new HashMap<String, T>();
+		Map<String, T> matches = new LinkedHashMap<String, T>();
 
 		for (Map.Entry<String, Object> entry : this.beans.entrySet()) {
 			String beanName = entry.getKey();

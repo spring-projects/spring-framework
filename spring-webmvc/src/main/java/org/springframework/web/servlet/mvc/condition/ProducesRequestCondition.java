@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
+import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 
 /**
@@ -44,6 +46,11 @@ import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.Hea
  * @since 3.1
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
+
+	private final static ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
+
+	private static final ProducesRequestCondition EMPTY_CONDITION = new ProducesRequestCondition();
+
 
 	private final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
 			Collections.singletonList(new ProduceMediaTypeExpression("*/*"));
@@ -176,17 +183,35 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	@Override
 	public ProducesRequestCondition getMatchingCondition(HttpServletRequest request) {
+		if (CorsUtils.isPreFlightRequest(request)) {
+			return PRE_FLIGHT_MATCH;
+		}
 		if (isEmpty()) {
 			return this;
+		}
+		List<MediaType> acceptedMediaTypes;
+		try {
+			acceptedMediaTypes = getAcceptedMediaTypes(request);
+		}
+		catch (HttpMediaTypeException ex) {
+			return null;
 		}
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<ProduceMediaTypeExpression>(expressions);
 		for (Iterator<ProduceMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
 			ProduceMediaTypeExpression expression = iterator.next();
-			if (!expression.match(request)) {
+			if (!expression.match(acceptedMediaTypes)) {
 				iterator.remove();
 			}
 		}
-		return (result.isEmpty()) ? null : new ProducesRequestCondition(result, this.contentNegotiationManager);
+		if (!result.isEmpty()) {
+			return new ProducesRequestCondition(result, this.contentNegotiationManager);
+		}
+		else if (acceptedMediaTypes.contains(MediaType.ALL)) {
+			return EMPTY_CONDITION;
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -295,9 +320,12 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			super(expression);
 		}
 
-		@Override
-		protected boolean matchMediaType(HttpServletRequest request) throws HttpMediaTypeNotAcceptableException {
-			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(request);
+		public final boolean match(List<MediaType> acceptedMediaTypes) {
+			boolean match = matchMediaType(acceptedMediaTypes);
+			return (!isNegated() ? match : !match);
+		}
+
+		private boolean matchMediaType(List<MediaType> acceptedMediaTypes) {
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
 				if (getMediaType().isCompatibleWith(acceptedMediaType)) {
 					return true;

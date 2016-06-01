@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,21 @@ public class TestSimpSession implements SimpSession {
 			subscription.setSession(this);
 			this.subscriptions.add(subscription);
 		}
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof SimpSession && this.id.equals(((SimpSession) other).getId())));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.id.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "id=" + this.id + ", subscriptions=" + this.subscriptions;
 	}
 
 }

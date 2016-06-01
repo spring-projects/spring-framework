@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,10 +150,12 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 * or {@code null} if none was found
 	 */
 	protected TransactionAttribute determineTransactionAttribute(AnnotatedElement ae) {
-		for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
-			TransactionAttribute attr = annotationParser.parseTransactionAnnotation(ae);
-			if (attr != null) {
-				return attr;
+		if (ae.getAnnotations().length > 0) {
+			for (TransactionAnnotationParser annotationParser : this.annotationParsers) {
+				TransactionAttribute attr = annotationParser.parseTransactionAnnotation(ae);
+				if (attr != null) {
+					return attr;
+				}
 			}
 		}
 		return null;

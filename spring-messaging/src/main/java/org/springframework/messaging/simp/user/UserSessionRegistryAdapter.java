@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,14 @@ import java.util.Set;
 import org.springframework.util.CollectionUtils;
 
 /**
- * A temporary adapter to allow use of deprecated {@link UserSessionRegistry}.
+ * An adapter that allows a {@code UserSessionRegistry}, which is deprecated in
+ * favor of {@code SimpUserRegistry}, to be used as a  {@code SimpUserRegistry}.
+ * Due to the more limited information available, methods such as
+ * {@link #getUsers()} and {@link #findSubscriptions} are not supported.
+ *
+ * <p>As of 4.2, this adapter is used only in applications that explicitly
+ * register a custom {@code UserSessionRegistry} bean by overriding
+ * {@link org.springframework.messaging.simp.config.AbstractMessageBrokerConfiguration#userSessionRegistry()}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -33,18 +40,18 @@ import org.springframework.util.CollectionUtils;
 @SuppressWarnings("deprecation")
 public class UserSessionRegistryAdapter implements SimpUserRegistry {
 
-	private final UserSessionRegistry delegate;
+	private final UserSessionRegistry userSessionRegistry;
 
 
-	public UserSessionRegistryAdapter(UserSessionRegistry delegate) {
-		this.delegate = delegate;
+	public UserSessionRegistryAdapter(UserSessionRegistry registry) {
+		this.userSessionRegistry = registry;
 	}
 
 
 	@Override
 	public SimpUser getUser(String userName) {
-		Set<String> sessionIds = this.delegate.getSessionIds(userName);
-		return (!CollectionUtils.isEmpty(sessionIds) ? new SimpleSimpUser(userName, sessionIds) : null);
+		Set<String> sessionIds = this.userSessionRegistry.getSessionIds(userName);
+		return (!CollectionUtils.isEmpty(sessionIds) ? new SimpUserAdapter(userName, sessionIds) : null);
 	}
 
 	@Override
@@ -58,17 +65,21 @@ public class UserSessionRegistryAdapter implements SimpUserRegistry {
 	}
 
 
-	private static class SimpleSimpUser implements SimpUser {
+	/**
+	 * Expose the only information available from a UserSessionRegistry
+	 * (name and session id's) as a {@code SimpUser}.
+	 */
+	private static class SimpUserAdapter implements SimpUser {
 
 		private final String name;
 
 		private final Map<String, SimpSession> sessions;
 
-		public SimpleSimpUser(String name, Set<String> sessionIds) {
+		public SimpUserAdapter(String name, Set<String> sessionIds) {
 			this.name = name;
 			this.sessions = new HashMap<String, SimpSession>(sessionIds.size());
 			for (String sessionId : sessionIds) {
-				this.sessions.put(sessionId, new SimpleSimpSession(sessionId));
+				this.sessions.put(sessionId, new SimpSessionAdapter(sessionId));
 			}
 		}
 
@@ -94,11 +105,15 @@ public class UserSessionRegistryAdapter implements SimpUserRegistry {
 	}
 
 
-	private static class SimpleSimpSession implements SimpSession {
+	/**
+	 * Expose the only information available from a UserSessionRegistry
+	 * (session ids but no subscriptions) as a {@code SimpSession}.
+	 */
+	private static class SimpSessionAdapter implements SimpSession {
 
 		private final String id;
 
-		public SimpleSimpSession(String id) {
+		public SimpSessionAdapter(String id) {
 			this.id = id;
 		}
 

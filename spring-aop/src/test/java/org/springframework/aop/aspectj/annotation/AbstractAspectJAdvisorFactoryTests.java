@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.aop.aspectj.annotation;
 
 import java.io.FileNotFoundException;
@@ -693,6 +694,11 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		}
 
 		@Override
+		public Object getAspectCreationMutex() {
+			return this;
+		}
+
+		@Override
 		public int getOrder() {
 			return Ordered.LOWEST_PRECEDENCE;
 		}
@@ -961,7 +967,7 @@ abstract class AbstractMakeModifiable {
 	private Method getGetterFromSetter(Method setter) {
 		String getterName = setter.getName().replaceFirst("set", "get");
 		try {
-			return setter.getDeclaringClass().getMethod(getterName, (Class[]) null);
+			return setter.getDeclaringClass().getMethod(getterName);
 		}
 		catch (NoSuchMethodException ex) {
 			// must be write only

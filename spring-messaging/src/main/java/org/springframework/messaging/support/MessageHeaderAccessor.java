@@ -319,7 +319,8 @@ public class MessageHeaderAccessor {
 
 	protected void verifyType(String headerName, Object headerValue) {
 		if (headerName != null && headerValue != null) {
-			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) || MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
+			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) ||
+					MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
 				if (!(headerValue instanceof MessageChannel || headerValue instanceof String)) {
 					throw new IllegalArgumentException(
 							"'" + headerName + "' header value must be a MessageChannel or String");
@@ -500,7 +501,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return (bytes.length < 80) ?
 						" payload=" + new String(bytes, charset) :
@@ -525,7 +526,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return " payload=" + new String(bytes, charset);
 			}
@@ -572,11 +573,13 @@ public class MessageHeaderAccessor {
 	 * A variation of {@link #getAccessor(org.springframework.messaging.Message, Class)}
 	 * with a {@code MessageHeaders} instance instead of a {@code Message}.
 	 * <p>This is for cases when a full message may not have been created yet.
-	 * @return an accessor instance of the specified typem or {@code null} if none
+	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends MessageHeaderAccessor> T getAccessor(MessageHeaders messageHeaders, Class<T> requiredType) {
+	public static <T extends MessageHeaderAccessor> T getAccessor(
+			MessageHeaders messageHeaders, Class<T> requiredType) {
+
 		if (messageHeaders instanceof MutableMessageHeaders) {
 			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
 			MessageHeaderAccessor headerAccessor = mutableHeaders.getMessageHeaderAccessor();
@@ -593,7 +596,7 @@ public class MessageHeaderAccessor {
 	 * wrapping the message with a {@code MessageHeaderAccessor} instance.
 	 * <p>This is for cases where a header needs to be updated in generic code
 	 * while preserving the accessor type for downstream processing.
-	 * @return an accessor of the required type, never {@code null}.
+	 * @return an accessor of the required type (never {@code null})
 	 * @since 4.1
 	 */
 	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
@@ -646,7 +649,6 @@ public class MessageHeaderAccessor {
 			if (getId() == null) {
 				IdGenerator idGenerator = (MessageHeaderAccessor.this.idGenerator != null ?
 						MessageHeaderAccessor.this.idGenerator : MessageHeaders.getIdGenerator());
-
 				UUID id = idGenerator.generateId();
 				if (id != null && id != MessageHeaders.ID_VALUE_NONE) {
 					getRawHeaders().put(ID, id);

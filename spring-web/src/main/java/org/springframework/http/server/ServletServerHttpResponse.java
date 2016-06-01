@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
+		Assert.notNull(status, "HttpStatus must not be null");
 		this.servletResponse.setStatus(status.value());
 	}
 
@@ -114,8 +115,8 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 				this.servletResponse.setContentType(this.headers.getContentType().toString());
 			}
 			if (this.servletResponse.getCharacterEncoding() == null && this.headers.getContentType() != null &&
-					this.headers.getContentType().getCharSet() != null) {
-				this.servletResponse.setCharacterEncoding(this.headers.getContentType().getCharSet().name());
+					this.headers.getContentType().getCharset() != null) {
+				this.servletResponse.setCharacterEncoding(this.headers.getContentType().getCharset().name());
 			}
 			this.headersWritten = true;
 		}
@@ -136,6 +137,11 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	private class ServletResponseHttpHeaders extends HttpHeaders {
 
 		private static final long serialVersionUID = 3410708522401046302L;
+
+		@Override
+		public boolean containsKey(Object key) {
+			return (super.containsKey(key) || (get(key) != null));
+		}
 
 		@Override
 		public String getFirst(String headerName) {

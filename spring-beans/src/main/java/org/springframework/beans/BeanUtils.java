@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public abstract class BeanUtils {
 
 	/**
 	 * Instantiate a class using its no-arg constructor and return the new instance
-	 * as the the specified assignable type.
+	 * as the specified assignable type.
 	 * <p>Useful in cases where
 	 * the type of the class to instantiate (clazz) is not available, but the type
 	 * desired (assignableTo) is known.
@@ -147,20 +147,16 @@ public abstract class BeanUtils {
 			return ctor.newInstance(args);
 		}
 		catch (InstantiationException ex) {
-			throw new BeanInstantiationException(ctor.getDeclaringClass(),
-					"Is it an abstract class?", ex);
+			throw new BeanInstantiationException(ctor, "Is it an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new BeanInstantiationException(ctor.getDeclaringClass(),
-					"Is the constructor accessible?", ex);
+			throw new BeanInstantiationException(ctor, "Is the constructor accessible?", ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new BeanInstantiationException(ctor.getDeclaringClass(),
-					"Illegal arguments for constructor", ex);
+			throw new BeanInstantiationException(ctor, "Illegal arguments for constructor", ex);
 		}
 		catch (InvocationTargetException ex) {
-			throw new BeanInstantiationException(ctor.getDeclaringClass(),
-					"Constructor threw exception", ex.getTargetException());
+			throw new BeanInstantiationException(ctor, "Constructor threw exception", ex.getTargetException());
 		}
 	}
 
@@ -278,8 +274,12 @@ public abstract class BeanUtils {
 					targetMethod = method;
 					numMethodsFoundWithCurrentMinimumArgs = 1;
 				}
-				else {
-					if (targetMethod.getParameterTypes().length == numParams) {
+				else if (!method.isBridge() && targetMethod.getParameterTypes().length == numParams) {
+					if (targetMethod.isBridge()) {
+						// Prefer regular method over bridge...
+						targetMethod = method;
+					}
+					else {
 						// Additional candidate with same length
 						numMethodsFoundWithCurrentMinimumArgs++;
 					}
@@ -289,7 +289,7 @@ public abstract class BeanUtils {
 		if (numMethodsFoundWithCurrentMinimumArgs > 1) {
 			throw new IllegalArgumentException("Cannot resolve method '" + methodName +
 					"' to a unique method. Attempted to resolve to overloaded method with " +
-					"the least number of parameters, but there were " +
+					"the least number of parameters but there were " +
 					numMethodsFoundWithCurrentMinimumArgs + " candidates.");
 		}
 		return targetMethod;

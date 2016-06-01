@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	public SockJsMessageCodec getMessageCodec() {
 		Assert.state(this.messageCodec != null, "A SockJsMessageCodec is required but not available: " +
-				"Add Jackson 2 to the classpath, or configure a custom SockJsMessageCodec.");
+				"Add Jackson to the classpath, or configure a custom SockJsMessageCodec.");
 		return this.messageCodec;
 	}
 
@@ -247,8 +247,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		try {
 			HttpMethod supportedMethod = transportType.getHttpMethod();
-			if (!supportedMethod.equals(request.getMethod())) {
-				if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
+			if (supportedMethod != request.getMethod()) {
+				if (HttpMethod.OPTIONS == request.getMethod() && transportType.supportsCors()) {
 					if (checkOrigin(request, response, HttpMethod.OPTIONS, supportedMethod)) {
 						response.setStatusCode(HttpStatus.NO_CONTENT);
 						addCacheHeaders(response);
@@ -326,7 +326,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			return false;
 		}
 
-		if (!getAllowedOrigins().contains("*")) {
+		if (!this.allowedOrigins.contains("*")) {
 			TransportType transportType = TransportType.fromValue(transport);
 			if (transportType == null || !transportType.supportsOrigin()) {
 				if (logger.isWarnEnabled()) {
@@ -359,14 +359,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (this.sessionCleanupTask != null) {
 				return;
 			}
-			final List<String> removedSessionIds = new ArrayList<String>();
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
+					List<String> removedIds = new ArrayList<String>();
 					for (SockJsSession session : sessions.values()) {
 						try {
 							if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
 								sessions.remove(session.getId());
+								removedIds.add(session.getId());
 								session.close();
 							}
 						}
@@ -375,9 +376,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 							logger.debug("Failed to close " + session, ex);
 						}
 					}
-					if (logger.isDebugEnabled() && !removedSessionIds.isEmpty()) {
-						logger.debug("Closed " + removedSessionIds.size() + " sessions " + removedSessionIds);
-						removedSessionIds.clear();
+					if (logger.isDebugEnabled() && !removedIds.isEmpty()) {
+						logger.debug("Closed " + removedIds.size() + " sessions: " + removedIds);
 					}
 				}
 			}, getDisconnectDelay());

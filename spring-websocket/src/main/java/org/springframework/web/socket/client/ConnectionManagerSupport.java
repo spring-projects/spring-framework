@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,10 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 	}
 
 
+	protected URI getUri() {
+		return this.uri;
+	}
+
 	/**
 	 * Set whether to auto-connect to the remote endpoint after this connection manager
 	 * has been initialized and the Spring context has been refreshed.
@@ -95,8 +99,61 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 		return this.phase;
 	}
 
-	protected URI getUri() {
-		return this.uri;
+
+	/**
+	 * Start the WebSocket connection. If already connected, the method has no impact.
+	 */
+	@Override
+	public final void start() {
+		synchronized (this.lifecycleMonitor) {
+			if (!isRunning()) {
+				startInternal();
+			}
+		}
+	}
+
+	protected void startInternal() {
+		synchronized (this.lifecycleMonitor) {
+			if (logger.isInfoEnabled()) {
+				logger.info("Starting " + getClass().getSimpleName());
+			}
+			this.running = true;
+			openConnection();
+		}
+	}
+
+	@Override
+	public final void stop() {
+		synchronized (this.lifecycleMonitor) {
+			if (isRunning()) {
+				if (logger.isInfoEnabled()) {
+					logger.info("Stopping " + getClass().getSimpleName());
+				}
+				try {
+					stopInternal();
+				}
+				catch (Throwable ex) {
+					logger.error("Failed to stop WebSocket connection", ex);
+				}
+				finally {
+					this.running = false;
+				}
+			}
+		}
+	}
+
+	@Override
+	public final void stop(Runnable callback) {
+		synchronized (this.lifecycleMonitor) {
+			stop();
+			callback.run();
+		}
+	}
+
+	protected void stopInternal() throws Exception {
+		if (isConnected()) {
+			closeConnection();
+		}
 	}
 
 	/**
@@ -109,66 +166,11 @@ public abstract class ConnectionManagerSupport implements SmartLifecycle {
 		}
 	}
 
-	/**
-	 * Start the websocket connection. If already connected, the method has no impact.
-	 */
-	@Override
-	public final void start() {
-		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
-				startInternal();
-			}
-		}
-	}
-
-	protected void startInternal() {
-		synchronized (lifecycleMonitor) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Starting " + this.getClass().getSimpleName());
-			}
-			this.running = true;
-			openConnection();
-		}
-	}
 
 	protected abstract void openConnection();
 
-	@Override
-	public final void stop() {
-		synchronized (this.lifecycleMonitor) {
-			if (isRunning()) {
-				if (logger.isInfoEnabled()) {
-					logger.info("Stopping " + this.getClass().getSimpleName());
-				}
-				try {
-					stopInternal();
-				}
-				catch (Throwable e) {
-					logger.error("Failed to stop WebSocket connection", e);
-				}
-				finally {
-					this.running = false;
-				}
-			}
-		}
-	}
-
-	protected void stopInternal() throws Exception {
-		if (isConnected()) {
-			closeConnection();
-		}
-	}
-
-	protected abstract boolean isConnected();
-
 	protected abstract void closeConnection() throws Exception;
 
-	@Override
-	public final void stop(Runnable callback) {
-		synchronized (this.lifecycleMonitor) {
-			this.stop();
-			callback.run();
-		}
-	}
+	protected abstract boolean isConnected();
 
 }

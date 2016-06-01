@@ -96,8 +96,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
-import org.springframework.web.bind.annotation.support.HandlerMethodInvoker;
-import org.springframework.web.bind.annotation.support.HandlerMethodResolver;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -110,9 +108,6 @@ import org.springframework.web.servlet.HandlerAdapter;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;
-import org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.UrlPathHelper;
@@ -164,7 +159,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private MethodNameResolver methodNameResolver = new InternalPathMethodNameResolver();
+	private org.springframework.web.servlet.mvc.multiaction.MethodNameResolver methodNameResolver =
+			new org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver();
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -255,7 +251,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * <p>Will only kick in when the handler method cannot be resolved uniquely
 	 * through the annotation metadata already.
 	 */
-	public void setMethodNameResolver(MethodNameResolver methodNameResolver) {
+	public void setMethodNameResolver(org.springframework.web.servlet.mvc.multiaction.MethodNameResolver methodNameResolver) {
 		this.methodNameResolver = methodNameResolver;
 	}
 
@@ -524,9 +520,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 
 	/**
-	 * Servlet-specific subclass of {@link HandlerMethodResolver}.
+	 * Servlet-specific subclass of {@code HandlerMethodResolver}.
 	 */
-	private class ServletHandlerMethodResolver extends HandlerMethodResolver {
+	@SuppressWarnings("deprecation")
+	private class ServletHandlerMethodResolver extends org.springframework.web.bind.annotation.support.HandlerMethodResolver {
 
 		private final Map<Method, RequestMappingInfo> mappings = new HashMap<Method, RequestMappingInfo>();
 
@@ -674,7 +671,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				if (!allowedMethods.isEmpty()) {
 					throw new HttpRequestMethodNotSupportedException(request.getMethod(), StringUtils.toStringArray(allowedMethods));
 				}
-				throw new NoSuchRequestHandlingMethodException(lookupPath, request.getMethod(), request.getParameterMap());
+				throw new org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException(
+						lookupPath, request.getMethod(), request.getParameterMap());
 			}
 		}
 
@@ -768,13 +766,14 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 
 	/**
-	 * Servlet-specific subclass of {@link HandlerMethodInvoker}.
+	 * Servlet-specific subclass of {@code HandlerMethodInvoker}.
 	 */
-	private class ServletHandlerMethodInvoker extends HandlerMethodInvoker {
+	@SuppressWarnings("deprecation")
+	private class ServletHandlerMethodInvoker extends org.springframework.web.bind.annotation.support.HandlerMethodInvoker {
 
 		private boolean responseArgumentUsed = false;
 
-		private ServletHandlerMethodInvoker(HandlerMethodResolver resolver) {
+		private ServletHandlerMethodInvoker(org.springframework.web.bind.annotation.support.HandlerMethodResolver resolver) {
 			super(resolver, webBindingInitializer, sessionAttributeStore, parameterNameDiscoverer,
 					customArgumentResolvers, messageConverters);
 		}

@@ -158,9 +158,13 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * The default is 1000 ms, that is, 1 second.
 	 * <p><b>NOTE:</b> This value needs to be smaller than the transaction
 	 * timeout used by the transaction manager (in the appropriate unit,
-	 * of course). -1 indicates no timeout at all; however, this is only
-	 * feasible if not running within a transaction manager.
+	 * of course). 0 indicates no timeout at all; however, this is only
+	 * feasible if not running within a transaction manager and generally
+	 * discouraged since such a listener container cannot cleanly shut down.
+	 * A negative value such as -1 indicates a no-wait receive operation.
+	 * @see #receiveFromConsumer(MessageConsumer, long)
 	 * @see javax.jms.MessageConsumer#receive(long)
+	 * @see javax.jms.MessageConsumer#receiveNoWait()
 	 * @see javax.jms.MessageConsumer#receive()
 	 * @see #setTransactionTimeout
 	 */
@@ -417,7 +421,7 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @throws JMSException if thrown by JMS methods
 	 */
 	protected Message receiveMessage(MessageConsumer consumer) throws JMSException {
-		return (this.receiveTimeout < 0 ? consumer.receive() : consumer.receive(this.receiveTimeout));
+		return receiveFromConsumer(consumer, getReceiveTimeout());
 	}
 
 	/**

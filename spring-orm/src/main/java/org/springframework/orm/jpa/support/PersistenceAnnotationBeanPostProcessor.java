@@ -190,7 +190,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	private transient ListableBeanFactory beanFactory;
 
 	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(64);
+			new ConcurrentHashMap<String, InjectionMetadata>(256);
 
 	private final Map<Object, EntityManager> extendedEntityManagersToClose =
 			new ConcurrentHashMap<Object, EntityManager>(16);
@@ -373,6 +373,11 @@ public class PersistenceAnnotationBeanPostProcessor
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		EntityManager emToClose = this.extendedEntityManagersToClose.remove(bean);
 		EntityManagerFactoryUtils.closeEntityManager(emToClose);
+	}
+
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return this.extendedEntityManagersToClose.containsKey(bean);
 	}
 
 

@@ -130,7 +130,7 @@ public class GenericTypeResolverTests {
 		Type t = null;
 		Type x = null;
 		for (Map.Entry<TypeVariable, Type> entry : map.entrySet()) {
-			if(entry.getKey().toString().equals("T")) {
+			if (entry.getKey().toString().equals("T")) {
 				t = entry.getValue();
 			}
 			else {

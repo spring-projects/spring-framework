@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,9 +114,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * <p>Performs full initialization of the bean, including all applicable
 	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>Note: This is intended for creating a fresh instance, populating annotated
-	 * fields and methods as well as applying all standard bean initialiation callbacks.
+	 * fields and methods as well as applying all standard bean initialization callbacks.
 	 * It does <i>not</> imply traditional by-name or by-type autowiring of properties;
-	 * use {@link #createBean(Class, int, boolean)} for that purposes.
+	 * use {@link #createBean(Class, int, boolean)} for those purposes.
 	 * @param beanClass the class of the bean to create
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed
@@ -129,7 +129,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * <p>Note: This is essentially intended for (re-)populating annotated fields and
 	 * methods, either for new instances or for deserialized instances. It does
 	 * <i>not</i> imply traditional by-name or by-type autowiring of properties;
-	 * use {@link #autowireBeanProperties} for that purposes.
+	 * use {@link #autowireBeanProperties} for those purposes.
 	 * @param existingBean the existing bean instance
 	 * @throws BeansException if wiring failed
 	 */
@@ -159,7 +159,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @param descriptor the descriptor for the dependency
 	 * @param beanName the name of the bean which declares the present dependency
 	 * @return the resolved object, or {@code null} if none found
-	 * @throws BeansException in dependency resolution failed
+	 * @throws BeansException if dependency resolution failed
 	 */
 	Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException;
 
@@ -321,7 +321,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @param typeConverter the TypeConverter to use for populating arrays and
 	 * collections
 	 * @return the resolved object, or {@code null} if none found
-	 * @throws BeansException in dependency resolution failed
+	 * @throws BeansException if dependency resolution failed
 	 */
 	Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException;

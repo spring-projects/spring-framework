@@ -61,7 +61,9 @@ import org.springframework.beans.factory.InitializingBean;
  * @since 1.2
  * @see org.hibernate.engine.FilterDefinition
  * @see LocalSessionFactoryBean#setFilterDefinitions
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class FilterDefinitionFactoryBean implements FactoryBean<FilterDefinition>, BeanNameAware, InitializingBean {
 
 	private final TypeResolver typeResolver = new TypeResolver();

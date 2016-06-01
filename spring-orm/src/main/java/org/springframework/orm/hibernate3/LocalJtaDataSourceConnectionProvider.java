@@ -23,7 +23,9 @@ package org.springframework.orm.hibernate3;
  *
  * @author Juergen Hoeller
  * @since 2.5.1
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class LocalJtaDataSourceConnectionProvider extends LocalDataSourceConnectionProvider {
 
 	/**

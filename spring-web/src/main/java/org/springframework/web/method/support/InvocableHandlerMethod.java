@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,7 @@ import org.springframework.web.method.HandlerMethod;
  * conversion. Use the {@link #setDataBinderFactory(WebDataBinderFactory)} property to supply
  * a binder factory to pass to argument resolvers.
  *
- * <p>Use {@link #setHandlerMethodArgumentResolvers(HandlerMethodArgumentResolverComposite)}
- * to customize the list of argument resolvers.
+ * <p>Use {@link #setHandlerMethodArgumentResolvers} to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -223,7 +222,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(getBridgedMethod(), getBean(), args);
-			throw new IllegalStateException(getInvocationErrorMessage(ex.getMessage(), args), ex);
+			String message = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+			throw new IllegalStateException(getInvocationErrorMessage(message, args), ex);
 		}
 		catch (InvocationTargetException ex) {
 			// Unwrap for HandlerExceptionResolvers ...
@@ -256,7 +256,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
 			String msg = "The mapped controller method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual controller bean instance '" +
+					"' is not an instance of the actual controller bean class '" +
 					targetBeanClass.getName() + "'. If the controller requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(getInvocationErrorMessage(msg, args));
@@ -266,7 +266,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
 		sb.append("Resolved arguments: \n");
-		for (int i=0; i < resolvedArgs.length; i++) {
+		for (int i = 0; i < resolvedArgs.length; i++) {
 			sb.append("[").append(i).append("] ");
 			if (resolvedArgs[i] == null) {
 				sb.append("[null] \n");

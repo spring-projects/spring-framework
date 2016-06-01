@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
@@ -368,7 +370,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		else {
 			applicationEvent = new PayloadApplicationEvent<Object>(this, event);
 			if (eventType == null) {
-				eventType = ResolvableType.forClassWithGenerics(PayloadApplicationEvent.class, event.getClass());
+				eventType = ((PayloadApplicationEvent)applicationEvent).getResolvableType();
 			}
 		}
 
@@ -460,8 +462,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	@Override
-	public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor) {
-		this.beanFactoryPostProcessors.add(beanFactoryPostProcessor);
+	public void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor) {
+		Assert.notNull(postProcessor, "BeanFactoryPostProcessor must not be null");
+		this.beanFactoryPostProcessors.add(postProcessor);
 	}
 
 
@@ -475,6 +478,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public void addApplicationListener(ApplicationListener<?> listener) {
+		Assert.notNull(listener, "ApplicationListener must not be null");
 		if (this.applicationEventMulticaster != null) {
 			this.applicationEventMulticaster.addApplicationListener(listener);
 		}
@@ -541,7 +545,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			catch (BeansException ex) {
-				logger.warn("Exception encountered during context initialization - cancelling refresh attempt", ex);
+				if (logger.isWarnEnabled()) {
+					logger.warn("Exception encountered during context initialization - " +
+							"cancelling refresh attempt: " + ex);
+				}
 
 				// Destroy already created singletons to avoid dangling resources.
 				destroyBeans();
@@ -672,6 +679,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory) {
 		PostProcessorRegistrationDelegate.invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
+
+		// Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
+		// (e.g. through an @Bean method registered by ConfigurationClassPostProcessor)
+		if (beanFactory.getTempClassLoader() == null && beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
+			beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
+		}
 	}
 
 	/**
@@ -819,6 +833,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 					beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
 		}
 
+		// Register a default embedded value resolver if no bean post-processor
+		// (such as a PropertyPlaceholderConfigurer bean) registered any before:
+		// at this point, primarily for resolution in annotation attribute values.
+		if (!beanFactory.hasEmbeddedValueResolver()) {
+			beanFactory.addEmbeddedValueResolver(new StringValueResolver() {
+				@Override
+				public String resolveStringValue(String strVal) {
+					return getEnvironment().resolvePlaceholders(strVal);
+				}
+			});
+		}
+
 		// Initialize LoadTimeWeaverAware beans early to allow for registering their transformers early.
 		String[] weaverAwareNames = beanFactory.getBeanNamesForType(LoadTimeWeaverAware.class, false, false);
 		for (String weaverAwareName : weaverAwareNames) {
@@ -864,13 +890,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Reset Spring's common core caches, in particular the {@link ResolvableType}
-	 * and the {@link CachedIntrospectionResults} caches.
+	 * Reset Spring's common core caches, in particular the {@link ReflectionUtils},
+	 * {@link ResolvableType} and {@link CachedIntrospectionResults} caches.
 	 * @since 4.2
+	 * @see ReflectionUtils#clearCache()
 	 * @see ResolvableType#clearCache()
 	 * @see CachedIntrospectionResults#clearClassLoader(ClassLoader)
 	 */
 	protected void resetCommonCaches() {
+		ReflectionUtils.clearCache();
 		ResolvableType.clearCache();
 		CachedIntrospectionResults.clearClassLoader(getClassLoader());
 	}
@@ -1282,7 +1310,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public boolean isRunning() {
-		return getLifecycleProcessor().isRunning();
+		return (this.lifecycleProcessor != null && this.lifecycleProcessor.isRunning());
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
 
 import org.springframework.beans.NotReadablePropertyException;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
@@ -190,9 +191,9 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * Return FieldError arguments for a validation error on the given field.
 	 * Invoked for each violated constraint.
 	 * <p>The default implementation returns a first argument indicating the field name
-	 * (of type DefaultMessageSourceResolvable, with "objectName.field" and "field" as codes).
-	 * Afterwards, it adds all actual constraint annotation attributes (i.e. excluding
-	 * "message", "groups" and "payload") in alphabetical order of their attribute names.
+	 * (see {@link #getResolvableField}). Afterwards, it adds all actual constraint
+	 * annotation attributes (i.e. excluding "message", "groups" and "payload") in
+	 * alphabetical order of their attribute names.
 	 * <p>Can be overridden to e.g. add further attributes from the constraint descriptor.
 	 * @param objectName the name of the target object
 	 * @param field the field that caused the binding error
@@ -204,19 +205,37 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 */
 	protected Object[] getArgumentsForConstraint(String objectName, String field, ConstraintDescriptor<?> descriptor) {
 		List<Object> arguments = new LinkedList<Object>();
-		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
-		arguments.add(new DefaultMessageSourceResolvable(codes, field));
+		arguments.add(getResolvableField(objectName, field));
 		// Using a TreeMap for alphabetical ordering of attribute names
 		Map<String, Object> attributesToExpose = new TreeMap<String, Object>();
 		for (Map.Entry<String, Object> entry : descriptor.getAttributes().entrySet()) {
 			String attributeName = entry.getKey();
 			Object attributeValue = entry.getValue();
 			if (!internalAnnotationAttributes.contains(attributeName)) {
+				if (attributeValue instanceof String) {
+					attributeValue = new ResolvableAttribute(attributeValue.toString());
+				}
 				attributesToExpose.put(attributeName, attributeValue);
 			}
 		}
 		arguments.addAll(attributesToExpose.values());
 		return arguments.toArray(new Object[arguments.size()]);
+	}
+
+	/**
+	 * Build a resolvable wrapper for the specified field, allowing to resolve the field's
+	 * name in a {@code MessageSource}.
+	 * <p>The default implementation returns a first argument indicating the field:
+	 * of type {@code DefaultMessageSourceResolvable}, with "objectName.field" and "field"
+	 * as codes, and with the plain field name as default message.
+	 * @param objectName the name of the target object
+	 * @param field the field that caused the binding error
+	 * @return a corresponding {@code MessageSourceResolvable} for the specified field
+	 * @since 4.3
+	 */
+	protected MessageSourceResolvable getResolvableField(String objectName, String field) {
+		String[] codes = new String[] {objectName + Errors.NESTED_PATH_SEPARATOR + field, field};
+		return new DefaultMessageSourceResolvable(codes, field);
 	}
 
 	/**
@@ -249,13 +268,13 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	public <T> Set<ConstraintViolation<T>> validate(T object, Class<?>... groups) {
-		Assert.notNull(this.targetValidator, "No target Validator set");
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.validate(object, groups);
 	}
 
 	@Override
 	public <T> Set<ConstraintViolation<T>> validateProperty(T object, String propertyName, Class<?>... groups) {
-		Assert.notNull(this.targetValidator, "No target Validator set");
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.validateProperty(object, propertyName, groups);
 	}
 
@@ -263,20 +282,50 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	public <T> Set<ConstraintViolation<T>> validateValue(
 			Class<T> beanType, String propertyName, Object value, Class<?>... groups) {
 
-		Assert.notNull(this.targetValidator, "No target Validator set");
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.validateValue(beanType, propertyName, value, groups);
 	}
 
 	@Override
 	public BeanDescriptor getConstraintsForClass(Class<?> clazz) {
-		Assert.notNull(this.targetValidator, "No target Validator set");
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.getConstraintsForClass(clazz);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T unwrap(Class<T> type) {
-		Assert.notNull(this.targetValidator, "No target Validator set");
-		return this.targetValidator.unwrap(type);
+		Assert.state(this.targetValidator != null, "No target Validator set");
+		return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
+	}
+
+
+	/**
+	 * Wrapper for a String attribute which can be resolved via a {@code MessageSource},
+	 * falling back to the original attribute as a default value otherwise.
+	 */
+	private static class ResolvableAttribute implements MessageSourceResolvable {
+
+		private final String resolvableString;
+
+		public ResolvableAttribute(String resolvableString) {
+			this.resolvableString = resolvableString;
+		}
+
+		@Override
+		public String[] getCodes() {
+			return new String[] {this.resolvableString};
+		}
+
+		@Override
+		public Object[] getArguments() {
+			return null;
+		}
+
+		@Override
+		public String getDefaultMessage() {
+			return this.resolvableString;
+		}
 	}
 
 }

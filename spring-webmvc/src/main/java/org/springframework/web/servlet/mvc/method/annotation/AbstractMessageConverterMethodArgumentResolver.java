@@ -22,8 +22,8 @@ import java.io.PushbackInputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,8 +63,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
  */
 public abstract class AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private static final List<HttpMethod> SUPPORTED_METHODS =
-			Arrays.asList(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
+	private static final Set<HttpMethod> SUPPORTED_METHODS =
+			EnumSet.of(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
 
 	private static final Object NO_VALUE = new Object();
 
@@ -228,8 +228,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 
 		if (body == NO_VALUE) {
-			if (!SUPPORTED_METHODS.contains(httpMethod)
-					|| (noContentType && inputMessage.getBody() == null)) {
+			if (httpMethod == null || !SUPPORTED_METHODS.contains(httpMethod) ||
+					(noContentType && inputMessage.getBody() == null)) {
 				return null;
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);

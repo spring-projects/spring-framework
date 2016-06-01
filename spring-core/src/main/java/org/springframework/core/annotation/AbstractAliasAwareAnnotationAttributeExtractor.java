@@ -55,8 +55,8 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	 * of the supplied type; may be {@code null} if unknown
 	 * @param source the underlying source of annotation attributes; never {@code null}
 	 */
-	AbstractAliasAwareAnnotationAttributeExtractor(Class<? extends Annotation> annotationType,
-			AnnotatedElement annotatedElement, S source) {
+	AbstractAliasAwareAnnotationAttributeExtractor(
+			Class<? extends Annotation> annotationType, AnnotatedElement annotatedElement, S source) {
 
 		Assert.notNull(annotationType, "annotationType must not be null");
 		Assert.notNull(source, "source must not be null");
@@ -84,12 +84,12 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 
 	@Override
 	public final Object getAttributeValue(Method attributeMethod) {
-		final String attributeName = attributeMethod.getName();
+		String attributeName = attributeMethod.getName();
 		Object attributeValue = getRawAttributeValue(attributeMethod);
 
 		List<String> aliasNames = this.attributeAliasMap.get(attributeName);
 		if (aliasNames != null) {
-			final Object defaultValue = AnnotationUtils.getDefaultValue(getAnnotationType(), attributeName);
+			Object defaultValue = AnnotationUtils.getDefaultValue(getAnnotationType(), attributeName);
 			for (String aliasName : aliasNames) {
 				Object aliasValue = getRawAttributeValue(aliasName);
 

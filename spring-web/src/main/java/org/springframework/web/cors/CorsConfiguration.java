@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.cors;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -103,7 +102,7 @@ public class CorsConfiguration {
 	}
 
 	private List<String> combine(List<String> source, List<String> other) {
-		if (other == null) {
+		if (other == null || other.contains(ALL)) {
 			return source;
 		}
 		if (source == null || source.contains(ALL)) {
@@ -341,14 +340,18 @@ public class CorsConfiguration {
 		}
 		if (allowedMethods.isEmpty()) {
 			allowedMethods.add(HttpMethod.GET.name());
+			allowedMethods.add(HttpMethod.HEAD.name());
 		}
 		List<HttpMethod> result = new ArrayList<HttpMethod>(allowedMethods.size());
 		boolean allowed = false;
 		for (String method : allowedMethods) {
-			if (requestMethod.name().equals(method)) {
+			if (requestMethod.matches(method)) {
 				allowed = true;
 			}
-			result.add(HttpMethod.valueOf(method));
+			HttpMethod resolved = HttpMethod.resolve(method);
+			if (resolved != null) {
+				result.add(resolved);
+			}
 		}
 		return (allowed ? result : null);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 import com.googlecode.protobuf.format.HtmlFormat;
 import com.googlecode.protobuf.format.JsonFormat;
+import com.googlecode.protobuf.format.ProtobufFormatter;
 import com.googlecode.protobuf.format.XmlFormat;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -41,20 +41,19 @@ import org.springframework.util.FileCopyUtils;
 
 
 /**
- * An {@code HttpMessageConverter} that can read and write Protobuf
- * {@link com.google.protobuf.Message} using
- * <a href="https://developers.google.com/protocol-buffers/">Google Protocol buffers</a>.
+ * An {@code HttpMessageConverter} that reads and writes {@link com.google.protobuf.Message}s
+ * using <a href="https://developers.google.com/protocol-buffers/">Google Protocol Buffers</a>.
  *
- * <p>By default it supports {@code "application/json"}, {@code "application/xml"},
- * {@code "text/plain"} and {@code "application/x-protobuf"} while writing also
- * supports {@code "text/html"}
+ * <p>By default, it supports {@code "application/x-protobuf"}, {@code "text/plain"},
+ * {@code "application/json"}, {@code "application/xml"}, while also writing {@code "text/html"}.
  *
- * <p>To generate Message Java classes you need to install the protoc binary.
+ * <p>To generate {@code Message} Java classes, you need to install the {@code protoc} binary.
  *
- * <p>Tested against Protobuf version 2.5.0.
+ * <p>Requires Protobuf 2.6 and Protobuf Java Format 1.4, as of Spring 4.3.
  *
  * @author Alex Antonov
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<Message> {
@@ -67,10 +66,17 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 
 	public static final String X_PROTOBUF_MESSAGE_HEADER = "X-Protobuf-Message";
 
+
+	private static final ProtobufFormatter JSON_FORMAT = new JsonFormat();
+
+	private static final ProtobufFormatter XML_FORMAT = new XmlFormat();
+
+	private static final ProtobufFormatter HTML_FORMAT = new HtmlFormat();
+
+
 	private static final ConcurrentHashMap<Class<?>, Method> methodCache = new ConcurrentHashMap<Class<?>, Method>();
 
-
-	private ExtensionRegistry extensionRegistry = ExtensionRegistry.newInstance();
+	private final ExtensionRegistry extensionRegistry = ExtensionRegistry.newInstance();
 
 
 	/**
@@ -85,7 +91,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 * that allows the registration of message extensions.
 	 */
 	public ProtobufHttpMessageConverter(ExtensionRegistryInitializer registryInitializer) {
-		super(PROTOBUF, MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON);
+		super(PROTOBUF, MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
 		if (registryInitializer != null) {
 			registryInitializer.initializeExtensionRegistry(this.extensionRegistry);
 		}
@@ -98,55 +104,43 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	}
 
 	@Override
+	protected MediaType getDefaultContentType(Message message) {
+		return PROTOBUF;
+	}
+
+	@Override
 	protected Message readInternal(Class<? extends Message> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
-		contentType = (contentType != null ? contentType : PROTOBUF);
-
-		Charset charset = getCharset(inputMessage.getHeaders());
-		InputStreamReader reader = new InputStreamReader(inputMessage.getBody(), charset);
+		if (contentType == null) {
+			contentType = PROTOBUF;
+		}
+		Charset charset = contentType.getCharset();
+		if (charset == null) {
+			charset = DEFAULT_CHARSET;
+		}
 
 		try {
 			Message.Builder builder = getMessageBuilder(clazz);
-
-			if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-				JsonFormat.merge(reader, this.extensionRegistry, builder);
-			}
-			else if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
+			if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
+				InputStreamReader reader = new InputStreamReader(inputMessage.getBody(), charset);
 				TextFormat.merge(reader, this.extensionRegistry, builder);
 			}
+			else if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
+				JSON_FORMAT.merge(inputMessage.getBody(), charset, this.extensionRegistry, builder);
+			}
 			else if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-				XmlFormat.merge(reader, this.extensionRegistry, builder);
+				XML_FORMAT.merge(inputMessage.getBody(), charset, this.extensionRegistry, builder);
 			}
 			else {
 				builder.mergeFrom(inputMessage.getBody(), this.extensionRegistry);
 			}
 			return builder.build();
 		}
-		catch (Exception e) {
-			throw new HttpMessageNotReadableException("Could not read Protobuf message: " + e.getMessage(), e);
+		catch (Exception ex) {
+			throw new HttpMessageNotReadableException("Could not read Protobuf message: " + ex.getMessage(), ex);
 		}
-	}
-
-	private Charset getCharset(HttpHeaders headers) {
-		if (headers == null || headers.getContentType() == null || headers.getContentType().getCharSet() == null) {
-			return DEFAULT_CHARSET;
-		}
-		return headers.getContentType().getCharSet();
-	}
-
-	/**
-	 * Create a new {@code Message.Builder} instance for the given class.
-	 * <p>This method uses a ConcurrentHashMap for caching method lookups.
-	 */
-	private Message.Builder getMessageBuilder(Class<? extends Message> clazz) throws Exception {
-		Method method = methodCache.get(clazz);
-		if (method == null) {
-			method = clazz.getMethod("newBuilder");
-			methodCache.put(clazz, method);
-		}
-		return (Message.Builder) method.invoke(clazz);
 	}
 
 	/**
@@ -155,7 +149,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 	 */
 	@Override
 	protected boolean canWrite(MediaType mediaType) {
-		return super.canWrite(mediaType) || MediaType.TEXT_HTML.isCompatibleWith(mediaType);
+		return (super.canWrite(mediaType) || MediaType.TEXT_HTML.isCompatibleWith(mediaType));
 	}
 
 	@Override
@@ -163,36 +157,32 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 			throws IOException, HttpMessageNotWritableException {
 
 		MediaType contentType = outputMessage.getHeaders().getContentType();
-		Charset charset = getCharset(contentType);
+		if (contentType == null) {
+			contentType = getDefaultContentType(message);
+		}
+		Charset charset = contentType.getCharset();
+		if (charset == null) {
+			charset = DEFAULT_CHARSET;
+		}
 
-		if (MediaType.TEXT_HTML.isCompatibleWith(contentType)) {
-			final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
-			HtmlFormat.print(message, outputStreamWriter);
-			outputStreamWriter.flush();
-		}
-		else if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
-			final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
-			JsonFormat.print(message, outputStreamWriter);
-			outputStreamWriter.flush();
-		}
-		else if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
-			final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
+		if (MediaType.TEXT_PLAIN.isCompatibleWith(contentType)) {
+			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
 			TextFormat.print(message, outputStreamWriter);
 			outputStreamWriter.flush();
 		}
+		else if (MediaType.APPLICATION_JSON.isCompatibleWith(contentType)) {
+			JSON_FORMAT.print(message, outputMessage.getBody(), charset);
+		}
 		else if (MediaType.APPLICATION_XML.isCompatibleWith(contentType)) {
-			final OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputMessage.getBody(), charset);
-			XmlFormat.print(message, outputStreamWriter);
-			outputStreamWriter.flush();
+			XML_FORMAT.print(message, outputMessage.getBody(), charset);
+		}
+		else if (MediaType.TEXT_HTML.isCompatibleWith(contentType)) {
+			HTML_FORMAT.print(message, outputMessage.getBody(), charset);
 		}
 		else if (PROTOBUF.isCompatibleWith(contentType)) {
 			setProtoHeader(outputMessage, message);
 			FileCopyUtils.copy(message.toByteArray(), outputMessage.getBody());
 		}
-	}
-
-	private Charset getCharset(MediaType contentType) {
-		return contentType.getCharSet() != null ? contentType.getCharSet() : DEFAULT_CHARSET;
 	}
 
 	/**
@@ -206,9 +196,18 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		response.getHeaders().set(X_PROTOBUF_MESSAGE_HEADER, message.getDescriptorForType().getFullName());
 	}
 
-	@Override
-	protected MediaType getDefaultContentType(Message message) {
-		return PROTOBUF;
+
+	/**
+	 * Create a new {@code Message.Builder} instance for the given class.
+	 * <p>This method uses a ConcurrentHashMap for caching method lookups.
+	 */
+	private static Message.Builder getMessageBuilder(Class<? extends Message> clazz) throws Exception {
+		Method method = methodCache.get(clazz);
+		if (method == null) {
+			method = clazz.getMethod("newBuilder");
+			methodCache.put(clazz, method);
+		}
+		return (Message.Builder) method.invoke(clazz);
 	}
 
 }

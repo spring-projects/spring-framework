@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,23 +54,23 @@ public class AnnotationAttributesTests {
 		nestedAttributes.put("name", "algernon");
 
 		attributes.put("name", "dave");
-		attributes.put("names", new String[] { "dave", "frank", "hal" });
+		attributes.put("names", new String[] {"dave", "frank", "hal"});
 		attributes.put("bool1", true);
 		attributes.put("bool2", false);
 		attributes.put("color", Color.RED);
 		attributes.put("class", Integer.class);
-		attributes.put("classes", new Class<?>[] { Number.class, Short.class, Integer.class });
+		attributes.put("classes", new Class<?>[] {Number.class, Short.class, Integer.class});
 		attributes.put("number", 42);
 		attributes.put("anno", nestedAttributes);
-		attributes.put("annoArray", new AnnotationAttributes[] { nestedAttributes });
+		attributes.put("annoArray", new AnnotationAttributes[] {nestedAttributes});
 
 		assertThat(attributes.getString("name"), equalTo("dave"));
-		assertThat(attributes.getStringArray("names"), equalTo(new String[] { "dave", "frank", "hal" }));
+		assertThat(attributes.getStringArray("names"), equalTo(new String[] {"dave", "frank", "hal"}));
 		assertThat(attributes.getBoolean("bool1"), equalTo(true));
 		assertThat(attributes.getBoolean("bool2"), equalTo(false));
 		assertThat(attributes.<Color>getEnum("color"), equalTo(Color.RED));
 		assertTrue(attributes.getClass("class").equals(Integer.class));
-		assertThat(attributes.getClassArray("classes"), equalTo(new Class[] { Number.class, Short.class, Integer.class }));
+		assertThat(attributes.getClassArray("classes"), equalTo(new Class<?>[] {Number.class, Short.class, Integer.class}));
 		assertThat(attributes.<Integer>getNumber("number"), equalTo(42));
 		assertThat(attributes.getAnnotation("anno").<Integer>getNumber("value"), equalTo(10));
 		assertThat(attributes.getAnnotationArray("annoArray")[0].getString("name"), equalTo("algernon"));
@@ -99,8 +99,8 @@ public class AnnotationAttributesTests {
 		attributes.put("filters", filter);
 
 		// Get back arrays of single elements
-		assertThat(attributes.getStringArray("names"), equalTo(new String[] { "Dogbert" }));
-		assertThat(attributes.getClassArray("classes"), equalTo(new Class[] { Number.class }));
+		assertThat(attributes.getStringArray("names"), equalTo(new String[] {"Dogbert"}));
+		assertThat(attributes.getClassArray("classes"), equalTo(new Class<?>[] {Number.class}));
 
 		AnnotationAttributes[] array = attributes.getAnnotationArray("nestedAttributes");
 		assertNotNull(array);
@@ -118,7 +118,7 @@ public class AnnotationAttributesTests {
 		Filter filter = FilteredClass.class.getAnnotation(Filter.class);
 
 		attributes.put("filter", filter);
-		attributes.put("filters", new Filter[] { filter, filter });
+		attributes.put("filters", new Filter[] {filter, filter});
 
 		Filter retrievedFilter = attributes.getAnnotation("filter", Filter.class);
 		assertThat(retrievedFilter, equalTo(filter));
@@ -257,7 +257,7 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void getAliasedStringArray() {
-		final String[] INPUT = new String[] { "test.xml" };
+		final String[] INPUT = new String[] {"test.xml"};
 		final String[] EMPTY = new String[0];
 
 		attributes.clear();
@@ -297,7 +297,7 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void getAliasedStringArrayWithImplicitAliases() {
-		final String[] INPUT = new String[] { "test.xml" };
+		final String[] INPUT = new String[] {"test.xml"};
 		final String[] EMPTY = new String[0];
 		final List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
 
@@ -352,8 +352,8 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void getAliasedStringArrayWithDifferentAliasedValues() {
-		attributes.put("location", new String[] { "1.xml" });
-		attributes.put("value", new String[] { "2.xml" });
+		attributes.put("location", new String[] {"1.xml"});
+		attributes.put("value", new String[] {"2.xml"});
 
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("In annotation [" + ContextConfig.class.getName() + "]"));
@@ -382,7 +382,7 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void getAliasedClassArray() {
-		final Class<?>[] INPUT = new Class<?>[] { String.class };
+		final Class<?>[] INPUT = new Class<?>[] {String.class};
 		final Class<?>[] EMPTY = new Class<?>[0];
 
 		attributes.clear();
@@ -422,7 +422,7 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void getAliasedClassArrayWithImplicitAliases() {
-		final Class<?>[] INPUT = new Class<?>[] { String.class };
+		final Class<?>[] INPUT = new Class<?>[] {String.class};
 		final Class<?>[] EMPTY = new Class<?>[0];
 		final List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
 
@@ -465,8 +465,8 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void getAliasedClassArrayWithDifferentAliasedValues() {
-		attributes.put("classes", new Class[] { String.class });
-		attributes.put("value", new Class[] { Number.class });
+		attributes.put("classes", new Class<?>[] {String.class});
+		attributes.put("value", new Class<?>[] {Number.class});
 
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("In annotation [" + Filter.class.getName() + "]"));
@@ -476,6 +476,7 @@ public class AnnotationAttributesTests {
 
 		getAliasedClassArray("classes");
 	}
+
 
 	private Class<?>[] getAliasedClassArray(String attributeName) {
 		return attributes.getAliasedClassArray(attributeName, Filter.class, null);
@@ -491,8 +492,10 @@ public class AnnotationAttributesTests {
 
 
 	enum Color {
+
 		RED, WHITE, BLUE
 	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Filter {
@@ -506,9 +509,11 @@ public class AnnotationAttributesTests {
 		String pattern();
 	}
 
+
 	@Filter(pattern = "foo")
 	static class FilteredClass {
 	}
+
 
 	/**
 	 * Mock of {@code org.springframework.context.annotation.Scope}.
@@ -522,6 +527,7 @@ public class AnnotationAttributesTests {
 		@AliasFor(attribute = "value")
 		String name() default "singleton";
 	}
+
 
 	@Scope(name = "custom")
 	static class ScopedComponent {

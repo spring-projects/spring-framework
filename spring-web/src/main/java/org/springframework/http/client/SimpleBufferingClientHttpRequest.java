@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.connection.getRequestMethod());
+		return HttpMethod.resolve(this.connection.getRequestMethod());
 	}
 
 	@Override
@@ -68,12 +68,10 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		addHeaders(this.connection, headers);
-
-		// JDK < 1.8 doesn't support getOutputStream with HTTP DELETE
-		if (HttpMethod.DELETE.equals(getMethod()) && bufferedOutput.length == 0) {
+		// JDK <1.8 doesn't support getOutputStream with HTTP DELETE
+		if (HttpMethod.DELETE == getMethod() && bufferedOutput.length == 0) {
 			this.connection.setDoOutput(false);
 		}
-
 		if (this.connection.getDoOutput() && this.outputStreaming) {
 			this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
 		}
@@ -81,7 +79,10 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 		if (this.connection.getDoOutput()) {
 			FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
 		}
-
+		else {
+			// Immediately trigger the request in a no-output scenario as well
+			this.connection.getResponseCode();
+		}
 		return new SimpleClientHttpResponse(this.connection);
 	}
 

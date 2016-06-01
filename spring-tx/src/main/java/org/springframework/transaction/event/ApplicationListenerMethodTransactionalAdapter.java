@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,10 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 	public ApplicationListenerMethodTransactionalAdapter(String beanName, Class<?> targetClass, Method method) {
 		super(beanName, targetClass, method);
-		this.annotation = findAnnotation(method);
+		this.annotation = AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
+		if (this.annotation == null) {
+			throw new IllegalStateException("No TransactionalEventListener annotation found on '" + method + "'");
+		}
 	}
 
 
@@ -81,14 +84,6 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 		return new TransactionSynchronizationEventAdapter(this, event, this.annotation.phase());
 	}
 
-	static TransactionalEventListener findAnnotation(Method method) {
-		TransactionalEventListener annotation =
-				AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
-		if (annotation == null) {
-			throw new IllegalStateException("No TransactionalEventListener annotation found on '" + method + "'");
-		}
-		return annotation;
-	}
 
 
 	private static class TransactionSynchronizationEventAdapter extends TransactionSynchronizationAdapter {

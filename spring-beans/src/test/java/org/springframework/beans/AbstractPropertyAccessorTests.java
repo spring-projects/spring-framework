@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1763,6 +1763,14 @@ public abstract class AbstractPropertyAccessorTests {
 		assertEquals("val1", Spr10115Bean.prop1);
 	}
 
+	@Test
+	public void cornerSpr13837() {
+		Spr13837Bean target = new Spr13837Bean();
+		AbstractPropertyAccessor accessor = createAccessor(target);
+		accessor.setPropertyValue("something", 42);
+		assertEquals(Integer.valueOf(42), target.something);
+	}
+
 
 	private Person createPerson(String name, String city, String country) {
 		return new Person(name, new Address(city, country));
@@ -2198,6 +2206,30 @@ public abstract class AbstractPropertyAccessorTests {
 
 		public static void setProp1(String prop1) {
 			Spr10115Bean.prop1 = prop1;
+		}
+	}
+
+	interface Spr13837 {
+
+		Integer getSomething();
+
+		<T extends Spr13837> T setSomething(Integer something);
+
+	}
+
+	static class Spr13837Bean implements Spr13837 {
+
+		protected Integer something;
+
+		@Override
+		public Integer getSomething() {
+			return this.something;
+		}
+
+		@Override
+		public Spr13837Bean setSomething(final Integer something) {
+			this.something = something;
+			return this;
 		}
 	}
 

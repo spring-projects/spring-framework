@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
@@ -78,7 +79,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Sam Brannen
  */
-public final class XmlBeanFactoryTests {
+public class XmlBeanFactoryTests {
 
 	private static final Class<?> CLASS = XmlBeanFactoryTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -1608,6 +1609,16 @@ public final class XmlBeanFactoryTests {
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertTrue(bean.array instanceof String[]);
 		assertEquals(0, ((String[]) bean.array).length);
+	}
+
+	@Test
+	public void testConstructorWithUnresolvableParameterName() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
+		AtomicInteger bean = (AtomicInteger) xbf.getBean("constructorUnresolvableName");
+		assertEquals(1, bean.get());
+		bean = (AtomicInteger) xbf.getBean("constructorUnresolvableNameWithIndex");
+		assertEquals(1, bean.get());
 	}
 
 	@Test

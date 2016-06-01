@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.util.WebUtils;
-
 
 /**
  * {@link ServerHttpRequest} implementation that accesses one part of a multipart
@@ -54,44 +51,24 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 
 
 	/**
-	 * Create a new instance.
-	 * @param request the current request
+	 * Create a new {@code RequestPartServletServerHttpRequest} instance.
+	 * @param request the current servlet request
 	 * @param partName the name of the part to adapt to the {@link ServerHttpRequest} contract
 	 * @throws MissingServletRequestPartException if the request part cannot be found
-	 * @throws IllegalArgumentException if MultipartHttpServletRequest cannot be initialized
+	 * @throws MultipartException if MultipartHttpServletRequest cannot be initialized
 	 */
 	public RequestPartServletServerHttpRequest(HttpServletRequest request, String partName)
 			throws MissingServletRequestPartException {
 
 		super(request);
 
-		this.multipartRequest = asMultipartRequest(request);
+		this.multipartRequest = MultipartResolutionDelegate.asMultipartHttpServletRequest(request);
 		this.partName = partName;
 
 		this.headers = this.multipartRequest.getMultipartHeaders(this.partName);
 		if (this.headers == null) {
-			if (request instanceof MultipartHttpServletRequest) {
-				throw new MissingServletRequestPartException(partName);
-			}
-			else {
-				throw new IllegalArgumentException(
-						"Failed to obtain request part: " + partName + ". " +
-						"The part is missing or multipart processing is not configured. " +
-						"Check for a MultipartResolver bean or if Servlet 3.0 multipart processing is enabled.");
-			}
+			throw new MissingServletRequestPartException(partName);
 		}
-	}
-
-	private static MultipartHttpServletRequest asMultipartRequest(HttpServletRequest request) {
-		MultipartHttpServletRequest unwrapped = WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
-		if (unwrapped != null) {
-			return unwrapped;
-		}
-		else if (ClassUtils.hasMethod(HttpServletRequest.class, "getParts")) {
-			// Servlet 3.0 available ..
-			return new StandardMultipartHttpServletRequest(request);
-		}
-		throw new IllegalArgumentException("Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 	}
 
 
@@ -126,7 +103,7 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 	private String determineEncoding() {
 		MediaType contentType = getHeaders().getContentType();
 		if (contentType != null) {
-			Charset charset = contentType.getCharSet();
+			Charset charset = contentType.getCharset();
 			if (charset != null) {
 				return charset.name();
 			}
