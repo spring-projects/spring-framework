@@ -89,9 +89,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.channel.receive()
-		                   .retain() //FIXME Rogue reference holding
-				.map(dataBufferFactory::wrap);
+		return this.channel.receive().retain().map(this.dataBufferFactory::wrap);
 	}
 
 }
