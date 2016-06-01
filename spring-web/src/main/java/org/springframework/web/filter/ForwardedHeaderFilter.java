@@ -72,16 +72,22 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * Configure a contextPath value that will replace the contextPath of
-	 * proxy-forwarded requests.
-	 * <p>This is useful when external clients are not aware of the application
-	 * context path. However a proxy forwards the request to a URL that includes
-	 * a contextPath.
+	 * Configure a contextPath override that will replace the contextPath of
+	 * proxy-forwarded requests. This is useful when external clients are not
+	 * aware of the application context path to which the proxy is configured
+	 * to forward to.
+	 *
+	 * <p>For example, a client may connect to a proxy at:<br>
+	 * {@code https://example.com/}
+	 *
+	 * <p>In turn the proxy forwards to the application at:<br>
+	 * {@code 192.168.1.1:8080/example/}
+	 *
 	 * @param contextPath the context path; the given value will be sanitized to
 	 * ensure it starts with a '/' but does not end with one, or if the context
 	 * path is empty (default, root context) it is left as-is.
 	 */
-	public void setContextPath(String contextPath) {
+	public void setContextPathOverride(String contextPath) {
 		Assert.notNull(contextPath, "'contextPath' must not be null");
 		this.contextPathHelper = new ContextPathHelper(contextPath);
 	}

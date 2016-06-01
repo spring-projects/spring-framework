@@ -59,42 +59,42 @@ public class ForwardedHeaderFilterTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void contextPathNull() {
-		this.filter.setContextPath(null);
+		this.filter.setContextPathOverride(null);
 	}
 
 	@Test
 	public void contextPathEmpty() throws Exception {
-		this.filter.setContextPath("");
+		this.filter.setContextPathOverride("");
 		assertEquals("", filterAndGetContextPath());
 	}
 
 	@Test
 	public void contextPathWithExtraSpaces() throws Exception {
-		this.filter.setContextPath("  /foo  ");
+		this.filter.setContextPathOverride("  /foo  ");
 		assertEquals("/foo", filterAndGetContextPath());
 	}
 
 	@Test
 	public void contextPathWithNoLeadingSlash() throws Exception {
-		this.filter.setContextPath("foo");
+		this.filter.setContextPathOverride("foo");
 		assertEquals("/foo", filterAndGetContextPath());
 	}
 
 	@Test
 	public void contextPathWithTrailingSlash() throws Exception {
-		this.filter.setContextPath("/foo/bar/");
+		this.filter.setContextPathOverride("/foo/bar/");
 		assertEquals("/foo/bar", filterAndGetContextPath());
 	}
 
 	@Test
 	public void contextPathWithTrailingSlashes() throws Exception {
-		this.filter.setContextPath("/foo/bar/baz///");
+		this.filter.setContextPathOverride("/foo/bar/baz///");
 		assertEquals("/foo/bar/baz", filterAndGetContextPath());
 	}
 
 	@Test
 	public void requestUri() throws Exception {
-		this.filter.setContextPath("/");
+		this.filter.setContextPathOverride("/");
 		this.request.setContextPath("/app");
 		this.request.setRequestURI("/app/path");
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -105,7 +105,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriWithTrailingSlash() throws Exception {
-		this.filter.setContextPath("/");
+		this.filter.setContextPathOverride("/");
 		this.request.setContextPath("/app");
 		this.request.setRequestURI("/app/path/");
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -115,7 +115,7 @@ public class ForwardedHeaderFilterTests {
 	}
 	@Test
 	public void requestUriEqualsContextPath() throws Exception {
-		this.filter.setContextPath("/");
+		this.filter.setContextPathOverride("/");
 		this.request.setContextPath("/app");
 		this.request.setRequestURI("/app");
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -126,7 +126,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriRootUrl() throws Exception {
-		this.filter.setContextPath("/");
+		this.filter.setContextPathOverride("/");
 		this.request.setContextPath("/app");
 		this.request.setRequestURI("/app/");
 		HttpServletRequest actual = filterAndGetWrappedRequest();
