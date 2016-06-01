@@ -23,14 +23,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
@@ -48,8 +44,6 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 
 
 	private final List<MediaType> mediaTypes = new ArrayList<>(4);
-
-	private DataBufferFactory bufferAllocator = new DefaultDataBufferFactory();
 
 	private ApplicationContext applicationContext;
 
@@ -77,23 +71,6 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	@Override
 	public List<MediaType> getSupportedMediaTypes() {
 		return this.mediaTypes;
-	}
-
-	/**
-	 * Configure the {@link DataBufferFactory} to use for write I/O.
-	 * <p>By default this is set to {@link DefaultDataBufferFactory}.
-	 * @param bufferAllocator the factory to use
-	 */
-	public void setBufferAllocator(DataBufferFactory bufferAllocator) {
-		Assert.notNull(bufferAllocator, "'bufferAllocator' is required.");
-		this.bufferAllocator = bufferAllocator;
-	}
-
-	/**
-	 * Return the configured buffer factory, never {@code null}.
-	 */
-	public DataBufferFactory getBufferAllocator() {
-		return this.bufferAllocator;
 	}
 
 	@Override

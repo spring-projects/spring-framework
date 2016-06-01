@@ -193,7 +193,6 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	protected AbstractUrlBasedView createUrlBasedView(String viewName) {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(getViewClass());
 		view.setSupportedMediaTypes(getSupportedMediaTypes());
-		view.setBufferAllocator(getBufferAllocator());
 		view.setUrl(getPrefix() + viewName + getSuffix());
 		return view;
 	}

@@ -164,7 +164,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			logger.debug("Rendering FreeMarker template [" + getUrl() + "].");
 		}
 		Locale locale = Locale.getDefault(); // TODO
-		DataBuffer dataBuffer = getBufferAllocator().allocateBuffer();
+		DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
 		try {
 			Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream());
 			getTemplate(locale).process(freeMarkerModel, writer);

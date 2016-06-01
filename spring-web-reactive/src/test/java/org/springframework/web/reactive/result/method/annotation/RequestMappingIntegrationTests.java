@@ -82,7 +82,9 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigu
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -382,9 +384,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	@SuppressWarnings("unused")
 	static class FrameworkConfig {
 
-		private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-
-
 		@Bean
 		public RequestMappingHandlerMapping handlerMapping() {
 			return new RequestMappingHandlerMapping();
@@ -429,9 +428,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@Bean
 		public ViewResolver freeMarkerViewResolver() {
-			FreeMarkerViewResolver viewResolver = new FreeMarkerViewResolver("", ".ftl");
-			viewResolver.setBufferAllocator(this.dataBufferFactory);
-			return viewResolver;
+			return new FreeMarkerViewResolver("", ".ftl");
 		}
 
 		@Bean
@@ -564,7 +561,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/stream-create")
 		public Publisher<Void> streamCreate(@RequestBody Flux<Person> personStream) {
-			return personStream.toList().doOnSuccess(persons::addAll).then();
+			return personStream.asList().doOnSuccess(persons::addAll).then();
 		}
 
 		@RequestMapping("/person-capitalize")
