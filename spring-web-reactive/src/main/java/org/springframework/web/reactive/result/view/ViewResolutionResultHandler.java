@@ -127,6 +127,9 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		}
 	}
 
+	/**
+	 * Return the configured default {@code View}'s.
+	 */
 	public List<View> getDefaultViews() {
 		return this.defaultViews;
 	}
@@ -187,46 +190,48 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		}
 
 		Mono<Object> viewMono;
-		if (isViewReturnType(result, elementType)) {
-			viewMono = valueMono.otherwiseIfEmpty(selectDefaultViewName(exchange, result));
+		if (isViewNameOrReference(elementType, result)) {
+			Mono<Object> viewName = getDefaultViewNameMono(exchange, result);
+			viewMono = valueMono.otherwiseIfEmpty(viewName);
 		}
 		else {
-			viewMono = valueMono.map(value -> updateModel(result, value))
+			viewMono = valueMono.map(value -> updateModel(value, result))
 					.defaultIfEmpty(result.getModel())
-					.then(model -> selectDefaultViewName(exchange, result));
+					.then(model -> getDefaultViewNameMono(exchange, result));
 		}
 
-		return viewMono.then(returnValue -> {
-			if (returnValue instanceof View) {
-				return ((View) returnValue).render(result, null, exchange);
+		return viewMono.then(view -> {
+			if (view instanceof View) {
+				return ((View) view).render(result, null, exchange);
 			}
-			else if (returnValue instanceof CharSequence) {
-				String viewName = returnValue.toString();
+			else if (view instanceof CharSequence) {
+				String viewName = view.toString();
 				Locale locale = Locale.getDefault(); // TODO
-				return resolveViewAndRender(viewName, locale, result, exchange);
+				return resolveAndRender(viewName, locale, result, exchange);
 
 			}
 			else {
 				// Should not happen
-				return Mono.error(new IllegalStateException("Unexpected return value"));
+				return Mono.error(new IllegalStateException("Unexpected view type"));
 			}
 		});
 	}
 
-	private boolean isViewReturnType(HandlerResult result, ResolvableType elementType) {
+	private boolean isViewNameOrReference(ResolvableType elementType, HandlerResult result) {
 		Class<?> clazz = elementType.getRawClass();
 		return (View.class.isAssignableFrom(clazz) ||
 				(CharSequence.class.isAssignableFrom(clazz) && !hasModelAttributeAnnotation(result)));
 	}
 
-	private Mono<Object> selectDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
-		String defaultViewName = getDefaultViewName(exchange, result);
+	private Mono<Object> getDefaultViewNameMono(ServerWebExchange exchange, HandlerResult result) {
+		String defaultViewName = getDefaultViewName(result, exchange);
 		if (defaultViewName != null) {
 			return Mono.just(defaultViewName);
 		}
 		else {
-			return Mono.error(new IllegalStateException("Handler [" + result.getHandler() + "] " +
-					"neither returned a view name nor a View object"));
+			return Mono.error(new IllegalStateException(
+					"Handler [" + result.getHandler() + "] " +
+							"neither returned a view name nor a View object"));
 		}
 	}
 
@@ -239,7 +244,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 	 * processing will result in an IllegalStateException.
 	 */
 	@SuppressWarnings("UnusedParameters")
-	protected String getDefaultViewName(ServerWebExchange exchange, HandlerResult result) {
+	protected String getDefaultViewName(HandlerResult result, ServerWebExchange exchange) {
 		String path = this.pathHelper.getLookupPathForRequest(exchange);
 		if (path.startsWith("/")) {
 			path = path.substring(1);
@@ -250,7 +255,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		return StringUtils.stripFilenameExtension(path);
 	}
 
-	private Object updateModel(HandlerResult result, Object value) {
+	private Object updateModel(Object value, HandlerResult result) {
 		if (value instanceof Model) {
 			result.getModel().addAllAttributes(((Model) value).asMap());
 		}
@@ -293,7 +298,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		}
 	}
 
-	private Mono<? extends Void> resolveViewAndRender(String viewName, Locale locale,
+	private Mono<? extends Void> resolveAndRender(String viewName, Locale locale,
 			HandlerResult result, ServerWebExchange exchange) {
 
 		return Flux.fromIterable(getViewResolvers())

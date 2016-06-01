@@ -43,6 +43,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
@@ -88,7 +89,7 @@ public class ViewResolutionResultHandlerTests {
 
 
 	@Test
-	public void supportsWithNullReturnValue() throws Exception {
+	public void supports() throws Exception {
 		testSupports("handleString", true);
 		testSupports("handleView", true);
 		testSupports("handleMonoString", true);
@@ -120,7 +121,8 @@ public class ViewResolutionResultHandlerTests {
 		handle("/path", value, "handleView");
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
@@ -129,7 +131,8 @@ public class ViewResolutionResultHandlerTests {
 		handle("/path", value, "handleMonoView");
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
@@ -139,16 +142,18 @@ public class ViewResolutionResultHandlerTests {
 
 		TestSubscriber<DataBuffer> subscriber = new TestSubscriber<>();
 		subscriber.bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
-	public void viewNameInMono() throws Exception {
+	public void viewNameMono() throws Exception {
 		Object value = Mono.just("account");
 		handle("/path", value, "handleMonoString", new TestViewResolver("account"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
@@ -158,7 +163,8 @@ public class ViewResolutionResultHandlerTests {
 				new TestViewResolver("account"), new TestViewResolver("profile"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("profile: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("profile: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
@@ -173,15 +179,18 @@ public class ViewResolutionResultHandlerTests {
 
 		handle("/account", null, "handleString", resolver);
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 
 		handle("/account/", null, "handleString", resolver);
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 
 		handle("/account.123", null, "handleString", resolver);
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
@@ -190,47 +199,52 @@ public class ViewResolutionResultHandlerTests {
 		handle("/account", value, "handleMonoString", new TestViewResolver("account"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
-	public void model() throws Exception {
+	public void modelReturnValue() throws Exception {
 		Model value = new ExtendedModelMap().addAttribute("name", "Joe");
 		handle("/account", value, "handleModel", new TestViewResolver("account"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
-	public void map() throws Exception {
+	public void mapReturnValue() throws Exception {
 		Map<String, String> value = Collections.singletonMap("name", "Joe");
 		handle("/account", value, "handleMap", new TestViewResolver("account"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
-	public void modelAttributeAnnotation() throws Exception {
+	public void modelAttributeAnnotationReturnValue() throws Exception {
 		String value = "Joe";
 		handle("/account", value, "handleModelAttributeAnnotation", new TestViewResolver("account"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123, name=Joe}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
-	public void testBean() throws Exception {
+	public void objectReturnValue() throws Exception {
 		Object value = new TestBean("Joe");
 		handle("/account", value, "handleTestBean", new TestViewResolver("account"));
 
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("account: {id=123, testBean=TestBean[name=Joe]}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("account: {id=123, testBean=TestBean[name=Joe]}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
-	public void selectBestMediaType() throws Exception {
+	public void contentNegotiation() throws Exception {
 		TestView htmlView = new TestView("account");
 		htmlView.setMediaTypes(Collections.singletonList(MediaType.TEXT_HTML));
 
@@ -245,11 +259,12 @@ public class ViewResolutionResultHandlerTests {
 
 		assertEquals(MediaType.APPLICATION_JSON, this.response.getHeaders().getContentType());
 		new TestSubscriber<DataBuffer>().bindTo(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("defaultView: {id=123}", asString(buf)));
+				.assertValuesWith(buf -> assertEquals("defaultView: {id=123}",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 	@Test
-	public void selectBestMediaTypeNotAcceptable() throws Exception {
+	public void contentNegotiationNotAcceptable() throws Exception {
 		TestView htmlView = new TestView("account");
 		htmlView.setMediaTypes(Collections.singletonList(MediaType.TEXT_HTML));
 
@@ -302,18 +317,6 @@ public class ViewResolutionResultHandlerTests {
 
 		TestSubscriber<Void> subscriber = new TestSubscriber<>();
 		return subscriber.bindTo(mono).await(Duration.ofSeconds(1));
-	}
-
-	private static DataBuffer asDataBuffer(String value) {
-		ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(Charset.forName("UTF-8")));
-		return new DefaultDataBufferFactory().wrap(byteBuffer);
-	}
-
-	private static String asString(DataBuffer dataBuffer) {
-		ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
-		final byte[] bytes = new byte[byteBuffer.remaining()];
-		byteBuffer.get(bytes);
-		return new String(bytes, Charset.forName("UTF-8"));
 	}
 
 
@@ -381,7 +384,9 @@ public class ViewResolutionResultHandlerTests {
 			if (mediaType != null) {
 				response.getHeaders().setContentType(mediaType);
 			}
-			return response.writeWith(Flux.just(asDataBuffer(value)));
+			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(Charset.forName("UTF-8")));
+			DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(byteBuffer);
+			return response.writeWith(Flux.just(dataBuffer));
 		}
 	}
 
