@@ -39,7 +39,6 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
 
-
 /**
  * Filter that wraps the request in order to override its
  * {@link HttpServletRequest#getServerName() getServerName()},
@@ -70,19 +69,15 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	private ContextPathHelper contextPathHelper;
 
 
-
 	/**
-	 * Configure a contextPath override that will replace the contextPath of
+	 * Configure a context path override that will replace the context path of
 	 * proxy-forwarded requests. This is useful when external clients are not
 	 * aware of the application context path to which the proxy is configured
 	 * to forward to.
-	 *
 	 * <p>For example, a client may connect to a proxy at:<br>
 	 * {@code https://example.com/}
-	 *
 	 * <p>In turn the proxy forwards to the application at:<br>
 	 * {@code 192.168.1.1:8080/example/}
-	 *
 	 * @param contextPath the context path; the given value will be sanitized to
 	 * ensure it starts with a '/' but does not end with one, or if the context
 	 * path is empty (default, root context) it is left as-is.
@@ -141,7 +136,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final Map<String, List<String>> headers;
 
-
 		public ForwardedHeaderRequestWrapper(HttpServletRequest request, ContextPathHelper pathHelper) {
 			super(request);
 
@@ -159,7 +153,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.requestUrl = initRequestUrl(this.scheme, this.host, port, this.requestUri);
 			this.headers = initHeaders(request);
 		}
-
 
 		private static String initContextPath(HttpServletRequest request, ContextPathHelper pathHelper) {
 			String contextPath = (pathHelper != null ? pathHelper.getContextPath(request) : request.getContextPath());
@@ -205,7 +198,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			}
 			return value;
 		}
-
 
 		@Override
 		public String getScheme() {
@@ -303,7 +295,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			if (this.contextPath.equals("/") && pathWithinApplication.startsWith("/")) {
 				return pathWithinApplication;
 			}
-			return this.contextPath + pathWithinApplication;
+			return (this.contextPath + pathWithinApplication);
 		}
 	}
 
