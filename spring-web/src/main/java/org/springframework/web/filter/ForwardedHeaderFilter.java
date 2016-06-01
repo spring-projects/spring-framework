@@ -34,6 +34,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
@@ -48,6 +49,7 @@ import org.springframework.web.util.UrlPathHelper;
  * reflects the client-originated protocol and address.
  *
  * @author Rossen Stoyanchev
+ * @author Eddú Meléndez
  * @since 4.3
  */
 public class ForwardedHeaderFilter extends OncePerRequestFilter {
@@ -143,11 +145,30 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.host = uriComponents.getHost();
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 
-			this.contextPath = (pathHelper != null ? pathHelper.getContextPath(request) : request.getContextPath());
-			this.requestUri = (pathHelper != null ? pathHelper.getRequestUri(request) : request.getRequestURI());
+			this.contextPath = contextPath(request, pathHelper);
+			this.requestUri = requestUri(request, pathHelper);
 			this.requestUrl = initRequestUrl(this.scheme, this.host, port, this.requestUri);
 
 			this.headers = initHeaders(request);
+		}
+
+		private static String contextPath(HttpServletRequest request, ContextPathHelper pathHelper) {
+			String contextPath = (pathHelper != null ? pathHelper.getContextPath(request) : request.getContextPath());
+			return prependForwardedPrefix(request, contextPath);
+		}
+
+		private static String requestUri(HttpServletRequest request, ContextPathHelper pathHelper) {
+			String requestUri = (pathHelper != null ? pathHelper.getRequestUri(request) : request.getRequestURI());
+			return prependForwardedPrefix(request, requestUri);
+		}
+
+		private static String prependForwardedPrefix(HttpServletRequest request, String value) {
+			String header = request.getHeader("X-Forwarded-Prefix");
+			if (StringUtils.hasText(header)) {
+				value = header + value;
+			}
+			UriComponents uriComponents = UriComponentsBuilder.fromUriString(value).build();
+			return uriComponents.toUriString();
 		}
 
 		private static StringBuffer initRequestUrl(String scheme, String host, int port, String path) {
