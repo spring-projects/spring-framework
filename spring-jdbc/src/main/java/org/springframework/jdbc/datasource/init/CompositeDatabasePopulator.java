@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,28 @@ import java.util.List;
  * @author Dave Syer
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Kazuki Shimizu
  * @since 3.1
  */
 public class CompositeDatabasePopulator implements DatabasePopulator {
 
-	private List<DatabasePopulator> populators = new ArrayList<DatabasePopulator>();
+	private final List<DatabasePopulator> populators = new ArrayList<DatabasePopulator>();
 
+	/**
+	 * Construct an instance.
+	 */
+	public CompositeDatabasePopulator() {
+	}
+
+	/**
+	 * Construct an instance with specified the list of delegates.
+	 *
+	 * @param populators the list of delegates
+	 * @since 4.3
+	 */
+	public CompositeDatabasePopulator(DatabasePopulator... populators) {
+		addPopulators(populators);
+	}
 
 	/**
 	 * Specify a list of populators to delegate to.
