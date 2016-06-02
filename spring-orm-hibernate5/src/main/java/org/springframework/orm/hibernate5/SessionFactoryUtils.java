@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.orm.hibernate5;
 
+import java.lang.reflect.Method;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
 import org.hibernate.NonUniqueObjectException;
@@ -59,6 +61,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
+import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class featuring methods for Hibernate Session handling.
@@ -86,6 +90,57 @@ public abstract class SessionFactoryUtils {
 	static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
 
+	private static Method getFlushMode;
+
+	static {
+		try {
+			// Hibernate 5.2+ getHibernateFlushMode()
+			getFlushMode = Session.class.getMethod("getHibernateFlushMode");
+		}
+		catch (NoSuchMethodException ex) {
+			try {
+				// Hibernate 5.0/5.1 getFlushMode() with FlushMode return type
+				getFlushMode = Session.class.getMethod("getFlushMode");
+			}
+			catch (NoSuchMethodException ex2) {
+				throw new IllegalStateException("No compatible Hibernate getFlushMode signature found", ex2);
+			}
+		}
+		// Check that it is the Hibernate FlushMode type, not JPA's...
+		Assert.state(FlushMode.class == getFlushMode.getReturnType());
+	}
+
+
+	/**
+	 * Get the native Hibernate FlushMode, adapting between Hibernate 5.0/5.1 and 5.2+.
+	 * @param session the Hibernate Session to get the flush mode from
+	 * @return the FlushMode (never {@code null})
+	 * @since 4.3
+	 */
+	static FlushMode getFlushMode(Session session) {
+		return (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+	}
+
+	/**
+	 * Perform actual closing of the Hibernate Session,
+	 * catching and logging any cleanup exceptions thrown.
+	 * @param session the Hibernate Session to close (may be {@code null})
+	 * @see Session#close()
+	 */
+	public static void closeSession(Session session) {
+		if (session != null) {
+			try {
+				session.close();
+			}
+			catch (HibernateException ex) {
+				logger.debug("Could not close Hibernate Session", ex);
+			}
+			catch (Throwable ex) {
+				logger.debug("Unexpected exception on closing Hibernate Session", ex);
+			}
+		}
+	}
+
 	/**
 	 * Determine the DataSource of the given SessionFactory.
 	 * @param sessionFactory the SessionFactory to check
@@ -112,26 +167,6 @@ public abstract class SessionFactoryUtils {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Perform actual closing of the Hibernate Session,
-	 * catching and logging any cleanup exceptions thrown.
-	 * @param session the Hibernate Session to close (may be {@code null})
-	 * @see Session#close()
-	 */
-	public static void closeSession(Session session) {
-		if (session != null) {
-			try {
-				session.close();
-			}
-			catch (HibernateException ex) {
-				logger.debug("Could not close Hibernate Session", ex);
-			}
-			catch (Throwable ex) {
-				logger.debug("Unexpected exception on closing Hibernate Session", ex);
-			}
-		}
 	}
 
 	/**

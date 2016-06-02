@@ -46,7 +46,7 @@ configure(allprojects) { project ->
 	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.11.Final"
-	ext.hibernate5Version    = "5.1.0.Final"
+	ext.hibernate5Version    = "5.2.0.Final"
 	ext.hibval4Version       = "4.3.2.Final"
 	ext.hibval5Version       = "5.2.4.Final"
 	ext.hsqldbVersion        = "2.3.4"
@@ -798,7 +798,6 @@ project("spring-orm-hibernate5") {
 		provided(project(":spring-tx"))
 		optional(project(":spring-web"))
 		optional("org.hibernate:hibernate-core:${hibernate5Version}")
-		optional("org.hibernate:hibernate-entitymanager:${hibernate5Version}")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 	}

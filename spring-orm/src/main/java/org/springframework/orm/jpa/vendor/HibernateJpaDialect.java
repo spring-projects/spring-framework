@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,13 +66,14 @@ import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
  * Hibernate EntityManager. Developed and tested against Hibernate 3.6,
- * 4.2/4.3 as well as 5.0.
+ * 4.2/4.3 as well as 5.0/5.1/5.2.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -87,6 +88,8 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	private static Class<?> optimisticLockExceptionClass;
 
 	private static Class<?> pessimisticLockExceptionClass;
+
+	private static Method getFlushMode;
 
 	static {
 		// Checking for Hibernate 4.x's Optimistic/PessimisticEntityLockException
@@ -104,6 +107,22 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		catch (ClassNotFoundException ex) {
 			pessimisticLockExceptionClass = null;
 		}
+
+		try {
+			// Hibernate 5.2+ getHibernateFlushMode()
+			getFlushMode = Session.class.getMethod("getHibernateFlushMode");
+		}
+		catch (NoSuchMethodException ex) {
+			try {
+				// Classic Hibernate getFlushMode() with FlushMode return type
+				getFlushMode = Session.class.getMethod("getFlushMode");
+			}
+			catch (NoSuchMethodException ex2) {
+				throw new IllegalStateException("No compatible Hibernate getFlushMode signature found", ex2);
+			}
+		}
+		// Check that it is the Hibernate FlushMode type, not JPA's...
+		Assert.state(FlushMode.class == getFlushMode.getReturnType());
 	}
 
 
@@ -184,7 +203,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 	}
 
 	protected FlushMode prepareFlushMode(Session session, boolean readOnly) throws PersistenceException {
-		FlushMode flushMode = session.getFlushMode();
+		FlushMode flushMode = (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
 		if (readOnly) {
 			// We should suppress flushing for a read-only transaction.
 			if (!flushMode.equals(FlushMode.MANUAL)) {

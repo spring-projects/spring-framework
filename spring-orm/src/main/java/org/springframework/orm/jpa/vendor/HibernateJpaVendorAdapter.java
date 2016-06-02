@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.hibernate.dialect.SQLServerDialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
- * EntityManager. Developed and tested against Hibernate 3.6, 4.2/4.3 as well as 5.0.
+ * EntityManager. Developed and tested against Hibernate 3.6, 4.2/4.3 as well as 5.x.
  * <b>Hibernate 4.2+ is strongly recommended for use with Spring 4.0+.</b>
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -412,6 +412,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
@@ -476,8 +477,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 			if (!definition.isReadOnly() && !txObject.isNewSession()) {
 				// We need AUTO or COMMIT for a non-read-only transaction.
-				FlushMode flushMode = session.getFlushMode();
-				if (session.getFlushMode().equals(FlushMode.MANUAL)) {
+				FlushMode flushMode = SessionFactoryUtils.getFlushMode(session);
+				if (FlushMode.MANUAL.equals(flushMode)) {
 					session.setFlushMode(FlushMode.AUTO);
 					txObject.getSessionHolder().setPreviousFlushMode(flushMode);
 				}
@@ -627,6 +628,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
@@ -703,6 +705,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @param session the Hibernate Session to check
 	 * @see ConnectionReleaseMode#ON_CLOSE
 	 */
+	@SuppressWarnings("deprecation")
 	protected boolean isSameConnectionForEntireSession(Session session) {
 		if (!(session instanceof SessionImplementor)) {
 			// The best we can do is to assume we're safe.
