@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.accept;
 
 import java.util.Map;
@@ -32,8 +33,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class ServletPathExtensionContentNegotiationStrategy
-		extends PathExtensionContentNegotiationStrategy {
+public class ServletPathExtensionContentNegotiationStrategy extends PathExtensionContentNegotiationStrategy {
 
 	private final ServletContext servletContext;
 
@@ -41,12 +41,12 @@ public class ServletPathExtensionContentNegotiationStrategy
 	/**
 	 * Create an instance with the given extension-to-MediaType lookup.
 	 */
-	public ServletPathExtensionContentNegotiationStrategy(ServletContext context,
-			Map<String, MediaType> mediaTypes) {
+	public ServletPathExtensionContentNegotiationStrategy(
+			ServletContext servletContext, Map<String, MediaType> mediaTypes) {
 
 		super(mediaTypes);
-		Assert.notNull(context, "ServletContext is required!");
-		this.servletContext = context;
+		Assert.notNull(servletContext, "ServletContext is required");
+		this.servletContext = servletContext;
 	}
 
 	/**

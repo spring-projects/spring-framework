@@ -57,8 +57,7 @@ public class PathExtensionContentNegotiationStrategy
 
 	private static final Log logger = LogFactory.getLog(PathExtensionContentNegotiationStrategy.class);
 
-	private static final boolean JAF_PRESENT = ClassUtils.isPresent(
-			"javax.activation.FileTypeMap",
+	private static final boolean JAF_PRESENT = ClassUtils.isPresent("javax.activation.FileTypeMap",
 			PathExtensionContentNegotiationStrategy.class.getClassLoader());
 
 	private static final UrlPathHelper PATH_HELPER = new UrlPathHelper();
