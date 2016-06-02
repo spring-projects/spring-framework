@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * {@link DatabasePopulator} implementation that delegates to a list of other
+ * Composite {@link DatabasePopulator} that delegates to a list of given
  * {@code DatabasePopulator} implementations, executing all scripts.
  *
  * @author Dave Syer
@@ -33,11 +33,11 @@ import java.util.List;
  */
 public class CompositeDatabasePopulator implements DatabasePopulator {
 
-	private List<DatabasePopulator> populators = new ArrayList<DatabasePopulator>();
+	private final List<DatabasePopulator> populators = new ArrayList<DatabasePopulator>(4);
 
 
 	/**
-	 * Specify a list of populators to delegate to.
+	 * Specify one or more populators to delegate to.
 	 */
 	public void setPopulators(DatabasePopulator... populators) {
 		this.populators.clear();
@@ -51,9 +51,7 @@ public class CompositeDatabasePopulator implements DatabasePopulator {
 		this.populators.addAll(Arrays.asList(populators));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+
 	@Override
 	public void populate(Connection connection) throws SQLException, ScriptException {
 		for (DatabasePopulator populator : this.populators) {

@@ -46,7 +46,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>Prefixes and suffixes for the before and after messages can be configured using the
  * {@code beforeMessagePrefix}, {@code afterMessagePrefix}, {@code beforeMessageSuffix} and
- * {@code afterMessageSuffix} properties,
+ * {@code afterMessageSuffix} properties.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -124,7 +124,6 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includePayload" in the filter definition in {@code web.xml}.
 	 */
-
 	public void setIncludePayload(boolean includePayload) {
 		this.includePayload = includePayload;
 	}
@@ -254,12 +253,14 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		StringBuilder msg = new StringBuilder();
 		msg.append(prefix);
 		msg.append("uri=").append(request.getRequestURI());
+
 		if (isIncludeQueryString()) {
 			String queryString = request.getQueryString();
 			if (queryString != null) {
 				msg.append('?').append(queryString);
 			}
 		}
+
 		if (isIncludeClientInfo()) {
 			String client = request.getRemoteAddr();
 			if (StringUtils.hasLength(client)) {
@@ -274,6 +275,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 				msg.append(";user=").append(user);
 			}
 		}
+
 		if (isIncludePayload()) {
 			ContentCachingRequestWrapper wrapper =
 					WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
@@ -292,6 +294,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 				}
 			}
 		}
+
 		msg.append(suffix);
 		return msg.toString();
 	}
