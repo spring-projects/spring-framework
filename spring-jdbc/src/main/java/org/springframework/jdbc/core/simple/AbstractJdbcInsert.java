@@ -476,31 +476,20 @@ public abstract class AbstractJdbcInsert {
 					@Override
 					public Object doInConnection(Connection con) throws SQLException, DataAccessException {
 						// Do the insert
-						PreparedStatement ps = null;
-						try {
-							ps = con.prepareStatement(getInsertString());
+						try (PreparedStatement ps = con.prepareStatement(getInsertString())) {
 							setParameterValues(ps, values, getInsertTypes());
 							ps.executeUpdate();
 						}
-						finally {
-							JdbcUtils.closeStatement(ps);
-						}
 						//Get the key
-						Statement keyStmt = null;
-						ResultSet rs = null;
 						Map<String, Object> keys = new HashMap<>(1);
-						try {
-							keyStmt = con.createStatement();
-							rs = keyStmt.executeQuery(keyQuery);
-							if (rs.next()) {
-								long key = rs.getLong(1);
-								keys.put(getGeneratedKeyNames()[0], key);
-								keyHolder.getKeyList().add(keys);
+						try (Statement keyStmt = con.createStatement()) {
+							try (ResultSet rs = keyStmt.executeQuery(keyQuery)) {
+								if (rs.next()) {
+									long key = rs.getLong(1);
+									keys.put(getGeneratedKeyNames()[0], key);
+									keyHolder.getKeyList().add(keys);
+								}
 							}
-						}
-						finally {
-							JdbcUtils.closeResultSet(rs);
-							JdbcUtils.closeStatement(keyStmt);
 						}
 						return null;
 					}

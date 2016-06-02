@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,10 +92,8 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 			* are performed on the same connection (otherwise we can't be sure that last_insert_id()
 			* returned the correct value)
 			*/
-			Connection con = DataSourceUtils.getConnection(getDataSource());
-			Statement stmt = null;
-			try {
-				stmt = con.createStatement();
+			try (Connection con = DataSourceUtils.getConnection(getDataSource());
+			     Statement stmt = con.createStatement()) {
 				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 				// Increment the sequence column...
 				String columnName = getColumnName();
@@ -116,10 +114,6 @@ public class MySQLMaxValueIncrementer extends AbstractColumnMaxValueIncrementer 
 			}
 			catch (SQLException ex) {
 				throw new DataAccessResourceFailureException("Could not obtain last_insert_id()", ex);
-			}
-			finally {
-				JdbcUtils.closeStatement(stmt);
-				DataSourceUtils.releaseConnection(con, getDataSource());
 			}
 		}
 		else {

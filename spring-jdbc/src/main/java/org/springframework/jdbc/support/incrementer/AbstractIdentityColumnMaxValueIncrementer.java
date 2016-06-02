@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,34 +87,24 @@ public abstract class AbstractIdentityColumnMaxValueIncrementer extends Abstract
 			* are performed on the same connection (otherwise we can't be sure that @@identity
 			* returns the correct value)
 			*/
-			Connection con = DataSourceUtils.getConnection(getDataSource());
-			Statement stmt = null;
-			try {
-				stmt = con.createStatement();
+			try (Connection con = DataSourceUtils.getConnection(getDataSource());
+			     Statement stmt = con.createStatement()) {
 				DataSourceUtils.applyTransactionTimeout(stmt, getDataSource());
 				this.valueCache = new long[getCacheSize()];
 				this.nextValueIndex = 0;
 				for (int i = 0; i < getCacheSize(); i++) {
 					stmt.executeUpdate(getIncrementStatement());
-					ResultSet rs = stmt.executeQuery(getIdentityStatement());
-					try {
+					try (ResultSet rs = stmt.executeQuery(getIdentityStatement())) {
 						if (!rs.next()) {
 							throw new DataAccessResourceFailureException("Identity statement failed after inserting");
 						}
 						this.valueCache[i] = rs.getLong(1);
-					}
-					finally {
-						JdbcUtils.closeResultSet(rs);
 					}
 				}
 				stmt.executeUpdate(getDeleteStatement(this.valueCache));
 			}
 			catch (SQLException ex) {
 				throw new DataAccessResourceFailureException("Could not increment identity", ex);
-			}
-			finally {
-				JdbcUtils.closeStatement(stmt);
-				DataSourceUtils.releaseConnection(con, getDataSource());
 			}
 		}
 		return this.valueCache[this.nextValueIndex++];

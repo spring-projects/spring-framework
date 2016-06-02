@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,23 +37,11 @@ abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseCon
 
 	@Override
 	public void shutdown(DataSource dataSource, String databaseName) {
-		Connection con = null;
-		try {
-			con = dataSource.getConnection();
+		try(Connection con = dataSource.getConnection()) {
 			con.createStatement().execute("SHUTDOWN");
 		}
 		catch (SQLException ex) {
 			logger.warn("Could not shut down embedded database", ex);
-		}
-		finally {
-			if (con != null) {
-				try {
-					con.close();
-				}
-				catch (Throwable ex) {
-					logger.debug("Could not close JDBC Connection on shutdown", ex);
-				}
-			}
 		}
 	}
 
