@@ -143,7 +143,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 				String description = "Failed to handle " + message + " to " + this + " in " + this.messageHandler;
 				throw new MessageDeliveryException(message, description, ex);
 			}
-			catch (Error err) {
+			catch (Throwable err) {
 				String description = "Failed to handle " + message + " to " + this + " in " + this.messageHandler;
 				MessageDeliveryException ex2 = new MessageDeliveryException(message, description, err);
 				triggerAfterMessageHandled(message, ex2);
