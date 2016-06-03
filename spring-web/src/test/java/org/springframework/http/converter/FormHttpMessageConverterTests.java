@@ -247,8 +247,19 @@ public class FormHttpMessageConverterTests {
 				allOf(startsWith("<MyBean"), endsWith("><string>foo</string></MyBean>")));
 	}
 
+    @Test
+    public void writeMultipartWith_Utf8_AsDefaultEncoding() throws IOException {
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
+        String easternEuropeCharacters = "łęąć";
+        body.set("param", easternEuropeCharacters);
+        MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+        this.converter.write(body, MediaType.MULTIPART_FORM_DATA, outputMessage);
 
-	private static class MockHttpOutputMessageRequestContext implements RequestContext {
+        assertThat("Invalid encoding of Eastern Europe characters", outputMessage.getBodyAsString(UTF_8),
+                containsString(easternEuropeCharacters));
+    }
+
+    private static class MockHttpOutputMessageRequestContext implements RequestContext {
 
 		private final MockHttpOutputMessage outputMessage;
 
