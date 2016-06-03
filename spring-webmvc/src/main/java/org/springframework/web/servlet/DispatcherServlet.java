@@ -975,7 +975,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		catch (Exception ex) {
 			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
 		}
-		catch (Error err) {
+		catch (Throwable err) {
 			triggerAfterCompletionWithError(processedRequest, response, mappedHandler, err);
 		}
 		finally {
@@ -1300,7 +1300,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	}
 
 	private void triggerAfterCompletionWithError(HttpServletRequest request, HttpServletResponse response,
-			HandlerExecutionChain mappedHandler, Error error) throws Exception {
+			HandlerExecutionChain mappedHandler, Throwable error) throws Exception {
 
 		ServletException ex = new NestedServletException("Handler processing failed", error);
 		if (mappedHandler != null) {
