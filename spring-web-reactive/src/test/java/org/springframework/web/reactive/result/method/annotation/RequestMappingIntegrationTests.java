@@ -561,7 +561,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/stream-create")
 		public Publisher<Void> streamCreate(@RequestBody Flux<Person> personStream) {
-			return personStream.asList().doOnSuccess(persons::addAll).then();
+			return personStream.collectList().doOnSuccess(persons::addAll).then();
 		}
 
 		@RequestMapping("/person-capitalize")

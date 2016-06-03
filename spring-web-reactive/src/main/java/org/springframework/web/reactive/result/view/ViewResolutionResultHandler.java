@@ -306,7 +306,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 				.switchIfEmpty(Mono.error(
 						new IllegalStateException(
 								"Could not resolve view with name '" + viewName + "'.")))
-				.asList()
+				.collectList()
 				.then(views -> {
 					views.addAll(getDefaultViews());
 
