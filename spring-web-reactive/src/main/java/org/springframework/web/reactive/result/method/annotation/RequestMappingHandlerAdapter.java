@@ -17,9 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,16 +32,9 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.codec.support.ByteBufferDecoder;
-import org.springframework.core.codec.support.ByteBufferEncoder;
-import org.springframework.core.codec.support.JacksonJsonDecoder;
-import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.Jaxb2Decoder;
-import org.springframework.core.codec.support.Jaxb2Encoder;
-import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
-import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
@@ -68,13 +59,20 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private final List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 
-	private ConversionService conversionService = new DefaultConversionService();
+	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
-	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
-			new ConcurrentHashMap<>(64);
+	private ConversionService conversionService = new DefaultFormattingConversionService();
 
 	private ConfigurableBeanFactory beanFactory;
 
+	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache = new ConcurrentHashMap<>(64);
+
+
+
+	public RequestMappingHandlerAdapter() {
+		this.messageConverters.add(new CodecHttpMessageConverter<>(new ByteBufferDecoder()));
+		this.messageConverters.add(new CodecHttpMessageConverter<>(new StringDecoder()));
+	}
 
 
 	/**
@@ -91,6 +89,18 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	 */
 	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
 		return this.argumentResolvers;
+	}
+
+	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
+		this.messageConverters.clear();
+		this.messageConverters.addAll(messageConverters);
+	}
+
+	/**
+	 * Provide the message converters to use for argument resolution.
+	 */
+	public List<HttpMessageConverter<?>> getMessageConverters() {
+		return this.messageConverters;
 	}
 
 	public void setConversionService(ConversionService conversionService) {
@@ -121,12 +131,12 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	public void afterPropertiesSet() throws Exception {
 		if (ObjectUtils.isEmpty(this.argumentResolvers)) {
 
-			List<HttpMessageConverter<?>> converters = Arrays.asList(
-					new CodecHttpMessageConverter<ByteBuffer>(new ByteBufferEncoder(), new ByteBufferDecoder()),
-					new CodecHttpMessageConverter<String>(new StringEncoder(), new StringDecoder()),
-					new CodecHttpMessageConverter<Object>(new Jaxb2Encoder(), new Jaxb2Decoder()),
-					new CodecHttpMessageConverter<Object>(new JacksonJsonEncoder(),
-							new JacksonJsonDecoder(new JsonObjectDecoder())));
+//			List<HttpMessageConverter<?>> converters = Arrays.asList(
+//					new CodecHttpMessageConverter<ByteBuffer>(new ByteBufferEncoder(), new ByteBufferDecoder()),
+//					new CodecHttpMessageConverter<String>(new StringEncoder(), new StringDecoder()),
+//					new CodecHttpMessageConverter<Object>(new Jaxb2Encoder(), new Jaxb2Decoder()),
+//					new CodecHttpMessageConverter<Object>(new JacksonJsonEncoder(),
+//							new JacksonJsonDecoder(new JsonObjectDecoder())));
 
 			// Annotation-based argument resolution
 			ConversionService cs = getConversionService();
@@ -134,7 +144,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 			this.argumentResolvers.add(new RequestParamMapMethodArgumentResolver());
 			this.argumentResolvers.add(new PathVariableMethodArgumentResolver(cs, getBeanFactory()));
 			this.argumentResolvers.add(new PathVariableMapMethodArgumentResolver());
-			this.argumentResolvers.add(new RequestBodyArgumentResolver(converters, cs));
+			this.argumentResolvers.add(new RequestBodyArgumentResolver(getMessageConverters(), cs));
 			this.argumentResolvers.add(new RequestHeaderMethodArgumentResolver(cs, getBeanFactory()));
 			this.argumentResolvers.add(new RequestHeaderMapMethodArgumentResolver());
 			this.argumentResolvers.add(new CookieValueMethodArgumentResolver(cs, getBeanFactory()));

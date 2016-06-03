@@ -44,6 +44,9 @@ import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.ByteBufferEncoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
+import org.springframework.core.codec.support.Jaxb2Decoder;
+import org.springframework.core.codec.support.Jaxb2Encoder;
+import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
@@ -392,8 +395,18 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@Bean
 		public RequestMappingHandlerAdapter handlerAdapter() {
 			RequestMappingHandlerAdapter handlerAdapter = new RequestMappingHandlerAdapter();
+			handlerAdapter.setMessageConverters(getDefaultMessageConverters());
 			handlerAdapter.setConversionService(conversionService());
 			return handlerAdapter;
+		}
+
+		private List<HttpMessageConverter<?>> getDefaultMessageConverters() {
+			return Arrays.asList(
+					new CodecHttpMessageConverter<>(new ByteBufferEncoder(), new ByteBufferDecoder()),
+					new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder()),
+					new CodecHttpMessageConverter<>(new Jaxb2Encoder(), new Jaxb2Decoder()),
+					new CodecHttpMessageConverter<>(new JacksonJsonEncoder(),
+							new JacksonJsonDecoder(new JsonObjectDecoder())));
 		}
 
 		@Bean
@@ -407,11 +420,9 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@Bean
 		public ResponseBodyResultHandler responseBodyResultHandler() {
-			List<HttpMessageConverter<?>> converters = Arrays.asList(
-					new ResourceHttpMessageConverter(),
-					new CodecHttpMessageConverter<>(new ByteBufferEncoder(), new ByteBufferDecoder()),
-					new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder()),
-					new CodecHttpMessageConverter<>(new JacksonJsonEncoder(), new JacksonJsonDecoder()));
+			List<HttpMessageConverter<?>> converters = new ArrayList<>();
+			converters.add(new ResourceHttpMessageConverter());
+			converters.addAll(getDefaultMessageConverters());
 			return new ResponseBodyResultHandler(converters, conversionService());
 		}
 

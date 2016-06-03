@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -230,11 +231,9 @@ public class DispatcherHandlerErrorTests {
 
 		@Bean
 		public ResponseBodyResultHandler resultHandler() {
-			List<HttpMessageConverter<?>> converters = Collections.singletonList(
-					new CodecHttpMessageConverter<>(new StringEncoder(),
-							new StringDecoder()));
-			return new ResponseBodyResultHandler(converters,
-					new DefaultConversionService());
+			HttpMessageConverter<String> converter = new CodecHttpMessageConverter<>(new StringEncoder());
+			ConversionService conversionService = new DefaultConversionService();
+			return new ResponseBodyResultHandler(Collections.singletonList(converter), conversionService);
 		}
 
 		@Bean

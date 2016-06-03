@@ -48,7 +48,6 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueMe
 		return parameter.hasParameterAnnotation(SessionAttribute.class);
 	}
 
-
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		SessionAttribute annot = parameter.getParameterAnnotation(SessionAttribute.class);

@@ -166,6 +166,7 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		Locale locale = Locale.getDefault(); // TODO
 		DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
 		try {
+			// TODO: pass charset
 			Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream());
 			getTemplate(locale).process(freeMarkerModel, writer);
 		}
