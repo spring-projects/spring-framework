@@ -32,9 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
@@ -65,27 +63,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 	}
 
-
-	private ContextPathHelper contextPathHelper;
-
-
-	/**
-	 * Configure a context path override that will replace the context path of
-	 * proxy-forwarded requests. This is useful when external clients are not
-	 * aware of the application context path to which the proxy is configured
-	 * to forward to.
-	 * <p>For example, a client may connect to a proxy at:<br>
-	 * {@code https://example.com/}
-	 * <p>In turn the proxy forwards to the application at:<br>
-	 * {@code 192.168.1.1:8080/example/}
-	 * @param contextPath the context path; the given value will be sanitized to
-	 * ensure it starts with a '/' but does not end with one, or if the context
-	 * path is empty (default, root context) it is left as-is.
-	 */
-	public void setContextPathOverride(String contextPath) {
-		Assert.notNull(contextPath, "'contextPath' must not be null");
-		this.contextPathHelper = new ContextPathHelper(contextPath);
-	}
+	private final UrlPathHelper pathHelper = new UrlPathHelper();
 
 
 	@Override
@@ -114,7 +92,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
 
-		filterChain.doFilter(new ForwardedHeaderRequestWrapper(request, this.contextPathHelper), response);
+		filterChain.doFilter(new ForwardedHeaderRequestWrapper(request, this.pathHelper), response);
 	}
 
 
@@ -136,7 +114,8 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 		private final Map<String, List<String>> headers;
 
-		public ForwardedHeaderRequestWrapper(HttpServletRequest request, ContextPathHelper pathHelper) {
+
+		public ForwardedHeaderRequestWrapper(HttpServletRequest request, UrlPathHelper pathHelper) {
 			super(request);
 
 			HttpRequest httpRequest = new ServletServerHttpRequest(request);
@@ -148,28 +127,22 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			this.host = uriComponents.getHost();
 			this.port = (port == -1 ? (this.secure ? 443 : 80) : port);
 
-			this.contextPath = initContextPath(request, pathHelper);
-			this.requestUri = initRequestUri(request, pathHelper);
-			this.requestUrl = initRequestUrl(this.scheme, this.host, port, this.requestUri);
+			String prefix = getForwardedPrefix(request);
+			this.contextPath = (prefix != null ? prefix : request.getContextPath());
+			this.requestUri = this.contextPath + pathHelper.getPathWithinApplication(request);
+			this.requestUrl = new StringBuffer(this.scheme + "://" + this.host +
+					(port == -1 ? "" : ":" + port) + this.requestUri);
 			this.headers = initHeaders(request);
 		}
 
-		private static String initContextPath(HttpServletRequest request, ContextPathHelper pathHelper) {
-			String contextPath = (pathHelper != null ? pathHelper.getContextPath(request) : request.getContextPath());
-			return prependForwardedPrefix(request, contextPath);
-		}
-
-		private static String initRequestUri(HttpServletRequest request, ContextPathHelper pathHelper) {
-			String requestUri = (pathHelper != null ? pathHelper.getRequestUri(request) : request.getRequestURI());
-			return prependForwardedPrefix(request, requestUri);
-		}
-
-		private static StringBuffer initRequestUrl(String scheme, String host, int port, String path) {
-			StringBuffer sb = new StringBuffer();
-			sb.append(scheme).append("://").append(host);
-			sb.append(port == -1 ? "" : ":" + port);
-			sb.append(path);
-			return sb;
+		private static String getForwardedPrefix(HttpServletRequest request) {
+			String header = request.getHeader("X-Forwarded-Prefix");
+			if (header != null) {
+				while (header.endsWith("/")) {
+					header = header.substring(0, header.length() - 1);
+				}
+			}
+			return header;
 		}
 
 		/**
@@ -186,17 +159,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 				headers.remove(name);
 			}
 			return headers;
-		}
-
-		private static String prependForwardedPrefix(HttpServletRequest request, String value) {
-			String header = request.getHeader("X-Forwarded-Prefix");
-			if (StringUtils.hasText(header)) {
-				while (header.endsWith("/")) {
-					header = header.substring(0, header.length() - 1);
-				}
-				value = header + value;
-			}
-			return value;
 		}
 
 		@Override
@@ -234,7 +196,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 			return this.requestUrl;
 		}
 
-		// Override header accessors in order to not expose forwarded headers
+		// Override header accessors to not expose forwarded headers
 
 		@Override
 		public String getHeader(String name) {
@@ -251,51 +213,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		public Enumeration<String> getHeaderNames() {
 			return Collections.enumeration(this.headers.keySet());
-		}
-	}
-
-
-	private static class ContextPathHelper {
-
-		private final String contextPath;
-
-		private final UrlPathHelper urlPathHelper;
-
-		public ContextPathHelper(String contextPath) {
-			Assert.notNull(contextPath);
-			this.contextPath = sanitizeContextPath(contextPath);
-			this.urlPathHelper = new UrlPathHelper();
-			this.urlPathHelper.setUrlDecode(false);
-			this.urlPathHelper.setRemoveSemicolonContent(false);
-		}
-
-		private static String sanitizeContextPath(String contextPath) {
-			contextPath = contextPath.trim();
-			if (contextPath.isEmpty()) {
-				return contextPath;
-			}
-			if (contextPath.equals("/")) {
-				return "/";
-			}
-			if (contextPath.charAt(0) != '/') {
-				contextPath = "/"  + contextPath;
-			}
-			while (contextPath.endsWith("/")) {
-				contextPath = contextPath.substring(0, contextPath.length() -1);
-			}
-			return contextPath;
-		}
-
-		public String getContextPath(HttpServletRequest request) {
-			return this.contextPath;
-		}
-
-		public String getRequestUri(HttpServletRequest request) {
-			String pathWithinApplication = this.urlPathHelper.getPathWithinApplication(request);
-			if (this.contextPath.equals("/") && pathWithinApplication.startsWith("/")) {
-				return pathWithinApplication;
-			}
-			return (this.contextPath + pathWithinApplication);
 		}
 	}
 
