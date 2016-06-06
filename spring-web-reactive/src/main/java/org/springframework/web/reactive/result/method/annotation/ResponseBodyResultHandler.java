@@ -78,6 +78,14 @@ public class ResponseBodyResultHandler extends ContentNegotiatingResultHandlerSu
 		this(converters, conversionService, new HeaderContentTypeResolver());
 	}
 
+
+	/**
+	 * Return the configured message converters.
+	 */
+	public List<HttpMessageConverter<?>> getMessageConverters() {
+		return this.messageConverters;
+	}
+
 	/**
 	 * Constructor with message converters, a {@code ConversionService}, and a
 	 * {@code RequestedContentTypeResolver}.
