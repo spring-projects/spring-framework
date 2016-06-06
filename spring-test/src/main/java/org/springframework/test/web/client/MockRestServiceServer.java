@@ -241,7 +241,7 @@ public class MockRestServiceServer {
 
 		@Override
 		public MockRestServiceServerBuilder ignoreExpectOrder(boolean ignoreExpectOrder) {
-			this.ignoreExpectOrder = true;
+			this.ignoreExpectOrder = ignoreExpectOrder;
 			return this;
 		}
 
