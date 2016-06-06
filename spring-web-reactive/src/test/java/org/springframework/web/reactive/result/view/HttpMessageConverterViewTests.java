@@ -35,12 +35,9 @@ import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.Jaxb2Encoder;
 import org.springframework.core.codec.support.Pojo;
 import org.springframework.core.codec.support.StringEncoder;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
@@ -74,8 +71,7 @@ public class HttpMessageConverterViewTests {
 
 	@Before
 	public void setup() throws Exception {
-		HttpMessageConverter<?> converter = new CodecHttpMessageConverter<>(new JacksonJsonEncoder());
-		this.view = new HttpMessageConverterView(converter);
+		this.view = new HttpMessageConverterView(new JacksonJsonEncoder());
 		this.model = new ExtendedModelMap();
 		this.result = new HandlerResult(new Object(), null, ResolvableType.NONE, model);
 	}
@@ -127,8 +123,7 @@ public class HttpMessageConverterViewTests {
 
 	@Test
 	public void extractObjectMultipleMatchesNotSupported() throws Exception {
-		HttpMessageConverter<?> converter = new CodecHttpMessageConverter<>(new StringEncoder());
-		HttpMessageConverterView view = new HttpMessageConverterView(converter);
+		HttpMessageConverterView view = new HttpMessageConverterView(new StringEncoder());
 		view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
 		this.model.addAttribute("foo1", "bar1");
 		this.model.addAttribute("foo2", "bar2");
@@ -145,8 +140,7 @@ public class HttpMessageConverterViewTests {
 
 	@Test
 	public void extractObjectNotSupported() throws Exception {
-		HttpMessageConverter<?> converter = new CodecHttpMessageConverter<>(new Jaxb2Encoder());
-		HttpMessageConverterView view = new HttpMessageConverterView(converter);
+		HttpMessageConverterView view = new HttpMessageConverterView(new Jaxb2Encoder());
 		view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
 		this.model.addAttribute("foo1", "bar1");
 

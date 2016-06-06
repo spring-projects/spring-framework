@@ -25,7 +25,9 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.ui.ModelMap;
@@ -48,6 +50,19 @@ public class HttpMessageConverterView implements View {
 	private final List<MediaType> mediaTypes;
 
 
+	/**
+	 * Create a {@code View} with the given {@code Encoder}.
+	 * Internally this creates
+	 * {@link CodecHttpMessageConverter#CodecHttpMessageConverter(Encoder)
+	 * CodecHttpMessageConverter(Encoder)}.
+	 */
+	public HttpMessageConverterView(Encoder<?> encoder) {
+		this(new CodecHttpMessageConverter<>(encoder));
+	}
+
+	/**
+	 * Create a View that delegates to the given message converter.
+	 */
 	public HttpMessageConverterView(HttpMessageConverter<?> converter) {
 		Assert.notNull(converter, "'converter' is required.");
 		this.converter = converter;
@@ -55,6 +70,9 @@ public class HttpMessageConverterView implements View {
 	}
 
 
+	/**
+	 * Return the configured message converter.
+	 */
 	public HttpMessageConverter<?> getConverter() {
 		return this.converter;
 	}

@@ -18,7 +18,6 @@ package org.springframework.web.reactive;
 
 import java.net.URI;
 import java.util.Collections;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +29,6 @@ import reactor.core.util.SignalKind;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -63,7 +61,9 @@ import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
