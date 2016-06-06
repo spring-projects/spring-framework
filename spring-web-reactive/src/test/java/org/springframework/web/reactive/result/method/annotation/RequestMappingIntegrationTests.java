@@ -21,7 +21,6 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlElement;
@@ -40,19 +39,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.ByteBufferDecoder;
-import org.springframework.core.codec.support.ByteBufferEncoder;
-import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.Jaxb2Decoder;
-import org.springframework.core.codec.support.Jaxb2Encoder;
-import org.springframework.core.codec.support.JsonObjectDecoder;
-import org.springframework.core.codec.support.StringDecoder;
-import org.springframework.core.codec.support.StringEncoder;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -62,9 +49,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
-import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ZeroCopyIntegrationTests;
@@ -78,11 +62,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.result.SimpleResultHandler;
-import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
-import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.reactive.config.ViewResolverRegistry;
+import org.springframework.web.reactive.config.WebReactiveConfiguration;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
-import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -385,61 +367,11 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Configuration
 	@SuppressWarnings("unused")
-	static class FrameworkConfig {
+	static class FrameworkConfig extends WebReactiveConfiguration {
 
-		@Bean
-		public RequestMappingHandlerMapping handlerMapping() {
-			return new RequestMappingHandlerMapping();
-		}
-
-		@Bean
-		public RequestMappingHandlerAdapter handlerAdapter() {
-			RequestMappingHandlerAdapter handlerAdapter = new RequestMappingHandlerAdapter();
-			handlerAdapter.setMessageConverters(getDefaultMessageConverters());
-			handlerAdapter.setConversionService(conversionService());
-			return handlerAdapter;
-		}
-
-		private List<HttpMessageConverter<?>> getDefaultMessageConverters() {
-			return Arrays.asList(
-					new CodecHttpMessageConverter<>(new ByteBufferEncoder(), new ByteBufferDecoder()),
-					new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder()),
-					new CodecHttpMessageConverter<>(new Jaxb2Encoder(), new Jaxb2Decoder()),
-					new CodecHttpMessageConverter<>(new JacksonJsonEncoder(),
-							new JacksonJsonDecoder(new JsonObjectDecoder())));
-		}
-
-		@Bean
-		public ConversionService conversionService() {
-			// TODO: test failures with DefaultConversionService
-			GenericConversionService service = new GenericConversionService();
-			service.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-			service.addConverter(new ReactiveStreamsToRxJava1Converter());
-			return service;
-		}
-
-		@Bean
-		public ResponseBodyResultHandler responseBodyResultHandler() {
-			List<HttpMessageConverter<?>> converters = new ArrayList<>();
-			converters.add(new ResourceHttpMessageConverter());
-			converters.addAll(getDefaultMessageConverters());
-			return new ResponseBodyResultHandler(converters, conversionService());
-		}
-
-		@Bean
-		public SimpleResultHandler simpleHandlerResultHandler() {
-			return new SimpleResultHandler(conversionService());
-		}
-
-		@Bean
-		public ViewResolutionResultHandler viewResolverResultHandler() {
-			List<ViewResolver> resolvers = Collections.singletonList(freeMarkerViewResolver());
-			return new ViewResolutionResultHandler(resolvers, conversionService());
-		}
-
-		@Bean
-		public ViewResolver freeMarkerViewResolver() {
-			return new FreeMarkerViewResolver("", ".ftl");
+		@Override
+		protected void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
 		}
 
 		@Bean
