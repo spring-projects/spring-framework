@@ -71,7 +71,6 @@ public class HeaderRequestMatchersIntegrationTests {
 		this.mockServer.verify();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testStringContains() throws Exception {
 
