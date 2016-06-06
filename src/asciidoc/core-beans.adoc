@@ -4593,15 +4593,16 @@ If you intend to express annotation-driven injection by name, do not primarily u
 semantically defined to identify a specific target component by its unique name, with
 the declared type being irrelevant for the matching process.
 
-As a specific consequence of this semantic difference, beans that are themselves defined
-as a collection or map type cannot be injected through `@Autowired`, because type
-matching is not properly applicable to them. Use `@Resource` for such beans, referring
-to the specific collection or map bean by unique name.
+For beans that are themselves defined as a collection/map or array type, `@Resource`
+is a fine solution, referring to the specific collection or array bean by unique name.
+That said, as of 4.3, collection/map and array types can be matched through Spring's
+`@Autowired` type matching algorithm as well, as long as the element type information
+is preserved in `@Bean` return type signatures or collection inheritance hierarchies.
 
 `@Autowired` applies to fields, constructors, and multi-argument methods, allowing for
 narrowing through qualifier annotations at the parameter level. By contrast, `@Resource`
-is supported only for fields and bean property setter methods with a single argument. As
-a consequence, stick with qualifiers if your injection target is a constructor or a
+is supported only for fields and bean property setter methods with a single argument.
+As a consequence, stick with qualifiers if your injection target is a constructor or a
 multi-argument method.
 ====
 
