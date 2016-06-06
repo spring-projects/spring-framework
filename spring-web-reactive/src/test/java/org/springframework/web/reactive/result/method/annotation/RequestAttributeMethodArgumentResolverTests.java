@@ -97,7 +97,7 @@ public class RequestAttributeMethodArgumentResolverTests {
 		Foo foo = new Foo();
 		this.exchange.getAttributes().put("foo", foo);
 		mono = this.resolver.resolveArgument(param, null, this.exchange);
-		assertSame(foo, mono.get());
+		assertSame(foo, mono.block());
 	}
 
 	@Test
@@ -106,36 +106,36 @@ public class RequestAttributeMethodArgumentResolverTests {
 		Foo foo = new Foo();
 		this.exchange.getAttributes().put("specialFoo", foo);
 		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
-		assertSame(foo, mono.get());
+		assertSame(foo, mono.block());
 	}
 
 	@Test
 	public void resolveNotRequired() throws Exception {
 		MethodParameter param = initMethodParameter(2);
 		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
-		assertNull(mono.get());
+		assertNull(mono.block());
 
 		Foo foo = new Foo();
 		this.exchange.getAttributes().put("foo", foo);
 		mono = this.resolver.resolveArgument(param, null, this.exchange);
-		assertSame(foo, mono.get());
+		assertSame(foo, mono.block());
 	}
 
 	@Test
 	public void resolveOptional() throws Exception {
 		MethodParameter param = initMethodParameter(3);
 		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
-		assertNotNull(mono.get());
-		assertEquals(Optional.class, mono.get().getClass());
-		assertFalse(((Optional) mono.get()).isPresent());
+		assertNotNull(mono.block());
+		assertEquals(Optional.class, mono.block().getClass());
+		assertFalse(((Optional) mono.block()).isPresent());
 
 		Foo foo = new Foo();
 		this.exchange.getAttributes().put("foo", foo);
 		mono = this.resolver.resolveArgument(param, null, this.exchange);
 
-		assertNotNull(mono.get());
-		assertEquals(Optional.class, mono.get().getClass());
-		Optional optional = (Optional) mono.get();
+		assertNotNull(mono.block());
+		assertEquals(Optional.class, mono.block().getClass());
+		Optional optional = (Optional) mono.block();
 		assertTrue(optional.isPresent());
 		assertSame(foo, optional.get());
 	}

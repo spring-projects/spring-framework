@@ -94,7 +94,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 		Map<String, String> expected = Collections.singletonMap(name, value);
 
 		Mono<Object> mono = resolver.resolveArgument(paramMap, null, exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof Map);
 		assertEquals(expected, result);
@@ -112,7 +112,7 @@ public class RequestParamMapMethodArgumentResolverTests {
 		expected.add(name, value2);
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramMultiValueMap, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof MultiValueMap);
 		assertEquals(expected, result);

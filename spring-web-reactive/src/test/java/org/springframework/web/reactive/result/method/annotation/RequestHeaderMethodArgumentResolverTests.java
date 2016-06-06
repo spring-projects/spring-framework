@@ -109,7 +109,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.exchange.getRequest().getHeaders().add("name", expected);
 
 		Mono<Object> mono = this.resolver.resolveArgument(paramNamedDefaultValueStringHeader, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 		assertTrue(result instanceof String);
 		assertEquals(expected, result);
 	}
@@ -120,7 +120,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.exchange.getRequest().getHeaders().put("name", Arrays.asList(expected));
 
 		Mono<Object> mono = this.resolver.resolveArgument(paramNamedValueStringArray, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 		assertTrue(result instanceof String[]);
 		assertArrayEquals(expected, (String[]) result);
 	}
@@ -128,7 +128,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	@Test
 	public void resolveDefaultValue() throws Exception {
 		Mono<Object> mono = this.resolver.resolveArgument(paramNamedDefaultValueStringHeader, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 		assertTrue(result instanceof String);
 		assertEquals("bar", result);
 	}
@@ -138,7 +138,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		System.setProperty("systemProperty", "bar");
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(paramSystemProperty, null, this.exchange);
-			Object result = mono.get();
+			Object result = mono.block();
 			assertTrue(result instanceof String);
 			assertEquals("bar", result);
 		}
@@ -155,7 +155,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		System.setProperty("systemProperty", "bar");
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(paramResolvedNameWithExpression, null, this.exchange);
-			Object result = mono.get();
+			Object result = mono.block();
 			assertTrue(result instanceof String);
 			assertEquals(expected, result);
 		}
@@ -172,7 +172,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		System.setProperty("systemProperty", "bar");
 		try {
 			Mono<Object> mono = this.resolver.resolveArgument(paramResolvedNameWithPlaceholder, null, this.exchange);
-			Object result = mono.get();
+			Object result = mono.block();
 			assertTrue(result instanceof String);
 			assertEquals(expected, result);
 		}
@@ -196,7 +196,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.exchange.getRequest().getHeaders().add("name", rfc1123val);
 
 		Mono<Object> mono = this.resolver.resolveArgument(paramDate, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof Date);
 		assertEquals(new Date(rfc1123val), result);
@@ -208,7 +208,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.exchange.getRequest().getHeaders().add("name", rfc1123val);
 
 		Mono<Object> mono = this.resolver.resolveArgument(paramInstant, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof Instant);
 		assertEquals(Instant.from(DateTimeFormatter.RFC_1123_DATE_TIME.parse(rfc1123val)), result);

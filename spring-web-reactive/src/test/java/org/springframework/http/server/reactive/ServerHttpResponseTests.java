@@ -45,7 +45,7 @@ public class ServerHttpResponseTests {
 	@Test
 	public void writeWith() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
-		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).get();
+		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
@@ -60,7 +60,7 @@ public class ServerHttpResponseTests {
 	public void writeWithError() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		IllegalStateException error = new IllegalStateException("boo");
-		response.writeWith(Flux.error(error)).otherwise(ex -> Mono.empty()).get();
+		response.writeWith(Flux.error(error)).otherwise(ex -> Mono.empty()).block();
 
 		assertFalse(response.headersWritten);
 		assertFalse(response.cookiesWritten);
@@ -70,7 +70,7 @@ public class ServerHttpResponseTests {
 	@Test
 	public void setComplete() throws Exception {
 		TestServerHttpResponse response = new TestServerHttpResponse();
-		response.setComplete().get();
+		response.setComplete().block();
 
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
@@ -85,7 +85,7 @@ public class ServerHttpResponseTests {
 			response.getCookies().add(cookie.getName(), cookie);
 			return Mono.empty();
 		});
-		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).get();
+		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
@@ -102,7 +102,7 @@ public class ServerHttpResponseTests {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		IllegalStateException error = new IllegalStateException("boo");
 		response.beforeCommit(() -> Mono.error(error));
-		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).get();
+		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
 		assertTrue("beforeCommit action errors should be ignored", response.headersWritten);
 		assertTrue("beforeCommit action errors should be ignored", response.cookiesWritten);
@@ -122,7 +122,7 @@ public class ServerHttpResponseTests {
 			response.getCookies().add(cookie.getName(), cookie);
 			return Mono.empty();
 		});
-		response.setComplete().get();
+		response.setComplete().block();
 
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);

@@ -57,7 +57,7 @@ public class ChannelSendOperatorTests {
 	public void errorBeforeFirstItem() throws Exception {
 		IllegalStateException error = new IllegalStateException("boo");
 		Mono<Void> completion = Mono.<String>error(error).as(this::sendOperator);
-		Signal<Void> signal = completion.materialize().get();
+		Signal<Void> signal = completion.materialize().block();
 
 		assertNotNull(signal);
 		assertSame("Unexpected signal: " + signal, error, signal.getThrowable());
@@ -66,7 +66,7 @@ public class ChannelSendOperatorTests {
 	@Test
 	public void completionBeforeFirstItem() throws Exception {
 		Mono<Void> completion = Flux.<String>empty().as(this::sendOperator);
-		Signal<Void> signal = completion.materialize().get();
+		Signal<Void> signal = completion.materialize().block();
 
 		assertNotNull(signal);
 		assertTrue("Unexpected signal: " + signal, signal.isOnComplete());
@@ -78,7 +78,7 @@ public class ChannelSendOperatorTests {
 	@Test
 	public void writeOneItem() throws Exception {
 		Mono<Void> completion = Flux.just("one").as(this::sendOperator);
-		Signal<Void> signal = completion.materialize().get();
+		Signal<Void> signal = completion.materialize().block();
 
 		assertNotNull(signal);
 		assertTrue("Unexpected signal: " + signal, signal.isOnComplete());
@@ -93,7 +93,7 @@ public class ChannelSendOperatorTests {
 	public void writeMultipleItems() throws Exception {
 		List<String> items = Arrays.asList("one", "two", "three");
 		Mono<Void> completion = Flux.fromIterable(items).as(this::sendOperator);
-		Signal<Void> signal = completion.materialize().get();
+		Signal<Void> signal = completion.materialize().block();
 
 		assertNotNull(signal);
 		assertTrue("Unexpected signal: " + signal, signal.isOnComplete());
@@ -117,7 +117,7 @@ public class ChannelSendOperatorTests {
 			return i;
 		});
 		Mono<Void> completion = publisher.as(this::sendOperator);
-		Signal<Void> signal = completion.materialize().get();
+		Signal<Void> signal = completion.materialize().block();
 
 		assertNotNull(signal);
 		assertSame("Unexpected signal: " + signal, error, signal.getThrowable());

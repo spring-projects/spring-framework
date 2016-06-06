@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.print.attribute.standard.Media;
-
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 
@@ -47,9 +45,9 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.FixedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
@@ -100,7 +98,7 @@ public class ResponseBodyResultHandlerTests {
 
 		ServerWebExchange exchange = createExchange("/foo");
 		HandlerResult result = new HandlerResult(new Object(), "fooValue", ResolvableType.forClass(String.class));
-		handler.handleResult(exchange, result).get();
+		handler.handleResult(exchange, result).block();
 
 		assertEquals(contentType, exchange.getResponse().getHeaders().getContentType());
 	}
@@ -114,7 +112,7 @@ public class ResponseBodyResultHandlerTests {
 		HandlerResultHandler handler = createHandler(new StringEncoder(), new JacksonJsonEncoder());
 
 		HandlerResult result = new HandlerResult(new Object(), "fooValue", ResolvableType.forClass(String.class));
-		handler.handleResult(exchange, result).get();
+		handler.handleResult(exchange, result).block();
 
 		assertEquals(MediaType.APPLICATION_JSON, exchange.getResponse().getHeaders().getContentType());
 	}

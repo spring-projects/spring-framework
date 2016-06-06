@@ -66,32 +66,32 @@ public class DefaultWebSessionManagerTests {
 	@Test
 	public void getSessionWithoutStarting() throws Exception {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
-		WebSession session = this.manager.getSession(this.exchange).get();
+		WebSession session = this.manager.getSession(this.exchange).block();
 		session.save();
 
 		assertFalse(session.isStarted());
 		assertFalse(session.isExpired());
 		assertNull(this.idResolver.getSavedId());
-		assertNull(this.manager.getSessionStore().retrieveSession(session.getId()).get());
+		assertNull(this.manager.getSessionStore().retrieveSession(session.getId()).block());
 	}
 
 	@Test
 	public void startSessionExplicitly() throws Exception {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
-		WebSession session = this.manager.getSession(this.exchange).get();
+		WebSession session = this.manager.getSession(this.exchange).block();
 		session.start();
 		session.save();
 
 		String id = session.getId();
 		assertNotNull(this.idResolver.getSavedId());
 		assertEquals(id, this.idResolver.getSavedId());
-		assertSame(session, this.manager.getSessionStore().retrieveSession(id).get());
+		assertSame(session, this.manager.getSessionStore().retrieveSession(id).block());
 	}
 
 	@Test
 	public void startSessionImplicitly() throws Exception {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
-		WebSession session = this.manager.getSession(this.exchange).get();
+		WebSession session = this.manager.getSession(this.exchange).block();
 		session.getAttributes().put("foo", "bar");
 		session.save();
 
@@ -104,7 +104,7 @@ public class DefaultWebSessionManagerTests {
 		this.manager.getSessionStore().storeSession(existing);
 		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
 
-		WebSession actual = this.manager.getSession(this.exchange).get();
+		WebSession actual = this.manager.getSession(this.exchange).block();
 		assertSame(existing, actual);
 	}
 
@@ -117,7 +117,7 @@ public class DefaultWebSessionManagerTests {
 		this.manager.getSessionStore().storeSession(existing);
 		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
 
-		WebSession actual = this.manager.getSession(this.exchange).get();
+		WebSession actual = this.manager.getSession(this.exchange).block();
 		assertNotSame(existing, actual);
 	}
 
@@ -127,7 +127,7 @@ public class DefaultWebSessionManagerTests {
 		this.manager.getSessionStore().storeSession(existing);
 		this.idResolver.setIdsToResolve(Arrays.asList("1", "2", "3"));
 
-		WebSession actual = this.manager.getSession(this.exchange).get();
+		WebSession actual = this.manager.getSession(this.exchange).block();
 		assertSame(existing, actual);
 	}
 

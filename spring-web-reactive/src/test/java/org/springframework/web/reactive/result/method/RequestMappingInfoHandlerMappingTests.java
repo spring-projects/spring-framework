@@ -368,7 +368,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	@SuppressWarnings("ConstantConditions")
 	private HandlerMethod getHandler(ServerWebExchange exchange) throws Exception {
 		Mono<Object> handler = this.handlerMapping.getHandler(exchange);
-		return (HandlerMethod) handler.get();
+		return (HandlerMethod) handler.block();
 	}
 
 	private void testHttpMediaTypeNotSupportedException(String url) throws Exception {
@@ -389,7 +389,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		ModelMap model = new ExtendedModelMap();
 		Mono<HandlerResult> mono = new InvocableHandlerMethod(handlerMethod).invokeForRequest(exchange, model);
 
-		HandlerResult result = mono.get();
+		HandlerResult result = mono.block();
 		assertNotNull(result);
 
 		Optional<Object> value = result.getReturnValue();

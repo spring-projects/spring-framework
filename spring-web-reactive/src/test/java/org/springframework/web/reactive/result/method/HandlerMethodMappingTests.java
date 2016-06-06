@@ -84,7 +84,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key, this.handler, this.method1);
 
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
-		assertEquals(this.method1, ((HandlerMethod) result.get()).getMethod());
+		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/f*", this.handler, this.method2);
 
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
-		assertEquals(this.method1, ((HandlerMethod) result.get()).getMethod());
+		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
 	}
 
 	@Test
@@ -140,11 +140,11 @@ public class HandlerMethodMappingTests {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
-		assertNotNull(result.get());
+		assertNotNull(result.block());
 
 		this.mapping.unregisterMapping(key);
 		result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
-		assertNull(result.get());
+		assertNull(result.block());
 		assertNull(this.mapping.getMappingRegistry().getMappingsByUrl(key));
 	}
 

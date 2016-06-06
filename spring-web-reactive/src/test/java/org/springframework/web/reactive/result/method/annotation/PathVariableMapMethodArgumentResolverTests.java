@@ -88,7 +88,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new ModelMap(), this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertEquals(uriTemplateVars, result);
 	}
@@ -96,7 +96,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 	@Test
 	public void resolveArgumentNoUriVars() throws Exception {
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new ModelMap(), this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertEquals(Collections.emptyMap(), result);
 	}

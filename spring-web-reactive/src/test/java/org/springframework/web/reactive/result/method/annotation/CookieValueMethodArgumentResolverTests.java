@@ -92,7 +92,7 @@ public class CookieValueMethodArgumentResolverTests {
 		this.exchange.getRequest().getCookies().add(expected.getName(), expected);
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.cookieParameter, null, this.exchange);
-		assertEquals(expected, mono.get());
+		assertEquals(expected, mono.block());
 	}
 
 	@Test
@@ -101,13 +101,13 @@ public class CookieValueMethodArgumentResolverTests {
 		this.exchange.getRequest().getCookies().add(cookie.getName(), cookie);
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.cookieStringParameter, null, this.exchange);
-		assertEquals("Invalid result", cookie.getValue(), mono.get());
+		assertEquals("Invalid result", cookie.getValue(), mono.block());
 	}
 
 	@Test
 	public void resolveCookieDefaultValue() {
 		Mono<Object> mono = this.resolver.resolveArgument(this.cookieStringParameter, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof String);
 		assertEquals("bar", result);

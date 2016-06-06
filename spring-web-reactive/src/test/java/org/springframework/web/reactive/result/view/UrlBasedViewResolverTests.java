@@ -48,10 +48,10 @@ public class UrlBasedViewResolverTests {
 		resolver.setApplicationContext(context);
 
 		Mono<View> mono = resolver.resolveViewName("my-view", Locale.US);
-		assertNotNull(mono.get());
+		assertNotNull(mono.block());
 
 		mono = resolver.resolveViewName("not-my-view", Locale.US);
-		assertNull(mono.get());
+		assertNull(mono.block());
 	}
 
 

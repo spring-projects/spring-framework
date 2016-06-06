@@ -45,10 +45,10 @@ public class ReactiveStreamsToCompletableFutureConverter implements GenericConve
 			return null;
 		}
 		else if (CompletableFuture.class.isAssignableFrom(source.getClass())) {
-			return Mono.fromCompletableFuture((CompletableFuture)source);
+			return Mono.fromFuture((CompletableFuture) source);
 		}
 		else if (CompletableFuture.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return Mono.from((Publisher)source).toCompletableFuture();
+			return Mono.from((Publisher) source).toFuture();
 		}
 		return null;
 	}

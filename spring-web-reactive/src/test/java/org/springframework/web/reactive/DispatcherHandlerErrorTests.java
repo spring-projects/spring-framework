@@ -191,7 +191,7 @@ public class DispatcherHandlerErrorTests {
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
 		Mono<Void> publisher = webHandler.handle(this.exchange);
 
-		publisher.get();
+		publisher.block();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
@@ -203,13 +203,13 @@ public class DispatcherHandlerErrorTests {
 		webHandler = new ExceptionHandlingWebHandler(webHandler, new ServerError500ExceptionHandler());
 		Mono<Void> publisher = webHandler.handle(this.exchange);
 
-		publisher.get();
+		publisher.block();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
 
 	private Throwable awaitErrorSignal(Mono<?> mono) throws Exception {
-		Signal<?> signal = mono.materialize().get();
+		Signal<?> signal = mono.materialize().block();
 		assertEquals("Unexpected signal: " + signal, SignalKind.onError, signal.getType());
 		return signal.getThrowable();
 	}

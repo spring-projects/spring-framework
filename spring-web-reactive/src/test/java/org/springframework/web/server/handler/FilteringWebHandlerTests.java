@@ -23,20 +23,17 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.core.test.TestSubscriber;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -70,7 +67,7 @@ public class FilteringWebHandlerTests {
 		TestFilter filter2 = new TestFilter();
 		TestFilter filter3 = new TestFilter();
 		HttpHandler httpHandler = createHttpHandler(webHandler, filter1, filter2, filter3);
-		httpHandler.handle(this.request, this.response).get();
+		httpHandler.handle(this.request, this.response).block();
 
 		assertTrue(filter1.invoked());
 		assertTrue(filter2.invoked());
@@ -82,7 +79,7 @@ public class FilteringWebHandlerTests {
 	public void zeroFilters() throws Exception {
 		StubWebHandler webHandler = new StubWebHandler();
 		HttpHandler httpHandler = createHttpHandler(webHandler);
-		httpHandler.handle(this.request, this.response).get();
+		httpHandler.handle(this.request, this.response).block();
 
 		assertTrue(webHandler.invoked());
 	}
@@ -94,7 +91,7 @@ public class FilteringWebHandlerTests {
 		ShortcircuitingFilter filter2 = new ShortcircuitingFilter();
 		TestFilter filter3 = new TestFilter();
 		HttpHandler httpHandler = createHttpHandler(webHandler, filter1, filter2, filter3);
-		httpHandler.handle(this.request, this.response).get();
+		httpHandler.handle(this.request, this.response).block();
 
 		assertTrue(filter1.invoked());
 		assertTrue(filter2.invoked());
@@ -107,7 +104,7 @@ public class FilteringWebHandlerTests {
 		StubWebHandler webHandler = new StubWebHandler();
 		AsyncFilter filter = new AsyncFilter();
 		HttpHandler httpHandler = createHttpHandler(webHandler, filter);
-		httpHandler.handle(this.request, this.response).get();
+		httpHandler.handle(this.request, this.response).block();
 
 		assertTrue(filter.invoked());
 		assertTrue(webHandler.invoked());
@@ -118,7 +115,7 @@ public class FilteringWebHandlerTests {
 		TestExceptionHandler exceptionHandler = new TestExceptionHandler();
 		HttpHandler handler = WebHttpHandlerBuilder.webHandler(new StubWebHandler())
 				.filters(new ExceptionFilter()).exceptionHandlers(exceptionHandler).build();
-		handler.handle(this.request, this.response).get();
+		handler.handle(this.request, this.response).block();
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 

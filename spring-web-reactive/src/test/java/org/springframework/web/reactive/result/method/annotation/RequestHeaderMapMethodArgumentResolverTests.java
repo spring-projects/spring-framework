@@ -93,7 +93,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		this.exchange.getRequest().getHeaders().add(name, value);
 
 		Mono<Object> mono = this.resolver.resolveArgument(paramMap, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof Map);
 		assertEquals("Invalid result", expected, result);
@@ -113,7 +113,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		expected.add(name, value2);
 
 		Mono<Object> mono = this.resolver.resolveArgument(paramMultiValueMap, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof MultiValueMap);
 		assertEquals("Invalid result", expected, result);
@@ -133,7 +133,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		expected.add(name, value2);
 
 		Mono<Object> mono = this.resolver.resolveArgument(paramHttpHeaders, null, this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof HttpHeaders);
 		assertEquals("Invalid result", expected, result);

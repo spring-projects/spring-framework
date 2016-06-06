@@ -62,7 +62,7 @@ public class ExceptionHandlingHttpHandlerTests {
 	@Test
 	public void handleErrorSignal() throws Exception {
 		WebExceptionHandler exceptionHandler = new BadRequestExceptionHandler();
-		createWebHandler(exceptionHandler).handle(this.exchange).get();
+		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
 	}
@@ -75,7 +75,7 @@ public class ExceptionHandlingHttpHandlerTests {
 				new BadRequestExceptionHandler(),
 				new UnresolvedExceptionHandler()
 		};
-		createWebHandler(exceptionHandlers).handle(this.exchange).get();
+		createWebHandler(exceptionHandlers).handle(this.exchange).block();
 
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
 	}
@@ -83,7 +83,7 @@ public class ExceptionHandlingHttpHandlerTests {
 	@Test
 	public void unresolvedException() throws Exception {
 		WebExceptionHandler exceptionHandler = new UnresolvedExceptionHandler();
-		createWebHandler(exceptionHandler).handle(this.exchange).get();
+		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
@@ -91,7 +91,7 @@ public class ExceptionHandlingHttpHandlerTests {
 	@Test
 	public void thrownExceptionBecomesErrorSignal() throws Exception {
 		WebExceptionHandler exceptionHandler = new BadRequestExceptionHandler();
-		createWebHandler(exceptionHandler).handle(this.exchange).get();
+		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
 	}

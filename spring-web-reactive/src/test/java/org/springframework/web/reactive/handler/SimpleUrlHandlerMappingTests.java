@@ -108,7 +108,7 @@ public class SimpleUrlHandlerMappingTests {
 			throws URISyntaxException {
 
 		ServerWebExchange exchange = createExchange(url);
-		Object actual = handlerMapping.getHandler(exchange).get();
+		Object actual = handlerMapping.getHandler(exchange).block();
 		if (bean != null) {
 			assertNotNull(actual);
 			assertSame(bean, actual);

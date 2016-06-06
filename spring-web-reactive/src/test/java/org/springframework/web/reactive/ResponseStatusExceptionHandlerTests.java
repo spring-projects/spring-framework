@@ -63,7 +63,7 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
 		Mono<Void> publisher = this.handler.handle(this.exchange, ex);
 
-		publisher.get();
+		publisher.block();
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
 	}
 
@@ -72,7 +72,7 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable ex = new IllegalStateException();
 		Mono<Void> publisher = this.handler.handle(this.exchange, ex);
 
-		Signal<Void> signal = publisher.materialize().get();
+		Signal<Void> signal = publisher.materialize().block();
 		assertNotNull(signal);
 		assertTrue(signal.hasError());
 		assertSame(ex, signal.getThrowable());

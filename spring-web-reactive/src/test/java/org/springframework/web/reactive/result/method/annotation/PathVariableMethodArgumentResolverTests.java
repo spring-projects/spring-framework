@@ -89,7 +89,7 @@ public class PathVariableMethodArgumentResolverTests {
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, new ModelMap(), this.exchange);
-		Object result = mono.get();
+		Object result = mono.block();
 
 		assertTrue(result instanceof String);
 		assertEquals("value", result);
