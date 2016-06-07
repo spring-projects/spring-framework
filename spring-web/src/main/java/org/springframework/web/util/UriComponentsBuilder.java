@@ -665,7 +665,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * "Forwarded" is not found.
 	 * @param headers the HTTP headers to consider
 	 * @return this UriComponentsBuilder
-	 * @since 4.3
+	 * @since 4.2.7
 	 */
 	UriComponentsBuilder adaptFromForwardedHeaders(HttpHeaders headers) {
 		String forwardedHeader = headers.getFirst("Forwarded");
@@ -743,7 +743,7 @@ public class UriComponentsBuilder implements Cloneable {
 	/**
 	 * Clone this {@code UriComponentsBuilder}.
 	 * @return the cloned {@code UriComponentsBuilder} object
-	 * @since 4.3
+	 * @since 4.2.7
 	 */
 	public UriComponentsBuilder cloneBuilder() {
 		return new UriComponentsBuilder(this);
