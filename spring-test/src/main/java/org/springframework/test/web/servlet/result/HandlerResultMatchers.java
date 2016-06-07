@@ -128,7 +128,7 @@ public class HandlerResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				HandlerMethod handlerMethod = getHandlerMethod(result);
-				assertThat("HandlerMethod", handlerMethod.getMethod().getName(), matcher);
+				assertThat("Handler method", handlerMethod.getMethod().getName(), matcher);
 			}
 		};
 	}
@@ -141,7 +141,7 @@ public class HandlerResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				HandlerMethod handlerMethod = getHandlerMethod(result);
-				assertEquals("HandlerMethod", name, handlerMethod.getMethod().getName());
+				assertEquals("Handler method", name, handlerMethod.getMethod().getName());
 			}
 		};
 	}
@@ -154,7 +154,7 @@ public class HandlerResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				HandlerMethod handlerMethod = getHandlerMethod(result);
-				assertEquals("HandlerMethod", method, handlerMethod.getMethod());
+				assertEquals("Handler method", method, handlerMethod.getMethod());
 			}
 		};
 	}
