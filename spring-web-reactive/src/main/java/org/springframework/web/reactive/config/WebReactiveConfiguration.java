@@ -91,6 +91,10 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		this.applicationContext = applicationContext;
 	}
 
+	protected ApplicationContext getApplicationContext() {
+		return this.applicationContext;
+	}
+
 
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
