@@ -2422,7 +2422,7 @@ runtime more than once, see <<beans-factory-method-injection>>
 
 
 [[beans-factory-scopes-other]]
-=== request, session, globalSession, application, and websocket scopes
+=== Request, session, global session, application, and WebSocket scopes
 
 The `request`, `session`, `globalSession`, `application`, and `websocket` scopes are
 __only__ available if you use a web-aware Spring `ApplicationContext` implementation
@@ -2497,7 +2497,7 @@ down the call chain.
 [[beans-factory-scopes-request]]
 ==== Request scope
 
-Consider the following bean definition:
+Consider the following XML configuration for a bean definition:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2513,11 +2513,24 @@ created from the same `loginAction` bean definition will not see these changes i
 they are particular to an individual request. When the request completes processing, the
 bean that is scoped to the request is discarded.
 
+When using Java Config, the `@RequestScope` annotation can be used to assign a component
+to the `request` scope.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestScope
+	@Component
+	public class LoginAction {
+		// ...
+	}
+----
+
 
 [[beans-factory-scopes-session]]
 ==== Session scope
 
-Consider the following bean definition:
+Consider the following XML configuration for a bean definition:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2534,6 +2547,19 @@ using instances created from the same `userPreferences` bean definition do not s
 changes in state, because they are particular to an individual HTTP `Session`. When the
 HTTP `Session` is eventually discarded, the bean that is scoped to that particular HTTP
 `Session` is also discarded.
+
+When using Java Config, the `@SessionScope` annotation can be used to assign a component
+to the `session` scope.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@SessionScope
+	@Component
+	public class UserPreferences {
+		// ...
+	}
+----
 
 
 [[beans-factory-scopes-global-session]]
@@ -2562,7 +2588,7 @@ error is raised.
 [[beans-factory-scopes-application]]
 ==== Application scope
 
-Consider the following bean definition:
+Consider the following XML configuration for a bean definition:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -2577,6 +2603,19 @@ The Spring container creates a new instance of the `AppPreferences` bean by usin
 differs in two important ways: It is a singleton per `ServletContext`, not per Spring
 'ApplicationContext' (for which there may be several in any given web application),
 and it is actually exposed and therefore visible as a `ServletContext` attribute.
+
+When using Java Config, the `@ApplicationScope` annotation can be used to assign a
+component to the `application` scope.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@ApplicationScope
+	@Component
+	public class AppPreferences {
+		// ...
+	}
+----
 
 
 [[beans-factory-scopes-other-injection]]
