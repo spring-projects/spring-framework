@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import org.springframework.beans.FatalBeanException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,10 +71,10 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@BeforeClass
 	public static void setupOnce() {
-		ExceptionHandlerExceptionResolver r = new ExceptionHandlerExceptionResolver();
-		r.afterPropertiesSet();
-		RESOLVER_COUNT = r.getArgumentResolvers().getResolvers().size();
-		HANDLER_COUNT = r.getReturnValueHandlers().getHandlers().size();
+		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
+		resolver.afterPropertiesSet();
+		RESOLVER_COUNT = resolver.getArgumentResolvers().getResolvers().size();
+		HANDLER_COUNT = resolver.getReturnValueHandlers().getHandlers().size();
 	}
 
 	@Before
@@ -220,9 +221,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertEquals("TestExceptionResolver: IllegalStateException", this.response.getContentAsString());
 	}
 
-	// SPR-12605
-
-	@Test
+	@Test  // SPR-12605
 	public void resolveExceptionWithHandlerMethodArg() throws Exception {
 		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(cxt);
@@ -247,6 +246,22 @@ public class ExceptionHandlerExceptionResolverTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod,
 				new NestedServletException("Handler dispatch failed", err));
+
+		assertNotNull("Exception was not handled", mav);
+		assertTrue(mav.isEmpty());
+		assertEquals(err.toString(), this.response.getContentAsString());
+	}
+
+	@Test
+	public void resolveExceptionWithAssertionErrorAsRootCause() throws Exception {
+		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(cxt);
+		this.resolver.afterPropertiesSet();
+
+		AssertionError err = new AssertionError("argh");
+		FatalBeanException ex = new FatalBeanException("wrapped", err);
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 
 		assertNotNull("Exception was not handled", mav);
 		assertTrue(mav.isEmpty());

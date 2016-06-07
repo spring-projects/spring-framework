@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.util.NestedServletException;
 
 /**
  * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class,
@@ -39,6 +38,7 @@ import org.springframework.web.util.NestedServletException;
  * to the exception types supported by a given {@link Method}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ExceptionHandlerMethodResolver {
@@ -126,8 +126,11 @@ public class ExceptionHandlerMethodResolver {
 	 */
 	public Method resolveMethod(Exception exception) {
 		Method method = resolveMethodByExceptionType(exception.getClass());
-		if (method == null && exception instanceof NestedServletException && exception.getCause() != null) {
-			method = resolveMethodByExceptionType(exception.getCause().getClass());
+		if (method == null) {
+			Throwable cause = exception.getCause();
+			if (cause != null) {
+				method = resolveMethodByExceptionType(cause.getClass());
+			}
 		}
 		return method;
 	}
