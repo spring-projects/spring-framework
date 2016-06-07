@@ -99,7 +99,7 @@ public class DefaultContextCache implements ContextCache {
 	 * @see #DefaultContextCache()
 	 */
 	public DefaultContextCache(int maxSize) {
-		Assert.isTrue(maxSize > 0, "maxSize must be positive");
+		Assert.isTrue(maxSize > 0, "'maxSize' must be positive");
 		this.maxSize = maxSize;
 	}
 
@@ -314,16 +314,14 @@ public class DefaultContextCache implements ContextCache {
 	 * Simple cache implementation based on {@link LinkedHashMap} with a maximum
 	 * size and a <em>least recently used</em> (LRU) eviction policy that
 	 * properly closes application contexts.
-	 *
-	 * @author Sam Brannen
 	 * @since 4.3
 	 */
 	@SuppressWarnings("serial")
 	private class LruCache extends LinkedHashMap<MergedContextConfiguration, ApplicationContext> {
 
 		/**
-		 * Create a new {@code LruCache} with the supplied initial capacity and
-		 * load factor.
+		 * Create a new {@code LruCache} with the supplied initial capacity
+		 * and load factor.
 		 * @param initialCapacity the initial capacity
 		 * @param loadFactor the load factor
 		 */

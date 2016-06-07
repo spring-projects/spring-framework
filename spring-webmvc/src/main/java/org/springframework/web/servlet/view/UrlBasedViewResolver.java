@@ -257,21 +257,22 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	}
 
 	/**
-	 * Configure one or more hosts associated with the application. All other
-	 * hosts will be considered external hosts. In effect this property
-	 * provides a way turn off encoding on redirect via
-	 * {@link HttpServletResponse#encodeRedirectURL} for URLs that have a host
-	 * and that host is not listed as a known host.
+	 * Configure one or more hosts associated with the application.
+	 * All other hosts will be considered external hosts.
+	 * <p>In effect, this property provides a way turn off encoding on redirect
+	 * via {@link HttpServletResponse#encodeRedirectURL} for URLs that have a
+	 * host and that host is not listed as a known host.
 	 * <p>If not set (the default) all URLs are encoded through the response.
 	 * @param redirectHosts one or more application hosts
 	 * @since 4.3
 	 */
-	public void setRedirectHosts(String[] redirectHosts) {
+	public void setRedirectHosts(String... redirectHosts) {
 		this.redirectHosts = redirectHosts;
 	}
 
 	/**
 	 * Return the configured application hosts for redirect purposes.
+	 * @since 4.3
 	 */
 	public String[] getRedirectHosts() {
 		return this.redirectHosts;

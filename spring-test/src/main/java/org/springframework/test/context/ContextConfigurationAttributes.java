@@ -42,11 +42,12 @@ import org.springframework.util.StringUtils;
  */
 public class ContextConfigurationAttributes {
 
-	private static final Log logger = LogFactory.getLog(ContextConfigurationAttributes.class);
-
 	private static final String[] EMPTY_LOCATIONS = new String[0];
 
 	private static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
+
+
+	private static final Log logger = LogFactory.getLog(ContextConfigurationAttributes.class);
 
 	private final Class<?> declaringClass;
 
@@ -66,8 +67,7 @@ public class ContextConfigurationAttributes {
 
 
 	/**
-	 * Construct a new {@link ContextConfigurationAttributes} instance with default
-	 * values.
+	 * Construct a new {@link ContextConfigurationAttributes} instance with default values.
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration},
 	 * either explicitly or implicitly
 	 * @since 4.3
@@ -101,8 +101,8 @@ public class ContextConfigurationAttributes {
 	@SuppressWarnings("unchecked")
 	public ContextConfigurationAttributes(Class<?> declaringClass, AnnotationAttributes annAttrs) {
 		this(declaringClass, annAttrs.getStringArray("locations"), annAttrs.getClassArray("classes"), annAttrs.getBoolean("inheritLocations"),
-			(Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[]) annAttrs.getClassArray("initializers"),
-			annAttrs.getBoolean("inheritInitializers"), annAttrs.getString("name"), (Class<? extends ContextLoader>) annAttrs.getClass("loader"));
+				(Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[]) annAttrs.getClassArray("initializers"),
+				annAttrs.getBoolean("inheritInitializers"), annAttrs.getString("name"), (Class<? extends ContextLoader>) annAttrs.getClass("loader"));
 	}
 
 	/**
@@ -156,8 +156,8 @@ public class ContextConfigurationAttributes {
 		if (!ObjectUtils.isEmpty(locations) && !ObjectUtils.isEmpty(classes) && logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Test class [%s] has been configured with @ContextConfiguration's 'locations' (or 'value') %s " +
-							"and 'classes' %s attributes. Most SmartContextLoader implementations support " +
-							"only one declaration of resources per @ContextConfiguration annotation.",
+					"and 'classes' %s attributes. Most SmartContextLoader implementations support " +
+					"only one declaration of resources per @ContextConfiguration annotation.",
 					declaringClass.getName(), ObjectUtils.nullSafeToString(locations),
 					ObjectUtils.nullSafeToString(classes)));
 		}

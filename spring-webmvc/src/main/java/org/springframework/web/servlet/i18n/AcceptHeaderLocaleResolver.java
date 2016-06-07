@@ -40,7 +40,7 @@ import org.springframework.web.servlet.LocaleResolver;
  */
 public class AcceptHeaderLocaleResolver implements LocaleResolver {
 
-	private final List<Locale> supportedLocales = new ArrayList<Locale>();
+	private final List<Locale> supportedLocales = new ArrayList<Locale>(4);
 
 	private Locale defaultLocale;
 
@@ -91,8 +91,9 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 
 	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
-		if (getDefaultLocale() != null  && request.getHeader("Accept-Language") == null) {
-			return getDefaultLocale();
+		Locale defaultLocale = getDefaultLocale();
+		if (defaultLocale != null && request.getHeader("Accept-Language") == null) {
+			return defaultLocale;
 		}
 		Locale locale = request.getLocale();
 		if (!isSupportedLocale(locale)) {
@@ -102,7 +103,8 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	}
 
 	private boolean isSupportedLocale(Locale locale) {
-		return (getSupportedLocales().isEmpty() || getSupportedLocales().contains(locale));
+		List<Locale> supportedLocales = getSupportedLocales();
+		return (supportedLocales.isEmpty() || supportedLocales.contains(locale));
 	}
 
 	private Locale findSupportedLocale(HttpServletRequest request, Locale fallback) {

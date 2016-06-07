@@ -308,23 +308,20 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		}
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private MergedContextConfiguration buildDefaultMergedContextConfiguration(Class<?> testClass,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
-		List<ContextConfigurationAttributes> defaultConfigAttributesList
-			= Collections.singletonList(new ContextConfigurationAttributes(testClass));
+		List<ContextConfigurationAttributes> defaultConfigAttributesList =
+				Collections.singletonList(new ContextConfigurationAttributes(testClass));
 
 		ContextLoader contextLoader = resolveContextLoader(testClass, defaultConfigAttributesList);
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
-				"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s], using %s",
-				testClass.getName(), contextLoader.getClass().getSimpleName()));
+					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s], using %s",
+					testClass.getName(), contextLoader.getClass().getSimpleName()));
 		}
 		return buildMergedContextConfiguration(testClass, defaultConfigAttributesList, null,
-			cacheAwareContextLoaderDelegate, false);
+				cacheAwareContextLoaderDelegate, false);
 	}
 
 	/**
@@ -367,7 +364,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
-					configAttributes));
+						configAttributes));
 			}
 			if (contextLoader instanceof SmartContextLoader) {
 				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
@@ -412,9 +409,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return processMergedContextConfiguration(mergedConfig);
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private Set<ContextCustomizer> getContextCustomizers(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
@@ -439,18 +433,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
 		return SpringFactoriesLoader.loadFactories(ContextCustomizerFactory.class, getClass().getClassLoader());
-	}
-
-	/**
-	 * @since 4.3
-	 */
-	private boolean areAllEmpty(Collection<?>... collections) {
-		for (Collection<?> collection : collections) {
-			if (!collection.isEmpty()) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -573,6 +555,16 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
 		return mergedConfig;
+	}
+
+
+	private static boolean areAllEmpty(Collection<?>... collections) {
+		for (Collection<?> collection : collections) {
+			if (!collection.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

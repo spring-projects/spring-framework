@@ -46,11 +46,12 @@ public abstract class MultipartResolutionDelegate {
 
 	static {
 		try {
-			servletPartClass = ClassUtils.forName(
-					"javax.servlet.http.Part", MultipartResolutionDelegate.class.getClassLoader());
+			servletPartClass = ClassUtils.forName("javax.servlet.http.Part",
+					MultipartResolutionDelegate.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
-			// Servlet 3.0 Part type not available - Part references simply not supported then.
+			// Servlet 3.0 javax.servlet.http.Part type not available -
+			// Part references simply not supported then.
 		}
 	}
 

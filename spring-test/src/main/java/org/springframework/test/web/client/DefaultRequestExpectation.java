@@ -87,11 +87,12 @@ public class DefaultRequestExpectation implements RequestExpectation {
 
 	@Override
 	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
-		if (getResponseCreator() == null) {
-			throw new IllegalStateException("createResponse called before ResponseCreator was set.");
+		ResponseCreator responseCreator = getResponseCreator();
+		if (responseCreator == null) {
+			throw new IllegalStateException("createResponse called before ResponseCreator was set");
 		}
 		getRequestCount().incrementAndValidate();
-		return getResponseCreator().createResponse(request);
+		return responseCreator.createResponse(request);
 	}
 
 	@Override
@@ -114,11 +115,9 @@ public class DefaultRequestExpectation implements RequestExpectation {
 
 		private int matchedRequestCount;
 
-
 		public RequestCount(ExpectedCount expectedCount) {
 			this.expectedCount = expectedCount;
 		}
-
 
 		public ExpectedCount getExpectedCount() {
 			return this.expectedCount;

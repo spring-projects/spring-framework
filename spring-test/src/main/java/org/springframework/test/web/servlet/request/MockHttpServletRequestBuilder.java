@@ -149,8 +149,8 @@ public class MockHttpServletRequestBuilder
 	 * @since 4.3
 	 */
 	MockHttpServletRequestBuilder(String httpMethod, URI url) {
-		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(url, "url is required");
+		Assert.notNull(httpMethod, "'httpMethod' is required");
+		Assert.notNull(url, "'url' is required");
 		this.method = httpMethod;
 		this.url = url;
 	}

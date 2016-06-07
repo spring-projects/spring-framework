@@ -136,19 +136,16 @@ abstract class BootstrapUtils {
 			testContextBootstrapper.setBootstrapContext(bootstrapContext);
 			return testContextBootstrapper;
 		}
+		catch (IllegalStateException ex) {
+			throw ex;
+		}
 		catch (Throwable ex) {
-			if (ex instanceof IllegalStateException) {
-				throw (IllegalStateException) ex;
-			}
 			throw new IllegalStateException("Could not load TestContextBootstrapper [" + clazz +
 					"]. Specify @BootstrapWith's 'value' attribute or make the default bootstrapper class available.",
 					ex);
 		}
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private static Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
 		Set<BootstrapWith> annotations = AnnotatedElementUtils.findAllMergedAnnotations(testClass, BootstrapWith.class);
 		if (annotations.size() < 1) {
@@ -162,9 +159,6 @@ abstract class BootstrapUtils {
 		return annotations.iterator().next().value();
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {
 		ClassLoader classLoader = BootstrapUtils.class.getClassLoader();
 		AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(testClass,

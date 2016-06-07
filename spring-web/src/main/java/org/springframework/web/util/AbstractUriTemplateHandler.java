@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.net.URI;
@@ -106,6 +107,7 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 		return insertBaseUrl(url);
 	}
 
+
 	/**
 	 * Actually expand and encode the URI template.
 	 */
@@ -116,13 +118,15 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 	 */
 	protected abstract URI expandInternal(String uriTemplate, Object... uriVariables);
 
+
 	/**
 	 * Insert a base URL (if configured) unless the given URL has a host already.
 	 */
 	private URI insertBaseUrl(URI url) {
 		try {
-			if (getBaseUrl() != null && url.getHost() == null) {
-				url = new URI(getBaseUrl() + url.toString());
+			String baseUrl = getBaseUrl();
+			if (baseUrl != null && url.getHost() == null) {
+				url = new URI(baseUrl + url.toString());
 			}
 			return url;
 		}

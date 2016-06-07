@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.client;
 
 import java.io.UnsupportedEncodingException;
@@ -21,12 +22,12 @@ import java.nio.charset.Charset;
 import org.springframework.http.HttpHeaders;
 
 /**
- * Abstract base class for exceptions that contain actual HTTP response data.
+ * Common base class for exceptions that contain actual HTTP response data.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-public abstract class RestClientResponseException extends RestClientException {
+public class RestClientResponseException extends RestClientException {
 
 	private static final long serialVersionUID = -8803556342728481792L;
 

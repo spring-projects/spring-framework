@@ -63,6 +63,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Prefix");
 	}
 
+
 	private final UrlPathHelper pathHelper = new UrlPathHelper();
 
 
@@ -113,7 +114,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		private final StringBuffer requestUrl;
 
 		private final Map<String, List<String>> headers;
-
 
 		public ForwardedHeaderRequestWrapper(HttpServletRequest request, UrlPathHelper pathHelper) {
 			super(request);

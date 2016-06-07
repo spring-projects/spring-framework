@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.http.server.ServerHttpResponse;
 
-
 /**
  * Contract to adapt streaming async types to {@code ResponseBodyEmitter}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
 public interface ResponseBodyEmitterAdapter {
 
 	/**
-	 * Obtain a {@code ResponseBodyEmitter} for the given return value. If
-	 * the return is the body {@code ResponseEntity} then the given
+	 * Obtain a {@code ResponseBodyEmitter} for the given return value.
+	 * If the return is the body {@code ResponseEntity} then the given
 	 * {@code ServerHttpResponse} contains its status and headers.
-	 * @param returnValue the return value, never {@code null}
+	 * @param returnValue the return value (never {@code null})
 	 * @param response the response
 	 * @return the return value adapted to a {@code ResponseBodyEmitter}
 	 */

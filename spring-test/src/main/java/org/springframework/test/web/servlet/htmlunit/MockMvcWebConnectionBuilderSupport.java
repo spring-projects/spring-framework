@@ -159,8 +159,8 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * Create a new {@link WebConnection} that will use a {@link MockMvc}
 	 * instance if one of the specified {@link WebRequestMatcher} instances
 	 * matches.
-	 * @param webClient the WebClient to use if none of
-	 * the specified {@code WebRequestMatcher} instances matches; never {@code null}
+	 * @param webClient the WebClient to use if none of the specified
+	 * {@code WebRequestMatcher} instances matches (never {@code null})
 	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
 	 * instance if one of the specified {@code WebRequestMatcher} matches
 	 * @see #alwaysUseMockMvc()

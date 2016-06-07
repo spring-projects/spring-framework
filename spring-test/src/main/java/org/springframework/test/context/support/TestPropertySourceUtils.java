@@ -39,7 +39,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
+import org.springframework.test.util.MetaAnnotationUtils.*;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -58,8 +58,6 @@ import static org.springframework.test.util.MetaAnnotationUtils.*;
  */
 public abstract class TestPropertySourceUtils {
 
-	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
-
 	/**
 	 * The name of the {@link MapPropertySource} created from <em>inlined properties</em>.
 	 * @since 4.1.5
@@ -67,10 +65,8 @@ public abstract class TestPropertySourceUtils {
 	 */
 	public static final String INLINED_PROPERTIES_PROPERTY_SOURCE_NAME = "Inlined Test Properties";
 
+	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
 
-	private TestPropertySourceUtils() {
-		/* no-op */
-	}
 
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
 		Class<TestPropertySource> annotationType = TestPropertySource.class;

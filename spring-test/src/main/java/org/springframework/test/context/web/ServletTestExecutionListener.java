@@ -106,6 +106,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	public static final String ACTIVATE_LISTENER = Conventions.getQualifiedAttributeName(
 			ServletTestExecutionListener.class, "activateListener");
 
+
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
 
@@ -122,7 +123,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * callback phase via Spring Web's {@link RequestContextHolder}, but only if
 	 * the {@linkplain TestContext#getTestClass() test class} is annotated with
 	 * {@link WebAppConfiguration @WebAppConfiguration}.
-	 *
 	 * @see TestExecutionListener#prepareTestInstance(TestContext)
 	 * @see #setUpRequestContextIfNecessary(TestContext)
 	 */
@@ -136,7 +136,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * {@link RequestContextHolder}, but only if the
 	 * {@linkplain TestContext#getTestClass() test class} is annotated with
 	 * {@link WebAppConfiguration @WebAppConfiguration}.
-	 *
 	 * @see TestExecutionListener#beforeTestMethod(TestContext)
 	 * @see #setUpRequestContextIfNecessary(TestContext)
 	 */
@@ -154,11 +153,9 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 * into the test instance for subsequent tests by setting the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
 	 * in the test context to {@code true}.
-	 *
 	 * <p>The {@link #RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} and
 	 * {@link #POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE} will be subsequently
 	 * removed from the test context, regardless of their values.
-	 *
 	 * @see TestExecutionListener#afterTestMethod(TestContext)
 	 */
 	@Override

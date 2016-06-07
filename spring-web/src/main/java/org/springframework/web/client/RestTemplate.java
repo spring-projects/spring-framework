@@ -240,7 +240,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	/**
 	 * Configure default URI variable values. This is a shortcut for:
 	 * <pre class="code">
-	 *
 	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
 	 * handler.setDefaultUriVariables(...);
 	 *
@@ -252,7 +251,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
 		Assert.isInstanceOf(AbstractUriTemplateHandler.class, this.uriTemplateHandler,
-				"Can only use this property in conjunction with an AbstractUriTemplateHandler.");
+				"Can only use this property in conjunction with an AbstractUriTemplateHandler");
 		((AbstractUriTemplateHandler) this.uriTemplateHandler).setDefaultUriVariables(defaultUriVariables);
 	}
 

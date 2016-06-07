@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ import org.springframework.util.Assert;
  * for storing expectations and actual requests, and checking for unsatisfied
  * expectations at the end.
  *
- * <p>Sub-classes are responsible for validating each request by matching it to
+ * <p>Subclasses are responsible for validating each request by matching it to
  * to expectations following the order of declaration or not.
  *
  * @author Rossen Stoyanchev
@@ -57,7 +58,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 
 	@Override
 	public ResponseActions expectRequest(ExpectedCount count, RequestMatcher matcher) {
-		Assert.state(getRequests().isEmpty(), "Cannot add more expectations after actual requests are made.");
+		Assert.state(getRequests().isEmpty(), "Cannot add more expectations after actual requests are made");
 		RequestExpectation expectation = new DefaultRequestExpectation(count, matcher);
 		getExpectations().add(expectation);
 		return expectation;
@@ -81,11 +82,10 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	}
 
 	/**
-	 * Sub-classes must implement the actual validation of the request
+	 * Subclasses must implement the actual validation of the request
 	 * matching it to a declared expectation.
 	 */
-	protected abstract ClientHttpResponse validateRequestInternal(ClientHttpRequest request)
-			throws IOException;
+	protected abstract ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException;
 
 	@Override
 	public void verify() {
@@ -148,7 +148,6 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	protected static class RequestExpectationGroup {
 
 		private final Set<RequestExpectation> expectations = new LinkedHashSet<RequestExpectation>();
-
 
 		public Set<RequestExpectation> getExpectations() {
 			return this.expectations;

@@ -154,7 +154,6 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	/**
 	 * Configure default URI variable values. This is a shortcut for:
 	 * <pre class="code">
-	 *
 	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
 	 * handler.setDefaultUriVariables(...);
 	 *
@@ -167,7 +166,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
 		UriTemplateHandler handler = this.syncTemplate.getUriTemplateHandler();
 		Assert.isInstanceOf(AbstractUriTemplateHandler.class, handler,
-				"Can only use this property in conjunction with a DefaultUriTemplateHandler.");
+				"Can only use this property in conjunction with a DefaultUriTemplateHandler");
 		((AbstractUriTemplateHandler) handler).setDefaultUriVariables(defaultUriVariables);
 	}
 

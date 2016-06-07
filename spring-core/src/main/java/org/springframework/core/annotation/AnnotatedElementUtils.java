@@ -1458,6 +1458,7 @@ public class AnnotatedElementUtils {
 		List<T> getAggregatedResults();
 	}
 
+
 	/**
 	 * {@link Processor} that {@linkplain #process(AnnotatedElement, Annotation, int)
 	 * processes} annotations but does not {@linkplain #postProcess post-process} or
@@ -1467,7 +1468,6 @@ public class AnnotatedElementUtils {
 	private abstract static class SimpleAnnotationProcessor<T> implements Processor<T> {
 
 		private final boolean alwaysProcesses;
-
 
 		public SimpleAnnotationProcessor() {
 			this(false);
@@ -1498,6 +1498,7 @@ public class AnnotatedElementUtils {
 		}
 	}
 
+
 	/**
 	 * {@link SimpleAnnotationProcessor} that always returns {@link Boolean#TRUE} when
 	 * asked to {@linkplain #process(AnnotatedElement, Annotation, int) process} an
@@ -1511,6 +1512,7 @@ public class AnnotatedElementUtils {
 			return Boolean.TRUE;
 		}
 	}
+
 
 	/**
 	 * {@link Processor} that gets the {@code AnnotationAttributes} for the
@@ -1532,7 +1534,6 @@ public class AnnotatedElementUtils {
 		private final boolean aggregates;
 
 		private final List<AnnotationAttributes> aggregatedResults;
-
 
 		MergedAnnotationAttributesProcessor() {
 			this(false, false, false);
@@ -1635,7 +1636,6 @@ public class AnnotatedElementUtils {
 			Object value = AnnotationUtils.getValue(annotation, sourceAttributeName);
 			return AnnotationUtils.adaptValue(element, value, this.classValuesAsString, this.nestedAnnotationsAsMap);
 		}
-
 	}
 
 }

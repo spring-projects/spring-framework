@@ -145,27 +145,6 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		setSupportedMethods(supportedMethods);
 	}
 
-	private void initAllowHeader() {
-		Collection<String> allowedMethods;
-		if (this.supportedMethods == null) {
-			allowedMethods = new ArrayList<String>(HttpMethod.values().length - 1);
-			for (HttpMethod method : HttpMethod.values()) {
-				if (!HttpMethod.TRACE.equals(method)) {
-					allowedMethods.add(method.name());
-				}
-			}
-		}
-		else if (this.supportedMethods.contains(HttpMethod.OPTIONS.name())) {
-			allowedMethods = this.supportedMethods;
-		}
-		else {
-			allowedMethods = new ArrayList<String>(this.supportedMethods);
-			allowedMethods.add(HttpMethod.OPTIONS.name());
-
-		}
-		this.allowHeader = StringUtils.collectionToCommaDelimitedString(allowedMethods);
-	}
-
 
 	/**
 	 * Set the HTTP methods that this content generator should support.
@@ -187,6 +166,27 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public final String[] getSupportedMethods() {
 		return StringUtils.toStringArray(this.supportedMethods);
+	}
+
+	private void initAllowHeader() {
+		Collection<String> allowedMethods;
+		if (this.supportedMethods == null) {
+			allowedMethods = new ArrayList<String>(HttpMethod.values().length - 1);
+			for (HttpMethod method : HttpMethod.values()) {
+				if (!HttpMethod.TRACE.equals(method)) {
+					allowedMethods.add(method.name());
+				}
+			}
+		}
+		else if (this.supportedMethods.contains(HttpMethod.OPTIONS.name())) {
+			allowedMethods = this.supportedMethods;
+		}
+		else {
+			allowedMethods = new ArrayList<String>(this.supportedMethods);
+			allowedMethods.add(HttpMethod.OPTIONS.name());
+
+		}
+		this.allowHeader = StringUtils.collectionToCommaDelimitedString(allowedMethods);
 	}
 
 	/**
@@ -268,14 +268,15 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param varyByRequestHeaders one or more request header names
 	 * @since 4.3
 	 */
-	public void setVaryByRequestHeaders(String... varyByRequestHeaders) {
+	public final void setVaryByRequestHeaders(String... varyByRequestHeaders) {
 		this.varyByRequestHeaders = varyByRequestHeaders;
 	}
 
 	/**
 	 * Return the configured request header names for the "Vary" response header.
+	 * @since 4.3
 	 */
-	public String[] getVaryByRequestHeaders() {
+	public final String[] getVaryByRequestHeaders() {
 		return this.varyByRequestHeaders;
 	}
 
@@ -592,6 +593,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			}
 		}
 	}
+
 
 	private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response) {
 		if (!response.containsHeader(HttpHeaders.VARY)) {

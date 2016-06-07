@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,21 +255,22 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
-	 * Configure one or more hosts associated with the application. All other
-	 * hosts will be considered external hosts. In effect this property
-	 * provides a way turn off encoding via
-	 * {@link HttpServletResponse#encodeRedirectURL} for URLs that have a host
-	 * and that host is not listed as a known host.
+	 * Configure one or more hosts associated with the application.
+	 * All other hosts will be considered external hosts.
+	 * <p>In effect, this property provides a way turn off encoding via
+	 * {@link HttpServletResponse#encodeRedirectURL} for URLs that have a
+	 * host and that host is not listed as a known host.
 	 * <p>If not set (the default) all URLs are encoded through the response.
 	 * @param hosts one or more application hosts
 	 * @since 4.3
 	 */
-	public void setHosts(String[] hosts) {
+	public void setHosts(String... hosts) {
 		this.hosts = hosts;
 	}
 
 	/**
 	 * Return the configured application hosts.
+	 * @since 4.3
 	 */
 	public String[] getHosts() {
 		return this.hosts;
