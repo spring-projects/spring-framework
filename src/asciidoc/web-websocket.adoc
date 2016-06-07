@@ -2010,7 +2010,7 @@ public class MyController {
 }
 ----
 
-It is also possible to declare a Spring-managed bean in the `"websocket"` scope.
+It is also possible to declare a Spring-managed bean in the `websocket` scope.
 WebSocket-scoped beans can be injected into controllers and any channel interceptors
 registered on the "clientInboundChannel". Those are typically singletons and live
 longer than any individual WebSocket session. Therefore you will need to use a
@@ -2020,7 +2020,7 @@ scope proxy mode for WebSocket-scoped beans:
 [subs="verbatim,quotes"]
 ----
 @Component
-@Scope(name = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(scopeName = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MyBean {
 
     @PostConstruct

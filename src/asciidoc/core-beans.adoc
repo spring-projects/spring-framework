@@ -2274,7 +2274,7 @@ the __scope__ of the objects created from a particular bean definition. This app
 powerful and flexible in that you can __choose__ the scope of the objects you create
 through configuration instead of having to bake in the scope of an object at the Java
 class level. Beans can be defined to be deployed in one of a number of scopes: out of
-the box, the Spring Framework supports five scopes, three of which are available only if
+the box, the Spring Framework supports seven scopes, five of which are available only if
 you use a web-aware `ApplicationContext`.
 
 The following scopes are supported out of the box. You can also create
@@ -2301,13 +2301,17 @@ The following scopes are supported out of the box. You can also create
 | Scopes a single bean definition to the lifecycle of an HTTP `Session`. Only valid in
   the context of a web-aware Spring `ApplicationContext`.
 
-| <<beans-factory-scopes-global-session,global session>>
+| <<beans-factory-scopes-global-session,globalSession>>
 | Scopes a single bean definition to the lifecycle of a global HTTP `Session`. Typically
-  only valid when used in a portlet context. Only valid in the context of a web-aware
+  only valid when used in a Portlet context. Only valid in the context of a web-aware
   Spring `ApplicationContext`.
 
 | <<beans-factory-scopes-application,application>>
 | Scopes a single bean definition to the lifecycle of a `ServletContext`. Only valid in
+  the context of a web-aware Spring `ApplicationContext`.
+
+| <<websocket-stomp-websocket-scope,websocket>>
+| Scopes a single bean definition to the lifecycle of a `WebSocket`. Only valid in
   the context of a web-aware Spring `ApplicationContext`.
 |===
 
@@ -2418,22 +2422,22 @@ runtime more than once, see <<beans-factory-method-injection>>
 
 
 [[beans-factory-scopes-other]]
-=== Request, session, and global session scopes
+=== request, session, globalSession, application, and websocket scopes
 
-The `request`, `session`, and `global session` scopes are __only__ available if you use
-a web-aware Spring `ApplicationContext` implementation (such as
-`XmlWebApplicationContext`). If you use these scopes with regular Spring IoC containers
-such as the `ClassPathXmlApplicationContext`, you get an `IllegalStateException`
-complaining about an unknown bean scope.
+The `request`, `session`, `globalSession`, `application`, and `websocket` scopes are
+__only__ available if you use a web-aware Spring `ApplicationContext` implementation
+(such as `XmlWebApplicationContext`). If you use these scopes with regular Spring IoC
+containers such as the `ClassPathXmlApplicationContext`, an `IllegalStateException` will
+be thrown complaining about an unknown bean scope.
 
 
 [[beans-factory-scopes-other-web-configuration]]
 ==== Initial web configuration
 
-To support the scoping of beans at the `request`, `session`, and `global session` levels
-(web-scoped beans), some minor initial configuration is required before you define your
-beans. (This initial setup is __not__ required for the standard scopes, `singleton` and
-`prototype`.)
+To support the scoping of beans at the `request`, `session`, `globalSession`,
+`application`, and `websocket` levels (web-scoped beans), some minor initial
+configuration is required before you define your beans. (This initial setup is __not__
+required for the standard scopes, `singleton` and `prototype`.)
 
 How you accomplish this initial setup depends on your particular Servlet environment.
 
@@ -2543,15 +2547,15 @@ Consider the following bean definition:
 	<bean id="userPreferences" class="com.foo.UserPreferences" scope="globalSession"/>
 ----
 
-The `global session` scope is similar to the standard HTTP `Session` scope
+The `globalSession` scope is similar to the standard HTTP `Session` scope
 (<<beans-factory-scopes-session,described above>>), and applies only in the context of
 portlet-based web applications. The portlet specification defines the notion of a global
 `Session` that is shared among all portlets that make up a single portlet web
-application. Beans defined at the `global session` scope are scoped (or bound) to the
+application. Beans defined at the `globalSession` scope are scoped (or bound) to the
 lifetime of the global portlet `Session`.
 
 If you write a standard Servlet-based web application and you define one or more beans
-as having `global session` scope, the standard HTTP `Session` scope is used, and no
+as having `globalSession` scope, the standard HTTP `Session` scope is used, and no
 error is raised.
 
 
