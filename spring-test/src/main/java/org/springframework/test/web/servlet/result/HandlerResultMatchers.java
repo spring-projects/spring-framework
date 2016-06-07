@@ -25,12 +25,14 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.MethodInvocationInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * Factory for assertions on the selected handler or handler method.
@@ -43,6 +45,7 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
  * which is used by default with the Spring MVC Java config and XML namespace.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class HandlerResultMatchers {
@@ -75,13 +78,13 @@ public class HandlerResultMatchers {
 	}
 
 	/**
-	 * Assert the controller method used to process the request. The expected
-	 * method is specified through a "mock" controller method invocation
-	 * similar to {@link MvcUriComponentsBuilder#fromMethodCall(Object)}.
-	 * <p>For example given this controller:
+	 * Assert the controller method used to process the request.
+	 * <p>The expected method is specified through a "mock" controller method
+	 * invocation similar to {@link MvcUriComponentsBuilder#fromMethodCall(Object)}.
+	 * <p>For example, given this controller:
 	 * <pre class="code">
 	 * &#064;RestController
-	 * static class SimpleController {
+	 * public class SimpleController {
 	 *
 	 *     &#064;RequestMapping("/")
 	 *     public ResponseEntity<Void> handle() {
@@ -89,19 +92,29 @@ public class HandlerResultMatchers {
 	 *     }
 	 * }
 	 * </pre>
-	 * <p>A test can be performed:
+	 * <p>A test that has statically imported {@link MvcUriComponentsBuilder#on}
+	 * can be performed as follows:
 	 * <pre class="code">
 	 * mockMvc.perform(get("/"))
 	 *     .andExpect(handler().methodCall(on(SimpleController.class).handle()));
 	 * </pre>
+	 *
+	 * @param obj either the value returned from a "mock" controller invocation
+	 * or the "mock" controller itself after an invocation
 	 */
-	public ResultMatcher methodCall(final Object info) {
+	public ResultMatcher methodCall(final Object obj) {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				HandlerMethod handlerMethod = getHandlerMethod(result);
-				Method method = ((MvcUriComponentsBuilder.MethodInvocationInfo) info).getControllerMethod();
-				assertEquals("HandlerMethod", method, handlerMethod.getMethod());
+				if (!MethodInvocationInfo.class.isInstance(obj)) {
+					fail(String.format("The supplied object [%s] is not an instance of %s. "
+							+ "Ensure that you invoke the handler method via MvcUriComponentsBuilder.on().",
+							obj, MethodInvocationInfo.class.getName()));
+				}
+				MethodInvocationInfo invocationInfo = (MethodInvocationInfo) obj;
+				Method expected = invocationInfo.getControllerMethod();
+				Method actual = getHandlerMethod(result).getMethod();
+				assertEquals("Handler method", expected, actual);
 			}
 		};
 	}

@@ -18,7 +18,9 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
 import java.lang.reflect.Method;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,11 +41,14 @@ import static org.springframework.web.servlet.mvc.method.annotation.MvcUriCompon
  * Examples of expectations on the controller type and controller method.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class HandlerAssertionTests {
 
 	private final MockMvc mockMvc = standaloneSetup(new SimpleController()).alwaysExpect(status().isOk()).build();
 
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
@@ -52,6 +57,15 @@ public class HandlerAssertionTests {
 	}
 
 	@Test
+	public void methodCallOnNonMock() throws Exception {
+		exception.expect(AssertionError.class);
+		exception.expectMessage("The supplied object [bogus] is not an instance of");
+		exception.expectMessage(MvcUriComponentsBuilder.MethodInvocationInfo.class.getName());
+		exception.expectMessage("Ensure that you invoke the handler method via MvcUriComponentsBuilder.on()");
+
+		this.mockMvc.perform(get("/")).andExpect(handler().methodCall("bogus"));
+	}
+
 	@Test
 	public void methodCall() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(handler().methodCall(on(SimpleController.class).handle()));
