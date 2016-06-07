@@ -2513,13 +2513,13 @@ created from the same `loginAction` bean definition will not see these changes i
 they are particular to an individual request. When the request completes processing, the
 bean that is scoped to the request is discarded.
 
-When using Java Config, the `@RequestScope` annotation can be used to assign a component
-to the `request` scope.
+When using annotation-driven components or Java Config, the `@RequestScope` annotation
+can be used to assign a component to the `request` scope.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestScope
+	**@RequestScope**
 	@Component
 	public class LoginAction {
 		// ...
@@ -2548,13 +2548,13 @@ changes in state, because they are particular to an individual HTTP `Session`. W
 HTTP `Session` is eventually discarded, the bean that is scoped to that particular HTTP
 `Session` is also discarded.
 
-When using Java Config, the `@SessionScope` annotation can be used to assign a component
-to the `session` scope.
+When using annotation-driven components or Java Config, the `@SessionScope` annotation
+can be used to assign a component to the `session` scope.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@SessionScope
+	**@SessionScope**
 	@Component
 	public class UserPreferences {
 		// ...
@@ -2604,13 +2604,13 @@ differs in two important ways: It is a singleton per `ServletContext`, not per S
 'ApplicationContext' (for which there may be several in any given web application),
 and it is actually exposed and therefore visible as a `ServletContext` attribute.
 
-When using Java Config, the `@ApplicationScope` annotation can be used to assign a
-component to the `application` scope.
+When using annotation-driven components or Java Config, the `@ApplicationScope`
+annotation can be used to assign a component to the `application` scope.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@ApplicationScope
+	**@ApplicationScope**
 	@Component
 	public class AppPreferences {
 		// ...
