@@ -611,12 +611,12 @@ application that uses this annotation:
 	}
 ----
 
-In the example, the `@RequestMapping` is used in a number of places. The first usage is
-on the type (class) level, which indicates that all handling methods on this controller
+In the above example, `@RequestMapping` is used in a number of places. The first usage is
+on the type (class) level, which indicates that all handler methods in this controller
 are relative to the `/appointments` path. The `get()` method has a further
-`@RequestMapping` refinement: it only accepts GET requests, meaning that an HTTP GET for
+`@RequestMapping` refinement: it only accepts `GET` requests, meaning that an HTTP `GET` for
 `/appointments` invokes this method. The `add()` has a similar refinement, and the
-`getNewForm()` combines the definition of HTTP method and path into one, so that GET
+`getNewForm()` combines the definition of HTTP method and path into one, so that `GET`
 requests for `appointments/new` are handled by that method.
 
 The `getForDay()` method shows another usage of `@RequestMapping`: URI templates. (See
@@ -651,10 +651,66 @@ application shows a multi-action controller using `@RequestMapping`:
 	}
 ----
 
-The above example does not specify GET vs. PUT, POST, and so forth, because
-`@RequestMapping` maps all HTTP methods by default. Use `@RequestMapping(method=GET)`
-to narrow the mapping.
+The above example does not specify `GET` vs. `PUT`, `POST`, and so forth, because
+`@RequestMapping` maps all HTTP methods by default. Use `@RequestMapping(method=GET)` or
+`@GetMapping` to narrow the mapping.
 
+[[mvc-ann-requestmapping-composed]]
+==== Composed @RequestMapping Variants
+
+Spring Framework 4.3 introduces the following method-level _composed_ variants of the
+`@RequestMapping` annotation that help to simplify mappings for common HTTP methods and
+better express the semantics of the annotated handler method. For example, a
+`@GetMapping` can be read as a `GET` `@RequestMapping`.
+
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
+
+The following example shows a modified version of the `AppointmentsController` from the
+previous section that has been simplified with _composed_ `@RequestMapping` annotations.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	**@RequestMapping("/appointments")**
+	public class AppointmentsController {
+
+		private final AppointmentBook appointmentBook;
+
+		@Autowired
+		public AppointmentsController(AppointmentBook appointmentBook) {
+			this.appointmentBook = appointmentBook;
+		}
+
+		**@GetMapping**
+		public Map<String, Appointment> get() {
+			return appointmentBook.getAppointmentsForToday();
+		}
+
+		**@GetMapping("/{day}")**
+		public Map<String, Appointment> getForDay(@PathVariable @DateTimeFormat(iso=ISO.DATE) Date day, Model model) {
+			return appointmentBook.getAppointmentsForDay(day);
+		}
+
+		**@GetMapping("/new")**
+		public AppointmentForm getNewForm() {
+			return new AppointmentForm();
+		}
+
+		**@PostMapping**
+		public String add(@Valid AppointmentForm appointment, BindingResult result) {
+			if (result.hasErrors()) {
+				return "appointments/new";
+			}
+			appointmentBook.addAppointment(appointment);
+			return "redirect:/appointments";
+		}
+	}
+----
 
 [[mvc-ann-requestmapping-proxying]]
 ==== @Controller and AOP Proxying

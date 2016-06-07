@@ -674,6 +674,7 @@ Spring 4.3 also improves the caching abstraction as follows:
 * Built-in support for <<mvc-ann-requestmapping-head-options,HTTP HEAD and HTTP OPTIONS>>.
 * New `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping`
   _composed annotations_ for `@RequestMapping`.
+** See <<mvc-ann-requestmapping-composed>> for details.
 * New `@RequestScope`, `@SessionScope`, and `@ApplicationScope` _composed annotations_ for web scopes.
 * New `@RestControllerAdvice` annotation with combined `@ControllerAdvice` with `@ResponseBody` semantics.
 * `@ResponseStatus` is now supported at the class level and inherited by all methods.
