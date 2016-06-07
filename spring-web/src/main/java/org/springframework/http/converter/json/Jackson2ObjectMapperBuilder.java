@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -284,8 +284,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Configure custom serializers. Each serializer is registered for the type
-	 * returned by {@link JsonSerializer#handledType()}, which must not be
-	 * {@code null}.
+	 * returned by {@link JsonSerializer#handledType()}, which must not be {@code null}.
 	 * @see #serializersByType(Map)
 	 */
 	public Jackson2ObjectMapperBuilder serializers(JsonSerializer<?>... serializers) {
@@ -320,6 +319,25 @@ public class Jackson2ObjectMapperBuilder {
 	public Jackson2ObjectMapperBuilder serializersByType(Map<Class<?>, JsonSerializer<?>> serializers) {
 		if (serializers != null) {
 			this.serializers.putAll(serializers);
+		}
+		return this;
+	}
+
+	/**
+	 * Configure custom deserializers. Each deserializer is registered for the type
+	 * returned by {@link JsonDeserializer#handledType()}, which must not be {@code null}.
+	 * @since 4.3
+	 * @see #deserializersByType(Map)
+	 */
+	public Jackson2ObjectMapperBuilder deserializers(JsonDeserializer<?>... deserializers) {
+		if (deserializers != null) {
+			for (JsonDeserializer<?> deserializer : deserializers) {
+				Class<?> handledType = deserializer.handledType();
+				if (handledType == null || handledType == Object.class) {
+					throw new IllegalArgumentException("Unknown handled type in " + deserializer.getClass().getName());
+				}
+				this.deserializers.put(deserializer.handledType(), deserializer);
+			}
 		}
 		return this;
 	}
