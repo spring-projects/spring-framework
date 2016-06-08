@@ -47,7 +47,7 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.4"
 	ext.httpasyncVersion     = "4.1.1"
 	ext.httpclientVersion    = "4.5.2"
-	ext.jackson2Version      = "2.6.6"
+	ext.jackson2Version      = "2.6.7"
 	ext.jasperreportsVersion = "6.2.1"
 	ext.javamailVersion      = "1.5.5"
 	ext.jettyVersion         = "9.3.9.v20160517"
@@ -55,7 +55,7 @@ configure(allprojects) { project ->
 	ext.jrubyVersion         = "1.7.25"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.36.Final"
+	ext.nettyVersion         = "4.0.37.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.13"
