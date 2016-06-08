@@ -52,7 +52,7 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.4"
 	ext.httpasyncVersion     = "4.1.1"
 	ext.httpclientVersion    = "4.5.2"
-	ext.jackson2Version      = "2.7.4"
+	ext.jackson2Version      = "2.8.0.rc1"
 	ext.jasperreportsVersion = "6.2.1"
 	ext.javamailVersion      = "1.5.5"
 	ext.jettyVersion         = "9.3.9.v20160517"
@@ -60,7 +60,7 @@ configure(allprojects) { project ->
 	ext.jrubyVersion         = "1.7.25"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.1.0.Final"
+	ext.nettyVersion         = "4.1.1.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.okhttp3Version       = "3.3.1"
 	ext.openjpaVersion       = "2.4.1"
@@ -75,7 +75,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.5.2"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.4.0.Beta1"
+	ext.undertowVersion      = "1.4.0.CR1"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.9"
 

@@ -64,7 +64,6 @@ import com.fasterxml.jackson.databind.ser.std.ClassSerializer;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-
 import kotlin.ranges.IntRange;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -253,7 +252,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertEquals(timestamp.toString(), new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
 
 		Path file = Paths.get("foo");
-		assertEquals("\"foo\"", new String(objectMapper.writeValueAsBytes(file), "UTF-8"));
+		assertTrue(new String(objectMapper.writeValueAsBytes(file), "UTF-8").endsWith("foo\""));
 
 		Optional<String> optional = Optional.of("test");
 		assertEquals("\"test\"", new String(objectMapper.writeValueAsBytes(optional), "UTF-8"));
@@ -263,7 +262,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertEquals("{\"start\":1,\"end\":3}", new String(objectMapper.writeValueAsBytes(range), "UTF-8"));
 	}
 
-	@Test // SPR-12634
+	@Test  // SPR-12634
 	public void customizeWellKnownModulesWithModule() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.modulesToInstall(new CustomIntegerModule()).build();
@@ -272,7 +271,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
 	}
 
-	@Test // SPR-12634
+	@Test  // SPR-12634
 	@SuppressWarnings("unchecked")
 	public void customizeWellKnownModulesWithModuleClass() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modulesToInstall(CustomIntegerModule.class).build();
@@ -281,7 +280,7 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertThat(new String(objectMapper.writeValueAsBytes(new Integer(4)), "UTF-8"), containsString("customid"));
 	}
 
-	@Test // SPR-12634
+	@Test  // SPR-12634
 	public void customizeWellKnownModulesWithSerializer() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.serializerByType(Integer.class, new CustomIntegerSerializer()).build();
@@ -519,6 +518,7 @@ public class Jackson2ObjectMapperBuilderTests {
 			this.property2 = property2;
 		}
 	}
+
 
 	public static class ListContainer<T> {
 
