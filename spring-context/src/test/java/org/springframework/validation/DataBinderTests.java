@@ -227,12 +227,14 @@ public class DataBinderTests {
 
 			assertTrue("Has age errors", br.hasFieldErrors("age"));
 			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
+			assertEquals("typeMismatch", binder.getBindingResult().getFieldError("age").getCode());
 			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
 			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
 			assertEquals(0, tb.getAge());
 
 			assertTrue("Has touchy errors", br.hasFieldErrors("touchy"));
 			assertTrue("Correct number of touchy errors", br.getFieldErrorCount("touchy") == 1);
+			assertEquals("methodInvocation", binder.getBindingResult().getFieldError("touchy").getCode());
 			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
 			assertEquals("m.y", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
 			assertNull(tb.getTouchy());
@@ -316,12 +318,14 @@ public class DataBinderTests {
 
 			assertTrue("Has age errors", br.hasFieldErrors("age"));
 			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
+			assertEquals("typeMismatch", binder.getBindingResult().getFieldError("age").getCode());
 			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
 			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
 			assertEquals(0, tb.getAge());
 
 			assertTrue("Has touchy errors", br.hasFieldErrors("touchy"));
 			assertTrue("Correct number of touchy errors", br.getFieldErrorCount("touchy") == 1);
+			assertEquals("methodInvocation", binder.getBindingResult().getFieldError("touchy").getCode());
 			assertEquals("m.y", binder.getBindingResult().getFieldValue("touchy"));
 			assertEquals("m.y", binder.getBindingResult().getFieldError("touchy").getRejectedValue());
 			assertNull(tb.getTouchy());
@@ -420,6 +424,7 @@ public class DataBinderTests {
 
 		binder.bind(pvs);
 		assertTrue(binder.getBindingResult().hasFieldErrors("name"));
+		assertEquals("typeMismatch", binder.getBindingResult().getFieldError("name").getCode());
 		assertEquals("test", binder.getBindingResult().getFieldValue("name"));
 	}
 
@@ -568,6 +573,7 @@ public class DataBinderTests {
 			assertEquals(new Float(0.0), tb.getMyFloat());
 			assertEquals("1x2", binder.getBindingResult().getFieldValue("myFloat"));
 			assertTrue(binder.getBindingResult().hasFieldErrors("myFloat"));
+			assertEquals("typeMismatch", binder.getBindingResult().getFieldError("myFloat").getCode());
 		}
 		finally {
 			LocaleContextHolder.resetLocaleContext();
@@ -882,7 +888,6 @@ public class DataBinderTests {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new Integer(99));
 			}
-
 			@Override
 			public String getAsText() {
 				return "argh";
@@ -907,7 +912,6 @@ public class DataBinderTests {
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
-
 			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
@@ -980,7 +984,6 @@ public class DataBinderTests {
 			public Integer parse(String text, Locale locale) throws ParseException {
 				return 99;
 			}
-
 			@Override
 			public String print(Integer object, Locale locale) {
 				return "argh";
