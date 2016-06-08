@@ -5177,19 +5177,26 @@ the `@RestController` annotation from Spring MVC is __composed__ of `@Controller
 
 In addition, composed annotations may optionally redeclare attributes from
 meta-annotations to allow user customization. This can be particularly useful when you
-want to only expose a subset of the meta-annotation's attributes. For example, the
-following is a custom `@Scope` annotation that hardcodes the scope name to `session` but
-still allows customization of the `proxyMode`.
+want to only expose a subset of the meta-annotation's attributes. For example, Spring's
+`@SessionScope` annotation hardcodes the scope name to `session` but still allows
+customization of the `proxyMode`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Retention(RetentionPolicy.RUNTIME)
-	**@Scope("session")**
+	@Documented
+	@Scope(WebApplicationContext.SCOPE_SESSION)
 	public @interface SessionScope {
 
-		ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT;
+		/**
+		 * Alias for {@link Scope#proxyMode}.
+		 * <p>Defaults to {@link ScopedProxyMode#TARGET_CLASS}.
+		 */
+		@AliasFor(annotation = Scope.class)
+		ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
+
 	}
 ----
 
@@ -5200,7 +5207,7 @@ still allows customization of the `proxyMode`.
 ----
 	@Service
 	**@SessionScope**
-	public class SessionScopedUserService implements UserService {
+	public class SessionScopedService {
 		// ...
 	}
 ----
@@ -5211,8 +5218,8 @@ Or with an overridden value for the `proxyMode` as follows:
 [subs="verbatim,quotes"]
 ----
 	@Service
-	**@SessionScope(proxyMode = ScopedProxyMode.TARGET_CLASS)**
-	public class SessionScopedService {
+	**@SessionScope(proxyMode = ScopedProxyMode.INTERFACES)**
+	public class SessionScopedUserService implements UserService {
 		// ...
 	}
 ----
@@ -5472,13 +5479,12 @@ support for autowiring of `@Bean` methods:
 		}
 
 		@Bean
-		@Scope(BeanDefinition.SCOPE_SINGLETON)
 		private TestBean privateInstance() {
 			return new TestBean("privateInstance", i++);
 		}
 
 		@Bean
-		@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@RequestScope
 		public TestBean requestScopedInstance() {
 			return new TestBean("requestScopedInstance", 3);
 		}
@@ -5610,8 +5616,8 @@ auto-generated names are adequate whenever the container is responsible for wiri
 === Providing a scope for autodetected components
 
 As with Spring-managed components in general, the default and most common scope for
-autodetected components is singleton. However, sometimes you need other scopes, which
-Spring 2.5 provides with a new `@Scope` annotation. Simply provide the name of the scope
+autodetected components is `singleton`. However, sometimes you need a different scope
+which can be specified via the `@Scope` annotation. Simply provide the name of the scope
 within the annotation:
 
 [source,java,indent=0]
@@ -5623,6 +5629,9 @@ within the annotation:
 		// ...
 	}
 ----
+
+For details on web-specific scopes, see <<beans-factory-scopes-other>>.
+
 
 [NOTE]
 ====
@@ -6456,7 +6465,7 @@ link) to our `@Bean` using Java, it would look like the following:
 ----
 	// an HTTP Session-scoped bean exposed as a proxy
 	@Bean
-	**@Scope(value = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)**
+	**@SessionScope**
 	public UserPreferences userPreferences() {
 		return new UserPreferences();
 	}
