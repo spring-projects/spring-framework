@@ -200,7 +200,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	/**
 	 * Add default headers to the output message.
 	 * <p>This implementation delegates to {@link #getDefaultContentType(Object)} if a content
-	 * type was not provided, calls {@link #getContentLength}, and sets the corresponding headers
+	 * type was not provided, calls {@link #getContentLength}, and sets the corresponding headers.
 	 * @since 4.2
 	 */
 	protected void addDefaultHeaders(HttpHeaders headers, T t, MediaType contentType) throws IOException{
