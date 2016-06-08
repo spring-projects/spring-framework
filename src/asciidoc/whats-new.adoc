@@ -629,6 +629,8 @@ public @interface MyTestConfig {
 
 === Core Container Improvements
 
+* Core container exceptions provide richer metadata to evaluate programmatically.
+* Java 8 default methods get detected as bean property getters/setters.
 * It is no longer necessary to specify the `@Autowired` annotation if the target
   bean only defines one constructor.
 * `@Configuration` classes support constructor injection.
@@ -640,6 +642,7 @@ public @interface MyTestConfig {
   `String path` in a composed annotation.
 * `@Scheduled` and `@Schedules` may now be used as _meta-annotations_ to create
   custom _composed annotations_ with attribute overrides.
+* `@Scheduled` is properly supported on beans of any scope.
 
 === Data Access Improvements
 
@@ -685,6 +688,8 @@ Spring 4.3 also improves the caching abstraction as follows:
 * New `@SessionAttribute` annotation for access to session attributes (see <<mvc-ann-sessionattrib-global, example>>).
 * New `@RequestAttribute` annotation for access to request attributes (see <<mvc-ann-requestattrib, example>>).
 * `@ModelAttribute` allows preventing data binding via `binding=false` attribute (see <<mvc-ann-modelattrib-method-args, reference>>).
+* Consistent exposure of Errors and custom Throwables to MVC exception handlers.
+* Consistent charset handling in HTTP message converters, including a UTF-8 default for multipart text content.
 * Static resource handling uses the configured `ContentNegotiationManager` for media type determination.
 * `RestTemplate` and `AsyncRestTemplate` support strict URI variable encoding via `DefaultUriTemplateHandler`.
 * `AsyncRestTemplate` supports request interception.
@@ -721,3 +726,15 @@ Spring 4.3 also improves the caching abstraction as follows:
 * Client-side REST test support allows indicating how many times a request is expected and
   whether the order of declaration for expectations should be ignored (see <<spring-mvc-test-client>>).
 * Client-side REST Test supports expectations for form data in the request body.
+
+=== Support for new library and server generations
+
+* Hibernate ORM 5.2 (still supporting 4.2/4.3 and 5.0/5.1 as well, with 3.6 deprecated now)
+* Jackson 2.8 (minimum raised to Jackson 2.6+ as of Spring 4.3)
+* OkHttp 3.x (still supporting OkHttp 2.x side by side)
+* Netty 4.1
+* Undertow 1.4
+* Tomcat 8.5.2 as well as 9.0 M6
+
+Furthermore, Spring Framework 4.3 embeds the updated ASM 5.1 and Objenesis 2.4 in
+`spring-core.jar`.
