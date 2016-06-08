@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +34,6 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.Jaxb2Encoder;
-import org.springframework.core.codec.support.Pojo;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
@@ -156,8 +156,11 @@ public class HttpMessageConverterViewTests {
 
 	@Test
 	public void render() throws Exception {
-		this.model.addAttribute("pojo", new Pojo("foo", "bar"));
-		this.view.setModelKeys(Collections.singleton("pojo"));
+		Map<String, String> pojoData = new LinkedHashMap<>();
+		pojoData.put("foo", "f");
+		pojoData.put("bar", "b");
+		this.model.addAttribute("pojoData", pojoData);
+		this.view.setModelKeys(Collections.singleton("pojoData"));
 
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
@@ -168,8 +171,9 @@ public class HttpMessageConverterViewTests {
 
 		TestSubscriber
 				.subscribe(response.getBody())
-				.assertValuesWith(buf -> assertEquals("{\"foo\":\"foo\",\"bar\":\"bar\"}",
+				.assertValuesWith(buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
+
 
 }

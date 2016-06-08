@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -36,7 +38,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.Jaxb2Decoder;
 import org.springframework.core.codec.support.Jaxb2Encoder;
-import org.springframework.core.codec.support.Pojo;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
@@ -141,8 +142,8 @@ public class WebReactiveConfigurationTests {
 		assertHasConverter(converters, ByteBuffer.class, MediaType.APPLICATION_OCTET_STREAM);
 		assertHasConverter(converters, String.class, MediaType.TEXT_PLAIN);
 		assertHasConverter(converters, Resource.class, MediaType.IMAGE_PNG);
-		assertHasConverter(converters, Pojo.class, MediaType.APPLICATION_XML);
-		assertHasConverter(converters, Pojo.class, MediaType.APPLICATION_JSON);
+		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
+		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_JSON);
 
 		name = "mvcConversionService";
 		ConversionService service = context.getBean(name, ConversionService.class);
@@ -161,7 +162,7 @@ public class WebReactiveConfigurationTests {
 		assertEquals(2, converters.size());
 
 		assertHasConverter(converters, String.class, MediaType.TEXT_PLAIN);
-		assertHasConverter(converters, Pojo.class, MediaType.APPLICATION_XML);
+		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
 	}
 
 	@Test
@@ -193,8 +194,8 @@ public class WebReactiveConfigurationTests {
 		assertHasConverter(converters, ByteBuffer.class, MediaType.APPLICATION_OCTET_STREAM);
 		assertHasConverter(converters, String.class, MediaType.TEXT_PLAIN);
 		assertHasConverter(converters, Resource.class, MediaType.IMAGE_PNG);
-		assertHasConverter(converters, Pojo.class, MediaType.APPLICATION_XML);
-		assertHasConverter(converters, Pojo.class, MediaType.APPLICATION_JSON);
+		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
+		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_JSON);
 	}
 
 	@Test
@@ -273,5 +274,9 @@ public class WebReactiveConfigurationTests {
 			return new FreeMarkerConfigurer();
 		}
 
+	}
+
+	@XmlRootElement
+	static class TestBean {
 	}
 }

@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,7 +46,6 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JsonObjectDecoder;
-import org.springframework.core.codec.support.Pojo;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
@@ -102,7 +103,7 @@ public class RequestBodyArgumentResolverTests {
 	public void supports() throws Exception {
 		RequestBodyArgumentResolver resolver = resolver(new StringDecoder());
 
-		assertTrue(resolver.supportsParameter(parameter("monoPojo")));
+		assertTrue(resolver.supportsParameter(parameter("monoTestBean")));
 		assertFalse(resolver.supportsParameter(parameter("paramWithoutAnnotation")));
 	}
 
@@ -110,51 +111,51 @@ public class RequestBodyArgumentResolverTests {
 	public void missingContentType() throws Exception {
 		String body = "{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}";
 		this.request.writeWith(Flux.just(dataBuffer(body)));
-		Mono<Object> result = this.resolver.resolveArgument(parameter("monoPojo"), this.model, this.exchange);
+		Mono<Object> result = this.resolver.resolveArgument(parameter("monoTestBean"), this.model, this.exchange);
 
 		TestSubscriber.subscribe(result)
 				.assertError(UnsupportedMediaTypeStatusException.class);
 	}
 
 	@Test @SuppressWarnings("unchecked")
-	public void monoPojo() throws Exception {
+	public void monoTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		Mono<Pojo> mono = (Mono<Pojo>) resolve("monoPojo", Mono.class, body);
-		assertEquals(new Pojo("f1", "b1"), mono.block());
+		Mono<TestBean> mono = (Mono<TestBean>) resolve("monoTestBean", Mono.class, body);
+		assertEquals(new TestBean("f1", "b1"), mono.block());
 	}
 
 	@Test @SuppressWarnings("unchecked")
-	public void fluxPojo() throws Exception {
+	public void fluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		Flux<Pojo> flux = (Flux<Pojo>) resolve("fluxPojo", Flux.class, body);
-		assertEquals(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")), flux.collectList().block());
+		Flux<TestBean> flux = (Flux<TestBean>) resolve("fluxTestBean", Flux.class, body);
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")), flux.collectList().block());
 	}
 
 	@Test @SuppressWarnings("unchecked")
-	public void singlePojo() throws Exception {
+	public void singleTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		Single<Pojo> single = (Single<Pojo>) resolve("singlePojo", Single.class, body);
-		assertEquals(new Pojo("f1", "b1"), single.toBlocking().value());
+		Single<TestBean> single = (Single<TestBean>) resolve("singleTestBean", Single.class, body);
+		assertEquals(new TestBean("f1", "b1"), single.toBlocking().value());
 	}
 
 	@Test @SuppressWarnings("unchecked")
-	public void observablePojo() throws Exception {
+	public void observableTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		Observable<?> observable = (Observable<?>) resolve("observablePojo", Observable.class, body);
-		assertEquals(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")),
+		Observable<?> observable = (Observable<?>) resolve("observableTestBean", Observable.class, body);
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
 				observable.toList().toBlocking().first());
 	}
 
 	@Test @SuppressWarnings("unchecked")
-	public void futurePojo() throws Exception {
+	public void futureTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		assertEquals(new Pojo("f1", "b1"), resolve("futurePojo", CompletableFuture.class, body).get());
+		assertEquals(new TestBean("f1", "b1"), resolve("futureTestBean", CompletableFuture.class, body).get());
 	}
 
 	@Test
-	public void pojo() throws Exception {
+	public void testBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		assertEquals(new Pojo("f1", "b1"), resolve("pojo", Pojo.class, body));
+		assertEquals(new TestBean("f1", "b1"), resolve("testBean", TestBean.class, body));
 	}
 
 	@Test
@@ -172,7 +173,7 @@ public class RequestBodyArgumentResolverTests {
 	@Ignore
 	public void list() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		assertEquals(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")),
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
 				resolve("list", List.class, body));
 	}
 
@@ -180,8 +181,8 @@ public class RequestBodyArgumentResolverTests {
 	@Ignore
 	public void array() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		assertArrayEquals(new Pojo[] {new Pojo("f1", "b1"), new Pojo("f2", "b2")},
-				resolve("array", Pojo[].class, body));
+		assertArrayEquals(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")},
+				resolve("array", TestBean[].class, body));
 	}
 
 
@@ -229,17 +230,71 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unused")
 	void handle(
-			@RequestBody Mono<Pojo> monoPojo,
-			@RequestBody Flux<Pojo> fluxPojo,
-			@RequestBody Single<Pojo> singlePojo,
-			@RequestBody Observable<Pojo> observablePojo,
-			@RequestBody CompletableFuture<Pojo> futurePojo,
-			@RequestBody Pojo pojo,
+			@RequestBody Mono<TestBean> monoTestBean,
+			@RequestBody Flux<TestBean> fluxTestBean,
+			@RequestBody Single<TestBean> singleTestBean,
+			@RequestBody Observable<TestBean> observableTestBean,
+			@RequestBody CompletableFuture<TestBean> futureTestBean,
+			@RequestBody TestBean testBean,
 			@RequestBody Map<String, String> map,
-			@RequestBody List<Pojo> list,
-			@RequestBody Set<Pojo> set,
-			@RequestBody Pojo[] array,
-			Pojo paramWithoutAnnotation) {
+			@RequestBody List<TestBean> list,
+			@RequestBody Set<TestBean> set,
+			@RequestBody TestBean[] array,
+			TestBean paramWithoutAnnotation) {
 	}
 
+
+	@XmlRootElement
+	static class TestBean {
+
+		private String foo;
+
+		private String bar;
+
+		public TestBean() {
+		}
+
+		public TestBean(String foo, String bar) {
+			this.foo = foo;
+			this.bar = bar;
+		}
+
+		public String getFoo() {
+			return this.foo;
+		}
+
+		public void setFoo(String foo) {
+			this.foo = foo;
+		}
+
+		public String getBar() {
+			return this.bar;
+		}
+
+		public void setBar(String bar) {
+			this.bar = bar;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o instanceof TestBean) {
+				TestBean other = (TestBean) o;
+				return this.foo.equals(other.foo) && this.bar.equals(other.bar);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return 31 * foo.hashCode() + bar.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "TestBean[foo='" + this.foo + "\'" + ", bar='" + this.bar + "\']";
+		}
+	}
 }
