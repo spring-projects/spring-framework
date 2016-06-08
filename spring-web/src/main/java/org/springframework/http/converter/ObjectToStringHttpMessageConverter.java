@@ -31,9 +31,10 @@ import org.springframework.util.Assert;
  * the String content to and from the target object type.
  *
  * <p>By default, this converter supports the media type {@code text/plain} only.
- * This can be overridden by setting the
- * {@link #setSupportedMediaTypes supportedMediaTypes} property.
- * Example of usage:
+ * This can be overridden through the {@link #setSupportedMediaTypes supportedMediaTypes}
+ * property.
+ *
+ * <p>A usage example:
  *
  * <pre class="code">
  * &lt;bean class="org.springframework.http.converter.ObjectToStringHttpMessageConverter">
@@ -72,7 +73,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	public ObjectToStringHttpMessageConverter(ConversionService conversionService, Charset defaultCharset) {
 		super(defaultCharset, MediaType.TEXT_PLAIN);
 
-		Assert.notNull(conversionService, "conversionService is required");
+		Assert.notNull(conversionService, "ConversionService is required");
 		this.conversionService = conversionService;
 		this.stringHttpMessageConverter = new StringHttpMessageConverter(defaultCharset);
 	}
@@ -104,7 +105,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	@Override
-	protected Object readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage) throws IOException {
+	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException {
 		String value = this.stringHttpMessageConverter.readInternal(String.class, inputMessage);
 		return this.conversionService.convert(value, clazz);
 	}
