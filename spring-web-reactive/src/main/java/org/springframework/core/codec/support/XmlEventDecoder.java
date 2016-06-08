@@ -83,7 +83,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 	}
 
 	@Override
-	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 		Flux<DataBuffer> flux = Flux.from(inputStream);
 		if (useAalto && aaltoPresent) {

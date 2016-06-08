@@ -43,14 +43,14 @@ public class StringEncoder extends AbstractEncoder<String> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
-		Class<?> clazz = type.getRawClass();
-		return (super.canEncode(type, mimeType, hints) && String.class.equals(clazz));
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		Class<?> clazz = elementType.getRawClass();
+		return (super.canEncode(elementType, mimeType, hints) && String.class.equals(clazz));
 	}
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends String> inputStream,
-			DataBufferFactory dataBufferFactory, ResolvableType type, MimeType mimeType,
+			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
 			Object... hints) {
 		Charset charset;
 		if (mimeType != null && mimeType.getCharSet() != null) {
@@ -61,7 +61,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 		}
 		return Flux.from(inputStream).map(s -> {
 			byte[] bytes = s.getBytes(charset);
-			DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(bytes.length);
+			DataBuffer dataBuffer = bufferFactory.allocateBuffer(bytes.length);
 			dataBuffer.write(bytes);
 			return dataBuffer;
 		});

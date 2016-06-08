@@ -42,7 +42,7 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 	}
 
 	@Override
-	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
 		if (mimeType == null) {
 			return true;
 		}

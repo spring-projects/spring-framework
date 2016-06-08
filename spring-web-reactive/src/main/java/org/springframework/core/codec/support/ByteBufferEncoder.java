@@ -38,17 +38,17 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
-		Class<?> clazz = type.getRawClass();
-		return (super.canEncode(type, mimeType, hints) && ByteBuffer.class.isAssignableFrom(clazz));
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		Class<?> clazz = elementType.getRawClass();
+		return (super.canEncode(elementType, mimeType, hints) && ByteBuffer.class.isAssignableFrom(clazz));
 	}
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends ByteBuffer> inputStream,
-			DataBufferFactory dataBufferFactory, ResolvableType type, MimeType mimeType,
+			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
 			Object... hints) {
 
-		return Flux.from(inputStream).map(dataBufferFactory::wrap);
+		return Flux.from(inputStream).map(bufferFactory::wrap);
 	}
 
 }

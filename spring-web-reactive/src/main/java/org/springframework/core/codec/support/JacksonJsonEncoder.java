@@ -64,24 +64,24 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream,
-			DataBufferFactory dataBufferFactory, ResolvableType type, MimeType mimeType,
+			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
 			Object... hints) {
 		if (inputStream instanceof Mono) {
 			// single object
 			return Flux.from(inputStream)
-					.map(value -> serialize(value, dataBufferFactory));
+					.map(value -> serialize(value, bufferFactory));
 		}
 		else {
 			// array
 			Mono<DataBuffer> startArray =
-					Mono.just(dataBufferFactory.wrap(START_ARRAY_BUFFER));
+					Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER));
 			Flux<DataBuffer> arraySeparators =
-					Mono.just(dataBufferFactory.wrap(SEPARATOR_BUFFER)).repeat();
+					Mono.just(bufferFactory.wrap(SEPARATOR_BUFFER)).repeat();
 			Mono<DataBuffer> endArray =
-					Mono.just(dataBufferFactory.wrap(END_ARRAY_BUFFER));
+					Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER));
 
 			Flux<DataBuffer> serializedObjects = Flux.from(inputStream)
-					.map(value -> serialize(value, dataBufferFactory));
+					.map(value -> serialize(value, bufferFactory));
 
 			Flux<DataBuffer> array = Flux.zip(serializedObjects, arraySeparators)
 					.flatMap(tuple -> Flux.just(tuple.getT1(), tuple.getT2()));

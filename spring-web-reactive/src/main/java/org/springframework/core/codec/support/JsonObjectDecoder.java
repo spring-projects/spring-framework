@@ -93,7 +93,7 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 	}
 
 	@Override
-	public Flux<DataBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+	public Flux<DataBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
 		return Flux.from(inputStream)

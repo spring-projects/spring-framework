@@ -52,9 +52,9 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	}
 
 	@Override
-	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
-		Class<?> clazz = type.getRawClass();
-		return (super.canEncode(type, mimeType, hints) &&
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		Class<?> clazz = elementType.getRawClass();
+		return (super.canEncode(elementType, mimeType, hints) &&
 				Resource.class.isAssignableFrom(clazz));
 	}
 

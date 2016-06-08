@@ -27,34 +27,41 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
 
 /**
- * Encode a stream of Objects of type {@code T} into a stream of bytes.
+ * Strategy to encode a stream of Objects of type {@code <T>} into an output
+ * stream of bytes.
  *
  * @author Sebastien Deleuze
- * @see Decoder
+ * @author Rossen Stoyanchev
+ * @param <T> the type of elements in the input stream
  */
 public interface Encoder<T> {
 
 	/**
-	 * Indicate whether the given type and mime type can be processed by this encoder.
-	 * @param type the stream element type to process.
-	 * @param mimeType the mime type to process.
-	 * @param hints Additional information about how to do decode, optional.
-	 * @return {@code true} if can process; {@code false} otherwise
+	 * Whether the encoder supports the given source element type and the MIME
+	 * type for the output stream.
+	 *
+	 * @param elementType the type of elements in the source stream
+	 * @param mimeType the MIME type for the output stream
+	 * @param hints additional information about how to do encode, optional
+	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints);
+	boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints);
 
 	/**
-	 * Encode an input stream of {@code T} to an output {@link DataBuffer} stream.
-	 * @param inputStream the input stream to process.
-	 * @param dataBufferFactory a buffer factory used to create the output
-	 * @param type the stream element type to process.
-	 * @param mimeType the mime type to process.
-	 * @param hints Additional information about how to do decode, optional.
+	 * Encode a stream of Objects of type {@code T} into a {@link DataBuffer}
+	 * output stream.
+	 *
+	 * @param inputStream the input stream of Objects to encode
+	 * @param bufferFactory for creating output stream {@code DataBuffer}'s
+	 * @param elementType the expected type of elements in the input stream;
+	 * this type must have been previously passed to the {@link #canEncode}
+	 * method and it must have returned {@code true}.
+	 * @param mimeType the MIME type for the output stream
+	 * @param hints additional information about how to do encode, optional
 	 * @return the output stream
 	 */
-	Flux<DataBuffer> encode(Publisher<? extends T> inputStream,
-			DataBufferFactory dataBufferFactory, ResolvableType type,
-			MimeType mimeType, Object... hints);
+	Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType elementType, MimeType mimeType, Object... hints);
 
 	/**
 	 * Return the list of mime types this encoder supports.

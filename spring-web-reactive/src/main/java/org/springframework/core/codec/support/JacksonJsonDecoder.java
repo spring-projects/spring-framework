@@ -61,14 +61,14 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
-		ObjectReader reader = this.mapper.readerFor(type.getRawClass());
+		ObjectReader reader = this.mapper.readerFor(elementType.getRawClass());
 
 		Flux<DataBuffer> stream = Flux.from(inputStream);
 		if (this.preProcessor != null) {
-			stream = this.preProcessor.decode(inputStream, type, mimeType, hints);
+			stream = this.preProcessor.decode(inputStream, elementType, mimeType, hints);
 		}
 
 		return stream.map(dataBuffer -> {

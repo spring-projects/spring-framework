@@ -69,9 +69,9 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
-		if (super.canDecode(type, mimeType, hints)) {
-			Class<?> outputClass = type.getRawClass();
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		if (super.canDecode(elementType, mimeType, hints)) {
+			Class<?> outputClass = elementType.getRawClass();
 			return outputClass.isAnnotationPresent(XmlRootElement.class) ||
 					outputClass.isAnnotationPresent(XmlType.class);
 		}
@@ -81,9 +81,9 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
-		Class<?> outputClass = type.getRawClass();
+		Class<?> outputClass = elementType.getRawClass();
 		Flux<XMLEvent> xmlEventFlux =
 				this.xmlEventDecoder.decode(inputStream, null, mimeType);
 

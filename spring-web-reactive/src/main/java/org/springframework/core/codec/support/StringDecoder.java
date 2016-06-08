@@ -70,13 +70,13 @@ public class StringDecoder extends AbstractDecoder<String> {
 	}
 
 	@Override
-	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
-		return super.canDecode(type, mimeType, hints) &&
-				String.class.equals(type.getRawClass());
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		return super.canDecode(elementType, mimeType, hints) &&
+				String.class.equals(elementType.getRawClass());
 	}
 
 	@Override
-	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream);
 		if (this.splitOnNewline) {

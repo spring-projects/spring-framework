@@ -40,13 +40,13 @@ public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
-		Class<?> clazz = type.getRawClass();
-		return (super.canDecode(type, mimeType, hints) && ByteBuffer.class.isAssignableFrom(clazz));
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		Class<?> clazz = elementType.getRawClass();
+		return (super.canDecode(elementType, mimeType, hints) && ByteBuffer.class.isAssignableFrom(clazz));
 	}
 
 	@Override
-	public Flux<ByteBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+	public Flux<ByteBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 		return Flux.from(inputStream).map((dataBuffer) -> {
 			ByteBuffer copy = ByteBuffer.allocate(dataBuffer.readableByteCount());

@@ -26,35 +26,42 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
 
 /**
- * Decode a stream of bytes to a stream of type {@code T}.
+ * Strategy for decoding a {@link DataBuffer} input stream into an output stream
+ * of elements of type {@code <T>}.
  *
  * @author Sebastien Deleuze
- * @see Encoder
+ * @author Rossen Stoyanchev
+ * @param <T> the type of elements in the output stream
  */
 public interface Decoder<T> {
 
 	/**
-	 * Whether the decoder supports the given Java and mime type.
-	 * @param type the stream element type to process.
-	 * @param mimeType the mime type to process.
-	 * @param hints Additional information about how to do decode, optional.
-	 * @return {@code true} if can process; {@code false} otherwise
+	 * Whether the decoder supports the given target element type and the MIME
+	 * type of the source stream.
+	 *
+	 * @param elementType the target element type for the output stream
+	 * @param mimeType the mime type associated with the stream to decode
+	 * @param hints additional information about how to do decode, optional
+	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints);
+	boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints);
 
 	/**
-	 * Decode an input {@link DataBuffer} stream to an output stream of {@code T}.
-	 * @param inputStream the input stream to process.
-	 * @param type the stream element type to process.
-	 * @param mimeType the mime type to process.
-	 * @param hints Additional information about how to do decode, optional.
-	 * @return the output stream
+	 * Decode a {@link DataBuffer} input stream into a Flux of {@code T}.
+	 *
+	 * @param inputStream the {@code DataBuffer} input stream to decode
+	 * @param elementType the expected type of elements in the output stream;
+	 * this type must have been previously passed to the {@link #canDecode}
+	 * method and it must have returned {@code true}.
+	 * @param mimeType the MIME type associated with the input stream, optional
+	 * @param hints additional information about how to do decode, optional
+	 * @return the output stream with decoded elements
 	 */
-	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints);
 
 	/**
-	 * Return the list of mime types this decoder supports.
+	 * Return the list of MIME types this decoder supports.
 	 */
 	List<MimeType> getSupportedMimeTypes();
 

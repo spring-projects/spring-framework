@@ -43,17 +43,17 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 	}
 
 	@Override
-	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
-		Class<?> clazz = type.getRawClass();
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		Class<?> clazz = elementType.getRawClass();
 		return (InputStreamResource.class.equals(clazz) ||
 				clazz.isAssignableFrom(ByteArrayResource.class)) &&
-				super.canDecode(type, mimeType, hints);
+				super.canDecode(elementType, mimeType, hints);
 	}
 
 	@Override
-	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
-		Class<?> clazz = type.getRawClass();
+		Class<?> clazz = elementType.getRawClass();
 
 		Mono<byte[]> byteArray = Flux.from(inputStream).
 				reduce(DataBuffer::write).

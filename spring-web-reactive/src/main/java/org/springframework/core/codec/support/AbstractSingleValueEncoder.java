@@ -37,13 +37,13 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
 	@Override
 	public final Flux<DataBuffer> encode(Publisher<? extends T> inputStream,
-			DataBufferFactory dataBufferFactory, ResolvableType type, MimeType mimeType,
+			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
 			Object... hints) {
 		return Flux.from(inputStream).
 				take(1).
 				concatMap(t -> {
 					try {
-						return encode(t, dataBufferFactory, type, mimeType);
+						return encode(t, bufferFactory, elementType, mimeType);
 					}
 					catch (Exception ex) {
 						return Flux.error(ex);
