@@ -16,6 +16,11 @@
 
 package org.springframework.core.codec.support;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
@@ -29,27 +34,86 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Unit tests for {@link JacksonJsonDecoder}.
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
-	private final JacksonJsonDecoder decoder = new JacksonJsonDecoder();
-
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(null, MediaType.APPLICATION_JSON));
-		assertFalse(this.decoder.canDecode(null, MediaType.APPLICATION_XML));
+		JacksonJsonDecoder decoder = new JacksonJsonDecoder();
+
+		assertTrue(decoder.canDecode(null, MediaType.APPLICATION_JSON));
+		assertFalse(decoder.canDecode(null, MediaType.APPLICATION_XML));
 	}
 
 	@Test
-	public void decode() {
-		Flux<DataBuffer> source =
-				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
-		Flux<Object> output =
-				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues(new Pojo("foofoo", "barbar"));
+	public void decodePojo() {
+		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
+		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		Flux<Object> flux = new JacksonJsonDecoder().decode(source, elementType, null);
+
+		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
+				assertValues(new Pojo("foofoo", "barbar"));
 	}
+
+	@Test
+	@Ignore // Issues 112 (no generic type), otherwise works
+	public void decodeToListWithoutObjectDecoder() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer(
+				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
+
+		Method method = getClass().getDeclaredMethod("handle", List.class);
+		ResolvableType elementType = ResolvableType.forMethodParameter(method, 0);
+		Flux<Object> flux = new JacksonJsonDecoder().decode(source, elementType, null);
+
+		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
+				assertValues(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")));
+	}
+
+	@Test
+	@Ignore // Issue 109
+	public void decodeToFluxWithoutObjectDecoder() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer(
+				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
+
+		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		Flux<Object> flux = new JacksonJsonDecoder().decode(source, elementType, null);
+
+		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
+				assertValues(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
+	}
+
+	@Test
+	@Ignore // Issue 109
+	public void decodeToListWithObjectDecoder() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer(
+				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
+
+		Method method = getClass().getDeclaredMethod("handle", List.class);
+		ResolvableType elementType = ResolvableType.forMethodParameter(method, 0);
+		Flux<Object> flux = new JacksonJsonDecoder(new JsonObjectDecoder()).decode(source, elementType, null);
+
+		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
+				assertValues(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")));
+	}
+
+	@Test
+	public void decodeToFluxWithObjectDecoder() throws Exception {
+		Flux<DataBuffer> source = Flux.just(stringBuffer(
+				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
+
+		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		Flux<Object> flux = new JacksonJsonDecoder(new JsonObjectDecoder()).decode(source, elementType, null);
+
+		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
+				assertValues(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
+	}
+
+	@SuppressWarnings("unused")
+	void handle(List<Pojo> list) {
+	}
+
 
 }
