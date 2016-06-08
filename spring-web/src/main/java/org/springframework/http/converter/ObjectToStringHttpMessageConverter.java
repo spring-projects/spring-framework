@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.util.Assert;
  * An {@code HttpMessageConverter} that uses {@link StringHttpMessageConverter}
  * for reading and writing content and a {@link ConversionService} for converting
  * the String content to and from the target object type.
- * <p>
- * By default, this converter supports the media type {@code text/plain} only.
+ *
+ * <p>By default, this converter supports the media type {@code text/plain} only.
  * This can be overridden by setting the
  * {@link #setSupportedMediaTypes supportedMediaTypes} property.
  * Example of usage:
@@ -49,17 +49,15 @@ import org.springframework.util.Assert;
  */
 public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConverter<Object> {
 
-	private ConversionService conversionService;
+	private final ConversionService conversionService;
 
-	private StringHttpMessageConverter stringHttpMessageConverter;
+	private final StringHttpMessageConverter stringHttpMessageConverter;
 
 
 	/**
 	 * A constructor accepting a {@code ConversionService} to use to convert the
-	 * (String) message body to/from the target class type. This constructor
-	 * uses {@link StringHttpMessageConverter#DEFAULT_CHARSET} as the default
-	 * charset.
-	 *
+	 * (String) message body to/from the target class type. This constructor uses
+	 * {@link StringHttpMessageConverter#DEFAULT_CHARSET} as the default charset.
 	 * @param conversionService the conversion service
 	 */
 	public ObjectToStringHttpMessageConverter(ConversionService conversionService) {
@@ -67,9 +65,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	/**
-	 * A constructor accepting a {@code ConversionService} as well as a default
-	 * charset.
-	 *
+	 * A constructor accepting a {@code ConversionService} as well as a default charset.
 	 * @param conversionService the conversion service
 	 * @param defaultCharset the default charset
 	 */
@@ -81,6 +77,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 		this.stringHttpMessageConverter = new StringHttpMessageConverter(defaultCharset);
 	}
 
+
 	/**
 	 * Indicates whether the {@code Accept-Charset} should be written to any outgoing request.
 	 * <p>Default is {@code true}.
@@ -88,6 +85,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	public void setWriteAcceptCharset(boolean writeAcceptCharset) {
 		this.stringHttpMessageConverter.setWriteAcceptCharset(writeAcceptCharset);
 	}
+
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
@@ -113,8 +111,8 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
 	@Override
 	protected void writeInternal(Object obj, HttpOutputMessage outputMessage) throws IOException {
-		String s = this.conversionService.convert(obj, String.class);
-		this.stringHttpMessageConverter.writeInternal(s, outputMessage);
+		String value = this.conversionService.convert(obj, String.class);
+		this.stringHttpMessageConverter.writeInternal(value, outputMessage);
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.0
  * @see MultiValueMap
  */
@@ -90,13 +91,13 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 
-	private Charset charset = DEFAULT_CHARSET;
-
-	private Charset multipartCharset;
-
 	private List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
+
+	private Charset charset = DEFAULT_CHARSET;
+
+	private Charset multipartCharset;
 
 
 	public FormHttpMessageConverter() {
@@ -108,30 +109,10 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		stringHttpMessageConverter.setWriteAcceptCharset(false);
 		this.partConverters.add(stringHttpMessageConverter);
 		this.partConverters.add(new ResourceHttpMessageConverter());
+
+		applyDefaultCharset();
 	}
 
-
-	/**
-	 * Set the default character set to use for reading and writing form data when
-	 * the request or response Content-Type header does not explicitly specify it.
-	 * <p>By default this is set to "UTF-8".
-	 */
-	public void setCharset(Charset charset) {
-		this.charset = charset;
-	}
-
-	/**
-	 * Set the character set to use when writing multipart data to encode file
-	 * names. Encoding is based on the encoded-word syntax defined in RFC 2047
-	 * and relies on {@code MimeUtility} from "javax.mail".
-	 * <p>If not set file names will be encoded as US-ASCII.
-	 * @param multipartCharset the charset to use
-	 * @since 4.1.1
-	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
-	 */
-	public void setMultipartCharset(Charset multipartCharset) {
-		this.multipartCharset = multipartCharset;
-	}
 
 	/**
 	 * Set the list of {@link MediaType} objects supported by this converter.
@@ -161,6 +142,49 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	public void addPartConverter(HttpMessageConverter<?> partConverter) {
 		Assert.notNull(partConverter, "'partConverter' must not be null");
 		this.partConverters.add(partConverter);
+	}
+
+	/**
+	 * Set the default character set to use for reading and writing form data when
+	 * the request or response Content-Type header does not explicitly specify it.
+	 * <p>By default this is set to "UTF-8". As of 4.3, it will also be used as
+	 * the default charset for the conversion of text bodies in a multipart request.
+	 * In contrast to this, {@link #setMultipartCharset} only affects the encoding of
+	 * <i>file names</i> in a multipart request according to the encoded-word syntax.
+	 */
+	public void setCharset(Charset charset) {
+		if (charset != this.charset) {
+			this.charset = (charset != null ? charset : DEFAULT_CHARSET);
+			applyDefaultCharset();
+		}
+	}
+
+	/**
+	 * Apply the configured charset as a default to registered part converters.
+	 */
+	private void applyDefaultCharset() {
+		for (HttpMessageConverter<?> candidate : this.partConverters) {
+			if (candidate instanceof AbstractHttpMessageConverter) {
+				AbstractHttpMessageConverter<?> converter = (AbstractHttpMessageConverter<?>) candidate;
+				// Only override default charset if the converter operates with a charset to begin with...
+				if (converter.getDefaultCharset() != null) {
+					converter.setDefaultCharset(this.charset);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Set the character set to use when writing multipart data to encode file
+	 * names. Encoding is based on the encoded-word syntax defined in RFC 2047
+	 * and relies on {@code MimeUtility} from "javax.mail".
+	 * <p>If not set file names will be encoded as US-ASCII.
+	 * @param multipartCharset the charset to use
+	 * @since 4.1.1
+	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
+	 */
+	public void setMultipartCharset(Charset multipartCharset) {
+		this.multipartCharset = multipartCharset;
 	}
 
 
@@ -255,7 +279,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		Charset charset;
 		if (contentType != null) {
 			outputMessage.getHeaders().setContentType(contentType);
-			charset = contentType.getCharset() != null ? contentType.getCharset() : this.charset;
+			charset = (contentType.getCharset() != null ? contentType.getCharset() : this.charset);
 		}
 		else {
 			outputMessage.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);

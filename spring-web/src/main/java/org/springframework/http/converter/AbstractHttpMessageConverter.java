@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 3.0
  */
 public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConverter<T> {
@@ -246,8 +247,11 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
 			}
 			if (contentTypeToUse != null) {
-				if (contentTypeToUse.getCharset() == null && this.defaultCharset != null) {
-					contentTypeToUse = new MediaType(contentTypeToUse, this.defaultCharset);
+				if (contentTypeToUse.getCharset() == null) {
+					Charset defaultCharset = getDefaultCharset();
+					if (defaultCharset != null) {
+						contentTypeToUse = new MediaType(contentTypeToUse, defaultCharset);
+					}
 				}
 				headers.setContentType(contentTypeToUse);
 			}
