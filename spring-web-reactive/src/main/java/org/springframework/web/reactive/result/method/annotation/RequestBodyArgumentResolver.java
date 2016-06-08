@@ -17,6 +17,9 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.xml.crypto.Data;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -25,6 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.ui.ModelMap;
@@ -32,6 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * Resolves method arguments annotated with {@code @RequestBody} by reading and
@@ -48,6 +53,8 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 
 	private final ConversionService conversionService;
 
+	private final List<MediaType> supportedMediaTypes;
+
 
 	/**
 	 * Constructor with message converters and a ConversionService.
@@ -61,6 +68,9 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		Assert.notNull(service, "'conversionService' is required.");
 		this.messageConverters = converters;
 		this.conversionService = service;
+		this.supportedMediaTypes = converters.stream()
+				.flatMap(converter -> converter.getReadableMediaTypes().stream())
+				.collect(Collectors.toList());
 	}
 
 
@@ -69,6 +79,13 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
 		return this.messageConverters;
+	}
+
+	/**
+	 * Return the configured {@link ConversionService}.
+	 */
+	public ConversionService getConversionService() {
+		return this.conversionService;
 	}
 
 
@@ -82,42 +99,40 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 			ServerWebExchange exchange) {
 
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
-
+		boolean asyncType = isAsyncType(type);
+		ResolvableType elementType = (asyncType ? type.getGeneric(0) : type);
 		MediaType mediaType = exchange.getRequest().getHeaders().getContentType();
 		if (mediaType == null) {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
-		Flux<?> elementFlux = exchange.getRequest().getBody();
-
-		HttpMessageConverter<?> converter = getMessageConverter(elementType, mediaType);
-		if (converter != null) {
-			elementFlux = converter.read(elementType, exchange.getRequest());
-		}
-
-		if (type.getRawClass() == Flux.class) {
-			return Mono.just(elementFlux);
-		}
-		else if (type.getRawClass() == Mono.class) {
-			return Mono.just(Mono.from(elementFlux));
-		}
-		else if (this.conversionService.canConvert(Publisher.class, type.getRawClass())) {
-			Object target = this.conversionService.convert(elementFlux, type.getRawClass());
-			return Mono.just(target);
-		}
-
-		// TODO Currently manage only "Foo" parameter, not "List<Foo>" parameters, Stéphane is going to add toIterable/toIterator to Flux to support that use case
-		return elementFlux.next().map(o -> o);
-	}
-
-	private HttpMessageConverter<?> getMessageConverter(ResolvableType type, MediaType mediaType) {
-		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-			if (messageConverter.canRead(type, mediaType)) {
-				return messageConverter;
+		for (HttpMessageConverter<?> converter : getMessageConverters()) {
+			if (converter.canRead(elementType, mediaType)) {
+				Flux<?> elementFlux = converter.read(elementType, exchange.getRequest());
+				if (Mono.class.equals(type.getRawClass())) {
+					Object value = Mono.from(elementFlux);
+					return Mono.just(value);
+				}
+				else if (Flux.class.equals(type.getRawClass())) {
+					return Mono.just(elementFlux);
+				}
+				else if (asyncType) {
+					Object value = getConversionService().convert(elementFlux, type.getRawClass());
+					return Mono.just(value);
+				}
+				else {
+					// TODO Currently manage only "Foo" parameter, not "List<Foo>" parameters, Stéphane is going to add toIterable/toIterator to Flux to support that use case
+					return elementFlux.next().map(o -> o);
+				}
 			}
 		}
-		return null;
+
+		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
+	}
+
+	private boolean isAsyncType(ResolvableType type) {
+		return (Mono.class.equals(type.getRawClass()) || Flux.class.equals(type.getRawClass()) ||
+				getConversionService().canConvert(Publisher.class, type.getRawClass()));
 	}
 
 }

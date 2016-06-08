@@ -68,4 +68,9 @@ public class Pojo {
 	public int hashCode() {
 		return 31 * foo.hashCode() + bar.hashCode();
 	}
+
+	@Override
+	public String toString() {
+		return "Pojo[foo='" + this.foo + "\'" + ", bar='" + this.bar + "\']";
+	}
 }
