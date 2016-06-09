@@ -331,6 +331,12 @@ you can use in your unit and integration tests in conjunction with the TestConte
 framework. Refer to the corresponding javadocs for further information, including
 default attribute values, attribute aliases, and so on.
 
+===== @BootstrapWith
+`@BootstrapWith` is a class-level annotation that is used to configure how the _Spring
+TestContext Framework_ is bootstrapped. Specifically, `@BootstrapWith` is used to specify
+a custom `TestContextBootstrapper`. Consult the <<testcontext-bootstrapping,Bootstrapping
+the TestContext framework>> section for further details.
+
 ===== @ContextConfiguration
 `@ContextConfiguration` defines class-level metadata that is used to determine how to
 load and configure an `ApplicationContext` for integration tests. Specifically,
@@ -980,6 +986,7 @@ annotations_ and reduce configuration duplication across a test suite.
 Each of the following may be used as meta-annotations in conjunction with the
 <<testcontext-framework,TestContext framework>>.
 
+* `@BootstrapWith`
 * `@ContextConfiguration`
 * `@ContextHierarchy`
 * `@ActiveProfiles`
@@ -1153,6 +1160,30 @@ locations__.
 * `GenericPropertiesContextLoader`: loads a standard `ApplicationContext` from Java
 Properties files.
 
+[[testcontext-bootstrapping]]
+==== Bootstrapping the TestContext framework
+
+The default configuration for the internals of the Spring TestContext Framework is
+sufficient for all common use cases. However, there are times when a development team or
+third party framework would like to change the default `ContextLoader`, implement a
+custom `TestContext` or `ContextCache`, augment the default sets of
+`ContextCustomizerFactory` and `TestExecutionListener` implementations, etc. For such low
+level control over how the TestContext framework operates, Spring provides a
+bootstrapping strategy.
+
+`TestContextBootstrapper` defines the SPI for _bootstrapping_ the TestContext framework.
+A `TestContextBootstrapper` is used by the `TestContextManager` to load the
+`TestExecutionListener` implementations for the current test and to build the
+`TestContext` that it manages. A custom bootstrapping strategy can be configured for a
+test class (or test class hierarchy) via `@BootstrapWith`, either directly or as a
+meta-annotation. If a bootstrapper is not explicitly configured via `@BootstrapWith`,
+either the `DefaultTestContextBootstrapper` or the `WebTestContextBootstrapper` will be
+used, depending on the presence of `@WebAppConfiguration`.
+
+Since the `TestContextBootstrapper` SPI is likely to change in the future in order to
+accommodate new requirements, implementers are strongly encouraged not to implement this
+interface directly but rather to extend `AbstractTestContextBootstrapper` or one of its
+concrete subclasses instead.
 
 [[testcontext-tel-config]]
 ==== TestExecutionListener configuration
