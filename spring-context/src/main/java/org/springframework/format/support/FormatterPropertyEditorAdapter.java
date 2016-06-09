@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.text.ParseException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.Formatter;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Adapter that bridges between {@link Formatter} and {@link PropertyEditor}.
@@ -60,17 +61,23 @@ public class FormatterPropertyEditorAdapter extends PropertyEditorSupport {
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
-		try {
-			setValue(this.formatter.parse(text, LocaleContextHolder.getLocale()));
+		if (StringUtils.hasText(text)) {
+			try {
+				setValue(this.formatter.parse(text, LocaleContextHolder.getLocale()));
+			}
+			catch (ParseException ex) {
+				throw new IllegalArgumentException("Parse attempt failed for value [" + text + "]", ex);
+			}
 		}
-		catch (ParseException ex) {
-			throw new IllegalArgumentException("Parse attempt failed for value [" + text + "]", ex);
+		else {
+			setValue(null);
 		}
 	}
 
 	@Override
 	public String getAsText() {
-		return this.formatter.print(getValue(), LocaleContextHolder.getLocale());
+		Object value = getValue();
+		return (value != null ? this.formatter.print(value, LocaleContextHolder.getLocale()) : "");
 	}
 
 }

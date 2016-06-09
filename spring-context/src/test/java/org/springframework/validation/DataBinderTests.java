@@ -402,11 +402,12 @@ public class DataBinderTests {
 	}
 
 	@Test
-	public void testBindingErrorWithStringFormatter() {
+	public void testBindingErrorWithParseExceptionFromFormatter() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
+
 		conversionService.addFormatter(new Formatter<String>() {
 			@Override
 			public String parse(String text, Locale locale) throws ParseException {
@@ -417,6 +418,35 @@ public class DataBinderTests {
 				return object;
 			}
 		});
+
+		binder.setConversionService(conversionService);
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "test");
+
+		binder.bind(pvs);
+		assertTrue(binder.getBindingResult().hasFieldErrors("name"));
+		assertEquals("typeMismatch", binder.getBindingResult().getFieldError("name").getCode());
+		assertEquals("test", binder.getBindingResult().getFieldValue("name"));
+	}
+
+	@Test
+	public void testBindingErrorWithRuntimeExceptionFromFormatter() {
+		TestBean tb = new TestBean();
+		DataBinder binder = new DataBinder(tb);
+		FormattingConversionService conversionService = new FormattingConversionService();
+		DefaultConversionService.addDefaultConverters(conversionService);
+
+		conversionService.addFormatter(new Formatter<String>() {
+			@Override
+			public String parse(String text, Locale locale) throws ParseException {
+				throw new RuntimeException(text);
+			}
+			@Override
+			public String print(String object, Locale locale) {
+				return object;
+			}
+		});
+
 		binder.setConversionService(conversionService);
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "test");
@@ -580,9 +610,10 @@ public class DataBinderTests {
 	}
 
 	@Test
-	public void testBindingErrorWithCustomStringFormatter() {
+	public void testBindingErrorWithParseExceptionFromCustomFormatter() {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb);
+
 		binder.addCustomFormatter(new Formatter<String>() {
 			@Override
 			public String parse(String text, Locale locale) throws ParseException {
@@ -593,12 +624,39 @@ public class DataBinderTests {
 				return object;
 			}
 		});
+
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", "test");
 
 		binder.bind(pvs);
 		assertTrue(binder.getBindingResult().hasFieldErrors("name"));
 		assertEquals("test", binder.getBindingResult().getFieldValue("name"));
+		assertEquals("typeMismatch", binder.getBindingResult().getFieldError("name").getCode());
+	}
+
+	@Test
+	public void testBindingErrorWithRuntimeExceptionFromCustomFormatter() {
+		TestBean tb = new TestBean();
+		DataBinder binder = new DataBinder(tb);
+
+		binder.addCustomFormatter(new Formatter<String>() {
+			@Override
+			public String parse(String text, Locale locale) throws ParseException {
+				throw new RuntimeException(text);
+			}
+			@Override
+			public String print(String object, Locale locale) {
+				return object;
+			}
+		});
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("name", "test");
+
+		binder.bind(pvs);
+		assertTrue(binder.getBindingResult().hasFieldErrors("name"));
+		assertEquals("test", binder.getBindingResult().getFieldValue("name"));
+		assertEquals("typeMismatch", binder.getBindingResult().getFieldError("name").getCode());
 	}
 
 	@Test
@@ -990,7 +1048,7 @@ public class DataBinderTests {
 		}, "age");
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("age", "");
+		pvs.add("age", "x");
 		binder.bind(pvs);
 
 		assertEquals("argh", binder.getBindingResult().getFieldValue("age"));
