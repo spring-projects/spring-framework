@@ -1226,8 +1226,8 @@ one to write so-called __POJO test classes__. POJO test classes are not required
 extend a particular class hierarchy.
 
 The following section provides an overview of the internals of the TestContext
-framework. If you are only interested in using the framework and not necessarily
-interested in extending it with your own custom listeners or custom loaders, feel free
+framework. If you are only interested in _using_ the framework and not necessarily
+interested in _extending_ it with your own custom listeners or custom loaders, feel free
 to go directly to the configuration (<<testcontext-ctx-management,context management>>,
 <<testcontext-fixture-di,dependency injection>>, <<testcontext-tx,transaction
 management>>), <<testcontext-support-classes,support classes>>, and
@@ -1242,9 +1242,9 @@ The core of the framework consists of the `TestContextManager` class and the
 methods within a single test class in JUnit 4). The `TestContextManager` in turn manages a
 `TestContext` that holds the context of the current test. The `TestContextManager` also
 updates the state of the `TestContext` as the test progresses and delegates to
-++TestExecutionListener++s, which instrument the actual test execution by providing
-dependency injection, managing transactions, and so on. A `SmartContextLoader` is
-responsible for loading an `ApplicationContext` for a given test class. Consult the
+`TestExecutionListener` implementations, which instrument the actual test execution by
+providing dependency injection, managing transactions, and so on. A `SmartContextLoader`
+is responsible for loading an `ApplicationContext` for a given test class. Consult the
 javadocs and the Spring test suite for further information and examples of various
 implementations.
 
@@ -1253,14 +1253,14 @@ implementations.
   for the test instance for which it is responsible. The `TestContext` also delegates to a
   `SmartContextLoader` to load an `ApplicationContext` if requested.
 * `TestContextManager`: The main entry point into the __Spring TestContext Framework__,
-  which manages a single `TestContext` and signals events to all registered
-  ++TestExecutionListener++s at well-defined test execution points:
+  which manages a single `TestContext` and signals events to each registered
+  `TestExecutionListener` at well-defined test execution points:
 ** prior to any __before class__ or __before all__ methods of a particular testing framework
 ** test instance post-processing
 ** prior to any __before__ or __before each__ methods of a particular testing framework
 ** after any __after__ or __after each__ methods of a particular testing framework
 ** after any __after class__ or __after all__ methods of a particular testing framework
-* `TestExecutionListener`: Defines a __listener__ API for reacting to test execution
+* `TestExecutionListener`: Defines the API for reacting to test execution
   events published by the `TestContextManager` with which the listener is registered. See
   <<testcontext-tel-config>>.
 * `ContextLoader`: Strategy interface introduced in Spring 2.5 for loading an
@@ -1271,7 +1271,7 @@ implementations.
 
 Implement `SmartContextLoader` instead of this interface in order to provide support for
 annotated classes, active bean definition profiles, test property sources, context
-hierarchies, and ++WebApplicationContext++s.
+hierarchies, and `WebApplicationContext` support.
 
 * `SmartContextLoader`: Extension of the `ContextLoader` interface introduced in Spring
   3.1.
@@ -1316,9 +1316,8 @@ locations__.
 ** `GenericPropertiesContextLoader`: loads a standard `ApplicationContext` from Java
 Properties files.
 
-The following sections explain how to configure the TestContext framework through
-annotations and provide working examples of how to write unit and integration tests with
-the framework.
+The following sections explain how to configure the TestContext framework and provide
+working examples of how to write unit and integration tests with the framework.
 
 [[testcontext-tel-config]]
 ==== TestExecutionListener configuration
