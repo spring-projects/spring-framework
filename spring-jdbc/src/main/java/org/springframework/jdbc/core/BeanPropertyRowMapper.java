@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
@@ -84,6 +86,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 	/** Whether we're defaulting primitives when mapping a null value */
 	private boolean primitivesDefaultedForNullValue = false;
+
+	/** ConversionService for binding JDBC values to bean properties */
+	private ConversionService conversionService = new DefaultConversionService();
 
 	/** Map of the fields we provide mapping for */
 	private Map<String, PropertyDescriptor> mappedFields;
@@ -177,6 +182,27 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 */
 	public boolean isPrimitivesDefaultedForNullValue() {
 		return this.primitivesDefaultedForNullValue;
+	}
+
+	/**
+	 * Set a {@link ConversionService} for binding JDBC values to bean properties,
+	 * or {@code null} for none.
+	 * <p>Default is a {@link DefaultConversionService}, as of Spring 4.3. This
+	 * provides support for {@code java.time} conversion and other special types.
+	 * @since 4.3
+	 * @see #initBeanWrapper(BeanWrapper)
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+
+	/**
+	 * Return a {@link ConversionService} for binding JDBC values to bean properties,
+	 * or {@code null} if none.
+	 * @since 4.3
+	 */
+	public ConversionService getConversionService() {
+		return this.conversionService;
 	}
 
 
@@ -313,10 +339,17 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Initialize the given BeanWrapper to be used for row mapping.
 	 * To be called for each row.
-	 * <p>The default implementation is empty. Can be overridden in subclasses.
+	 * <p>The default implementation applies the configured {@link ConversionService},
+	 * if any. Can be overridden in subclasses.
 	 * @param bw the BeanWrapper to initialize
+	 * @see #getConversionService()
+	 * @see BeanWrapper#setConversionService
 	 */
 	protected void initBeanWrapper(BeanWrapper bw) {
+		ConversionService cs = getConversionService();
+		if (cs != null) {
+			bw.setConversionService(cs);
+		}
 	}
 
 	/**
