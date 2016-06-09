@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 /**
- * Eventually get Jackson handler ({@link JsonSerializer}, {@link JsonDeserializer},
- * {@link KeyDeserializer}, {@link TypeResolverBuilder}, {@link TypeIdResolver}) beans by
- * type from Spring {@link ApplicationContext}. If no bean is found, the default behavior
- * happen (calling no-argument constructor via reflection).
+ * Allows for creating Jackson ({@link JsonSerializer}, {@link JsonDeserializer},
+ * {@link KeyDeserializer}, {@link TypeResolverBuilder}, {@link TypeIdResolver})
+ * beans with autowiring against a Spring {@link ApplicationContext}.
  *
- * @since 4.1.3
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
+ * @since 4.1.3
  * @see Jackson2ObjectMapperBuilder#handlerInstantiator(HandlerInstantiator)
+ * @see ApplicationContext#getAutowireCapableBeanFactory()
  * @see HandlerInstantiator
  */
 public class SpringHandlerInstantiator extends HandlerInstantiator {
@@ -56,33 +57,30 @@ public class SpringHandlerInstantiator extends HandlerInstantiator {
 		this.beanFactory = beanFactory;
 	}
 
+
 	@Override
-	public JsonSerializer<?> serializerInstance(SerializationConfig config,
-			Annotated annotated, Class<?> keyDeserClass) {
-		return (JsonSerializer<?>) this.beanFactory.createBean(keyDeserClass);
+	public JsonDeserializer<?> deserializerInstance(DeserializationConfig config, Annotated annotated, Class<?> implClass) {
+		return (JsonDeserializer<?>) this.beanFactory.createBean(implClass);
 	}
 
 	@Override
-	public JsonDeserializer<?> deserializerInstance(DeserializationConfig config,
-			Annotated annotated, Class<?> deserClass) {
-		return (JsonDeserializer<?>) this.beanFactory.createBean(deserClass);
+	public KeyDeserializer keyDeserializerInstance(DeserializationConfig config, Annotated annotated, Class<?> implClass) {
+		return (KeyDeserializer) this.beanFactory.createBean(implClass);
 	}
 
 	@Override
-	public KeyDeserializer keyDeserializerInstance(DeserializationConfig config,
-			Annotated annotated, Class<?> serClass) {
-		return (KeyDeserializer) this.beanFactory.createBean(serClass);
+	public JsonSerializer<?> serializerInstance(SerializationConfig config, Annotated annotated, Class<?> implClass) {
+		return (JsonSerializer<?>) this.beanFactory.createBean(implClass);
 	}
 
 	@Override
-	public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config,
-			Annotated annotated, Class<?> resolverClass) {
-		return (TypeResolverBuilder<?>) this.beanFactory.createBean(resolverClass);
+	public TypeResolverBuilder<?> typeResolverBuilderInstance(MapperConfig<?> config, Annotated annotated, Class<?> implClass) {
+		return (TypeResolverBuilder<?>) this.beanFactory.createBean(implClass);
 	}
 
 	@Override
-	public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config,
-			Annotated annotated, Class<?> resolverClass) {
-		return (TypeIdResolver) this.beanFactory.createBean(resolverClass);
+	public TypeIdResolver typeIdResolverInstance(MapperConfig<?> config, Annotated annotated, Class<?> implClass) {
+		return (TypeIdResolver) this.beanFactory.createBean(implClass);
 	}
+
 }
