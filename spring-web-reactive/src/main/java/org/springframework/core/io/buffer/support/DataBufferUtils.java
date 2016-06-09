@@ -57,7 +57,7 @@ public abstract class DataBufferUtils {
 
 	/**
 	 * Reads the given {@code InputStream} into a {@code Flux} of
-	 * {@code DataBuffer}s. Closes the stream when the flux inputStream terminated.
+	 * {@code DataBuffer}s. Closes the input stream when the flux is terminated.
 	 * @param inputStream the input stream to read from
 	 * @param dataBufferFactory the factory to create data buffers with
 	 * @param bufferSize the maximum size of the data buffers
