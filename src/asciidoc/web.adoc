@@ -9,7 +9,7 @@ for WebSocket-style messaging in web applications.
 
 Spring Framework's own web framework, <<mvc,Spring Web MVC>>, is covered in the
 first couple of chapters. Subsequent chapters are concerned with Spring Framework's
-integration with other web technologies, such as <<jsf,JSF>> and.
+integration with other web technologies, such as <<jsf,JSF>>.
 
 Following that is coverage of Spring Framework's MVC <<portlet,portlet framework>>.
 

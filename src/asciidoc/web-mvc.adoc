@@ -37,7 +37,7 @@ add advice to final methods.
 In Spring Web MVC you can use any object as a command or form-backing object; you do not
 need to implement a framework-specific interface or base class. Spring's data binding is
 highly flexible: for example, it treats type mismatches as validation errors that can be
-evaluated by the application, not as system errors. Thus you need not duplicate your
+evaluated by the application, not as system errors. Thus you do not need to duplicate your
 business objects' properties as simple, untyped strings in your form objects simply to
 handle invalid submissions, or to convert the Strings properly. Instead, it is often
 preferable to bind directly to your business objects.
