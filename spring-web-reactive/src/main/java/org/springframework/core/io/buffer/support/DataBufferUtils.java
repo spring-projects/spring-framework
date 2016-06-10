@@ -21,13 +21,9 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.IntPredicate;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -122,45 +118,6 @@ public abstract class DataBufferUtils {
 						return dataBuffer.slice(0, size);
 					}
 				});
-	}
-
-	/**
-	 * Tokenize the {@link DataBuffer} using the given delimiter
-	 * function. Does not include the delimiter in the result.
-	 * @param dataBuffer the data buffer to tokenize
-	 * @param delimiter the delimiter function
-	 * @return the tokens
-	 */
-	public static List<DataBuffer> tokenize(DataBuffer dataBuffer,
-			IntPredicate delimiter) {
-		Assert.notNull(dataBuffer, "'dataBuffer' must not be null");
-		Assert.notNull(delimiter, "'delimiter' must not be null");
-
-		List<DataBuffer> results = new ArrayList<DataBuffer>();
-		int idx;
-		do {
-			idx = dataBuffer.indexOf(delimiter);
-			if (idx < 0) {
-				results.add(dataBuffer);
-			}
-			else {
-				if (idx > 0) {
-					DataBuffer slice = dataBuffer.slice(0, idx);
-					slice = retain(slice);
-					results.add(slice);
-				}
-				int remainingLen = dataBuffer.readableByteCount() - (idx + 1);
-				if (remainingLen > 0) {
-					dataBuffer = dataBuffer.slice(idx + 1, remainingLen);
-				}
-				else {
-					release(dataBuffer);
-					idx = -1;
-				}
-			}
-		}
-		while (idx != -1);
-		return Collections.unmodifiableList(results);
 	}
 
 	/**

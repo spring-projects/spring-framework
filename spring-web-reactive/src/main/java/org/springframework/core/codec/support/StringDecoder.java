@@ -19,7 +19,9 @@ package org.springframework.core.codec.support;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -46,6 +48,8 @@ import org.springframework.util.MimeTypeUtils;
 public class StringDecoder extends AbstractDecoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
+	private static final IntPredicate NEWLINE_DELIMITER = b -> b == '\n' || b == '\r';
 
 	private final boolean splitOnNewline;
 
@@ -80,11 +84,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 			MimeType mimeType, Object... hints) {
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream);
 		if (this.splitOnNewline) {
-			inputFlux = inputFlux.flatMap(dataBuffer -> {
-				List<DataBuffer> tokens =
-						DataBufferUtils.tokenize(dataBuffer, b -> b == '\n' || b == '\r');
-				return Flux.fromIterable(tokens);
-			});
+			inputFlux = inputFlux.flatMap(StringDecoder::splitOnNewline);
 		}
 		Charset charset = getCharset(mimeType);
 		return inputFlux.map(dataBuffer -> {
@@ -93,6 +93,24 @@ public class StringDecoder extends AbstractDecoder<String> {
 			return charBuffer.toString();
 		});
 	}
+
+	private static Flux<DataBuffer> splitOnNewline(DataBuffer dataBuffer) {
+		List<DataBuffer> results = new ArrayList<DataBuffer>();
+		int startIdx = 0;
+		int endIdx = 0;
+		final int limit = dataBuffer.readableByteCount();
+		do {
+			endIdx = dataBuffer.indexOf(NEWLINE_DELIMITER, startIdx);
+			int length = endIdx != -1 ? endIdx - startIdx + 1 : limit - startIdx;
+			DataBuffer token = dataBuffer.slice(startIdx, length);
+			results.add(DataBufferUtils.retain(token));
+			startIdx = endIdx + 1;
+		}
+		while (startIdx < limit && endIdx != -1);
+		DataBufferUtils.release(dataBuffer);
+		return Flux.fromIterable(results);
+	}
+	
 
 	private Charset getCharset(MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {

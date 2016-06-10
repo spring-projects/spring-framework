@@ -82,8 +82,7 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		TestSubscriber
 				.subscribe(output)
 				.assertNoError()
-				.assertComplete()
-				.assertValues("foo", "bar", "baz");
+				.assertComplete().assertValues("\n", "foo\r", "\n", "bar\r", "\n", "baz");
 	}
 
 	@Test

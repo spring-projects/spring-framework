@@ -38,19 +38,21 @@ public interface DataBuffer {
 	 * Returns the index of the first byte in this buffer that matches the given
 	 * predicate.
 	 * @param predicate the predicate to match
+	 * @param fromIndex the index to start the search from
 	 * @return the index of the first byte that matches {@code predicate}; or {@code -1}
 	 * if none match
 	 */
-	int indexOf(IntPredicate predicate);
+	int indexOf(IntPredicate predicate, int fromIndex);
 
 	/**
 	 * Returns the index of the last byte in this buffer that matches the given
 	 * predicate.
 	 * @param predicate the predicate to match
+	 * @param fromIndex the index to start the search from
 	 * @return the index of the last byte that matches {@code predicate}; or {@code -1}
 	 * if none match
 	 */
-	int lastIndexOf(IntPredicate predicate);
+	int lastIndexOf(IntPredicate predicate, int fromIndex);
 
 	/**
 	 * Returns the number of bytes that can be read from this data buffer.
