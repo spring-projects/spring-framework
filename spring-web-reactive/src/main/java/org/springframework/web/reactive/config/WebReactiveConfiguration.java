@@ -22,6 +22,8 @@ import java.util.Map;
 
 import reactor.core.converter.DependencyUtils;
 
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -48,6 +50,8 @@ import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
 import org.springframework.util.ClassUtils;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
@@ -185,6 +189,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 		adapter.setMessageConverters(getMessageConverters());
 		adapter.setConversionService(mvcConversionService());
+		adapter.setValidator(mvcValidator());
 
 		return adapter;
 	}
@@ -284,6 +289,46 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		}
 	}
 
+	/**
+	 * Return a global {@link Validator} instance for example for validating
+	 * {@code @RequestBody} method arguments.
+	 * <p>Delegates to {@link #getValidator()} first. If that returns {@code null}
+	 * checks the classpath for the presence of a JSR-303 implementations
+	 * before creating a {@code OptionalValidatorFactoryBean}. If a JSR-303
+	 * implementation is not available, a "no-op" {@link Validator} is returned.
+	 */
+	@Bean
+	public Validator mvcValidator() {
+		Validator validator = getValidator();
+		if (validator == null) {
+			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
+				Class<?> clazz;
+				try {
+					String name = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
+					clazz = ClassUtils.forName(name, classLoader);
+				}
+				catch (ClassNotFoundException ex) {
+					throw new BeanInitializationException("Could not find default validator class", ex);
+				}
+				catch (LinkageError ex) {
+					throw new BeanInitializationException("Could not load default validator class", ex);
+				}
+				validator = (Validator) BeanUtils.instantiate(clazz);
+			}
+			else {
+				validator = new NoOpValidator();
+			}
+		}
+		return validator;
+	}
+
+	/**
+	 * Override this method to provide a custom {@link Validator}.
+	 */
+	protected Validator getValidator() {
+		return null;
+	}
+
 	@Bean
 	public SimpleHandlerAdapter simpleHandlerAdapter() {
 		return new SimpleHandlerAdapter();
@@ -315,6 +360,19 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * Override this to configure view resolution.
 	 */
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
+	}
+
+
+	private static final class NoOpValidator implements Validator {
+
+		@Override
+		public boolean supports(Class<?> clazz) {
+			return false;
+		}
+
+		@Override
+		public void validate(Object target, Errors errors) {
+		}
 	}
 
 }

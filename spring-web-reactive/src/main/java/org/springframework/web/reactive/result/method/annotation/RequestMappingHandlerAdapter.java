@@ -39,7 +39,7 @@ import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.ObjectUtils;
+import org.springframework.validation.Validator;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.reactive.HandlerAdapter;
@@ -66,6 +66,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(10);
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
+
+	private Validator validator;
 
 	private ConfigurableBeanFactory beanFactory;
 
@@ -142,6 +144,23 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	}
 
 	/**
+	 * Configure a Validator for validation of controller method arguments such
+	 * as {@code @RequestBody}.
+	 *
+	 * TODO: this may be replaced by DataBinder
+	 */
+	public void setValidator(Validator validator) {
+		this.validator = validator;
+	}
+
+	/**
+	 * Return the configured Validator.
+	 */
+	public Validator getValidator() {
+		return this.validator;
+	}
+
+	/**
 	 * A {@link ConfigurableBeanFactory} is expected for resolving expressions
 	 * in method argument default values.
 	 */
@@ -173,7 +192,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver(cs, getBeanFactory()));
 		resolvers.add(new PathVariableMapMethodArgumentResolver());
-		resolvers.add(new RequestBodyArgumentResolver(getMessageConverters(), cs));
+		resolvers.add(new RequestBodyArgumentResolver(getMessageConverters(), cs, getValidator()));
 		resolvers.add(new RequestHeaderMethodArgumentResolver(cs, getBeanFactory()));
 		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
 		resolvers.add(new CookieValueMethodArgumentResolver(cs, getBeanFactory()));

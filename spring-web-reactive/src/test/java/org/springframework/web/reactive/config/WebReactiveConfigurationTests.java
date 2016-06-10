@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
@@ -50,6 +49,8 @@ import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.validation.Validator;
+import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
@@ -148,6 +149,11 @@ public class WebReactiveConfigurationTests {
 		name = "mvcConversionService";
 		ConversionService service = context.getBean(name, ConversionService.class);
 		assertSame(service, adapter.getConversionService());
+
+		name = "mvcValidator";
+		Validator validator = context.getBean(name, Validator.class);
+		assertSame(validator, adapter.getValidator());
+		assertEquals(OptionalValidatorFactoryBean.class, validator.getClass());
 	}
 
 	@Test
