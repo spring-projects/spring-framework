@@ -96,8 +96,9 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 			ServerWebExchange exchange) {
 
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		boolean asyncType = isAsyncType(type);
-		ResolvableType elementType = (asyncType ? type.getGeneric(0) : type);
+		boolean isAsyncType = isAsyncType(type);
+		ResolvableType elementType = (isAsyncType ? type.getGeneric(0) : type);
+
 		MediaType mediaType = exchange.getRequest().getHeaders().getContentType();
 		if (mediaType == null) {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
@@ -107,18 +108,15 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 			if (converter.canRead(elementType, mediaType)) {
 				Flux<?> elementFlux = converter.read(elementType, exchange.getRequest());
 				if (Mono.class.equals(type.getRawClass())) {
-					Object value = Mono.from(elementFlux);
-					return Mono.just(value);
+					return Mono.just(Mono.from(elementFlux));
 				}
 				else if (Flux.class.equals(type.getRawClass())) {
 					return Mono.just(elementFlux);
 				}
-				else if (asyncType) {
-					Object value = getConversionService().convert(elementFlux, type.getRawClass());
-					return Mono.just(value);
+				else if (isAsyncType) {
+					return Mono.just(getConversionService().convert(elementFlux, type.getRawClass()));
 				}
 				else {
-					// TODO Currently manage only "Foo" parameter, not "List<Foo>" parameters, Stéphane is going to add toIterable/toIterator to Flux to support that use case
 					return elementFlux.next().map(o -> o);
 				}
 			}
