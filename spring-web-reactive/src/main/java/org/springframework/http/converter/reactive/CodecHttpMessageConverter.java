@@ -18,7 +18,6 @@ package org.springframework.http.converter.reactive;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -46,6 +45,10 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 	private final Encoder<T> encoder;
 
 	private final Decoder<T> decoder;
+
+	private final List<MediaType> readableMediaTypes;
+
+	private final List<MediaType> writableMediaTypes;
 
 	/**
 	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder}. When
@@ -76,6 +79,13 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 	public CodecHttpMessageConverter(Encoder<T> encoder, Decoder<T> decoder) {
 		this.encoder = encoder;
 		this.decoder = decoder;
+
+		this.readableMediaTypes = decoder != null ?
+				MediaTypeUtils.toMediaTypes(decoder.getDecodableMimeTypes()) :
+				Collections.emptyList();
+		this.writableMediaTypes = encoder != null ?
+				MediaTypeUtils.toMediaTypes(encoder.getEncodableMimeTypes()) :
+				Collections.emptyList();
 	}
 
 	@Override
@@ -90,16 +100,12 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 
 	@Override
 	public List<MediaType> getReadableMediaTypes() {
-		return this.decoder != null ? this.decoder.getSupportedMimeTypes().stream().
-				map(MediaTypeUtils::toMediaType).
-				collect(Collectors.toList()) : Collections.emptyList();
+		return this.readableMediaTypes;
 	}
 
 	@Override
 	public List<MediaType> getWritableMediaTypes() {
-		return this.encoder != null ? this.encoder.getSupportedMimeTypes().stream().
-				map(MediaTypeUtils::toMediaType).
-				collect(Collectors.toList()) : Collections.emptyList();
+		return this.writableMediaTypes;
 	}
 
 	@Override

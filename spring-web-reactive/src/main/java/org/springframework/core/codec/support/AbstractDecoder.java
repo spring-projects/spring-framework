@@ -26,19 +26,20 @@ import org.springframework.util.MimeType;
 
 /**
  * @author Sebastien Deleuze
+ * @author Arjen Poutsma
  */
 public abstract class AbstractDecoder<T> implements Decoder<T> {
 
-	private List<MimeType> supportedMimeTypes = Collections.emptyList();
+	private List<MimeType> decodableMimeTypes = Collections.emptyList();
 
 	protected AbstractDecoder(MimeType... supportedMimeTypes) {
-		this.supportedMimeTypes = Arrays.asList(supportedMimeTypes);
+		this.decodableMimeTypes = Arrays.asList(supportedMimeTypes);
 	}
 
 
 	@Override
-	public List<MimeType> getSupportedMimeTypes() {
-		return this.supportedMimeTypes;
+	public List<MimeType> getDecodableMimeTypes() {
+		return this.decodableMimeTypes;
 	}
 
 	@Override
@@ -46,12 +47,8 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 		if (mimeType == null) {
 			return true;
 		}
-		for (MimeType supportedMimeType : this.supportedMimeTypes) {
-			if (supportedMimeType.isCompatibleWith(mimeType)) {
-				return true;
-			}
-		}
-		return false;
+		return this.decodableMimeTypes.stream().
+				anyMatch(mt -> mt.isCompatibleWith(mimeType));
 	}
 
 }

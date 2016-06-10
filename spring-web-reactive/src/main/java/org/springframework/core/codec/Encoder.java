@@ -66,6 +66,6 @@ public interface Encoder<T> {
 	/**
 	 * Return the list of mime types this encoder supports.
 	 */
-	List<MimeType> getSupportedMimeTypes();
+	List<MimeType> getEncodableMimeTypes();
 
 }

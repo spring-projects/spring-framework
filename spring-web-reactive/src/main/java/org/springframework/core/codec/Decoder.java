@@ -63,6 +63,6 @@ public interface Decoder<T> {
 	/**
 	 * Return the list of MIME types this decoder supports.
 	 */
-	List<MimeType> getSupportedMimeTypes();
+	List<MimeType> getDecodableMimeTypes();
 
 }
