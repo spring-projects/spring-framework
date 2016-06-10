@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
@@ -61,8 +60,12 @@ import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
@@ -120,28 +123,28 @@ public class RequestBodyArgumentResolverTests {
 	@Test @SuppressWarnings("unchecked")
 	public void monoTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		Mono<TestBean> mono = (Mono<TestBean>) resolve("monoTestBean", Mono.class, body);
+		Mono<TestBean> mono = (Mono<TestBean>) resolveValue("monoTestBean", Mono.class, body);
 		assertEquals(new TestBean("f1", "b1"), mono.block());
 	}
 
 	@Test @SuppressWarnings("unchecked")
 	public void fluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		Flux<TestBean> flux = (Flux<TestBean>) resolve("fluxTestBean", Flux.class, body);
+		Flux<TestBean> flux = (Flux<TestBean>) resolveValue("fluxTestBean", Flux.class, body);
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")), flux.collectList().block());
 	}
 
 	@Test @SuppressWarnings("unchecked")
 	public void singleTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		Single<TestBean> single = (Single<TestBean>) resolve("singleTestBean", Single.class, body);
+		Single<TestBean> single = (Single<TestBean>) resolveValue("singleTestBean", Single.class, body);
 		assertEquals(new TestBean("f1", "b1"), single.toBlocking().value());
 	}
 
 	@Test @SuppressWarnings("unchecked")
 	public void observableTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		Observable<?> observable = (Observable<?>) resolve("observableTestBean", Observable.class, body);
+		Observable<?> observable = (Observable<?>) resolveValue("observableTestBean", Observable.class, body);
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
 				observable.toList().toBlocking().first());
 	}
@@ -149,13 +152,13 @@ public class RequestBodyArgumentResolverTests {
 	@Test @SuppressWarnings("unchecked")
 	public void futureTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		assertEquals(new TestBean("f1", "b1"), resolve("futureTestBean", CompletableFuture.class, body).get());
+		assertEquals(new TestBean("f1", "b1"), resolveValue("futureTestBean", CompletableFuture.class, body).get());
 	}
 
 	@Test
 	public void testBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		assertEquals(new TestBean("f1", "b1"), resolve("testBean", TestBean.class, body));
+		assertEquals(new TestBean("f1", "b1"), resolveValue("testBean", TestBean.class, body));
 	}
 
 	@Test
@@ -164,7 +167,7 @@ public class RequestBodyArgumentResolverTests {
 		Map<String, String> map = new HashMap<>();
 		map.put("foo", "f1");
 		map.put("bar", "b1");
-		assertEquals(map, resolve("map", Map.class, body));
+		assertEquals(map, resolveValue("map", Map.class, body));
 	}
 
 	// TODO: @Ignore
@@ -174,7 +177,7 @@ public class RequestBodyArgumentResolverTests {
 	public void list() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
-				resolve("list", List.class, body));
+				resolveValue("list", List.class, body));
 	}
 
 	@Test
@@ -182,12 +185,28 @@ public class RequestBodyArgumentResolverTests {
 	public void array() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		assertArrayEquals(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")},
-				resolve("array", TestBean[].class, body));
+				resolveValue("array", TestBean[].class, body));
+	}
+
+	@Test @SuppressWarnings("unchecked")
+	public void validateMonoTestBean() throws Exception {
+		String body = "{\"bar\":\"b1\"}";
+		Mono<TestBean> mono = (Mono<TestBean>) resolveValue("monoTestBean", Mono.class, body);
+		TestSubscriber.subscribe(mono).assertNoValues().assertError(ServerWebInputException.class);
+	}
+
+	@Test @SuppressWarnings("unchecked")
+	public void validateFluxTestBean() throws Exception {
+		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\"}]";
+		Flux<TestBean> flux = (Flux<TestBean>) resolveValue("fluxTestBean", Flux.class, body);
+
+		TestSubscriber.subscribe(flux).assertValues(new TestBean("f1", "b1"))
+				.assertError(ServerWebInputException.class);
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private <T> T resolve(String paramName, Class<T> valueType, String body) {
+	private <T> T resolveValue(String paramName, Class<T> valueType, String body) {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		this.request.writeWith(Flux.just(dataBuffer(body)));
 		Mono<Object> result = this.resolver.resolveArgument(parameter(paramName), this.model, this.exchange);
@@ -204,7 +223,7 @@ public class RequestBodyArgumentResolverTests {
 		GenericConversionService service = new GenericConversionService();
 		service.addConverter(new ReactiveStreamsToCompletableFutureConverter());
 		service.addConverter(new ReactiveStreamsToRxJava1Converter());
-		return new RequestBodyArgumentResolver(converters, service);
+		return new RequestBodyArgumentResolver(converters, service, new TestBeanValidator());
 	}
 
 	@SuppressWarnings("ConfusingArgumentToVarargsMethod")
@@ -230,8 +249,8 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unused")
 	void handle(
-			@RequestBody Mono<TestBean> monoTestBean,
-			@RequestBody Flux<TestBean> fluxTestBean,
+			@Validated @RequestBody Mono<TestBean> monoTestBean,
+			@Validated @RequestBody Flux<TestBean> fluxTestBean,
 			@RequestBody Single<TestBean> singleTestBean,
 			@RequestBody Observable<TestBean> observableTestBean,
 			@RequestBody CompletableFuture<TestBean> futureTestBean,
@@ -295,6 +314,22 @@ public class RequestBodyArgumentResolverTests {
 		@Override
 		public String toString() {
 			return "TestBean[foo='" + this.foo + "\'" + ", bar='" + this.bar + "\']";
+		}
+	}
+
+	static class TestBeanValidator implements Validator {
+
+		@Override
+		public boolean supports(Class<?> clazz) {
+			return clazz.equals(TestBean.class);
+		}
+
+		@Override
+		public void validate(Object target, Errors errors) {
+			TestBean testBean = (TestBean) target;
+			if (testBean.getFoo() == null) {
+				errors.rejectValue("foo", "nullValue");
+			}
 		}
 	}
 }
