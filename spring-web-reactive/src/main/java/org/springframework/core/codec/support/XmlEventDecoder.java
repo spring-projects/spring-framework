@@ -143,13 +143,14 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 						}
 					}
 				}
-				DataBufferUtils.release(dataBuffer);
 				return Flux.fromIterable(events);
 			}
 			catch (XMLStreamException ex) {
 				return Mono.error(ex);
 			}
-
+			finally {
+				DataBufferUtils.release(dataBuffer);
+			}
 		}
 	}
 }
