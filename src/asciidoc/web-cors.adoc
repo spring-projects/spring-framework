@@ -17,7 +17,7 @@ and less powerful hacks like IFRAME or JSONP.
 
 As of Spring Framework 4.2, CORS is supported out of the box. CORS requests
 (https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/java/org/springframework/web/servlet/FrameworkServlet.java#L906[including preflight ones with an `OPTIONS` method])
-are automatically dispatched to the various registered ++HandlerMapping++s. They handle
+are automatically dispatched to the various registered ``HandlerMapping``s. They handle
 CORS preflight requests and intercept CORS simple and actual requests thanks to a
 {api-spring-framework}/web/cors/CorsProcessor.html[CorsProcessor]
 implementation (https://github.com/spring-projects/spring-framework/blob/master/spring-web/src/main/java/org/springframework/web/cors/DefaultCorsProcessor.java[DefaultCorsProcessor]

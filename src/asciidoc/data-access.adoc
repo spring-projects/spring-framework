@@ -801,7 +801,7 @@ the call stack, and make a determination whether to mark the transaction for rol
 In its default configuration, the Spring Framework's transaction infrastructure code
 __only__ marks a transaction for rollback in the case of runtime, unchecked exceptions;
 that is, when the thrown exception is an instance or subclass of `RuntimeException`. (
-++Error++s will also - by default - result in a rollback). Checked exceptions that are
+``Error``s will also - by default - result in a rollback). Checked exceptions that are
 thrown from a transactional method do __not__ result in rollback in the default
 configuration.
 
@@ -2330,7 +2330,7 @@ creation and release of resources, which helps you avoid common errors such as
 forgetting to close the connection. It performs the basic tasks of the core JDBC
 workflow such as statement creation and execution, leaving application code to provide
 SQL and extract results. The `JdbcTemplate` class executes SQL queries, update
-statements and stored procedure calls, performs iteration over ++ResultSet++s and
+statements and stored procedure calls, performs iteration over ``ResultSet``s and
 extraction of returned parameter values. It also catches JDBC exceptions and translates
 them to the generic, more informative, exception hierarchy defined in the
 `org.springframework.dao` package.
@@ -4543,8 +4543,8 @@ declaration of an `SqlOutParameter`.
 You use the `SqlTypeValue` to pass in the value of a Java object like `TestItem` into a
 stored procedure. The `SqlTypeValue` interface has a single method named
 `createTypeValue` that you must implement. The active connection is passed in, and you
-can use it to create database-specific objects such as ++StructDescriptor++s, as shown in
-the following example, or ++ArrayDescriptor++s.
+can use it to create database-specific objects such as ``StructDescriptor``s, as shown in
+the following example, or ``ArrayDescriptor``s.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -7105,7 +7105,7 @@ set using the `targetClass` property. Optionally, you can set the binding name u
 ----
 
 A `JibxMarshaller` is configured for a single class. If you want to marshal multiple
-classes, you have to configure multiple ++JibxMarshaller++s with different `targetClass`
+classes, you have to configure multiple ``JibxMarshaller``s with different `targetClass`
 property values.
 
 

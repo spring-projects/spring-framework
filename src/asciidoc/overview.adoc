@@ -238,7 +238,7 @@ of the `spring-webmvc` module.
 The `spring-test` module supports the <<unit-testing,unit testing>> and
 <<integration-testing,integration testing>> of Spring components with JUnit or TestNG. It
 provides consistent <<testcontext-ctx-management,loading>> of Spring
-++ApplicationContext++s and <<testcontext-ctx-management-caching,caching>> of those
+``ApplicationContext``s and <<testcontext-ctx-management-caching,caching>> of those
 contexts. It also provides <<mock-objects,mock objects>> that you can use to test your
 code in isolation.
 

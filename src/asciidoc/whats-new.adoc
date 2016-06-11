@@ -368,9 +368,9 @@ method has been added.
 * Test property sources which automatically override system and application property
   sources can be configured via the new `@TestPropertySource` annotation.
 ** See <<testcontext-ctx-management-property-sources>> for details.
-* Default ++TestExecutionListener++s can now be automatically discovered.
+* Default ``TestExecutionListener``s can now be automatically discovered.
 ** See <<testcontext-tel-config-automatic-discovery>> for details.
-* Custom ++TestExecutionListener++s can now be automatically merged with the default
+* Custom ``TestExecutionListener``s can now be automatically merged with the default
   listeners.
 ** See <<testcontext-tel-config-merging>> for details.
 * The documentation for transactional testing support in the TestContext framework has
@@ -597,13 +597,13 @@ public @interface MyTestConfig {
    subsequent release.
 * `@Sql` now supports execution of _inlined SQL statements_ via a new
   `statements` attribute.
-* The `ContextCache` that is used for caching ++ApplicationContext++s
+* The `ContextCache` that is used for caching ``ApplicationContext``s
   between tests is now a public API with a default implementation that
   can be replaced for custom caching needs.
 * `DefaultTestContext`, `DefaultBootstrapContext`, and
   `DefaultCacheAwareContextLoaderDelegate` are now public classes in the
   `support` subpackage, allowing for custom extensions.
-* ++TestContextBootstrapper++s are now responsible for building the
+* ``TestContextBootstrapper``s are now responsible for building the
   `TestContext`.
 * In the Spring MVC Test framework, `MvcResult` details can now be logged
   at `DEBUG` level or written to a custom `OutputStream` or `Writer`. See
@@ -616,7 +616,7 @@ public @interface MyTestConfig {
   definition profiles.
 * Embedded databases can now be automatically assigned a unique name,
   allowing common test database configuration to be reused in different
-  ++ApplicationContext++s within a test suite.
+  ``ApplicationContext``s within a test suite.
 ** See <<jdbc-embedded-database-unique-names>> for details.
 * `MockHttpServletRequest` and `MockHttpServletResponse` now provide better
   support for date header formatting via the `getDateHeader` and `setDateHeader`

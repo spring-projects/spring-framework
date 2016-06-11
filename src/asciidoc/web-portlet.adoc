@@ -333,7 +333,7 @@ action request, handling a render request, and returning a model and a view.
 === AbstractController and PortletContentGenerator
 
 Of course, just a `Controller` interface isn't enough. To provide a basic
-infrastructure, all of Spring Portlet MVC's ++Controller++s inherit from
+infrastructure, all of Spring Portlet MVC's ``Controller``s inherit from
 `AbstractController`, a class offering access to Spring's `ApplicationContext` and
 control over caching.
 
@@ -542,7 +542,7 @@ The rest of this section describes three of Spring Portlet MVC's most commonly u
 handler mappings. They all extend `AbstractHandlerMapping` and share the following
 properties:
 
-* `interceptors`: The list of interceptors to use. ++HandlerInterceptor++s are discussed
+* `interceptors`: The list of interceptors to use. ``HandlerInterceptor``s are discussed
   in <<portlet-handlermapping-interceptor>>.
 * `defaultHandler`: The default handler to use, when this handler mapping does not
   result in a matching handler.
@@ -1006,7 +1006,7 @@ register any custom property editor because there is no type conversion to be pe
 
 [[portlet-exceptionresolver]]
 == Handling exceptions
-Just like Servlet MVC, Portlet MVC provides ++HandlerExceptionResolver++s to ease the
+Just like Servlet MVC, Portlet MVC provides ``HandlerExceptionResolver``s to ease the
 pain of unexpected exceptions that occur while your request is being processed by a
 handler that matched the request. Portlet MVC also provides a portlet-specific, concrete
 `SimpleMappingExceptionResolver` that enables you to take the class name of any

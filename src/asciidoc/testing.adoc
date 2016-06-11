@@ -64,7 +64,7 @@ depends on environment-specific properties.
 ==== JNDI
 The `org.springframework.mock.jndi` package contains an implementation of the JNDI SPI,
 which you can use to set up a simple JNDI environment for test suites or stand-alone
-applications. If, for example, JDBC ++DataSource++s get bound to the same JNDI names in
+applications. If, for example, JDBC ``DataSource``s get bound to the same JNDI names in
 test code as within a Java EE container, you can reuse both application code and
 configuration in testing scenarios without modification.
 
@@ -79,7 +79,7 @@ alternative Servlet API mock objects such as http://www.mockobjects.com[MockObje
 Spring Framework 4.0, the set of mocks in the `org.springframework.mock.web` package is
 based on the Servlet 3.0 API.
 
-For thorough integration testing of your Spring MVC and REST ++Controller++s in
+For thorough integration testing of your Spring MVC and REST ``Controller``s in
 conjunction with your `WebApplicationContext` configuration for Spring MVC, see the
 <<spring-mvc-test-framework,_Spring MVC Test Framework_>>.
 
@@ -132,10 +132,10 @@ dealing with Spring MVC `ModelAndView` objects.
 .Unit testing Spring MVC Controllers
 [TIP]
 ====
-To unit test your Spring MVC ++Controller++s as POJOs, use `ModelAndViewAssert` combined
+To unit test your Spring MVC ``Controller``s as POJOs, use `ModelAndViewAssert` combined
 with `MockHttpServletRequest`, `MockHttpSession`, and so on from Spring's
 <<mock-objects-servlet, Servlet API mocks>>. For thorough integration testing of your
-Spring MVC and REST ++Controller++s in conjunction with your `WebApplicationContext`
+Spring MVC and REST ``Controller``s in conjunction with your `WebApplicationContext`
 configuration for Spring MVC, use the <<spring-mvc-test-framework,_Spring MVC Test
 Framework_>> instead.
 ====
@@ -193,7 +193,7 @@ configuration details.
 [[testing-ctx-management]]
 ==== Context management and caching
 The Spring TestContext Framework provides consistent loading of Spring
-++ApplicationContext++s and ++WebApplicationContext++s as well as caching of those
+``ApplicationContext``s and ``WebApplicationContext``s as well as caching of those
 contexts. Support for the caching of loaded contexts is important, because startup time
 can become an issue -- not because of the overhead of Spring itself, but because the
 objects instantiated by the Spring container take time to instantiate. For example, a
@@ -227,7 +227,7 @@ configure instances of your test classes via Dependency Injection. This provides
 convenient mechanism for setting up test fixtures using preconfigured beans from your
 application context. A strong benefit here is that you can reuse application contexts
 across various testing scenarios (e.g., for configuring Spring-managed object graphs,
-transactional proxies, ++DataSource++s, etc.), thus avoiding the need to duplicate
+transactional proxies, ``DataSource``s, etc.), thus avoiding the need to duplicate
 complex test fixture setup for individual test cases.
 
 As an example, consider the scenario where we have a class, `HibernateTitleRepository`,
@@ -442,7 +442,7 @@ hierarchy. See the `@WebAppConfiguration` javadocs for further details.
 
 ===== @ContextHierarchy
 `@ContextHierarchy` is a class-level annotation that is used to define a hierarchy of
-++ApplicationContext++s for integration tests. `@ContextHierarchy` should be declared
+``ApplicationContext``s for integration tests. `@ContextHierarchy` should be declared
 with a list of one or more `@ContextConfiguration` instances, each of which defines a
 level in the context hierarchy. The following examples demonstrate the use of
 `@ContextHierarchy` within a single test class; however, `@ContextHierarchy` can also be
@@ -670,7 +670,7 @@ hierarchy via `@ContextHierarchy`, the `hierarchyMode` flag can be used to contr
 the context cache is cleared. By default an __exhaustive__ algorithm will be used that
 clears the context cache including not only the current level but also all other context
 hierarchies that share an ancestor context common to the current test; all
-++ApplicationContext++s that reside in a sub-hierarchy of the common ancestor context
+``ApplicationContext``s that reside in a sub-hierarchy of the common ancestor context
 will be removed from the context cache and closed. If the __exhaustive__ algorithm is
 overkill for a particular use case, the simpler __current level__ algorithm can be
 specified instead, as seen below.
@@ -1207,7 +1207,7 @@ by default, exactly in this order.
 [[testcontext-tel-config-registering-tels]]
 ===== Registering custom TestExecutionListeners
 
-Custom ++TestExecutionListener++s can be registered for a test class and its subclasses
+Custom ``TestExecutionListener``s can be registered for a test class and its subclasses
 via the `@TestExecutionListeners` annotation. See
 <<integration-testing-annotations,annotation support>> and the javadocs for
 `@TestExecutionListeners` for details and examples.
@@ -1215,31 +1215,31 @@ via the `@TestExecutionListeners` annotation. See
 [[testcontext-tel-config-automatic-discovery]]
 ===== Automatic discovery of default TestExecutionListeners
 
-Registering custom ++TestExecutionListener++s via `@TestExecutionListeners` is suitable
+Registering custom ``TestExecutionListener``s via `@TestExecutionListeners` is suitable
 for custom listeners that are used in limited testing scenarios; however, it can become
 cumbersome if a custom listener needs to be used across a test suite. Since Spring
 Framework 4.1, this issue is addressed via support for automatic discovery of _default_
 `TestExecutionListener` implementations via the `SpringFactoriesLoader` mechanism.
 
 Specifically, the `spring-test` module declares all core default
-++TestExecutionListener++s under the
+``TestExecutionListener``s under the
 `org.springframework.test.context.TestExecutionListener` key in its
 `META-INF/spring.factories` properties file. Third-party frameworks and developers can
-contribute their own ++TestExecutionListener++s to the list of default listeners in the
+contribute their own ``TestExecutionListener``s to the list of default listeners in the
 same manner via their own `META-INF/spring.factories` properties file.
 
 [[testcontext-tel-config-ordering]]
 ===== Ordering TestExecutionListeners
 
-When the TestContext framework discovers default ++TestExecutionListener++s via the
+When the TestContext framework discovers default ``TestExecutionListener``s via the
 aforementioned `SpringFactoriesLoader` mechanism, the instantiated listeners are sorted
 using Spring's `AnnotationAwareOrderComparator` which honors Spring's `Ordered` interface
 and `@Order` annotation for ordering. `AbstractTestExecutionListener` and all default
-++TestExecutionListener++s provided by Spring implement `Ordered` with appropriate
+``TestExecutionListener``s provided by Spring implement `Ordered` with appropriate
 values. Third-party frameworks and developers should therefore make sure that their
-_default_ ++TestExecutionListener++s are registered in the proper order by implementing
+_default_ ``TestExecutionListener``s are registered in the proper order by implementing
 `Ordered` or declaring `@Order`. Consult the javadocs for the `getOrder()` methods of the
-core default ++TestExecutionListener++s for details on what values are assigned to each
+core default ``TestExecutionListener``s for details on what values are assigned to each
 core listener.
 
 [[testcontext-tel-config-merging]]
@@ -1273,7 +1273,7 @@ which listeners are registered by default. Moreover, the set of default listener
 change from release to release -- for example, `SqlScriptsTestExecutionListener` was
 introduced in Spring Framework 4.1, and `DirtiesContextBeforeModesTestExecutionListener`
 was introduced in Spring Framework 4.2. Furthermore, third-party frameworks like Spring
-Security register their own default ++TestExecutionListener++s via the aforementioned
+Security register their own default ``TestExecutionListener``s via the aforementioned
 <<testcontext-tel-config-automatic-discovery, automatic discovery mechanism>>.
 
 To avoid having to be aware of and re-declare **all** _default_ listeners, the
@@ -2486,7 +2486,7 @@ annotation is provided by the `DirtiesContextBeforeModesTestExecutionListener` a
 
 When writing integration tests that rely on a loaded Spring `ApplicationContext`, it is
 often sufficient to test against a single context; however, there are times when it is
-beneficial or even necessary to test against a hierarchy of ++ApplicationContext++s. For
+beneficial or even necessary to test against a hierarchy of ``ApplicationContext``s. For
 example, if you are developing a Spring MVC web application you will typically have a
 root `WebApplicationContext` loaded via Spring's `ContextLoaderListener` and a child
 `WebApplicationContext` loaded via Spring's `DispatcherServlet`. This results in a

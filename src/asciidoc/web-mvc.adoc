@@ -1302,7 +1302,7 @@ The following are the supported method arguments:
 [NOTE]
 ====
 Session access may not be thread-safe, in particular in a Servlet environment. Consider
-setting the ++RequestMappingHandlerAdapter++'s "synchronizeOnSession" flag to "true" if
+setting the ``RequestMappingHandlerAdapter``'s "synchronizeOnSession" flag to "true" if
 multiple requests are allowed to access a session concurrently.
 ====
 
@@ -1333,7 +1333,7 @@ multiple requests are allowed to access a session concurrently.
   See <<mvc-ann-requestheader>>.
 * `@RequestBody` annotated parameters for access to the HTTP request body. Parameter
   values are converted to the declared method argument type using
-  ++HttpMessageConverter++s. See <<mvc-ann-requestbody>>.
+  ``HttpMessageConverter``s. See <<mvc-ann-requestbody>>.
 * `@RequestPart` annotated parameters for access to the content of a
   "multipart/form-data" request part. See <<mvc-multipart-forms-non-browsers>> and
   <<mvc-multipart>>.
@@ -1344,7 +1344,7 @@ multiple requests are allowed to access a session concurrently.
 * `@RequestAttribute` annotated parameters for access to request attributes.
 * `HttpEntity<?>` parameters for access to the Servlet request HTTP headers and
   contents. The request stream will be converted to the entity body using
-  ++HttpMessageConverter++s. See <<mvc-ann-httpentity>>.
+  ``HttpMessageConverter``s. See <<mvc-ann-httpentity>>.
 * `java.util.Map` / `org.springframework.ui.Model` / `org.springframework.ui.ModelMap`
   for enriching the implicit model that is exposed to the web view.
 * `org.springframework.web.servlet.mvc.support.RedirectAttributes` to specify the exact
@@ -1427,10 +1427,10 @@ The following are the supported return types:
   signature).
 * If the method is annotated with `@ResponseBody`, the return type is written to the
   response HTTP body. The return value will be converted to the declared method argument
-  type using ++HttpMessageConverter++s. See <<mvc-ann-responsebody>>.
+  type using ``HttpMessageConverter``s. See <<mvc-ann-responsebody>>.
 * An `HttpEntity<?>` or `ResponseEntity<?>` object to provide access to the Servlet
   response HTTP headers and contents. The entity body will be converted to the response
-  stream using ++HttpMessageConverter++s. See <<mvc-ann-httpentity>>.
+  stream using ``HttpMessageConverter``s. See <<mvc-ann-httpentity>>.
 * An `HttpHeaders` object to return a response with no body.
 * A `Callable<?>` can be returned when the application wants to produce the return value
   asynchronously in a thread managed by Spring MVC.
@@ -1482,7 +1482,7 @@ The following code snippet shows the usage:
 ----
 
 Parameters using this annotation are required by default, but you can specify that a
-parameter is optional by setting ++@RequestParam++'s `required` attribute to `false`
+parameter is optional by setting ``@RequestParam``'s `required` attribute to `false`
 (e.g., `@RequestParam(path="id", required=false)`).
 
 Type conversion is applied automatically if the target method parameter type is not
@@ -1607,7 +1607,7 @@ is a stereotype annotation that combines `@ResponseBody` and `@Controller`. More
 that, it gives more meaning to your Controller and also may carry additional semantics
 in future releases of the framework.
 
-As with regular ++@Controller++s, a `@RestController` may be assisted by
+As with regular ``@Controller``s, a `@RestController` may be assisted by
 `@ControllerAdvice` or `@RestControllerAdvice` beans. See the <<mvc-ann-controller-advice>>
 section for more details.
 
@@ -1691,7 +1691,7 @@ depending on your needs.
 A controller can have any number of `@ModelAttribute` methods. All such methods are
 invoked before `@RequestMapping` methods of the same controller.
 
-`@ModelAttribute` methods can also be defined in an ++@ControllerAdvice++-annotated class
+`@ModelAttribute` methods can also be defined in an ``@ControllerAdvice``-annotated class
 and such methods apply to many controllers. See the <<mvc-ann-controller-advice>> section
 for more details.
 
@@ -2151,7 +2151,7 @@ PropertyEditors required by several of the PetClinic controllers.
 	</bean>
 ----
 
-`@InitBinder` methods can also be defined in an ++@ControllerAdvice++-annotated class in
+`@InitBinder` methods can also be defined in an ``@ControllerAdvice``-annotated class in
 which case they apply to matching controllers. This provides an alternative to using a
 `WebBindingInitializer`. See the <<mvc-ann-controller-advice>> section for more details.
 
@@ -2626,7 +2626,7 @@ don't need to do that because the `RequestMappingHandlerMapping` automatically l
 all `HandlerMapping` classes extending from `AbstractHandlerMapping` have the following
 properties that you can use to customize their behavior:
 
-* `interceptors` List of interceptors to use. ++HandlerInterceptor++s are discussed in
+* `interceptors` List of interceptors to use. ``HandlerInterceptor``s are discussed in
   <<mvc-handlermapping-interceptor>>.
 * `defaultHandler` Default handler to use, when this handler mapping does not result in
   a matching handler.

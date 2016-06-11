@@ -3485,7 +3485,7 @@ dependency type:
 
 | `BootstrapContextAware`
 | Resource adapter `BootstrapContext` the container runs in. Typically available only in
-  JCA aware ++ApplicationContext++s
+  JCA aware ``ApplicationContext``s
 | <<cci>>
 
 | `LoadTimeWeaverAware`
@@ -3637,21 +3637,21 @@ after the Spring container finishes instantiating, configuring, and initializing
 you can plug in one or more `BeanPostProcessor` implementations.
 
 You can configure multiple `BeanPostProcessor` instances, and you can control the order
-in which these ++BeanPostProcessor++s execute by setting the `order` property. You can
+in which these ``BeanPostProcessor``s execute by setting the `order` property. You can
 set this property only if the `BeanPostProcessor` implements the `Ordered` interface; if
 you write your own `BeanPostProcessor` you should consider implementing the `Ordered`
 interface too. For further details, consult the javadocs of the `BeanPostProcessor` and
 `Ordered` interfaces. See also the note below on
 <<beans-factory-programmatically-registering-beanpostprocessors, programmatic
-registration of `BeanPostProcessors`>>.
+registration of ``BeanPostProcessor``s>>.
 
 [NOTE]
 ====
-++BeanPostProcessor++s operate on bean (or object) __instances__; that is to say, the
-Spring IoC container instantiates a bean instance and __then__ ++BeanPostProcessor++s do
+``BeanPostProcessor``s operate on bean (or object) __instances__; that is to say, the
+Spring IoC container instantiates a bean instance and __then__ ``BeanPostProcessor``s do
 their work.
 
-++BeanPostProcessor++s are scoped __per-container__. This is only relevant if you are
+``BeanPostProcessor``s are scoped __per-container__. This is only relevant if you are
 using container hierarchies. If you define a `BeanPostProcessor` in one container, it
 will __only__ post-process the beans in that container. In other words, beans that are
 defined in one container are not post-processed by a `BeanPostProcessor` defined in
@@ -3679,12 +3679,12 @@ configuration metadata which implement the `BeanPostProcessor` interface. The
 later upon bean creation. Bean post-processors can be deployed in the container just
 like any other beans.
 
-Note that when declaring a ++BeanPostProcessor++ using an `@Bean` factory method on a
+Note that when declaring a `BeanPostProcessor` using an `@Bean` factory method on a
 configuration class, the return type of the factory method should be the implementation
 class itself or at least the `org.springframework.beans.factory.config.BeanPostProcessor`
 interface, clearly indicating the post-processor nature of that bean. Otherwise, the
 `ApplicationContext` won't be able to autodetect it by type before fully creating it.
-Since a ++BeanPostProcessor++ needs to be instantiated early in order to apply to the
+Since a `BeanPostProcessor` needs to be instantiated early in order to apply to the
 initialization of other beans in the context, this early type detection is critical.
 
 
@@ -3697,9 +3697,9 @@ While the recommended approach for `BeanPostProcessor` registration is through
 register them __programmatically__ against a `ConfigurableBeanFactory` using the
 `addBeanPostProcessor` method. This can be useful when needing to evaluate conditional
 logic before registration, or even for copying bean post processors across contexts in a
-hierarchy. Note however that `BeanPostProcessors` added programmatically __do not
+hierarchy. Note however that ``BeanPostProcessor``s added programmatically __do not
 respect the `Ordered` interface__. Here it is the __order of registration__ that
-dictates the order of execution. Note also that `BeanPostProcessors` registered
+dictates the order of execution. Note also that ``BeanPostProcessor``s registered
 programmatically are always processed before those registered through auto-detection,
 regardless of any explicit ordering.
 ====
@@ -3708,11 +3708,11 @@ regardless of any explicit ordering.
 [NOTE]
 ====
 Classes that implement the `BeanPostProcessor` interface are __special__ and are treated
-differently by the container. All `BeanPostProcessors` __and beans that they reference
+differently by the container. All ``BeanPostProcessor``s __and beans that they reference
 directly__ are instantiated on startup, as part of the special startup phase of the
-`ApplicationContext`. Next, all `BeanPostProcessors` are registered in a sorted fashion
+`ApplicationContext`. Next, all ``BeanPostProcessor``s are registered in a sorted fashion
 and applied to all further beans in the container. Because AOP auto-proxying is
-implemented as a `BeanPostProcessor` itself, neither `BeanPostProcessors` nor the beans
+implemented as a `BeanPostProcessor` itself, neither ``BeanPostProcessor``s nor the beans
 they reference directly are eligible for auto-proxying, and thus do not have aspects
 woven into them.
 
@@ -3729,7 +3729,7 @@ directly correspond to the declared name of a bean and no name attribute is used
 Spring will access other beans for matching them by type.
 ====
 
-The following examples show how to write, register, and use `BeanPostProcessors` in an
+The following examples show how to write, register, and use ``BeanPostProcessor``s in an
 `ApplicationContext`.
 
 
@@ -3850,10 +3850,10 @@ this interface are similar to those of the `BeanPostProcessor`, with one major
 difference: `BeanFactoryPostProcessor` operates on the __bean configuration metadata__;
 that is, the Spring IoC container allows a `BeanFactoryPostProcessor` to read the
 configuration metadata and potentially change it __before__ the container instantiates
-any beans other than `BeanFactoryPostProcessors`.
+any beans other than ``BeanFactoryPostProcessor``s.
 
-You can configure multiple `BeanFactoryPostProcessors`, and you can control the order in
-which these `BeanFactoryPostProcessors` execute by setting the `order` property.
+You can configure multiple ``BeanFactoryPostProcessor``s, and you can control the order in
+which these ``BeanFactoryPostProcessor``s execute by setting the `order` property.
 However, you can only set this property if the `BeanFactoryPostProcessor` implements the
 `Ordered` interface. If you write your own `BeanFactoryPostProcessor`, you should
 consider implementing the `Ordered` interface too. Consult the javadocs of the
@@ -3869,10 +3869,10 @@ to work with bean instances within a `BeanFactoryPostProcessor` (e.g., using
 standard container lifecycle. This may cause negative side effects such as bypassing
 bean post processing.
 
-Also, `BeanFactoryPostProcessors` are scoped __per-container__. This is only relevant if
+Also, ``BeanFactoryPostProcessor``s are scoped __per-container__. This is only relevant if
 you are using container hierarchies. If you define a `BeanFactoryPostProcessor` in one
 container, it will __only__ be applied to the bean definitions in that container. Bean
-definitions in one container will not be post-processed by `BeanFactoryPostProcessors`
+definitions in one container will not be post-processed by ``BeanFactoryPostProcessor``s
 in another container, even if both containers are part of the same hierarchy.
 ====
 
@@ -3892,8 +3892,8 @@ you would any other bean.
 
 [NOTE]
 ====
-As with ++BeanPostProcessor++s , you typically do not want to configure
-++BeanFactoryPostProcessor++s for lazy initialization. If no other bean references a
+As with ``BeanPostProcessor``s , you typically do not want to configure
+``BeanFactoryPostProcessor``s for lazy initialization. If no other bean references a
 `Bean(Factory)PostProcessor`, that post-processor will not get instantiated at all.
 Thus, marking it for lazy initialization will be ignored, and the
 `Bean(Factory)PostProcessor` will be instantiated eagerly even if you set the
@@ -4211,7 +4211,7 @@ example:
 This annotation simply indicates that the affected bean property must be populated at
 configuration time, through an explicit property value in a bean definition or through
 autowiring. The container throws an exception if the affected bean property has not been
-populated; this allows for eager and explicit failure, avoiding ++NullPointerException++s
+populated; this allows for eager and explicit failure, avoiding ``NullPointerException``s
 or the like later on. It is still recommended that you put assertions into the bean
 class itself, for example, into an init method. Doing so enforces those required
 references and values even when you use the class outside of a container.
@@ -5231,7 +5231,7 @@ For further details, consult the <<annotation-programming-model,Spring Annotatio
 === Automatically detecting classes and registering bean definitions
 
 Spring can automatically detect stereotyped classes and register corresponding
-++BeanDefinition++s with the `ApplicationContext`. For example, the following two classes
+``BeanDefinition``s with the `ApplicationContext`. For example, the following two classes
 are eligible for such autodetection:
 
 [source,java,indent=0]
@@ -6561,7 +6561,7 @@ inter-bean dependencies. See <<beans-java-basic-concepts>> for a general introdu
 [[beans-java-injecting-dependencies]]
 ==== Injecting inter-bean dependencies
 
-When ++@Bean++s have dependencies on one another, expressing that dependency is as simple
+When ``@Bean``s have dependencies on one another, expressing that dependency is as simple
 as having one bean method call another:
 
 [source,java,indent=0]
@@ -8385,7 +8385,7 @@ For optimal usage and understanding of application contexts, users should genera
 familiarize themselves with Spring's `Resource` abstraction, as described in the chapter
 <<resources>>.
 
-An application context is a `ResourceLoader`, which can be used to load ++Resource++s. A
+An application context is a `ResourceLoader`, which can be used to load ``Resource``s. A
 `Resource` is essentially a more feature rich version of the JDK class `java.net.URL`,
 in fact, the implementations of the `Resource` wrap an instance of `java.net.URL` where
 appropriate. A `Resource` can obtain low-level resources from almost any location in a
@@ -8471,7 +8471,7 @@ class for the configuration details involved in RAR deployment.
 __For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:__ package
 all application classes into a RAR file, which is a standard JAR file with a different
 file extension. Add all required library JARs into the root of the RAR archive. Add a
-"META-INF/ra.xml" deployment descriptor (as shown in ++SpringContextResourceAdapter++'s
+"META-INF/ra.xml" deployment descriptor (as shown in ``SpringContextResourceAdapter``s
 JavaDoc) and the corresponding Spring XML bean definition file(s) (typically
 "META-INF/applicationContext.xml"), and drop the resulting RAR file into your
 application server's deployment directory.
@@ -8589,7 +8589,7 @@ implementation, you must write code like this:
 In both cases, the explicit registration step is inconvenient, which is one reason why
 the various `ApplicationContext` implementations are preferred above plain `BeanFactory`
 implementations in the vast majority of Spring-backed applications, especially when
-using `BeanFactoryPostProcessors` and `BeanPostProcessors`. These mechanisms implement
+using ``BeanFactoryPostProcessor``s and ``BeanPostProcessor``s. These mechanisms implement
 important functionality such as property placeholder replacement and AOP.
 
 
