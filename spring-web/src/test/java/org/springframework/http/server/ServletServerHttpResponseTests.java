@@ -16,22 +16,19 @@
 
 package org.springframework.http.server;
 
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -56,6 +53,15 @@ public class ServletServerHttpResponseTests {
 		response.setStatusCode(HttpStatus.NOT_FOUND);
 		assertEquals("Invalid status code", 404, mockResponse.getStatus());
 	}
+
+    @Test
+    public void testAccessControlOriginHeader() throws Exception {
+        mockResponse.addHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "domain1.com");
+
+        String allowedOrigin = response.getHeaders().getAccessControlAllowOrigin();
+        assertNotNull("The Access-Control-Allow-Origin header should be set", allowedOrigin);
+        assertTrue("The Access-Control-Allow-Origin header should contain domain1.com", allowedOrigin.contains("domain1.com"));
+    }
 
 	@Test
 	public void getHeaders() throws Exception {
