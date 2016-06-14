@@ -85,9 +85,10 @@ public abstract class MultipartResolutionDelegate {
 
 	public static boolean isMultipartArgument(MethodParameter parameter) {
 		Class<?> paramType = parameter.getNestedParameterType();
-		return (MultipartFile.class == paramType || isMultipartFileCollection(parameter) ||
-				isMultipartFileArray(parameter) || servletPartClass == paramType ||
-				isPartCollection(parameter) || isPartArray(parameter));
+		return (MultipartFile.class == paramType ||
+				isMultipartFileCollection(parameter) || isMultipartFileArray(parameter) ||
+				(servletPartClass != null && (servletPartClass == paramType ||
+						isPartCollection(parameter) || isPartArray(parameter))));
 	}
 
 	public static Object resolveMultipartArgument(String name, MethodParameter parameter, HttpServletRequest request)
