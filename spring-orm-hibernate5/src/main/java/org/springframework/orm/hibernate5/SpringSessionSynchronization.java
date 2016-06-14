@@ -98,7 +98,7 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 			Session session = getCurrentSession();
 			// Read-write transaction -> flush the Hibernate Session.
 			// Further check: only flush when not FlushMode.MANUAL.
-			if (!session.getFlushMode().equals(FlushMode.MANUAL)) {
+			if (!FlushMode.MANUAL.equals(SessionFactoryUtils.getFlushMode(session))) {
 				try {
 					SessionFactoryUtils.logger.debug("Flushing Hibernate Session on transaction synchronization");
 					session.flush();
