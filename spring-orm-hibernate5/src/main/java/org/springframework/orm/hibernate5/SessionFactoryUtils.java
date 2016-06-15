@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate5;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -62,6 +63,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -148,12 +150,16 @@ public abstract class SessionFactoryUtils {
 	 * @see ConnectionProvider
 	 */
 	public static DataSource getDataSource(SessionFactory sessionFactory) {
-		if (sessionFactory instanceof SessionFactoryImplementor) {
-			SessionFactoryImplementor sfi = (SessionFactoryImplementor) sessionFactory;
-			Object dataSourceValue = sfi.getProperties().get(Environment.DATASOURCE);
+		Method getProperties = ClassUtils.getMethodIfAvailable(sessionFactory.getClass(), "getProperties");
+		if (getProperties != null) {
+			Map<?, ?> props = (Map<?, ?>) ReflectionUtils.invokeMethod(getProperties, sessionFactory);
+			Object dataSourceValue = props.get(Environment.DATASOURCE);
 			if (dataSourceValue instanceof DataSource) {
 				return (DataSource) dataSourceValue;
 			}
+		}
+		if (sessionFactory instanceof SessionFactoryImplementor) {
+			SessionFactoryImplementor sfi = (SessionFactoryImplementor) sessionFactory;
 			try {
 				ConnectionProvider cp = sfi.getServiceRegistry().getService(ConnectionProvider.class);
 				if (cp != null) {
