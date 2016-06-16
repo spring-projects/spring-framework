@@ -39,6 +39,7 @@ import reactor.core.util.BackpressureUtils;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -330,6 +331,9 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 						logger.trace("written: " + written + " total: " + total);
 						if (written == total) {
+							if (dataBuffer instanceof FlushingDataBuffer) {
+								flush(output);
+							}
 							releaseBuffer();
 							if (!completed) {
 								subscription.request(1);
@@ -359,6 +363,17 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				}
 
 				return bytesWritten;
+			}
+
+			private void flush(ServletOutputStream output) {
+				if (output.isReady()) {
+					logger.trace("Flushing");
+					try {
+						output.flush();
+					}
+					catch (IOException ignored) {
+					}
+				}
 			}
 
 			private void releaseBuffer() {

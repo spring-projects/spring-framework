@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -28,6 +29,7 @@ import reactor.core.publisher.Mono;
 import rx.Observable;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpStatus;
@@ -63,20 +65,14 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		Observable<ByteBuf> content =
-				RxJava1ObservableConverter.from(publisher).map(this::toByteBuf);
-		Observable<Void> completion = this.response.write(content);
-		return RxJava1ObservableConverter.from(completion).then();
+	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
+		Observable<ByteBuf> content = RxJava1ObservableConverter.from(body).map(this::toByteBuf);
+		return RxJava1ObservableConverter.from(this.response.write(content, bb -> bb instanceof FlushingByteBuf)).then();
 	}
 
 	private ByteBuf toByteBuf(DataBuffer buffer) {
-		if (buffer instanceof NettyDataBuffer) {
-			return ((NettyDataBuffer) buffer).getNativeBuffer();
-		}
-		else {
-			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
-		}
+		ByteBuf byteBuf = (buffer instanceof NettyDataBuffer ? ((NettyDataBuffer) buffer).getNativeBuffer() :  Unpooled.wrappedBuffer(buffer.asByteBuffer()));
+		return (buffer instanceof FlushingDataBuffer ? new FlushingByteBuf(byteBuf) : byteBuf);
 	}
 
 	@Override
@@ -101,6 +97,14 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.response.addCookie(cookie);
 			}
+		}
+	}
+
+	private class FlushingByteBuf extends CompositeByteBuf {
+
+		public FlushingByteBuf(ByteBuf byteBuf) {
+			super(byteBuf.alloc(), byteBuf.isDirect(), 1);
+			this.addComponent(true, byteBuf);
 		}
 	}
 

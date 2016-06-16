@@ -35,6 +35,8 @@ import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.FlushingDataBuffer;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -201,6 +203,8 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		private volatile ByteBuffer byteBuffer;
 
+		private volatile DataBuffer dataBuffer;
+
 		private volatile boolean completed = false;
 
 		private Subscription subscription;
@@ -232,6 +236,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 			logger.trace("onNext. buffer: " + dataBuffer);
 
 			this.byteBuffer = dataBuffer.asByteBuffer();
+			this.dataBuffer = dataBuffer;
 		}
 
 		@Override
@@ -266,8 +271,6 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 				}
 			}
 			catch (IOException ignored) {
-				logger.error(ignored, ignored);
-
 			}
 		}
 
@@ -283,6 +286,9 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 						logger.trace("written: " + written + " total: " + total);
 
 						if (written == total) {
+							if (dataBuffer instanceof FlushingDataBuffer) {
+								flush(channel);
+							}
 							releaseBuffer();
 							if (!completed) {
 								subscription.request(1);
@@ -302,11 +308,6 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 			}
 
-			private void releaseBuffer() {
-				byteBuffer = null;
-
-			}
-
 			private int writeByteBuffer(StreamSinkChannel channel) throws IOException {
 				int written;
 				int totalWritten = 0;
@@ -316,6 +317,17 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 				}
 				while (byteBuffer.hasRemaining() && written > 0);
 				return totalWritten;
+			}
+
+			private void flush(StreamSinkChannel channel) throws IOException {
+				logger.trace("Flushing");
+				channel.flush();
+			}
+
+			private void releaseBuffer() {
+				DataBufferUtils.release(dataBuffer);
+				dataBuffer = null;
+				byteBuffer = null;
 			}
 
 		}
