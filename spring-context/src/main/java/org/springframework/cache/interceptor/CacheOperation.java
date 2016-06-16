@@ -115,7 +115,8 @@ public abstract class CacheOperation implements BasicOperation {
 	/**
 	 * Return an identifying description for this cache operation.
 	 * <p>Returned value is produced by calling {@link Builder#getOperationDescription()}
-	 * during object construction. This method is used in {@link #hashCode} and {@link #equals}.
+	 * during object construction. This method is used in {@link #hashCode} and
+	 * {@link #equals}.
 	 * @see Builder#getOperationDescription()
 	 */
 	@Override
