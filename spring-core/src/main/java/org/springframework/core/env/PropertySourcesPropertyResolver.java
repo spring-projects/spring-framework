@@ -18,6 +18,7 @@ package org.springframework.core.env;
 
 import org.springframework.core.convert.ConversionException;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link PropertyResolver} implementation that resolves property values against
@@ -86,7 +87,10 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 					if (resolveNestedPlaceholders && value instanceof String) {
 						value = resolveNestedPlaceholders((String) value);
 					}
-					if (debugEnabled) {
+					if (debugEnabled && key.toLowerCase().contains("password")) {
+						logger.debug(String.format("Found key '%s' in [%s] with type [%s] and value '****'",
+								key, propertySource.getName(), valueType.getSimpleName()));
+					} else if (debugEnabled) {
 						logger.debug(String.format("Found key '%s' in [%s] with type [%s] and value '%s'",
 								key, propertySource.getName(), valueType.getSimpleName(), value));
 					}
