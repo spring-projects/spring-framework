@@ -8403,6 +8403,33 @@ result in an exception as a custom `CacheManager` will be ignored by the
 `CacheResolver` implementation. This is probably not what you expect.
 ====
 
+[[cache-annotations-cacheable-synchronized]]
+===== Synchronized caching
+In a multi-threaded environment, certain operations might be concurrently invoked for
+the same argument (typically on startup). By default, the cache abstraction does not
+lock anything and the same value may be computed several times, defeating the purpose
+of caching.
+
+For those particular cases, the `sync` attribute can be used to instruct the underlying
+cache provider to _lock_ the cache entry while the value is being computed. As a result,
+only one thread will be busy computing the value while the others are blocked until the
+entry is updated in the cache.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(cacheNames="foos", **sync="true"**)
+	public Foo executeExpensiveOperation(String id) {...}
+----
+
+[NOTE]
+====
+This is an optional feature and your favorite cache library may not support it. All
+`CacheManager` implementations provided by the core framework support it. Check the
+documentation of your cache provider for more details.
+====
+
+
 [[cache-annotations-cacheable-condition]]
 ===== Conditional caching
 Sometimes, a method might not be suitable for caching all the time (for example, it
