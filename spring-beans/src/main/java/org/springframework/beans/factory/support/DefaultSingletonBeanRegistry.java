@@ -449,11 +449,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	private boolean isDependent(String beanName, String dependentBeanName, Set<String> alreadySeen) {
-		String canonicalName = canonicalName(beanName);
 		if (alreadySeen != null && alreadySeen.contains(beanName)) {
 			return false;
 		}
-		Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
+		Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName(beanName));
 		if (dependentBeans == null) {
 			return false;
 		}
