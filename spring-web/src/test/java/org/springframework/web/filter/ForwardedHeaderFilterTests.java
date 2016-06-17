@@ -16,6 +16,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +40,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class ForwardedHeaderFilterTests {
 
+	private static final String X_FORWARDED_PROTO = "x-forwarded-proto"; // SPR-14372 (case insensitive)
+	private static final String X_FORWARDED_HOST = "x-forwarded-host";
+	private static final String X_FORWARDED_PORT = "x-forwarded-port";
+	private static final String X_FORWARDED_PREFIX = "x-forwarded-prefix";
+
+
 	private final ForwardedHeaderFilter filter = new ForwardedHeaderFilter();
 
 	private MockHttpServletRequest request;
@@ -59,25 +66,25 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void contextPathEmpty() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "");
+		this.request.addHeader(X_FORWARDED_PREFIX, "");
 		assertEquals("", filterAndGetContextPath());
 	}
 
 	@Test
 	public void contextPathWithTrailingSlash() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/foo/bar/");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/foo/bar/");
 		assertEquals("/foo/bar", filterAndGetContextPath());
 	}
 
 	@Test
 	public void contextPathWithTrailingSlashes() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/foo/bar/baz///");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/foo/bar/baz///");
 		assertEquals("/foo/bar/baz", filterAndGetContextPath());
 	}
 
 	@Test
 	public void requestUri() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/");
 		this.request.setContextPath("/app");
 		this.request.setRequestURI("/app/path");
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -88,7 +95,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriWithTrailingSlash() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/");
 		this.request.setContextPath("/app");
 		this.request.setRequestURI("/app/path/");
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -98,7 +105,7 @@ public class ForwardedHeaderFilterTests {
 	}
 	@Test
 	public void requestUriEqualsContextPath() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/");
 		this.request.setContextPath("/app");
 		this.request.setRequestURI("/app");
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -109,7 +116,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriRootUrl() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/");
 		this.request.setContextPath("/app");
 		this.request.setRequestURI("/app/");
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -119,11 +126,36 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
+	public void caseInsensitiveForwardedPrefix() throws Exception {
+		this.request = new MockHttpServletRequest() {
+
+			// Make it case-sensitive (SPR-14372)
+
+			@Override
+			public String getHeader(String header) {
+				Enumeration<String> names = getHeaderNames();
+				while (names.hasMoreElements()) {
+					String name = names.nextElement();
+					if (name.equals(header)) {
+						return super.getHeader(header);
+					}
+				}
+				return null;
+			}
+		};
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
+		this.request.setRequestURI("/path");
+		HttpServletRequest actual = filterAndGetWrappedRequest();
+
+		assertEquals("/prefix/path", actual.getRequestURI());
+	}
+
+	@Test
 	public void shouldFilter() throws Exception {
 		testShouldFilter("Forwarded");
-		testShouldFilter("X-Forwarded-Host");
-		testShouldFilter("X-Forwarded-Port");
-		testShouldFilter("X-Forwarded-Proto");
+		testShouldFilter(X_FORWARDED_HOST);
+		testShouldFilter(X_FORWARDED_PORT);
+		testShouldFilter(X_FORWARDED_PROTO);
 	}
 
 	@Test
@@ -134,9 +166,9 @@ public class ForwardedHeaderFilterTests {
 	@Test
 	public void forwardedRequest() throws Exception {
 		this.request.setRequestURI("/mvc-showcase");
-		this.request.addHeader("X-Forwarded-Proto", "https");
-		this.request.addHeader("X-Forwarded-Host", "84.198.58.199");
-		this.request.addHeader("X-Forwarded-Port", "443");
+		this.request.addHeader(X_FORWARDED_PROTO, "https");
+		this.request.addHeader(X_FORWARDED_HOST, "84.198.58.199");
+		this.request.addHeader(X_FORWARDED_PORT, "443");
 		this.request.addHeader("foo", "bar");
 
 		this.filter.doFilter(this.request, new MockHttpServletResponse(), this.filterChain);
@@ -148,15 +180,15 @@ public class ForwardedHeaderFilterTests {
 		assertEquals(443, actual.getServerPort());
 		assertTrue(actual.isSecure());
 
-		assertNull(actual.getHeader("X-Forwarded-Proto"));
-		assertNull(actual.getHeader("X-Forwarded-Host"));
-		assertNull(actual.getHeader("X-Forwarded-Port"));
+		assertNull(actual.getHeader(X_FORWARDED_PROTO));
+		assertNull(actual.getHeader(X_FORWARDED_HOST));
+		assertNull(actual.getHeader(X_FORWARDED_PORT));
 		assertEquals("bar", actual.getHeader("foo"));
 	}
 
 	@Test
 	public void requestUriWithForwardedPrefix() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/prefix");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
 		this.request.setRequestURI("/mvc-showcase");
 
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -165,7 +197,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void requestUriWithForwardedPrefixTrailingSlash() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/prefix/");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
 		this.request.setRequestURI("/mvc-showcase");
 
 		HttpServletRequest actual = filterAndGetWrappedRequest();
@@ -174,7 +206,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void contextPathWithForwardedPrefix() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/prefix");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix");
 		this.request.setContextPath("/mvc-showcase");
 
 		String actual = filterAndGetContextPath();
@@ -183,7 +215,7 @@ public class ForwardedHeaderFilterTests {
 
 	@Test
 	public void contextPathWithForwardedPrefixTrailingSlash() throws Exception {
-		this.request.addHeader("X-Forwarded-Prefix", "/prefix/");
+		this.request.addHeader(X_FORWARDED_PREFIX, "/prefix/");
 		this.request.setContextPath("/mvc-showcase");
 
 		String actual = filterAndGetContextPath();

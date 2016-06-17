@@ -19,9 +19,8 @@ package org.springframework.web.filter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.FilterChain;
@@ -33,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
@@ -52,10 +52,10 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
-	private static final Set<String> FORWARDED_HEADER_NAMES;
+	private static final Set<String> FORWARDED_HEADER_NAMES =
+			Collections.newSetFromMap(new LinkedCaseInsensitiveMap<Boolean>(5, Locale.ENGLISH));
 
 	static {
-		FORWARDED_HEADER_NAMES = new HashSet<String>(5);
 		FORWARDED_HEADER_NAMES.add("Forwarded");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Host");
 		FORWARDED_HEADER_NAMES.add("X-Forwarded-Port");
@@ -69,9 +69,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-		Enumeration<String> headerNames = request.getHeaderNames();
-		while (headerNames.hasMoreElements()) {
-			String name = headerNames.nextElement();
+		Enumeration<String> names = request.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
 			if (FORWARDED_HEADER_NAMES.contains(name)) {
 				return false;
 			}
@@ -136,27 +136,33 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		}
 
 		private static String getForwardedPrefix(HttpServletRequest request) {
-			String header = request.getHeader("X-Forwarded-Prefix");
-			if (header != null) {
-				while (header.endsWith("/")) {
-					header = header.substring(0, header.length() - 1);
+			String prefix = null;
+			Enumeration<String> names = request.getHeaderNames();
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				if ("X-Forwarded-Prefix".equalsIgnoreCase(name)) {
+					prefix = request.getHeader(name);
 				}
 			}
-			return header;
+			if (prefix != null) {
+				while (prefix.endsWith("/")) {
+					prefix = prefix.substring(0, prefix.length() - 1);
+				}
+			}
+			return prefix;
 		}
 
 		/**
 		 * Copy the headers excluding any {@link #FORWARDED_HEADER_NAMES}.
 		 */
 		private static Map<String, List<String>> initHeaders(HttpServletRequest request) {
-			Map<String, List<String>> headers = new LinkedHashMap<String, List<String>>();
-			Enumeration<String> headerNames = request.getHeaderNames();
-			while (headerNames.hasMoreElements()) {
-				String name = headerNames.nextElement();
-				headers.put(name, Collections.list(request.getHeaders(name)));
-			}
-			for (String name : FORWARDED_HEADER_NAMES) {
-				headers.remove(name);
+			Map<String, List<String>> headers = new LinkedCaseInsensitiveMap<List<String>>(Locale.ENGLISH);
+			Enumeration<String> names = request.getHeaderNames();
+			while (names.hasMoreElements()) {
+				String name = names.nextElement();
+				if (!FORWARDED_HEADER_NAMES.contains(name)) {
+					headers.put(name, Collections.list(request.getHeaders(name)));
+				}
 			}
 			return headers;
 		}
