@@ -30,8 +30,8 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * to loaded classes without the need to use a VM-wide agent.
  *
  * <p>To be registered using a
- * {@code <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/loader.html">Loader</a>} tag
- * in Tomcat's {@code <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">Context</a>}
+ * <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/loader.html">{@code Loader}</a> tag
+ * in Tomcat's <a href="http://tomcat.apache.org/tomcat-6.0-doc/config/context.html">{@code Context}</a>
  * definition in the {@code server.xml} file, with the Spring-provided "spring-instrument-tomcat.jar"
  * file deployed into Tomcat's "lib" directory. The required configuration tag looks as follows:
  *
