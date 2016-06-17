@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -105,6 +107,8 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	private volatile long timeLastActive = this.timeCreated;
 
 	private volatile ScheduledFuture<?> heartbeatTask;
+
+	private final Lock heartbeatLock = new ReentrantLock();
 
 	private volatile boolean heartbeatDisabled;
 
@@ -246,8 +250,15 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	public void sendHeartbeat() throws SockJsTransportFailureException {
 		if (isActive()) {
-			writeFrame(SockJsFrame.heartbeatFrame());
-			scheduleHeartbeat();
+			if (heartbeatLock.tryLock()) {
+				try {
+					writeFrame(SockJsFrame.heartbeatFrame());
+					scheduleHeartbeat();
+				}
+				finally {
+					heartbeatLock.unlock();
+				}
+			}
 		}
 	}
 
@@ -282,13 +293,26 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		try {
 			ScheduledFuture<?> task = this.heartbeatTask;
 			this.heartbeatTask = null;
-
-			if ((task != null) && !task.isDone()) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Cancelling heartbeat in session " + getId());
-				}
-				task.cancel(false);
+			if (task == null || task.isCancelled()) {
+				return;
 			}
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Cancelling heartbeat in session " + getId());
+			}
+			if (task.cancel(false)) {
+				return;
+			}
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Failed to cancel heartbeat, acquiring heartbeat write lock.");
+			}
+			this.heartbeatLock.lock();
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("Releasing heartbeat lock.");
+			}
+			this.heartbeatLock.unlock();
 		}
 		catch (Throwable ex) {
 			logger.debug("Failure while cancelling heartbeat in session " + getId(), ex);
