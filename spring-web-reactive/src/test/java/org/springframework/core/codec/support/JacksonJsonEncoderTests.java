@@ -16,11 +16,14 @@
 
 package org.springframework.core.codec.support;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
@@ -50,8 +53,9 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 	public void write() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 
+		ResolvableType type = ResolvableType.forClass(Pojo.class);
 		Flux<DataBuffer> output =
-				this.encoder.encode(source, this.dataBufferFactory, null, null);
+				this.encoder.encode(source, this.dataBufferFactory, type, null);
 
 		TestSubscriber
 				.subscribe(output)
@@ -62,6 +66,37 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 						stringConsumer(","),
 						stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"),
 						stringConsumer("]"));
+	}
+
+	@Test
+	public void writeWithType() {
+		Flux<ParentClass> source = Flux.just(new Foo(), new Bar());
+
+		ResolvableType type = ResolvableType.forClass(ParentClass.class);
+		Flux<DataBuffer> output =
+				this.encoder.encode(source, this.dataBufferFactory, type, null);
+
+		TestSubscriber
+				.subscribe(output)
+				.assertComplete()
+				.assertNoError()
+				.assertValuesWith(stringConsumer("["),
+						stringConsumer("{\"type\":\"foo\"}"),
+						stringConsumer(","),
+						stringConsumer("{\"type\":\"bar\"}"),
+						stringConsumer("]"));
+	}
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+	private static class ParentClass {
+	}
+
+	@JsonTypeName("foo")
+	private static class Foo extends ParentClass {
+	}
+
+	@JsonTypeName("bar")
+	private static class Bar extends ParentClass {
 	}
 
 }

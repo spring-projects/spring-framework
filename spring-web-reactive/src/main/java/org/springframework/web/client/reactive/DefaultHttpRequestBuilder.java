@@ -60,6 +60,8 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
 	protected Publisher contentPublisher;
 
+	protected ResolvableType contentType;
+
 	protected final List<HttpCookie> cookies = new ArrayList<HttpCookie>();
 
 	protected DefaultHttpRequestBuilder() {
@@ -111,11 +113,13 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
 	public DefaultHttpRequestBuilder content(Object content) {
 		this.contentPublisher = Mono.just(content);
+		this.contentType = ResolvableType.forInstance(content);
 		return this;
 	}
 
-	public DefaultHttpRequestBuilder contentStream(Publisher<?> content) {
+	public DefaultHttpRequestBuilder contentStream(Publisher<?> content, ResolvableType type) {
 		this.contentPublisher = Flux.from(content);
+		this.contentType = type;
 		return this;
 	}
 
@@ -139,22 +143,21 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 		request.getHeaders().putAll(this.httpHeaders);
 
 		if (this.contentPublisher != null) {
-			ResolvableType requestBodyType = ResolvableType.forInstance(this.contentPublisher);
 			MediaType mediaType = request.getHeaders().getContentType();
 
 			Optional<Encoder<?>> messageEncoder = messageEncoders
 					.stream()
-					.filter(e -> e.canEncode(requestBodyType, mediaType))
+					.filter(e -> e.canEncode(this.contentType, mediaType))
 					.findFirst();
 
 			if (messageEncoder.isPresent()) {
 				request.writeWith(messageEncoder.get()
 						.encode(this.contentPublisher, request.bufferFactory(),
-								requestBodyType, mediaType));
+								this.contentType, mediaType));
 			}
 			else {
 				throw new WebClientException("Can't write request body " +
-						"of type '" + requestBodyType.toString() +
+						"of type '" + this.contentType.toString() +
 						"' for content-type '" + mediaType.toString() + "'");
 			}
 		}
