@@ -155,6 +155,27 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		String encoding = determineEncoding(request);
 		FileUpload fileUpload = prepareFileUpload(encoding);
 		try {
+			Collection<Part> parts = request.getParts();
+			if(parts != null){
+	            		List<FileItem> items = new ArrayList<FileItem>();
+				for(Part part : parts){
+					 FileItemFactory fac = getFileItemFactory();
+					 String contentType = part.getContentType();
+					 FileItem fileItem = null;
+					 if(contentType == null){
+						 fileItem = fac.createItem(part.getName(),
+								 contentType, true,
+								 part.getName());
+					 } else {
+						 fileItem = fac.createItem(part.getName(),
+								 contentType, false,
+								 part.getName());
+					 }
+                    			Streams.copy(part.getInputStream(), fileItem.getOutputStream(), true);
+	                		items.add(fileItem);
+				}
+				return parseFileItems(items, encoding);
+			}
 			List<FileItem> fileItems = ((ServletFileUpload) fileUpload).parseRequest(request);
 			return parseFileItems(fileItems, encoding);
 		}
@@ -164,6 +185,12 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		catch (FileUploadException ex) {
 			throw new MultipartException("Could not parse multipart servlet request", ex);
 		}
+		catch (IOException ex) {
+			throw new MultipartException("Could not parse multipart servlet request", ex);
+		}
+		catch (ServletException ex) {
+			throw new MultipartException("Could not parse multipart servlet request", ex);
+		} 
 	}
 
 	/**
