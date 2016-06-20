@@ -44,13 +44,13 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 	}
 
 	@Test
-	public void canWrite() {
+	public void canEncode() {
 		assertTrue(this.encoder.canEncode(null, MediaType.APPLICATION_JSON));
 		assertFalse(this.encoder.canEncode(null, MediaType.APPLICATION_XML));
 	}
 
 	@Test
-	public void write() {
+	public void encode() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
@@ -69,7 +69,7 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 	}
 
 	@Test
-	public void writeWithType() {
+	public void encodeWithType() {
 		Flux<ParentClass> source = Flux.just(new Foo(), new Bar());
 
 		ResolvableType type = ResolvableType.forClass(ParentClass.class);
