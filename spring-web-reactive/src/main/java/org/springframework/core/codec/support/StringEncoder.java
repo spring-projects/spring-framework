@@ -53,8 +53,8 @@ public class StringEncoder extends AbstractEncoder<String> {
 			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
 			Object... hints) {
 		Charset charset;
-		if (mimeType != null && mimeType.getCharSet() != null) {
-			charset = mimeType.getCharSet();
+		if (mimeType != null && mimeType.getCharset() != null) {
+			charset = mimeType.getCharset();
 		}
 		else {
 			 charset = DEFAULT_CHARSET;
