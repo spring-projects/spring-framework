@@ -46,6 +46,7 @@ import org.hibernate.cfg.Environment;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 
+import org.springframework.core.InfrastructureProxy;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -317,7 +318,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	public SessionFactory buildSessionFactory(AsyncTaskExecutor bootstrapExecutor) {
 		Assert.notNull(bootstrapExecutor, "AsyncTaskExecutor must not be null");
 		return (SessionFactory) Proxy.newProxyInstance(this.resourcePatternResolver.getClassLoader(),
-				new Class<?>[] {SessionFactoryImplementor.class},
+				new Class<?>[] {SessionFactoryImplementor.class, InfrastructureProxy.class},
 				new BootstrapSessionFactoryInvocationHandler(bootstrapExecutor));
 	}
 
@@ -353,6 +354,10 @@ public class LocalSessionFactoryBuilder extends Configuration {
 				}
 				else if (method.getName().equals("getProperties")) {
 					return getProperties();
+				}
+				else if (method.getName().equals("getWrappedObject")) {
+					// Call coming in through InfrastructureProxy interface...
+					return getSessionFactory();
 				}
 				// Regular delegation to the target SessionFactory,
 				// enforcing its full initialization...
