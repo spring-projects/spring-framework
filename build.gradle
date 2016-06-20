@@ -526,7 +526,6 @@ project("spring-messaging") {
 		}
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("log4j:log4j:${log4jVersion}")
@@ -972,7 +971,6 @@ project("spring-websocket") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
 		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("log4j:log4j:${log4jVersion}")
