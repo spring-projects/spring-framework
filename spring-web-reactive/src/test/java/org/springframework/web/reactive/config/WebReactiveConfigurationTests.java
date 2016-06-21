@@ -55,6 +55,7 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
+import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.HttpMessageConverterView;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
@@ -183,13 +184,12 @@ public class WebReactiveConfigurationTests {
 		service.canConvert(Observable.class, Flux.class);
 	}
 
-
 	@Test
-	public void responseBodyResultHandler() throws Exception {
+	public void responseEntityResultHandler() throws Exception {
 		ApplicationContext context = loadConfig(WebReactiveConfiguration.class);
 
-		String name = "responseBodyResultHandler";
-		ResponseBodyResultHandler handler = context.getBean(name, ResponseBodyResultHandler.class);
+		String name = "responseEntityResultHandler";
+		ResponseEntityResultHandler handler = context.getBean(name, ResponseEntityResultHandler.class);
 		assertNotNull(handler);
 
 		assertEquals(0, handler.getOrder());
@@ -202,6 +202,34 @@ public class WebReactiveConfigurationTests {
 		assertHasConverter(converters, Resource.class, MediaType.IMAGE_PNG);
 		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
 		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_JSON);
+
+		name = "mvcContentTypeResolver";
+		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
+		assertSame(resolver, handler.getContentTypeResolver());
+	}
+
+	@Test
+	public void responseBodyResultHandler() throws Exception {
+		ApplicationContext context = loadConfig(WebReactiveConfiguration.class);
+
+		String name = "responseBodyResultHandler";
+		ResponseBodyResultHandler handler = context.getBean(name, ResponseBodyResultHandler.class);
+		assertNotNull(handler);
+
+		assertEquals(100, handler.getOrder());
+
+		List<HttpMessageConverter<?>> converters = handler.getMessageConverters();
+		assertEquals(5, converters.size());
+
+		assertHasConverter(converters, ByteBuffer.class, MediaType.APPLICATION_OCTET_STREAM);
+		assertHasConverter(converters, String.class, MediaType.TEXT_PLAIN);
+		assertHasConverter(converters, Resource.class, MediaType.IMAGE_PNG);
+		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
+		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_JSON);
+
+		name = "mvcContentTypeResolver";
+		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
+		assertSame(resolver, handler.getContentTypeResolver());
 	}
 
 	@Test

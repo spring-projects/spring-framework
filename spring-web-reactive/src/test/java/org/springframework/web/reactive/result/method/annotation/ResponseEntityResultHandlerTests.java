@@ -13,36 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.ui.ExtendedModelMap;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.FixedContentTypeResolver;
@@ -58,100 +57,92 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
-
 /**
- * Unit tests for {@link ResponseBodyResultHandler}.
- * @author Sebastien Deleuze
+ * Unit tests for {@link ResponseEntityResultHandler}.
  * @author Rossen Stoyanchev
  */
-public class ResponseBodyResultHandlerTests {
+public class ResponseEntityResultHandlerTests {
+
+	private MockServerHttpResponse response = new MockServerHttpResponse();
 
 
 	@Test
 	public void supports() throws NoSuchMethodException {
-		ResponseBodyResultHandler handler = createHandler(new StringEncoder());
+		ResponseEntityResultHandler handler = createHandler(new StringEncoder());
 		TestController controller = new TestController();
 
-		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("notAnnotated"));
+		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("responseString"));
 		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
+		assertTrue(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
+
+		hm = new HandlerMethod(controller, TestController.class.getMethod("responseVoid"));
+		type = ResolvableType.forMethodParameter(hm.getReturnType());
+		assertTrue(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
+
+		hm = new HandlerMethod(controller, TestController.class.getMethod("string"));
+		type = ResolvableType.forMethodParameter(hm.getReturnType());
 		assertFalse(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
 	}
 
 	@Test
 	public void defaultOrder() throws Exception {
-		ResponseBodyResultHandler handler = createHandler(new StringEncoder());
-		assertEquals(100, handler.getOrder());
+		ResponseEntityResultHandler handler = createHandler(new StringEncoder());
+		assertEquals(0, handler.getOrder());
 	}
 
 	@Test
-	public void usesContentTypeResolver() throws Exception {
+	public void jsonResponseBody() throws Exception {
 		RequestedContentTypeResolver resolver = new FixedContentTypeResolver(APPLICATION_JSON_UTF8);
 		HandlerResultHandler handler = createHandler(resolver, new StringEncoder(), new JacksonJsonEncoder());
 
+		TestController controller = new TestController();
+		HandlerMethod hm = new HandlerMethod(controller, controller.getClass().getMethod("responseString"));
+		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
+		HandlerResult result = new HandlerResult(hm, ResponseEntity.ok("fooValue"), type);
+
 		ServerWebExchange exchange = createExchange("/foo");
-		HandlerResult result = new HandlerResult(new Object(), "fooValue", ResolvableType.forClass(String.class));
 		handler.handleResult(exchange, result).block();
 
-		assertEquals(APPLICATION_JSON_UTF8, exchange.getResponse().getHeaders().getContentType());
-	}
-
-	@Test
-	public void detectsProducibleMediaTypesAttribute() throws Exception {
-		ServerWebExchange exchange = createExchange("/foo");
-		Set<MediaType> mediaTypes = Collections.singleton(MediaType.APPLICATION_JSON);
-		exchange.getAttributes().put(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
-
-		HandlerResultHandler handler = createHandler(new StringEncoder(), new JacksonJsonEncoder());
-
-		HandlerResult result = new HandlerResult(new Object(), "fooValue", ResolvableType.forClass(String.class));
-		handler.handleResult(exchange, result).block();
-
-		assertEquals(MediaType.APPLICATION_JSON, exchange.getResponse().getHeaders().getContentType());
+		assertEquals(HttpStatus.OK, this.response.getStatus());
+		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+		TestSubscriber.subscribe(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals("\"fooValue\"",
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
 
-	private ResponseBodyResultHandler createHandler(Encoder<?>... encoders) {
+	private ResponseEntityResultHandler createHandler(Encoder<?>... encoders) {
 		return createHandler(new HeaderContentTypeResolver(), encoders);
 	}
 
-	private ResponseBodyResultHandler createHandler(RequestedContentTypeResolver resolver,
+	private ResponseEntityResultHandler createHandler(RequestedContentTypeResolver resolver,
 			Encoder<?>... encoders) {
 
 		List<HttpMessageConverter<?>> converters = Arrays.stream(encoders)
 				.map(encoder -> new CodecHttpMessageConverter<>(encoder, null))
 				.collect(Collectors.toList());
-		return new ResponseBodyResultHandler(converters, new DefaultConversionService(), resolver);
+		return new ResponseEntityResultHandler(converters, new DefaultConversionService(), resolver);
 	}
 
 	private ServerWebExchange createExchange(String path) throws URISyntaxException {
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
 		WebSessionManager sessionManager = mock(WebSessionManager.class);
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		return new DefaultServerWebExchange(request, this.response, sessionManager);
 	}
 
 
 	@SuppressWarnings("unused")
 	private static class TestController {
 
-		public Publisher<String> notAnnotated() {
+		public ResponseEntity<String> responseString() {
 			return null;
 		}
 
-		@ResponseBody
-		public Publisher<String> publisherString() {
+		public ResponseEntity<Void> responseVoid() {
 			return null;
 		}
 
-		@ResponseBody
-		public Publisher<Void> publisherVoid() {
+		public String string() {
 			return null;
 		}
 	}

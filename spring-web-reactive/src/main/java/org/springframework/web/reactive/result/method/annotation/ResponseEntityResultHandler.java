@@ -13,43 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.method.HandlerMethod;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 
-
 /**
- * {@code HandlerResultHandler} that handles return values from methods annotated
- * with {@code @ResponseBody} writing to the body of the request or response with
- * an {@link HttpMessageConverter}.
+ * Handles {@link HttpEntity} and {@link ResponseEntity} return values.
  *
- * <p>By default the order for the result handler is set to 100. It detects the
- * presence of an {@code @ResponseBody} annotation and should be ordered after
- * result handlers that look for a specific return type such as
- * {@code ResponseEntity}.
+ * <p>By default the order for this result handler is set to 0. It is generally
+ * safe to place it early in the order as it looks for a concrete return type.
  *
  * @author Rossen Stoyanchev
- * @author Stephane Maldini
- * @author Sebastien Deleuze
- * @author Arjen Poutsma
  */
-public class ResponseBodyResultHandler extends AbstractMessageConverterResultHandler
+public class ResponseEntityResultHandler extends AbstractMessageConverterResultHandler
 		implements HandlerResultHandler {
 
 	/**
@@ -60,7 +53,7 @@ public class ResponseBodyResultHandler extends AbstractMessageConverterResultHan
 	 * @param converters converters for writing the response body with
 	 * @param conversionService for converting to Flux and Mono from other reactive types
 	 */
-	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> converters,
+	public ResponseEntityResultHandler(List<HttpMessageConverter<?>> converters,
 			ConversionService conversionService) {
 
 		this(converters, conversionService, new HeaderContentTypeResolver());
@@ -75,30 +68,50 @@ public class ResponseBodyResultHandler extends AbstractMessageConverterResultHan
 	 * rx.Observable, rx.Single, etc.) to Flux or Mono
 	 * @param contentTypeResolver for resolving the requested content type
 	 */
-	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> converters,
+	public ResponseEntityResultHandler(List<HttpMessageConverter<?>> converters,
 			ConversionService conversionService, RequestedContentTypeResolver contentTypeResolver) {
 
 		super(converters, conversionService, contentTypeResolver);
-		setOrder(100);
+		setOrder(0);
 	}
 
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		Object handler = result.getHandler();
-		if (handler instanceof HandlerMethod) {
-			MethodParameter returnType = ((HandlerMethod) handler).getReturnType();
-			Class<?> containingClass = returnType.getContainingClass();
-			return (AnnotationUtils.findAnnotation(containingClass, ResponseBody.class) != null ||
-					returnType.getMethodAnnotation(ResponseBody.class) != null);
-		}
-		return false;
+		ResolvableType returnType = result.getReturnValueType();
+		return (HttpEntity.class.isAssignableFrom(returnType.getRawClass()) &&
+				!RequestEntity.class.isAssignableFrom(returnType.getRawClass()));
 	}
+
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		Object body = result.getReturnValue().orElse(null);
-		ResolvableType bodyType = result.getReturnValueType();
+
+		Object body = null;
+
+		Optional<Object> optional = result.getReturnValue();
+		if (optional.isPresent()) {
+			Assert.isInstanceOf(HttpEntity.class, optional.get());
+			HttpEntity<?> httpEntity = (HttpEntity<?>) optional.get();
+
+			if (httpEntity instanceof ResponseEntity) {
+				ResponseEntity<?> responseEntity = (ResponseEntity<?>) httpEntity;
+				exchange.getResponse().setStatusCode(responseEntity.getStatusCode());
+			}
+
+			HttpHeaders entityHeaders = httpEntity.getHeaders();
+			HttpHeaders responseHeaders = exchange.getResponse().getHeaders();
+
+			if (!entityHeaders.isEmpty()) {
+				entityHeaders.entrySet().stream()
+						.filter(entry -> responseHeaders.containsKey(entry.getKey()))
+						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
+			}
+
+			body = httpEntity.getBody();
+		}
+
+		ResolvableType bodyType = result.getReturnValueType().getGeneric(0);
 		return writeBody(exchange, body, bodyType);
 	}
 

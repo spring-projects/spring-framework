@@ -60,6 +60,7 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
+import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
@@ -335,13 +336,20 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	}
 
 	@Bean
-	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(getMessageConverters(), mvcConversionService());
+	public SimpleResultHandler simpleResultHandler() {
+		return new SimpleResultHandler(mvcConversionService());
 	}
 
 	@Bean
-	public SimpleResultHandler simpleResultHandler() {
-		return new SimpleResultHandler(mvcConversionService());
+	public ResponseEntityResultHandler responseEntityResultHandler() {
+		return new ResponseEntityResultHandler(getMessageConverters(), mvcConversionService(),
+				mvcContentTypeResolver());
+	}
+
+	@Bean
+	public ResponseBodyResultHandler responseBodyResultHandler() {
+		return new ResponseBodyResultHandler(getMessageConverters(), mvcConversionService(),
+				mvcContentTypeResolver());
 	}
 
 	@Bean

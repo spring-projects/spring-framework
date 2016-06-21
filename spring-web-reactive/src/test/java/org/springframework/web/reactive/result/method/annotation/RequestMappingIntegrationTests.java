@@ -173,6 +173,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
+	@Ignore // Issue #119
+	public void serializeAsMonoResponseEntity() throws Exception {
+		serializeAsPojo("http://localhost:" + port + "/monoResponseEntity");
+	}
+
+	@Test
 	public void serializeAsMono() throws Exception {
 		serializeAsPojo("http://localhost:" + port + "/mono");
 	}
@@ -448,6 +454,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/raw-observable")
 		public Observable<ByteBuffer> rawObservableResponseBody() {
 			return Observable.just(ByteBuffer.wrap("Hello!".getBytes()));
+		}
+
+		@RequestMapping("/monoResponseEntity")
+		public ResponseEntity<Mono<Person>> monoResponseEntity() {
+			Mono<Person> body = Mono.just(new Person("Robert"));
+			return ResponseEntity.ok(body);
 		}
 
 		@RequestMapping("/mono")
