@@ -19,8 +19,10 @@ package org.springframework.core.codec.support;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -29,6 +31,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 
@@ -64,7 +67,11 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
-		ObjectReader reader = this.mapper.readerFor(elementType.getRawClass());
+		Assert.notNull(inputStream, "'inputStream' must not be null");
+		Assert.notNull(elementType, "'elementType' must not be null");
+		TypeFactory typeFactory = this.mapper.getTypeFactory();
+		JavaType javaType = typeFactory.constructType(elementType.getType());
+		ObjectReader reader = this.mapper.readerFor(javaType);
 
 		Flux<DataBuffer> stream = Flux.from(inputStream);
 		if (this.preProcessor != null) {
