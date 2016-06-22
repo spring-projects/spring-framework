@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.web.context.ServletContextAware;
  * to customize the properties of the (one and only) {@code ServerContainer} instance.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  */
 public class ServletServerContainerFactoryBean
@@ -52,6 +53,8 @@ public class ServletServerContainerFactoryBean
 	private Integer maxTextMessageBufferSize;
 
 	private Integer maxBinaryMessageBufferSize;
+	
+	private ServletContext servletContext;
 
 	private ServerContainer serverContainer;
 
@@ -90,14 +93,18 @@ public class ServletServerContainerFactoryBean
 
 	@Override
 	public void setServletContext(ServletContext servletContext) {
-		this.serverContainer = (ServerContainer) servletContext.getAttribute("javax.websocket.server.ServerContainer");
+		this.servletContext = servletContext;
 	}
 
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.state(this.serverContainer != null,
+		Assert.state(this.servletContext != null,
 				"A ServletContext is required to access the javax.websocket.server.ServerContainer instance");
+		this.serverContainer = (ServerContainer) this.servletContext.getAttribute(
+				"javax.websocket.server.ServerContainer");
+		Assert.state(this.serverContainer != null,
+				"Attribute 'javax.websocket.server.ServerContainer' not found in ServletContext");
 
 		if (this.asyncSendTimeout != null) {
 			this.serverContainer.setAsyncSendTimeout(this.asyncSendTimeout);
