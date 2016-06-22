@@ -991,6 +991,7 @@ project("spring-test") {
 		optional(project(":spring-web"))
 		optional(project(":spring-webmvc"))
 		optional(project(":spring-webmvc-portlet"))
+		optional(project(":spring-websocket"))
 		optional("junit:junit:${junitVersion}")
 		optional("org.testng:testng:${testngVersion}")
 		optional("javax.inject:javax.inject:1")
@@ -1002,6 +1003,7 @@ project("spring-test") {
 		}
 		optional("javax.portlet:portlet-api:2.0")
 		optional("javax.el:javax.el-api:2.2.5")
+		optional("javax.websocket:javax.websocket-api:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")

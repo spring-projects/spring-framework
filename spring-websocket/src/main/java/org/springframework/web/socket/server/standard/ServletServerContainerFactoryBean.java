@@ -53,7 +53,7 @@ public class ServletServerContainerFactoryBean
 	private Integer maxTextMessageBufferSize;
 
 	private Integer maxBinaryMessageBufferSize;
-	
+
 	private ServletContext servletContext;
 
 	private ServerContainer serverContainer;
