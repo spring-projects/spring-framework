@@ -26,6 +26,7 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.sse.SseEvent;
 
@@ -40,25 +41,25 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void nullMimeType() {
-		SseEventEncoder encoder = new SseEventEncoder(new StringEncoder(), Arrays.asList(new JacksonJsonEncoder()));
+		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		assertTrue(encoder.canEncode(ResolvableType.forClass(Object.class), null));
 	}
 
 	@Test
 	public void unsupportedMimeType() {
-		SseEventEncoder encoder = new SseEventEncoder(new StringEncoder(), Arrays.asList(new JacksonJsonEncoder()));
+		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		assertFalse(encoder.canEncode(ResolvableType.forClass(Object.class), new MimeType("foo", "bar")));
 	}
 
 	@Test
 	public void supportedMimeType() {
-		SseEventEncoder encoder = new SseEventEncoder(new StringEncoder(), Arrays.asList(new JacksonJsonEncoder()));
+		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		assertTrue(encoder.canEncode(ResolvableType.forClass(Object.class), new MimeType("text", "event-stream")));
 	}
 
 	@Test
 	public void encodeServerSentEvent() {
-		SseEventEncoder encoder = new SseEventEncoder(new StringEncoder(), Arrays.asList(new JacksonJsonEncoder()));
+		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		SseEvent event = new SseEvent();
 		event.setId("c42");
 		event.setName("foo");
@@ -82,7 +83,7 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void encodeString() {
-		SseEventEncoder encoder = new SseEventEncoder(new StringEncoder(), Arrays.asList(new JacksonJsonEncoder()));
+		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		Flux<String> source = Flux.just("foo", "bar");
 		Flux<DataBuffer> output = encoder.encode(source, this.dataBufferFactory,
 				ResolvableType.forClass(String.class), new MimeType("text", "event-stream"));
@@ -99,7 +100,7 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void encodeMultilineString() {
-		SseEventEncoder encoder = new SseEventEncoder(new StringEncoder(), Arrays.asList(new JacksonJsonEncoder()));
+		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		Flux<DataBuffer> output = encoder.encode(source, this.dataBufferFactory,
 				ResolvableType.forClass(String.class), new MimeType("text", "event-stream"));
@@ -117,7 +118,7 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void encodePojo() {
-		SseEventEncoder encoder = new SseEventEncoder(new StringEncoder(), Arrays.asList(new JacksonJsonEncoder()));
+		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 		Flux<DataBuffer> output = encoder.encode(source, this.dataBufferFactory,
 						ResolvableType.forClass(Pojo.class), new MimeType("text", "event-stream"));
@@ -125,9 +126,13 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 				.subscribe(output)
 				.assertNoError()
 				.assertValuesWith(
-						stringConsumer("data:{\"foo\":\"foofoo\",\"bar\":\"barbar\"}\n"),
+						stringConsumer("data:"),
+						stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"),
 						stringConsumer("\n"),
-						stringConsumer("data:{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}\n"),
+						stringConsumer("\n"),
+						stringConsumer("data:"),
+						stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"),
+						stringConsumer("\n"),
 						stringConsumer("\n")
 				);
 	}

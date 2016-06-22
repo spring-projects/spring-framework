@@ -34,14 +34,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
+import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
@@ -56,7 +51,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.WebClient;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.result.SimpleResultHandler;
+import org.springframework.web.reactive.config.WebReactiveConfiguration;
 import org.springframework.web.reactive.sse.SseEvent;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
@@ -108,7 +103,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.perform(get("http://localhost:" + port + "/sse/string")
 				.accept(new MediaType("text", "event-stream")))
 				.extract(bodyStream(String.class))
-				.take(Duration.ofMillis(500))
+				.take(Duration.ofMillis(1000))
 				.reduce((s1, s2) -> s1 + s2);
 
 		TestSubscriber
@@ -123,7 +118,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.perform(get("http://localhost:" + port + "/sse/person")
 				.accept(new MediaType("text", "event-stream")))
 				.extract(bodyStream(String.class))
-				.take(Duration.ofMillis(500))
+				.take(Duration.ofMillis(1000))
 				.reduce((s1, s2) -> s1 + s2);
 
 		TestSubscriber
@@ -138,7 +133,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.perform(get("http://localhost:" + port + "/sse/event")
 				.accept(new MediaType("text", "event-stream")))
 				.extract(bodyStream(String.class))
-				.take(Duration.ofMillis(500))
+				.take(Duration.ofMillis(1000))
 				.reduce((s1, s2) -> s1 + s2);
 
 		TestSubscriber
@@ -176,46 +171,17 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Configuration
 	@SuppressWarnings("unused")
-	static class TestConfiguration {
-
-		private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
+	static class TestConfiguration extends WebReactiveConfiguration {
 
 		@Bean
 		public SseController sseController() {
 			return new SseController();
 		}
 
-		@Bean
-		public RequestMappingHandlerMapping handlerMapping() {
-			return new RequestMappingHandlerMapping();
+		@Override
+		protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+			converters.add(new SseHttpMessageConverter(Arrays.asList(new JacksonJsonEncoder())));
 		}
-
-		@Bean
-		public RequestMappingHandlerAdapter handlerAdapter() {
-			RequestMappingHandlerAdapter handlerAdapter = new RequestMappingHandlerAdapter();
-			handlerAdapter.setConversionService(conversionService());
-			return handlerAdapter;
-		}
-
-		@Bean
-		public ConversionService conversionService() {
-			GenericConversionService service = new GenericConversionService();
-			service.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-			service.addConverter(new ReactiveStreamsToRxJava1Converter());
-			return service;
-		}
-
-		@Bean
-		public ResponseBodyResultHandler responseBodyResultHandler() {
-			List<HttpMessageConverter<?>> converters = Arrays.asList(new SseHttpMessageConverter());
-			return new ResponseBodyResultHandler(converters, conversionService());
-		}
-
-		@Bean
-		public SimpleResultHandler simpleHandlerResultHandler() {
-			return new SimpleResultHandler(conversionService());
-		}
-
 	}
 
 	private static class Person {

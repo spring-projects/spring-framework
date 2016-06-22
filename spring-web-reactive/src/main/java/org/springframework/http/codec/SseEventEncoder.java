@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.support.AbstractEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.FlushingDataBuffer;
@@ -40,24 +42,22 @@ import org.springframework.web.reactive.sse.SseEvent;
  */
 public class SseEventEncoder extends AbstractEncoder<Object> {
 
-	private final Encoder<String> stringEncoder;
-
 	private final List<Encoder<?>> dataEncoders;
 
 
-	public SseEventEncoder(Encoder<String> stringEncoder, List<Encoder<?>> dataEncoders) {
+	public SseEventEncoder(List<Encoder<?>> dataEncoders) {
 		super(new MimeType("text", "event-stream"));
-		Assert.notNull(stringEncoder, "'stringEncoder' must not be null");
 		Assert.notNull(dataEncoders, "'dataEncoders' must not be null");
-		this.stringEncoder = stringEncoder;
 		this.dataEncoders = dataEncoders;
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory, ResolvableType type, MimeType sseMimeType, Object... hints) {
+	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType type, MimeType sseMimeType, Object... hints) {
 
 		return Flux.from(inputStream).flatMap(input -> {
-			SseEvent event = (SseEvent.class.equals(type.getRawClass()) ? (SseEvent)input : new SseEvent(input));
+			SseEvent event = (SseEvent.class.equals(type.getRawClass()) ?
+					(SseEvent)input : new SseEvent(input));
 
 			StringBuilder sb = new StringBuilder();
 
@@ -87,12 +87,11 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 
 			Object data = event.getData();
 			Flux<DataBuffer> dataBuffer = Flux.empty();
-			MimeType stringMimeType = this.stringEncoder.getEncodableMimeTypes().get(0);
 			MimeType mimeType = (event.getMimeType() == null ?
-	                (data instanceof String ? stringMimeType : new MimeType("*")) : event.getMimeType());
+					new MimeType("*") : event.getMimeType());
 			if (data != null) {
 				sb.append("data:");
-				if (data instanceof String && mimeType.isCompatibleWith(stringMimeType)) {
+				if (data instanceof String) {
 					sb.append(((String)data).replaceAll("\\n", "\ndata:")).append("\n");
 				}
 				else {
@@ -103,8 +102,9 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 
 					if (encoder.isPresent()) {
 						dataBuffer = ((Encoder<Object>)encoder.get())
-								.encode(Mono.just(data), bufferFactory, ResolvableType.forClass(data.getClass()), mimeType)
-								.concatWith(encodeString("\n", bufferFactory, stringMimeType));
+								.encode(Mono.just(data), bufferFactory,
+										ResolvableType.forClass(data.getClass()), mimeType)
+								.concatWith(encodeString("\n", bufferFactory));
 					}
 					else {
 						throw new CodecException("No suitable encoder found!");
@@ -112,16 +112,19 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 				}
 			}
 
-			return Flux
-					.concat(encodeString(sb.toString(), bufferFactory, stringMimeType), dataBuffer)
-					.reduce((buf1, buf2) -> buf1.write(buf2))
-					.concatWith(encodeString("\n", bufferFactory, stringMimeType).map(b -> new FlushingDataBuffer(b)));
+			return Flux.concat(
+					encodeString(sb.toString(), bufferFactory),
+					dataBuffer,
+					encodeString("\n", bufferFactory).map(b -> new FlushingDataBuffer(b))
+			);
 		});
 
 	}
 
-	private Flux<DataBuffer> encodeString(String str, DataBufferFactory bufferFactory, MimeType mimeType) {
-		return stringEncoder.encode(Mono.just(str), bufferFactory, ResolvableType.forClass(String.class), mimeType);
+	private Mono<DataBuffer> encodeString(String str, DataBufferFactory bufferFactory) {
+		byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+		DataBuffer buffer = bufferFactory.allocateBuffer(bytes.length).write(bytes);
+		return Mono.just(buffer);
 	}
 
 }

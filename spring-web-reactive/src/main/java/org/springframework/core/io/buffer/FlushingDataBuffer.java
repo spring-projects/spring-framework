@@ -33,6 +33,10 @@ public class FlushingDataBuffer implements DataBuffer {
 
 	private final DataBuffer buffer;
 
+	public FlushingDataBuffer() {
+		this.buffer = new DefaultDataBufferFactory().allocateBuffer(0);
+	}
+
 	public FlushingDataBuffer(DataBuffer buffer) {
 		Assert.notNull(buffer);
 		this.buffer = buffer;
@@ -85,7 +89,7 @@ public class FlushingDataBuffer implements DataBuffer {
 
 	@Override
 	public DataBuffer write(byte[] source, int offset, int length) {
-		return this.write(source, offset, length);
+		return this.buffer.write(source, offset, length);
 	}
 
 	@Override
@@ -117,4 +121,5 @@ public class FlushingDataBuffer implements DataBuffer {
 	public OutputStream asOutputStream() {
 		return this.buffer.asOutputStream();
 	}
+
 }

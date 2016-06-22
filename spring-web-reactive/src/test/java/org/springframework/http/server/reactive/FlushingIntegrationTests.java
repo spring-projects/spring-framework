@@ -62,6 +62,8 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		return new FlushingHandler();
 	}
 
+	// Handler that never completes designed to test if flushing is perform correctly when
+	// a FlushingDataBuffer is written
 	private static class FlushingHandler implements HttpHandler {
 
 		@Override

@@ -26,9 +26,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.SseEventEncoder;
-import org.springframework.core.codec.support.StringEncoder;
+import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.web.reactive.sse.SseEvent;
@@ -51,16 +49,10 @@ import org.springframework.web.reactive.sse.SseEvent;
 public class SseHttpMessageConverter extends CodecHttpMessageConverter<Object> {
 
 	/**
-	 * Default constructor that creates a new instance configured with {@link StringEncoder}
-	 * and {@link JacksonJsonEncoder} encoders.
+	 * Constructor that creates a new instance configured with the specified data encoders.
 	 */
-	public SseHttpMessageConverter() {
-		this(new StringEncoder(), Arrays.asList(new JacksonJsonEncoder()));
-	}
-
-	public SseHttpMessageConverter(Encoder<String> stringEncoder, List<Encoder<?>> dataEncoders) {
-		// 1 SseEvent element = 1 DataBuffer element so flush after each element
-		super(new SseEventEncoder(stringEncoder, dataEncoders), null);
+	public SseHttpMessageConverter(List<Encoder<?>> dataEncoders) {
+		super(new SseEventEncoder(dataEncoders), null);
 	}
 
 	@Override
