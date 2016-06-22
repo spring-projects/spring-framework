@@ -394,8 +394,8 @@ public class MethodParameter {
 	/**
 	 * Return the nested type of the method/constructor parameter.
 	 * @return the parameter type (never {@code null})
-	 * @see #getNestingLevel()
 	 * @since 3.1
+	 * @see #getNestingLevel()
 	 */
 	public Class<?> getNestedParameterType() {
 		if (this.nestingLevel > 1) {
