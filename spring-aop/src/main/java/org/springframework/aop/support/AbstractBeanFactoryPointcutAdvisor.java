@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.aopalliance.aop.Advice;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -71,8 +72,23 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		resetAdviceMonitor();
 	}
 
+	private void resetAdviceMonitor() {
+		if (this.beanFactory instanceof AbstractBeanFactory) {
+			this.adviceMonitor = ((AbstractBeanFactory) this.beanFactory).getSingletonMutex();
+		}
+		else {
+			this.adviceMonitor = new Object();
+		}
+	}
+
+	/**
+	 * Specify a particular instance of the target advice directly,
+	 * avoiding lazy resolution in {@link #getAdvice()}.
+	 * @since 3.1
+	 */
 	public void setAdvice(Advice advice) {
 		synchronized (this.adviceMonitor) {
 			this.advice = advice;
@@ -91,7 +107,15 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 
 	@Override
 	public String toString() {
-		return getClass().getName() + ": advice bean '" + getAdviceBeanName() + "'";
+		StringBuilder sb = new StringBuilder(getClass().getName());
+		sb.append(": advice ");
+		if (this.adviceBeanName != null) {
+			sb.append("bean '").append(this.adviceBeanName).append("'");
+		}
+		else {
+			sb.append(this.advice);
+		}
+		return sb.toString();
 	}
 
 
@@ -104,7 +128,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		ois.defaultReadObject();
 
 		// Initialize transient fields.
-		this.adviceMonitor = new Object();
+		resetAdviceMonitor();
 	}
 
 }
