@@ -80,6 +80,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Before
 	public void setup() throws Exception {
 		this.resolver = new ExceptionHandlerExceptionResolver();
+		this.resolver.setWarnLogCategory(this.resolver.getClass().getName());
 		this.request = new MockHttpServletRequest("GET", "/");
 		this.response = new MockHttpServletResponse();
 	}
@@ -399,11 +400,13 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Configuration
 	static class MyConfig {
 
-		@Bean public TestExceptionResolver testExceptionResolver() {
+		@Bean
+		public TestExceptionResolver testExceptionResolver() {
 			return new TestExceptionResolver();
 		}
 
-		@Bean public AnotherTestExceptionResolver anotherTestExceptionResolver() {
+		@Bean
+		public AnotherTestExceptionResolver anotherTestExceptionResolver() {
 			return new AnotherTestExceptionResolver();
 		}
 	}
@@ -445,15 +448,18 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Configuration
 	static class MyControllerAdviceConfig {
 
-		@Bean public NotCalledTestExceptionResolver notCalledTestExceptionResolver() {
+		@Bean
+		public NotCalledTestExceptionResolver notCalledTestExceptionResolver() {
 			return new NotCalledTestExceptionResolver();
 		}
 
-		@Bean public BasePackageTestExceptionResolver basePackageTestExceptionResolver() {
+		@Bean
+		public BasePackageTestExceptionResolver basePackageTestExceptionResolver() {
 			return new BasePackageTestExceptionResolver();
 		}
 
-		@Bean public DefaultTestExceptionResolver defaultTestExceptionResolver() {
+		@Bean
+		public DefaultTestExceptionResolver defaultTestExceptionResolver() {
 			return new DefaultTestExceptionResolver();
 		}
 	}

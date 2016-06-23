@@ -61,6 +61,7 @@ public class DefaultHandlerExceptionResolverTests {
 	@Before
 	public void setUp() {
 		exceptionResolver = new DefaultHandlerExceptionResolver();
+		exceptionResolver.setWarnLogCategory(exceptionResolver.getClass().getName());
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
 		request.setMethod("GET");
