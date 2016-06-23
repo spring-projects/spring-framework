@@ -18,6 +18,7 @@ package org.springframework.core.codec.support;
 
 import java.util.Arrays;
 
+import static org.junit.Assert.*;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,13 +27,10 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.sse.SseEvent;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 
 /**
  * @author Sebastien Deleuze
@@ -77,7 +75,8 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 								"event:foo\n" +
 								"retry:123\n" +
 								":bla\n:bla bla\n:bla bla bla\n"),
-						stringConsumer("\n")
+						stringConsumer("\n"),
+						b -> assertEquals(FlushingDataBuffer.class, b.getClass())
 				);
 	}
 
@@ -93,8 +92,10 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 				.assertValuesWith(
 						stringConsumer("data:foo\n"),
 						stringConsumer("\n"),
+						b -> assertEquals(FlushingDataBuffer.class, b.getClass()),
 						stringConsumer("data:bar\n"),
-						stringConsumer("\n")
+						stringConsumer("\n"),
+						b -> assertEquals(FlushingDataBuffer.class, b.getClass())
 				);
 	}
 
@@ -110,11 +111,12 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 				.assertValuesWith(
 						stringConsumer("data:foo\ndata:bar\n"),
 						stringConsumer("\n"),
+						b -> assertEquals(FlushingDataBuffer.class, b.getClass()),
 						stringConsumer("data:foo\ndata:baz\n"),
-						stringConsumer("\n")
+						stringConsumer("\n"),
+						b -> assertEquals(FlushingDataBuffer.class, b.getClass())
 				);
 	}
-
 
 	@Test
 	public void encodePojo() {
@@ -130,10 +132,12 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 						stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"),
 						stringConsumer("\n"),
 						stringConsumer("\n"),
+						b -> assertEquals(FlushingDataBuffer.class, b.getClass()),
 						stringConsumer("data:"),
 						stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"),
 						stringConsumer("\n"),
-						stringConsumer("\n")
+						stringConsumer("\n"),
+						b -> assertEquals(FlushingDataBuffer.class, b.getClass())
 				);
 	}
 

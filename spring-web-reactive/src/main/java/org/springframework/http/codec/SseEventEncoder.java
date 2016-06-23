@@ -115,7 +115,8 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 			return Flux.concat(
 					encodeString(sb.toString(), bufferFactory),
 					dataBuffer,
-					encodeString("\n", bufferFactory).map(b -> new FlushingDataBuffer(b))
+					encodeString("\n", bufferFactory),
+					Mono.just(FlushingDataBuffer.INSTANCE)
 			);
 		});
 

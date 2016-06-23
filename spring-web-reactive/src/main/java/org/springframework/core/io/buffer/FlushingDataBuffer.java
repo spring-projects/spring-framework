@@ -21,26 +21,25 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.function.IntPredicate;
 
-import org.springframework.util.Assert;
-
 /**
- * {@link DataBuffer} wrapper that indicates the file or the socket writing this buffer
- * should be flushed.
+ * Empty {@link DataBuffer} that indicates to the file or the socket writing it that
+ * previously buffered data should be flushed.
  *
  * @author Sebastien Deleuze
+ * @see FlushingDataBuffer#INSTANCE
  */
 public class FlushingDataBuffer implements DataBuffer {
 
+	/** Singleton instance of this class */
+	public static final FlushingDataBuffer INSTANCE = new FlushingDataBuffer();
+
 	private final DataBuffer buffer;
 
-	public FlushingDataBuffer() {
+
+	private FlushingDataBuffer() {
 		this.buffer = new DefaultDataBufferFactory().allocateBuffer(0);
 	}
 
-	public FlushingDataBuffer(DataBuffer buffer) {
-		Assert.notNull(buffer);
-		this.buffer = buffer;
-	}
 
 	@Override
 	public DataBufferFactory factory() {

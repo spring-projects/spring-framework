@@ -70,14 +70,15 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			Flux<DataBuffer> responseBody = Flux
 					.interval(50)
-					.take(2)
-					.concatWith(Flux.never())
 					.map(l -> {
 						byte[] data = ("data" + l).getBytes();
 						DataBuffer buffer = response.bufferFactory().allocateBuffer(data.length);
 						buffer.write(data);
-						return new FlushingDataBuffer(buffer);
-					});
+						return buffer;
+					})
+					.take(2)
+					.concatWith(Mono.just(FlushingDataBuffer.INSTANCE))
+					.concatWith(Flux.never());
 			return response.writeWith(responseBody);
 		}
 	}
