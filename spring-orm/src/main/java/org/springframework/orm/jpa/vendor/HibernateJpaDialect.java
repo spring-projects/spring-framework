@@ -362,13 +362,23 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			}
 			if (this.preparedCon != null && this.session.isConnected()) {
 				Connection conToReset = HibernateConnectionHandle.doGetConnection(this.session);
-				if (conToReset != this.preparedCon) {
+				if (!isEquivalentConnection(conToReset)) {
 					LogFactory.getLog(HibernateJpaDialect.class).warn(
-							"JDBC Connection to reset not identical to originally prepared Connection - please " +
+							"JDBC Connection to reset not equivalent to originally prepared Connection - please " +
 							"make sure to use connection release mode ON_CLOSE (the default) and to run against " +
 							"Hibernate 4.2+ (or switch HibernateJpaDialect's prepareConnection flag to false");
 				}
 				DataSourceUtils.resetConnectionAfterTransaction(conToReset, this.previousIsolationLevel);
+			}
+		}
+
+		private boolean isEquivalentConnection(Connection con) {
+			try {
+				return (con.equals(this.preparedCon) ||
+						con.unwrap(Connection.class).equals(this.preparedCon.unwrap(Connection.class)));
+			}
+			catch (Throwable ex) {
+				return false;
 			}
 		}
 	}
