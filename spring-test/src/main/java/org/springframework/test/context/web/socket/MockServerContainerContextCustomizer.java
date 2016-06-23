@@ -39,4 +39,20 @@ class MockServerContainerContextCustomizer implements ContextCustomizer {
 		}
 	}
 
+	@Override
+	public boolean equals(Object that) {
+		if (this == that) {
+			return true;
+		}
+		if (that == null || this.getClass() != that.getClass()) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
+
 }
