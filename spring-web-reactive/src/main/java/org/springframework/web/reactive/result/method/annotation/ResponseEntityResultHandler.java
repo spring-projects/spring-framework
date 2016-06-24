@@ -104,7 +104,7 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 
 			if (!entityHeaders.isEmpty()) {
 				entityHeaders.entrySet().stream()
-						.filter(entry -> responseHeaders.containsKey(entry.getKey()))
+						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
 

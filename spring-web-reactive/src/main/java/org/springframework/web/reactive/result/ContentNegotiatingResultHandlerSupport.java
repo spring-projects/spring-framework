@@ -126,7 +126,7 @@ public abstract class ContentNegotiatingResultHandlerSupport implements Ordered 
 	}
 
 	private List<MediaType> getAcceptableTypes(ServerWebExchange exchange) {
-		List<MediaType> mediaTypes = this.contentTypeResolver.resolveMediaTypes(exchange);
+		List<MediaType> mediaTypes = getContentTypeResolver().resolveMediaTypes(exchange);
 		return (mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes);
 	}
 

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
@@ -82,16 +83,22 @@ public abstract class AbstractMessageConverterResultHandler extends ContentNegot
 				publisher = Mono.empty();
 			}
 			elementType = bodyType.getGeneric(0);
-			if (Void.class.equals(elementType.getRawClass())) {
-				return Mono.from((Publisher<Void>) publisher);
-			}
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
 			elementType = bodyType;
 		}
 
+		if (Void.class.equals(elementType.getRawClass())) {
+			return Mono.from((Publisher<Void>) publisher);
+		}
+
 		List<MediaType> producibleTypes = getProducibleMediaTypes(elementType);
+		if (producibleTypes.isEmpty()) {
+			return Mono.error(new IllegalStateException(
+					"No converter for return value type: " + elementType));
+		}
+
 		MediaType bestMediaType = selectMediaType(exchange, producibleTypes);
 
 		if (bestMediaType != null) {
