@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.sse;
 
-import org.springframework.http.converter.reactive.SseHttpMessageConverter;
+import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.util.MimeType;
 
 /**
@@ -26,7 +26,7 @@ import org.springframework.util.MimeType;
  * {@code SseEmitter} type. It allows to send Server-Sent Events in a reactive way.
  *
  * @author Sebastien Deleuze
- * @see SseHttpMessageConverter
+ * @see SseEventEncoder
  * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommandation</a>
  */
 public class SseEvent {
@@ -95,9 +95,9 @@ public class SseEvent {
 	/**
 	 * Set {@code data} SSE field. If a multiline {@code String} is provided, it will be
 	 * turned into multiple {@code data} field lines by  as
-	 * defined in Server-Sent Events W3C recommandation.
+	 * defined in Server-Sent Events W3C recommendation.
 	 *
-	 * If no {@code mediaType} is defined, default {@link SseHttpMessageConverter} will:
+	 * If no {@code mediaType} is defined, default {@link SseEventEncoder} will:
 	 *  - Turn single line {@code String} to a single {@code data} field
 	 *  - Turn multiline line {@code String} to multiple {@code data} fields
 	 *  - Serialize other {@code Object} as JSON
@@ -117,7 +117,7 @@ public class SseEvent {
 
 	/**
 	 * Set the {@link MimeType} used to serialize the {@code data}.
-	 * {@link SseHttpMessageConverter} should be configured with the relevant encoder to be
+	 * {@link SseEventEncoder} should be configured with the relevant encoder to be
 	 * able to serialize it.
 	 */
 	public void setMimeType(MimeType mimeType) {
@@ -147,8 +147,8 @@ public class SseEvent {
 
 	/**
 	 * Set SSE comment. If a multiline comment is provided, it will be turned into multiple
-	 * SSE comment lines by {@link SseHttpMessageConverter} as defined in Server-Sent Events W3C
-	 * recommandation.
+	 * SSE comment lines by {@link SseEventEncoder} as defined in Server-Sent Events W3C
+	 * recommendation.
 	 */
 	public void setComment(String comment) {
 		this.comment = comment;

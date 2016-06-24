@@ -112,11 +112,14 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 				}
 			}
 
+			// Keep the SSE connection open even for cold stream in order to avoid
+			// unexpected browser reconnection
 			return Flux.concat(
 					encodeString(sb.toString(), bufferFactory),
 					dataBuffer,
 					encodeString("\n", bufferFactory),
-					Mono.just(FlushingDataBuffer.INSTANCE)
+					Mono.just(FlushingDataBuffer.INSTANCE),
+					Flux.never()
 			);
 		});
 

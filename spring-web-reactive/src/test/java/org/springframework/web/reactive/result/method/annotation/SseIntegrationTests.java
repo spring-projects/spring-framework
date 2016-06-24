@@ -29,6 +29,7 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
@@ -36,8 +37,9 @@ import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
+import org.springframework.http.codec.SseEventEncoder;
+import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
-import org.springframework.http.converter.reactive.SseHttpMessageConverter;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -165,7 +167,8 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		@Override
 		protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-			converters.add(new SseHttpMessageConverter(Arrays.asList(new JacksonJsonEncoder())));
+			Encoder<Object> sseEncoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
+			converters.add(new CodecHttpMessageConverter<>(sseEncoder));
 		}
 	}
 
