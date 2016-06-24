@@ -79,20 +79,44 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 	@Override
 	public boolean supports(HandlerResult result) {
 		ResolvableType returnType = result.getReturnValueType();
-		return (HttpEntity.class.isAssignableFrom(returnType.getRawClass()) &&
-				!RequestEntity.class.isAssignableFrom(returnType.getRawClass()));
+		if (isSupportedType(returnType)) {
+			return true;
+		}
+		else if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
+			ResolvableType genericType = result.getReturnValueType().getGeneric(0);
+			return isSupportedType(genericType);
+
+		}
+		return false;
+	}
+
+	private boolean isSupportedType(ResolvableType returnType) {
+		Class<?> clazz = returnType.getRawClass();
+		return (HttpEntity.class.isAssignableFrom(clazz) && !RequestEntity.class.isAssignableFrom(clazz));
 	}
 
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
-		Object body = null;
+		ResolvableType returnType = result.getReturnValueType();
+		Mono<?> returnValueMono;
+		ResolvableType bodyType;
 
 		Optional<Object> optional = result.getReturnValue();
-		if (optional.isPresent()) {
-			Assert.isInstanceOf(HttpEntity.class, optional.get());
-			HttpEntity<?> httpEntity = (HttpEntity<?>) optional.get();
+		if (optional.isPresent() && getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
+			returnValueMono = getConversionService().convert(optional.get(), Mono.class);
+			bodyType = returnType.getGeneric(0).getGeneric(0);
+		}
+		else {
+			returnValueMono = Mono.justOrEmpty(optional);
+			bodyType = returnType.getGeneric(0);
+		}
+
+		return returnValueMono.then(returnValue -> {
+
+			Assert.isInstanceOf(HttpEntity.class, returnValue);
+			HttpEntity<?> httpEntity = (HttpEntity<?>) returnValue;
 
 			if (httpEntity instanceof ResponseEntity) {
 				ResponseEntity<?> responseEntity = (ResponseEntity<?>) httpEntity;
@@ -108,11 +132,8 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
 
-			body = httpEntity.getBody();
-		}
-
-		ResolvableType bodyType = result.getReturnValueType().getGeneric(0);
-		return writeBody(exchange, body, bodyType);
+			return writeBody(exchange, httpEntity.getBody(), bodyType);
+		});
 	}
 
 }
