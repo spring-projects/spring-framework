@@ -40,6 +40,7 @@ import org.springframework.http.support.MediaTypeUtils;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 
@@ -50,6 +51,7 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 	private final List<MediaType> readableMediaTypes;
 
 	private final List<MediaType> writableMediaTypes;
+
 
 	/**
 	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder}. When
@@ -89,6 +91,7 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 				Collections.emptyList();
 	}
 
+
 	@Override
 	public boolean canRead(ResolvableType type, MediaType mediaType) {
 		return this.decoder != null && this.decoder.canDecode(type, mediaType);
@@ -109,6 +112,7 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		return this.writableMediaTypes;
 	}
 
+
 	@Override
 	public Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
 		if (this.decoder == null) {
@@ -118,16 +122,13 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		if (contentType == null) {
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
-
-		Flux<DataBuffer> body = inputMessage.getBody();
-
-		return this.decoder.decode(body, type, contentType);
+		return this.decoder.decode(inputMessage.getBody(), type, contentType);
 	}
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
-			MediaType contentType,
-			ReactiveHttpOutputMessage outputMessage) {
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+
 		if (this.encoder == null) {
 			return Mono.error(new IllegalStateException("No decoder set"));
 		}
@@ -139,22 +140,23 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 			}
 			headers.setContentType(contentTypeToUse);
 		}
-		DataBufferFactory dataBufferFactory = outputMessage.bufferFactory();
-		Flux<DataBuffer> body =
-				this.encoder.encode(inputStream, dataBufferFactory, type, contentType);
+		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
+		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, type, contentType);
 		return outputMessage.writeWith(body);
 	}
 
 	/**
-	 * Returns the default content type for the given type. Called when {@link #write}
-	 * is invoked without a specified content type parameter.
-	 * <p>By default, this returns a {@link MediaType} created using the first element of
-	 * the encoder {@link Encoder#getEncodableMimeTypes() encodableMimeTypes} property, if any.
-	 * Can be overridden in subclasses.
-	 * @param type the type to return the content type for
-	 * @return the content type, or {@code null} if not known
+	 * Return the default content type for the given {@code ResolvableType}.
+	 * Used when {@link #write} is called without a concrete content type.
+	 *
+	 * <p>By default returns the first of {@link Encoder#getEncodableMimeTypes()
+	 * encodableMimeTypes}, if any.
+	 *
+	 * @param elementType the type of element for encoding
+	 * @return the content type, or {@code null}
 	 */
-	protected MediaType getDefaultContentType(ResolvableType type) {
+	protected MediaType getDefaultContentType(ResolvableType elementType) {
 		return (!this.writableMediaTypes.isEmpty() ? this.writableMediaTypes.get(0) : null);
 	}
+
 }
