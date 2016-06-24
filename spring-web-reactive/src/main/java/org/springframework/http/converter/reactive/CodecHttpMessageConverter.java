@@ -132,14 +132,22 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		if (this.encoder == null) {
 			return Mono.error(new IllegalStateException("No decoder set"));
 		}
+
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
 			MediaType contentTypeToUse = contentType;
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 				contentTypeToUse = getDefaultContentType(type);
 			}
-			headers.setContentType(contentTypeToUse);
+			else if (MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
+				MediaType mediaType = getDefaultContentType(type);
+				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
+			}
+			if (contentTypeToUse != null) {
+				headers.setContentType(contentTypeToUse);
+			}
 		}
+
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
 		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, type, contentType);
 		return outputMessage.writeWith(body);

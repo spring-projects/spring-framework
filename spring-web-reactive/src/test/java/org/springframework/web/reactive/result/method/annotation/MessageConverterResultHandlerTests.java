@@ -48,6 +48,7 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
@@ -90,16 +91,12 @@ public class MessageConverterResultHandlerTests {
 
 
 	@Test // SPR-12894
-	@Ignore // GH # 121
 	public void useDefaultContentType() throws Exception {
-		Object body = new ByteArrayResource("body".getBytes("UTF-8"));
+		Resource body = new ClassPathResource("logo.png", getClass());
 		ResolvableType bodyType = ResolvableType.forType(Resource.class);
 		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
 
-		assertEquals("image/jpeg", this.response.getHeaders().getFirst("Content-Type"));
-		TestSubscriber.subscribe(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals("body",
-						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
+		assertEquals("image/x-png", this.response.getHeaders().getFirst("Content-Type"));
 	}
 
 	@Test
