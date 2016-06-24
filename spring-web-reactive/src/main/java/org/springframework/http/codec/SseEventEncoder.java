@@ -31,6 +31,7 @@ import org.springframework.core.codec.support.AbstractEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.FlushingDataBuffer;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.sse.SseEvent;
@@ -87,8 +88,8 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 
 			Object data = event.getData();
 			Flux<DataBuffer> dataBuffer = Flux.empty();
-			MimeType mimeType = (event.getMimeType() == null ?
-					new MimeType("*") : event.getMimeType());
+			MediaType mediaType = (event.getMediaType() == null ?
+					MediaType.ALL : event.getMediaType());
 			if (data != null) {
 				sb.append("data:");
 				if (data instanceof String) {
@@ -97,13 +98,13 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 				else {
 					Optional<Encoder<?>> encoder = dataEncoders
 						.stream()
-						.filter(e -> e.canEncode(ResolvableType.forClass(data.getClass()), mimeType))
+						.filter(e -> e.canEncode(ResolvableType.forClass(data.getClass()), mediaType))
 						.findFirst();
 
 					if (encoder.isPresent()) {
 						dataBuffer = ((Encoder<Object>)encoder.get())
 								.encode(Mono.just(data), bufferFactory,
-										ResolvableType.forClass(data.getClass()), mimeType)
+										ResolvableType.forClass(data.getClass()), mediaType)
 								.concatWith(encodeString("\n", bufferFactory));
 					}
 					else {

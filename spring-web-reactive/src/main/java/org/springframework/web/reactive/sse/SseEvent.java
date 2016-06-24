@@ -16,8 +16,8 @@
 
 package org.springframework.web.reactive.sse;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.codec.SseEventEncoder;
-import org.springframework.util.MimeType;
 
 /**
  * Represent a Server-Sent Event.
@@ -27,7 +27,7 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @see SseEventEncoder
- * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommandation</a>
+ * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
  */
 public class SseEvent {
 
@@ -37,7 +37,7 @@ public class SseEvent {
 
 	private Object data;
 
-	private MimeType mimeType;
+	private MediaType mediaType;
 
 	private Long reconnectTime;
 
@@ -59,9 +59,9 @@ public class SseEvent {
 	/**
 	 * Create an instance with the provided {@code data} and {@code mediaType}.
 	 */
-	public SseEvent(Object data, MimeType mimeType) {
+	public SseEvent(Object data, MediaType mediaType) {
 		this.data = data;
-		this.mimeType = mimeType;
+		this.mediaType = mediaType;
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class SseEvent {
 	 *  - Turn multiline line {@code String} to multiple {@code data} fields
 	 *  - Serialize other {@code Object} as JSON
 	 *
-	 * @see #setMimeType(MimeType)
+	 * @see #setMediaType(MediaType)
 	 */
 	public void setData(Object data) {
 		this.data = data;
@@ -116,19 +116,19 @@ public class SseEvent {
 	}
 
 	/**
-	 * Set the {@link MimeType} used to serialize the {@code data}.
+	 * Set the {@link MediaType} used to serialize the {@code data}.
 	 * {@link SseEventEncoder} should be configured with the relevant encoder to be
 	 * able to serialize it.
 	 */
-	public void setMimeType(MimeType mimeType) {
-		this.mimeType = mimeType;
+	public void setMediaType(MediaType mediaType) {
+		this.mediaType = mediaType;
 	}
 
 	/**
-	 * @see #setMimeType(MimeType)
+	 * @see #setMediaType(MediaType)
 	 */
-	public MimeType getMimeType() {
-		return mimeType;
+	public MediaType getMediaType() {
+		return this.mediaType;
 	}
 
 	/**
