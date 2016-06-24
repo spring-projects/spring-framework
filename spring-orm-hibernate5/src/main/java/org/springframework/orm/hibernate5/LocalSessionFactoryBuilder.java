@@ -139,6 +139,10 @@ public class LocalSessionFactoryBuilder extends Configuration {
 		if (dataSource != null) {
 			getProperties().put(Environment.DATASOURCE, dataSource);
 		}
+
+		// Hibernate 5.2: manually enforce connection release mode ON_CLOSE (the former default)
+		getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+
 		getProperties().put(AvailableSettings.CLASSLOADERS, Collections.singleton(resourceLoader.getClassLoader()));
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
@@ -157,6 +161,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 */
 	public LocalSessionFactoryBuilder setJtaTransactionManager(Object jtaTransactionManager) {
 		Assert.notNull(jtaTransactionManager, "Transaction manager reference must not be null");
+
 		if (jtaTransactionManager instanceof JtaTransactionManager) {
 			boolean webspherePresent = ClassUtils.isPresent("com.ibm.wsspi.uow.UOWManager", getClass().getClassLoader());
 			if (webspherePresent) {
@@ -182,6 +187,10 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			throw new IllegalArgumentException(
 					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
 		}
+
+		// Hibernate 5.2: manually enforce connection release mode AFTER_STATEMENT (the JTA default)
+		getProperties().remove("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT");
+
 		return this;
 	}
 

@@ -101,6 +101,27 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	}
 
 
+	/**
+	 * Set whether to prepare the underlying JDBC Connection of a transactional
+	 * Hibernate Session, that is, whether to apply a transaction-specific
+	 * isolation level and/or the transaction's read-only flag to the underlying
+	 * JDBC Connection.
+	 * <p>See {@link HibernateJpaDialect#setPrepareConnection(boolean)} for details.
+	 * This is just a convenience flag passed through to {@code HibernateJpaDialect}.
+	 * <p>On Hibernate 5.2, this flag remains {@code true} by default like against
+	 * previous Hibernate versions. The vendor adapter manually enforces Hibernate's
+	 * new connection handling mode {@code DELAYED_ACQUISITION_AND_HOLD} in that case
+	 * unless a user-specified connection handling mode property indicates otherwise;
+	 * switch this flag to {@code false} to avoid that interference.
+	 * @since 4.3.1
+	 * @see #getJpaPropertyMap()
+	 * @see HibernateJpaDialect#beginTransaction
+	 */
+	public void setPrepareConnection(boolean prepareConnection) {
+		this.jpaDialect.setPrepareConnection(prepareConnection);
+	}
+
+
 	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
@@ -130,6 +151,11 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 		if (isShowSql()) {
 			jpaProperties.put(Environment.SHOW_SQL, "true");
+		}
+
+		if (this.jpaDialect.prepareConnection) {
+			// Hibernate 5.2: manually enforce connection release mode ON_CLOSE (the former default)
+			jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
 		}
 
 		return jpaProperties;
