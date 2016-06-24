@@ -51,9 +51,7 @@ import org.springframework.util.Assert;
  * Hibernate SessionFactory in a Spring application context; the SessionFactory can
  * then be passed to Hibernate-based data access objects via dependency injection.
  *
- * <p>This class is similar in role to the same-named class in the {@code orm.hibernate3}
- * package. However, in practice, it is closer to {@code AnnotationSessionFactoryBean}
- * since its core purpose is to bootstrap a {@code SessionFactory} from package scanning.
+ * <p>Compatible with Hibernate 5.0/5.1 as well as 5.2, as of Spring 4.3.
  *
  * @author Juergen Hoeller
  * @since 4.2
