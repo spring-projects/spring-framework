@@ -39,6 +39,7 @@ import org.springframework.http.support.MediaTypeUtils;
  * {@link Encoder} and {@link Decoder}.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 
@@ -132,11 +133,28 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		}
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			headers.setContentType(contentType);
+			MediaType contentTypeToUse = contentType;
+			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
+				contentTypeToUse = getDefaultContentType(type);
+			}
+			headers.setContentType(contentTypeToUse);
 		}
 		DataBufferFactory dataBufferFactory = outputMessage.bufferFactory();
 		Flux<DataBuffer> body =
 				this.encoder.encode(inputStream, dataBufferFactory, type, contentType);
 		return outputMessage.writeWith(body);
+	}
+
+	/**
+	 * Returns the default content type for the given type. Called when {@link #write}
+	 * is invoked without a specified content type parameter.
+	 * <p>By default, this returns a {@link MediaType} created using the first element of
+	 * the encoder {@link Encoder#getEncodableMimeTypes() encodableMimeTypes} property, if any.
+	 * Can be overridden in subclasses.
+	 * @param type the type to return the content type for
+	 * @return the content type, or {@code null} if not known
+	 */
+	protected MediaType getDefaultContentType(ResolvableType type) {
+		return (!this.writableMediaTypes.isEmpty() ? this.writableMediaTypes.get(0) : null);
 	}
 }
