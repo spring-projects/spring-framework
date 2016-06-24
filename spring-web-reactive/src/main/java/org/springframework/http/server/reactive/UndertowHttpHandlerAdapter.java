@@ -31,12 +31,9 @@ import org.xnio.IoUtils;
 import org.xnio.channels.StreamSinkChannel;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Mono;
-import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.FlushingDataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -65,7 +62,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
 
 		RequestBodyPublisher requestBody =
-				new RequestBodyPublisher(exchange, dataBufferFactory);
+				new RequestBodyPublisher(exchange, this.dataBufferFactory);
 		requestBody.registerListener();
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, requestBody);
 
@@ -76,7 +73,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		ServerHttpResponse response =
 				new UndertowServerHttpResponse(exchange, responseChannel,
 				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBody)),
-						dataBufferFactory);
+						this.dataBufferFactory);
 
 		this.delegate.handle(request, response).subscribe(new Subscriber<Void>() {
 
@@ -130,7 +127,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		}
 
 		public void registerListener() {
-			this.requestChannel.getReadSetter().set(listener);
+			this.requestChannel.getReadSetter().set(this.listener);
 			this.requestChannel.resumeReads();
 		}
 
@@ -145,7 +142,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		@Override
 		protected void noLongerStalled() {
-			listener.handleEvent(requestChannel);
+			this.listener.handleEvent(this.requestChannel);
 		}
 
 		private class RequestBodyListener
@@ -157,7 +154,8 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 					return;
 				}
 				logger.trace("handleEvent");
-				ByteBuffer byteBuffer = pooledByteBuffer.getBuffer();
+				ByteBuffer byteBuffer =
+						RequestBodyPublisher.this.pooledByteBuffer.getBuffer();
 				try {
 					while (true) {
 						if (!checkSubscriptionForDemand()) {
@@ -177,7 +175,9 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 						}
 						else {
 							byteBuffer.flip();
-							DataBuffer dataBuffer = dataBufferFactory.wrap(byteBuffer);
+							DataBuffer dataBuffer =
+									RequestBodyPublisher.this.dataBufferFactory
+											.wrap(byteBuffer);
 							publishOnNext(dataBuffer);
 						}
 					}
@@ -190,9 +190,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	}
 
-	private static class ResponseBodySubscriber implements Subscriber<DataBuffer> {
-
-		private static final Log logger = LogFactory.getLog(ResponseBodySubscriber.class);
+	private static class ResponseBodySubscriber extends AbstractResponseBodySubscriber {
 
 		private final ChannelListener<StreamSinkChannel> listener =
 				new ResponseBodyListener();
@@ -203,12 +201,6 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		private volatile ByteBuffer byteBuffer;
 
-		private volatile DataBuffer dataBuffer;
-
-		private volatile boolean completed = false;
-
-		private Subscription subscription;
-
 		public ResponseBodySubscriber(HttpServerExchange exchange,
 				StreamSinkChannel responseChannel) {
 			this.exchange = exchange;
@@ -216,58 +208,77 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		}
 
 		public void registerListener() {
-			this.responseChannel.getWriteSetter().set(listener);
+			this.responseChannel.getWriteSetter().set(this.listener);
 			this.responseChannel.resumeWrites();
 		}
 
-
 		@Override
-		public void onSubscribe(Subscription subscription) {
-			logger.trace("onSubscribe. Subscription: " + subscription);
-			if (BackpressureUtils.validate(this.subscription, subscription)) {
-				this.subscription = subscription;
-				this.subscription.request(1);
+		protected void writeError(Throwable t) {
+			if (!this.exchange.isResponseStarted() &&
+					this.exchange.getStatusCode() < 500) {
+				this.exchange.setStatusCode(500);
 			}
 		}
 
 		@Override
-		public void onNext(DataBuffer dataBuffer) {
-			Assert.state(this.byteBuffer == null);
-			logger.trace("onNext. buffer: " + dataBuffer);
-
-			this.byteBuffer = dataBuffer.asByteBuffer();
-			this.dataBuffer = dataBuffer;
-		}
-
-		@Override
-		public void onError(Throwable t) {
-			logger.error("onError", t);
-			if (!exchange.isResponseStarted() && exchange.getStatusCode() < 500) {
-				exchange.setStatusCode(500);
+		protected void flush() throws IOException {
+			if (logger.isTraceEnabled()) {
+				logger.trace("flush");
 			}
-			closeChannel(responseChannel);
+			this.responseChannel.flush();
 		}
 
 		@Override
-		public void onComplete() {
-			logger.trace("onComplete. buffer: " + this.byteBuffer);
-
-			this.completed = true;
-
+		protected boolean write(DataBuffer dataBuffer) throws IOException {
 			if (this.byteBuffer == null) {
-				closeChannel(responseChannel);
+				return false;
 			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("write: " + dataBuffer);
+			}
+			int total = this.byteBuffer.remaining();
+			int written = writeByteBuffer(this.byteBuffer);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("written: " + written + " total: " + total);
+			}
+			return written == total;
 		}
 
-		private void closeChannel(StreamSinkChannel channel) {
-			try {
-				channel.shutdownWrites();
+		private int writeByteBuffer(ByteBuffer byteBuffer) throws IOException {
+			int written;
+			int totalWritten = 0;
+			do {
+				written = this.responseChannel.write(byteBuffer);
+				totalWritten += written;
+			}
+			while (byteBuffer.hasRemaining() && written > 0);
+			return totalWritten;
+		}
 
-				if (!channel.flush()) {
-					channel.getWriteSetter().set(ChannelListeners
-							.flushingChannelListener(o -> IoUtils.safeClose(channel),
+		@Override
+		protected void receiveBuffer(DataBuffer dataBuffer) {
+			super.receiveBuffer(dataBuffer);
+			this.byteBuffer = dataBuffer.asByteBuffer();
+		}
+
+		@Override
+		protected void releaseBuffer() {
+			super.releaseBuffer();
+			this.byteBuffer = null;
+		}
+
+		@Override
+		protected void close() {
+			try {
+				this.responseChannel.shutdownWrites();
+
+				if (!this.responseChannel.flush()) {
+					this.responseChannel.getWriteSetter().set(ChannelListeners
+							.flushingChannelListener(
+									o -> IoUtils.safeClose(this.responseChannel),
 									ChannelListeners.closingChannelExceptionHandler()));
-					channel.resumeWrites();
+					this.responseChannel.resumeWrites();
 				}
 			}
 			catch (IOException ignored) {
@@ -278,60 +289,12 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 			@Override
 			public void handleEvent(StreamSinkChannel channel) {
-				if (byteBuffer != null) {
-					try {
-						int total = byteBuffer.remaining();
-						int written = writeByteBuffer(channel);
-
-						logger.trace("written: " + written + " total: " + total);
-
-						if (written == total) {
-							if (dataBuffer instanceof FlushingDataBuffer) {
-								flush(channel);
-							}
-							releaseBuffer();
-							if (!completed) {
-								subscription.request(1);
-							}
-							else {
-								closeChannel(channel);
-							}
-						}
-					}
-					catch (IOException ex) {
-						onError(ex);
-					}
-				}
-				else if (subscription != null) {
-					subscription.request(1);
-				}
-
-			}
-
-			private int writeByteBuffer(StreamSinkChannel channel) throws IOException {
-				int written;
-				int totalWritten = 0;
-				do {
-					written = channel.write(byteBuffer);
-					totalWritten += written;
-				}
-				while (byteBuffer.hasRemaining() && written > 0);
-				return totalWritten;
-			}
-
-			private void flush(StreamSinkChannel channel) throws IOException {
-				logger.trace("Flushing");
-				channel.flush();
-			}
-
-			private void releaseBuffer() {
-				DataBufferUtils.release(dataBuffer);
-				dataBuffer = null;
-				byteBuffer = null;
+				onWritePossible();
 			}
 
 		}
 
 	}
+
 
 }

@@ -34,13 +34,10 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Mono;
-import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.core.io.buffer.FlushingDataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
@@ -88,16 +85,17 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		ServletAsyncContextSynchronizer synchronizer = new ServletAsyncContextSynchronizer(context);
 
 		RequestBodyPublisher requestBody =
-				new RequestBodyPublisher(synchronizer, dataBufferFactory, bufferSize);
+				new RequestBodyPublisher(synchronizer, this.dataBufferFactory,
+						this.bufferSize);
 		requestBody.registerListener();
 		ServletServerHttpRequest request =
 				new ServletServerHttpRequest(servletRequest, requestBody);
 
 		ResponseBodySubscriber responseBody =
-				new ResponseBodySubscriber(synchronizer, bufferSize);
+				new ResponseBodySubscriber(synchronizer, this.bufferSize);
 		responseBody.registerListener();
 		ServletServerHttpResponse response =
-				new ServletServerHttpResponse(servletResponse, dataBufferFactory,
+				new ServletServerHttpResponse(servletResponse, this.dataBufferFactory,
 						publisher -> Mono
 								.from(subscriber -> publisher.subscribe(responseBody)));
 
@@ -162,16 +160,17 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		public void registerListener() throws IOException {
-			this.synchronizer.getRequest().getInputStream().setReadListener(readListener);
+			this.synchronizer.getRequest().getInputStream()
+					.setReadListener(this.readListener);
 		}
 
 		@Override
 		protected void noLongerStalled() {
 			try {
-				readListener.onDataAvailable();
+				this.readListener.onDataAvailable();
 			}
 			catch (IOException ex) {
-				readListener.onError(ex);
+				this.readListener.onError(ex);
 			}
 		}
 
@@ -183,7 +182,9 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 					return;
 				}
 				logger.trace("onDataAvailable");
-				ServletInputStream input = synchronizer.getRequest().getInputStream();
+				ServletInputStream input =
+						RequestBodyPublisher.this.synchronizer.getRequest()
+								.getInputStream();
 
 				while (true) {
 					if (!checkSubscriptionForDemand()) {
@@ -198,15 +199,17 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 						break;
 					}
 
-					int read = input.read(buffer);
+					int read = input.read(RequestBodyPublisher.this.buffer);
 					logger.trace("Input read:" + read);
 
 					if (read == -1) {
 						break;
 					}
 					else if (read > 0) {
-						DataBuffer dataBuffer = dataBufferFactory.allocateBuffer(read);
-						dataBuffer.write(buffer, 0, read);
+						DataBuffer dataBuffer =
+								RequestBodyPublisher.this.dataBufferFactory
+										.allocateBuffer(read);
+						dataBuffer.write(RequestBodyPublisher.this.buffer, 0, read);
 
 						publishOnNext(dataBuffer);
 					}
@@ -216,7 +219,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 			@Override
 			public void onAllDataRead() throws IOException {
 				logger.trace("All data read");
-				synchronizer.readComplete();
+				RequestBodyPublisher.this.synchronizer.readComplete();
 
 				publishOnComplete();
 			}
@@ -224,7 +227,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 			@Override
 			public void onError(Throwable t) {
 				logger.trace("RequestBodyReadListener Error", t);
-				synchronizer.readComplete();
+				RequestBodyPublisher.this.synchronizer.readComplete();
 
 				publishOnError(t);
 			}
@@ -232,9 +235,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	}
 
-	private static class ResponseBodySubscriber implements Subscriber<DataBuffer> {
-
-		private static final Log logger = LogFactory.getLog(ResponseBodySubscriber.class);
+	private static class ResponseBodySubscriber extends AbstractResponseBodySubscriber {
 
 		private final ResponseBodyWriteListener writeListener =
 				new ResponseBodyWriteListener();
@@ -243,14 +244,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		private final int bufferSize;
 
-		private volatile DataBuffer dataBuffer;
-
-		private volatile boolean completed = false;
-
-		private volatile boolean flushOnNext = false;
-
-		private Subscription subscription;
-
+		private volatile boolean flushOnNext;
 
 		public ResponseBodySubscriber(ServletAsyncContextSynchronizer synchronizer,
 				int bufferSize) {
@@ -259,145 +253,119 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		public void registerListener() throws IOException {
-			synchronizer.getResponse().getOutputStream().setWriteListener(writeListener);
+			outputStream().setWriteListener(this.writeListener);
+		}
+
+		private ServletOutputStream outputStream() throws IOException {
+			return this.synchronizer.getResponse().getOutputStream();
 		}
 
 		@Override
-		public void onSubscribe(Subscription subscription) {
-			logger.trace("onSubscribe. Subscription: " + subscription);
-			if (BackpressureUtils.validate(this.subscription, subscription)) {
-				this.subscription = subscription;
-				this.subscription.request(1);
-			}
-		}
+		protected void receiveBuffer(DataBuffer dataBuffer) {
+			super.receiveBuffer(dataBuffer);
 
-		@Override
-		public void onNext(DataBuffer dataBuffer) {
-			Assert.state(this.dataBuffer == null);
-
-			logger.trace("onNext. buffer: " + dataBuffer);
-
-			this.dataBuffer = dataBuffer;
 			try {
-				this.writeListener.onWritePossible();
+				if (outputStream().isReady()) {
+					onWritePossible();
+				}
 			}
-			catch (IOException e) {
-				onError(e);
+			catch (IOException ignored) {
 			}
 		}
 
 		@Override
-		public void onError(Throwable t) {
-			logger.error("onError", t);
+		protected boolean write(DataBuffer dataBuffer) throws IOException {
+			ServletOutputStream output = outputStream();
+
+			boolean ready = output.isReady();
+
+			if (this.flushOnNext) {
+				flush();
+				ready = output.isReady();
+			}
+
+			if (this.logger.isTraceEnabled()) {
+				this.logger.trace("write: " + dataBuffer + " ready: " + ready);
+			}
+
+			if (ready) {
+				int total = dataBuffer.readableByteCount();
+				int written = writeDataBuffer(dataBuffer);
+
+				if (this.logger.isTraceEnabled()) {
+					this.logger.trace("written: " + written + " total: " + total);
+				}
+				return written == total;
+			}
+			else {
+				return false;
+			}
+		}
+
+		@Override
+		protected void writeError(Throwable t) {
 			HttpServletResponse response =
 					(HttpServletResponse) this.synchronizer.getResponse();
-			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-			this.synchronizer.complete();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		}
+
+		@Override
+		protected void flush() throws IOException {
+			ServletOutputStream output = outputStream();
+			if (output.isReady()) {
+				if (logger.isTraceEnabled()) {
+					this.logger.trace("flush");
+				}
+				try {
+					output.flush();
+					this.flushOnNext = false;
+				}
+				catch (IOException ignored) {
+				}
+			}
+			else {
+				this.flushOnNext = true;
+			}
 
 		}
 
 		@Override
-		public void onComplete() {
-			logger.trace("onComplete. buffer: " + this.dataBuffer);
+		protected void close() {
+			this.synchronizer.writeComplete();
+		}
 
-			this.completed = true;
+		private int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
+			InputStream input = dataBuffer.asInputStream();
+			ServletOutputStream output = outputStream();
 
-			if (this.dataBuffer != null) {
-				try {
-					this.writeListener.onWritePossible();
-				}
-				catch (IOException ex) {
-					onError(ex);
-				}
+			int bytesWritten = 0;
+			byte[] buffer = new byte[this.bufferSize];
+			int bytesRead = -1;
+
+			while (output.isReady() && (bytesRead = input.read(buffer)) != -1) {
+				output.write(buffer, 0, bytesRead);
+				bytesWritten += bytesRead;
 			}
 
-			if (this.dataBuffer == null) {
-				this.synchronizer.writeComplete();
-			}
+			return bytesWritten;
 		}
 
 		private class ResponseBodyWriteListener implements WriteListener {
 
 			@Override
 			public void onWritePossible() throws IOException {
-				logger.trace("onWritePossible");
-				ServletOutputStream output = synchronizer.getResponse().getOutputStream();
-
-				boolean ready = output.isReady();
-
-				if (flushOnNext) {
-					flush(output);
-					ready = output.isReady();
-				}
-
-				logger.trace("ready: " + ready + " buffer: " + dataBuffer);
-
-				if (ready) {
-					if (dataBuffer != null) {
-
-						int total = dataBuffer.readableByteCount();
-						int written = writeDataBuffer();
-
-						logger.trace("written: " + written + " total: " + total);
-						if (written == total) {
-							if (dataBuffer instanceof FlushingDataBuffer) {
-								flush(output);
-							}
-							releaseBuffer();
-							if (!completed) {
-								subscription.request(1);
-							}
-							else {
-								synchronizer.writeComplete();
-							}
-						}
-					}
-					else if (subscription != null) {
-						subscription.request(1);
-					}
-				}
-			}
-
-			private int writeDataBuffer() throws IOException {
-				InputStream input = dataBuffer.asInputStream();
-				ServletOutputStream output = synchronizer.getResponse().getOutputStream();
-
-				int bytesWritten = 0;
-				byte[] buffer = new byte[bufferSize];
-				int bytesRead = -1;
-
-				while (output.isReady() && (bytesRead = input.read(buffer)) != -1) {
-					output.write(buffer, 0, bytesRead);
-					bytesWritten += bytesRead;
-				}
-
-				return bytesWritten;
-			}
-
-			private void flush(ServletOutputStream output) {
-				if (output.isReady()) {
-					logger.trace("Flushing");
-					try {
-						output.flush();
-						flushOnNext = false;
-					}
-					catch (IOException ignored) {
-					}
-				} else {
-					flushOnNext = true;
-				}
-			}
-
-			private void releaseBuffer() {
-				DataBufferUtils.release(dataBuffer);
-				dataBuffer = null;
+				ResponseBodySubscriber.this.onWritePossible();
 			}
 
 			@Override
 			public void onError(Throwable ex) {
-				logger.error("ResponseBodyWriteListener error", ex);
+				// Error on writing to the HTTP stream, so any further writes will probably
+				// fail. Let's log instead of calling {@link #writeError}.
+				ResponseBodySubscriber.this.logger
+						.error("ResponseBodyWriteListener error", ex);
 			}
 		}
 	}
+
 
 }

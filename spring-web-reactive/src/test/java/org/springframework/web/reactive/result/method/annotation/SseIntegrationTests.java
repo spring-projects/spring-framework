@@ -22,9 +22,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized;
-import static org.springframework.web.client.reactive.HttpRequestBuilders.get;
-import static org.springframework.web.client.reactive.WebResponseExtractors.bodyStream;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
@@ -43,10 +40,6 @@ import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.converter.reactive.SseHttpMessageConverter;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.boot.JettyHttpServer;
-import org.springframework.http.server.reactive.boot.ReactorHttpServer;
-import org.springframework.http.server.reactive.boot.RxNettyHttpServer;
-import org.springframework.http.server.reactive.boot.TomcatHttpServer;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.WebClient;
@@ -55,21 +48,13 @@ import org.springframework.web.reactive.config.WebReactiveConfiguration;
 import org.springframework.web.reactive.sse.SseEvent;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
+import static org.springframework.web.client.reactive.HttpRequestBuilders.get;
+import static org.springframework.web.client.reactive.WebResponseExtractors.bodyStream;
+
 /**
  * @author Sebastien Deleuze
  */
 public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
-
-	// TODO Fix Undertow support and remove this method
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		return new Object[][] {
-				{new JettyHttpServer()},
-				{new RxNettyHttpServer()},
-				{new ReactorHttpServer()},
-				{new TomcatHttpServer()},
-		};
-	}
 
 	private AnnotationConfigApplicationContext wac;
 
