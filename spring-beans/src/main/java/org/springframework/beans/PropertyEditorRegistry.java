@@ -19,12 +19,13 @@ package org.springframework.beans;
 import java.beans.PropertyEditor;
 
 /**
+ * 封装了用于注册PropertyEditor的方法,这个核心接口用于被PropertyEditor所操作
  * Encapsulates methods for registering JavaBeans {@link PropertyEditor PropertyEditors}.
  * This is the central interface that a {@link PropertyEditorRegistrar} operates on.
  *
  * <p>Extended by {@link BeanWrapper}; implemented by {@link BeanWrapperImpl}
  * and {@link org.springframework.validation.DataBinder}.
- *
+ *		这个接口被BeanWrapper和DataBinder所扩展
  * @author Juergen Hoeller
  * @since 1.2.6
  * @see java.beans.PropertyEditor
@@ -35,6 +36,7 @@ import java.beans.PropertyEditor;
 public interface PropertyEditorRegistry {
 
 	/**
+	 * 根据属性的类型来制定对应的PropertyEditor
 	 * Register the given custom property editor for all properties of the given type.
 	 * @param requiredType the type of the property
 	 * @param propertyEditor the editor to register
@@ -42,6 +44,7 @@ public interface PropertyEditorRegistry {
 	void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor);
 
 	/**
+	 * 根据属性的类型和属性的名称来指定对应的PropertyEditor,该方法不常用,但是可以做到细粒度的转换
 	 * Register the given custom property editor for the given type and
 	 * property, or for all properties of the given type.
 	 * <p>If the property path denotes an array or Collection property,
@@ -67,6 +70,7 @@ public interface PropertyEditorRegistry {
 	void registerCustomEditor(Class<?> requiredType, String propertyPath, PropertyEditor propertyEditor);
 
 	/**
+	 * 根据属性的类型以及属性的名称,查询其对应的PropertyEditor
 	 * Find a custom property editor for the given type and property.
 	 * @param requiredType the type of the property (can be {@code null} if a property
 	 * is given but should be specified in any case for consistency checking)
