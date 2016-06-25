@@ -51,7 +51,6 @@ import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.LookupOverride;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -529,9 +528,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
 			return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
 		}
-		else if (cachedArgument instanceof RuntimeBeanReference) {
-			return this.beanFactory.getBean(((RuntimeBeanReference) cachedArgument).getBeanName());
-		}
 		else {
 			return cachedArgument;
 		}
@@ -581,7 +577,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								String autowiredBeanName = autowiredBeanNames.iterator().next();
 								if (beanFactory.containsBean(autowiredBeanName)) {
 									if (beanFactory.isTypeMatch(autowiredBeanName, field.getType())) {
-										this.cachedFieldValue = new RuntimeBeanReference(autowiredBeanName);
+										this.cachedFieldValue = new ShortcutDependencyDescriptor(desc, autowiredBeanName);
 									}
 								}
 							}
@@ -665,7 +661,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 									String autowiredBeanName = it.next();
 									if (beanFactory.containsBean(autowiredBeanName)) {
 										if (beanFactory.isTypeMatch(autowiredBeanName, paramTypes[i])) {
-											this.cachedMethodArguments[i] = new RuntimeBeanReference(autowiredBeanName);
+											this.cachedMethodArguments[i] =
+													new ShortcutDependencyDescriptor(descriptors[i], autowiredBeanName);
 										}
 									}
 								}
@@ -698,6 +695,26 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 				arguments[i] = resolvedCachedArgument(beanName, this.cachedMethodArguments[i]);
 			}
 			return arguments;
+		}
+	}
+
+
+	/**
+	 * DependencyDescriptor variant with a pre-resolved target bean name.
+	 */
+	@SuppressWarnings("serial")
+	private static class ShortcutDependencyDescriptor extends DependencyDescriptor {
+
+		private final String shortcutBeanName;
+
+		public ShortcutDependencyDescriptor(DependencyDescriptor original, String shortcutBeanName) {
+			super(original);
+			this.shortcutBeanName = shortcutBeanName;
+		}
+
+		@Override
+		public Object resolveShortcut(BeanFactory beanFactory) {
+			return resolveCandidate(this.shortcutBeanName, beanFactory);
 		}
 	}
 

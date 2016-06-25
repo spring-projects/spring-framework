@@ -1024,27 +1024,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	public Object doResolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
-		Class<?> type = descriptor.getDependencyType();
-		Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
-		if (value != null) {
-			if (value instanceof String) {
-				String strVal = resolveEmbeddedValue((String) value);
-				BeanDefinition bd = (beanName != null && containsBean(beanName) ? getMergedBeanDefinition(beanName) : null);
-				value = evaluateBeanDefinitionString(strVal, bd);
-			}
-			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
-			return (descriptor.getField() != null ?
-					converter.convertIfNecessary(value, type, descriptor.getField()) :
-					converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
-		}
-
-		Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
-		if (multipleBeans != null) {
-			return multipleBeans;
-		}
-
 		InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
 		try {
+			Object shortcut = descriptor.resolveShortcut(this);
+			if (shortcut != null) {
+				return shortcut;
+			}
+
+			Class<?> type = descriptor.getDependencyType();
+			Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
+			if (value != null) {
+				if (value instanceof String) {
+					String strVal = resolveEmbeddedValue((String) value);
+					BeanDefinition bd = (beanName != null && containsBean(beanName) ? getMergedBeanDefinition(beanName) : null);
+					value = evaluateBeanDefinitionString(strVal, bd);
+				}
+				TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
+				return (descriptor.getField() != null ?
+						converter.convertIfNecessary(value, type, descriptor.getField()) :
+						converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
+			}
+
+			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
+			if (multipleBeans != null) {
+				return multipleBeans;
+			}
+
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {

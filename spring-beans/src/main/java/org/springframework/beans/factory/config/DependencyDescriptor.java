@@ -187,6 +187,21 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		return beanFactory.getBean(beanName);
 	}
 
+	/**
+	 * Resolve a shortcut for this dependency against the given factory, for example
+	 * taking some pre-resolved information into account.
+	 * <p>The resolution algorithm will first attempt to resolve a shortcut through this
+	 * method before going into the regular type matching algorithm across all beans.
+	 * Subclasses may override this method to improve resolution performance based on
+	 * pre-cached information while still receiving {@link InjectionPoint} exposure etc.
+	 * @param beanFactory the associated factory
+	 * @return the shortcut result if any, or {@code null} if none
+	 * @since 4.3.1
+	 */
+	public Object resolveShortcut(BeanFactory beanFactory) {
+		return null;
+	}
+
 
 	/**
 	 * Increase this descriptor's nesting level.
