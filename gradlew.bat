@@ -14,7 +14,6 @@ set APP_BASE_NAME=%~n0
 set APP_HOME=%DIRNAME%
 
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-set GRADLE_OPTS=-XX:MaxMetaspaceSize=1024m -Xmx1024m -XX:MaxHeapSize=256m %GRADLE_OPTS%
 set DEFAULT_JVM_OPTS=
 
 @rem Find java.exe
