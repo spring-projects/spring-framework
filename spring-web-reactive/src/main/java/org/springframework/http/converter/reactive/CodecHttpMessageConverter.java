@@ -144,6 +144,12 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
 			}
 			if (contentTypeToUse != null) {
+				if (contentTypeToUse.getCharset() == null) {
+					MediaType mediaType = getDefaultContentType(type);
+					if (mediaType != null && mediaType.getCharset() != null) {
+						contentTypeToUse = new MediaType(contentTypeToUse, mediaType.getCharset());
+					}
+				}
 				headers.setContentType(contentTypeToUse);
 			}
 		}
