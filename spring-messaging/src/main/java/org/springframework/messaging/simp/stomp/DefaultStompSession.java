@@ -67,7 +67,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private static final Message<byte[]> HEARTBEAT;
 
-
 	static {
 		StompHeaderAccessor accessor = StompHeaderAccessor.createForHeartbeat();
 		HEARTBEAT = MessageBuilder.createMessage(StompDecoder.HEARTBEAT_PAYLOAD, accessor.getMessageHeaders());
@@ -92,6 +91,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 
 	private volatile TcpConnection<byte[]> connection;
+
+	private volatile String version;
 
 	private final AtomicInteger subscriptionIndex = new AtomicInteger();
 
@@ -313,7 +314,12 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	@Override
 	public Receiptable acknowledge(String messageId, boolean consumed) {
 		StompHeaders stompHeaders = new StompHeaders();
-		stompHeaders.setId(messageId);
+		if ("1.1".equals(this.version)) {
+			stompHeaders.setMessageId(messageId);
+		}
+		else {
+			stompHeaders.setId(messageId);
+		}
 
 		String receiptId = checkOrAddReceipt(stompHeaders);
 		Receiptable receiptable = new ReceiptHandler(receiptId);
@@ -407,6 +413,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 				}
 				else if (StompCommand.CONNECTED.equals(command)) {
 					initHeartbeatTasks(stompHeaders);
+					this.version = stompHeaders.getFirst("version");
 					this.sessionFuture.set(this);
 					this.sessionHandler.afterConnected(this, stompHeaders);
 				}
