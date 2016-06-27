@@ -47,7 +47,9 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		Mono<String> result = this.webClient
 				.perform(get("http://localhost:" + port))
 				.extract(bodyStream(String.class))
-				.take(2)
+				.takeUntil(s -> {
+					return s.endsWith("data1");
+				})
 				.reduce((s1, s2) -> s1 + s2);
 
 		TestSubscriber
