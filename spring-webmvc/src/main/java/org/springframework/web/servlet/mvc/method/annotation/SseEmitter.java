@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", Charset.forName("UTF-8"));
 
+	static final MediaType UTF8_TEXT_EVENTSTREAM = new MediaType("text", "event-stream", Charset.forName("UTF-8"));
+
 
 	/**
 	 * Create a new SseEmitter instance.
@@ -65,7 +67,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			headers.setContentType(new MediaType("text", "event-stream"));
+			headers.setContentType(UTF8_TEXT_EVENTSTREAM);
 		}
 	}
 
