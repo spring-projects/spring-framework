@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.ByteBufferEncoder;
@@ -34,6 +35,7 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
@@ -108,14 +110,14 @@ public class ResponseBodyResultHandlerTests {
 
 	@Test
 	public void supports() throws NoSuchMethodException {
-		TestController controller = new TestController();
-		testSupports(controller, "handleReturningString", true);
-		testSupports(controller, "handleReturningVoid", true);
+		Object controller = new TestController();
+		testSupports(controller, "handleToString", true);
 		testSupports(controller, "doWork", false);
 
-		TestRestController restController = new TestRestController();
-		testSupports(restController, "handleReturningString", true);
-		testSupports(restController, "handleReturningVoid", true);
+		controller = new TestRestController();
+		testSupports(controller, "handleToString", true);
+		testSupports(controller, "handleToResponseEntity", false);
+		testSupports(controller, "handleToMonoResponseEntity", false);
 	}
 
 	private void testSupports(Object controller, String method, boolean result) throws NoSuchMethodException {
@@ -139,11 +141,15 @@ public class ResponseBodyResultHandlerTests {
 	@RestController @SuppressWarnings("unused")
 	private static class TestRestController {
 
-		public String handleReturningString() {
+		public String handleToString() {
 			return null;
 		}
 
-		public Void handleReturningVoid() {
+		public ResponseEntity<String> handleToResponseEntity() {
+			return null;
+		}
+
+		public Mono<ResponseEntity<String>> handleToMonoResponseEntity() {
 			return null;
 		}
 	}
@@ -152,12 +158,7 @@ public class ResponseBodyResultHandlerTests {
 	private static class TestController {
 
 		@ResponseBody
-		public String handleReturningString() {
-			return null;
-		}
-
-		@ResponseBody
-		public Void handleReturningVoid() {
+		public String handleToString() {
 			return null;
 		}
 

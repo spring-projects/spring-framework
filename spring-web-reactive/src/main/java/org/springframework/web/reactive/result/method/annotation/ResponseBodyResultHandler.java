@@ -24,9 +24,9 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
@@ -39,10 +39,10 @@ import org.springframework.web.server.ServerWebExchange;
  * with {@code @ResponseBody} writing to the body of the request or response with
  * an {@link HttpMessageConverter}.
  *
- * <p>By default the order for the result handler is set to 100. It detects the
- * presence of an {@code @ResponseBody} annotation and should be ordered after
- * result handlers that look for a specific return type such as
- * {@code ResponseEntity}.
+ * <p>By default the order for this result handler is set to 100. As it detects
+ * the presence of {@code @ResponseBody} it should be ordered after result
+ * handlers that look for a specific return type. Note however that this handler
+ * does recognize and explicitly ignores the {@code ResponseEntity} return type.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
@@ -85,15 +85,35 @@ public class ResponseBodyResultHandler extends AbstractMessageConverterResultHan
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		Object handler = result.getHandler();
-		if (handler instanceof HandlerMethod) {
-			MethodParameter returnType = ((HandlerMethod) handler).getReturnType();
-			Class<?> containingClass = returnType.getContainingClass();
-			return (AnnotationUtils.findAnnotation(containingClass, ResponseBody.class) != null ||
-					returnType.getMethodAnnotation(ResponseBody.class) != null);
+		ResolvableType returnType = result.getReturnValueType();
+		if (returnType.getSource() instanceof MethodParameter) {
+			MethodParameter parameter = (MethodParameter) returnType.getSource();
+			if (hasResponseBodyAnnotation(parameter) && !isHttpEntityType(returnType)) {
+				return true;
+			}
 		}
 		return false;
 	}
+
+	private boolean hasResponseBodyAnnotation(MethodParameter parameter) {
+		Class<?> containingClass = parameter.getContainingClass();
+		return (AnnotationUtils.findAnnotation(containingClass, ResponseBody.class) != null ||
+				parameter.getMethodAnnotation(ResponseBody.class) != null);
+	}
+
+	private boolean isHttpEntityType(ResolvableType returnType) {
+		if (HttpEntity.class.isAssignableFrom(returnType.getRawClass())) {
+			return true;
+		}
+		else if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
+			ResolvableType genericType = returnType.getGeneric(0);
+			if (HttpEntity.class.isAssignableFrom(genericType.getRawClass())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
