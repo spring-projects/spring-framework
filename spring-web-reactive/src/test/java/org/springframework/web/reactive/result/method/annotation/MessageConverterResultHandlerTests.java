@@ -17,13 +17,17 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,21 +37,13 @@ import reactor.core.test.TestSubscriber;
 import rx.Observable;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.ByteBufferEncoder;
-import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.Jaxb2Decoder;
 import org.springframework.core.codec.support.Jaxb2Encoder;
-import org.springframework.core.codec.support.JsonObjectDecoder;
-import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
@@ -68,6 +64,9 @@ import org.springframework.web.server.session.WebSessionManager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
  * Unit tests for {@link AbstractMessageConverterResultHandler}.
@@ -99,6 +98,18 @@ public class MessageConverterResultHandlerTests {
 		assertEquals("image/x-png", this.response.getHeaders().getFirst("Content-Type"));
 	}
 
+	@Test // SPR-13631
+	public void useDefaultCharset() throws Exception {
+		this.exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
+				Collections.singleton(APPLICATION_JSON));
+
+		String body = "foo";
+		ResolvableType bodyType = ResolvableType.forType(String.class);
+		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+
+		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+	}
+
 	@Test
 	public void voidReturnType() throws Exception {
 		testVoidReturnType(null, ResolvableType.forType(Void.class));
@@ -125,6 +136,40 @@ public class MessageConverterResultHandlerTests {
 		TestSubscriber.subscribe(mono).assertError(IllegalStateException.class);
 	}
 
+	@Test // SPR-12811
+	@Ignore
+	public void jacksonTypeOfListElement() throws Exception {
+		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
+		ResolvableType bodyType = ResolvableType.forClassWithGenerics(List.class, ParentClass.class);
+		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+
+		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+		assertResponseBody("[{\"type\":\"foo\",\"parentProperty\":\"foo\"}," +
+				"{\"type\":\"bar\",\"parentProperty\":\"bar\"}]");
+	}
+
+	@Test // SPR-13318
+	@Ignore
+	public void jacksonTypeWithSubType() throws Exception {
+		SimpleBean body = new SimpleBean(123L, "foo");
+		ResolvableType bodyType = ResolvableType.forClass(Identifiable.class);
+		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+
+		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+		assertResponseBody("{\"id\":123,\"name\":\"foo\"}");
+	}
+
+	@Test // SPR-13318
+	@Ignore
+	public void jacksonTypeWithSubTypeOfListElement() throws Exception {
+		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
+		ResolvableType bodyType = ResolvableType.forClassWithGenerics(List.class, Identifiable.class);
+		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+
+		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
+		assertResponseBody("[{\"id\":123,\"name\":\"foo\"},{\"id\":456,\"name\":\"bar\"}]");
+	}
+
 
 	private AbstractMessageConverterResultHandler createResultHandler(HttpMessageConverter<?>... converters) {
 		List<HttpMessageConverter<?>> converterList;
@@ -147,6 +192,79 @@ public class MessageConverterResultHandlerTests {
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 
 		return new AbstractMessageConverterResultHandler(converterList, service, resolver) {};
+	}
+
+	private void assertResponseBody(String responseBody) {
+		TestSubscriber.subscribe(this.response.getBody())
+				.assertValuesWith(buf -> assertEquals(responseBody,
+						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
+	}
+
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+	@SuppressWarnings("unused")
+	private static class ParentClass {
+
+		private String parentProperty;
+
+		public ParentClass() {
+		}
+
+		public ParentClass(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+
+		public String getParentProperty() {
+			return parentProperty;
+		}
+
+		public void setParentProperty(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+	}
+
+	@JsonTypeName("foo")
+	private static class Foo extends ParentClass {
+
+		public Foo(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	@JsonTypeName("bar")
+	private static class Bar extends ParentClass {
+
+		public Bar(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	private interface Identifiable extends Serializable {
+
+		@SuppressWarnings("unused")
+		Long getId();
+	}
+
+	@SuppressWarnings({ "serial" })
+	private static class SimpleBean implements Identifiable {
+
+		private Long id;
+
+		private String name;
+
+		public SimpleBean(Long id, String name) {
+			this.id = id;
+			this.name = name;
+		}
+
+		@Override
+		public Long getId() {
+			return id;
+		}
+
+		public String getName() {
+			return name;
+		}
 	}
 
 }
