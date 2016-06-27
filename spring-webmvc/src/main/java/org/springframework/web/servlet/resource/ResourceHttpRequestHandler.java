@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -109,6 +110,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	private ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
 
 	private ContentNegotiationManager contentNegotiationManager;
+
+	private final ContentNegotiationManagerFactoryBean cnmFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private CorsConfiguration corsConfiguration;
 
@@ -249,6 +252,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		return this.corsConfiguration;
 	}
 
+	@Override
+	protected void initServletContext(ServletContext servletContext) {
+		this.cnmFactoryBean.setServletContext(servletContext);
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -261,7 +269,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 		initAllowedLocations();
 		if (this.contentNegotiationManager == null) {
-			this.contentNegotiationManager = initContentNegotiationManager();
+			this.cnmFactoryBean.afterPropertiesSet();
+			this.contentNegotiationManager = this.cnmFactoryBean.getObject();
 		}
 		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
@@ -290,18 +299,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			}
 		}
 	}
-
-	/**
-	 * Create the {@code ContentNegotiationManager} to use to resolve the
-	 * {@link MediaType} for requests. This implementation delegates to
-	 * {@link ContentNegotiationManagerFactoryBean} with default settings.
-	 */
-	protected ContentNegotiationManager initContentNegotiationManager() {
-		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
-		factory.afterPropertiesSet();
-		return factory.getObject();
-	}
-
 
 	/**
 	 * Processes a resource request.
