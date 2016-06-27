@@ -211,6 +211,11 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 				parameter.getParameterName() : requestParam.name());
 
 		if (value == null) {
+			if (requestParam != null) {
+				if (!requestParam.required() || !requestParam.defaultValue().equals(ValueConstants.DEFAULT_NONE)) {
+					return;
+				}
+			}
 			builder.queryParam(name);
 		}
 		else if (value instanceof Collection) {
