@@ -371,7 +371,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				return true;
 			}
 		}
-		if (path.contains("../")) {
+		if (path.contains("..")) {
 			path = StringUtils.cleanPath(path);
 			if (path.contains("../")) {
 				if (logger.isTraceEnabled()) {
