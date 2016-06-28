@@ -3169,7 +3169,7 @@ You configure destroy method callbacks similarly (in XML, that is) by using the
 
 Where existing bean classes already have callback methods that are named at variance
 with the convention, you can override the default by specifying (in XML, that is) the
-method name using the `init-method` and `destroy-method` attributes of the <bean/>
+method name using the `init-method` and `destroy-method` attributes of the `<bean/>`
 itself.
 
 The Spring container guarantees that a configured initialization callback is called
