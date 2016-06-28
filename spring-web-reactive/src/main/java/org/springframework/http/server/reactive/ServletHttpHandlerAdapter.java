@@ -269,7 +269,8 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 					onWritePossible();
 				}
 			}
-			catch (IOException ignored) {
+			catch (IOException ex) {
+				onError(ex);
 			}
 		}
 
@@ -277,12 +278,11 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		protected boolean write(DataBuffer dataBuffer) throws IOException {
 			ServletOutputStream output = outputStream();
 
-			boolean ready = output.isReady();
-
 			if (this.flushOnNext) {
 				flush();
-				ready = output.isReady();
 			}
+
+			boolean ready = output.isReady();
 
 			if (this.logger.isTraceEnabled()) {
 				this.logger.trace("write: " + dataBuffer + " ready: " + ready);

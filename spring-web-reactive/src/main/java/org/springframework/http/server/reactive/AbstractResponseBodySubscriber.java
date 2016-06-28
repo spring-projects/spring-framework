@@ -139,8 +139,8 @@ abstract class AbstractResponseBodySubscriber implements Subscriber<DataBuffer> 
 	 */
 	protected abstract void close();
 
-	private void changeState(State oldState, State newState) {
-		this.state.compareAndSet(oldState, newState);
+	private boolean changeState(State oldState, State newState) {
+		return this.state.compareAndSet(oldState, newState);
 	}
 
 	/**
@@ -171,8 +171,9 @@ abstract class AbstractResponseBodySubscriber implements Subscriber<DataBuffer> 
 					Subscription subscription) {
 				if (BackpressureUtils.validate(subscriber.subscription, subscription)) {
 					subscriber.subscription = subscription;
-					subscriber.changeState(this, REQUESTED);
-					subscription.request(1);
+					if (subscriber.changeState(this, REQUESTED)) {
+						subscription.request(1);
+					}
 				}
 			}
 		},
@@ -186,15 +187,17 @@ abstract class AbstractResponseBodySubscriber implements Subscriber<DataBuffer> 
 			@Override
 			void onNext(AbstractResponseBodySubscriber subscriber,
 					DataBuffer dataBuffer) {
-				subscriber.changeState(this, RECEIVED);
-				subscriber.receiveBuffer(dataBuffer);
+				if (subscriber.changeState(this, RECEIVED)) {
+					subscriber.receiveBuffer(dataBuffer);
+				}
 			}
 
 			@Override
 			void onComplete(AbstractResponseBodySubscriber subscriber) {
-				subscriber.subscriptionCompleted = true;
-				subscriber.changeState(this, COMPLETED);
-				subscriber.close();
+				if (subscriber.changeState(this, COMPLETED)) {
+					subscriber.subscriptionCompleted = true;
+					subscriber.close();
+				}
 			}
 		},
 		/**
@@ -217,12 +220,14 @@ abstract class AbstractResponseBodySubscriber implements Subscriber<DataBuffer> 
 						subscriber.releaseBuffer();
 						boolean subscriptionCompleted = subscriber.subscriptionCompleted;
 						if (!subscriptionCompleted) {
-							subscriber.changeState(this, REQUESTED);
-							subscriber.subscription.request(1);
+							if (subscriber.changeState(this, REQUESTED)) {
+								subscriber.subscription.request(1);
+							}
 						}
 						else {
-							subscriber.changeState(this, COMPLETED);
-							subscriber.close();
+							if (subscriber.changeState(this, COMPLETED)) {
+								subscriber.close();
+							}
 						}
 					}
 				}
@@ -258,7 +263,7 @@ abstract class AbstractResponseBodySubscriber implements Subscriber<DataBuffer> 
 		};
 
 		void onSubscribe(AbstractResponseBodySubscriber subscriber, Subscription s) {
-			throw new IllegalStateException(toString());
+			s.cancel();
 		}
 
 		void onNext(AbstractResponseBodySubscriber subscriber, DataBuffer dataBuffer) {
@@ -266,9 +271,10 @@ abstract class AbstractResponseBodySubscriber implements Subscriber<DataBuffer> 
 		}
 
 		void onError(AbstractResponseBodySubscriber subscriber, Throwable t) {
-			subscriber.changeState(this, COMPLETED);
-			subscriber.writeError(t);
-			subscriber.close();
+			if (subscriber.changeState(this, COMPLETED)) {
+				subscriber.writeError(t);
+				subscriber.close();
+			}
 		}
 
 		void onComplete(AbstractResponseBodySubscriber subscriber) {
