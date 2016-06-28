@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.support;
 
 import java.util.Arrays;
@@ -37,7 +38,6 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import static org.junit.Assert.assertEquals;
@@ -48,6 +48,7 @@ import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTE
 /**
  * Unit tests for {@link HandlerMappingIntrospector}.
  * @author Rossen Stoyanchev
+ * @since 4.3.1
  */
 public class HandlerMappingIntrospectorTests {
 
@@ -90,7 +91,8 @@ public class HandlerMappingIntrospectorTests {
 		List<HandlerMapping> actual = new HandlerMappingIntrospector(cxt).getHandlerMappings();
 		assertEquals(2, actual.size());
 		assertEquals(BeanNameUrlHandlerMapping.class, actual.get(0).getClass());
-		assertEquals(DefaultAnnotationHandlerMapping.class, actual.get(1).getClass());
+		assertEquals(org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping.class,
+				actual.get(1).getClass());
 	}
 
 	@Test

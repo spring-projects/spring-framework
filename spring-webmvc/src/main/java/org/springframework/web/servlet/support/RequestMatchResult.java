@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.support;
 
 import java.util.Collections;
@@ -27,7 +28,7 @@ import org.springframework.util.PathMatcher;
  * variables from the pattern.
  *
  * @author Rossen Stoyanchev
- * @since 4.3
+ * @since 4.3.1
  */
 public class RequestMatchResult {
 

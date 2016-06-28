@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.support;
 
 import java.io.IOException;
@@ -44,14 +45,14 @@ import org.springframework.web.servlet.HandlerMapping;
  *
  * <p>Provides the following methods:
  * <ul>
- * <li>{@link #getMatchableHandlerMapping} -- obtain a {@code HandlerMapping}
+ * <li>{@link #getMatchableHandlerMapping} &mdash; obtain a {@code HandlerMapping}
  * to check request-matching criteria against.
- * <li>{@link #getCorsConfiguration} -- obtain the CORS configuration for the
+ * <li>{@link #getCorsConfiguration} &mdash; obtain the CORS configuration for the
  * request.
  * </ul>
  *
  * @author Rossen Stoyanchev
- * @since 4.3
+ * @since 4.3.1
  */
 public class HandlerMappingIntrospector implements CorsConfigurationSource {
 
@@ -60,7 +61,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 
 	/**
 	 * Constructor that detects the configured {@code HandlerMapping}s in the
-	 * given {@code ApplicationContext} or falling back on
+	 * given {@code ApplicationContext} or falls back on
 	 * "DispatcherServlet.properties" like the {@code DispatcherServlet}.
 	 */
 	public HandlerMappingIntrospector(ApplicationContext context) {

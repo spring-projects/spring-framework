@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.support;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,7 +26,7 @@ import org.springframework.web.servlet.HandlerMapping;
  * configuration and implementation.
  *
  * @author Rossen Stoyanchev
- * @since 4.3
+ * @since 4.3.1
  * @see HandlerMappingIntrospector
  */
 public interface MatchableHandlerMapping {
