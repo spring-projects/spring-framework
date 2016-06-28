@@ -204,3 +204,41 @@ It can be provided in various ways:
    interface (like https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/java/org/springframework/web/servlet/resource/ResourceHttpRequestHandler.java[`ResourceHttpRequestHandler`]
    now does) in order to provide a {api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
    instance for each request.
+
+== Filter based CORS support
+
+In order to support CORS with filter-based security frameworks like
+http://projects.spring.io/spring-security/[Spring Security], or
+with other libraries that do not support natively CORS, Spring Framework also
+provides a http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/web/filter/CorsFilter.html[`CorsFilter`].
+Instead of using `@CrossOrigin` or `WebMvcConfigurer#addCorsMappings(CorsRegistry)`, you
+need to register a custom filter defined like bellow:
+
+[source,java,indent=0]
+----
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+public class MyCorsFilter extends CorsFilter {
+
+	public MyCorsFilter() {
+		super(configurationSource());
+	}
+
+	private static UrlBasedCorsConfigurationSource configurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowCredentials(true);
+		config.addAllowedOrigin("http://domain1.com");
+		config.addAllowedHeader("*");
+		config.addAllowedMethod("*");
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
+	}
+}
+----
+
+You need to ensure that `CorsFilter` is ordered before the other filters, see
+https://spring.io/blog/2015/06/08/cors-support-in-spring-framework#filter-based-cors-support[this blog post]
+about how to configure Spring Boot accordingly.
