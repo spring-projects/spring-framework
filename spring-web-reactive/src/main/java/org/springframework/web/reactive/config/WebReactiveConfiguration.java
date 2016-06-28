@@ -46,6 +46,7 @@ import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutu
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.format.Formatter;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
@@ -241,6 +242,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * {@link #configureMessageConverters(List)}.
 	 */
 	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> converters) {
+		List<Encoder<?>> sseDataEncoders = new ArrayList<>();
 		converters.add(converter(new ByteBufferEncoder(), new ByteBufferDecoder()));
 		converters.add(converter(new StringEncoder(), new StringDecoder()));
 		converters.add(new ResourceHttpMessageConverter());
@@ -248,9 +250,14 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			converters.add(converter(new Jaxb2Encoder(), new Jaxb2Decoder()));
 		}
 		if (jackson2Present) {
-			JsonObjectDecoder objectDecoder = new JsonObjectDecoder();
-			converters.add(converter(new JacksonJsonEncoder(), new JacksonJsonDecoder(objectDecoder)));
+			JacksonJsonEncoder jacksonEncoder = new JacksonJsonEncoder();
+			JacksonJsonDecoder jacksonDecoder = new JacksonJsonDecoder(new JsonObjectDecoder());
+			converters.add(converter(jacksonEncoder, jacksonDecoder));
+			sseDataEncoders.add(jacksonEncoder);
+		} else {
+
 		}
+		converters.add(converter(new SseEventEncoder(sseDataEncoders), null));
 	}
 
 	private static <T> HttpMessageConverter<T> converter(Encoder<T> encoder, Decoder<T> decoder) {

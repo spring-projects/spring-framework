@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
 import org.junit.Test;
+import static org.springframework.http.MediaType.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Observable;
@@ -139,13 +140,14 @@ public class WebReactiveConfigurationTests {
 		assertNotNull(adapter);
 
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertEquals(5, converters.size());
+		assertEquals(6, converters.size());
 
-		assertHasConverter(converters, ByteBuffer.class, MediaType.APPLICATION_OCTET_STREAM);
-		assertHasConverter(converters, String.class, MediaType.TEXT_PLAIN);
-		assertHasConverter(converters, Resource.class, MediaType.IMAGE_PNG);
-		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
-		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_JSON);
+		assertHasConverter(converters, ByteBuffer.class, APPLICATION_OCTET_STREAM, APPLICATION_OCTET_STREAM);
+		assertHasConverter(converters, String.class, TEXT_PLAIN, TEXT_PLAIN);
+		assertHasConverter(converters, Resource.class, IMAGE_PNG, IMAGE_PNG);
+		assertHasConverter(converters, TestBean.class, APPLICATION_XML, APPLICATION_XML);
+		assertHasConverter(converters, TestBean.class, APPLICATION_JSON, APPLICATION_JSON);
+		assertHasConverter(converters, TestBean.class, null, MediaType.parseMediaType("text/event-stream"));
 
 		name = "mvcConversionService";
 		ConversionService service = context.getBean(name, ConversionService.class);
@@ -168,8 +170,8 @@ public class WebReactiveConfigurationTests {
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertEquals(2, converters.size());
 
-		assertHasConverter(converters, String.class, MediaType.TEXT_PLAIN);
-		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
+		assertHasConverter(converters, String.class, TEXT_PLAIN, TEXT_PLAIN);
+		assertHasConverter(converters, TestBean.class, APPLICATION_XML, APPLICATION_XML);
 	}
 
 	@Test
@@ -195,13 +197,14 @@ public class WebReactiveConfigurationTests {
 		assertEquals(0, handler.getOrder());
 
 		List<HttpMessageConverter<?>> converters = handler.getMessageConverters();
-		assertEquals(5, converters.size());
+		assertEquals(6, converters.size());
 
-		assertHasConverter(converters, ByteBuffer.class, MediaType.APPLICATION_OCTET_STREAM);
-		assertHasConverter(converters, String.class, MediaType.TEXT_PLAIN);
-		assertHasConverter(converters, Resource.class, MediaType.IMAGE_PNG);
-		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
-		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_JSON);
+		assertHasConverter(converters, ByteBuffer.class, APPLICATION_OCTET_STREAM, APPLICATION_OCTET_STREAM);
+		assertHasConverter(converters, String.class, TEXT_PLAIN, TEXT_PLAIN);
+		assertHasConverter(converters, Resource.class, IMAGE_PNG, IMAGE_PNG);
+		assertHasConverter(converters, TestBean.class, APPLICATION_XML, APPLICATION_XML);
+		assertHasConverter(converters, TestBean.class, APPLICATION_JSON, APPLICATION_JSON);
+		assertHasConverter(converters, TestBean.class, null, MediaType.parseMediaType("text/event-stream"));
 
 		name = "mvcContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -219,13 +222,14 @@ public class WebReactiveConfigurationTests {
 		assertEquals(100, handler.getOrder());
 
 		List<HttpMessageConverter<?>> converters = handler.getMessageConverters();
-		assertEquals(5, converters.size());
+		assertEquals(6, converters.size());
 
-		assertHasConverter(converters, ByteBuffer.class, MediaType.APPLICATION_OCTET_STREAM);
-		assertHasConverter(converters, String.class, MediaType.TEXT_PLAIN);
-		assertHasConverter(converters, Resource.class, MediaType.IMAGE_PNG);
-		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_XML);
-		assertHasConverter(converters, TestBean.class, MediaType.APPLICATION_JSON);
+		assertHasConverter(converters, ByteBuffer.class, APPLICATION_OCTET_STREAM, APPLICATION_OCTET_STREAM);
+		assertHasConverter(converters, String.class, TEXT_PLAIN, TEXT_PLAIN);
+		assertHasConverter(converters, Resource.class, IMAGE_PNG, IMAGE_PNG);
+		assertHasConverter(converters, TestBean.class, APPLICATION_XML, APPLICATION_XML);
+		assertHasConverter(converters, TestBean.class, APPLICATION_JSON, APPLICATION_JSON);
+		assertHasConverter(converters, TestBean.class, null, MediaType.parseMediaType("text/event-stream"));
 
 		name = "mvcContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -254,10 +258,12 @@ public class WebReactiveConfigurationTests {
 	}
 
 
-	private void assertHasConverter(List<HttpMessageConverter<?>> converters, Class<?> clazz, MediaType mediaType) {
+	private void assertHasConverter(List<HttpMessageConverter<?>> converters, Class<?> clazz,
+			MediaType readMediaType, MediaType writeMediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
 		assertTrue(converters.stream()
-				.filter(c -> c.canRead(type, mediaType) && c.canWrite(type, mediaType))
+				.filter(c -> (readMediaType == null || c.canRead(type, readMediaType))
+						&& (writeMediaType == null || c.canWrite(type, writeMediaType)))
 				.findAny()
 				.isPresent());
 	}
