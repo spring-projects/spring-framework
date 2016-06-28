@@ -16,18 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.*;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
@@ -199,31 +192,46 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
 		MediaType.sortBySpecificityAndQuality(mediaTypes);
 
-		MediaType selectedMediaType = null;
+		List<MediaType> selectedMediaTypes = new ArrayList<MediaType>();
 		for (MediaType mediaType : mediaTypes) {
 			if (mediaType.isConcrete()) {
-				selectedMediaType = mediaType;
-				break;
+				selectedMediaTypes.add(mediaType);
 			}
 			else if (mediaType.equals(MediaType.ALL) || mediaType.equals(MEDIA_TYPE_APPLICATION)) {
-				selectedMediaType = MediaType.APPLICATION_OCTET_STREAM;
-				break;
+				selectedMediaTypes.add(MediaType.APPLICATION_OCTET_STREAM);
 			}
 		}
 
-		if (selectedMediaType != null) {
-			selectedMediaType = selectedMediaType.removeQualityValue();
-			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter instanceof GenericHttpMessageConverter) {
-					if (((GenericHttpMessageConverter<T>) messageConverter).canWrite(type,
-							clazz, selectedMediaType)) {
+		if (!selectedMediaTypes.isEmpty()) {
+			for (MediaType selectedMediaType:selectedMediaTypes) {
+				selectedMediaType = selectedMediaType.removeQualityValue();
+				for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
+					if (messageConverter instanceof GenericHttpMessageConverter) {
+						if (((GenericHttpMessageConverter<T>) messageConverter).canWrite(type,
+								clazz, selectedMediaType)) {
+							value = (T) getAdvice().beforeBodyWrite(value, returnType, selectedMediaType,
+									(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
+									inputMessage, outputMessage);
+							if (value != null) {
+								addContentDispositionHeader(inputMessage, outputMessage);
+								((GenericHttpMessageConverter<T>) messageConverter).write(value,
+										type, selectedMediaType, outputMessage);
+								if (logger.isDebugEnabled()) {
+									logger.debug("Written [" + value + "] as \"" +
+											selectedMediaType + "\" using [" + messageConverter + "]");
+								}
+							}
+							return;
+						}
+					}
+					else if (messageConverter.canWrite(clazz, selectedMediaType)) {
 						value = (T) getAdvice().beforeBodyWrite(value, returnType, selectedMediaType,
 								(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
 								inputMessage, outputMessage);
 						if (value != null) {
 							addContentDispositionHeader(inputMessage, outputMessage);
-							((GenericHttpMessageConverter<T>) messageConverter).write(value,
-									type, selectedMediaType, outputMessage);
+							((HttpMessageConverter<T>) messageConverter).write(value,
+									selectedMediaType, outputMessage);
 							if (logger.isDebugEnabled()) {
 								logger.debug("Written [" + value + "] as \"" +
 										selectedMediaType + "\" using [" + messageConverter + "]");
@@ -231,21 +239,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 						}
 						return;
 					}
-				}
-				else if (messageConverter.canWrite(clazz, selectedMediaType)) {
-					value = (T) getAdvice().beforeBodyWrite(value, returnType, selectedMediaType,
-							(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
-							inputMessage, outputMessage);
-					if (value != null) {
-						addContentDispositionHeader(inputMessage, outputMessage);
-						((HttpMessageConverter<T>) messageConverter).write(value,
-								selectedMediaType, outputMessage);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Written [" + value + "] as \"" +
-									selectedMediaType + "\" using [" + messageConverter + "]");
-						}
-					}
-					return;
 				}
 			}
 		}
