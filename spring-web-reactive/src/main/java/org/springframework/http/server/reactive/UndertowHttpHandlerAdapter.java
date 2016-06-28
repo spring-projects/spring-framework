@@ -57,7 +57,6 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		this.dataBufferFactory = dataBufferFactory;
 	}
 
-
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
 
@@ -72,7 +71,8 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		responseBody.registerListener();
 		ServerHttpResponse response =
 				new UndertowServerHttpResponse(exchange, responseChannel,
-				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBody)),
+						publisher -> Mono
+								.from(subscriber -> publisher.subscribe(responseBody)),
 						this.dataBufferFactory);
 
 		this.delegate.handle(request, response).subscribe(new Subscriber<Void>() {
@@ -90,7 +90,8 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 			@Override
 			public void onError(Throwable ex) {
 				if (exchange.isResponseStarted() || exchange.getStatusCode() > 500) {
-					logger.error("Error from request handling. Completing the request.", ex);
+					logger.error("Error from request handling. Completing the request.",
+							ex);
 				}
 				else {
 					exchange.setStatusCode(500);
@@ -107,10 +108,11 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
 
-		private static final Log logger = LogFactory.getLog(RequestBodyPublisher.class);
+		private final ChannelListener<StreamSourceChannel> readListener =
+				new ReadListener();
 
-		private final ChannelListener<StreamSourceChannel> listener =
-				new RequestBodyListener();
+		private final ChannelListener<StreamSourceChannel> closeListener =
+				new CloseListener();
 
 		private final StreamSourceChannel requestChannel;
 
@@ -127,11 +129,31 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		}
 
 		public void registerListener() {
-			this.requestChannel.getReadSetter().set(this.listener);
+			this.requestChannel.getReadSetter().set(this.readListener);
+			this.requestChannel.getCloseSetter().set(this.closeListener);
 			this.requestChannel.resumeReads();
 		}
 
-		private void close() {
+		@Override
+		protected DataBuffer read() throws IOException {
+			ByteBuffer byteBuffer = this.pooledByteBuffer.getBuffer();
+			int read = this.requestChannel.read(byteBuffer);
+			if (logger.isTraceEnabled()) {
+				logger.trace("read:" + read);
+			}
+
+			if (read > 0) {
+				byteBuffer.flip();
+				return this.dataBufferFactory.wrap(byteBuffer);
+			}
+			else if (read == -1) {
+				onAllDataRead();
+			}
+			return null;
+		}
+
+		@Override
+		protected void close() {
 			if (this.pooledByteBuffer != null) {
 				IoUtils.safeClose(this.pooledByteBuffer);
 			}
@@ -140,54 +162,21 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 			}
 		}
 
-		@Override
-		protected void noLongerStalled() {
-			this.listener.handleEvent(this.requestChannel);
-		}
-
-		private class RequestBodyListener
-				implements ChannelListener<StreamSourceChannel> {
+		private class ReadListener implements ChannelListener<StreamSourceChannel> {
 
 			@Override
 			public void handleEvent(StreamSourceChannel channel) {
-				if (isSubscriptionCancelled()) {
-					return;
-				}
-				logger.trace("handleEvent");
-				ByteBuffer byteBuffer =
-						RequestBodyPublisher.this.pooledByteBuffer.getBuffer();
-				try {
-					while (true) {
-						if (!checkSubscriptionForDemand()) {
-							break;
-						}
-						int read = channel.read(byteBuffer);
-						logger.trace("Input read:" + read);
-
-						if (read == -1) {
-							publishOnComplete();
-							close();
-							break;
-						}
-						else if (read == 0) {
-							// input not ready, wait until we are invoked again
-							break;
-						}
-						else {
-							byteBuffer.flip();
-							DataBuffer dataBuffer =
-									RequestBodyPublisher.this.dataBufferFactory
-											.wrap(byteBuffer);
-							publishOnNext(dataBuffer);
-						}
-					}
-				}
-				catch (IOException ex) {
-					publishOnError(ex);
-				}
+				onDataAvailable();
 			}
 		}
 
+		private class CloseListener implements ChannelListener<StreamSourceChannel> {
+
+			@Override
+			public void handleEvent(StreamSourceChannel channel) {
+				onAllDataRead();
+			}
+		}
 	}
 
 	private static class ResponseBodySubscriber extends AbstractResponseBodySubscriber {
@@ -295,6 +284,5 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		}
 
 	}
-
 
 }

@@ -16,16 +16,21 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.IOException;
+import java.nio.channels.Channel;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.ReadListener;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.util.Assert;
 
 /**
  * Abstract base class for {@code Publisher} implementations that bridge between
@@ -38,171 +43,287 @@ import org.springframework.util.Assert;
  */
 abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 
-	private ResponseBodySubscription subscription;
+	protected final Log logger = LogFactory.getLog(getClass());
 
-	private volatile boolean stalled;
+	private final AtomicReference<State> state =
+			new AtomicReference<>(State.UNSUBSCRIBED);
+
+	private final AtomicLong demand = new AtomicLong();
+
+	private Subscriber<? super DataBuffer> subscriber;
 
 	@Override
 	public void subscribe(Subscriber<? super DataBuffer> subscriber) {
-		Objects.requireNonNull(subscriber);
-		Assert.state(this.subscription == null, "Only a single subscriber allowed");
-
-		this.subscription = new ResponseBodySubscription(subscriber);
-		subscriber.onSubscribe(this.subscription);
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace(this.state + " subscribe: " + subscriber);
+		}
+		this.state.get().subscribe(this, subscriber);
 	}
 
 	/**
-	 * Publishes the given signal to the subscriber.
-	 * @param dataBuffer the signal to publish
-	 * @see Subscriber#onNext(Object)
+	 * Called via a listener interface to indicate that reading is possible.
+	 * @see ReadListener#onDataAvailable()
+	 * @see org.xnio.ChannelListener#handleEvent(Channel)
 	 */
-	protected final void publishOnNext(DataBuffer dataBuffer) {
-		Assert.state(this.subscription != null);
-		this.subscription.publishOnNext(dataBuffer);
+	protected final void onDataAvailable() {
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace(this.state + " onDataAvailable");
+		}
+		this.state.get().onDataAvailable(this);
 	}
 
 	/**
-	 * Publishes the given error to the subscriber.
-	 * @param t the error to publish
-	 * @see Subscriber#onError(Throwable)
+	 * Called via a listener interface to indicate that all data has been read.
+	 * @see ReadListener#onAllDataRead()
+	 * @see org.xnio.ChannelListener#handleEvent(Channel)
 	 */
-	protected final void publishOnError(Throwable t) {
-		if (this.subscription != null) {
-			this.subscription.publishOnError(t);
+	protected final void onAllDataRead() {
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace(this.state + " onAllDataRead");
 		}
+		this.state.get().onAllDataRead(this);
 	}
 
 	/**
-	 * Publishes the complete signal to the subscriber.
-	 * @see Subscriber#onComplete()
+	 * Called by a listener interface to indicate that as error has occured.
+	 * @param t the error
+	 * @see ReadListener#onError(Throwable)
 	 */
-	protected final void publishOnComplete() {
-		if (this.subscription != null) {
-			this.subscription.publishOnComplete();
+	protected final void onError(Throwable t) {
+		if (this.logger.isErrorEnabled()) {
+			this.logger.error(this.state + " onError: " + t, t);
 		}
+		this.state.get().onError(this, t);
 	}
 
 	/**
-	 * Returns true if the {@code Subscriber} associated with this {@code Publisher} has
-	 * cancelled its {@code Subscription}.
-	 * @return {@code true} if a subscriber has been registered and its subscription has
-	 * been cancelled; {@code false} otherwise
-	 * @see ResponseBodySubscription#isCancelled()
-	 * @see Subscription#cancel()
+	 * Reads and publishes data buffers from the input. Continues till either there is no
+	 * more demand, or till there is no more data to be read.
+	 * @return {@code true} if there is more data to be read; {@code false} otherwise
 	 */
-	protected final boolean isSubscriptionCancelled() {
-		return (this.subscription != null && this.subscription.isCancelled());
-	}
-
-	/**
-	 * Checks the subscription for demand, and marks this publisher as "stalled" if there
-	 * is none. The next time the subscriber {@linkplain Subscription#request(long)
-	 * requests} more events, the {@link #noLongerStalled()} method is called.
-	 * @return {@code true} if there is demand; {@code false} otherwise
-	 */
-	protected final boolean checkSubscriptionForDemand() {
-		if (this.subscription == null || !this.subscription.hasDemand()) {
-			this.stalled = true;
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-
-	/**
-	 * Abstract template method called when this publisher is no longer "stalled". Used in
-	 * sub-classes to resume reading from the request.
-	 */
-	protected abstract void noLongerStalled();
-
-	private final class ResponseBodySubscription implements Subscription {
-
-		private final Subscriber<? super DataBuffer> subscriber;
-
-		private final AtomicLong demand = new AtomicLong();
-
-		private boolean cancelled;
-
-		public ResponseBodySubscription(Subscriber<? super DataBuffer> subscriber) {
-			Assert.notNull(subscriber, "'subscriber' must not be null");
-
-			this.subscriber = subscriber;
-		}
-
-		@Override
-		public final void cancel() {
-			this.cancelled = true;
-		}
-
-		/**
-		 * Indicates whether this subscription has been cancelled.
-		 * @see #cancel()
-		 */
-		protected final boolean isCancelled() {
-			return this.cancelled;
-		}
-
-		@Override
-		public final void request(long n) {
-			if (!isCancelled() && BackpressureUtils.checkRequest(n, this.subscriber)) {
-				long demand = BackpressureUtils.addAndGet(this.demand, n);
-
-				if (stalled && demand > 0) {
-					stalled = false;
-					noLongerStalled();
-				}
-			}
-		}
-
-		/**
-		 * Indicates whether this subscription has demand.
-		 * @see #request(long)
-		 */
-		protected final boolean hasDemand() {
-			return this.demand.get() > 0;
-		}
-
-		/**
-		 * Publishes the given signal to the subscriber wrapped by this subscription, if
-		 * it has not been cancelled. If there is {@linkplain #hasDemand() no demand} for
-		 * the signal, an exception will be thrown.
-		 * @param dataBuffer the signal to publish
-		 * @see Subscriber#onNext(Object)
-		 */
-		protected final void publishOnNext(DataBuffer dataBuffer) {
-			if (!isCancelled()) {
-				if (hasDemand()) {
+	private boolean readAndPublish() {
+		try {
+			while (hasDemand()) {
+				DataBuffer dataBuffer = read();
+				if (dataBuffer != null) {
 					BackpressureUtils.getAndSub(this.demand, 1L);
 					this.subscriber.onNext(dataBuffer);
 				}
 				else {
-					throw new IllegalStateException("No demand for: " + dataBuffer);
+					return false;
+				}
+			}
+			return true;
+		}
+		catch (IOException ex) {
+			onError(ex);
+			return false;
+		}
+	}
+
+	/**
+	 * Reads a data buffer from the input, if possible. Returns {@code null} if a buffer
+	 * could not be read.
+	 * @return the data buffer that was read; or {@code null}
+	 */
+	protected abstract DataBuffer read() throws IOException;
+
+	/**
+	 * Closes the input.
+	 */
+	protected abstract void close();
+
+	private boolean hasDemand() {
+		return this.demand.get() > 0;
+	}
+
+	private boolean changeState(AbstractRequestBodyPublisher.State oldState,
+			AbstractRequestBodyPublisher.State newState) {
+		return this.state.compareAndSet(oldState, newState);
+	}
+
+	private static final class RequestBodySubscription implements Subscription {
+
+		private final AbstractRequestBodyPublisher publisher;
+
+		public RequestBodySubscription(AbstractRequestBodyPublisher publisher) {
+			this.publisher = publisher;
+		}
+
+		@Override
+		public final void request(long n) {
+			if (this.publisher.logger.isTraceEnabled()) {
+				this.publisher.logger.trace(state() + " request: " + n);
+			}
+			state().request(this.publisher, n);
+		}
+
+		@Override
+		public final void cancel() {
+			if (this.publisher.logger.isTraceEnabled()) {
+				this.publisher.logger.trace(state() + " cancel");
+			}
+			state().cancel(this.publisher);
+		}
+
+		private AbstractRequestBodyPublisher.State state() {
+			return this.publisher.state.get();
+		}
+
+	}
+
+	/**
+	 * Represents a state for the {@link Publisher} to be in. The following figure
+	 * indicate the four different states that exist, and the relationships between them.
+	 *
+	 * <pre>
+	 *       UNSUBSCRIBED
+	 *        |
+	 *        v
+	 * DATA_UNAVAILABLE <---> DATA_AVAILABLE
+	 *                |       |
+	 *                v       v
+	 *                COMPLETED
+	 * </pre>
+	 * Refer to the individual states for more information.
+	 */
+
+	private enum State {
+		/**
+		 * The initial unsubscribed state. Will respond to {@link
+		 * #subscribe(AbstractRequestBodyPublisher, Subscriber)} by
+		 * changing state to {@link #DATA_UNAVAILABLE}.
+		 */
+		UNSUBSCRIBED {
+			@Override
+			void subscribe(AbstractRequestBodyPublisher publisher,
+					Subscriber<? super DataBuffer> subscriber) {
+				Objects.requireNonNull(subscriber);
+				if (publisher.changeState(this, DATA_UNAVAILABLE)) {
+					Subscription subscription = new RequestBodySubscription(
+									publisher);
+					publisher.subscriber = subscriber;
+					subscriber.onSubscribe(subscription);
+				}
+				else {
+					throw new IllegalStateException(toString());
+				}
+			}
+		},
+		/**
+		 * State that gets entered when there is no data to be read. Responds to {@link
+		 * #request(AbstractRequestBodyPublisher, long)} by increasing the demand, and
+		 * responds to {@link #onDataAvailable(AbstractRequestBodyPublisher)} by
+		 * reading the available data and changing state to {@link #DATA_AVAILABLE} if
+		 * there continues to be more data available after the demand has been satisfied.
+		 */
+		DATA_UNAVAILABLE {
+			@Override
+			void request(AbstractRequestBodyPublisher publisher, long n) {
+				if (BackpressureUtils.checkRequest(n, publisher.subscriber)) {
+					BackpressureUtils.addAndGet(publisher.demand, n);
+				}
+			}
+
+			@Override
+			void onDataAvailable(AbstractRequestBodyPublisher publisher) {
+				boolean dataAvailable = publisher.readAndPublish();
+				if (dataAvailable) {
+					publisher.changeState(this, DATA_AVAILABLE);
+				}
+			}
+
+		},
+		/**
+		 * State that gets entered when there is data to be read. Responds to {@link
+		 * #request(AbstractRequestBodyPublisher, long)} by increasing the demand, and
+		 * by reading the available data and changing state to {@link #DATA_UNAVAILABLE}
+		 * if there is no more data available.
+		 */
+		DATA_AVAILABLE {
+			@Override
+			void request(AbstractRequestBodyPublisher publisher, long n) {
+				if (BackpressureUtils.checkRequest(n, publisher.subscriber)) {
+					BackpressureUtils.addAndGet(publisher.demand, n);
+					boolean dataAvailable = publisher.readAndPublish();
+					if (!dataAvailable) {
+						publisher.changeState(this, DATA_UNAVAILABLE);
+					}
+				}
+			}
+		},
+		/**
+		 * The terminal completed state. Does not respond to any events.
+		 */
+		COMPLETED {
+			@Override
+			void subscribe(AbstractRequestBodyPublisher publisher,
+					Subscriber<? super DataBuffer> subscriber) {
+				// ignore
+			}
+
+			@Override
+			void request(AbstractRequestBodyPublisher publisher, long n) {
+				// ignore
+			}
+
+			@Override
+			void cancel(AbstractRequestBodyPublisher publisher) {
+				// ignore
+			}
+
+			@Override
+			void onDataAvailable(AbstractRequestBodyPublisher publisher) {
+				// ignore
+			}
+
+			@Override
+			void onAllDataRead(AbstractRequestBodyPublisher publisher) {
+				// ignore
+			}
+
+			@Override
+			void onError(AbstractRequestBodyPublisher publisher, Throwable t) {
+				// ignore
+			}
+		};
+
+		void subscribe(AbstractRequestBodyPublisher publisher,
+				Subscriber<? super DataBuffer> subscriber) {
+			throw new IllegalStateException(toString());
+		}
+
+		void request(AbstractRequestBodyPublisher publisher, long n) {
+			throw new IllegalStateException(toString());
+		}
+
+		void cancel(AbstractRequestBodyPublisher publisher) {
+			if (publisher.changeState(this, COMPLETED)) {
+				publisher.close();
+			}
+		}
+
+		void onDataAvailable(AbstractRequestBodyPublisher publisher) {
+			throw new IllegalStateException(toString());
+		}
+
+		void onAllDataRead(AbstractRequestBodyPublisher publisher) {
+			if (publisher.changeState(this, COMPLETED)) {
+				publisher.close();
+				if (publisher.subscriber != null) {
+					publisher.subscriber.onComplete();
 				}
 			}
 		}
 
-		/**
-		 * Publishes the given error to the subscriber wrapped by this subscription, if it
-		 * has not been cancelled.
-		 * @param t the error to publish
-		 * @see Subscriber#onError(Throwable)
-		 */
-		protected final void publishOnError(Throwable t) {
-			if (!isCancelled()) {
-				this.subscriber.onError(t);
+		void onError(AbstractRequestBodyPublisher publisher, Throwable t) {
+			if (publisher.changeState(this, COMPLETED)) {
+				publisher.close();
+				if (publisher.subscriber != null) {
+					publisher.subscriber.onError(t);
+				}
 			}
 		}
 
-		/**
-		 * Publishes the complete signal to the subscriber wrapped by this subscription,
-		 * if it has not been cancelled.
-		 * @see Subscriber#onComplete()
-		 */
-		protected final void publishOnComplete() {
-			if (!isCancelled()) {
-				this.subscriber.onComplete();
-			}
-		}
 	}
 }

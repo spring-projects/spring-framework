@@ -141,10 +141,8 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
 
-		private static final Log logger = LogFactory.getLog(RequestBodyPublisher.class);
-
-		private final RequestBodyReadListener readListener =
-				new RequestBodyReadListener();
+		private final RequestBodyPublisher.RequestBodyReadListener readListener =
+				new RequestBodyPublisher.RequestBodyReadListener();
 
 		private final ServletAsyncContextSynchronizer synchronizer;
 
@@ -165,75 +163,49 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		@Override
-		protected void noLongerStalled() {
-			try {
-				this.readListener.onDataAvailable();
+		protected DataBuffer read() throws IOException {
+			ServletInputStream input = this.synchronizer.getRequest().getInputStream();
+			if (input.isReady()) {
+				int read = input.read(this.buffer);
+				if (logger.isTraceEnabled()) {
+					logger.trace("read:" + read);
+				}
+
+				if (read > 0) {
+					DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(read);
+					dataBuffer.write(this.buffer, 0, read);
+					return dataBuffer;
+				}
 			}
-			catch (IOException ex) {
-				this.readListener.onError(ex);
-			}
+			return null;
+		}
+
+		@Override
+		protected void close() {
+			this.synchronizer.readComplete();
+
 		}
 
 		private class RequestBodyReadListener implements ReadListener {
 
 			@Override
 			public void onDataAvailable() throws IOException {
-				if (isSubscriptionCancelled()) {
-					return;
-				}
-				logger.trace("onDataAvailable");
-				ServletInputStream input =
-						RequestBodyPublisher.this.synchronizer.getRequest()
-								.getInputStream();
-
-				while (true) {
-					if (!checkSubscriptionForDemand()) {
-						break;
-					}
-
-					boolean ready = input.isReady();
-					logger.trace(
-							"Input ready: " + ready + " finished: " + input.isFinished());
-
-					if (!ready) {
-						break;
-					}
-
-					int read = input.read(RequestBodyPublisher.this.buffer);
-					logger.trace("Input read:" + read);
-
-					if (read == -1) {
-						break;
-					}
-					else if (read > 0) {
-						DataBuffer dataBuffer =
-								RequestBodyPublisher.this.dataBufferFactory
-										.allocateBuffer(read);
-						dataBuffer.write(RequestBodyPublisher.this.buffer, 0, read);
-
-						publishOnNext(dataBuffer);
-					}
-				}
+				RequestBodyPublisher.this.onDataAvailable();
 			}
 
 			@Override
 			public void onAllDataRead() throws IOException {
-				logger.trace("All data read");
-				RequestBodyPublisher.this.synchronizer.readComplete();
-
-				publishOnComplete();
+				RequestBodyPublisher.this.onAllDataRead();
 			}
 
 			@Override
-			public void onError(Throwable t) {
-				logger.trace("RequestBodyReadListener Error", t);
-				RequestBodyPublisher.this.synchronizer.readComplete();
+			public void onError(Throwable throwable) {
+				RequestBodyPublisher.this.onError(throwable);
 
-				publishOnError(t);
 			}
 		}
-
 	}
+
 
 	private static class ResponseBodySubscriber extends AbstractResponseBodySubscriber {
 
