@@ -36,16 +36,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class AspectJEnableCachingTests extends AbstractCacheAnnotationTests {
 
-	/** hook into superclass suite of tests */
 	@Override
 	protected ConfigurableApplicationContext getApplicationContext() {
 		return new AnnotationConfigApplicationContext(EnableCachingConfig.class);
 	}
+
 
 	@Configuration
 	@EnableCaching(mode = AdviceMode.ASPECTJ)

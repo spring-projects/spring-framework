@@ -24,10 +24,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 
 /**
- * {@code @Configuration} class that registers the Spring infrastructure beans necessary
- * to enable AspectJ-based annotation-driven cache management.
+ * {@code @Configuration} class that registers the Spring infrastructure beans
+ * necessary to enable AspectJ-based annotation-driven cache management.
  *
  * @author Chris Beams
+ * @author Stephane Nicoll
  * @since 3.1
  * @see org.springframework.cache.annotation.EnableCaching
  * @see org.springframework.cache.annotation.CachingConfigurationSelector
