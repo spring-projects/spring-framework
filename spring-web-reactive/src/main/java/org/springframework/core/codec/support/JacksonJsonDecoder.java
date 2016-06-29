@@ -68,20 +68,16 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 		JavaType javaType = typeFactory.constructType(elementType.getType());
 		ObjectReader reader = this.mapper.readerFor(javaType);
 
-		Flux<DataBuffer> stream = Flux.from(inputStream);
-		if (this.preProcessor != null) {
-			stream = this.preProcessor.decode(inputStream, elementType, mimeType, hints);
-		}
-
-		return stream.map(dataBuffer -> {
-			try {
-				Object value = reader.readValue(dataBuffer.asInputStream());
-				DataBufferUtils.release(dataBuffer);
-				return value;
-			}
-			catch (IOException e) {
-				throw new CodecException("Error while reading the data", e);
-			}
+		return this.preProcessor.decode(inputStream, elementType, mimeType, hints)
+				.map(dataBuffer -> {
+					try {
+						Object value = reader.readValue(dataBuffer.asInputStream());
+						DataBufferUtils.release(dataBuffer);
+						return value;
+					}
+					catch (IOException e) {
+						return Flux.error(new CodecException("Error while reading the data", e));
+					}
 		});
 	}
 
