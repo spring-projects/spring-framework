@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,18 +34,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.result.condition.ParamsRequestCondition;
-import org.springframework.web.server.ServerWebInputException;
+import org.springframework.web.reactive.result.condition.NameValueExpression;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
@@ -207,59 +204,29 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * method but not by query parameter conditions
 	 */
 	@Override
-	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos,
-			String lookupPath, ServerWebExchange exchange) throws Exception {
+	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> infos, String lookupPath,
+			ServerWebExchange exchange) throws Exception {
 
-		Set<String> allowedMethods = new LinkedHashSet<>(4);
+		PartialMatchHelper helper = new PartialMatchHelper(infos, exchange);
 
-		Set<RequestMappingInfo> patternMatches = new HashSet<>();
-		Set<RequestMappingInfo> patternAndMethodMatches = new HashSet<>();
-
-		for (RequestMappingInfo info : requestMappingInfos) {
-			if (info.getPatternsCondition().getMatchingCondition(exchange) != null) {
-				patternMatches.add(info);
-				if (info.getMethodsCondition().getMatchingCondition(exchange) != null) {
-					patternAndMethodMatches.add(info);
-				}
-				else {
-					for (RequestMethod method : info.getMethodsCondition().getMethods()) {
-						allowedMethods.add(method.name());
-					}
-				}
-			}
+		if (helper.isEmpty()) {
+			return null;
 		}
 
 		ServerHttpRequest request = exchange.getRequest();
-		if (patternMatches.isEmpty()) {
-			return null;
-		}
-		else if (patternAndMethodMatches.isEmpty()) {
+
+		if (helper.hasMethodsMismatch()) {
 			HttpMethod httpMethod = request.getMethod();
+			Set<String> methods = helper.getAllowedMethods();
 			if (HttpMethod.OPTIONS.matches(httpMethod.name())) {
-				HttpOptionsHandler handler = new HttpOptionsHandler(allowedMethods);
+				HttpOptionsHandler handler = new HttpOptionsHandler(methods);
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
-			else if (!allowedMethods.isEmpty()) {
-				throw new MethodNotAllowedException(httpMethod.name(), allowedMethods);
-			}
+			throw new MethodNotAllowedException(httpMethod.name(), methods);
 		}
 
-		Set<MediaType> consumableMediaTypes;
-		Set<MediaType> producibleMediaTypes;
-		List<List<String>> paramConditions;
-
-		if (patternAndMethodMatches.isEmpty()) {
-			consumableMediaTypes = getConsumableMediaTypes(exchange, patternMatches);
-			producibleMediaTypes = getProducibleMediaTypes(exchange, patternMatches);
-			paramConditions = getRequestParams(exchange, patternMatches);
-		}
-		else {
-			consumableMediaTypes = getConsumableMediaTypes(exchange, patternAndMethodMatches);
-			producibleMediaTypes = getProducibleMediaTypes(exchange, patternAndMethodMatches);
-			paramConditions = getRequestParams(exchange, patternAndMethodMatches);
-		}
-
-		if (!consumableMediaTypes.isEmpty()) {
+		if (helper.hasConsumesMismatch()) {
+			Set<MediaType> mediaTypes = helper.getConsumableMediaTypes();
 			MediaType contentType;
 			try {
 				contentType = request.getHeaders().getContentType();
@@ -267,61 +234,175 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			catch (InvalidMediaTypeException ex) {
 				throw new UnsupportedMediaTypeStatusException(ex.getMessage());
 			}
-			throw new UnsupportedMediaTypeStatusException(contentType, new ArrayList<>(consumableMediaTypes));
+			throw new UnsupportedMediaTypeStatusException(contentType, new ArrayList<>(mediaTypes));
 		}
-		else if (!producibleMediaTypes.isEmpty()) {
-			throw new NotAcceptableStatusException(new ArrayList<>(producibleMediaTypes));
+
+		if (helper.hasProducesMismatch()) {
+			Set<MediaType> mediaTypes = helper.getProducibleMediaTypes();
+			throw new NotAcceptableStatusException(new ArrayList<>(mediaTypes));
 		}
-		else {
-			if (!CollectionUtils.isEmpty(paramConditions)) {
-				Map<String, String[]> params = request.getQueryParams().entrySet().stream()
-						.collect(Collectors.toMap(Entry::getKey,
-								entry -> entry.getValue().toArray(new String[entry.getValue().size()]))
-				);
-				throw new ServerWebInputException("Unsatisfied query parameter conditions: " +
-						paramConditions + ", actual parameters: " + params);
+
+		if (helper.hasParamsMismatch()) {
+			throw new ServerWebInputException(
+					"Unsatisfied query parameter conditions: " + helper.getParamConditions() +
+							", actual parameters: " + request.getQueryParams());
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * Aggregate all partial matches and expose methods checking across them.
+	 */
+	private static class PartialMatchHelper {
+
+		private final List<PartialMatch> partialMatches = new ArrayList<>();
+
+
+		public PartialMatchHelper(Set<RequestMappingInfo> infos, ServerWebExchange exchange) {
+			this.partialMatches.addAll(infos.stream().
+					filter(info -> info.getPatternsCondition().getMatchingCondition(exchange) != null).
+					map(info -> new PartialMatch(info, exchange)).
+					collect(Collectors.toList()));
+		}
+
+
+		/**
+		 * Whether there any partial matches.
+		 */
+		public boolean isEmpty() {
+			return this.partialMatches.isEmpty();
+		}
+
+		/**
+		 * Any partial matches for "methods"?
+		 */
+		public boolean hasMethodsMismatch() {
+			return !this.partialMatches.stream().
+					filter(PartialMatch::hasMethodsMatch).findAny().isPresent();
+		}
+
+		/**
+		 * Any partial matches for "methods" and "consumes"?
+		 */
+		public boolean hasConsumesMismatch() {
+			return !this.partialMatches.stream().
+					filter(PartialMatch::hasConsumesMatch).findAny().isPresent();
+		}
+
+		/**
+		 * Any partial matches for "methods", "consumes", and "produces"?
+		 */
+		public boolean hasProducesMismatch() {
+			return !this.partialMatches.stream().
+					filter(PartialMatch::hasProducesMatch).findAny().isPresent();
+		}
+
+		/**
+		 * Any partial matches for "methods", "consumes", "produces", and "params"?
+		 */
+		public boolean hasParamsMismatch() {
+			return !this.partialMatches.stream().
+					filter(PartialMatch::hasParamsMatch).findAny().isPresent();
+		}
+
+		/**
+		 * Return declared HTTP methods.
+		 */
+		public Set<String> getAllowedMethods() {
+			return this.partialMatches.stream().
+					flatMap(m -> m.getInfo().getMethodsCondition().getMethods().stream()).
+					map(Enum::name).
+					collect(Collectors.toCollection(LinkedHashSet::new));
+		}
+
+		/**
+		 * Return declared "consumable" types but only among those that also
+		 * match the "methods" condition.
+		 */
+		public Set<MediaType> getConsumableMediaTypes() {
+			return this.partialMatches.stream().filter(PartialMatch::hasMethodsMatch).
+					flatMap(m -> m.getInfo().getConsumesCondition().getConsumableMediaTypes().stream()).
+					collect(Collectors.toCollection(LinkedHashSet::new));
+		}
+
+		/**
+		 * Return declared "producible" types but only among those that also
+		 * match the "methods" and "consumes" conditions.
+		 */
+		public Set<MediaType> getProducibleMediaTypes() {
+			return this.partialMatches.stream().filter(PartialMatch::hasConsumesMatch).
+					flatMap(m -> m.getInfo().getProducesCondition().getProducibleMediaTypes().stream()).
+					collect(Collectors.toCollection(LinkedHashSet::new));
+		}
+
+		/**
+		 * Return declared "params" conditions but only among those that also
+		 * match the "methods", "consumes", and "params" conditions.
+		 */
+		public List<Set<NameValueExpression<String>>> getParamConditions() {
+			return this.partialMatches.stream().filter(PartialMatch::hasProducesMatch).
+					map(match -> match.getInfo().getParamsCondition().getExpressions()).
+					collect(Collectors.toList());
+		}
+
+
+		/**
+		 * Container for a RequestMappingInfo that matches the URL path at least.
+		 */
+		private static class PartialMatch {
+
+			private final RequestMappingInfo info;
+
+			private final boolean methodsMatch;
+
+			private final boolean consumesMatch;
+
+			private final boolean producesMatch;
+
+			private final boolean paramsMatch;
+
+
+			/**
+			 * @param info RequestMappingInfo that matches the URL path
+			 * @param exchange the current exchange
+			 */
+			public PartialMatch(RequestMappingInfo info, ServerWebExchange exchange) {
+				this.info = info;
+				this.methodsMatch = info.getMethodsCondition().getMatchingCondition(exchange) != null;
+				this.consumesMatch = info.getConsumesCondition().getMatchingCondition(exchange) != null;
+				this.producesMatch = info.getProducesCondition().getMatchingCondition(exchange) != null;
+				this.paramsMatch = info.getParamsCondition().getMatchingCondition(exchange) != null;
 			}
-			else {
-				return null;
+
+
+			public RequestMappingInfo getInfo() {
+				return this.info;
+			}
+
+			public boolean hasMethodsMatch() {
+				return this.methodsMatch;
+			}
+
+			public boolean hasConsumesMatch() {
+				return hasMethodsMatch() && this.consumesMatch;
+			}
+
+			public boolean hasProducesMatch() {
+				return hasConsumesMatch() && this.producesMatch;
+			}
+
+			public boolean hasParamsMatch() {
+				return hasProducesMatch() && this.paramsMatch;
+			}
+
+			@Override
+			public String toString() {
+				return this.info.toString();
 			}
 		}
 	}
-
-	private Set<MediaType> getConsumableMediaTypes(ServerWebExchange exchange,
-			Set<RequestMappingInfo> partialMatches) {
-
-		Set<MediaType> result = new HashSet<>();
-		for (RequestMappingInfo partialMatch : partialMatches) {
-			if (partialMatch.getConsumesCondition().getMatchingCondition(exchange) == null) {
-				result.addAll(partialMatch.getConsumesCondition().getConsumableMediaTypes());
-			}
-		}
-		return result;
-	}
-
-	private Set<MediaType> getProducibleMediaTypes(ServerWebExchange exchange,
-			Set<RequestMappingInfo> partialMatches) {
-
-		Set<MediaType> result = new HashSet<>();
-		for (RequestMappingInfo partialMatch : partialMatches) {
-			if (partialMatch.getProducesCondition().getMatchingCondition(exchange) == null) {
-				result.addAll(partialMatch.getProducesCondition().getProducibleMediaTypes());
-			}
-		}
-		return result;
-	}
-
-	private List<List<String>> getRequestParams(ServerWebExchange exchange,
-			Set<RequestMappingInfo> partialMatches) {
-
-		return partialMatches.stream()
-				.map(RequestMappingInfo::getParamsCondition)
-				.filter(condition -> condition.getMatchingCondition(exchange) == null)
-				.map(ParamsRequestCondition::getExpressions)
-				.map(expressions -> expressions.stream().map(Object::toString).collect(Collectors.toList()))
-				.collect(Collectors.toList());
-	}
-
 
 	/**
 	 * Default handler for HTTP OPTIONS.

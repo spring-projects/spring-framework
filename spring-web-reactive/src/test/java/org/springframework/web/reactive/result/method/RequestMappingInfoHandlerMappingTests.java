@@ -32,6 +32,7 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,6 +44,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -50,18 +53,20 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
-import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.HttpRequestPathHelper;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -147,39 +152,26 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void getHandlerRequestMethodNotAllowed() throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.POST, "/bar");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+
 		assertError(mono, MethodNotAllowedException.class,
 				ex -> assertEquals(new HashSet<>(Arrays.asList("GET", "HEAD")), ex.getSupportedMethods()));
 	}
 
-	// SPR-9603
-
-	@Test
+	@Test // SPR-9603
 	public void getHandlerRequestMethodMatchFalsePositive() throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/users");
 		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
 		this.handlerMapping.registerHandler(new UserController());
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		TestSubscriber
-				.subscribe(mono)
-				.assertError(NotAcceptableStatusException.class);
+		TestSubscriber.subscribe(mono).assertError(NotAcceptableStatusException.class);
 	}
 
-	// SPR-8462
-
-	@Test
+	@Test // SPR-8462
 	public void getHandlerMediaTypeNotSupported() throws Exception {
 		testHttpMediaTypeNotSupportedException("/person/1");
 		testHttpMediaTypeNotSupportedException("/person/1/");
 		testHttpMediaTypeNotSupportedException("/person/1.json");
-	}
-
-	@Test
-	public void getHandlerHttpOptions() throws Exception {
-		testHttpOptions("/foo", "GET,HEAD");
-		testHttpOptions("/person/1", "PUT");
-		testHttpOptions("/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
-		testHttpOptions("/something", "PUT,POST");
 	}
 
 	@Test
@@ -196,22 +188,30 @@ public class RequestMappingInfoHandlerMappingTests {
 	// SPR-8462
 
 	@Test
-	public void getHandlerMediaTypeNotAccepted() throws Exception {
-		testHttpMediaTypeNotAcceptableException("/persons");
-		testHttpMediaTypeNotAcceptableException("/persons/");
-		testHttpMediaTypeNotAcceptableException("/persons.json");
+	public void getHandlerTestMediaTypeNotAcceptable() throws Exception {
+		testMediaTypeNotAcceptable("/persons");
+		testMediaTypeNotAcceptable("/persons/");
+		testMediaTypeNotAcceptable("/persons.json");
 	}
 
 	// SPR-12854
 
 	@Test
-	public void getHandlerUnsatisfiedServletRequestParameterException() throws Exception {
+	public void getHandlerTestRequestParamMismatch() throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/params");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 		assertError(mono, ServerWebInputException.class, ex -> {
-			assertEquals(ex.getReason(), "Unsatisfied query parameter conditions: " +
-					"[[bar=baz], [foo=bar]], actual parameters: {}");
+			assertThat(ex.getReason(), containsString("[foo=bar]"));
+			assertThat(ex.getReason(), containsString("[bar=baz]"));
 		});
+	}
+
+	@Test
+	public void getHandlerHttpOptions() throws Exception {
+		testHttpOptions("/foo", "GET,HEAD");
+		testHttpOptions("/person/1", "PUT");
+		testHttpOptions("/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
+		testHttpOptions("/something", "PUT,POST");
 	}
 
 	@Test
@@ -398,7 +398,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals(allowHeader, ((HttpHeaders) value.get()).getFirst("Allow"));
 	}
 
-	private void testHttpMediaTypeNotAcceptableException(String url) throws Exception {
+	private void testMediaTypeNotAcceptable(String url) throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, url);
 		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
@@ -431,15 +431,15 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Controller
 	private static class TestController {
 
-		@RequestMapping(value = "/foo", method = RequestMethod.GET)
+		@GetMapping("/foo")
 		public void foo() {
 		}
 
-		@RequestMapping(value = "/foo", method = RequestMethod.GET, params="p")
+		@GetMapping(path = "/foo", params="p")
 		public void fooParam() {
 		}
 
-		@RequestMapping(value = "/ba*", method = { RequestMethod.GET, RequestMethod.HEAD })
+		@RequestMapping(path = "/ba*", method = { RequestMethod.GET, RequestMethod.HEAD })
 		public void bar() {
 		}
 
@@ -447,7 +447,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void empty() {
 		}
 
-		@RequestMapping(value = "/person/{id}", method = RequestMethod.PUT, consumes="application/xml")
+		@PutMapping(path = "/person/{id}", consumes="application/xml")
 		public void consumes(@RequestBody String text) {
 		}
 
@@ -488,11 +488,11 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Controller
 	private static class UserController {
 
-		@RequestMapping(value = "/users", method = RequestMethod.GET, produces = "application/json")
+		@GetMapping(path = "/users", produces = "application/json")
 		public void getUser() {
 		}
 
-		@RequestMapping(value = "/users", method = RequestMethod.PUT)
+		@PutMapping(path = "/users")
 		public void saveUser() {
 		}
 	}
@@ -510,16 +510,16 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		@Override
 		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-			RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-			if (annotation != null) {
+			RequestMapping annot = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
+			if (annot != null) {
 				BuilderConfiguration options = new BuilderConfiguration();
 				options.setPathHelper(getPathHelper());
 				options.setPathMatcher(getPathMatcher());
 				options.setSuffixPatternMatch(true);
 				options.setTrailingSlashMatch(true);
-				return RequestMappingInfo.paths(annotation.value()).methods(annotation.method())
-						.params(annotation.params()).headers(annotation.headers())
-						.consumes(annotation.consumes()).produces(annotation.produces())
+				return RequestMappingInfo.paths(annot.value()).methods(annot.method())
+						.params(annot.params()).headers(annot.headers())
+						.consumes(annot.consumes()).produces(annot.produces())
 						.options(options).build();
 			}
 			else {
