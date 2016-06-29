@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,13 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * Helper class that encapsulates the specification of a method parameter, i.e.
- * a {@link Method} or {@link Constructor} plus a parameter index and a nested
- * type index for a declared generic type. Useful as a specification object to
- * pass along.
+ * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
+ * or {@link Constructor} plus a parameter index and a nested type index for a declared generic
+ * type. Useful as a specification object to pass along.
  *
- * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter
- * SynthesizingMethodParameter} subclass available which synthesizes annotations
- * with attribute aliases. That subclass is used for web and message endpoint
- * processing, in particular.
+ * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
+ * subclass available which synthesizes annotations with attribute aliases. That subclass is used
+ * for web and message endpoint processing, in particular.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -167,7 +165,14 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Returns the wrapped member.
+	 * Return the class that declares the underlying Method or Constructor.
+	 */
+	public Class<?> getDeclaringClass() {
+		return getMember().getDeclaringClass();
+	}
+
+	/**
+	 * Return the wrapped member.
 	 * @return the Method or Constructor as Member
 	 */
 	public Member getMember() {
@@ -183,7 +188,9 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Returns the wrapped annotated element.
+	 * Return the wrapped annotated element.
+	 * <p>Note: This method exposes the annotations declared on the method/constructor
+	 * itself (i.e. at the method/constructor level, not at the parameter level).
 	 * @return the Method or Constructor as AnnotatedElement
 	 */
 	public AnnotatedElement getAnnotatedElement() {
@@ -196,13 +203,6 @@ public class MethodParameter {
 		else {
 			return this.constructor;
 		}
-	}
-
-	/**
-	 * Return the class that declares the underlying Method or Constructor.
-	 */
-	public Class<?> getDeclaringClass() {
-		return getMember().getDeclaringClass();
 	}
 
 	/**
@@ -338,8 +338,8 @@ public class MethodParameter {
 	/**
 	 * Return the nested type of the method/constructor parameter.
 	 * @return the parameter type (never {@code null})
-	 * @see #getNestingLevel()
 	 * @since 3.1
+	 * @see #getNestingLevel()
 	 */
 	public Class<?> getNestedParameterType() {
 		if (this.nestingLevel > 1) {
@@ -370,8 +370,8 @@ public class MethodParameter {
 	/**
 	 * Return the nested generic type of the method/constructor parameter.
 	 * @return the parameter type (never {@code null})
-	 * @see #getNestingLevel()
 	 * @since 4.2
+	 * @see #getNestingLevel()
 	 */
 	public Type getNestedGenericParameterType() {
 		if (this.nestingLevel > 1) {
@@ -424,32 +424,36 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return the parameter annotation of the given type, if available.
-	 * @param annotationType the annotation type to look for
-	 * @return the annotation object, or {@code null} if not found
-	 */
-	@SuppressWarnings("unchecked")
-	public <T extends Annotation> T getParameterAnnotation(Class<T> annotationType) {
-		Annotation[] anns = getParameterAnnotations();
-		for (Annotation ann : anns) {
-			if (annotationType.isInstance(ann)) {
-				return (T) ann;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Return true if the parameter has at least one annotation, false if it has none.
+	 * Return {@code true} if the parameter has at least one annotation,
+	 * {@code false} if it has none.
+	 * @see #getParameterAnnotations()
 	 */
 	public boolean hasParameterAnnotations() {
 		return (getParameterAnnotations().length != 0);
 	}
 
 	/**
-	 * Return true if the parameter has the given annotation type, and false if it doesn't.
+	 * Return the parameter annotation of the given type, if available.
+	 * @param annotationType the annotation type to look for
+	 * @return the annotation object, or {@code null} if not found
 	 */
-	public <T extends Annotation> boolean hasParameterAnnotation(Class<T> annotationType) {
+	@SuppressWarnings("unchecked")
+	public <A extends Annotation> A getParameterAnnotation(Class<A> annotationType) {
+		Annotation[] anns = getParameterAnnotations();
+		for (Annotation ann : anns) {
+			if (annotationType.isInstance(ann)) {
+				return (A) ann;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Return whether the parameter is declared with the given annotation type.
+	 * @param annotationType the annotation type to look for
+	 * @see #getParameterAnnotation(Class)
+	 */
+	public <A extends Annotation> boolean hasParameterAnnotation(Class<A> annotationType) {
 		return (getParameterAnnotation(annotationType) != null);
 	}
 

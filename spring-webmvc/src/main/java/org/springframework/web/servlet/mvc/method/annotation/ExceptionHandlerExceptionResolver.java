@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	public ExceptionHandlerExceptionResolver() {
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
+		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
 
 		this.messageConverters = new ArrayList<HttpMessageConverter<?>>();
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
@@ -264,11 +264,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(adviceBean.getBeanType());
 			if (resolver.hasExceptionMappings()) {
 				this.exceptionHandlerAdviceCache.put(adviceBean, resolver);
-				logger.info("Detected @ExceptionHandler methods in " + adviceBean);
+				if (logger.isInfoEnabled()) {
+					logger.info("Detected @ExceptionHandler methods in " + adviceBean);
+				}
 			}
 			if (ResponseBodyAdvice.class.isAssignableFrom(adviceBean.getBeanType())) {
 				this.responseBodyAdvice.add(adviceBean);
-				logger.info("Detected ResponseBodyAdvice implementation in " + adviceBean);
+				if (logger.isInfoEnabled()) {
+					logger.info("Detected ResponseBodyAdvice implementation in " + adviceBean);
+				}
 			}
 		}
 	}

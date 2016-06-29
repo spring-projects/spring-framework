@@ -69,9 +69,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * and services which use plain JDBC (without being aware of Hibernate)!
  * Application code needs to stick to the same simple Connection lookup pattern as
  * with {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
- * (i.e. {@link DataSourceUtils#getConnection}
+ * (i.e. {@link org.springframework.jdbc.datasource.DataSourceUtils#getConnection}
  * or going through a
- * {@link TransactionAwareDataSourceProxy}).
+ * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
  *
  * <p>Note: To be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource ({@link #setDataSource}).
@@ -235,7 +235,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * <p>Default is "false". Turning this flag on enforces over-commit holdability on the
 	 * underlying JDBC Connection (if {@link #prepareConnection "prepareConnection"} is on)
 	 * and skips the disconnect-on-completion step.
-	 * @since 4.2
 	 * @see Connection#setHoldability
 	 * @see ResultSet#HOLD_CURSORS_OVER_COMMIT
 	 * @see #disconnectOnCompletion(Session)
@@ -687,7 +686,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * <p>The default implementation simply calls {@link Session#disconnect()}.
 	 * Subclasses may override this with a no-op or with fine-tuned disconnection logic.
 	 * @param session the Hibernate Session to disconnect
-	 * @since 4.2
 	 * @see Session#disconnect()
 	 */
 	protected void disconnectOnCompletion(Session session) {

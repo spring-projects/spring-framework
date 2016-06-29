@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,11 +64,11 @@ public interface ConversionService {
 
 	/**
 	 * Convert the given {@code source} to the specified {@code targetType}.
-	 * @param source the source object to convert (may be null)
+	 * @param source the source object to convert (may be {@code null})
 	 * @param targetType the target type to convert to (required)
 	 * @return the converted object, an instance of targetType
 	 * @throws ConversionException if a conversion exception occurred
-	 * @throws IllegalArgumentException if targetType is null
+	 * @throws IllegalArgumentException if targetType is {@code null}
 	 */
 	<T> T convert(Object source, Class<T> targetType);
 
@@ -76,7 +76,7 @@ public interface ConversionService {
 	 * Convert the given {@code source} to the specified {@code targetType}.
 	 * The TypeDescriptors provide additional context about the source and target locations
 	 * where conversion will occur, often object fields or property locations.
-	 * @param source the source object to convert (may be null)
+	 * @param source the source object to convert (may be {@code null})
 	 * @param sourceType context about the source type to convert from
 	 * (may be {@code null} if source is {@code null})
 	 * @param targetType context about the target type to convert to (required)
