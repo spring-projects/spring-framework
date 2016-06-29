@@ -147,7 +147,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)</pr
 
             <para>Sometimes, a method might not be suitable for caching all the time (for example, it might depend on the given arguments). The cache annotations support such functionality
             through the <literal>conditional</literal> parameter which takes a <literal>SpEL</literal> expression that is evaluated to either <literal>true</literal> or <literal>false</literal>.
-            If <literal>true</literal>, the method is cached - if not, it behaves as if the method is not cached, that is executed every since time no matter what values are in the cache or what
+            If <literal>true</literal>, the method is cached - if not, it behaves as if the method is not cached, that is executed every time no matter what values are in the cache or what
             arguments are used. A quick example - the following method will be cached, only if the argument <literal>name</literal> has a length shorter then 32:</para>
 
             <programlisting language="java"><![CDATA[@Cacheable(value="book", condition="#name.length < 32")
