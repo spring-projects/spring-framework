@@ -69,9 +69,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * and services which use plain JDBC (without being aware of Hibernate)!
  * Application code needs to stick to the same simple Connection lookup pattern as
  * with {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}
- * (i.e. {@link DataSourceUtils#getConnection}
+ * (i.e. {@link org.springframework.jdbc.datasource.DataSourceUtils#getConnection}
  * or going through a
- * {@link TransactionAwareDataSourceProxy}).
+ * {@link org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy}).
  *
  * <p>Note: To be able to register a DataSource's Connection for plain JDBC code,
  * this instance needs to be aware of the DataSource ({@link #setDataSource}).
