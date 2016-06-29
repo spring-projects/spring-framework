@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.mock.env.MockPropertySource;
 
 import static org.hamcrest.Matchers.*;
@@ -114,9 +115,9 @@ public class PropertySourcesPropertyResolverTests {
 
 		try {
 			propertyResolver.getProperty("foo", TestType.class);
-			fail("Expected IllegalArgumentException due to non-convertible types");
+			fail("Expected ConverterNotFoundException due to non-convertible types");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (ConverterNotFoundException ex) {
 			// expected
 		}
 	}
@@ -272,7 +273,7 @@ public class PropertySourcesPropertyResolverTests {
 		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SomeType.class));
 	}
 
-	@Test(expected=ConversionException.class)
+	@Test(expected = ConversionException.class)
 	public void getPropertyAsClass_withMismatchedTypeForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", "java.lang.String"));
@@ -280,7 +281,7 @@ public class PropertySourcesPropertyResolverTests {
 		resolver.getPropertyAsClass("some.class", SomeType.class);
 	}
 
-	@Test(expected=ConversionException.class)
+	@Test(expected = ConversionException.class)
 	public void getPropertyAsClass_withNonExistentClassForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", "some.bogus.Class"));
@@ -296,7 +297,7 @@ public class PropertySourcesPropertyResolverTests {
 		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SpecificType.class));
 	}
 
-	@Test(expected=ConversionException.class)
+	@Test(expected = ConversionException.class)
 	public void getPropertyAsClass_withMismatchedObjectForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", new Integer(42)));
@@ -312,7 +313,7 @@ public class PropertySourcesPropertyResolverTests {
 		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SpecificType.class));
 	}
 
-	@Test(expected=ConversionException.class)
+	@Test(expected = ConversionException.class)
 	public void getPropertyAsClass_withMismatchedRealClassForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", Integer.class));
