@@ -95,6 +95,7 @@ dependencies {
 	compile "org.reactivestreams:reactive-streams:1.0.0"
 	compile "io.projectreactor:reactor-core:${reactorVersion}"
 	compile "commons-logging:commons-logging:1.2"
+	compile "io.netty:netty-buffer:${nettyVersion}" // Temporarily for JsonObjectDecoder (GH #116)
 
 	optional "org.springframework:spring-context-support:${springVersion}" // for FreeMarker
 	optional "io.reactivex:rxjava:${rxJavaVersion}"
