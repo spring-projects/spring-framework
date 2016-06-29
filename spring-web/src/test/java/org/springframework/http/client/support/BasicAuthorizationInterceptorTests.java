@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.client;
+package org.springframework.http.client.support;
 
 import java.net.URI;
 
@@ -24,6 +24,9 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
