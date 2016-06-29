@@ -28,7 +28,6 @@ import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.ByteBufferEncoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.http.HttpStatus;
@@ -86,7 +85,7 @@ public final class WebClient {
 		this.messageEncoders = Arrays.asList(new ByteBufferEncoder(), new StringEncoder(),
 				new JacksonJsonEncoder());
 		this.messageDecoders = Arrays.asList(new ByteBufferDecoder(), new StringDecoder(),
-				new JacksonJsonDecoder(new JsonObjectDecoder()));
+				new JacksonJsonDecoder());
 	}
 
 	/**

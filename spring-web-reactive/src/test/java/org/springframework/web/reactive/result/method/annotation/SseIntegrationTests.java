@@ -33,7 +33,6 @@ import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
@@ -69,7 +68,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		this.webClient.setMessageDecoders(Arrays.asList(
 				new ByteBufferDecoder(),
 				new StringDecoder(false),
-				new JacksonJsonDecoder(new JsonObjectDecoder())));
+				new JacksonJsonDecoder()));
 	}
 
 	@Override

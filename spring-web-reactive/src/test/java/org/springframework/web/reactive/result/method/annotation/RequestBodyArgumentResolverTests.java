@@ -44,7 +44,6 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
-import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
@@ -93,7 +92,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.resolver = resolver(new JacksonJsonDecoder(new JsonObjectDecoder()));
+		this.resolver = resolver(new JacksonJsonDecoder());
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();

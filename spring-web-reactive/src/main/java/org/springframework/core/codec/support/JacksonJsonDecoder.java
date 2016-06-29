@@ -45,22 +45,17 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 
 	private final ObjectMapper mapper;
 
-	private Decoder<DataBuffer> preProcessor;
+	private final Decoder<DataBuffer> preProcessor = new JsonObjectDecoder();
 
 
 	public JacksonJsonDecoder() {
-		this(new ObjectMapper(), null);
+		this(new ObjectMapper());
 	}
 
-	public JacksonJsonDecoder(Decoder<DataBuffer> preProcessor) {
-		this(new ObjectMapper(), preProcessor);
-	}
-
-	public JacksonJsonDecoder(ObjectMapper mapper, Decoder<DataBuffer> preProcessor) {
+	public JacksonJsonDecoder(ObjectMapper mapper) {
 		super(new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 		this.mapper = mapper;
-		this.preProcessor = preProcessor;
 	}
 
 	@Override

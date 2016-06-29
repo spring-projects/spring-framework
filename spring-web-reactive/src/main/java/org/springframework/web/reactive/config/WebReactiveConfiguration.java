@@ -36,7 +36,6 @@ import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.Jaxb2Decoder;
 import org.springframework.core.codec.support.Jaxb2Encoder;
-import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.converter.Converter;
@@ -251,7 +250,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		}
 		if (jackson2Present) {
 			JacksonJsonEncoder jacksonEncoder = new JacksonJsonEncoder();
-			JacksonJsonDecoder jacksonDecoder = new JacksonJsonDecoder(new JsonObjectDecoder());
+			JacksonJsonDecoder jacksonDecoder = new JacksonJsonDecoder();
 			converters.add(converter(jacksonEncoder, jacksonDecoder));
 			sseDataEncoders.add(jacksonEncoder);
 		} else {

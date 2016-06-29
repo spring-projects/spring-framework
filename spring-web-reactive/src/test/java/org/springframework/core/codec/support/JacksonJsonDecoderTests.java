@@ -59,8 +59,8 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 	}
 
 	@Test
-	@Ignore // Issues 112 (no generic type), otherwise works
-	public void decodeToListWithoutObjectDecoder() throws Exception {
+	@Ignore // Issue 109
+	public void decodeToList() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
 
@@ -73,39 +73,12 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 	}
 
 	@Test
-	@Ignore // Issue 109
-	public void decodeToFluxWithoutObjectDecoder() throws Exception {
+	public void decodeToFlux() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
 
 		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
 		Flux<Object> flux = new JacksonJsonDecoder().decode(source, elementType, null);
-
-		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
-				assertValues(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
-	}
-
-	@Test
-	@Ignore // Issue 109
-	public void decodeToListWithObjectDecoder() throws Exception {
-		Flux<DataBuffer> source = Flux.just(stringBuffer(
-				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
-
-		Method method = getClass().getDeclaredMethod("handle", List.class);
-		ResolvableType elementType = ResolvableType.forMethodParameter(method, 0);
-		Flux<Object> flux = new JacksonJsonDecoder(new JsonObjectDecoder()).decode(source, elementType, null);
-
-		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
-				assertValues(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")));
-	}
-
-	@Test
-	public void decodeToFluxWithObjectDecoder() throws Exception {
-		Flux<DataBuffer> source = Flux.just(stringBuffer(
-				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
-
-		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
-		Flux<Object> flux = new JacksonJsonDecoder(new JsonObjectDecoder()).decode(source, elementType, null);
 
 		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
 				assertValues(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
