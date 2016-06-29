@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,17 @@ public class AspectJCachingConfiguration extends AbstractCachingConfiguration {
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public AnnotationCacheAspect cacheAspect() {
 		AnnotationCacheAspect cacheAspect = AnnotationCacheAspect.aspectOf();
-		if (this.cacheManager != null) {
+		if (this.cacheResolver != null) {
+			cacheAspect.setCacheResolver(this.cacheResolver);
+		}
+		else if (this.cacheManager != null) {
 			cacheAspect.setCacheManager(this.cacheManager);
 		}
 		if (this.keyGenerator != null) {
 			cacheAspect.setKeyGenerator(this.keyGenerator);
+		}
+		if (this.errorHandler != null) {
+			cacheAspect.setErrorHandler(this.errorHandler);
 		}
 		return cacheAspect;
 	}
