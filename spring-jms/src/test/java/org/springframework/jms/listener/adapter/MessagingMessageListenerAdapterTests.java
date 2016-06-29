@@ -29,7 +29,9 @@ import javax.jms.Topic;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
@@ -50,6 +52,9 @@ import static org.mockito.BDDMockito.*;
  * @author Stephane Nicoll
  */
 public class MessagingMessageListenerAdapterTests {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 	private static final Destination sharedReplyDestination = mock(Destination.class);
 
@@ -120,6 +125,31 @@ public class MessagingMessageListenerAdapterTests {
 		catch (ListenerExecutionFailedException ex) {
 			assertEquals(MessageConversionException.class, ex.getCause().getClass());
 		}
+	}
+
+	@Test
+	public void payloadConversionLazilyInvoked() throws JMSException {
+		javax.jms.Message jmsMessage = mock(javax.jms.Message.class);
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		given(messageConverter.fromMessage(jmsMessage)).willReturn("FooBar");
+		MessagingMessageListenerAdapter listener = getSimpleInstance("simple", Message.class);
+		listener.setMessageConverter(messageConverter);
+		Message<?> message = listener.toMessagingMessage(jmsMessage);
+		verify(messageConverter, never()).fromMessage(jmsMessage);
+		assertEquals("FooBar", message.getPayload());
+		verify(messageConverter, times(1)).fromMessage(jmsMessage);
+	}
+
+	@Test
+	public void headerConversionLazilyInvoked() throws JMSException {
+		javax.jms.Message jmsMessage = mock(javax.jms.Message.class);
+		when(jmsMessage.getPropertyNames()).thenThrow(new IllegalArgumentException("Header failure"));
+		MessagingMessageListenerAdapter listener = getSimpleInstance("simple", Message.class);
+		Message<?> message = listener.toMessagingMessage(jmsMessage);
+
+		this.thrown.expect(IllegalArgumentException.class);
+		this.thrown.expectMessage("Header failure");
+		message.getHeaders(); // Triggers headers resolution
 	}
 
 	@Test

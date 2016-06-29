@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
@@ -65,10 +66,21 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 	@Test
 	public void messageConverterUsedIfSet() throws JMSException {
-		containerFactory.setMessageConverter(new UpperCaseMessageConverter());
+		this.containerFactory.setMessageConverter(new UpperCaseMessageConverter());
+		testMessageConverterIsUsed();
+	}
 
+	@Test
+	public void messagingMessageConverterCanBeUsed() throws JMSException {
+		MessagingMessageConverter converter = new MessagingMessageConverter();
+		converter.setPayloadConverter(new UpperCaseMessageConverter());
+		this.containerFactory.setMessageConverter(converter);
+		testMessageConverterIsUsed();
+	}
+
+	private void testMessageConverterIsUsed() throws JMSException {
 		MethodJmsListenerEndpoint endpoint = createDefaultMethodJmsEndpoint(
-				listener.getClass(), "handleIt", String.class, String.class);
+				this.listener.getClass(), "handleIt", String.class, String.class);
 		Message message = new StubTextMessage("foo-bar");
 		message.setStringProperty("my-header", "my-value");
 
