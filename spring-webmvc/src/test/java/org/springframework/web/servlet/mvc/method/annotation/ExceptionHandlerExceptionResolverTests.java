@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -68,10 +68,10 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	@BeforeClass
 	public static void setupOnce() {
-		ExceptionHandlerExceptionResolver r = new ExceptionHandlerExceptionResolver();
-		r.afterPropertiesSet();
-		RESOLVER_COUNT = r.getArgumentResolvers().getResolvers().size();
-		HANDLER_COUNT = r.getReturnValueHandlers().getHandlers().size();
+		ExceptionHandlerExceptionResolver resolver = new ExceptionHandlerExceptionResolver();
+		resolver.afterPropertiesSet();
+		RESOLVER_COUNT = resolver.getArgumentResolvers().getResolvers().size();
+		HANDLER_COUNT = resolver.getReturnValueHandlers().getHandlers().size();
 	}
 
 	@Before
@@ -93,7 +93,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	public void setCustomArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-		this.resolver.setCustomArgumentResolvers(Arrays.asList(resolver));
+		this.resolver.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
 
 		assertTrue(this.resolver.getArgumentResolvers().getResolvers().contains(resolver));
@@ -103,7 +103,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	public void setArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-		this.resolver.setArgumentResolvers(Arrays.asList(resolver));
+		this.resolver.setArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
 
 		assertMethodProcessorCount(1, HANDLER_COUNT);
@@ -112,7 +112,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	public void setCustomReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ViewNameMethodReturnValueHandler();
-		this.resolver.setCustomReturnValueHandlers(Arrays.asList(handler));
+		this.resolver.setCustomReturnValueHandlers(Collections.singletonList(handler));
 		this.resolver.afterPropertiesSet();
 
 		assertTrue(this.resolver.getReturnValueHandlers().getHandlers().contains(handler));
@@ -122,7 +122,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	public void setReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ModelMethodProcessor();
-		this.resolver.setReturnValueHandlers(Arrays.asList(handler));
+		this.resolver.setReturnValueHandlers(Collections.singletonList(handler));
 		this.resolver.afterPropertiesSet();
 
 		assertMethodProcessorCount(RESOLVER_COUNT, 1);
@@ -217,9 +217,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertEquals("TestExceptionResolver: IllegalStateException", this.response.getContentAsString());
 	}
 
-	// SPR-12605
-
-	@Test
+	@Test  // SPR-12605
 	public void resolveExceptionWithHandlerMethodArg() throws Exception {
 		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(cxt);
