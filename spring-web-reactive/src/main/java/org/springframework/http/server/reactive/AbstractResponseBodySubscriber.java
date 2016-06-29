@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.nio.channels.Channel;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.WriteListener;
 
@@ -169,11 +170,13 @@ abstract class AbstractResponseBodySubscriber implements Subscriber<DataBuffer> 
 			@Override
 			void onSubscribe(AbstractResponseBodySubscriber subscriber,
 					Subscription subscription) {
-				if (BackpressureUtils.validate(subscriber.subscription, subscription)) {
+				Objects.requireNonNull(subscription, "Subscription cannot be null");
+				if (subscriber.changeState(this, REQUESTED)) {
 					subscriber.subscription = subscription;
-					if (subscriber.changeState(this, REQUESTED)) {
-						subscription.request(1);
-					}
+					subscription.request(1);
+				}
+				else {
+					super.onSubscribe(subscriber, subscription);
 				}
 			}
 		},
