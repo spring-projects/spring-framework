@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,20 +67,22 @@ public class MethodParameter {
 
 
 	/**
-	 * Create a new MethodParameter for the given method, with nesting level 1.
+	 * Create a new {@code MethodParameter} for the given method, with nesting level 1.
 	 * @param method the Method to specify a parameter for
-	 * @param parameterIndex the index of the parameter
+	 * @param parameterIndex the index of the parameter: -1 for the method
+	 * return type; 0 for the first method parameter; 1 for the second method
+	 * parameter, etc.
 	 */
 	public MethodParameter(Method method, int parameterIndex) {
 		this(method, parameterIndex, 1);
 	}
 
 	/**
-	 * Create a new MethodParameter for the given method.
+	 * Create a new {@code MethodParameter} for the given method.
 	 * @param method the Method to specify a parameter for
-	 * @param parameterIndex the index of the parameter
-	 * (-1 for the method return type; 0 for the first method parameter,
-	 * 1 for the second method parameter, etc)
+	 * @param parameterIndex the index of the parameter: -1 for the method
+	 * return type; 0 for the first method parameter; 1 for the second method
+	 * parameter, etc.
 	 * @param nestingLevel the nesting level of the target type
 	 * (typically 1; e.g. in case of a List of Lists, 1 would indicate the
 	 * nested List, whereas 2 would indicate the element of the nested List)
@@ -158,22 +160,6 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Returns the wrapped member.
-	 * @return the Method or Constructor as Member
-	 */
-	private Member getMember() {
-		return (this.method != null ? this.method : this.constructor);
-	}
-
-	/**
-	 * Returns the wrapped annotated element.
-	 * @return the Method or Constructor as AnnotatedElement
-	 */
-	private AnnotatedElement getAnnotatedElement() {
-		return (this.method != null ? this.method : this.constructor);
-	}
-
-	/**
 	 * Return the class that declares the underlying Method or Constructor.
 	 */
 	public Class<?> getDeclaringClass() {
@@ -181,8 +167,24 @@ public class MethodParameter {
 	}
 
 	/**
+	 * Return the wrapped member.
+	 * @return the Method or Constructor as Member
+	 */
+	private Member getMember() {
+		return (this.method != null ? this.method : this.constructor);
+	}
+
+	/**
+	 * Return the wrapped annotated element.
+	 * @return the Method or Constructor as AnnotatedElement
+	 */
+	private AnnotatedElement getAnnotatedElement() {
+		return (this.method != null ? this.method : this.constructor);
+	}
+
+	/**
 	 * Return the index of the method/constructor parameter.
-	 * @return the parameter index (never negative)
+	 * @return the parameter index (-1 in case of the return type)
 	 */
 	public int getParameterIndex() {
 		return this.parameterIndex;
@@ -216,6 +218,7 @@ public class MethodParameter {
 	/**
 	 * Return the generic type of the method/constructor parameter.
 	 * @return the parameter type (never {@code null})
+	 * @since 3.0
 	 */
 	public Type getGenericParameterType() {
 		if (this.genericParameterType == null) {
@@ -231,6 +234,12 @@ public class MethodParameter {
 		return this.genericParameterType;
 	}
 
+	/**
+	 * Return the nested type of the method/constructor parameter.
+	 * @return the parameter type (never {@code null})
+	 * @since 3.1
+	 * @see #getNestingLevel()
+	 */
 	public Class<?> getNestedParameterType() {
 		if (this.nestingLevel > 1) {
 			Type type = getGenericParameterType();
