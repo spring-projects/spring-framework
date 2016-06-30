@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,9 +183,10 @@ class TypeConverterDelegate {
 
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
-			if (requiredType != null && Collection.class.isAssignableFrom(requiredType) && convertedValue instanceof String) {
-				TypeDescriptor elementType = typeDescriptor.getElementTypeDescriptor();
-				if (elementType != null && Enum.class.isAssignableFrom(elementType.getType())) {
+			if (typeDescriptor != null && requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
+					convertedValue instanceof String) {
+				TypeDescriptor elementTypeDesc = typeDescriptor.getElementTypeDescriptor();
+				if (elementTypeDesc != null && Enum.class.isAssignableFrom(elementTypeDesc.getType())) {
 					convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
 				}
 			}
