@@ -39,15 +39,9 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final ServerHttpResponse response;
 
-	private final WebSessionManager sessionManager;
-
-
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
-	private final Object createSessionLock = new Object();
-
-	private Mono<WebSession> sessionMono;
-
+	private final Mono<WebSession> sessionMono;
 
 
 	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
@@ -58,7 +52,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		Assert.notNull(response, "'sessionManager' is required.");
 		this.request = request;
 		this.response = response;
-		this.sessionManager = sessionManager;
+		this.sessionMono = sessionManager.getSession(this).cache();
 	}
 
 
@@ -84,13 +78,6 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 
 	@Override
 	public Mono<WebSession> getSession() {
-		if (this.sessionMono == null) {
-			synchronized (this.createSessionLock) {
-				if (this.sessionMono == null) {
-					this.sessionMono = this.sessionManager.getSession(this).cache();
-				}
-			}
-		}
 		return this.sessionMono;
 	}
 

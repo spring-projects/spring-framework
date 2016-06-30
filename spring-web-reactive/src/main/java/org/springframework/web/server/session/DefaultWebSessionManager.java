@@ -99,12 +99,13 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
-		return Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
-				.concatMap(this.sessionStore::retrieveSession)
-				.next()
-				.then(session -> validateSession(exchange, session))
-				.otherwiseIfEmpty(createSession(exchange))
-				.map(session -> extendSession(exchange, session));
+		return Mono.defer(() ->
+				Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
+						.concatMap(this.sessionStore::retrieveSession)
+						.next()
+						.then(session -> validateSession(exchange, session))
+						.otherwiseIfEmpty(createSession(exchange))
+						.map(session -> extendSession(exchange, session)));
 	}
 
 	protected Mono<WebSession> validateSession(ServerWebExchange exchange, WebSession session) {
