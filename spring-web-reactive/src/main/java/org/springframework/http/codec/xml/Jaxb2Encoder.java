@@ -26,7 +26,7 @@ import javax.xml.bind.annotation.XmlType;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.AbstractSingleValueEncoder;
+import org.springframework.core.codec.AbstractSingleValueEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.ClassUtils;

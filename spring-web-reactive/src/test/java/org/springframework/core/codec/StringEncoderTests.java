@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.core.codec;
 
 import java.nio.charset.StandardCharsets;
 
@@ -26,6 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.MediaType;

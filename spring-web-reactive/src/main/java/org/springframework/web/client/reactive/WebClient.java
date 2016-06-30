@@ -24,12 +24,12 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.support.ByteBufferDecoder;
-import org.springframework.core.codec.support.ByteBufferEncoder;
+import org.springframework.core.codec.ByteBufferDecoder;
+import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.core.codec.support.StringDecoder;
-import org.springframework.core.codec.support.StringEncoder;
+import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.codec.StringEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestFactory;

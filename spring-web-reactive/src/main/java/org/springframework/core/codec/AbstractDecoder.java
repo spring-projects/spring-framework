@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.core.codec;
 
 import java.util.Arrays;
 import java.util.Collections;

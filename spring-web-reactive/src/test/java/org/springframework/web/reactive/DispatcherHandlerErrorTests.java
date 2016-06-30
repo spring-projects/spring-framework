@@ -29,7 +29,7 @@ import reactor.core.util.SignalKind;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.support.StringEncoder;
+import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBuffer;

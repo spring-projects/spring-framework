@@ -44,7 +44,7 @@ import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.codec.Decoder;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
-import org.springframework.core.codec.support.StringDecoder;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;

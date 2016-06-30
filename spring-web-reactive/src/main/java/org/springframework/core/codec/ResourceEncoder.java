@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.core.codec;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.AbstractSingleValueEncoder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;

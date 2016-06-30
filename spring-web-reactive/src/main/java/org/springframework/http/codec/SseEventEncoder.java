@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.support.AbstractEncoder;
+import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.FlushingDataBuffer;

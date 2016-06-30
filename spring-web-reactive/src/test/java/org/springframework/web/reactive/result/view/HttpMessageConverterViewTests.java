@@ -34,7 +34,7 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Encoder;
-import org.springframework.core.codec.support.StringEncoder;
+import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;

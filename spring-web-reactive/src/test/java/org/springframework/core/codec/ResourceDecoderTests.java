@@ -14,63 +14,71 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.core.codec;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  */
-public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
+public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
-	private final ResourceEncoder encoder = new ResourceEncoder();
+	private final ResourceDecoder decoder = new ResourceDecoder();
 
 	@Test
-	public void canEncode() throws Exception {
+	public void canDecode() throws Exception {
 		assertTrue(
-				this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+				this.decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
 				MediaType.TEXT_PLAIN));
 		assertTrue(
-				this.encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
+				this.decoder.canDecode(ResolvableType.forClass(ByteArrayResource.class),
 				MediaType.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Resource.class),
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN));
 		assertTrue(
-				this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+				this.decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
 				MediaType.APPLICATION_JSON));
 	}
 
 	@Test
-	public void encode() throws Exception {
-		String s = "foo";
-		Resource resource = new ByteArrayResource(s.getBytes(StandardCharsets.UTF_8));
+	public void decode() throws Exception {
+		DataBuffer fooBuffer = stringBuffer("foo");
+		DataBuffer barBuffer = stringBuffer("bar");
+		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
 
-		Mono<Resource> source = Mono.just(resource);
-
-		Flux<DataBuffer> output = this.encoder.encode(source, this.dataBufferFactory,
-				ResolvableType.forClass(Resource.class),
-						null);
+		Flux<Resource> result = this.decoder
+				.decode(source, ResolvableType.forClass(Resource.class), null);
 
 		TestSubscriber
-				.subscribe(output)
+				.subscribe(result)
 				.assertNoError()
 				.assertComplete()
-				.assertValuesWith(stringConsumer(s));
+				.assertValuesWith(resource -> {
+					try {
+						byte[] bytes =
+								StreamUtils.copyToByteArray(resource.getInputStream());
+						assertEquals("foobar", new String(bytes));
+					}
+					catch (IOException e) {
+						fail(e.getMessage());
+					}
+				});
 
 	}
 

@@ -26,8 +26,8 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.ByteBufferEncoder;
-import org.springframework.core.codec.support.StringEncoder;
+import org.springframework.core.codec.ByteBufferEncoder;
+import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;

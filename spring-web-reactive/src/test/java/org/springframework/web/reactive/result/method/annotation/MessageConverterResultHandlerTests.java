@@ -37,8 +37,8 @@ import reactor.core.test.TestSubscriber;
 import rx.Observable;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.ByteBufferEncoder;
-import org.springframework.core.codec.support.StringEncoder;
+import org.springframework.core.codec.ByteBufferEncoder;
+import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;

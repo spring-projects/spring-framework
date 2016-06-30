@@ -25,8 +25,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.ResourceDecoder;
-import org.springframework.core.codec.support.ResourceEncoder;
+import org.springframework.core.codec.ResourceDecoder;
+import org.springframework.core.codec.ResourceEncoder;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceUtils2;

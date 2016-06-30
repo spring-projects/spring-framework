@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.core.codec;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;

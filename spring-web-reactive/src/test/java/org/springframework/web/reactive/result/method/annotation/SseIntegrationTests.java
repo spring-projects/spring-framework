@@ -30,10 +30,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.support.ByteBufferDecoder;
+import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.core.codec.support.StringDecoder;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
 import org.springframework.http.codec.SseEventEncoder;
