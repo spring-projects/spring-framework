@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec.xml;
+package org.springframework.http.codec.xml.jaxb;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

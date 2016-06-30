@@ -29,6 +29,12 @@ import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
+import org.springframework.http.codec.xml.jaxb.XmlRootElement;
+import org.springframework.http.codec.xml.jaxb.XmlRootElementWithName;
+import org.springframework.http.codec.xml.jaxb.XmlRootElementWithNameAndNamespace;
+import org.springframework.http.codec.xml.jaxb.XmlType;
+import org.springframework.http.codec.xml.jaxb.XmlTypeWithName;
+import org.springframework.http.codec.xml.jaxb.XmlTypeWithNameAndNamespace;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
