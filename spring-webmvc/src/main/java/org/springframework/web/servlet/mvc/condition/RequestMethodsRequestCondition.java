@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -109,7 +110,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		}
 
 		if (getMethods().isEmpty()) {
-			if (RequestMethod.OPTIONS.name().equals(request.getMethod())) {
+			if (RequestMethod.OPTIONS.name().equals(request.getMethod()) &&
+					!DispatcherType.ERROR.equals(request.getDispatcherType())) {
+
 				return null; // No implicit match for OPTIONS (we handle it)
 			}
 			return this;
