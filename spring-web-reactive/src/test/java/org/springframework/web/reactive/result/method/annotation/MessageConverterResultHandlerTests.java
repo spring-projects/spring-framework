@@ -38,8 +38,6 @@ import rx.Observable;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.ByteBufferEncoder;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
@@ -48,6 +46,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
@@ -59,11 +59,10 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.WebSessionManager;
+import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
@@ -85,7 +84,7 @@ public class MessageConverterResultHandlerTests {
 	public void setUp() throws Exception {
 		this.resultHandler = createResultHandler();
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
-		this.exchange = new DefaultServerWebExchange(request, this.response, mock(WebSessionManager.class));
+		this.exchange = new DefaultServerWebExchange(request, this.response, new MockWebSessionManager());
 	}
 
 

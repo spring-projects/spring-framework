@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static java.util.Arrays.asList;
@@ -43,7 +44,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link RequestMappingInfo}.
@@ -61,7 +61,7 @@ public class RequestMappingInfoTests {
 
 	@Before
 	public void setUp() throws Exception {
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/foo"));
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
@@ -335,7 +335,7 @@ public class RequestMappingInfoTests {
 		request.getHeaders().add(HttpHeaders.ORIGIN, "http://domain.com");
 		request.getHeaders().add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST");
 
-		WebSessionManager manager = mock(WebSessionManager.class);
+		WebSessionManager manager = new MockWebSessionManager();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
 

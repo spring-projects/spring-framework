@@ -34,12 +34,12 @@ import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ExpressionValueMethodArgumentResolver}.
@@ -64,7 +64,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		this.resolver = new ExpressionValueMethodArgumentResolver(conversionService, context.getBeanFactory());
 
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 		Method method = getClass().getMethod("params", int.class, String.class);

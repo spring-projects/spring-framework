@@ -31,13 +31,13 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
@@ -150,7 +150,7 @@ public class RequestMethodsRequestConditionTests {
 
 	private ServerWebExchange createExchange(String method) throws URISyntaxException {
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.resolve(method), new URI("/"));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
 

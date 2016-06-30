@@ -58,13 +58,13 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import org.springframework.web.server.handler.FilteringWebHandler;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 
 /**
  * Test the effect of exceptions at different stages of request processing by
@@ -96,7 +96,7 @@ public class DispatcherHandlerErrorTests {
 		this.dispatcherHandler = new DispatcherHandler();
 		this.dispatcherHandler.setApplicationContext(appContext);
 
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
 		this.response = new MockServerHttpResponse();

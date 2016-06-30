@@ -59,6 +59,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.HttpRequestPathHelper;
 
@@ -68,7 +69,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 
 /**
@@ -350,7 +350,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private ServerWebExchange createExchange(HttpMethod method, String url) throws URISyntaxException {
 		ServerHttpRequest request = new MockServerHttpRequest(method, new URI(url));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 	}

@@ -43,13 +43,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link RequestHeaderMethodArgumentResolver}.
@@ -91,7 +91,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 		this.paramInstant = new SynthesizingMethodParameter(method, 7);
 
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
 

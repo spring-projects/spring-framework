@@ -29,10 +29,13 @@ import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
@@ -52,7 +55,7 @@ public class ResponseStatusExceptionHandlerTests {
 	public void setUp() throws Exception {
 		this.handler = new ResponseStatusExceptionHandler();
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(request, this.response, sessionManager);
 	}

@@ -40,6 +40,7 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
@@ -63,7 +64,7 @@ public class InvocableHandlerMethodTests {
 
 	@Before
 	public void setUp() throws Exception {
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.request = mock(ServerHttpRequest.class);
 		this.exchange = new DefaultServerWebExchange(request, mock(ServerHttpResponse.class), sessionManager);
 		this.model = new ExtendedModelMap();

@@ -41,6 +41,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
@@ -76,13 +77,12 @@ public class SessionAttributeMethodArgumentResolverTests {
 		ConversionService cs = new DefaultConversionService();
 		this.resolver = new SessionAttributeMethodArgumentResolver(cs, context.getBeanFactory());
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
-		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
-
 		this.session = mock(WebSession.class);
-		when(sessionManager.getSession(this.exchange)).thenReturn(Mono.just(this.session));
 		when(this.session.getAttribute(any())).thenReturn(Optional.empty());
+
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		WebSessionManager sessionManager = new MockWebSessionManager(this.session);
+		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 		this.handleMethod = ReflectionUtils.findMethod(getClass(), "handleWithSessionAttribute", (Class<?>[]) null);
 	}

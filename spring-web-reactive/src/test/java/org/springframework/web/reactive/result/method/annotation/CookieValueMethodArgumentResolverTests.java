@@ -38,12 +38,12 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 /**
  * Test fixture with {@link CookieValueMethodArgumentResolver}.
@@ -69,7 +69,7 @@ public class CookieValueMethodArgumentResolverTests {
 		this.resolver = new CookieValueMethodArgumentResolver(cs, context.getBeanFactory());
 
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 		Method method = getClass().getMethod("params", HttpCookie.class, String.class, String.class);

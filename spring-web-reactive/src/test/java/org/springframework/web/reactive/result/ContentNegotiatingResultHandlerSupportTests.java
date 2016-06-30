@@ -34,10 +34,9 @@ import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.WebSessionManager;
+import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.springframework.http.MediaType.ALL;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
@@ -65,7 +64,7 @@ public class ContentNegotiatingResultHandlerSupportTests {
 		this.handlerSupport = new TestHandlerSupport();
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
 		this.exchange = new DefaultServerWebExchange(
-				this.request, new MockServerHttpResponse(), mock(WebSessionManager.class));
+				this.request, new MockServerHttpResponse(), new MockWebSessionManager());
 	}
 
 

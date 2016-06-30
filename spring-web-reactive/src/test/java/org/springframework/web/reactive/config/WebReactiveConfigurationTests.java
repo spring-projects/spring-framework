@@ -24,7 +24,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.springframework.http.MediaType.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Observable;
@@ -35,15 +34,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Decoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2Decoder;
+import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
@@ -65,14 +64,18 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigu
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.WebSessionManager;
+import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.IMAGE_PNG;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
  * Unit tests for {@link WebReactiveConfiguration}.
@@ -89,7 +92,7 @@ public class WebReactiveConfigurationTests {
 	public void setUp() throws Exception {
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(this.request, response, mock(WebSessionManager.class));
+		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
 
 

@@ -26,14 +26,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Rossen Stoyanchev
@@ -51,7 +51,7 @@ public class ExceptionHandlingHttpHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		URI uri = new URI("http://localhost:8080");
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, uri);
 		this.response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(request, this.response, sessionManager);

@@ -40,12 +40,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link AbstractHandlerMethodMapping}.
@@ -150,7 +150,7 @@ public class HandlerMethodMappingTests {
 
 	private ServerWebExchange createExchange(HttpMethod httpMethod, String path) throws URISyntaxException {
 		ServerHttpRequest request = new MockServerHttpRequest(httpMethod, new URI(path));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
 

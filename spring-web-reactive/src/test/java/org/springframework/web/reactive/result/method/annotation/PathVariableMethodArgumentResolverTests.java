@@ -39,12 +39,12 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link PathVariableMethodArgumentResolver}.
@@ -67,7 +67,7 @@ public class PathVariableMethodArgumentResolverTests {
 		this.resolver = new PathVariableMethodArgumentResolver(conversionService, null);
 
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
-		WebSessionManager sessionManager = mock(WebSessionManager.class);
+		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 		Method method = getClass().getMethod("handle", String.class, String.class);

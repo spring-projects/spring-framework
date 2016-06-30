@@ -29,6 +29,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
+ * Mock implementation of {@link ServerHttpRequest}.
  * @author Rossen Stoyanchev
  */
 public class MockServerHttpRequest implements ServerHttpRequest {
