@@ -251,6 +251,11 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 					}
 				}
 			}
+
+			@Override
+			void onDataAvailable(AbstractRequestBodyPublisher publisher) {
+				// ignore
+			}
 		},
 		/**
 		 * The terminal completed state. Does not respond to any events.
