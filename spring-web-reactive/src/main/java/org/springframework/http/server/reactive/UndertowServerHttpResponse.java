@@ -19,16 +19,19 @@ package org.springframework.http.server.reactive;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Publisher;
+import org.xnio.ChannelListener;
+import org.xnio.ChannelListeners;
+import org.xnio.IoUtils;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
 
@@ -44,27 +47,18 @@ import org.springframework.util.Assert;
  *
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
+ * @author Arjen Poutsma
  */
 public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		implements ZeroCopyHttpOutputMessage {
 
 	private final HttpServerExchange exchange;
 
-	private final StreamSinkChannel responseChannel;
-
-	private final Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter;
-
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
-			StreamSinkChannel responseChannel,
-			Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter,
 			DataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
 		Assert.notNull(exchange, "'exchange' is required.");
-		Assert.notNull(responseChannel, "'responseChannel' must not be null");
-		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.exchange = exchange;
-		this.responseChannel = responseChannel;
-		this.responseBodyWriter = responseBodyWriter;
 	}
 
 
@@ -80,16 +74,26 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		return this.responseBodyWriter.apply(publisher);
+		return Mono.from(s -> {
+			// lazily create Subscriber, since calling
+			// {@link HttpServerExchange#getResponseChannel} as done in the
+			// ResponseBodySubscriber constructor commits the response status and headers
+			ResponseBodySubscriber subscriber = new ResponseBodySubscriber(this.exchange);
+			subscriber.registerListener();
+			publisher.subscribe(subscriber);
+		});
 	}
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
 		writeHeaders();
 		writeCookies();
+
 		try {
+			StreamSinkChannel responseChannel =
+					getUndertowExchange().getResponseChannel();
 			FileChannel in = new FileInputStream(file).getChannel();
-			long result = this.responseChannel.transferFrom(in, position, count);
+			long result = responseChannel.transferFrom(in, position, count);
 			if (result < count) {
 				return Mono.error(new IOException("Could only write " + result +
 						" out of " + count + " bytes"));
@@ -128,4 +132,107 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		}
 	}
 
+	private static class ResponseBodySubscriber extends AbstractResponseBodySubscriber {
+
+		private final ChannelListener<StreamSinkChannel> listener = new WriteListener();
+
+		private final HttpServerExchange exchange;
+
+		private final StreamSinkChannel responseChannel;
+
+		private volatile ByteBuffer byteBuffer;
+
+		public ResponseBodySubscriber(HttpServerExchange exchange) {
+			this.exchange = exchange;
+			this.responseChannel = exchange.getResponseChannel();
+		}
+
+		public void registerListener() {
+			this.responseChannel.getWriteSetter().set(this.listener);
+			this.responseChannel.resumeWrites();
+		}
+
+		@Override
+		protected void writeError(Throwable t) {
+			if (!this.exchange.isResponseStarted() &&
+					this.exchange.getStatusCode() < 500) {
+				this.exchange.setStatusCode(500);
+			}
+		}
+
+		@Override
+		protected void flush() throws IOException {
+			if (logger.isTraceEnabled()) {
+				logger.trace("flush");
+			}
+			this.responseChannel.flush();
+		}
+
+		@Override
+		protected boolean write(DataBuffer dataBuffer) throws IOException {
+			if (this.byteBuffer == null) {
+				return false;
+			}
+			if (logger.isTraceEnabled()) {
+				logger.trace("write: " + dataBuffer);
+			}
+			int total = this.byteBuffer.remaining();
+			int written = writeByteBuffer(this.byteBuffer);
+
+			if (logger.isTraceEnabled()) {
+				logger.trace("written: " + written + " total: " + total);
+			}
+			return written == total;
+		}
+
+		private int writeByteBuffer(ByteBuffer byteBuffer) throws IOException {
+			int written;
+			int totalWritten = 0;
+			do {
+				written = this.responseChannel.write(byteBuffer);
+				totalWritten += written;
+			}
+			while (byteBuffer.hasRemaining() && written > 0);
+			return totalWritten;
+		}
+
+		@Override
+		protected void receiveBuffer(DataBuffer dataBuffer) {
+			super.receiveBuffer(dataBuffer);
+			this.byteBuffer = dataBuffer.asByteBuffer();
+		}
+
+		@Override
+		protected void releaseBuffer() {
+			super.releaseBuffer();
+			this.byteBuffer = null;
+		}
+
+		@Override
+		protected void close() {
+			try {
+				this.responseChannel.shutdownWrites();
+
+				if (!this.responseChannel.flush()) {
+					this.responseChannel.getWriteSetter().set(ChannelListeners
+							.flushingChannelListener(
+									o -> IoUtils.safeClose(this.responseChannel),
+									ChannelListeners.closingChannelExceptionHandler()));
+					this.responseChannel.resumeWrites();
+				}
+			}
+			catch (IOException ignored) {
+			}
+		}
+
+		private class WriteListener implements ChannelListener<StreamSinkChannel> {
+
+			@Override
+			public void handleEvent(StreamSinkChannel channel) {
+				onWritePossible();
+			}
+
+		}
+
+	}
 }

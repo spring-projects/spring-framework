@@ -16,16 +16,22 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 
+import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
-import org.reactivestreams.Publisher;
+import org.xnio.ChannelListener;
+import org.xnio.IoUtils;
+import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,14 +49,14 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerExchange exchange;
 
-	private final Flux<DataBuffer> body;
+	private final RequestBodyPublisher body;
 
 	public UndertowServerHttpRequest(HttpServerExchange exchange,
-			Publisher<DataBuffer> body) {
+			DataBufferFactory dataBufferFactory) {
 		Assert.notNull(exchange, "'exchange' is required.");
-		Assert.notNull(exchange, "'body' is required.");
 		this.exchange = exchange;
-		this.body = Flux.from(body);
+		this.body = new RequestBodyPublisher(exchange, dataBufferFactory);
+		this.body.registerListener();
 	}
 
 
@@ -92,7 +98,79 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.body;
+		return Flux.from(this.body);
 	}
 
+	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
+
+		private final ChannelListener<StreamSourceChannel> readListener =
+				new ReadListener();
+
+		private final ChannelListener<StreamSourceChannel> closeListener =
+				new CloseListener();
+
+		private final StreamSourceChannel requestChannel;
+
+		private final DataBufferFactory dataBufferFactory;
+
+		private final PooledByteBuffer pooledByteBuffer;
+
+		public RequestBodyPublisher(HttpServerExchange exchange,
+				DataBufferFactory dataBufferFactory) {
+			this.requestChannel = exchange.getRequestChannel();
+			this.pooledByteBuffer =
+					exchange.getConnection().getByteBufferPool().allocate();
+			this.dataBufferFactory = dataBufferFactory;
+		}
+
+		private void registerListener() {
+			this.requestChannel.getReadSetter().set(this.readListener);
+			this.requestChannel.getCloseSetter().set(this.closeListener);
+			this.requestChannel.resumeReads();
+		}
+
+		@Override
+		protected DataBuffer read() throws IOException {
+			ByteBuffer byteBuffer = this.pooledByteBuffer.getBuffer();
+			int read = this.requestChannel.read(byteBuffer);
+			if (logger.isTraceEnabled()) {
+				logger.trace("read:" + read);
+			}
+
+			if (read > 0) {
+				byteBuffer.flip();
+				return this.dataBufferFactory.wrap(byteBuffer);
+			}
+			else if (read == -1) {
+				onAllDataRead();
+			}
+			return null;
+		}
+
+		@Override
+		protected void close() {
+			if (this.pooledByteBuffer != null) {
+				IoUtils.safeClose(this.pooledByteBuffer);
+			}
+			if (this.requestChannel != null) {
+				IoUtils.safeClose(this.requestChannel);
+			}
+		}
+
+		private class ReadListener implements ChannelListener<StreamSourceChannel> {
+
+			@Override
+			public void handleEvent(StreamSourceChannel channel) {
+				onDataAvailable();
+			}
+		}
+
+		private class CloseListener implements ChannelListener<StreamSourceChannel> {
+
+			@Override
+			public void handleEvent(StreamSourceChannel channel) {
+				onAllDataRead();
+			}
+		}
+	}
 }
