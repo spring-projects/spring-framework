@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
-import org.springframework.http.codec.xml.XmlEventDecoder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

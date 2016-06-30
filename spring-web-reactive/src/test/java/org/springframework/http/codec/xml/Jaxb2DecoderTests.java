@@ -25,20 +25,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.jaxb.XmlRootElement;
-import org.springframework.core.codec.support.jaxb.XmlRootElementWithName;
-import org.springframework.core.codec.support.jaxb.XmlRootElementWithNameAndNamespace;
-import org.springframework.core.codec.support.jaxb.XmlType;
-import org.springframework.core.codec.support.jaxb.XmlTypeWithName;
-import org.springframework.core.codec.support.jaxb.XmlTypeWithNameAndNamespace;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
-import org.springframework.http.codec.xml.Jaxb2Decoder;
-import org.springframework.http.codec.xml.XmlEventDecoder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze

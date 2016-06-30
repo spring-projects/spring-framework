@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support.jaxb;
+package org.springframework.http.codec.xml;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * @author Arjen Poutsma
  */
-@XmlRootElement(name = "name", namespace = "namespace")
-public class XmlRootElementWithNameAndNamespace {
+@XmlType(name = "name", namespace = "namespace")
+public class XmlTypeWithNameAndNamespace {
 
 }

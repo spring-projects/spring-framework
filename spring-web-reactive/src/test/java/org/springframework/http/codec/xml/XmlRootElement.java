@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support.jaxb;
+package org.springframework.http.codec.xml;
 
 /**
  * @author Arjen Poutsma

@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support.jaxb;
-
-import javax.xml.bind.annotation.XmlType;
+package org.springframework.http.codec.xml;
 
 /**
  * @author Arjen Poutsma
  */
-@XmlType(name = "name")
-public class XmlTypeWithName {
+@javax.xml.bind.annotation.XmlType
+public class XmlType {
 
 }
