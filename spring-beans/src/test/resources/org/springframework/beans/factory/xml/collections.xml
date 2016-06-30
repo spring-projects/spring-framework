@@ -288,15 +288,6 @@
 		</property>
 	</bean>
 
-	<bean id="classArray" class="org.springframework.tests.sample.beans.HasMap">
-		<property name="classArray">
-			<list>
-				<value>java.lang.String</value>
-				<value>java.lang.Exception</value>
-			</list>
-		</property>
-	</bean>
-
 	<bean id="integerArray" class="org.springframework.tests.sample.beans.HasMap">
 		<property name="integerArray">
 			<list>
@@ -305,6 +296,14 @@
 				<value>2</value>
 			</list>
 		</property>
+	</bean>
+
+	<bean id="classArray" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="classArray" value="java.lang.String,java.lang.Exception"/>
+	</bean>
+
+	<bean id="classList" class="org.springframework.tests.sample.beans.HasMap">
+		<property name="classList" value="java.lang.String,java.lang.Exception"/>
 	</bean>
 
 	<bean id="listFactory" class="org.springframework.beans.factory.config.ListFactoryBean">

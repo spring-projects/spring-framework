@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,10 +145,9 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * The type of the backing class, method parameter, field, or property
 	 * described by this TypeDescriptor.
-	 * <p>Returns primitive types as-is.
-	 * <p>See {@link #getObjectType()} for a variation of this operation that
-	 * resolves primitive types to their corresponding Object types if necessary.
-	 * @return the type, or {@code null} if it cannot be determined
+	 * <p>Returns primitive types as-is. See {@link #getObjectType()} for a
+	 * variation of this operation that resolves primitive types to their
+	 * corresponding Object types if necessary.
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {
