@@ -45,7 +45,7 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  */
-public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
+class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 
 	private static final int ST_CORRUPTED = -1;
 
