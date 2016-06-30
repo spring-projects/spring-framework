@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.json;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -27,6 +27,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.Pojo;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

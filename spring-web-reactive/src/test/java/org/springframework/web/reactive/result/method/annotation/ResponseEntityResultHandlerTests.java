@@ -31,8 +31,8 @@ import rx.Single;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.ByteBufferEncoder;
-import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.Jaxb2Encoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;

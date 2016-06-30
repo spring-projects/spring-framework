@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.json;
 
 import java.nio.charset.StandardCharsets;
 

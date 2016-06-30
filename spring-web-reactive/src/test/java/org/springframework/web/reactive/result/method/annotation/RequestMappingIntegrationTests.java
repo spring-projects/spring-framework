@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.JacksonJsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;

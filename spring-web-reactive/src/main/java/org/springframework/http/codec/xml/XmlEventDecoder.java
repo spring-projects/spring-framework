@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.xml;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,6 +35,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.support.AbstractDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.ClassUtils;

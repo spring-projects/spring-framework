@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,6 +31,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.support.AbstractEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.Assert;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.xml;
 
 import java.util.List;
 import javax.xml.namespace.QName;
@@ -34,6 +34,9 @@ import org.springframework.core.codec.support.jaxb.XmlTypeWithNameAndNamespace;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.Pojo;
+import org.springframework.http.codec.xml.Jaxb2Decoder;
+import org.springframework.http.codec.xml.XmlEventDecoder;
 
 import static org.junit.Assert.*;
 

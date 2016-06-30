@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.json;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -29,6 +29,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.Pojo;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

@@ -54,7 +54,7 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 				MediaType.APPLICATION_JSON));
 		assertFalse(this.decoder
 				.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Object.class),
 				MediaType.APPLICATION_JSON));
 	}
 

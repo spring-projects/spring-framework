@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.xml;
 
 import javax.xml.stream.events.XMLEvent;
 
@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.http.codec.xml.XmlEventDecoder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

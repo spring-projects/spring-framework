@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.xml;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.support.AbstractSingleValueEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.ClassUtils;

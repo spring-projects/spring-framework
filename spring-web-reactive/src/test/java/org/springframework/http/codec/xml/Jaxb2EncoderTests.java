@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec.xml;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +31,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.Pojo;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.custommonkey.xmlunit.XMLAssert.fail;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.http.codec;
 
 import java.util.Arrays;
 
@@ -28,7 +28,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.FlushingDataBuffer;
-import org.springframework.http.codec.SseEventEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.sse.SseEvent;
 

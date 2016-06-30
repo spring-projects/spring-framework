@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.Ordered;
-import org.springframework.core.codec.support.JacksonJsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.reactive.result.view.HttpMessageConverterView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
