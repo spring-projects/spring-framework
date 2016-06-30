@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.support;
+package org.springframework.web.servlet.handler;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,17 +36,14 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.springframework.web.servlet.HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
+import static org.junit.Assert.*;
+import static org.springframework.web.servlet.HandlerMapping.*;
 
 /**
  * Unit tests for {@link HandlerMappingIntrospector}.
+ *
  * @author Rossen Stoyanchev
  * @since 4.3.1
  */
@@ -97,10 +94,8 @@ public class HandlerMappingIntrospectorTests {
 
 	@Test
 	public void getMatchable() throws Exception {
-
 		MutablePropertyValues pvs = new MutablePropertyValues(
-				Collections.singletonMap("urlMap",
-						Collections.singletonMap("/path", new Object())));
+				Collections.singletonMap("urlMap", Collections.singletonMap("/path", new Object())));
 
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
 		cxt.registerSingleton("hm", SimpleUrlHandlerMapping.class, pvs);
@@ -165,6 +160,7 @@ public class HandlerMappingIntrospectorTests {
 		}
 	}
 
+
 	@Configuration @SuppressWarnings({"WeakerAccess", "unused"})
 	static class TestConfig {
 
@@ -177,8 +173,8 @@ public class HandlerMappingIntrospectorTests {
 		public TestController testController() {
 			return new TestController();
 		}
-
 	}
+
 
 	@CrossOrigin("http://localhost:9000")
 	@Controller

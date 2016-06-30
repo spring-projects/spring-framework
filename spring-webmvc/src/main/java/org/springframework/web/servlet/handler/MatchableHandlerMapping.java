@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.support;
+package org.springframework.web.servlet.handler;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,13 +29,13 @@ import org.springframework.web.servlet.HandlerMapping;
  * @since 4.3.1
  * @see HandlerMappingIntrospector
  */
-public interface MatchableHandlerMapping {
+public interface MatchableHandlerMapping extends HandlerMapping {
 
 	/**
-	 * Whether the given request matches the request criteria.
+	 * Determine whether the given request matches the request criteria.
 	 * @param request the current request
 	 * @param pattern the pattern to match
-	 * @return the result from request matching or {@code null}
+	 * @return the result from request matching, or {@code null} if none
 	 */
 	RequestMatchResult match(HttpServletRequest request, String pattern);
 

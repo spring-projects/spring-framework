@@ -35,13 +35,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.handler.MatchableHandlerMapping;
+import org.springframework.web.servlet.handler.RequestMatchResult;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
-import org.springframework.web.servlet.support.MatchableHandlerMapping;
-import org.springframework.web.servlet.support.RequestMatchResult;
 
 /**
  * Creates {@link RequestMappingInfo} instances from type and method-level
@@ -54,7 +54,7 @@ import org.springframework.web.servlet.support.RequestMatchResult;
  * @since 3.1
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
-		implements EmbeddedValueResolverAware, MatchableHandlerMapping {
+		implements MatchableHandlerMapping, EmbeddedValueResolverAware {
 
 	private boolean useSuffixPatternMatch = true;
 

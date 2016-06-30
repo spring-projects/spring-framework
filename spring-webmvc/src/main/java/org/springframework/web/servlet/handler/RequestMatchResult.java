@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.support;
+package org.springframework.web.servlet.handler;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.util.Assert;
@@ -24,8 +23,8 @@ import org.springframework.util.PathMatcher;
 
 /**
  * Container for the result from request pattern matching via
- * {@link MatchableHandlerMapping} with a method to further extract URI template
- * variables from the pattern.
+ * {@link MatchableHandlerMapping} with a method to further extract
+ * URI template variables from the pattern.
  *
  * @author Rossen Stoyanchev
  * @since 4.3.1
@@ -57,21 +56,11 @@ public class RequestMatchResult {
 
 
 	/**
-	 * Whether the pattern was matched to the request.
-	 */
-	public boolean isMatch() {
-		return (this.matchingPattern != null);
-	}
-
-	/**
 	 * Extract URI template variables from the matching pattern as defined in
 	 * {@link PathMatcher#extractUriTemplateVariables}.
 	 * @return a map with URI template variables
 	 */
 	public Map<String, String> extractUriTemplateVariables() {
-		if (!isMatch()) {
-			return Collections.<String, String>emptyMap();
-		}
 		return this.pathMatcher.extractUriTemplateVariables(this.matchingPattern, this.lookupPath);
 	}
 

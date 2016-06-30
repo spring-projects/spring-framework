@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.support;
+package org.springframework.web.servlet.handler;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,16 +70,13 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 
 
 	private static List<HandlerMapping> initHandlerMappings(ApplicationContext context) {
-
 		Map<String, HandlerMapping> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				context, HandlerMapping.class, true, false);
-
 		if (!beans.isEmpty()) {
 			List<HandlerMapping> mappings = new ArrayList<HandlerMapping>(beans.values());
 			AnnotationAwareOrderComparator.sort(mappings);
 			return mappings;
 		}
-
 		return initDefaultHandlerMappings(context);
 	}
 
@@ -118,14 +115,12 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 		return this.handlerMappings;
 	}
 
-
 	/**
 	 * Find the {@link HandlerMapping} that would handle the given request and
-	 * return it as a {@link MatchableHandlerMapping} that can be used to
-	 * test request-matching criteria. If the matching HandlerMapping is not an
-	 * instance of {@link MatchableHandlerMapping}, an IllegalStateException is
-	 * raised.
-	 *
+	 * return it as a {@link MatchableHandlerMapping} that can be used to test
+	 * request-matching criteria.
+	 * <p>If the matching HandlerMapping is not an instance of
+	 * {@link MatchableHandlerMapping}, an IllegalStateException is raised.
 	 * @param request the current request
 	 * @return the resolved matcher, or {@code null}
 	 * @throws Exception if any of the HandlerMapping's raise an exception
@@ -179,8 +174,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 	 */
 	private static class RequestAttributeChangeIgnoringWrapper extends HttpServletRequestWrapper {
 
-
-		private RequestAttributeChangeIgnoringWrapper(HttpServletRequest request) {
+		public RequestAttributeChangeIgnoringWrapper(HttpServletRequest request) {
 			super(request);
 		}
 
