@@ -118,10 +118,7 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		if (this.decoder == null) {
 			return Flux.error(new IllegalStateException("No decoder set"));
 		}
-		MediaType contentType = inputMessage.getHeaders().getContentType();
-		if (contentType == null) {
-			contentType = MediaType.APPLICATION_OCTET_STREAM;
-		}
+		MediaType contentType = getContentType(inputMessage);
 		return this.decoder.decode(inputMessage.getBody(), type, contentType);
 	}
 
@@ -130,12 +127,15 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		if (this.decoder == null) {
 			return Mono.error(new IllegalStateException("No decoder set"));
 		}
-		MediaType contentType = inputMessage.getHeaders().getContentType();
-		if (contentType == null) {
-			contentType = MediaType.APPLICATION_OCTET_STREAM;
-		}
+		MediaType contentType = getContentType(inputMessage);
 		return this.decoder.decodeOne(inputMessage.getBody(), type, contentType);
 	}
+
+	private MediaType getContentType(ReactiveHttpInputMessage inputMessage) {
+		MediaType contentType = inputMessage.getHeaders().getContentType();
+		return (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
+	}
+
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
@@ -181,6 +181,7 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 	 * @param elementType the type of element for encoding
 	 * @return the content type, or {@code null}
 	 */
+	@SuppressWarnings("UnusedParameters")
 	protected MediaType getDefaultContentType(ResolvableType elementType) {
 		return (!this.writableMediaTypes.isEmpty() ? this.writableMediaTypes.get(0) : null);
 	}

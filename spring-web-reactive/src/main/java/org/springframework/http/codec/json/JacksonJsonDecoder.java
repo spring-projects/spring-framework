@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
-import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
@@ -38,18 +37,26 @@ import org.springframework.util.MimeType;
 
 
 /**
- * Decode from a bytes stream of JSON objects to a stream of {@code Object} (POJO).
+ * Decode a byte stream into JSON and convert to Object's with Jackson.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
+ *
  * @see JacksonJsonEncoder
  */
 public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 
+	private static final MimeType[] MIME_TYPES = new MimeType[] {
+			new MimeType("application", "json", StandardCharsets.UTF_8),
+			new MimeType("application", "*+json", StandardCharsets.UTF_8)
+	};
+
+
 	private final ObjectMapper mapper;
 
-	private final Decoder<DataBuffer> fluxPreProcessor = new JsonObjectDecoder();
+	private final JsonObjectDecoder fluxObjectDecoder = new JsonObjectDecoder(true);
 
-	private final Decoder<DataBuffer> monoPreProcessor = new JsonObjectDecoder(false);
+	private final JsonObjectDecoder monoObjectDecoder = new JsonObjectDecoder(false);
 
 
 	public JacksonJsonDecoder() {
@@ -57,46 +64,39 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 	}
 
 	public JacksonJsonDecoder(ObjectMapper mapper) {
-		super(new MimeType("application", "json", StandardCharsets.UTF_8),
-				new MimeType("application", "*+json", StandardCharsets.UTF_8));
+		super(MIME_TYPES);
 		this.mapper = mapper;
 	}
+
 
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
-		Assert.notNull(inputStream, "'inputStream' must not be null");
-		Assert.notNull(elementType, "'elementType' must not be null");
-		TypeFactory typeFactory = this.mapper.getTypeFactory();
-		JavaType javaType = typeFactory.constructType(elementType.getType());
-		ObjectReader reader = this.mapper.readerFor(javaType);
-
-		return this.fluxPreProcessor.decode(inputStream, elementType, mimeType, hints)
-				.map(dataBuffer -> {
-					try {
-						Object value = reader.readValue(dataBuffer.asInputStream());
-						DataBufferUtils.release(dataBuffer);
-						return value;
-					}
-					catch (IOException e) {
-						return Flux.error(new CodecException("Error while reading the data", e));
-					}
-		});
+		JsonObjectDecoder objectDecoder = this.fluxObjectDecoder;
+		return decodeInternal(objectDecoder, inputStream, elementType, mimeType, hints);
 	}
 
 	@Override
 	public Mono<Object> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
+		JsonObjectDecoder objectDecoder = this.monoObjectDecoder;
+		return decodeInternal(objectDecoder, inputStream, elementType, mimeType, hints).single();
+	}
+
+	private Flux<Object> decodeInternal(JsonObjectDecoder objectDecoder, Publisher<DataBuffer> inputStream,
+			ResolvableType elementType, MimeType mimeType, Object[] hints) {
+
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
+
 		TypeFactory typeFactory = this.mapper.getTypeFactory();
 		JavaType javaType = typeFactory.constructType(elementType.getType());
+
 		ObjectReader reader = this.mapper.readerFor(javaType);
 
-		return this.monoPreProcessor.decode(inputStream, elementType, mimeType, hints)
-				.single()
+		return objectDecoder.decode(inputStream, elementType, mimeType, hints)
 				.map(dataBuffer -> {
 					try {
 						Object value = reader.readValue(dataBuffer.asInputStream());
@@ -106,7 +106,7 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 					catch (IOException e) {
 						return Flux.error(new CodecException("Error while reading the data", e));
 					}
-		});
+				});
 	}
 
 }

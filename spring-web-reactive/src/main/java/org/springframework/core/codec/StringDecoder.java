@@ -52,7 +52,9 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	private static final IntPredicate NEWLINE_DELIMITER = b -> b == '\n' || b == '\r';
 
+
 	private final boolean splitOnNewline;
+
 
 	/**
 	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
@@ -74,6 +76,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 		this.splitOnNewline = splitOnNewline;
 	}
 
+
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
 		return super.canDecode(elementType, mimeType, hints) &&
@@ -83,37 +86,27 @@ public class StringDecoder extends AbstractDecoder<String> {
 	@Override
 	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
+
 		Flux<DataBuffer> inputFlux = Flux.from(inputStream);
 		if (this.splitOnNewline) {
-			inputFlux = inputFlux.flatMap(StringDecoder::splitOnNewline);
+			inputFlux = Flux.from(inputStream).flatMap(StringDecoder::splitOnNewline);
 		}
-		Charset charset = getCharset(mimeType);
-		return inputFlux.map(dataBuffer -> {
-			CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
-			DataBufferUtils.release(dataBuffer);
-			return charBuffer.toString();
-		});
+		return decodeInternal(inputFlux, mimeType);
 	}
 
 	@Override
 	public Mono<String> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
-		Charset charset = getCharset(mimeType);
-		return Flux.from(inputStream)
-				.map(dataBuffer -> {
-					CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
-					DataBufferUtils.release(dataBuffer);
-					return charBuffer.toString();
-				})
-				.collect(StringBuilder::new, StringBuilder::append)
-				.map(StringBuilder::toString);
+		return decodeInternal(Flux.from(inputStream), mimeType).
+				collect(StringBuilder::new, StringBuilder::append).
+				map(StringBuilder::toString);
 	}
 
 	private static Flux<DataBuffer> splitOnNewline(DataBuffer dataBuffer) {
-		List<DataBuffer> results = new ArrayList<DataBuffer>();
+		List<DataBuffer> results = new ArrayList<>();
 		int startIdx = 0;
-		int endIdx = 0;
+		int endIdx;
 		final int limit = dataBuffer.readableByteCount();
 		do {
 			endIdx = dataBuffer.indexOf(NEWLINE_DELIMITER, startIdx);
@@ -126,7 +119,15 @@ public class StringDecoder extends AbstractDecoder<String> {
 		DataBufferUtils.release(dataBuffer);
 		return Flux.fromIterable(results);
 	}
-	
+
+	private Flux<String> decodeInternal(Flux<DataBuffer> inputFlux, MimeType mimeType) {
+		Charset charset = getCharset(mimeType);
+		return inputFlux.map(dataBuffer -> {
+			CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
+			DataBufferUtils.release(dataBuffer);
+			return charBuffer.toString();
+		});
+	}
 
 	private Charset getCharset(MimeType mimeType) {
 		if (mimeType != null && mimeType.getCharset() != null) {

@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import rx.Observable;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
@@ -32,6 +31,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -122,59 +122,41 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 			ServerWebExchange exchange) {
 
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		boolean isAsyncType = isAsyncType(type);
-		boolean isStreamableType = isStreamableType(type);
-		ResolvableType elementType = (isStreamableType || isAsyncType ? type.getGeneric(0) : type);
 
-		MediaType mediaType = exchange.getRequest().getHeaders().getContentType();
+		boolean convertFromMono = getConversionService().canConvert(Mono.class, type.getRawClass());
+		boolean convertFromFlux = getConversionService().canConvert(Flux.class, type.getRawClass());
+
+		ResolvableType elementType = convertFromMono || convertFromFlux ? type.getGeneric(0) : type;
+
+		ServerHttpRequest request = exchange.getRequest();
+		MediaType mediaType = request.getHeaders().getContentType();
 		if (mediaType == null) {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
 		for (HttpMessageConverter<?> converter : getMessageConverters()) {
 			if (converter.canRead(elementType, mediaType)) {
-
-				if (isStreamableType) {
-					Publisher<?> elements = converter.read(elementType, exchange.getRequest());
+				if (convertFromFlux) {
+					Publisher<?> flux = converter.read(elementType, request);
 					if (this.validator != null) {
-						elements= applyValidationIfApplicable(elements, parameter);
+						flux= applyValidationIfApplicable(flux, parameter);
 					}
-					if (Flux.class.equals(type.getRawClass())) {
-						return Mono.just(elements);
-					}
-					else if (isAsyncType && this.conversionService.canConvert(Flux.class, type.getRawClass())) {
-						return Mono.just(this.conversionService.convert(elements, type.getRawClass()));
-					}
+					return Mono.just(this.conversionService.convert(flux, type.getRawClass()));
 				}
 				else {
-					Mono<?> element = converter.readOne(elementType, exchange.getRequest());
+					Mono<?> mono = converter.readOne(elementType, request);
 					if (this.validator != null) {
-						element = Mono.from(applyValidationIfApplicable(element, parameter));
+						mono = Mono.from(applyValidationIfApplicable(mono, parameter));
 					}
-					if (Mono.class.equals(type.getRawClass())) {
-						return Mono.just(element);
+					if (!convertFromMono) {
+						return mono.map(value-> value); // TODO: MonoToObjectConverter
 					}
-					else if (isAsyncType && this.conversionService.canConvert(Mono.class, type.getRawClass())) {
-						return Mono.just(this.conversionService.convert(element, type.getRawClass()));
-					}
-					else {
-						return (Mono<Object>)element;
-					}
+					return Mono.just(this.conversionService.convert(mono, type.getRawClass()));
 				}
 			}
 		}
 
 		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
-	}
-
-	private boolean isAsyncType(ResolvableType type) {
-		return (Mono.class.equals(type.getRawClass()) || Flux.class.equals(type.getRawClass()) ||
-				getConversionService().canConvert(Mono.class, type.getRawClass()) ||
-				getConversionService().canConvert(Flux.class, type.getRawClass()));
-	}
-
-	private boolean isStreamableType(ResolvableType type) {
-		return this.conversionService.canConvert(Flux.class, type.getRawClass());
 	}
 
 	protected Publisher<?> applyValidationIfApplicable(Publisher<?> elements, MethodParameter methodParam) {
@@ -185,7 +167,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 				Object hints = (validAnnot != null ? validAnnot.value() : AnnotationUtils.getValue(ann));
 				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
 				return Flux.from(elements).map(element -> {
-					validate(element, validationHints, methodParam);
+					doValidate(element, validationHints, methodParam);
 					return element;
 				});
 			}
@@ -196,7 +178,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	/**
 	 * TODO: replace with use of DataBinder
 	 */
-	private void validate(Object target, Object[] validationHints, MethodParameter methodParam) {
+	private void doValidate(Object target, Object[] validationHints, MethodParameter methodParam) {
 		String name = Conventions.getVariableNameForParameter(methodParam);
 		Errors errors = new BeanPropertyBindingResult(target, name);
 		if (!ObjectUtils.isEmpty(validationHints) && this.validator instanceof SmartValidator) {
