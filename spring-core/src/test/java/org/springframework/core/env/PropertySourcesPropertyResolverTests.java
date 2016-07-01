@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,6 +258,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void getPropertyAsClass() throws ClassNotFoundException, LinkageError {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SpecificType.class.getName()));
@@ -266,6 +267,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void getPropertyAsClass_withInterfaceAsTarget() throws ClassNotFoundException, LinkageError {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SomeType.class.getName()));
@@ -274,6 +276,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test(expected = ConversionException.class)
+	@SuppressWarnings("deprecation")
 	public void getPropertyAsClass_withMismatchedTypeForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", "java.lang.String"));
@@ -282,6 +285,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test(expected = ConversionException.class)
+	@SuppressWarnings("deprecation")
 	public void getPropertyAsClass_withNonExistentClassForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", "some.bogus.Class"));
@@ -290,6 +294,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void getPropertyAsClass_withObjectForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", new SpecificType()));
@@ -298,6 +303,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test(expected = ConversionException.class)
+	@SuppressWarnings("deprecation")
 	public void getPropertyAsClass_withMismatchedObjectForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", new Integer(42)));
@@ -306,6 +312,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void getPropertyAsClass_withRealClassForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SpecificType.class));
@@ -314,6 +321,7 @@ public class PropertySourcesPropertyResolverTests {
 	}
 
 	@Test(expected = ConversionException.class)
+	@SuppressWarnings("deprecation")
 	public void getPropertyAsClass_withMismatchedRealClassForValue() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("some.class", Integer.class));
