@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.apache.http.protocol.HttpContext;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
@@ -57,6 +58,20 @@ import org.springframework.util.Assert;
  * @since 3.1
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
+
+	private static Class<?> abstractHttpClientClass;
+
+	static {
+		try {
+			// Looking for AbstractHttpClient class (deprecated as of HttpComponents 4.3)
+			abstractHttpClientClass = ClassUtils.forName("org.apache.http.impl.client.AbstractHttpClient",
+					HttpComponentsClientHttpRequestFactory.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// Probably removed from HttpComponents in the meantime...
+		}
+	}
+
 
 	private HttpClient httpClient;
 
@@ -130,7 +145,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@SuppressWarnings("deprecation")
 	private void setLegacyConnectionTimeout(HttpClient client, int timeout) {
-		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
+		if (abstractHttpClientClass != null && abstractHttpClientClass.isInstance(client)) {
 			client.getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
 		}
 	}
@@ -171,7 +186,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	@SuppressWarnings("deprecation")
 	private void setLegacySocketTimeout(HttpClient client, int timeout) {
-		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
+		if (abstractHttpClientClass != null && abstractHttpClientClass.isInstance(client)) {
 			client.getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
 		}
 	}
