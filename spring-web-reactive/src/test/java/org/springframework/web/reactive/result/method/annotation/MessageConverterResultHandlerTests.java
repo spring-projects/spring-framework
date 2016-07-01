@@ -40,8 +40,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
+import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
+import org.springframework.core.convert.support.PublisherToFluxConverter;
+import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
@@ -136,7 +137,6 @@ public class MessageConverterResultHandlerTests {
 	}
 
 	@Test // SPR-12811
-	@Ignore
 	public void jacksonTypeOfListElement() throws Exception {
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
 		ResolvableType bodyType = ResolvableType.forClassWithGenerics(List.class, ParentClass.class);
@@ -185,8 +185,9 @@ public class MessageConverterResultHandlerTests {
 		}
 
 		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-		service.addConverter(new ReactiveStreamsToRxJava1Converter());
+		service.addConverter(new MonoToCompletableFutureConverter());
+		service.addConverter(new PublisherToFluxConverter());
+		service.addConverter(new ReactorToRxJava1Converter());
 
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 

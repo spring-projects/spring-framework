@@ -32,6 +32,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
+import org.springframework.core.convert.support.PublisherToFluxConverter;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Decoder;
@@ -41,8 +42,8 @@ import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
+import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
+import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.format.Formatter;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.SseEventEncoder;
@@ -285,14 +286,15 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * Override to add custom {@link Converter}s and {@link Formatter}s.
 	 * <p>By default this method method registers:
 	 * <ul>
-	 * <li>{@link ReactiveStreamsToCompletableFutureConverter}
-	 * <li>{@link ReactiveStreamsToRxJava1Converter}
+	 * <li>{@link MonoToCompletableFutureConverter}
+	 * <li>{@link ReactorToRxJava1Converter}
 	 * </ul>
 	 */
 	protected void addFormatters(ConverterRegistry registry) {
-		registry.addConverter(new ReactiveStreamsToCompletableFutureConverter());
+		registry.addConverter(new MonoToCompletableFutureConverter());
+		registry.addConverter(new PublisherToFluxConverter());
 		if (DependencyUtils.hasRxJava1()) {
-			registry.addConverter(new ReactiveStreamsToRxJava1Converter());
+			registry.addConverter(new ReactorToRxJava1Converter());
 		}
 	}
 

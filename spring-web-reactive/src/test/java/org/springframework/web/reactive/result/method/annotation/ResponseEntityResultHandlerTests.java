@@ -33,8 +33,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
+import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
+import org.springframework.core.convert.support.PublisherToFluxConverter;
+import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -105,8 +106,11 @@ public class ResponseEntityResultHandlerTests {
 			converterList = Arrays.asList(converters);
 		}
 		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-		service.addConverter(new ReactiveStreamsToRxJava1Converter());
+		service.addConverter(new MonoToCompletableFutureConverter());
+		service.addConverter(new PublisherToFluxConverter());
+		service.addConverter(new ReactorToRxJava1Converter());
+
+
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 
 		return new ResponseEntityResultHandler(converterList, service, resolver);

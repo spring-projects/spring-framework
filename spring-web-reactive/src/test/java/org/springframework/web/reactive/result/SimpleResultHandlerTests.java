@@ -24,13 +24,12 @@ import reactor.core.publisher.Flux;
 import rx.Observable;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
+import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
+import org.springframework.core.convert.support.PublisherToFluxConverter;
+import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.SimpleResultHandler;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -46,8 +45,9 @@ public class SimpleResultHandlerTests {
 	public void supportsWithConversionService() throws NoSuchMethodException {
 
 		GenericConversionService conversionService = new GenericConversionService();
-		conversionService.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-		conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
+		conversionService.addConverter(new MonoToCompletableFutureConverter());
+		conversionService.addConverter(new PublisherToFluxConverter());
+		conversionService.addConverter(new ReactorToRxJava1Converter());
 
 		SimpleResultHandler resultHandler = new SimpleResultHandler(conversionService);
 		TestController controller = new TestController();

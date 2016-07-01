@@ -18,24 +18,31 @@ package org.springframework.core.convert.support;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 import org.reactivestreams.Publisher;
+import reactor.core.converter.RxJava1ObservableConverter;
+import reactor.core.converter.RxJava1SingleConverter;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import rx.Observable;
+import rx.Single;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
+ * @author Stephane Maldini
  * @author Sebastien Deleuze
  */
-public class ReactiveStreamsToCompletableFutureConverter implements GenericConverter {
+public final class ReactorToRxJava1Converter implements GenericConverter {
 
 	@Override
-	public Set<ConvertiblePair> getConvertibleTypes() {
+	public Set<GenericConverter.ConvertiblePair> getConvertibleTypes() {
 		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>();
-		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, CompletableFuture.class));
-		pairs.add(new GenericConverter.ConvertiblePair(CompletableFuture.class, Publisher.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Flux.class, Observable.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Observable.class, Publisher.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Mono.class, Single.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Single.class, Publisher.class));
 		return pairs;
 	}
 
@@ -44,11 +51,17 @@ public class ReactiveStreamsToCompletableFutureConverter implements GenericConve
 		if (source == null) {
 			return null;
 		}
-		else if (CompletableFuture.class.isAssignableFrom(source.getClass())) {
-			return Mono.fromFuture((CompletableFuture) source);
+		if (Observable.class.isAssignableFrom(sourceType.getType())) {
+			return RxJava1ObservableConverter.from((Observable) source);
 		}
-		else if (CompletableFuture.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return Mono.from((Publisher) source).toFuture();
+		else if (Observable.class.isAssignableFrom(targetType.getType())) {
+			return RxJava1ObservableConverter.from((Publisher) source);
+		}
+		else if (Single.class.isAssignableFrom(sourceType.getType())) {
+			return RxJava1SingleConverter.from((Single) source);
+		}
+		else if (Single.class.isAssignableFrom(targetType.getType())) {
+			return RxJava1SingleConverter.from((Publisher) source);
 		}
 		return null;
 	}

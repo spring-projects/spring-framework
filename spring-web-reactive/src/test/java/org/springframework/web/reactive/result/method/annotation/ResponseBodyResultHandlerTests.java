@@ -30,8 +30,9 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
+import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
+import org.springframework.core.convert.support.PublisherToFluxConverter;
+import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
@@ -100,8 +101,9 @@ public class ResponseBodyResultHandlerTests {
 			converterList = Arrays.asList(converters);
 		}
 		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-		service.addConverter(new ReactiveStreamsToRxJava1Converter());
+		service.addConverter(new MonoToCompletableFutureConverter());
+		service.addConverter(new PublisherToFluxConverter());
+		service.addConverter(new ReactorToRxJava1Converter());
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 
 		return new ResponseBodyResultHandler(converterList, new DefaultConversionService(), resolver);
