@@ -72,21 +72,23 @@ public abstract class AbstractMessageConverterResultHandler extends ContentNegot
 	@SuppressWarnings("unchecked")
 	protected Mono<Void> writeBody(ServerWebExchange exchange, Object body, ResolvableType bodyType) {
 
-		Publisher<?> publisher;
-		ResolvableType elementType;
+		boolean convertToFlux = getConversionService().canConvert(bodyType.getRawClass(), Flux.class);
+		boolean convertToMono = getConversionService().canConvert(bodyType.getRawClass(), Mono.class);
 
-		if (getConversionService().canConvert(bodyType.getRawClass(), Publisher.class)) {
-			if (body != null) {
-				publisher = getConversionService().convert(body, Publisher.class);
-			}
-			else {
-				publisher = Mono.empty();
-			}
-			elementType = bodyType.getGeneric(0);
+		ResolvableType elementType = convertToFlux || convertToMono ? bodyType.getGeneric(0) : bodyType;
+
+		Publisher<?> publisher;
+		if (body == null) {
+			publisher = Mono.empty();
+		}
+		else if (convertToMono) {
+			publisher = getConversionService().convert(body, Mono.class);
+		}
+		else if (convertToFlux) {
+			publisher = getConversionService().convert(body, Flux.class);
 		}
 		else {
-			publisher = Mono.justOrEmpty(body);
-			elementType = bodyType;
+			publisher = Mono.just(body);
 		}
 
 		if (Void.class.equals(elementType.getRawClass())) {

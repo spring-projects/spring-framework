@@ -35,7 +35,7 @@ public class MonoToCompletableFutureConverter implements GenericConverter {
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>();
 		pairs.add(new GenericConverter.ConvertiblePair(Mono.class, CompletableFuture.class));
-		pairs.add(new GenericConverter.ConvertiblePair(CompletableFuture.class, Publisher.class));
+		pairs.add(new GenericConverter.ConvertiblePair(CompletableFuture.class, Mono.class));
 		return pairs;
 	}
 

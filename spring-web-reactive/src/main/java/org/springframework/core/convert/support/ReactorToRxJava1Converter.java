@@ -40,9 +40,9 @@ public final class ReactorToRxJava1Converter implements GenericConverter {
 	public Set<GenericConverter.ConvertiblePair> getConvertibleTypes() {
 		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>();
 		pairs.add(new GenericConverter.ConvertiblePair(Flux.class, Observable.class));
-		pairs.add(new GenericConverter.ConvertiblePair(Observable.class, Publisher.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Observable.class, Flux.class));
 		pairs.add(new GenericConverter.ConvertiblePair(Mono.class, Single.class));
-		pairs.add(new GenericConverter.ConvertiblePair(Single.class, Publisher.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Single.class, Mono.class));
 		return pairs;
 	}
 

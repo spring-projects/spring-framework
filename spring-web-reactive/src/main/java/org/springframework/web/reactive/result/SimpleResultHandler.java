@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
@@ -54,6 +55,13 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 
 
 	/**
+	 * Return the configured {@link ConversionService}.
+	 */
+	public ConversionService getConversionService() {
+		return this.conversionService;
+	}
+
+	/**
 	 * Set the order for this result handler relative to others.
 	 * <p>By default this is set to {@link Ordered#LOWEST_PRECEDENCE} and is
 	 * generally safe to use late in the order since it looks specifically for
@@ -76,7 +84,8 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 		if (Void.TYPE.equals(type.getRawClass())) {
 			return true;
 		}
-		if (this.conversionService.canConvert(type.getRawClass(), Publisher.class)) {
+		if (getConversionService().canConvert(type.getRawClass(), Mono.class) ||
+				getConversionService().canConvert(type.getRawClass(), Flux.class)) {
 			Class<?> clazz = result.getReturnValueType().getGeneric(0).getRawClass();
 			return Void.class.equals(clazz);
 		}
@@ -90,11 +99,19 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 		if (!optional.isPresent()) {
 			return Mono.empty();
 		}
+
 		Object returnValue = optional.get();
 		if (returnValue instanceof Mono) {
 			return (Mono<Void>) returnValue;
 		}
-		return Mono.from(this.conversionService.convert(returnValue, Publisher.class));
+
+		ResolvableType returnType = result.getReturnValueType();
+		if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
+			return this.conversionService.convert(returnValue, Mono.class);
+		}
+		else {
+			return this.conversionService.convert(returnValue, Flux.class).single();
+		}
 	}
 
 }
