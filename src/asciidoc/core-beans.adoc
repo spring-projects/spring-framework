@@ -3438,7 +3438,7 @@ a reference to the name defined in its associated object definition.
 ----
 	public interface BeanNameAware {
 
-		void setBeanName(string name) throws BeansException;
+		void setBeanName(String name) throws BeansException;
 
 	}
 ----
@@ -4443,7 +4443,7 @@ automatically resolved, with no special setup necessary.
 
 [NOTE]
 ====
-`@Autowired`, `@Inject`, `@Resource`, and `@Value` annotations are handled by a Spring
+`@Autowired`, `@Inject`, `@Resource`, and `@Value` annotations are handled by Spring
 `BeanPostProcessor` implementations which in turn means that you __cannot__ apply these
 annotations within your own `BeanPostProcessor` or `BeanFactoryPostProcessor` types (if
 any). These types must be 'wired up' explicitly via XML or using a Spring `@Bean` method.
