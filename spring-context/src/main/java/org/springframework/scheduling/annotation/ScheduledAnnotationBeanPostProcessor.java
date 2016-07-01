@@ -64,8 +64,7 @@ import org.springframework.util.StringValueResolver;
  * to the "fixedRate", "fixedDelay", or "cron" expression provided via the annotation.
  *
  * <p>This post-processor is automatically registered by Spring's
- * {@code <task:annotation-driven>} XML element, and also by the
- * @{@link EnableScheduling} annotation.
+ * {@code <task:annotation-driven>} XML element, and also by the @{@link EnableScheduling} annotation.
  *
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
  * allowing for customization of the scheduler to be used or for fine-grained

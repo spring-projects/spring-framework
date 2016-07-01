@@ -50,8 +50,8 @@ import org.springframework.web.util.WebUtils;
  * type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver}
  * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction
  * with Servlet 3.0 multipart requests. This resolver can also be created in default
- * resolution mode in which simple types (int, long, etc.) not annotated with
- * @{@link RequestParam} are also treated as request parameters with the
+ * resolution mode in which simple types (int, long, etc.) not annotated with @{@link RequestParam}
+ * are also treated as request parameters with the
  * parameter name derived from the argument name.
  *
  * <p>If the method parameter type is {@link Map}, the name specified in the
