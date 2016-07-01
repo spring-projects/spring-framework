@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result;
 
 import java.util.Optional;
 
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -80,13 +79,13 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		ResolvableType type = result.getReturnValueType();
+		ResolvableType type = result.getReturnType();
 		if (Void.TYPE.equals(type.getRawClass())) {
 			return true;
 		}
 		if (getConversionService().canConvert(type.getRawClass(), Mono.class) ||
 				getConversionService().canConvert(type.getRawClass(), Flux.class)) {
-			Class<?> clazz = result.getReturnValueType().getGeneric(0).getRawClass();
+			Class<?> clazz = result.getReturnType().getGeneric(0).getRawClass();
 			return Void.class.equals(clazz);
 		}
 		return false;
@@ -105,7 +104,7 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 			return (Mono<Void>) returnValue;
 		}
 
-		ResolvableType returnType = result.getReturnValueType();
+		ResolvableType returnType = result.getReturnType();
 		if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
 			return this.conversionService.convert(returnValue, Mono.class);
 		}

@@ -136,7 +136,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		Class<?> clazz = result.getReturnValueType().getRawClass();
+		Class<?> clazz = result.getReturnType().getRawClass();
 		if (hasModelAttributeAnnotation(result)) {
 			return true;
 		}
@@ -144,7 +144,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 			return true;
 		}
 		if (getConversionService().canConvert(clazz, Mono.class)) {
-			clazz = result.getReturnValueType().getGeneric(0).getRawClass();
+			clazz = result.getReturnType().getGeneric(0).getRawClass();
 			return isSupportedType(clazz);
 		}
 		return false;
@@ -171,7 +171,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 
 		Mono<Object> valueMono;
 		ResolvableType elementType;
-		ResolvableType returnType = result.getReturnValueType();
+		ResolvableType returnType = result.getReturnType();
 
 		if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
 			Optional<Object> optionalValue = result.getReturnValue();

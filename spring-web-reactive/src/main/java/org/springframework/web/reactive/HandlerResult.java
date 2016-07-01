@@ -37,7 +37,7 @@ public class HandlerResult {
 
 	private final Optional<Object> returnValue;
 
-	private final ResolvableType returnValueType;
+	private final ResolvableType returnType;
 
 	private final ModelMap model;
 
@@ -48,25 +48,25 @@ public class HandlerResult {
 	 * Create a new {@code HandlerResult}.
 	 * @param handler the handler that handled the request
 	 * @param returnValue the return value from the handler possibly {@code null}
-	 * @param returnValueType the return value type
+	 * @param returnType the return value type
 	 */
-	public HandlerResult(Object handler, Object returnValue, ResolvableType returnValueType) {
-		this(handler, returnValue, returnValueType, null);
+	public HandlerResult(Object handler, Object returnValue, ResolvableType returnType) {
+		this(handler, returnValue, returnType, null);
 	}
 
 	/**
 	 * Create a new {@code HandlerResult}.
 	 * @param handler the handler that handled the request
 	 * @param returnValue the return value from the handler possibly {@code null}
-	 * @param returnValueType the return value type
+	 * @param returnType the return value type
 	 * @param model the model used for request handling
 	 */
-	public HandlerResult(Object handler, Object returnValue, ResolvableType returnValueType, ModelMap model) {
+	public HandlerResult(Object handler, Object returnValue, ResolvableType returnType, ModelMap model) {
 		Assert.notNull(handler, "'handler' is required");
-		Assert.notNull(returnValueType, "'returnValueType' is required");
+		Assert.notNull(returnType, "'returnType' is required");
 		this.handler = handler;
 		this.returnValue = Optional.ofNullable(returnValue);
-		this.returnValueType = returnValueType;
+		this.returnType = returnType;
 		this.model = (model != null ? model : new ExtendedModelMap());
 	}
 
@@ -88,8 +88,8 @@ public class HandlerResult {
 	/**
 	 * Return the type of the value returned from the handler.
 	 */
-	public ResolvableType getReturnValueType() {
-		return this.returnValueType;
+	public ResolvableType getReturnType() {
+		return this.returnType;
 	}
 
 	/**

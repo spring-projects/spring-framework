@@ -78,12 +78,12 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		ResolvableType returnType = result.getReturnValueType();
+		ResolvableType returnType = result.getReturnType();
 		if (isSupportedType(returnType)) {
 			return true;
 		}
 		else if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
-			ResolvableType genericType = result.getReturnValueType().getGeneric(0);
+			ResolvableType genericType = result.getReturnType().getGeneric(0);
 			return isSupportedType(genericType);
 
 		}
@@ -99,7 +99,7 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
-		ResolvableType returnType = result.getReturnValueType();
+		ResolvableType returnType = result.getReturnType();
 		Mono<?> returnValueMono;
 		ResolvableType bodyType;
 

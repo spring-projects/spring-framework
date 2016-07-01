@@ -85,7 +85,7 @@ public class ResponseBodyResultHandler extends AbstractMessageConverterResultHan
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		ResolvableType returnType = result.getReturnValueType();
+		ResolvableType returnType = result.getReturnType();
 		if (returnType.getSource() instanceof MethodParameter) {
 			MethodParameter parameter = (MethodParameter) returnType.getSource();
 			if (hasResponseBodyAnnotation(parameter) && !isHttpEntityType(returnType)) {
@@ -118,7 +118,7 @@ public class ResponseBodyResultHandler extends AbstractMessageConverterResultHan
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Object body = result.getReturnValue().orElse(null);
-		ResolvableType bodyType = result.getReturnValueType();
+		ResolvableType bodyType = result.getReturnType();
 		return writeBody(exchange, body, bodyType);
 	}
 
