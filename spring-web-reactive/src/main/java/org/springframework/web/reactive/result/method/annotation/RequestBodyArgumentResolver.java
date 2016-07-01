@@ -18,9 +18,9 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -137,16 +137,16 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		for (HttpMessageConverter<?> converter : getMessageConverters()) {
 			if (converter.canRead(elementType, mediaType)) {
 				if (convertFromFlux) {
-					Publisher<?> flux = converter.read(elementType, request);
+					Flux<?> flux = converter.read(elementType, request);
 					if (this.validator != null) {
-						flux= applyValidationIfApplicable(flux, parameter);
+						flux = flux.map(applyValidationIfApplicable(parameter));
 					}
 					return Mono.just(this.conversionService.convert(flux, type.getRawClass()));
 				}
 				else {
 					Mono<?> mono = converter.readOne(elementType, request);
 					if (this.validator != null) {
-						mono = Mono.from(applyValidationIfApplicable(mono, parameter));
+						mono = mono.map(applyValidationIfApplicable(parameter));
 					}
 					if (!convertFromMono) {
 						return mono.map(value-> value); // TODO: MonoToObjectConverter
@@ -159,20 +159,20 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
 	}
 
-	protected Publisher<?> applyValidationIfApplicable(Publisher<?> elements, MethodParameter methodParam) {
+	protected <T> Function<T, T> applyValidationIfApplicable(MethodParameter methodParam) {
 		Annotation[] annotations = methodParam.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Validated validAnnot = AnnotationUtils.getAnnotation(ann, Validated.class);
 			if (validAnnot != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
 				Object hints = (validAnnot != null ? validAnnot.value() : AnnotationUtils.getValue(ann));
-				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-				return Flux.from(elements).map(element -> {
-					doValidate(element, validationHints, methodParam);
+				Object[] validHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+				return element -> {
+					doValidate(element, validHints, methodParam);
 					return element;
-				});
+				};
 			}
 		}
-		return elements;
+		return element -> element;
 	}
 
 	/**
