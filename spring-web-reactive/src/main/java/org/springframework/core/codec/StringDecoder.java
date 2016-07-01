@@ -25,6 +25,7 @@ import java.util.function.IntPredicate;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -92,6 +93,21 @@ public class StringDecoder extends AbstractDecoder<String> {
 			DataBufferUtils.release(dataBuffer);
 			return charBuffer.toString();
 		});
+	}
+
+	@Override
+	public Mono<String> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			MimeType mimeType, Object... hints) {
+
+		Charset charset = getCharset(mimeType);
+		return Flux.from(inputStream)
+				.map(dataBuffer -> {
+					CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
+					DataBufferUtils.release(dataBuffer);
+					return charBuffer.toString();
+				})
+				.collect(StringBuilder::new, StringBuilder::append)
+				.map(StringBuilder::toString);
 	}
 
 	private static Flux<DataBuffer> splitOnNewline(DataBuffer dataBuffer) {

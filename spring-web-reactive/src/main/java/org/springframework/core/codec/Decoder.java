@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -58,6 +59,20 @@ public interface Decoder<T> {
 	 * @return the output stream with decoded elements
 	 */
 	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			MimeType mimeType, Object... hints);
+
+	/**
+	 * Decode a {@link DataBuffer} input stream into a Mono of {@code T}.
+	 *
+	 * @param inputStream the {@code DataBuffer} input stream to decode
+	 * @param elementType the expected type of elements in the output stream;
+	 * this type must have been previously passed to the {@link #canDecode}
+	 * method and it must have returned {@code true}.
+	 * @param mimeType the MIME type associated with the input stream, optional
+	 * @param hints additional information about how to do decode, optional
+	 * @return the output stream with the decoded element
+	 */
+	Mono<T> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints);
 
 	/**

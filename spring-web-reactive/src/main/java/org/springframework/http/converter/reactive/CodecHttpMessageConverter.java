@@ -126,6 +126,18 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 	}
 
 	@Override
+	public Mono<T> readOne(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
+		if (this.decoder == null) {
+			return Mono.error(new IllegalStateException("No decoder set"));
+		}
+		MediaType contentType = inputMessage.getHeaders().getContentType();
+		if (contentType == null) {
+			contentType = MediaType.APPLICATION_OCTET_STREAM;
+		}
+		return this.decoder.decodeOne(inputMessage.getBody(), type, contentType);
+	}
+
+	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
 			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
 

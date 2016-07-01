@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
@@ -46,7 +47,9 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 
 	private final ObjectMapper mapper;
 
-	private final Decoder<DataBuffer> preProcessor = new JsonObjectDecoder();
+	private final Decoder<DataBuffer> fluxPreProcessor = new JsonObjectDecoder();
+
+	private final Decoder<DataBuffer> monoPreProcessor = new JsonObjectDecoder(false);
 
 
 	public JacksonJsonDecoder() {
@@ -69,7 +72,31 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 		JavaType javaType = typeFactory.constructType(elementType.getType());
 		ObjectReader reader = this.mapper.readerFor(javaType);
 
-		return this.preProcessor.decode(inputStream, elementType, mimeType, hints)
+		return this.fluxPreProcessor.decode(inputStream, elementType, mimeType, hints)
+				.map(dataBuffer -> {
+					try {
+						Object value = reader.readValue(dataBuffer.asInputStream());
+						DataBufferUtils.release(dataBuffer);
+						return value;
+					}
+					catch (IOException e) {
+						return Flux.error(new CodecException("Error while reading the data", e));
+					}
+		});
+	}
+
+	@Override
+	public Mono<Object> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			MimeType mimeType, Object... hints) {
+
+		Assert.notNull(inputStream, "'inputStream' must not be null");
+		Assert.notNull(elementType, "'elementType' must not be null");
+		TypeFactory typeFactory = this.mapper.getTypeFactory();
+		JavaType javaType = typeFactory.constructType(elementType.getType());
+		ObjectReader reader = this.mapper.readerFor(javaType);
+
+		return this.monoPreProcessor.decode(inputStream, elementType, mimeType, hints)
+				.single()
 				.map(dataBuffer -> {
 					try {
 						Object value = reader.readValue(dataBuffer.asInputStream());

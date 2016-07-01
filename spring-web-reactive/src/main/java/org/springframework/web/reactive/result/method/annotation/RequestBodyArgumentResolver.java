@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import rx.Observable;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
@@ -122,7 +123,8 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 		boolean isAsyncType = isAsyncType(type);
-		ResolvableType elementType = (isAsyncType ? type.getGeneric(0) : type);
+		boolean isStreamableType = isStreamableType(type);
+		ResolvableType elementType = (isStreamableType || isAsyncType ? type.getGeneric(0) : type);
 
 		MediaType mediaType = exchange.getRequest().getHeaders().getContentType();
 		if (mediaType == null) {
@@ -131,23 +133,33 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 
 		for (HttpMessageConverter<?> converter : getMessageConverters()) {
 			if (converter.canRead(elementType, mediaType)) {
-				Flux<?> elementFlux = converter.read(elementType, exchange.getRequest());
 
-				if (this.validator != null) {
-					elementFlux= applyValidationIfApplicable(elementFlux, parameter);
-				}
-
-				if (Mono.class.equals(type.getRawClass())) {
-					return Mono.just(Mono.from(elementFlux));
-				}
-				else if (Flux.class.equals(type.getRawClass())) {
-					return Mono.just(elementFlux);
-				}
-				else if (isAsyncType) {
-					return Mono.just(getConversionService().convert(elementFlux, type.getRawClass()));
+				if (isStreamableType) {
+					Publisher<?> elements = converter.read(elementType, exchange.getRequest());
+					if (this.validator != null) {
+						elements= applyValidationIfApplicable(elements, parameter);
+					}
+					if (Flux.class.equals(type.getRawClass())) {
+						return Mono.just(elements);
+					}
+					else if (isAsyncType && this.conversionService.canConvert(Flux.class, type.getRawClass())) {
+						return Mono.just(this.conversionService.convert(elements, type.getRawClass()));
+					}
 				}
 				else {
-					return elementFlux.next().map(o -> o);
+					Mono<?> element = converter.readOne(elementType, exchange.getRequest());
+					if (this.validator != null) {
+						element = Mono.from(applyValidationIfApplicable(element, parameter));
+					}
+					if (Mono.class.equals(type.getRawClass())) {
+						return Mono.just(element);
+					}
+					else if (isAsyncType && this.conversionService.canConvert(Mono.class, type.getRawClass())) {
+						return Mono.just(this.conversionService.convert(element, type.getRawClass()));
+					}
+					else {
+						return (Mono<Object>)element;
+					}
 				}
 			}
 		}
@@ -157,23 +169,28 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 
 	private boolean isAsyncType(ResolvableType type) {
 		return (Mono.class.equals(type.getRawClass()) || Flux.class.equals(type.getRawClass()) ||
-				getConversionService().canConvert(Publisher.class, type.getRawClass()));
+				getConversionService().canConvert(Mono.class, type.getRawClass()) ||
+				getConversionService().canConvert(Flux.class, type.getRawClass()));
 	}
 
-	protected Flux<?> applyValidationIfApplicable(Flux<?> elementFlux, MethodParameter methodParam) {
+	private boolean isStreamableType(ResolvableType type) {
+		return this.conversionService.canConvert(Flux.class, type.getRawClass());
+	}
+
+	protected Publisher<?> applyValidationIfApplicable(Publisher<?> elements, MethodParameter methodParam) {
 		Annotation[] annotations = methodParam.getParameterAnnotations();
 		for (Annotation ann : annotations) {
 			Validated validAnnot = AnnotationUtils.getAnnotation(ann, Validated.class);
 			if (validAnnot != null || ann.annotationType().getSimpleName().startsWith("Valid")) {
 				Object hints = (validAnnot != null ? validAnnot.value() : AnnotationUtils.getValue(ann));
 				Object[] validationHints = (hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-				return elementFlux.map(element -> {
+				return Flux.from(elements).map(element -> {
 					validate(element, validationHints, methodParam);
 					return element;
 				});
 			}
 		}
-		return elementFlux;
+		return elements;
 	}
 
 	/**

@@ -19,6 +19,7 @@ package org.springframework.core.codec;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
@@ -94,6 +95,20 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		TestSubscriber
 				.subscribe(output)
 				.assertValues("");
+	}
+
+	@Test
+	public void decodeOne() throws InterruptedException {
+		this.decoder = new StringDecoder(false);
+		Flux<DataBuffer> source =
+				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
+		Mono<String> output =
+				this.decoder.decodeOne(source, ResolvableType.forClass(String.class), null);
+		TestSubscriber
+				.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertValues("foobarbaz");
 	}
 
 }

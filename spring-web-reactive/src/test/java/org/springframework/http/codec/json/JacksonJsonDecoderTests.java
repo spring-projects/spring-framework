@@ -20,9 +20,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
@@ -30,7 +30,6 @@ import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
-import org.springframework.http.codec.json.JacksonJsonDecoder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -61,16 +60,15 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 	}
 
 	@Test
-	@Ignore // Issue 109
 	public void decodeToList() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
 
 		Method method = getClass().getDeclaredMethod("handle", List.class);
 		ResolvableType elementType = ResolvableType.forMethodParameter(method, 0);
-		Flux<Object> flux = new JacksonJsonDecoder().decode(source, elementType, null);
+		Mono<Object> mono = new JacksonJsonDecoder().decodeOne(source, elementType, null);
 
-		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
+		TestSubscriber.subscribe(mono).assertNoError().assertComplete().
 				assertValues(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")));
 	}
 

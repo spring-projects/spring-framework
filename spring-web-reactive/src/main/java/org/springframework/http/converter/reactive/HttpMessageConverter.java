@@ -50,15 +50,26 @@ public interface HttpMessageConverter<T> {
 	List<MediaType> getReadableMediaTypes();
 
 	/**
-	 * Read an object of the given type form the given input message, and returns it.
+	 * Read a {@link Flux} of the given type form the given input message, and returns it.
 	 * @param type the type of object to return. This type must have previously been
 	 * passed to the
 	 * {@link #canRead canRead} method of this interface, which must have returned {@code
 	 * true}.
 	 * @param inputMessage the HTTP input message to read from
-	 * @return the converted object
+	 * @return the converted {@link Flux} of elements
 	 */
 	Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage);
+
+	/**
+	 * Read a {@link Mono} of the given type form the given input message, and returns it.
+	 * @param type the type of object to return. This type must have previously been
+	 * passed to the
+	 * {@link #canRead canRead} method of this interface, which must have returned {@code
+	 * true}.
+	 * @param inputMessage the HTTP input message to read from
+	 * @return the converted {@link Mono} of object
+	 */
+	Mono<T> readOne(ResolvableType type, ReactiveHttpInputMessage inputMessage);
 
 	/**
 	 * Indicates whether the given class can be written by this converter.

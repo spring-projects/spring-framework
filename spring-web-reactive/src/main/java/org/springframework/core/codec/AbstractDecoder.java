@@ -20,8 +20,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Decoder;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
 
 /**
@@ -51,4 +54,8 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 				anyMatch(mt -> mt.isCompatibleWith(mimeType));
 	}
 
+	@Override
+	public Mono<T> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType, Object... hints) {
+		throw new UnsupportedOperationException();
+	}
 }
