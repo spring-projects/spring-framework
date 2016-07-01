@@ -40,7 +40,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
- * see the latter's javadoc} for a configuration example.
+ * see the latter's {@code javadoc} for a configuration example.
  *
  * <p>Note: Spring 4.0 supports Groovy 1.8 and higher.
  *
