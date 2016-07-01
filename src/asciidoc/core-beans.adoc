@@ -2680,12 +2680,12 @@ understand the "why" as well as the "how" behind it.
 ----
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
-bean definition. (See <<beans-factory-scopes-other-injection-proxies>> and
-<<xsd-configuration>>.) Why do definitions of beans scoped at the `request`, `session`,
-`globalSession` and custom-scope levels require the `<aop:scoped-proxy/>` element ?
+bean definition (see <<beans-factory-scopes-other-injection-proxies>> and
+<<xsd-configuration>>). Why do definitions of beans scoped at the `request`, `session`,
+`globalSession` and custom-scope levels require the `<aop:scoped-proxy/>` element?
 Let's examine the following singleton bean definition and contrast it with what you need
-to define for the aforementioned scopes. (The following `userPreferences` bean
-definition as it stands is __incomplete.)__
+to define for the aforementioned scopes (note that the following `userPreferences` bean
+definition as it stands is __incomplete__).
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
