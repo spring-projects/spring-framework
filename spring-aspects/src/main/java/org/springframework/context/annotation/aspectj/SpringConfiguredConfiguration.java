@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Role;
  * Configurable}.
  *
  * <p>This configuration class is automatically imported when using the
- * {@link EnableSpringConfigured @EnableSpringConfigured} annotation. See {@code @EnableSpringConfigured}'s
- * javadoc for complete usage details.
+ * {@link EnableSpringConfigured @EnableSpringConfigured} annotation. See
+ * {@code @EnableSpringConfigured}'s javadoc for complete usage details.
  *
  * @author Chris Beams
  * @since 3.1
