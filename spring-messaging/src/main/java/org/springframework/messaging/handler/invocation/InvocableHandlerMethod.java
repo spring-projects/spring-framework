@@ -277,10 +277,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			if (this.returnValue != null) {
 				return this.returnValue.getClass();
 			}
-			if (ResolvableType.NONE.equals(this.returnType)) {
-				throw new IllegalArgumentException("Expected Future-like type with generic parameter");
+			if (!ResolvableType.NONE.equals(this.returnType)) {
+				return this.returnType.getRawClass();
 			}
-			return this.returnType.getRawClass();
+			return super.getParameterType();
 		}
 
 		@Override
