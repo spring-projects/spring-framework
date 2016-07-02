@@ -82,10 +82,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 					if (resolveNestedPlaceholders && value instanceof String) {
 						value = resolveNestedPlaceholders((String) value);
 					}
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format("Found key '%s' in [%s] with type [%s] and value '%s'",
-								key, propertySource.getName(), value.getClass().getSimpleName(), value));
-					}
+					logKeyFound(key, propertySource, value);
 					return this.conversionService.convert(value, targetValueType);
 				}
 			}
@@ -106,10 +103,7 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 				}
 				Object value = propertySource.getProperty(key);
 				if (value != null) {
-					if (logger.isDebugEnabled()) {
-						logger.debug(String.format(
-								"Found key '%s' in [%s] with value '%s'", key, propertySource.getName(), value));
-					}
+					logKeyFound(key, propertySource, value);
 					Class<?> clazz;
 					if (value instanceof String) {
 						try {
@@ -140,17 +134,36 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		return null;
 	}
 
+	/**
+	 * Log the given key as found in the given {@link PropertySource}, resulting in
+	 * the given value.
+	 * <p>The default implementation writes a debug log message, including the value.
+	 * Subclasses may override this to change the log level and/or the log message.
+	 * @param key the key found
+	 * @param propertySource the {@code PropertySource} that the key has been found in
+	 * @param value the corresponding value
+	 * @since 4.3.1
+	 */
+	protected void logKeyFound(String key, PropertySource<?> propertySource, Object value) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Found key '%s' in [%s] with type [%s] and value '%s'",
+					key, propertySource.getName(), value.getClass().getSimpleName(), value));
+		}
+	}
+
 
 	@SuppressWarnings("serial")
 	@Deprecated
 	private static class ClassConversionException extends ConversionException {
 
 		public ClassConversionException(Class<?> actual, Class<?> expected) {
-			super(String.format("Actual type %s is not assignable to expected type %s", actual.getName(), expected.getName()));
+			super(String.format("Actual type %s is not assignable to expected type %s",
+					actual.getName(), expected.getName()));
 		}
 
 		public ClassConversionException(String actual, Class<?> expected, Exception ex) {
-			super(String.format("Could not find/load class %s during attempt to convert to %s", actual, expected.getName()), ex);
+			super(String.format("Could not find/load class %s during attempt to convert to %s",
+					actual, expected.getName()), ex);
 		}
 	}
 
