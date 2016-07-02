@@ -83,17 +83,25 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>(4);
+	private Collection<String> destinationPrefixes = new ArrayList<String>();
 
-	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>(4);
+	private final List<HandlerMethodArgumentResolver> customArgumentResolvers =
+			new ArrayList<HandlerMethodArgumentResolver>(4);
 
-	private final HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
+	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers =
+			new ArrayList<HandlerMethodReturnValueHandler>(4);
 
-	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =new HandlerMethodReturnValueHandlerComposite();
+	private final HandlerMethodArgumentResolverComposite argumentResolvers =
+			new HandlerMethodArgumentResolverComposite();
 
-	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>();
+	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =
+			new HandlerMethodReturnValueHandlerComposite();
 
-	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<String, T>();
+	private ApplicationContext applicationContext;
+
+	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>(64);
+
+	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<String, T>(64);
 
 	private final Map<Class<?>, AbstractExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, AbstractExceptionHandlerMethodResolver>(64);
@@ -101,16 +109,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	private final Map<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver>(64);
 
-	private Collection<String> destinationPrefixes = new ArrayList<String>();
-
-	private ApplicationContext applicationContext;
-
-	/**
-	 * Return the configured destination prefixes.
-	 */
-	public Collection<String> getDestinationPrefixes() {
-		return this.destinationPrefixes;
-	}
 
 	/**
 	 * When this property is configured only messages to destinations matching
@@ -131,6 +129,24 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
+	 * Return the configured destination prefixes, if any.
+	 */
+	public Collection<String> getDestinationPrefixes() {
+		return this.destinationPrefixes;
+	}
+
+	/**
+	 * Sets the list of custom {@code HandlerMethodArgumentResolver}s that will be used
+	 * after resolvers for supported argument type.
+	 */
+	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
+		this.customArgumentResolvers.clear();
+		if (customArgumentResolvers != null) {
+			this.customArgumentResolvers.addAll(customArgumentResolvers);
+		}
+	}
+
+	/**
 	 * Return the configured custom argument resolvers, if any.
 	 */
 	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
@@ -138,14 +154,13 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Sets the list of custom {@code HandlerMethodArgumentResolver}s that will be used
-	 * after resolvers for supported argument type.
-	 * @param customArgumentResolvers the list of resolvers; never {@code null}.
+	 * Set the list of custom {@code HandlerMethodReturnValueHandler}s that will be used
+	 * after return value handlers for known types.
 	 */
-	public void setCustomArgumentResolvers(List<HandlerMethodArgumentResolver> customArgumentResolvers) {
-		this.customArgumentResolvers.clear();
-		if (customArgumentResolvers != null) {
-			this.customArgumentResolvers.addAll(customArgumentResolvers);
+	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> customReturnValueHandlers) {
+		this.customReturnValueHandlers.clear();
+		if (customReturnValueHandlers != null) {
+			this.customReturnValueHandlers.addAll(customReturnValueHandlers);
 		}
 	}
 
@@ -157,27 +172,8 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Set the list of custom {@code HandlerMethodReturnValueHandler}s that will be used
-	 * after return value handlers for known types.
-	 * @param customReturnValueHandlers the list of custom return value handlers, never {@code null}.
-	 */
-	public void setCustomReturnValueHandlers(List<HandlerMethodReturnValueHandler> customReturnValueHandlers) {
-		this.customReturnValueHandlers.clear();
-		if (customReturnValueHandlers != null) {
-			this.customReturnValueHandlers.addAll(customReturnValueHandlers);
-		}
-	}
-
-	/**
-	 * Return the configured argument resolvers, if any.
-	 */
-	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
-		return this.argumentResolvers.getResolvers();
-	}
-
-	/**
-	 * Configure the complete list of supported argument types effectively overriding
-	 * the ones configured by default. This is an advanced option. For most use cases
+	 * Configure the complete list of supported argument types, effectively overriding
+	 * the ones configured by default. This is an advanced option; for most use cases
 	 * it should be sufficient to use {@link #setCustomArgumentResolvers}.
 	 */
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -189,15 +185,15 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the configured return value handlers, if any.
+	 * Return the complete list of argument resolvers.
 	 */
-	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
-		return this.returnValueHandlers.getReturnValueHandlers();
+	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
+		return this.argumentResolvers.getResolvers();
 	}
 
 	/**
-	 * Configure the complete list of supported return value types effectively overriding
-	 * the ones configured by default. This is an advanced option. For most use cases
+	 * Configure the complete list of supported return value types, effectively overriding
+	 * the ones configured by default. This is an advanced option; for most use cases
 	 * it should be sufficient to use {@link #setCustomReturnValueHandlers}.
 	 */
 	public void setReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
@@ -208,14 +204,22 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.returnValueHandlers.addHandlers(returnValueHandlers);
 	}
 
-	public ApplicationContext getApplicationContext() {
-		return this.applicationContext;
+	/**
+	 * Return the complete list of return value handlers.
+	 */
+	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
+		return this.returnValueHandlers.getReturnValueHandlers();
 	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
+
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
@@ -359,7 +363,9 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * (e.g. to support "global" {@code @MessageExceptionHandler}).
 	 * @since 4.2
 	 */
-	protected void registerExceptionHandlerAdvice(MessagingAdviceBean bean, AbstractExceptionHandlerMethodResolver resolver) {
+	protected void registerExceptionHandlerAdvice(
+			MessagingAdviceBean bean, AbstractExceptionHandlerMethodResolver resolver) {
+
 		this.exceptionHandlerAdviceCache.put(bean, resolver);
 	}
 
