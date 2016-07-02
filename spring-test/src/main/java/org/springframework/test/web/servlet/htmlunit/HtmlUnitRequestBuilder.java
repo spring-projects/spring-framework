@@ -427,8 +427,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private UriComponents uriComponents() {
 		URL url = this.webRequest.getUrl();
-		UriComponentsBuilder uriBldr = UriComponentsBuilder.fromUriString(url.toExternalForm());
-		return uriBldr.build();
+		return UriComponentsBuilder.fromUriString(url.toExternalForm()).build();
 	}
 
 	@Override
@@ -455,13 +454,14 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		return this.webClient.getCookieManager();
 	}
 
+
 	/**
-	 * An extension to {@link MockHttpServletRequest} that ensures that
-	 * when a new {@link HttpSession} is created, it is added to the managed sessions.
+	 * An extension to {@link MockHttpServletRequest} that ensures that when a
+	 * new {@link HttpSession} is created, it is added to the managed sessions.
 	 */
 	private final class HtmlUnitMockHttpServletRequest extends MockHttpServletRequest {
 
-		private HtmlUnitMockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
+		public HtmlUnitMockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
 			super(servletContext, method, requestURI);
 		}
 
@@ -490,16 +490,17 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 	}
 
+
 	/**
 	 * An extension to {@link MockHttpSession} that ensures when
-	 * {@link #invalidate()} is called that the {@link HttpSession} is
-	 * removed from the managed sessions.
+	 * {@link #invalidate()} is called that the {@link HttpSession}
+	 * is removed from the managed sessions.
 	 */
 	private final class HtmlUnitMockHttpSession extends MockHttpSession {
 
 		private final MockHttpServletRequest request;
 
-		private HtmlUnitMockHttpSession(MockHttpServletRequest request) {
+		public HtmlUnitMockHttpSession(MockHttpServletRequest request) {
 			super(request.getServletContext());
 			this.request = request;
 		}
