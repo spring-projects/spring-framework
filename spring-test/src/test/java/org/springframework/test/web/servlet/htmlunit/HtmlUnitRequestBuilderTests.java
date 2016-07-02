@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -27,9 +28,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.io.IOUtils;
+import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import org.apache.http.auth.UsernamePasswordCredentials;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,16 +42,12 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.FileCopyUtils;
 
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
-
-import static java.util.Arrays.asList;
+import static java.util.Arrays.*;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 /**
  * Unit tests for {@link HtmlUnitRequestBuilder}.
@@ -77,7 +76,6 @@ public class HtmlUnitRequestBuilderTests {
 		requestBuilder = new HtmlUnitRequestBuilder(sessions, webClient, webRequest);
 	}
 
-	// --- constructor
 
 	@Test(expected = IllegalArgumentException.class)
 	public void constructorNullSessions() {
@@ -93,8 +91,6 @@ public class HtmlUnitRequestBuilderTests {
 	public void constructorNullWebRequest() {
 		new HtmlUnitRequestBuilder(sessions, webClient, null);
 	}
-
-	// --- buildRequest
 
 	@Test
 	@SuppressWarnings("deprecation")
@@ -245,7 +241,8 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(IOUtils.toString(actualRequest.getInputStream()), equalTo(content));
+		assertThat(FileCopyUtils.copyToString(new InputStreamReader(actualRequest.getInputStream(), "ISO-8859-1")),
+				equalTo(content));
 	}
 
 	@Test
@@ -411,6 +408,26 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(actualRequest.getParameter("name"), equalTo("value"));
 	}
 
+	@Test  // SPR-14177
+	public void buildRequestParameterMapDecodesParameterName() throws Exception {
+		webRequest.setUrl(new URL("http://example.com/example/?row%5B0%5D=value"));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
+		assertThat(actualRequest.getParameter("row[0]"), equalTo("value"));
+	}
+
+	@Test
+	public void buildRequestParameterMapDecodesParameterValue() throws Exception {
+		webRequest.setUrl(new URL("http://example.com/example/?name=row%5B0%5D"));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
+		assertThat(actualRequest.getParameter("name"), equalTo("row[0]"));
+	}
+
 	@Test
 	public void buildRequestParameterMapFromSingleQueryParamWithoutValueAndWithoutEqualsSign() throws Exception {
 		webRequest.setUrl(new URL("http://example.com/example/?name"));
@@ -544,7 +561,7 @@ public class HtmlUnitRequestBuilderTests {
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
-		assertThat(IOUtils.toString(actualRequest.getReader()), equalTo(expectedBody));
+		assertThat(FileCopyUtils.copyToString(actualRequest.getReader()), equalTo(expectedBody));
 	}
 
 	@Test
