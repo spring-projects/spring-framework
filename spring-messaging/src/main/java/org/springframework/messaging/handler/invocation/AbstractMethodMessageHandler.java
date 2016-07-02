@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,17 +83,13 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Collection<String> destinationPrefixes = new ArrayList<String>();
-
 	private final List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>(4);
 
 	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>(4);
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
+	private final HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
-	private HandlerMethodReturnValueHandlerComposite returnValueHandlers =new HandlerMethodReturnValueHandlerComposite();
-
-	private ApplicationContext applicationContext;
+	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =new HandlerMethodReturnValueHandlerComposite();
 
 	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>();
 
@@ -105,6 +101,16 @@ public abstract class AbstractMethodMessageHandler<T>
 	private final Map<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver>(64);
 
+	private Collection<String> destinationPrefixes = new ArrayList<String>();
+
+	private ApplicationContext applicationContext;
+
+	/**
+	 * Return the configured destination prefixes.
+	 */
+	public Collection<String> getDestinationPrefixes() {
+		return this.destinationPrefixes;
+	}
 
 	/**
 	 * When this property is configured only messages to destinations matching
@@ -125,10 +131,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the configured destination prefixes.
+	 * Return the configured custom argument resolvers, if any.
 	 */
-	public Collection<String> getDestinationPrefixes() {
-		return this.destinationPrefixes;
+	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
+		return this.customArgumentResolvers;
 	}
 
 	/**
@@ -144,10 +150,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the configured custom argument resolvers, if any.
+	 * Return the configured custom return value handlers, if any.
 	 */
-	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
-		return this.customArgumentResolvers;
+	public List<HandlerMethodReturnValueHandler> getCustomReturnValueHandlers() {
+		return this.customReturnValueHandlers;
 	}
 
 	/**
@@ -163,10 +169,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the configured custom return value handlers, if any.
+	 * Return the configured argument resolvers, if any.
 	 */
-	public List<HandlerMethodReturnValueHandler> getCustomReturnValueHandlers() {
-		return this.customReturnValueHandlers;
+	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
+		return this.argumentResolvers.getResolvers();
 	}
 
 	/**
@@ -182,8 +188,11 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.argumentResolvers.addResolvers(argumentResolvers);
 	}
 
-	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
-		return this.argumentResolvers.getResolvers();
+	/**
+	 * Return the configured return value handlers, if any.
+	 */
+	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
+		return this.returnValueHandlers.getReturnValueHandlers();
 	}
 
 	/**
@@ -199,26 +208,14 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.returnValueHandlers.addHandlers(returnValueHandlers);
 	}
 
-	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
-		return this.returnValueHandlers.getReturnValueHandlers();
-	}
-
-	/**
-	 * Return a map with all handler methods and their mappings.
-	 */
-	public Map<T, HandlerMethod> getHandlerMethods() {
-		return Collections.unmodifiableMap(this.handlerMethods);
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
-
-	public ApplicationContext getApplicationContext() {
-		return this.applicationContext;
-	}
-
 
 	@Override
 	public void afterPropertiesSet() {
@@ -366,6 +363,13 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.exceptionHandlerAdviceCache.put(bean, resolver);
 	}
 
+	/**
+	 * Return a map with all handler methods and their mappings.
+	 */
+	public Map<T, HandlerMethod> getHandlerMethods() {
+		return Collections.unmodifiableMap(this.handlerMethods);
+	}
+
 
 	@Override
 	public void handleMessage(Message<?> message) throws MessagingException {
@@ -427,14 +431,14 @@ public abstract class AbstractMethodMessageHandler<T>
 			addMatchesToCollection(allMappings, message, matches);
 		}
 		if (matches.isEmpty()) {
-			handleNoMatch(handlerMethods.keySet(), lookupDestination, message);
+			handleNoMatch(this.handlerMethods.keySet(), lookupDestination, message);
 			return;
 		}
 		Comparator<Match> comparator = new MatchComparator(getMappingComparator(message));
 		Collections.sort(matches, comparator);
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Found " + matches.size() + " methods: " + matches);
+			logger.trace("Found " + matches.size() + " handler methods: " + matches);
 		}
 
 		Match bestMatch = matches.get(0);
@@ -450,7 +454,6 @@ public abstract class AbstractMethodMessageHandler<T>
 
 		handleMatch(bestMatch.mapping, bestMatch.handlerMethod, lookupDestination, message);
 	}
-
 
 	private void addMatchesToCollection(Collection<T> mappingsToCheck, Message<?> message, List<Match> matches) {
 		for (T mapping : mappingsToCheck) {
@@ -470,6 +473,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected abstract T getMatchingMapping(T mapping, Message<?> message);
 
+	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
+		logger.debug("No matching message handler methods.");
+	}
+
 	/**
 	 * Return a comparator for sorting matching mappings.
 	 * The returned comparator should sort 'better' matches higher.
@@ -477,7 +484,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * @return the comparator, never {@code null}
 	 */
 	protected abstract Comparator<T> getMappingComparator(Message<?> message);
-
 
 	protected void handleMatch(T mapping, HandlerMethod handlerMethod, String lookupDestination, Message<?> message) {
 		if (logger.isDebugEnabled()) {
@@ -515,7 +521,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected void processHandlerMethodException(HandlerMethod handlerMethod, Exception ex, Message<?> message) {
 		InvocableHandlerMethod invocable = getExceptionHandlerMethod(handlerMethod, ex);
 		if (invocable == null) {
-			logger.error("Unhandled exception", ex);
+			logger.error("Unhandled exception from message handler method", ex);
 			return;
 		}
 		invocable.setMessageMethodArgumentResolvers(this.argumentResolvers);
@@ -534,8 +540,6 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.error("Error while processing handler method exception", ex2);
 		}
 	}
-
-	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType);
 
 	/**
 	 * Find an {@code @MessageExceptionHandler} method for the given exception.
@@ -575,9 +579,9 @@ public abstract class AbstractMethodMessageHandler<T>
 		return null;
 	}
 
-	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
-		logger.debug("No matching methods.");
-	}
+	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(
+			Class<?> beanType);
+
 
 	@Override
 	public String toString() {
@@ -596,7 +600,7 @@ public abstract class AbstractMethodMessageHandler<T>
 
 		private final HandlerMethod handlerMethod;
 
-		private Match(T mapping, HandlerMethod handlerMethod) {
+		public Match(T mapping, HandlerMethod handlerMethod) {
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
 		}
@@ -622,12 +626,12 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 	}
 
+
 	private class ReturnValueListenableFutureCallback implements ListenableFutureCallback<Object> {
 
 		private final InvocableHandlerMethod handlerMethod;
 
 		private final Message<?> message;
-
 
 		public ReturnValueListenableFutureCallback(InvocableHandlerMethod handlerMethod, Message<?> message) {
 			this.handlerMethod = handlerMethod;
@@ -651,7 +655,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 
 		private void handleFailure(Throwable ex) {
-			Exception cause = (ex instanceof Exception ? (Exception) ex : new RuntimeException(ex));
+			Exception cause = (ex instanceof Exception ? (Exception) ex : new IllegalStateException(ex));
 			processHandlerMethodException(this.handlerMethod, cause, this.message);
 		}
 	}
