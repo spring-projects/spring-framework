@@ -35,14 +35,14 @@ import org.springframework.util.ClassUtils;
  */
 class MockServerContainerContextCustomizerFactory implements ContextCustomizerFactory {
 
-	private static final boolean webSocketPresent = ClassUtils.isPresent("javax.websocket.server.ServerContainer",
-			MockServerContainerContextCustomizerFactory.class.getClassLoader());
-
 	private static final String WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME =
 			"org.springframework.test.context.web.WebAppConfiguration";
 
 	private static final String MOCK_SERVER_CONTAINER_CONTEXT_CUSTOMIZER_CLASS_NAME =
 			"org.springframework.test.context.web.socket.MockServerContainerContextCustomizer";
+
+	private static final boolean webSocketPresent = ClassUtils.isPresent("javax.websocket.server.ServerContainer",
+			MockServerContainerContextCustomizerFactory.class.getClassLoader());
 
 
 	@Override
@@ -52,12 +52,12 @@ class MockServerContainerContextCustomizerFactory implements ContextCustomizerFa
 		if (webSocketPresent && isAnnotatedWithWebAppConfiguration(testClass)) {
 			try {
 				Class<?> clazz = ClassUtils.forName(MOCK_SERVER_CONTAINER_CONTEXT_CUSTOMIZER_CLASS_NAME,
-					getClass().getClassLoader());
+						getClass().getClassLoader());
 				return (ContextCustomizer) BeanUtils.instantiateClass(clazz);
 			}
 			catch (Throwable ex) {
-				throw new IllegalStateException("Failed to enable WebSocket test support; could not load class: "
-						+ MOCK_SERVER_CONTAINER_CONTEXT_CUSTOMIZER_CLASS_NAME, ex);
+				throw new IllegalStateException("Failed to enable WebSocket test support; could not load class: " +
+						MOCK_SERVER_CONTAINER_CONTEXT_CUSTOMIZER_CLASS_NAME, ex);
 			}
 		}
 
@@ -66,8 +66,8 @@ class MockServerContainerContextCustomizerFactory implements ContextCustomizerFa
 	}
 
 	private static boolean isAnnotatedWithWebAppConfiguration(Class<?> testClass) {
-		return AnnotatedElementUtils.findMergedAnnotationAttributes(testClass,
-			WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME, false, false) != null;
+		return (AnnotatedElementUtils.findMergedAnnotationAttributes(testClass,
+				WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME, false, false) != null);
 	}
 
 }

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Set;
-
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.DeploymentException;
 import javax.websocket.Endpoint;
@@ -30,8 +29,7 @@ import javax.websocket.server.ServerContainer;
 import javax.websocket.server.ServerEndpointConfig;
 
 /**
- * Mock implementation of the {@link javax.websocket.server.ServerContainer}
- * interface.
+ * Mock implementation of the {@link javax.websocket.server.ServerContainer} interface.
  *
  * @author Sam Brannen
  * @since 4.3.1
@@ -107,16 +105,19 @@ class MockServerContainer implements ServerContainer {
 	@Override
 	public Session connectToServer(Endpoint endpointInstance, ClientEndpointConfig cec, URI path)
 			throws DeploymentException, IOException {
+
 		throw new UnsupportedOperationException(
-			"MockServerContainer does not support connectToServer(Endpoint, ClientEndpointConfig, URI)");
+				"MockServerContainer does not support connectToServer(Endpoint, ClientEndpointConfig, URI)");
 	}
 
 	@Override
 	public Session connectToServer(Class<? extends Endpoint> endpointClass, ClientEndpointConfig cec, URI path)
 			throws DeploymentException, IOException {
+
 		throw new UnsupportedOperationException(
-			"MockServerContainer does not support connectToServer(Class, ClientEndpointConfig, URI)");
+				"MockServerContainer does not support connectToServer(Class, ClientEndpointConfig, URI)");
 	}
+
 
 	// --- ServerContainer -----------------------------------------------------
 
@@ -128,7 +129,7 @@ class MockServerContainer implements ServerContainer {
 	@Override
 	public void addEndpoint(ServerEndpointConfig serverConfig) throws DeploymentException {
 		throw new UnsupportedOperationException(
-			"MockServerContainer does not support addEndpoint(ServerEndpointConfig)");
+				"MockServerContainer does not support addEndpoint(ServerEndpointConfig)");
 	}
 
 }
