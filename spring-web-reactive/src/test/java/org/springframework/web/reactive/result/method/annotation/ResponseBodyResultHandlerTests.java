@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -123,8 +122,7 @@ public class ResponseBodyResultHandlerTests {
 
 	private void testSupports(Object controller, String method, boolean result) throws NoSuchMethodException {
 		HandlerMethod hm = handlerMethod(controller, method);
-		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
-		HandlerResult handlerResult = new HandlerResult(hm, null, type, new ExtendedModelMap());
+		HandlerResult handlerResult = new HandlerResult(hm, null, hm.getReturnType(), new ExtendedModelMap());
 		assertEquals(result, this.resultHandler.supports(handlerResult));
 	}
 

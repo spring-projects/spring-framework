@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 import rx.Single;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.StringEncoder;
@@ -48,12 +49,11 @@ import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
@@ -74,9 +74,6 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
  * @author Rossen Stoyanchev
  */
 public class ResponseEntityResultHandlerTests {
-
-	private static final Object HANDLER = new Object();
-
 
 	private ResponseEntityResultHandler resultHandler;
 
@@ -119,23 +116,22 @@ public class ResponseEntityResultHandlerTests {
 
 	@Test @SuppressWarnings("ConstantConditions")
 	public void supports() throws NoSuchMethodException {
-		ModelMap model = new ExtendedModelMap();
 
 		Object value = null;
-		ResolvableType type = responseEntityType(String.class);
-		assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER, value, type, model)));
+		ResolvableType type = responseEntity(String.class);
+		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
-		type = forClassWithGenerics(Mono.class, responseEntityType(String.class));
-		assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER, value, type, model)));
+		type = classWithGenerics(Mono.class, responseEntity(String.class));
+		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
-		type = forClassWithGenerics(Single.class, responseEntityType(String.class));
-		assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER, value, type, model)));
+		type = classWithGenerics(Single.class, responseEntity(String.class));
+		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
-		type = forClassWithGenerics(CompletableFuture.class, responseEntityType(String.class));
-		assertTrue(this.resultHandler.supports(new HandlerResult(HANDLER, value, type, model)));
+		type = classWithGenerics(CompletableFuture.class, responseEntity(String.class));
+		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
 		type = ResolvableType.forClass(String.class);
-		assertFalse(this.resultHandler.supports(new HandlerResult(HANDLER, value, type, model)));
+		assertFalse(this.resultHandler.supports(handlerResult(value, type)));
 	}
 
 	@Test
@@ -145,8 +141,9 @@ public class ResponseEntityResultHandlerTests {
 
 	@Test
 	public void statusCode() throws Exception {
-		ResolvableType type = responseEntityType(Void.class);
-		HandlerResult result = new HandlerResult(HANDLER, ResponseEntity.noContent().build(), type);
+		ResponseEntity<Void> value = ResponseEntity.noContent().build();
+		ResolvableType type = responseEntity(Void.class);
+		HandlerResult result = handlerResult(value, type);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.NO_CONTENT, this.response.getStatus());
@@ -157,8 +154,9 @@ public class ResponseEntityResultHandlerTests {
 	@Test
 	public void headers() throws Exception {
 		URI location = new URI("/path");
-		ResolvableType type = responseEntityType(Void.class);
-		HandlerResult result = new HandlerResult(HANDLER, ResponseEntity.created(location).build(), type);
+		ResolvableType type = responseEntity(Void.class);
+		ResponseEntity<Void> value = ResponseEntity.created(location).build();
+		HandlerResult result = handlerResult(value, type);
 		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.CREATED, this.response.getStatus());
@@ -170,25 +168,25 @@ public class ResponseEntityResultHandlerTests {
 	@Test
 	public void handleReturnTypes() throws Exception {
 		Object returnValue = ResponseEntity.ok("abc");
-		ResolvableType returnType = responseEntityType(String.class);
+		ResolvableType returnType = responseEntity(String.class);
 		testHandle(returnValue, returnType);
 
 		returnValue = Mono.just(ResponseEntity.ok("abc"));
-		returnType = forClassWithGenerics(Mono.class, responseEntityType(String.class));
+		returnType = forClassWithGenerics(Mono.class, responseEntity(String.class));
 		testHandle(returnValue, returnType);
 
 		returnValue = Mono.just(ResponseEntity.ok("abc"));
-		returnType = forClassWithGenerics(Single.class, responseEntityType(String.class));
+		returnType = forClassWithGenerics(Single.class, responseEntity(String.class));
 		testHandle(returnValue, returnType);
 
 		returnValue = Mono.just(ResponseEntity.ok("abc"));
-		returnType = forClassWithGenerics(CompletableFuture.class, responseEntityType(String.class));
+		returnType = forClassWithGenerics(CompletableFuture.class, responseEntity(String.class));
 		testHandle(returnValue, returnType);
 	}
 
 
-	private void testHandle(Object returnValue, ResolvableType returnType) {
-		HandlerResult result = new HandlerResult(HANDLER, returnValue, returnType);
+	private void testHandle(Object returnValue, ResolvableType type) {
+		HandlerResult result = handlerResult(returnValue, type);
 		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 
 		assertEquals(HttpStatus.OK, this.response.getStatus());
@@ -197,14 +195,40 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 
-	private ResolvableType responseEntityType(Class<?> bodyType) {
-		return forClassWithGenerics(ResponseEntity.class, bodyType);
+	private ResolvableType responseEntity(Class<?> bodyType) {
+		return classWithGenerics(ResponseEntity.class, ResolvableType.forClass(bodyType));
+	}
+
+	private ResolvableType classWithGenerics(Class<?> sourceType, ResolvableType genericType) {
+		return ResolvableType.forClassWithGenerics(sourceType, genericType);
+	}
+
+	private HandlerResult handlerResult(Object returnValue, ResolvableType type) {
+		MethodParameter param = ResolvableMethod.on(TestController.class).returning(type).resolveReturnType();
+		return new HandlerResult(new TestController(), returnValue, param);
 	}
 
 	private void assertResponseBody(String responseBody) {
 		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals(responseBody,
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class TestController {
+
+		ResponseEntity<String> responseEntityString() { return null; }
+
+		ResponseEntity<Void> responseEntityVoid() { return null; }
+
+		Mono<ResponseEntity<String>> mono() { return null; }
+
+		Single<ResponseEntity<String>> single() { return null; }
+
+		CompletableFuture<ResponseEntity<String>> completableFuture() { return null; }
+
+		String string() { return null; }
 	}
 
 }

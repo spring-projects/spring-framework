@@ -16,14 +16,16 @@
 
 package org.springframework.web.reactive.result;
 
+import java.lang.reflect.Method;
+
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
+import org.springframework.core.MethodParameter;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebHandler;
 
 /**
  * HandlerAdapter that allows using the plain {@link WebHandler} contract with
@@ -34,8 +36,18 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class SimpleHandlerAdapter implements HandlerAdapter {
 
-	private static final ResolvableType MONO_VOID = ResolvableType.forClassWithGenerics(
-			Mono.class, Void.class);
+	private static final MethodParameter RETURN_TYPE;
+
+	static {
+		try {
+			Method method = WebHandler.class.getMethod("handle", ServerWebExchange.class);
+			RETURN_TYPE = new MethodParameter(method, -1);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException(
+					"Failed to initialize the return type for WebHandler: " + ex.getMessage());
+		}
+	}
 
 
 	@Override
@@ -47,7 +59,7 @@ public class SimpleHandlerAdapter implements HandlerAdapter {
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		WebHandler webHandler = (WebHandler) handler;
 		Mono<Void> mono = webHandler.handle(exchange);
-		return Mono.just(new HandlerResult(webHandler, mono, MONO_VOID));
+		return Mono.just(new HandlerResult(webHandler, mono, RETURN_TYPE));
 	}
 
 }

@@ -38,7 +38,6 @@ import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
@@ -151,13 +150,8 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 	}
 
 	private boolean hasModelAttributeAnnotation(HandlerResult result) {
-		if (result.getHandler() instanceof HandlerMethod) {
-			MethodParameter returnType = ((HandlerMethod) result.getHandler()).getReturnType();
-			if (returnType.hasMethodAnnotation(ModelAttribute.class)) {
-				return true;
-			}
-		}
-		return false;
+		MethodParameter returnType = result.getReturnTypeSource();
+		return returnType.hasMethodAnnotation(ModelAttribute.class);
 	}
 
 	private boolean isSupportedType(Class<?> clazz) {
@@ -263,13 +257,10 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 			//noinspection unchecked
 			result.getModel().addAllAttributes((Map<String, ?>) value);
 		}
-		else if (result.getHandler() instanceof HandlerMethod) {
-			MethodParameter returnType = ((HandlerMethod) result.getHandler()).getReturnType();
+		else {
+			MethodParameter returnType = result.getReturnTypeSource();
 			String name = getNameForReturnValue(value, returnType);
 			result.getModel().addAttribute(name, value);
-		}
-		else {
-			result.getModel().addAttribute(value);
 		}
 		return value;
 	}

@@ -86,13 +86,8 @@ public class ResponseBodyResultHandler extends AbstractMessageConverterResultHan
 	@Override
 	public boolean supports(HandlerResult result) {
 		ResolvableType returnType = result.getReturnType();
-		if (returnType.getSource() instanceof MethodParameter) {
-			MethodParameter parameter = (MethodParameter) returnType.getSource();
-			if (hasResponseBodyAnnotation(parameter) && !isHttpEntityType(returnType)) {
-				return true;
-			}
-		}
-		return false;
+		MethodParameter parameter = result.getReturnTypeSource();
+		return hasResponseBodyAnnotation(parameter) && !isHttpEntityType(returnType);
 	}
 
 	private boolean hasResponseBodyAnnotation(MethodParameter parameter) {

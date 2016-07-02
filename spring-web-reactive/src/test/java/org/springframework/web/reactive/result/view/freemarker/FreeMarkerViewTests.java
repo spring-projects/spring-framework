@@ -29,13 +29,14 @@ import reactor.core.test.TestSubscriber;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.ResolvableType;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -125,7 +126,8 @@ public class FreeMarkerViewTests {
 
 		ModelMap model = new ExtendedModelMap();
 		model.addAttribute("hello", "hi FreeMarker");
-		HandlerResult result = new HandlerResult(new Object(), "", ResolvableType.NONE, model);
+		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("handle"), -1);
+		HandlerResult result = new HandlerResult(new Object(), "", returnType, model);
 		view.render(result, null, this.exchange);
 
 		TestSubscriber
@@ -140,6 +142,12 @@ public class FreeMarkerViewTests {
 		final byte[] bytes = new byte[byteBuffer.remaining()];
 		byteBuffer.get(bytes);
 		return new String(bytes, UTF_8);
+	}
+
+
+	@SuppressWarnings("unused")
+	private String handle() {
+		return null;
 	}
 
 }

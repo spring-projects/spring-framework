@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
@@ -35,6 +36,7 @@ public class HandlerResult {
 
 	private final Object handler;
 
+	@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 	private final Optional<Object> returnValue;
 
 	private final ResolvableType returnType;
@@ -50,7 +52,7 @@ public class HandlerResult {
 	 * @param returnValue the return value from the handler possibly {@code null}
 	 * @param returnType the return value type
 	 */
-	public HandlerResult(Object handler, Object returnValue, ResolvableType returnType) {
+	public HandlerResult(Object handler, Object returnValue, MethodParameter returnType) {
 		this(handler, returnValue, returnType, null);
 	}
 
@@ -61,12 +63,12 @@ public class HandlerResult {
 	 * @param returnType the return value type
 	 * @param model the model used for request handling
 	 */
-	public HandlerResult(Object handler, Object returnValue, ResolvableType returnType, ModelMap model) {
+	public HandlerResult(Object handler, Object returnValue, MethodParameter returnType, ModelMap model) {
 		Assert.notNull(handler, "'handler' is required");
 		Assert.notNull(returnType, "'returnType' is required");
 		this.handler = handler;
 		this.returnValue = Optional.ofNullable(returnValue);
-		this.returnType = returnType;
+		this.returnType = ResolvableType.forMethodParameter(returnType);
 		this.model = (model != null ? model : new ExtendedModelMap());
 	}
 
@@ -90,6 +92,14 @@ public class HandlerResult {
 	 */
 	public ResolvableType getReturnType() {
 		return this.returnType;
+	}
+
+	/**
+	 * Return the {@link MethodParameter} from which
+	 * {@link #getReturnType() returnType} was created.
+	 */
+	public MethodParameter getReturnTypeSource() {
+		return (MethodParameter) this.returnType.getSource();
 	}
 
 	/**

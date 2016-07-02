@@ -18,21 +18,21 @@ package org.springframework.web.reactive.result;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import rx.Observable;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
 import org.springframework.core.convert.support.PublisherToFluxConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link SimpleResultHandler}.
@@ -41,72 +41,55 @@ import static org.junit.Assert.assertTrue;
  */
 public class SimpleResultHandlerTests {
 
-	@Test
-	public void supportsWithConversionService() throws NoSuchMethodException {
+	private SimpleResultHandler resultHandler;
 
+
+	@Before
+	public void setUp() throws Exception {
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addConverter(new MonoToCompletableFutureConverter());
 		conversionService.addConverter(new PublisherToFluxConverter());
 		conversionService.addConverter(new ReactorToRxJava1Converter());
-
-		SimpleResultHandler resultHandler = new SimpleResultHandler(conversionService);
-		TestController controller = new TestController();
-
-		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("voidReturnValue"));
-		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("streamVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("observableVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
-
-		hm = new HandlerMethod(controller, TestController.class.getMethod("completableFutureVoid"));
-		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
+		this.resultHandler = new SimpleResultHandler(conversionService);
 	}
 
-	private HandlerResult createHandlerResult(HandlerMethod hm, ResolvableType type) {
-		return new HandlerResult(hm, null, type);
+
+	@Test
+	public void supportsWithConversionService() throws NoSuchMethodException {
+		testSupports(ResolvableType.forClass(void.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(Publisher.class, Void.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(Flux.class, Void.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(Observable.class, Void.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(CompletableFuture.class, Void.class), true);
+
+		testSupports(ResolvableType.forClass(String.class), false);
+		testSupports(ResolvableType.forClassWithGenerics(Publisher.class, String.class), false);
+	}
+
+	private void testSupports(ResolvableType type, boolean result) {
+		MethodParameter param = ResolvableMethod.on(TestController.class).returning(type).resolveReturnType();
+		HandlerResult handlerResult = new HandlerResult(new TestController(), null, param);
+		assertEquals(result, this.resultHandler.supports(handlerResult));
 	}
 
 
 	@SuppressWarnings("unused")
 	private static class TestController {
 
-		public void voidReturnValue() {
-		}
+		public void voidReturn() { }
 
-		public Publisher<String> publisherString() {
-			return null;
-		}
+		public Publisher<String> publisherString() { return null; }
 
-		public Publisher<Void> publisherVoid() {
-			return null;
-		}
+		public Flux<Void> flux() { return null; }
 
-		public Flux<Void> streamVoid() {
-			return null;
-		}
+		public Observable<Void> observable() { return null; }
 
-		public Observable<Void> observableVoid() {
-			return null;
-		}
+		public CompletableFuture<Void> completableFuture() { return null; }
 
-		public CompletableFuture<Void> completableFutureVoid() {
-			return null;
-		}
+		public String string() { return null; }
+
+		public Publisher<Void> publisher() { return null; }
+
 	}
 
 }

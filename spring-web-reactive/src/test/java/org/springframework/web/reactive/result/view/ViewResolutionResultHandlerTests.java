@@ -35,6 +35,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 import rx.Single;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -49,13 +50,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -90,26 +90,19 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void supports() throws Exception {
-		Object handler = new Object();
-		HandlerMethod hm = handlerMethod(new TestController(), "modelAttributeMethod");
 
-		testSupports(handler, ResolvableType.forClass(String.class), true);
-		testSupports(handler, ResolvableType.forClass(View.class), true);
-		testSupports(handler, ResolvableType.forClassWithGenerics(Mono.class, String.class), true);
-		testSupports(handler, ResolvableType.forClassWithGenerics(Mono.class, View.class), true);
-		testSupports(handler, ResolvableType.forClassWithGenerics(Single.class, String.class), true);
-		testSupports(handler, ResolvableType.forClassWithGenerics(Single.class, View.class), true);
-		testSupports(handler, ResolvableType.forClass(Model.class), true);
-		testSupports(handler, ResolvableType.forClass(Map.class), true);
-		testSupports(handler, ResolvableType.forClass(TestBean.class), true);
-		testSupports(handler, ResolvableType.forClass(Integer.class), false);
-		testSupports(hm, ResolvableType.forMethodParameter(hm.getReturnType()), true);
-	}
+		testSupports(ResolvableType.forClass(String.class), true);
+		testSupports(ResolvableType.forClass(View.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(Mono.class, String.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(Mono.class, View.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(Single.class, String.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(Single.class, View.class), true);
+		testSupports(ResolvableType.forClass(Model.class), true);
+		testSupports(ResolvableType.forClass(Map.class), true);
+		testSupports(ResolvableType.forClass(TestBean.class), true);
+		testSupports(ResolvableType.forClass(Integer.class), false);
 
-	private void testSupports(Object handler, ResolvableType returnType, boolean result) {
-		ViewResolutionResultHandler resultHandler = createResultHandler(mock(ViewResolver.class));
-		HandlerResult handlerResult = new HandlerResult(handler, null, returnType, new ExtendedModelMap());
-		assertEquals(result, resultHandler.supports(handlerResult));
+		testSupports(resolvableMethod().annotated(ModelAttribute.class), true);
 	}
 
 	@Test
@@ -125,53 +118,50 @@ public class ViewResolutionResultHandlerTests {
 
 	@Test
 	public void handleReturnValueTypes() throws Exception {
-		Object handler = new Object();
 		Object returnValue;
 		ResolvableType returnType;
 		ViewResolver resolver = new TestViewResolver("account");
 
-		returnValue = new TestView("account");
 		returnType = ResolvableType.forClass(View.class);
-		testHandle("/path", handler, returnValue, returnType, "account: {id=123}");
+		returnValue = new TestView("account");
+		testHandle("/path", returnType, returnValue, "account: {id=123}");
 
-		returnValue = Mono.just(new TestView("account"));
 		returnType = ResolvableType.forClassWithGenerics(Mono.class, View.class);
-		testHandle("/path", handler, returnValue, returnType, "account: {id=123}");
+		returnValue = Mono.just(new TestView("account"));
+		testHandle("/path", returnType, returnValue, "account: {id=123}");
 
-		returnValue = "account";
 		returnType = ResolvableType.forClass(String.class);
-		testHandle("/path", handler, returnValue, returnType, "account: {id=123}", resolver);
+		returnValue = "account";
+		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
-		returnValue = Mono.just("account");
 		returnType = ResolvableType.forClassWithGenerics(Mono.class, String.class);
-		testHandle("/path", handler, returnValue, returnType, "account: {id=123}", resolver);
+		returnValue = Mono.just("account");
+		testHandle("/path", returnType, returnValue, "account: {id=123}", resolver);
 
-		returnValue = new ExtendedModelMap().addAttribute("name", "Joe");
 		returnType = ResolvableType.forClass(Model.class);
-		testHandle("/account", handler, returnValue, returnType, "account: {id=123, name=Joe}", resolver);
+		returnValue = new ExtendedModelMap().addAttribute("name", "Joe");
+		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
-		returnValue = Collections.singletonMap("name", "Joe");
 		returnType = ResolvableType.forClass(Map.class);
-		testHandle("/account", handler, returnValue, returnType, "account: {id=123, name=Joe}", resolver);
+		returnValue = Collections.singletonMap("name", "Joe");
+		testHandle("/account", returnType, returnValue, "account: {id=123, name=Joe}", resolver);
 
-		HandlerMethod hm = handlerMethod(new TestController(), "modelAttributeMethod");
-		returnValue = "Joe";
-		returnType = ResolvableType.forMethodParameter(hm.getReturnType());
-		testHandle("/account", hm, returnValue, returnType, "account: {id=123, name=Joe}", resolver);
-
-		returnValue = new TestBean("Joe");
 		returnType = ResolvableType.forClass(TestBean.class);
-		testHandle("/account", handler, returnValue, returnType, "account: {id=123, testBean=TestBean[name=Joe]}", resolver);
+		returnValue = new TestBean("Joe");
+		String responseBody = "account: {id=123, testBean=TestBean[name=Joe]}";
+		testHandle("/account", returnType, returnValue, responseBody, resolver);
+
+		testHandle("/account", resolvableMethod().annotated(ModelAttribute.class),
+				99L, "account: {id=123, num=99}", resolver);
 	}
 
 	@Test
 	public void handleWithMultipleResolvers() throws Exception {
-		Object handler = new Object();
 		Object returnValue = "profile";
 		ResolvableType returnType = ResolvableType.forClass(String.class);
 		ViewResolver[] resolvers = {new TestViewResolver("account"), new TestViewResolver("profile")};
 
-		testHandle("/account", handler, returnValue, returnType, "profile: {id=123}", resolvers);
+		testHandle("/account", returnType, returnValue, "profile: {id=123}", resolvers);
 	}
 
 	@Test
@@ -180,11 +170,11 @@ public class ViewResolutionResultHandlerTests {
 		testDefaultViewName(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, String.class));
 	}
 
-	private void testDefaultViewName(Object returnValue, ResolvableType returnType)
+	private void testDefaultViewName(Object returnValue, ResolvableType type)
 			throws URISyntaxException {
 
 		ModelMap model = new ExtendedModelMap().addAttribute("id", "123");
-		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, model);
+		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), model);
 		ViewResolutionResultHandler handler =  createResultHandler(new TestViewResolver("account"));
 
 		this.request.setUri(new URI("/account"));
@@ -203,9 +193,9 @@ public class ViewResolutionResultHandlerTests {
 	@Test
 	public void unresolvedViewName() throws Exception {
 		String returnValue = "account";
-		ResolvableType returnType = ResolvableType.forClass(String.class);
+		ResolvableType type = ResolvableType.forClass(String.class);
 		ExtendedModelMap model = new ExtendedModelMap();
-		HandlerResult handlerResult = new HandlerResult(new Object(), returnValue, returnType, model);
+		HandlerResult handlerResult = new HandlerResult(new Object(), returnValue, returnType(type), model);
 
 		this.request.setUri(new URI("/path"));
 		Mono<Void> mono = createResultHandler().handleResult(this.exchange, handlerResult);
@@ -217,7 +207,8 @@ public class ViewResolutionResultHandlerTests {
 	public void contentNegotiation() throws Exception {
 		TestBean value = new TestBean("Joe");
 		ResolvableType type = ResolvableType.forClass(TestBean.class);
-		HandlerResult handlerResult = new HandlerResult(new Object(), value, type, new ExtendedModelMap());
+		ExtendedModelMap model = new ExtendedModelMap();
+		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), model);
 
 		this.request.getHeaders().setAccept(Collections.singletonList(APPLICATION_JSON));
 		this.request.setUri(new URI("/account"));
@@ -236,7 +227,8 @@ public class ViewResolutionResultHandlerTests {
 	public void contentNegotiationWith406() throws Exception {
 		TestBean value = new TestBean("Joe");
 		ResolvableType type = ResolvableType.forClass(TestBean.class);
-		HandlerResult handlerResult = new HandlerResult(new Object(), value, type, new ExtendedModelMap());
+		ExtendedModelMap model = new ExtendedModelMap();
+		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), model);
 
 		this.request.getHeaders().setAccept(Collections.singletonList(APPLICATION_JSON));
 		this.request.setUri(new URI("/account"));
@@ -246,6 +238,26 @@ public class ViewResolutionResultHandlerTests {
 		TestSubscriber.subscribe(mono).assertError(NotAcceptableStatusException.class);
 	}
 
+
+	private MethodParameter returnType(ResolvableType type) {
+		return resolvableMethod().returning(type).resolveReturnType();
+	}
+
+	private ResolvableMethod resolvableMethod() {
+		return ResolvableMethod.on(TestController.class);
+	}
+
+	private void testSupports(ResolvableType type, boolean result) {
+		testSupports(resolvableMethod().returning(type), result);
+	}
+
+	private void testSupports(ResolvableMethod resolvableMethod, boolean result) {
+		ViewResolutionResultHandler resultHandler = createResultHandler(mock(ViewResolver.class));
+		MethodParameter returnType = resolvableMethod.resolveReturnType();
+		ExtendedModelMap model = new ExtendedModelMap();
+		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, model);
+		assertEquals(result, resultHandler.supports(handlerResult));
+	}
 
 	private ViewResolutionResultHandler createResultHandler(ViewResolver... resolvers) {
 		return createResultHandler(Collections.emptyList(), resolvers);
@@ -261,15 +273,18 @@ public class ViewResolutionResultHandlerTests {
 		return handler;
 	}
 
-	private HandlerMethod handlerMethod(Object controller, String method) throws NoSuchMethodException {
-		return new HandlerMethod(controller, controller.getClass().getMethod(method));
+	private void testHandle(String path, ResolvableType returnType, Object returnValue,
+			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
+
+		testHandle(path, resolvableMethod().returning(returnType), returnValue, responseBody, resolvers);
 	}
 
-	private void testHandle(String path, Object handler, Object returnValue, ResolvableType returnType,
+	private void testHandle(String path, ResolvableMethod resolvableMethod, Object returnValue,
 			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
 
 		ModelMap model = new ExtendedModelMap().addAttribute("id", "123");
-		HandlerResult result = new HandlerResult(handler, returnValue, returnType, model);
+		MethodParameter returnType = resolvableMethod.resolveReturnType();
+		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, model);
 		this.request.setUri(new URI(path));
 		createResultHandler(resolvers).handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody(responseBody);
@@ -350,15 +365,6 @@ public class ViewResolutionResultHandlerTests {
 		}
 	}
 
-	@Controller	@SuppressWarnings("unused")
-	private static class TestController {
-
-		@ModelAttribute("name")
-		public String modelAttributeMethod() {
-			return null;
-		}
-	}
-
 	private static class TestBean {
 
 		private final String name;
@@ -375,6 +381,33 @@ public class ViewResolutionResultHandlerTests {
 		public String toString() {
 			return "TestBean[name=" + this.name + "]";
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class TestController {
+
+		String string() { return null; }
+
+		View view() { return null; }
+
+		Mono<String> monoString() { return null; }
+
+		Mono<View> monoView() { return null; }
+
+		Single<String> singleString() { return null; }
+
+		Single<View> singleView() { return null; }
+
+		Model model() { return null; }
+
+		Map map() { return null; }
+
+		TestBean testBean() { return null; }
+
+		Integer integer() { return null; }
+
+		@ModelAttribute("num")
+		Long longAttribute() { return null; }
 	}
 
 }

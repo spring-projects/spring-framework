@@ -31,19 +31,20 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.test.TestSubscriber;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MimeType;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
@@ -62,18 +63,17 @@ import static org.junit.Assert.fail;
  */
 public class HttpMessageConverterViewTests {
 
-	private HttpMessageConverterView view;
+	private HttpMessageConverterView view = new HttpMessageConverterView(new JacksonJsonEncoder());
 
 	private HandlerResult result;
 
-	private ModelMap model;
+	private ModelMap model = new ExtendedModelMap();
 
 
 	@Before
 	public void setup() throws Exception {
-		this.view = new HttpMessageConverterView(new JacksonJsonEncoder());
-		this.model = new ExtendedModelMap();
-		this.result = new HandlerResult(new Object(), null, ResolvableType.NONE, model);
+		MethodParameter param = ResolvableMethod.on(this.getClass()).name("handle").resolveReturnType();
+		this.result = new HandlerResult(this, null, param, this.model);
 	}
 
 
@@ -175,5 +175,10 @@ public class HttpMessageConverterViewTests {
 						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
 	}
 
+
+	@SuppressWarnings("unused")
+	private String handle() {
+		return null;
+	}
 
 }

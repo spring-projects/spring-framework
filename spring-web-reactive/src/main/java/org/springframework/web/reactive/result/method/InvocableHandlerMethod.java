@@ -31,7 +31,6 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.ResolvableType;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -90,8 +89,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return resolveArguments(exchange, model, providedArgs).then(args -> {
 			try {
 				Object value = doInvoke(args);
-				ResolvableType type =  ResolvableType.forMethodParameter(getReturnType());
-				HandlerResult handlerResult = new HandlerResult(this, value, type, model);
+				HandlerResult handlerResult = new HandlerResult(this, value, getReturnType(), model);
 				return Mono.just(handlerResult);
 			}
 			catch (InvocationTargetException ex) {
