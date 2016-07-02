@@ -105,8 +105,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		String httpMethod = this.webRequest.getHttpMethod().name();
 		UriComponents uriComponents = uriComponents();
 
-		MockHttpServletRequest request = new HtmlUnitMockHttpServletRequest(servletContext, httpMethod,
-				uriComponents.getPath());
+		MockHttpServletRequest request = new HtmlUnitMockHttpServletRequest(
+				servletContext, httpMethod, uriComponents.getPath());
 		parent(request, this.parentBuilder);
 		request.setServerName(uriComponents.getHost()); // needs to be first for additional headers
 		authType(request);
@@ -123,7 +123,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		request.setProtocol("HTTP/1.1");
 		request.setQueryString(uriComponents.getQuery());
 		request.setScheme(uriComponents.getScheme());
-		pathInfo(uriComponents,request);
+		request.setPathInfo(null);
 
 		return postProcess(request);
 	}
@@ -223,14 +223,14 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		try {
 			request.setContent(requestBody.getBytes(charset));
 		}
-		catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+		catch (UnsupportedEncodingException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 
 	private void contentType(MockHttpServletRequest request) {
 		String contentType = header("Content-Type");
-		request.setContentType(contentType == null ? MediaType.ALL_VALUE.toString() : contentType);
+		request.setContentType(contentType != null ? contentType : MediaType.ALL_VALUE);
 	}
 
 	private void contextPath(MockHttpServletRequest request, UriComponents uriComponents) {
@@ -245,8 +245,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		}
 		else {
 			if (!uriComponents.getPath().startsWith(this.contextPath)) {
-				throw new IllegalArgumentException(uriComponents.getPath() + " should start with contextPath "
-						+ this.contextPath);
+				throw new IllegalArgumentException(uriComponents.getPath() + " should start with contextPath " +
+						this.contextPath);
 			}
 			request.setContextPath(this.contextPath);
 		}
@@ -375,8 +375,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		try {
 			return URLDecoder.decode(value, "UTF-8");
 		}
-		catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
+		catch (UnsupportedEncodingException ex) {
+			throw new IllegalStateException(ex);
 		}
 	}
 
@@ -395,10 +395,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			qualifier = "";
 		}
 		return new Locale(language, country, qualifier);
-	}
-
-	private void pathInfo(UriComponents uriComponents, MockHttpServletRequest request) {
-		request.setPathInfo(null);
 	}
 
 	private void servletPath(MockHttpServletRequest request, String requestPath) {
@@ -455,6 +451,9 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		return this;
 	}
 
+	private CookieManager getCookieManager() {
+		return this.webClient.getCookieManager();
+	}
 
 	/**
 	 * An extension to {@link MockHttpServletRequest} that ensures that
@@ -517,10 +516,6 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			}
 			removeSessionCookie(request, getId());
 		}
-	}
-
-	private CookieManager getCookieManager() {
-		return this.webClient.getCookieManager();
 	}
 
 }
