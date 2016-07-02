@@ -83,6 +83,8 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	private Collection<String> destinationPrefixes = new ArrayList<String>();
+
 	private final List<HandlerMethodArgumentResolver> customArgumentResolvers =
 			new ArrayList<HandlerMethodArgumentResolver>(4);
 
@@ -95,9 +97,11 @@ public abstract class AbstractMethodMessageHandler<T>
 	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers =
 			new HandlerMethodReturnValueHandlerComposite();
 
-	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>();
+	private ApplicationContext applicationContext;
 
-	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<String, T>();
+	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>(64);
+
+	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<String, T>(64);
 
 	private final Map<Class<?>, AbstractExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, AbstractExceptionHandlerMethodResolver>(64);
@@ -105,16 +109,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	private final Map<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
 			new LinkedHashMap<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver>(64);
 
-	private Collection<String> destinationPrefixes = new ArrayList<String>();
-
-	private ApplicationContext applicationContext;
-
-	/**
-	 * Return the configured destination prefixes.
-	 */
-	public Collection<String> getDestinationPrefixes() {
-		return this.destinationPrefixes;
-	}
 
 	/**
 	 * When this property is configured only messages to destinations matching
@@ -135,10 +129,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the configured custom argument resolvers, if any.
+	 * Return the configured destination prefixes, if any.
 	 */
-	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
-		return this.customArgumentResolvers;
+	public Collection<String> getDestinationPrefixes() {
+		return this.destinationPrefixes;
 	}
 
 	/**
@@ -153,10 +147,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the configured custom return value handlers, if any.
+	 * Return the configured custom argument resolvers, if any.
 	 */
-	public List<HandlerMethodReturnValueHandler> getCustomReturnValueHandlers() {
-		return this.customReturnValueHandlers;
+	public List<HandlerMethodArgumentResolver> getCustomArgumentResolvers() {
+		return this.customArgumentResolvers;
 	}
 
 	/**
@@ -171,10 +165,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the complete list of argument resolvers.
+	 * Return the configured custom return value handlers, if any.
 	 */
-	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
-		return this.argumentResolvers.getResolvers();
+	public List<HandlerMethodReturnValueHandler> getCustomReturnValueHandlers() {
+		return this.customReturnValueHandlers;
 	}
 
 	/**
@@ -191,10 +185,10 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	/**
-	 * Return the complete list of return value handlers.
+	 * Return the complete list of argument resolvers.
 	 */
-	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
-		return this.returnValueHandlers.getReturnValueHandlers();
+	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
+		return this.argumentResolvers.getResolvers();
 	}
 
 	/**
@@ -210,14 +204,22 @@ public abstract class AbstractMethodMessageHandler<T>
 		this.returnValueHandlers.addHandlers(returnValueHandlers);
 	}
 
-	public ApplicationContext getApplicationContext() {
-		return this.applicationContext;
+	/**
+	 * Return the complete list of return value handlers.
+	 */
+	public List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
+		return this.returnValueHandlers.getReturnValueHandlers();
 	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
+
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
+	}
+
 
 	@Override
 	public void afterPropertiesSet() {
