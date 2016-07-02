@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
@@ -67,11 +68,6 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private static final UrlPathHelper DECODING_URL_PATH_HELPER = new UrlPathHelper();
 
-	static {
-		RAW_URL_PATH_HELPER.setRemoveSemicolonContent(false);
-		RAW_URL_PATH_HELPER.setUrlDecode(false);
-	}
-
 	/* Extensions associated with the built-in message converters */
 	private static final Set<String> WHITELISTED_EXTENSIONS = new HashSet<String>(Arrays.asList(
 			"txt", "text", "yml", "properties", "csv",
@@ -81,6 +77,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private static final Set<String> WHITELISTED_MEDIA_BASE_TYPES = new HashSet<String>(
 			Arrays.asList("audio", "image", "video"));
 
+	static {
+		RAW_URL_PATH_HELPER.setRemoveSemicolonContent(false);
+		RAW_URL_PATH_HELPER.setUrlDecode(false);
+	}
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
@@ -266,19 +266,16 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
-	 * Return the generic type of the {@code returnType} (or of the nested type if it is
-	 * a {@link HttpEntity}).
+	 * Return the generic type of the {@code returnType} (or of the nested type
+	 * if it is an {@link HttpEntity}).
 	 */
 	private Type getGenericType(MethodParameter returnType) {
-		Type type;
 		if (HttpEntity.class.isAssignableFrom(returnType.getParameterType())) {
-			returnType.increaseNestingLevel();
-			type = returnType.getNestedGenericParameterType();
+			return ResolvableType.forType(returnType.getGenericParameterType()).getGeneric(0).getType();
 		}
 		else {
-			type = returnType.getGenericParameterType();
+			return returnType.getGenericParameterType();
 		}
-		return type;
 	}
 
 	/**
