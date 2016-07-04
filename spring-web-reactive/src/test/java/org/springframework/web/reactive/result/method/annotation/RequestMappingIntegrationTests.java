@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -434,13 +433,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/stream-result")
 		public Publisher<Long> stringStreamResponseBody() {
-			/*
-			TODO: replace the following line with:
-		    return Flux.interval(Duration.ofMillis(100)).take(5);
-		    to make the build last shorter. Unfortunately, this hangs the build as of
-		    20160317.
-			*/
-			return Flux.interval(Duration.ofSeconds(1)).take(5);
+			return Flux.interval(100).take(5);
 		}
 
 		@RequestMapping("/raw-flux")
