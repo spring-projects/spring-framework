@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,18 +56,14 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A {@link RequestUpgradeStrategy} for use with Jetty 9.0-9.3. Based on Jetty's
- * internal {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
+ * A {@link RequestUpgradeStrategy} for use with Jetty 9.3 and higher. Based on
+ * Jetty's internal {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
  *
  * @author Phillip Webb
  * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle, ServletContextAware {
-
-	// Pre-Jetty 9.3 init method without ServletContext
-	private static final Method webSocketFactoryInitMethod =
-			ClassUtils.getMethodIfAvailable(WebSocketServerFactory.class, "init");
 
 	private static final ThreadLocal<WebSocketHandlerContainer> wsContainerHolder =
 			new NamedThreadLocal<WebSocketHandlerContainer>("WebSocket Handler Container");
@@ -153,12 +149,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		if (!isRunning()) {
 			this.running = true;
 			try {
-				if (webSocketFactoryInitMethod != null) {
-					webSocketFactoryInitMethod.invoke(this.factory);
-				}
-				else {
-					this.factory.init(this.servletContext);
-				}
+				this.factory.init(this.servletContext);
 			}
 			catch (Exception ex) {
 				throw new IllegalStateException("Unable to initialize Jetty WebSocketServerFactory", ex);
