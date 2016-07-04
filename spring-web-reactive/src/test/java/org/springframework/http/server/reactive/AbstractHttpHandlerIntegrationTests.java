@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.File;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -41,11 +43,12 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	@Parameterized.Parameters(name = "server [{0}]")
 	public static Object[][] arguments() {
+		File base = new File(System.getProperty("java.io.tmpdir"));
 		return new Object[][] {
 				{new JettyHttpServer()},
 				{new RxNettyHttpServer()},
 				{new ReactorHttpServer()},
-				{new TomcatHttpServer()},
+				{new TomcatHttpServer(base.getAbsolutePath())},
 				{new UndertowHttpServer()}
 		};
 	}

@@ -20,13 +20,11 @@ import java.io.File;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
-import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Tomcat;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.Assert;
-import org.springframework.util.SocketUtils;
 
 
 /**
@@ -38,6 +36,16 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 
 	private boolean running;
 
+	private String baseDir;
+
+
+	public TomcatHttpServer() {
+	}
+
+	public TomcatHttpServer(String baseDir) {
+		this.baseDir = baseDir;
+	}
+
 
 	@Override
 	public boolean isRunning() {
@@ -48,6 +56,9 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 	public void afterPropertiesSet() throws Exception {
 
 		this.tomcatServer = new Tomcat();
+		if (this.baseDir != null) {
+			this.tomcatServer.setBaseDir(baseDir);
+		}
 		this.tomcatServer.setHostname(getHost());
 		this.tomcatServer.setPort(getPort());
 
