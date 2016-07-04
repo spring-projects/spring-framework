@@ -27,14 +27,14 @@ repositories {
 }
 
 ext {
-	springVersion = '4.3.0.BUILD-SNAPSHOT'
+	springVersion = '4.3.0.RELEASE'
 	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
-	rxJavaVersion = '1.1.5'
-	tomcatVersion = '8.5.2'
-	jettyVersion = '9.3.8.v20160314'
-	nettyVersion = '4.1.0.Final'
-	jacksonVersion = '2.7.3'
+	rxJavaVersion = '1.1.6'
+	tomcatVersion = '8.5.3'
+	jettyVersion = '9.3.10.v20160621'
+	nettyVersion = '4.1.2.Final'
+	jacksonVersion = '2.7.5'
 
 	javadocLinks = [
 		"http://docs.oracle.com/javase/8/docs/api/",
