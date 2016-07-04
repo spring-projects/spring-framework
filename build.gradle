@@ -60,6 +60,8 @@ configure(allprojects) { project ->
 	ext.jrubyVersion         = "1.7.25"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
+	ext.junitJupiterVersion  = '5.0.0-SNAPSHOT'
+	ext.junitPlatformVersion = '1.0.0-SNAPSHOT'
 	ext.log4jVersion         = "1.2.17"
 	ext.nettyVersion         = "4.1.1.Final"
 	ext.okhttpVersion        = "2.7.5"
@@ -131,6 +133,8 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
+		// For JUnit Platform and Jupiter snapshots:
+		maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 	}
 
 	dependencies {
@@ -993,6 +997,7 @@ project("spring-test") {
 		optional(project(":spring-webmvc-portlet"))
 		optional(project(":spring-websocket"))
 		optional("junit:junit:${junitVersion}")
+		optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
 		optional("org.testng:testng:${testngVersion}")
 		optional("javax.inject:javax.inject:1")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
@@ -1020,6 +1025,8 @@ project("spring-test") {
 		testCompile("org.hibernate:hibernate-core:${hibernate4Version}")
 		testCompile("org.hibernate:hibernate-entitymanager:${hibernate4Version}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
+		// Enable use of the JUnitPlatform Runner
+		testCompile("org.junit.platform:junit-platform-runner:${junitPlatformVersion}")
 		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("com.rometools:rome:${romeVersion}")
@@ -1034,7 +1041,9 @@ project("spring-test") {
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("javax.cache:cache-api:1.0.0")
+		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 		testRuntime("log4j:log4j:${log4jVersion}")
+
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 		testRuntime("org.terracotta:management-model:2.0.0")
 	}
@@ -1053,7 +1062,9 @@ project("spring-test") {
 		description = 'Runs JUnit tests.'
 		dependsOn testNG
 		useJUnit()
-		exclude "**/testng/**/*.*"
+		scanForTestClasses = false
+		include(['**/*Tests.class', '**/*Test.class', '**/SpringJUnitJupiterTestSuite.class'])
+		exclude(['**/testng/**/*.*'])
 	}
 
 	task aggregateTestReports(type: TestReport) {
