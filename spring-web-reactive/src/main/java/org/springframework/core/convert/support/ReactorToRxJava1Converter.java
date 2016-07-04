@@ -20,10 +20,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.reactivestreams.Publisher;
+import reactor.core.converter.RxJava1CompletableConverter;
 import reactor.core.converter.RxJava1ObservableConverter;
 import reactor.core.converter.RxJava1SingleConverter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import rx.Completable;
 import rx.Observable;
 import rx.Single;
 
@@ -43,6 +45,8 @@ public final class ReactorToRxJava1Converter implements GenericConverter {
 		pairs.add(new GenericConverter.ConvertiblePair(Observable.class, Flux.class));
 		pairs.add(new GenericConverter.ConvertiblePair(Mono.class, Single.class));
 		pairs.add(new GenericConverter.ConvertiblePair(Single.class, Mono.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Mono.class, Completable.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Completable.class, Mono.class));
 		return pairs;
 	}
 
@@ -62,6 +66,12 @@ public final class ReactorToRxJava1Converter implements GenericConverter {
 		}
 		else if (Single.class.isAssignableFrom(targetType.getType())) {
 			return RxJava1SingleConverter.from((Publisher) source);
+		}
+		else if (Completable.class.isAssignableFrom(sourceType.getType())) {
+			return RxJava1CompletableConverter.from((Completable) source);
+		}
+		else if (Completable.class.isAssignableFrom(targetType.getType())) {
+			return RxJava1CompletableConverter.from((Publisher) source);
 		}
 		return null;
 	}

@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import rx.Completable;
 import rx.Observable;
 import rx.Single;
 
@@ -49,8 +50,14 @@ public class ReactorToRxJava1ConverterTests {
 		assertTrue(this.conversionService.canConvert(Mono.class, Single.class));
 		assertTrue(this.conversionService.canConvert(Single.class, Mono.class));
 
+		assertTrue(this.conversionService.canConvert(Mono.class, Completable.class));
+		assertTrue(this.conversionService.canConvert(Completable.class, Mono.class));
+
 		assertFalse(this.conversionService.canConvert(Flux.class, Single.class));
 		assertFalse(this.conversionService.canConvert(Single.class, Flux.class));
+
+		assertFalse(this.conversionService.canConvert(Flux.class, Completable.class));
+		assertFalse(this.conversionService.canConvert(Completable.class, Flux.class));
 
 		assertFalse(this.conversionService.canConvert(Mono.class, Observable.class));
 		assertFalse(this.conversionService.canConvert(Observable.class, Mono.class));
