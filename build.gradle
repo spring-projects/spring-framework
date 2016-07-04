@@ -97,7 +97,7 @@ configure(allprojects) { project ->
 		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
 		"-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
 		"-Xlint:try", "-Xlint:fallthrough", "-Xlint:rawtypes", "-Xlint:deprecation",
-		"-Xlint:unchecked", "-Xlint:-options", "-Werror"
+		"-Xlint:unchecked", "-Xlint:-options" //, "-Werror"
 	]
 
 	compileTestJava.options*.compilerArgs = [
@@ -108,8 +108,8 @@ configure(allprojects) { project ->
 		"-Xlint:-unchecked", "-Xlint:-options"]
 
 	compileJava {
-		sourceCompatibility = 1.6
-		targetCompatibility = 1.6
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
 	}
 
 	compileTestJava {
@@ -143,7 +143,7 @@ configure(allprojects) { project ->
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
 
 		sniffer("org.codehaus.mojo:animal-sniffer-ant-tasks:${snifferVersion}")
-		javaApiSignature("org.codehaus.mojo.signature:java16:1.1@signature")  // API level from JDK 6 update 18
+		javaApiSignature("org.codehaus.mojo.signature:java18:1.0@signature")
 	}
 
 	task copyJavaApiSignature(type: Copy) {
