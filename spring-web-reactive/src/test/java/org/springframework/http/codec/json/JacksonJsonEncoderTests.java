@@ -52,7 +52,11 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 
 	@Test
 	public void encode() {
-		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
+		Flux<Pojo> source = Flux.just(
+				new Pojo("foo", "bar"),
+				new Pojo("foofoo", "barbar"),
+				new Pojo("foofoofoo", "barbarbar")
+		);
 
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
 		Flux<DataBuffer> output =
@@ -62,11 +66,15 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 				.subscribe(output)
 				.assertComplete()
 				.assertNoError()
-				.assertValuesWith(stringConsumer("["),
+				.assertValuesWith(
+						stringConsumer("["),
+						stringConsumer("{\"foo\":\"foo\",\"bar\":\"bar\"}"),
+						stringConsumer(","),
 						stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"),
 						stringConsumer(","),
 						stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"),
-						stringConsumer("]"));
+						stringConsumer("]")
+				);
 	}
 
 	@Test

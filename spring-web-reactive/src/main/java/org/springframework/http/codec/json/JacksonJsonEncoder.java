@@ -83,7 +83,7 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 			Mono<DataBuffer> startArray =
 					Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER));
 			Flux<DataBuffer> arraySeparators =
-					Mono.just(bufferFactory.wrap(SEPARATOR_BUFFER)).repeat();
+					Mono.fromSupplier(() -> bufferFactory.wrap(SEPARATOR_BUFFER)).repeat();
 			Mono<DataBuffer> endArray =
 					Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER));
 
