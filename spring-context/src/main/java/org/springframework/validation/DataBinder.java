@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,8 +92,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>This generic data binder can be used in any kind of environment.
  * It is typically used by Spring web MVC controllers, via the web-specific
- * subclasses {@link org.springframework.web.bind.ServletRequestDataBinder}
- * and {@link org.springframework.web.portlet.bind.PortletRequestDataBinder}.
+ * subclass {@link org.springframework.web.bind.ServletRequestDataBinder}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

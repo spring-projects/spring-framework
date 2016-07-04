@@ -40,7 +40,6 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Juergen Hoeller
  * @since 2.5.2
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter#setCustomArgumentResolvers
- * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter#setCustomArgumentResolvers
  */
 public interface WebArgumentResolver {
 

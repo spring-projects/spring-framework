@@ -49,14 +49,11 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
-import org.springframework.web.servlet.mvc.annotation.UriTemplateServletAnnotationControllerTests;
 import org.springframework.web.servlet.view.AbstractView;
 
 import static org.junit.Assert.*;
 
 /**
- * The origin of this test class is {@link UriTemplateServletAnnotationControllerTests}.
- *
  * Tests in this class run against the {@link HandlerMethod} infrastructure:
  * <ul>
  * 	<li>RequestMappingHandlerMapping
