@@ -1113,6 +1113,14 @@ configure(rootProject) {
 
 		maxMemory = "1024m"
 		destinationDir = new File(buildDir, "api")
+
+		doFirst {
+			classpath = files(
+				// ensure the javadoc process can resolve types compiled from .aj sources
+				project(":spring-aspects").sourceSets.main.output
+			)
+			classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
+		}
 	}
 
 	task docsZip(type: Zip, dependsOn: 'reference') {
