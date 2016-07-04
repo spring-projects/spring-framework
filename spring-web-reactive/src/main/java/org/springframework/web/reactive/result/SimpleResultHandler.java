@@ -18,12 +18,14 @@ package org.springframework.web.reactive.result;
 
 import java.util.Optional;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -41,6 +43,11 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  */
 public class SimpleResultHandler implements Ordered, HandlerResultHandler {
+
+	protected static final TypeDescriptor MONO_TYPE = TypeDescriptor.valueOf(Mono.class);
+
+	protected static final TypeDescriptor FLUX_TYPE = TypeDescriptor.valueOf(Flux.class);
+
 
 	private ConversionService conversionService;
 
@@ -83,12 +90,17 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 		if (Void.TYPE.equals(type.getRawClass())) {
 			return true;
 		}
-		if (getConversionService().canConvert(type.getRawClass(), Mono.class) ||
-				getConversionService().canConvert(type.getRawClass(), Flux.class)) {
+		TypeDescriptor source = new TypeDescriptor(result.getReturnTypeSource());
+		if (Publisher.class.isAssignableFrom(type.getRawClass()) ||
+				canConvert(source, MONO_TYPE) || canConvert(source, FLUX_TYPE)) {
 			Class<?> clazz = result.getReturnType().getGeneric(0).getRawClass();
 			return Void.class.equals(clazz);
 		}
 		return false;
+	}
+
+	private boolean canConvert(TypeDescriptor source, TypeDescriptor target) {
+		return getConversionService().canConvert(source, target);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -98,19 +110,14 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 		if (!optional.isPresent()) {
 			return Mono.empty();
 		}
-
-		Object returnValue = optional.get();
-		if (returnValue instanceof Mono) {
-			return (Mono<Void>) returnValue;
+		Object value = optional.get();
+		if (Publisher.class.isAssignableFrom(result.getReturnType().getRawClass())) {
+			return Mono.from((Publisher<?>) value).then();
 		}
-
-		ResolvableType returnType = result.getReturnType();
-		if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
-			return this.conversionService.convert(returnValue, Mono.class);
-		}
-		else {
-			return this.conversionService.convert(returnValue, Flux.class).single();
-		}
+		TypeDescriptor source = new TypeDescriptor(result.getReturnTypeSource());
+		return canConvert(source, MONO_TYPE) ?
+				((Mono<Void>) getConversionService().convert(value, source, MONO_TYPE)) :
+				((Flux<Void>) getConversionService().convert(value, source, FLUX_TYPE)).single();
 	}
 
 }

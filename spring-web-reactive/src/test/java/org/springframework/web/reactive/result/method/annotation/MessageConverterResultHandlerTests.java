@@ -36,12 +36,12 @@ import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 import rx.Observable;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.PublisherToFluxConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -58,6 +58,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
@@ -92,8 +93,8 @@ public class MessageConverterResultHandlerTests {
 	@Test // SPR-12894
 	public void useDefaultContentType() throws Exception {
 		Resource body = new ClassPathResource("logo.png", getClass());
-		ResolvableType bodyType = ResolvableType.forType(Resource.class);
-		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+		ResolvableType type = ResolvableType.forType(Resource.class);
+		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
 
 		assertEquals("image/x-png", this.response.getHeaders().getFirst("Content-Type"));
 	}
@@ -104,22 +105,22 @@ public class MessageConverterResultHandlerTests {
 				Collections.singleton(APPLICATION_JSON));
 
 		String body = "foo";
-		ResolvableType bodyType = ResolvableType.forType(String.class);
-		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+		ResolvableType type = ResolvableType.forType(String.class);
+		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 	}
 
 	@Test
 	public void voidReturnType() throws Exception {
-		testVoidReturnType(null, ResolvableType.forType(Void.class));
+		testVoidReturnType(null, ResolvableType.forType(void.class));
 		testVoidReturnType(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, Void.class));
 		testVoidReturnType(Flux.empty(), ResolvableType.forClassWithGenerics(Flux.class, Void.class));
 		testVoidReturnType(Observable.empty(), ResolvableType.forClassWithGenerics(Observable.class, Void.class));
 	}
 
-	private void testVoidReturnType(Object body, ResolvableType bodyType) {
-		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+	private void testVoidReturnType(Object body, ResolvableType type) {
+		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
 
 		assertNull(this.response.getHeaders().get("Content-Type"));
 		assertNull(this.response.getBody());
@@ -128,10 +129,10 @@ public class MessageConverterResultHandlerTests {
 	@Test // SPR-13135
 	public void unsupportedReturnType() throws Exception {
 		ByteArrayOutputStream body = new ByteArrayOutputStream();
-		ResolvableType bodyType = ResolvableType.forType(OutputStream.class);
+		ResolvableType type = ResolvableType.forType(OutputStream.class);
 
 		HttpMessageConverter<?> converter = new CodecHttpMessageConverter<>(new ByteBufferEncoder());
-		Mono<Void> mono = createResultHandler(converter).writeBody(this.exchange, body, bodyType);
+		Mono<Void> mono = createResultHandler(converter).writeBody(this.exchange, body, type, returnType(type));
 
 		TestSubscriber.subscribe(mono).assertError(IllegalStateException.class);
 	}
@@ -139,8 +140,8 @@ public class MessageConverterResultHandlerTests {
 	@Test // SPR-12811
 	public void jacksonTypeOfListElement() throws Exception {
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
-		ResolvableType bodyType = ResolvableType.forClassWithGenerics(List.class, ParentClass.class);
-		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, ParentClass.class);
+		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("[{\"type\":\"foo\",\"parentProperty\":\"foo\"}," +
@@ -151,8 +152,8 @@ public class MessageConverterResultHandlerTests {
 	@Ignore
 	public void jacksonTypeWithSubType() throws Exception {
 		SimpleBean body = new SimpleBean(123L, "foo");
-		ResolvableType bodyType = ResolvableType.forClass(Identifiable.class);
-		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+		ResolvableType type = ResolvableType.forClass(Identifiable.class);
+		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("{\"id\":123,\"name\":\"foo\"}");
@@ -162,13 +163,17 @@ public class MessageConverterResultHandlerTests {
 	@Ignore
 	public void jacksonTypeWithSubTypeOfListElement() throws Exception {
 		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
-		ResolvableType bodyType = ResolvableType.forClassWithGenerics(List.class, Identifiable.class);
-		this.resultHandler.writeBody(this.exchange, body, bodyType).block(Duration.ofSeconds(5));
+		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, Identifiable.class);
+		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("[{\"id\":123,\"name\":\"foo\"},{\"id\":456,\"name\":\"bar\"}]");
 	}
 
+
+	private MethodParameter returnType(ResolvableType bodyType) {
+		return ResolvableMethod.on(TestController.class).returning(bodyType).resolveReturnType();
+	}
 
 	private AbstractMessageConverterResultHandler createResultHandler(HttpMessageConverter<?>... converters) {
 		List<HttpMessageConverter<?>> converterList;
@@ -186,7 +191,6 @@ public class MessageConverterResultHandlerTests {
 
 		GenericConversionService service = new GenericConversionService();
 		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new PublisherToFluxConverter());
 		service.addConverter(new ReactorToRxJava1Converter());
 
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
@@ -265,6 +269,31 @@ public class MessageConverterResultHandlerTests {
 		public String getName() {
 			return name;
 		}
+	}
+
+	@SuppressWarnings("unused")
+	private static class TestController {
+
+		Resource resource() { return null; }
+
+		String string() { return null; }
+
+		void voidReturn() { }
+
+		Mono<Void> monoVoid() { return null; }
+
+		Flux<Void> fluxVoid() { return null; }
+
+		Observable<Void> observableVoid() { return null; }
+
+		OutputStream outputStream() { return null; }
+
+		List<ParentClass> listParentClass() { return null; }
+
+		Identifiable identifiable() { return null; }
+
+		List<Identifiable> listIdentifiable() { return null; }
+
 	}
 
 }

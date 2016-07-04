@@ -42,16 +42,16 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.codec.Decoder;
-import org.springframework.core.convert.support.PublisherToFluxConverter;
-import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
@@ -202,23 +202,29 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(String paramName, Class<T> valueType, String body) {
+
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		this.request.writeWith(Flux.just(dataBuffer(body)));
+
 		Mono<Object> result = this.resolver.resolveArgument(parameter(paramName), this.model, this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
+
 		assertNotNull(value);
 		assertTrue("Actual type: " + value.getClass(), valueType.isAssignableFrom(value.getClass()));
+
 		return (T) value;
 	}
 
 	@SuppressWarnings("Convert2MethodRef")
 	private RequestBodyArgumentResolver resolver(Decoder<?>... decoders) {
+
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		Arrays.asList(decoders).forEach(decoder -> converters.add(new CodecHttpMessageConverter<>(decoder)));
-		GenericConversionService service = new GenericConversionService();
+
+		FormattingConversionService service = new DefaultFormattingConversionService();
 		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new PublisherToFluxConverter());
 		service.addConverter(new ReactorToRxJava1Converter());
+
 		return new RequestBodyArgumentResolver(converters, service, new TestBeanValidator());
 	}
 

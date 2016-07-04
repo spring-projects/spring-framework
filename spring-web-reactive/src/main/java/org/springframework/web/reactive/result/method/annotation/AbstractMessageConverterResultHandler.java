@@ -22,8 +22,10 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -40,6 +42,11 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  */
 public abstract class AbstractMessageConverterResultHandler extends ContentNegotiatingResultHandlerSupport {
+
+	protected static final TypeDescriptor MONO_TYPE = TypeDescriptor.valueOf(Mono.class);
+
+	protected static final TypeDescriptor FLUX_TYPE = TypeDescriptor.valueOf(Flux.class);
+
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
@@ -70,28 +77,34 @@ public abstract class AbstractMessageConverterResultHandler extends ContentNegot
 
 
 	@SuppressWarnings("unchecked")
-	protected Mono<Void> writeBody(ServerWebExchange exchange, Object body, ResolvableType bodyType) {
+	protected Mono<Void> writeBody(ServerWebExchange exchange, Object body,
+			ResolvableType bodyType, MethodParameter bodyTypeParameter) {
 
-		boolean convertToFlux = getConversionService().canConvert(bodyType.getRawClass(), Flux.class);
-		boolean convertToMono = getConversionService().canConvert(bodyType.getRawClass(), Mono.class);
+		Publisher<?> publisher = null;
+		ResolvableType elementType;
 
-		ResolvableType elementType = convertToFlux || convertToMono ? bodyType.getGeneric(0) : bodyType;
-
-		Publisher<?> publisher;
-		if (body == null) {
-			publisher = Mono.empty();
-		}
-		else if (convertToMono) {
-			publisher = getConversionService().convert(body, Mono.class);
-		}
-		else if (convertToFlux) {
-			publisher = getConversionService().convert(body, Flux.class);
+		if (Publisher.class.isAssignableFrom(bodyType.getRawClass())) {
+			publisher = (Publisher<?>) body;
 		}
 		else {
-			publisher = Mono.just(body);
+			TypeDescriptor descriptor = new TypeDescriptor(bodyTypeParameter);
+			if (getConversionService().canConvert(descriptor, MONO_TYPE)) {
+				publisher = (Publisher<?>) getConversionService().convert(body, descriptor, MONO_TYPE);
+			}
+			else if (getConversionService().canConvert(descriptor, FLUX_TYPE)) {
+				publisher = (Publisher<?>) getConversionService().convert(body, descriptor, FLUX_TYPE);
+			}
 		}
 
-		if (Void.class.equals(elementType.getRawClass())) {
+		if (publisher != null) {
+			elementType = bodyType.getGeneric(0);
+		}
+		else {
+			elementType = bodyType;
+			publisher = Mono.justOrEmpty(body);
+		}
+
+		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
 			return Mono.from((Publisher<Void>) publisher);
 		}
 

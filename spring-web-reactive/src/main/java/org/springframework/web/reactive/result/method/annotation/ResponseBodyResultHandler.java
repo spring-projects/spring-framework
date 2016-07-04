@@ -114,7 +114,8 @@ public class ResponseBodyResultHandler extends AbstractMessageConverterResultHan
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Object body = result.getReturnValue().orElse(null);
 		ResolvableType bodyType = result.getReturnType();
-		return writeBody(exchange, body, bodyType);
+		MethodParameter bodyTypeParameter = result.getReturnTypeSource();
+		return writeBody(exchange, body, bodyType, bodyTypeParameter);
 	}
 
 }

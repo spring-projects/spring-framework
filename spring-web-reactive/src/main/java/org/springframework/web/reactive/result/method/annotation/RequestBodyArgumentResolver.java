@@ -29,6 +29,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -56,6 +57,11 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * @author Rossen Stoyanchev
  */
 public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolver {
+
+	private static final TypeDescriptor MONO_TYPE = TypeDescriptor.valueOf(Mono.class);
+
+	private static final TypeDescriptor FLUX_TYPE = TypeDescriptor.valueOf(Flux.class);
+
 
 	private final List<HttpMessageConverter<?>> messageConverters;
 
@@ -123,8 +129,9 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 
-		boolean convertFromMono = getConversionService().canConvert(Mono.class, type.getRawClass());
-		boolean convertFromFlux = getConversionService().canConvert(Flux.class, type.getRawClass());
+		TypeDescriptor typeDescriptor = new TypeDescriptor(parameter);
+		boolean convertFromMono = getConversionService().canConvert(MONO_TYPE, typeDescriptor);
+		boolean convertFromFlux = getConversionService().canConvert(FLUX_TYPE, typeDescriptor);
 
 		ResolvableType elementType = convertFromMono || convertFromFlux ? type.getGeneric(0) : type;
 
@@ -141,7 +148,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 					if (this.validator != null) {
 						flux = flux.map(applyValidationIfApplicable(parameter));
 					}
-					return Mono.just(this.conversionService.convert(flux, type.getRawClass()));
+					return Mono.just(getConversionService().convert(flux, FLUX_TYPE, typeDescriptor));
 				}
 				else {
 					Mono<?> mono = converter.readOne(elementType, request);
@@ -151,7 +158,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 					if (!convertFromMono) {
 						return mono.map(value-> value); // TODO: MonoToObjectConverter
 					}
-					return Mono.just(this.conversionService.convert(mono, type.getRawClass()));
+					return Mono.just(getConversionService().convert(mono, MONO_TYPE, typeDescriptor));
 				}
 			}
 		}

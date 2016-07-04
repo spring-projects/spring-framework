@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpEntity;
@@ -85,7 +86,6 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 		else if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
 			ResolvableType genericType = result.getReturnType().getGeneric(0);
 			return isSupportedType(genericType);
-
 		}
 		return false;
 	}
@@ -100,17 +100,25 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
 		ResolvableType returnType = result.getReturnType();
-		Mono<?> returnValueMono;
-		ResolvableType bodyType;
 
+		ResolvableType bodyType;
+		MethodParameter bodyTypeParameter;
+
+		Mono<?> returnValueMono;
 		Optional<Object> optional = result.getReturnValue();
+
 		if (optional.isPresent() && getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
 			returnValueMono = getConversionService().convert(optional.get(), Mono.class);
-			bodyType = returnType.getGeneric(0).getGeneric(0);
+			bodyType = returnType.getGeneric(0, 0);
+			bodyTypeParameter = new MethodParameter(result.getReturnTypeSource());
+			bodyTypeParameter.increaseNestingLevel();
+			bodyTypeParameter.increaseNestingLevel();
 		}
 		else {
 			returnValueMono = Mono.justOrEmpty(optional);
 			bodyType = returnType.getGeneric(0);
+			bodyTypeParameter = new MethodParameter(result.getReturnTypeSource());
+			bodyTypeParameter.increaseNestingLevel();
 		}
 
 		return returnValueMono.then(returnValue -> {
@@ -132,7 +140,7 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
 
-			return writeBody(exchange, httpEntity.getBody(), bodyType);
+			return writeBody(exchange, httpEntity.getBody(), bodyType, bodyTypeParameter);
 		});
 	}
 

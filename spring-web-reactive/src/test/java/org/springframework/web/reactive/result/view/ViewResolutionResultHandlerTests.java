@@ -38,13 +38,13 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.support.ConfigurableConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.convert.support.PublisherToFluxConverter;
+import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
@@ -264,10 +264,12 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private ViewResolutionResultHandler createResultHandler(List<View> defaultViews, ViewResolver... resolvers) {
-		ConfigurableConversionService service = new DefaultConversionService();
+
+		FormattingConversionService service = new DefaultFormattingConversionService();
+		service.addConverter(new MonoToCompletableFutureConverter());
 		service.addConverter(new ReactorToRxJava1Converter());
-		service.addConverter(new PublisherToFluxConverter());
 		List<ViewResolver> resolverList = Arrays.asList(resolvers);
+
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolverList, service);
 		handler.setDefaultViews(defaultViews);
 		return handler;

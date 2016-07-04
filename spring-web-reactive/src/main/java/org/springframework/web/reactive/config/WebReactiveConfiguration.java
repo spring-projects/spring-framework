@@ -28,25 +28,25 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.convert.support.PublisherToFluxConverter;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.codec.StringEncoder;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
+import org.springframework.core.convert.support.ReactorToRxJava1Converter;
+import org.springframework.format.Formatter;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Decoder;
 import org.springframework.http.codec.xml.Jaxb2Encoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.codec.StringEncoder;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.converter.ConverterRegistry;
-import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactorToRxJava1Converter;
-import org.springframework.format.Formatter;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
@@ -271,16 +271,12 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
-	// TODO: switch to DefaultFormattingConversionService
-
 	@Bean
-	public GenericConversionService mvcConversionService() {
-		GenericConversionService service = new GenericConversionService();
+	public FormattingConversionService mvcConversionService() {
+		FormattingConversionService service = new DefaultFormattingConversionService();
 		addFormatters(service);
 		return service;
 	}
-
-	// TODO: switch to FormatterRegistry
 
 	/**
 	 * Override to add custom {@link Converter}s and {@link Formatter}s.
@@ -290,9 +286,8 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * <li>{@link ReactorToRxJava1Converter}
 	 * </ul>
 	 */
-	protected void addFormatters(ConverterRegistry registry) {
+	protected void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(new MonoToCompletableFutureConverter());
-		registry.addConverter(new PublisherToFluxConverter());
 		if (DependencyUtils.hasRxJava1()) {
 			registry.addConverter(new ReactorToRxJava1Converter());
 		}

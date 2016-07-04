@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
@@ -26,10 +27,10 @@ import rx.Observable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.PublisherToFluxConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
+import org.springframework.format.support.DefaultFormattingConversionService;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.web.reactive.HandlerResult;
 
 import static org.junit.Assert.assertEquals;
@@ -46,16 +47,15 @@ public class SimpleResultHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		GenericConversionService conversionService = new GenericConversionService();
-		conversionService.addConverter(new MonoToCompletableFutureConverter());
-		conversionService.addConverter(new PublisherToFluxConverter());
-		conversionService.addConverter(new ReactorToRxJava1Converter());
-		this.resultHandler = new SimpleResultHandler(conversionService);
+		FormattingConversionService service = new DefaultFormattingConversionService();
+		service.addConverter(new MonoToCompletableFutureConverter());
+		service.addConverter(new ReactorToRxJava1Converter());
+		this.resultHandler = new SimpleResultHandler(service);
 	}
 
 
 	@Test
-	public void supportsWithConversionService() throws NoSuchMethodException {
+	public void supports() throws NoSuchMethodException {
 		testSupports(ResolvableType.forClass(void.class), true);
 		testSupports(ResolvableType.forClassWithGenerics(Publisher.class, Void.class), true);
 		testSupports(ResolvableType.forClassWithGenerics(Flux.class, Void.class), true);
@@ -64,6 +64,11 @@ public class SimpleResultHandlerTests {
 
 		testSupports(ResolvableType.forClass(String.class), false);
 		testSupports(ResolvableType.forClassWithGenerics(Publisher.class, String.class), false);
+	}
+
+	@Test
+	public void supportsUsesGenericTypeInformation() throws Exception {
+		testSupports(ResolvableType.forClassWithGenerics(List.class, Void.class), false);
 	}
 
 	private void testSupports(ResolvableType type, boolean result) {
@@ -89,6 +94,8 @@ public class SimpleResultHandlerTests {
 		public String string() { return null; }
 
 		public Publisher<Void> publisher() { return null; }
+
+		public List<Void> list() { return null; }
 
 	}
 
