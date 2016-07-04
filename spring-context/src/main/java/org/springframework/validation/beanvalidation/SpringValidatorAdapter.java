@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.validation.ConstraintViolation;
+import javax.validation.executable.ExecutableValidator;
 import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
 
@@ -297,6 +298,11 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	public <T> T unwrap(Class<T> type) {
 		Assert.state(this.targetValidator != null, "No target Validator set");
 		return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
+	}
+
+	@Override
+	public ExecutableValidator forExecutables() {
+		return this.targetValidator.forExecutables();
 	}
 
 

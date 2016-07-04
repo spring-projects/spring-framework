@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
+import javax.persistence.SynchronizationType;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -167,11 +168,6 @@ import org.springframework.util.StringUtils;
 public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
-
-	/* Check JPA 2.1 PersistenceContext.synchronization() attribute */
-	private static final Method synchronizationAttribute =
-			ClassUtils.getMethodIfAvailable(PersistenceContext.class, "synchronization");
-
 
 	private Object jndiEnvironment;
 
@@ -662,8 +658,7 @@ public class PersistenceAnnotationBeanPostProcessor
 				}
 				this.unitName = pc.unitName();
 				this.type = pc.type();
-				this.synchronizedWithTransaction = (synchronizationAttribute == null ||
-						"SYNCHRONIZED".equals(ReflectionUtils.invokeMethod(synchronizationAttribute, pc).toString()));
+				this.synchronizedWithTransaction = SynchronizationType.SYNCHRONIZED.equals(pc.synchronization());
 				this.properties = properties;
 			}
 			else {

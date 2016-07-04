@@ -9,8 +9,5 @@
  * using Hibernate's native <code>sessionFactory.getCurrentSession()</code> style.
  *
  * <p><b>This package supports Hibernate 5.x only.</b>
- * See the {@code org.springframework.orm.hibernate4} package for Hibernate 4.x support.
- * <b>Note:</b> Do not use HibernateTemplate or other classes from the hibernate4 package
- * with Hibernate 5; this will lead to class definition exceptions at runtime.
  */
 package org.springframework.orm.hibernate5;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,6 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  * Spring-specific subclass of the standard {@link HibernatePersistenceProvider}
  * from the {@code org.hibernate.jpa} package, adding support for
  * {@link SmartPersistenceUnitInfo#getManagedPackages()}.
- *
- * <p>Compatible with Hibernate 4.3-5.0. {@link SpringHibernateEjbPersistenceProvider}
- * is an alternative for compatibility with earlier Hibernate versions (3.6-4.2).
  *
  * @author Juergen Hoeller
  * @author Joris Kuipers
