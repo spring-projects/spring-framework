@@ -25,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -150,7 +149,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	@Ignore
 	public void streamResult() throws Exception {
 		URI url = new URI("http://localhost:" + port + "/stream-result");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
