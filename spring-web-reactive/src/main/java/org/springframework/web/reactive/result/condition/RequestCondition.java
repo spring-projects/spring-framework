@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.web.server.ServerWebExchange;
 
 /**

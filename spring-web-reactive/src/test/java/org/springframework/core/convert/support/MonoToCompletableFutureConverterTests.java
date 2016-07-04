@@ -22,8 +22,6 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import rx.Observable;
-import rx.Single;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

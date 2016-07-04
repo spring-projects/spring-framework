@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.condition;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * A contract for media type expressions (e.g. "text/plain", "!text/plain") as

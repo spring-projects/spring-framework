@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Encoder;
 import org.springframework.util.MimeType;
 
 /**
