@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,6 @@ public class CookieGenerator {
 
 	/**
 	 * Set whether the cookie is supposed to be marked with the "HttpOnly" attribute.
-	 * <p>Note that this feature is only available on Servlet 3.0 and higher.
 	 * @see javax.servlet.http.Cookie#setHttpOnly
 	 */
 	public void setCookieHttpOnly(boolean cookieHttpOnly) {

@@ -39,11 +39,6 @@ import org.springframework.util.CollectionUtils;
  */
 public class ServletServerHttpResponse implements ServerHttpResponse {
 
-	/** Checking for Servlet 3.0+ HttpServletResponse.getHeader(String) */
-	private static final boolean servlet3Present =
-			ClassUtils.hasMethod(HttpServletResponse.class, "getHeader", String.class);
-
-
 	private final HttpServletResponse servletResponse;
 
 	private final HttpHeaders headers;
@@ -60,7 +55,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	public ServletServerHttpResponse(HttpServletResponse servletResponse) {
 		Assert.notNull(servletResponse, "HttpServletResponse must not be null");
 		this.servletResponse = servletResponse;
-		this.headers = (servlet3Present ? new ServletResponseHttpHeaders() : new HttpHeaders());
+		this.headers = new ServletResponseHttpHeaders();
 	}
 
 

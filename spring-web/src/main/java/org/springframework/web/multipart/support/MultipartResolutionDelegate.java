@@ -24,8 +24,6 @@ import javax.servlet.http.Part;
 
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.MethodParameter;
-import org.springframework.util.ClassUtils;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.util.WebUtils;
@@ -40,20 +38,6 @@ import org.springframework.web.util.WebUtils;
 public abstract class MultipartResolutionDelegate {
 
 	public static final Object UNRESOLVABLE = new Object();
-
-
-	private static Class<?> servletPartClass = null;
-
-	static {
-		try {
-			servletPartClass = ClassUtils.forName("javax.servlet.http.Part",
-					MultipartResolutionDelegate.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Servlet 3.0 javax.servlet.http.Part type not available -
-			// Part references simply not supported then.
-		}
-	}
 
 
 	public static boolean isMultipartRequest(HttpServletRequest request) {
@@ -71,15 +55,7 @@ public abstract class MultipartResolutionDelegate {
 		if (unwrapped != null) {
 			return unwrapped;
 		}
-		return adaptToMultipartHttpServletRequest(request);
-	}
-
-	private static MultipartHttpServletRequest adaptToMultipartHttpServletRequest(HttpServletRequest request) {
-		if (servletPartClass != null) {
-			// Servlet 3.0 available ..
-			return new StandardMultipartHttpServletRequest(request);
-		}
-		throw new MultipartException("Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
+		return new StandardMultipartHttpServletRequest(request);
 	}
 
 
@@ -87,8 +63,7 @@ public abstract class MultipartResolutionDelegate {
 		Class<?> paramType = parameter.getNestedParameterType();
 		return (MultipartFile.class == paramType ||
 				isMultipartFileCollection(parameter) || isMultipartFileArray(parameter) ||
-				(servletPartClass != null && (servletPartClass == paramType ||
-						isPartCollection(parameter) || isPartArray(parameter))));
+				(Part.class == paramType || isPartCollection(parameter) || isPartArray(parameter)));
 	}
 
 	public static Object resolveMultipartArgument(String name, MethodParameter parameter, HttpServletRequest request)
@@ -100,19 +75,19 @@ public abstract class MultipartResolutionDelegate {
 
 		if (MultipartFile.class == parameter.getNestedParameterType()) {
 			if (multipartRequest == null && isMultipart) {
-				multipartRequest = adaptToMultipartHttpServletRequest(request);
+				multipartRequest = new StandardMultipartHttpServletRequest(request);
 			}
 			return (multipartRequest != null ? multipartRequest.getFile(name) : null);
 		}
 		else if (isMultipartFileCollection(parameter)) {
 			if (multipartRequest == null && isMultipart) {
-				multipartRequest = adaptToMultipartHttpServletRequest(request);
+				multipartRequest = new StandardMultipartHttpServletRequest(request);
 			}
 			return (multipartRequest != null ? multipartRequest.getFiles(name) : null);
 		}
 		else if (isMultipartFileArray(parameter)) {
 			if (multipartRequest == null && isMultipart) {
-				multipartRequest = adaptToMultipartHttpServletRequest(request);
+				multipartRequest = new StandardMultipartHttpServletRequest(request);
 			}
 			if (multipartRequest != null) {
 				List<MultipartFile> multipartFiles = multipartRequest.getFiles(name);
@@ -122,7 +97,7 @@ public abstract class MultipartResolutionDelegate {
 				return null;
 			}
 		}
-		else if (parameter.getNestedParameterType() == servletPartClass) {
+		else if (Part.class == parameter.getNestedParameterType()) {
 			return (isMultipart ? RequestPartResolver.resolvePart(request, name) : null);
 		}
 		else if (isPartCollection(parameter)) {
@@ -145,11 +120,11 @@ public abstract class MultipartResolutionDelegate {
 	}
 
 	private static boolean isPartCollection(MethodParameter methodParam) {
-		return (servletPartClass == getCollectionParameterType(methodParam));
+		return (Part.class == getCollectionParameterType(methodParam));
 	}
 
 	private static boolean isPartArray(MethodParameter methodParam) {
-		return (servletPartClass == methodParam.getNestedParameterType().getComponentType());
+		return (Part.class == methodParam.getNestedParameterType().getComponentType());
 	}
 
 	private static Class<?> getCollectionParameterType(MethodParameter methodParam) {
