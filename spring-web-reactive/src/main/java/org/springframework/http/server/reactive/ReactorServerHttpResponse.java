@@ -61,11 +61,6 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	public void setStatusCode(HttpStatus status) {
-		getReactorChannel().status(HttpResponseStatus.valueOf(status.value()));
-	}
-
-	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
 		return Flux.from(publisher)
 				.window()
@@ -73,6 +68,14 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 						.takeUntil(db -> db instanceof FlushingDataBuffer)
 						.map(this::toByteBuf)))
 				.then();
+	}
+
+	@Override
+	protected void writeStatusCode() {
+		HttpStatus statusCode = this.getStatusCode();
+		if (statusCode != null) {
+			getReactorChannel().status(HttpResponseStatus.valueOf(statusCode.value()));
+		}
 	}
 
 	@Override

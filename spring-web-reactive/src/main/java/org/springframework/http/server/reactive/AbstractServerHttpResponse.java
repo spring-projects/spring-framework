@@ -21,12 +21,15 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -38,14 +41,19 @@ import org.springframework.util.MultiValueMap;
  * Base class for {@link ServerHttpResponse} implementations.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
+
+	private static Log logger = LogFactory.getLog(AbstractServerHttpResponse.class);
 
 	private static final int STATE_NEW = 1;
 
 	private static final int STATE_COMMITTING = 2;
 
 	private static final int STATE_COMMITTED = 3;
+
+	private HttpStatus statusCode;
 
 	private final HttpHeaders headers;
 
@@ -68,6 +76,10 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public final DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
+	}
+
+	protected HttpStatus getStatusCode() {
+		return statusCode;
 	}
 
 	@Override
@@ -106,6 +118,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			});
 			mono = mono.then(() -> {
 				this.state.set(STATE_COMMITTED);
+				writeStatusCode();
 				writeHeaders();
 				writeCookies();
 				return Mono.empty();
@@ -113,6 +126,12 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		}
 		return mono;
 	}
+
+	/**
+	 * Implement this method to write the status code to the underlying response.
+	 * This method is called once only.
+	 */
+	protected abstract void writeStatusCode();
 
 	/**
 	 * Implement this method to apply header changes from {@link #getHeaders()}
@@ -141,6 +160,20 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public Mono<Void> setComplete() {
 		return applyBeforeCommit();
+	}
+
+	@Override
+	public boolean setStatusCode(HttpStatus statusCode) {
+		Assert.notNull(statusCode);
+		if (STATE_NEW == this.state.get()) {
+			this.statusCode = statusCode;
+			return true;
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Can't set the status " + statusCode.toString() +
+					" because the HTTP response has already been committed");
+		}
+		return false;
 	}
 
 }

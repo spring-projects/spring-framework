@@ -27,14 +27,17 @@ import org.springframework.util.MultiValueMap;
  * Represents a reactive server-side HTTP response.
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
 public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 
 	/**
 	 * Set the HTTP status code of the response.
 	 * @param status the HTTP status as an {@link HttpStatus} enum value
+	 * @return {@code false} if the status code has not been set because the HTTP response
+	 * is already committed, {@code true} if it has been set correctly.
 	 */
-	void setStatusCode(HttpStatus status);
+	boolean setStatusCode(HttpStatus status);
 
 	/**
 	 * Return a mutable map with the cookies to send to the server.

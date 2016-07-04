@@ -60,11 +60,6 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	public void setStatusCode(HttpStatus status) {
-		this.response.setStatus(HttpResponseStatus.valueOf(status.value()));
-	}
-
-	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
 		Observable<ByteBuf> content = RxJava1ObservableConverter.from(body).map(this::toByteBuf);
 		return RxJava1ObservableConverter.from(this.response.write(content, bb -> bb instanceof FlushingByteBuf)).then();
@@ -73,6 +68,14 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	private ByteBuf toByteBuf(DataBuffer buffer) {
 		ByteBuf byteBuf = (buffer instanceof NettyDataBuffer ? ((NettyDataBuffer) buffer).getNativeBuffer() :  Unpooled.wrappedBuffer(buffer.asByteBuffer()));
 		return (buffer instanceof FlushingDataBuffer ? new FlushingByteBuf(byteBuf) : byteBuf);
+	}
+
+	@Override
+	protected void writeStatusCode() {
+		HttpStatus statusCode = this.getStatusCode();
+		if (statusCode != null) {
+			this.response.setStatus(HttpResponseStatus.valueOf(statusCode.value()));
+		}
 	}
 
 	@Override

@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 
 import static junit.framework.TestCase.assertTrue;
@@ -36,6 +35,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class ServerHttpResponseTests {
 
@@ -47,6 +47,7 @@ public class ServerHttpResponseTests {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
+		assertTrue(response.statusCodeWritten);
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
 
@@ -62,6 +63,7 @@ public class ServerHttpResponseTests {
 		IllegalStateException error = new IllegalStateException("boo");
 		response.writeWith(Flux.error(error)).otherwise(ex -> Mono.empty()).block();
 
+		assertFalse(response.statusCodeWritten);
 		assertFalse(response.headersWritten);
 		assertFalse(response.cookiesWritten);
 		assertTrue(response.body.isEmpty());
@@ -72,6 +74,7 @@ public class ServerHttpResponseTests {
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.setComplete().block();
 
+		assertTrue(response.statusCodeWritten);
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
 		assertTrue(response.body.isEmpty());
@@ -87,6 +90,7 @@ public class ServerHttpResponseTests {
 		});
 		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
+		assertTrue(response.statusCodeWritten);
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
 		assertSame(cookie, response.getCookies().getFirst("ID"));
@@ -104,6 +108,7 @@ public class ServerHttpResponseTests {
 		response.beforeCommit(() -> Mono.error(error));
 		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
 
+		assertTrue("beforeCommit action errors should be ignored", response.statusCodeWritten);
 		assertTrue("beforeCommit action errors should be ignored", response.headersWritten);
 		assertTrue("beforeCommit action errors should be ignored", response.cookiesWritten);
 		assertNull(response.getCookies().get("ID"));
@@ -124,6 +129,7 @@ public class ServerHttpResponseTests {
 		});
 		response.setComplete().block();
 
+		assertTrue(response.statusCodeWritten);
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
 		assertTrue(response.body.isEmpty());
@@ -139,6 +145,8 @@ public class ServerHttpResponseTests {
 
 	private static class TestServerHttpResponse extends AbstractServerHttpResponse {
 
+		private boolean statusCodeWritten;
+
 		private boolean headersWritten;
 
 		private boolean cookiesWritten;
@@ -150,7 +158,9 @@ public class ServerHttpResponseTests {
 		}
 
 		@Override
-		public void setStatusCode(HttpStatus status) {
+		public void writeStatusCode() {
+			assertFalse(this.statusCodeWritten);
+			this.statusCodeWritten = true;
 		}
 
 		@Override

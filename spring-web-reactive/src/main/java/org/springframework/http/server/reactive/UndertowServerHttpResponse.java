@@ -67,12 +67,6 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	public void setStatusCode(HttpStatus status) {
-		Assert.notNull(status);
-		getUndertowExchange().setStatusCode(status.value());
-	}
-
-	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
 		return Mono.from(s -> {
 			// lazily create Subscriber, since calling
@@ -104,6 +98,14 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		}
 		catch (IOException ex) {
 			return Mono.error(ex);
+		}
+	}
+
+	@Override
+	protected void writeStatusCode() {
+		HttpStatus statusCode = this.getStatusCode();
+		if (statusCode != null) {
+			getUndertowExchange().setStatusCode(statusCode.value());
 		}
 	}
 

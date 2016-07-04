@@ -63,13 +63,16 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	public void setStatusCode(HttpStatus status) {
-		getServletResponse().setStatus(status.value());
+	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
+		return this.responseBodyWriter.apply(publisher);
 	}
 
 	@Override
-	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		return this.responseBodyWriter.apply(publisher);
+	protected void writeStatusCode() {
+		HttpStatus statusCode = this.getStatusCode();
+		if (statusCode != null) {
+			getServletResponse().setStatus(statusCode.value());
+		}
 	}
 
 	@Override

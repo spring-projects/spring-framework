@@ -49,8 +49,9 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 
 	@Override
-	public void setStatusCode(HttpStatus status) {
+	public boolean setStatusCode(HttpStatus status) {
 		this.status = status;
+		return true;
 	}
 
 	public HttpStatus getStatus() {
