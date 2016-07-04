@@ -1726,7 +1726,7 @@ proxies for beans containing that annotation:
 The `TransactionInterceptor` defined here depends on a `PlatformTransactionManager`
 definition, which is not included in this generic file (although it could be) because it
 will be specific to the application's transaction requirements (typically JTA, as in
-this example, or Hibernate, JDO or JDBC):
+this example, or Hibernate or JDBC):
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]

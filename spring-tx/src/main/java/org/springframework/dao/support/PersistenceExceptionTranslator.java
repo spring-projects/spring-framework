@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.dao.DataAccessException;
 
 /**
  * Interface implemented by Spring integrations with data access technologies
- * that throw runtime exceptions, such as JPA, TopLink, JDO and Hibernate.
+ * that throw runtime exceptions, such as JPA and Hibernate.
  *
  * <p>This allows consistent usage of combined exception translation functionality,
  * without forcing a single translator to understand every single possible type
