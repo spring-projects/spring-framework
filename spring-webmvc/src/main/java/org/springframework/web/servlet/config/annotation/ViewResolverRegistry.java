@@ -191,26 +191,6 @@ public class ViewResolverRegistry {
 	}
 
 	/**
-	 * Register Velocity view resolver with an empty default view name
-	 * prefix and a default suffix of ".vm".
-	 * <p><strong>Note</strong> that you must also configure Velocity by adding a
-	 * {@link org.springframework.web.servlet.view.velocity.VelocityConfigurer} bean.
-	 * @deprecated as of Spring 4.3, in favor of FreeMarker
-	 */
-	@Deprecated
-	public UrlBasedViewResolverRegistration velocity() {
-		if (this.applicationContext != null && !hasBeanOfType(org.springframework.web.servlet.view.velocity.VelocityConfigurer.class)) {
-			throw new BeanInitializationException("In addition to a Velocity view resolver " +
-					"there must also be a single VelocityConfig bean in this web application context " +
-					"(or its parent): VelocityConfigurer is the usual implementation. " +
-					"This bean may be given any name.");
-		}
-		VelocityRegistration registration = new VelocityRegistration();
-		this.viewResolvers.add(registration.getViewResolver());
-		return registration;
-	}
-
-	/**
 	 * Register a Groovy markup view resolver with an empty default view name
 	 * prefix and a default suffix of ".tpl".
 	 */
@@ -306,15 +286,6 @@ public class ViewResolverRegistry {
 
 		public TilesRegistration() {
 			super(new TilesViewResolver());
-		}
-	}
-
-	private static class VelocityRegistration extends UrlBasedViewResolverRegistration {
-
-		@SuppressWarnings("deprecation")
-		public VelocityRegistration() {
-			super(new org.springframework.web.servlet.view.velocity.VelocityViewResolver());
-			getViewResolver().setSuffix(".vm");
 		}
 	}
 

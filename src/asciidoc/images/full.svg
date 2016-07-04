@@ -154,7 +154,7 @@
 						x="11.15" dy="1.2em" class="st8">data to the domain </tspan><tspan x="27.83" dy="1.2em" class="st8">model</tspan></text>		</g>
 		<g id="shape13-48" v:mID="13" v:groupContext="shape" transform="translate(263.76,-211.679)">
 			<title>Box.13</title>
-			<desc>Integration with JSP, Velocity, XSLT, PDF, Excel</desc>
+			<desc>Integration with JSP, FreeMarker, XSLT, PDF, Excel</desc>
 			<v:userDefs>
 				<v:ud v:nameU="visVersion" v:val="VT0(11):26"/>
 			</v:userDefs>
@@ -166,7 +166,7 @@
 			</g>
 			<rect x="0" y="214.421" width="72" height="44.7771" class="st6"/>
 			<text x="8.49" y="231.41" class="st7" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Integration with JSP, <tspan
-						x="7.83" dy="1.2em" class="st8">Velocity</tspan>, XSLT, PDF, <tspan x="28.66" dy="1.2em" class="st8">Excel</tspan></text>		</g>
+						x="7.83" dy="1.2em" class="st8">FreeMarker</tspan>, XSLT, PDF, <tspan x="28.66" dy="1.2em" class="st8">Excel</tspan></text>		</g>
 		<g id="shape15-55" v:mID="15" v:groupContext="shape" transform="translate(16.44,-112.319)">
 			<title>Box.15</title>
 			<desc>Spring Context</desc>

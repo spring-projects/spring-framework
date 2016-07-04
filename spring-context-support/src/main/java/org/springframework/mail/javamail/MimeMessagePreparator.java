@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public interface MimeMessagePreparator {
 	 * @throws java.io.IOException passing any exceptions thrown by MimeMessage methods
 	 * through for automatic conversion to the MailException hierarchy
 	 * @throws Exception if mail preparation failed, for example when a
-	 * Velocity template cannot be rendered for the mail text
+	 * FreeMarker template cannot be rendered for the mail text
 	 */
 	void prepare(MimeMessage mimeMessage) throws Exception;
 

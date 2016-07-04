@@ -58,7 +58,6 @@ import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
  * @since 4.1
  * @see TilesConfigurerBeanDefinitionParser
  * @see FreeMarkerConfigurerBeanDefinitionParser
- * @see VelocityConfigurerBeanDefinitionParser
  * @see GroovyMarkupConfigurerBeanDefinitionParser
  * @see ScriptTemplateConfigurerBeanDefinitionParser
  */
@@ -96,11 +95,6 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 			else if ("freemarker".equals(name)) {
 				resolverBeanDef = new RootBeanDefinition(FreeMarkerViewResolver.class);
 				resolverBeanDef.getPropertyValues().add("suffix", ".ftl");
-				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
-			}
-			else if ("velocity".equals(name)) {
-				resolverBeanDef = new RootBeanDefinition(org.springframework.web.servlet.view.velocity.VelocityViewResolver.class);
-				resolverBeanDef.getPropertyValues().add("suffix", ".vm");
 				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
 			}
 			else if ("groovy".equals(name)) {

@@ -36,6 +36,7 @@ text based content.
 
 This requires Groovy 2.3.1+ on the classpath.
 
+
 [[view-groovymarkup-configuration]]
 === Configuration
 
@@ -76,6 +77,7 @@ The XML counterpart using the MVC namespace is:
 	<mvc:groovy-configurer resource-loader-path="/WEB-INF/"/>
 ----
 
+
 [[view-groovymarkup-example]]
 === Example
 
@@ -98,56 +100,26 @@ Here is a sample template for an HTML page:
 ----
 
 
-[[view-velocity]]
-== Velocity & FreeMarker
-http://velocity.apache.org[Velocity] and http://www.freemarker.org[FreeMarker] are two
-templating languages that can be used as view technologies within Spring MVC
-applications. The languages are quite similar and serve similar needs and so are
-considered together in this section. For semantic and syntactic differences between the
-two languages, see the http://www.freemarker.org[FreeMarker] web site.
+[[view-freemarker]]
+== FreeMarker
+http://www.freemarker.org[FreeMarker] is a  templating language that can be used as a
+view technology within Spring MVC applications. For details on the template language,
+see the http://www.freemarker.org[FreeMarker] web site.
 
 
-
-[[view-velocity-dependencies]]
+[[view-freemarker-dependencies]]
 === Dependencies
-Your web application will need to include `velocity-1.x.x.jar` or `freemarker-2.x.jar`
-in order to work with Velocity or FreeMarker respectively and `commons-collections.jar`
-is required for Velocity. Typically they are included in the `WEB-INF/lib` folder where
-they are guaranteed to be found by a Java EE server and added to the classpath for your
+Your web application will need to include `freemarker-2.x.jar` in order to work with
+FreeMarker. Typically this is included in the `WEB-INF/lib` folder where the jars are
+guaranteed to be found by a Java EE server and added to the classpath for your
 application. It is of course assumed that you already have the `spring-webmvc.jar` in
-your `'WEB-INF/lib'` directory too! If you make use of Spring's 'dateToolAttribute' or
-'numberToolAttribute' in your Velocity views, you will also need to include the
-`velocity-tools-generic-1.x.jar`
+your `'WEB-INF/lib'` directory too!
 
 
-
-[[view-velocity-contextconfig]]
+[[view-freemarker-contextconfig]]
 === Context configuration
 A suitable configuration is initialized by adding the relevant configurer bean
 definition to your `'{asterisk}-servlet.xml'` as shown below:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<!--
-	This bean sets up the Velocity environment for us based on a root path for templates.
-	Optionally, a properties file can be specified for more control over the Velocity
-	environment, but the defaults are pretty sane for file based template loading.
-	-->
-	<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-		<property name="resourceLoaderPath" value="/WEB-INF/velocity/"/>
-	</bean>
-
-	<!--
-	View resolvers can also be configured with ResourceBundles or XML files. If you need
-	different view resolving based on Locale, you have to use the resource bundle resolver.
-	-->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
-		<property name="cache" value="true"/>
-		<property name="prefix" value=""/>
-		<property name="suffix" value=".vm"/>
-	</bean>
-----
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -170,76 +142,22 @@ definition to your `'{asterisk}-servlet.xml'` as shown below:
 
 [NOTE]
 ====
-For non web-apps add a `VelocityConfigurationFactoryBean` or a
-`FreeMarkerConfigurationFactoryBean` to your application context definition file.
+For non web-apps add a `FreeMarkerConfigurationFactoryBean` to your application context
+definition file.
 ====
 
 
-
-[[view-velocity-createtemplates]]
+[[view-freemarker-createtemplates]]
 === Creating templates
-Your templates need to be stored in the directory specified by the `{asterisk}Configurer` bean
-shown above. This document does not cover details of creating templates for the two
-languages - please see their relevant websites for information. If you use the view
-resolvers highlighted, then the logical view names relate to the template file names in
-similar fashion to `InternalResourceViewResolver` for JSP's. So if your controller
-returns a ModelAndView object containing a view name of "welcome" then the resolvers
-will look for the `/WEB-INF/freemarker/welcome.ftl` or `/WEB-INF/velocity/welcome.vm`
-template as appropriate.
-
-
-
-[[view-velocity-advancedconfig]]
-=== Advanced configuration
-The basic configurations highlighted above will be suitable for most application
-requirements, however additional configuration options are available for when unusual or
-advanced requirements dictate.
-
-
-[[view-velocity-example-velocityproperties]]
-==== velocity.properties
-This file is completely optional, but if specified, contains the values that are passed
-to the Velocity runtime in order to configure velocity itself. Only required for
-advanced configurations, if you need this file, specify its location on the
-`VelocityConfigurer` bean definition above.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-		<property name="configLocation" value="/WEB-INF/velocity.properties"/>
-	</bean>
-----
-
-Alternatively, you can specify velocity properties directly in the bean definition for
-the Velocity config bean by replacing the "configLocation" property with the following
-inline properties.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-		<property name="velocityProperties">
-			<props>
-				<prop key="resource.loader">file</prop>
-				<prop key="file.resource.loader.class">
-					org.apache.velocity.runtime.resource.loader.FileResourceLoader
-				</prop>
-				<prop key="file.resource.loader.path">${webapp.root}/WEB-INF/velocity</prop>
-				<prop key="file.resource.loader.cache">false</prop>
-			</props>
-		</property>
-	</bean>
-----
-
-Refer to the
-{api-spring-framework}/ui/velocity/VelocityEngineFactory.html[API
-documentation] for Spring configuration of Velocity, or the Velocity documentation for
-examples and definitions of the `'velocity.properties'` file itself.
+Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
+shown above. If you use the view resolvers highlighted, then the logical view names
+relate to the template file names in similar fashion to `InternalResourceViewResolver`
+for JSP's. So if your controller returns a ModelAndView object containing a view name of
+"welcome" then the resolver will look for the `/WEB-INF/freemarker/welcome.ftl` template.
 
 
 [[views-freemarker]]
-==== FreeMarker
+=== Advanced FreeMarker configuration
 FreeMarker 'Settings' and 'SharedVariables' can be passed directly to the FreeMarker
 `Configuration` object managed by Spring by setting the appropriate bean properties on
 the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
@@ -266,14 +184,13 @@ the `Configuration` object.
 
 
 
-[[view-velocity-forms]]
+[[view-freemarker-forms]]
 === Bind support and form handling
 Spring provides a tag library for use in JSP's that contains (amongst other things) a
 `<spring:bind/>` tag. This tag primarily enables forms to display values from form
 backing objects and to show the results of failed validations from a `Validator` in the
-web or business tier. From version 1.1, Spring now has support for the same
-functionality in both Velocity and FreeMarker, with additional convenience macros for
-generating form input elements themselves.
+web or business tier. Spring also has support for the same functionality in FreeMarker,
+with additional convenience macros for generating form input elements themselves.
 
 
 [[view-bind-macros]]
@@ -285,9 +202,8 @@ Some of the macros defined in the Spring libraries are considered internal (priv
 no such scoping exists in the macro definitions making all macros visible to calling
 code and user templates. The following sections concentrate only on the macros you need
 to be directly calling from within your templates. If you wish to view the macro code
-directly, the files are called spring.vm / spring.ftl and are in the packages
-`org.springframework.web.servlet.view.velocity` or
-`org.springframework.web.servlet.view.freemarker` respectively.
+directly, the file is called `spring.ftl` in the package
+`org.springframework.web.servlet.view.freemarker`.
 
 
 [[view-simple-binding]]
@@ -295,28 +211,7 @@ directly, the files are called spring.vm / spring.ftl and are in the packages
 In your HTML forms (vm / ftl templates) which act as a form view for a Spring MVC
 controller, you can use code similar to the following to bind to field values and
 display error messages for each input field in similar fashion to the JSP equivalent.
-Example code is shown below for the `personFormV`/`personFormF` views configured earlier:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<!-- velocity macros are automatically available -->
-	<html>
-		...
-		<form action="" method="POST">
-			Name:
-			#springBind("myModelObject.name")
-			<input type="text"
-				name="${status.expression}"
-				value="$!status.value"/><br>
-			#foreach($error in $status.errorMessages) <b>$error</b> <br> #end
-			<br>
-			...
-			<input type="submit" value="submit"/>
-		</form>
-		...
-	</html>
-----
+Example code is shown below for the `personForm` view configured earlier:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -341,18 +236,18 @@ Example code is shown below for the `personFormV`/`personFormF` views configured
 	</html>
 ----
 
-`#springBind` / `<@spring.bind>` requires a 'path' argument which consists of the name
-of your command object (it will be 'command' unless you changed it in your
-FormController properties) followed by a period and the name of the field on the command
-object you wish to bind to. Nested fields can be used too such as
-"command.address.street". The `bind` macro assumes the default HTML escaping behavior
-specified by the ServletContext parameter `defaultHtmlEscape` in web.xml
+`<@spring.bind>` requires a 'path' argument which consists of the name of your command
+object (it will be 'command' unless you changed it in your FormController properties)
+followed by a period and the name of the field on the command object you wish to bind to.
+Nested fields can be used too such as "command.address.street". The `bind` macro assumes
+the default HTML escaping behavior specified by the ServletContext parameter
+`defaultHtmlEscape` in `web.xml`.
 
-The optional form of the macro called `#springBindEscaped` / `<@spring.bindEscaped>`
-takes a second argument and explicitly specifies whether HTML escaping should be used in
-the status error messages or values. Set to true or false as required. Additional form
-handling macros simplify the use of HTML escaping and these macros should be used
-wherever possible. They are explained in the next section.
+The optional form of the macro called `<@spring.bindEscaped>` takes a second argument
+and explicitly specifies whether HTML escaping should be used in the status error
+messages or values. Set to true or false as required. Additional form handling macros
+simplify the use of HTML escaping and these macros should be used wherever possible.
+They are explained in the next section.
 
 
 [[views-form-macros]]
@@ -369,62 +264,49 @@ parameter list that each takes.
 .Table of macro definitions
 [cols="3,1,1"]
 |===
-| macro| VTL definition| FTL definition
+| macro| FTL definition
 
 | **message** (output a string from a resource bundle based on the code parameter)
-| #springMessage($code)
 | <@spring.message code/>
 
 | **messageText** (output a string from a resource bundle based on the code parameter,
   falling back to the value of the default parameter)
-| #springMessageText($code $text)
 | <@spring.messageText code, text/>
 
 | **url** (prefix a relative URL with the application's context root)
-| #springUrl($relativeUrl)
 | <@spring.url relativeUrl/>
 
 | **formInput** (standard input field for gathering user input)
-| #springFormInput($path $attributes)
 | <@spring.formInput path, attributes, fieldType/>
 
 | **formHiddenInput *** (hidden input field for submitting non-user input)
-| #springFormHiddenInput($path $attributes)
 | <@spring.formHiddenInput path, attributes/>
 
 | **formPasswordInput** * (standard input field for gathering passwords. Note that no
   value will ever be populated in fields of this type)
-| #springFormPasswordInput($path $attributes)
 | <@spring.formPasswordInput path, attributes/>
 
 | **formTextarea** (large text field for gathering long, freeform text input)
-| #springFormTextarea($path $attributes)
 | <@spring.formTextarea path, attributes/>
 
 | **formSingleSelect** (drop down box of options allowing a single required value to be
   selected)
-| #springFormSingleSelect( $path $options $attributes)
 | <@spring.formSingleSelect path, options, attributes/>
 
 | **formMultiSelect** (a list box of options allowing the user to select 0 or more values)
-| #springFormMultiSelect($path $options $attributes)
 | <@spring.formMultiSelect path, options, attributes/>
 
 | **formRadioButtons** (a set of radio buttons allowing a single selection to be made
   from the available choices)
-| #springFormRadioButtons($path $options $separator $attributes)
 | <@spring.formRadioButtons path, options separator, attributes/>
 
 | **formCheckboxes** (a set of checkboxes allowing 0 or more values to be selected)
-| #springFormCheckboxes($path $options $separator $attributes)
 | <@spring.formCheckboxes path, options, separator, attributes/>
 
 | **formCheckbox** (a single checkbox)
-| #springFormCheckbox($path $attributes)
 | <@spring.formCheckbox path, attributes/>
 
 | **showErrors** (simplify display of validation errors for the bound field)
-| #springShowErrors($separator $classOrStyle)
 | <@spring.showErrors separator, classOrStyle/>
 |===
 
@@ -460,16 +342,6 @@ differences exist between the two languages, they are explained in the notes.
 
 [[views-form-macros-input]]
 ===== Input Fields
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<!-- the Name field example from above using form macros in VTL -->
-	...
-	Name:
-	#springFormInput("command.name" "")<br>
-	#springShowErrors("<br>" "")<br>
-----
-
 The formInput macro takes the path parameter (command.name) and an additional attributes
 parameter which is empty in the example above. The macro, along with all other form
 generation macros, performs an implicit spring bind on the path parameter. The binding
@@ -479,8 +351,7 @@ path parameter again - it simply operates on whichever field a bind was last cre
 The showErrors macro takes a separator parameter (the characters that will be used to
 separate multiple errors on a given field) and also accepts a second parameter, this
 time a class name or style attribute. Note that FreeMarker is able to specify default
-values for the attributes parameter, unlike Velocity, and the two macro calls above
-could be expressed as follows in FTL:
+values for the attributes parameter.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -559,15 +430,15 @@ codes would be created with suitable keys like the example below.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		Map cityMap = new LinkedHashMap();
+	protected Map<String, String> referenceData(HttpServletRequest request) throws Exception {
+		Map<String, String> cityMap = new LinkedHashMap<>();
 		cityMap.put("LDN", "London");
 		cityMap.put("PRS", "Paris");
 		cityMap.put("NYC", "New York");
 
-		Map m = new HashMap();
-		m.put("cityMap", cityMap);
-		return m;
+		Map<String, String> model = new HashMap<>();
+		model.put("cityMap", cityMap);
+		return model;
 	}
 ----
 
@@ -600,9 +471,6 @@ model/context variable named xhtmlCompliant:
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
-	## for Velocity..
-	#set($springXhtmlCompliant = true)
-
 	<#-- for FreeMarker -->
 	<#assign xhtmlCompliant = true in spring>
 ----

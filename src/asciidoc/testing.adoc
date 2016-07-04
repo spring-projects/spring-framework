@@ -84,12 +84,6 @@ conjunction with your `WebApplicationContext` configuration for Spring MVC, see 
 <<spring-mvc-test-framework,_Spring MVC Test Framework_>>.
 
 
-[[mock-objects-portlet]]
-==== Portlet API
-The `org.springframework.mock.web.portlet` package contains a set of Portlet API mock
-objects, targeted at usage with Spring's Portlet MVC framework.
-
-
 
 [[unit-testing-support-classes]]
 === Unit Testing support Classes
@@ -4091,9 +4085,9 @@ expectations.
 This means if you are using JSPs you can verify the JSP page to which the request was
 forwarded, but there won't be any HTML rendered. In other words, the JSP will not be
 _invoked_. Note however that all other rendering technologies which don't rely on
-forwarding such as Thymeleaf, Freemarker, and Velocity will render HTML to the response
-body as expected. The same is true for rendering JSON, XML, and other formats via
-`@ResponseBody` methods.
+forwarding such as Thymeleaf and Freemarker will render HTML to the response body as
+expected. The same is true for rendering JSON, XML, and other formats via `@ResponseBody`
+methods.
 
 Alternatively you may consider the full end-to-end integration testing support from
 Spring Boot via `@WebIntegrationTest`. See the
@@ -4149,8 +4143,8 @@ need to deploy to a Servlet container
 [NOTE]
 ====
 `MockMvc` works with templating technologies that do not rely on a Servlet Container (e.g.,
-Thymeleaf, Freemarker, Velocity, etc.), but it does not work with JSPs since they rely on
-the Servlet Container.
+Thymeleaf, FreeMarker, etc.), but it does not work with JSPs since they rely on the Servlet
+container.
 ====
 
 [[spring-mvc-test-server-htmlunit-why]]
