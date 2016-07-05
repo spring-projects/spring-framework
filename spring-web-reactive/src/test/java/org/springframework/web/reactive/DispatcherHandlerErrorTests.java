@@ -17,6 +17,7 @@
 package org.springframework.web.reactive;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Collections;
 
 import org.junit.Before;
@@ -171,12 +172,9 @@ public class DispatcherHandlerErrorTests {
 
 		WebExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
-		Mono<Void> publisher = webHandler.handle(this.exchange);
+		webHandler.handle(this.exchange).block(Duration.ofSeconds(5));
 
-		TestSubscriber.subscribe(publisher)
-				.assertErrorWith(ex -> assertEquals(
-						HttpStatus.INTERNAL_SERVER_ERROR, this.exchange.getResponse().getStatusCode()));
-
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.exchange.getResponse().getStatusCode());
 	}
 
 
