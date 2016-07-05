@@ -3,8 +3,6 @@
 
 <beans>
 
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"/>
-
 	<bean id="dao" class="org.springframework.beans.factory.xml.DummyDao" autowire="constructor"/>
 
 	<bean id="boPrototype" autowire="constructor" class="org.springframework.beans.factory.xml.DummyBoImpl"
