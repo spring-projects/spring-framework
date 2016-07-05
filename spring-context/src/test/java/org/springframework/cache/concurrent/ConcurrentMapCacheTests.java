@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ public class ConcurrentMapCacheTests extends AbstractCacheTests<ConcurrentMapCac
 
 	@Before
 	public void setUp() throws Exception {
-		nativeCache = new ConcurrentHashMap<Object, Object>();
-		cache = new ConcurrentMapCache(CACHE_NAME, nativeCache, true);
-		cache.clear();
+		this.nativeCache = new ConcurrentHashMap<>();
+		this.cache = new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true);
+		this.cache.clear();
 	}
 
 	@Override
@@ -84,9 +84,9 @@ public class ConcurrentMapCacheTests extends AbstractCacheTests<ConcurrentMapCac
 	public void testNonSerializableContent() {
 		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
 
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Failed to serialize");
-		thrown.expectMessage(this.cache.getClass().getName());
+		this.thrown.expect(IllegalArgumentException.class);
+		this.thrown.expectMessage("Failed to serialize");
+		this.thrown.expectMessage(this.cache.getClass().getName());
 		serializeCache.put(createRandomKey(), this.cache);
 	}
 
@@ -96,15 +96,15 @@ public class ConcurrentMapCacheTests extends AbstractCacheTests<ConcurrentMapCac
 
 		String key = createRandomKey();
 		this.nativeCache.put(key, "Some garbage");
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Failed to deserialize");
-		thrown.expectMessage("Some garbage");
+		this.thrown.expect(IllegalArgumentException.class);
+		this.thrown.expectMessage("Failed to deserialize");
+		this.thrown.expectMessage("Some garbage");
 		serializeCache.get(key);
 	}
 
 
 	private ConcurrentMapCache createCacheWithStoreByValue() {
-		return new ConcurrentMapCache(CACHE_NAME, nativeCache, true,
+		return new ConcurrentMapCache(CACHE_NAME, this.nativeCache, true,
 				new SerializationDelegate(ConcurrentMapCacheTests.class.getClassLoader()));
 	}
 
