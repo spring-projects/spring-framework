@@ -79,13 +79,14 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		return Mono.from(s -> {
-			// lazily create Subscriber, since calling
-			// {@link HttpServerExchange#getResponseChannel} as done in the
-			// ResponseBodySubscriber constructor commits the response status and headers
-			ResponseBodySubscriber subscriber = new ResponseBodySubscriber(this.exchange);
-			subscriber.registerListener();
-			publisher.subscribe(subscriber);
+		// lazily create Subscriber, since calling
+		// {@link HttpServerExchange#getResponseChannel} as done in the
+		// ResponseBodyProcessor constructor commits the response status and headers
+		return Mono.from(subscriber -> {
+			ResponseBodyProcessor processor = new ResponseBodyProcessor(this.exchange);
+			processor.registerListener();
+			publisher.subscribe(processor);
+			processor.subscribe(subscriber);
 		});
 	}
 
@@ -137,7 +138,7 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		}
 	}
 
-	private static class ResponseBodySubscriber extends AbstractResponseBodySubscriber {
+	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
 
 		private final ChannelListener<StreamSinkChannel> listener = new WriteListener();
 
@@ -147,7 +148,7 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 
 		private volatile ByteBuffer byteBuffer;
 
-		public ResponseBodySubscriber(HttpServerExchange exchange) {
+		public ResponseBodyProcessor(HttpServerExchange exchange) {
 			this.exchange = exchange;
 			this.responseChannel = exchange.getResponseChannel();
 		}
@@ -155,14 +156,6 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		public void registerListener() {
 			this.responseChannel.getWriteSetter().set(this.listener);
 			this.responseChannel.resumeWrites();
-		}
-
-		@Override
-		protected void writeError(Throwable t) {
-			if (!this.exchange.isResponseStarted() &&
-					this.exchange.getStatusCode() < 500) {
-				this.exchange.setStatusCode(500);
-			}
 		}
 
 		@Override

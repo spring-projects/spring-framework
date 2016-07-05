@@ -38,7 +38,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 /**
@@ -91,13 +90,15 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		ServletServerHttpRequest request =
 				new ServletServerHttpRequest(servletRequest, requestBody);
 
-		ResponseBodySubscriber responseBody =
-				new ResponseBodySubscriber(synchronizer, this.bufferSize);
+		ResponseBodyProcessor responseBody =
+				new ResponseBodyProcessor(synchronizer, this.bufferSize);
 		responseBody.registerListener();
 		ServletServerHttpResponse response =
 				new ServletServerHttpResponse(servletResponse, this.dataBufferFactory,
-						publisher -> Mono
-								.from(subscriber -> publisher.subscribe(responseBody)));
+						publisher -> Mono.from(subscriber -> {
+							publisher.subscribe(responseBody);
+							responseBody.subscribe(subscriber);
+						}));
 
 		HandlerResultSubscriber resultSubscriber =
 				new HandlerResultSubscriber(synchronizer);
@@ -129,7 +130,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 			logger.error("Error from request handling. Completing the request.", ex);
 			HttpServletResponse response =
 					(HttpServletResponse) this.synchronizer.getResponse();
-			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			this.synchronizer.complete();
 		}
 
@@ -206,8 +207,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 	}
 
-
-	private static class ResponseBodySubscriber extends AbstractResponseBodySubscriber {
+	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
 
 		private final ResponseBodyWriteListener writeListener =
 				new ResponseBodyWriteListener();
@@ -218,7 +218,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		private volatile boolean flushOnNext;
 
-		public ResponseBodySubscriber(ServletAsyncContextSynchronizer synchronizer,
+		public ResponseBodyProcessor(ServletAsyncContextSynchronizer synchronizer,
 				int bufferSize) {
 			this.synchronizer = synchronizer;
 			this.bufferSize = bufferSize;
@@ -273,13 +273,6 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		@Override
-		protected void writeError(Throwable t) {
-			HttpServletResponse response =
-					(HttpServletResponse) this.synchronizer.getResponse();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		}
-
-		@Override
 		protected void flush() throws IOException {
 			ServletOutputStream output = outputStream();
 			if (output.isReady()) {
@@ -324,14 +317,14 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 			@Override
 			public void onWritePossible() throws IOException {
-				ResponseBodySubscriber.this.onWritePossible();
+				ResponseBodyProcessor.this.onWritePossible();
 			}
 
 			@Override
 			public void onError(Throwable ex) {
 				// Error on writing to the HTTP stream, so any further writes will probably
 				// fail. Let's log instead of calling {@link #writeError}.
-				ResponseBodySubscriber.this.logger
+				ResponseBodyProcessor.this.logger
 						.error("ResponseBodyWriteListener error", ex);
 			}
 		}

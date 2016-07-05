@@ -52,6 +52,8 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 
 	private Subscriber<? super DataBuffer> subscriber;
 
+	private volatile boolean dataAvailable;
+
 	@Override
 	public void subscribe(Subscriber<? super DataBuffer> subscriber) {
 		if (this.logger.isTraceEnabled()) {
@@ -199,7 +201,9 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 			void subscribe(AbstractRequestBodyPublisher publisher,
 					Subscriber<? super DataBuffer> subscriber) {
 				Objects.requireNonNull(subscriber);
-				if (publisher.changeState(this, DATA_UNAVAILABLE)) {
+				State newState =
+						publisher.dataAvailable ? DATA_AVAILABLE : DATA_UNAVAILABLE;
+				if (publisher.changeState(this, newState)) {
 					Subscription subscription = new RequestBodySubscription(
 									publisher);
 					publisher.subscriber = subscriber;
@@ -208,6 +212,11 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 				else {
 					throw new IllegalStateException(toString());
 				}
+			}
+
+			@Override
+			void onDataAvailable(AbstractRequestBodyPublisher publisher) {
+				publisher.dataAvailable = true;
 			}
 		},
 		/**
@@ -252,20 +261,11 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 				}
 			}
 
-			@Override
-			void onDataAvailable(AbstractRequestBodyPublisher publisher) {
-				// ignore
-			}
 		},
 		/**
 		 * The terminal completed state. Does not respond to any events.
 		 */
 		COMPLETED {
-			@Override
-			void subscribe(AbstractRequestBodyPublisher publisher,
-					Subscriber<? super DataBuffer> subscriber) {
-				// ignore
-			}
 
 			@Override
 			void request(AbstractRequestBodyPublisher publisher, long n) {
@@ -274,11 +274,6 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 
 			@Override
 			void cancel(AbstractRequestBodyPublisher publisher) {
-				// ignore
-			}
-
-			@Override
-			void onDataAvailable(AbstractRequestBodyPublisher publisher) {
 				// ignore
 			}
 
@@ -309,7 +304,7 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 		}
 
 		void onDataAvailable(AbstractRequestBodyPublisher publisher) {
-			throw new IllegalStateException(toString());
+			// ignore
 		}
 
 		void onAllDataRead(AbstractRequestBodyPublisher publisher) {

@@ -70,11 +70,8 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 			@Override
 			public void onError(Throwable ex) {
-				if (exchange.isResponseStarted() || exchange.getStatusCode() > 500) {
-					logger.error("Error from request handling. Completing the request.",
-							ex);
-				}
-				else {
+				logger.error("Error from request handling. Completing the request.", ex);
+				if (!exchange.isResponseStarted() && exchange.getStatusCode() <= 500) {
 					exchange.setStatusCode(500);
 				}
 				exchange.endExchange();

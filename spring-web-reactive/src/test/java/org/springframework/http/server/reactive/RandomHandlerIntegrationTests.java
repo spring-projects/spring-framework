@@ -21,8 +21,6 @@ import java.util.Random;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,12 +29,9 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.boot.ReactorHttpServer;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.Assert.*;
 
 public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -60,7 +55,6 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 	@Test
 	public void random() throws Throwable {
 		// TODO: fix Reactor support
-		assumeFalse(server instanceof ReactorHttpServer);
 
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -72,14 +66,6 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 		assertEquals(RESPONSE_SIZE,
 				response.getHeaders().getContentLength());
 		assertEquals(RESPONSE_SIZE, response.getBody().length);
-
-		while (!handler.requestComplete) {
-			Thread.sleep(100);
-		}
-		if (handler.requestError != null) {
-			throw handler.requestError;
-		}
-		assertEquals(REQUEST_SIZE, handler.requestSize);
 	}
 
 
@@ -93,45 +79,21 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 
 		public static final int CHUNKS = 16;
 
-		private volatile boolean requestComplete;
-
-		private int requestSize;
-
-		private Throwable requestError;
-
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			requestError = null;
+			Mono<Integer> requestSizeMono = request.getBody().
+					reduce(0, (integer, dataBuffer) -> integer +
+							dataBuffer.readableByteCount()).
+					doAfterTerminate((size, throwable) -> {
+						assertNull(throwable);
+						assertEquals(REQUEST_SIZE, (long) size);
+					});
 
-			request.getBody().subscribe(new Subscriber<DataBuffer>() {
 
-				@Override
-				public void onSubscribe(Subscription s) {
-					requestComplete = false;
-					requestSize = 0;
-					requestError = null;
-					s.request(Long.MAX_VALUE);
-				}
-
-				@Override
-				public void onNext(DataBuffer bytes) {
-					requestSize += bytes.readableByteCount();
-				}
-
-				@Override
-				public void onError(Throwable t) {
-					requestComplete = true;
-					requestError = t;
-				}
-
-				@Override
-				public void onComplete() {
-					requestComplete = true;
-				}
-			});
 
 			response.getHeaders().setContentLength(RESPONSE_SIZE);
-			return response.writeWith(multipleChunks());
+
+			return requestSizeMono.then(response.writeWith(multipleChunks()));
 		}
 
 		private Publisher<DataBuffer> singleChunk() {
