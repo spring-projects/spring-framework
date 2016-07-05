@@ -48,6 +48,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 	private final HttpChannel channel;
 
+
 	public ReactorServerHttpResponse(HttpChannel response,
 			DataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
@@ -60,6 +61,15 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 		return this.channel;
 	}
 
+
+	@Override
+	protected void writeStatusCode() {
+		HttpStatus statusCode = this.getStatusCode();
+		if (statusCode != null) {
+			getReactorChannel().status(HttpResponseStatus.valueOf(statusCode.value()));
+		}
+	}
+
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
 		return Flux.from(publisher)
@@ -68,14 +78,6 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 						.takeUntil(db -> db instanceof FlushingDataBuffer)
 						.map(this::toByteBuf)))
 				.then();
-	}
-
-	@Override
-	protected void writeStatusCode() {
-		HttpStatus statusCode = this.getStatusCode();
-		if (statusCode != null) {
-			getReactorChannel().status(HttpResponseStatus.valueOf(statusCode.value()));
-		}
 	}
 
 	@Override
@@ -119,4 +121,5 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 			return this.channel.sendFile(file, position, count);
 		});
 	}
+
 }

@@ -23,8 +23,6 @@ import java.util.function.Function;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -42,11 +40,10 @@ import org.springframework.util.Assert;
  */
 public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 
-	private static final Log logger = LogFactory.getLog(ServletServerHttpResponse.class);
-
 	private final HttpServletResponse response;
 
 	private final Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter;
+
 
 	public ServletServerHttpResponse(HttpServletResponse response,
 			DataBufferFactory dataBufferFactory,
@@ -58,14 +55,11 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		this.responseBodyWriter = responseBodyWriter;
 	}
 
+
 	public HttpServletResponse getServletResponse() {
 		return this.response;
 	}
 
-	@Override
-	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		return this.responseBodyWriter.apply(publisher);
-	}
 
 	@Override
 	protected void writeStatusCode() {
@@ -73,6 +67,11 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		if (statusCode != null) {
 			getServletResponse().setStatus(statusCode.value());
 		}
+	}
+
+	@Override
+	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
+		return this.responseBodyWriter.apply(publisher);
 	}
 
 	@Override

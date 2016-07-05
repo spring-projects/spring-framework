@@ -54,6 +54,7 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 
 	private final HttpServerExchange exchange;
 
+
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
 			DataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
@@ -65,6 +66,16 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 	public HttpServerExchange getUndertowExchange() {
 		return this.exchange;
 	}
+
+
+	@Override
+	protected void writeStatusCode() {
+		HttpStatus statusCode = this.getStatusCode();
+		if (statusCode != null) {
+			getUndertowExchange().setStatusCode(statusCode.value());
+		}
+	}
+
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
@@ -98,14 +109,6 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		}
 		catch (IOException ex) {
 			return Mono.error(ex);
-		}
-	}
-
-	@Override
-	protected void writeStatusCode() {
-		HttpStatus statusCode = this.getStatusCode();
-		if (statusCode != null) {
-			getUndertowExchange().setStatusCode(statusCode.value());
 		}
 	}
 

@@ -45,7 +45,7 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
-	private static Log logger = LogFactory.getLog(AbstractServerHttpResponse.class);
+	private Log logger = LogFactory.getLog(getClass());
 
 	private static final int STATE_NEW = 1;
 
@@ -53,17 +53,20 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private static final int STATE_COMMITTED = 3;
 
+
+	private final DataBufferFactory dataBufferFactory;
+
+
 	private HttpStatus statusCode;
 
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
 
-	private final AtomicInteger state = new AtomicInteger(STATE_NEW);
-
 	private final List<Supplier<? extends Mono<Void>>> beforeCommitActions = new ArrayList<>(4);
 
-	private final DataBufferFactory dataBufferFactory;
+	private final AtomicInteger state = new AtomicInteger(STATE_NEW);
+
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
@@ -73,13 +76,29 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		this.cookies = new LinkedMultiValueMap<String, ResponseCookie>();
 	}
 
+
 	@Override
 	public final DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
 	}
 
+
+	@Override
+	public boolean setStatusCode(HttpStatus statusCode) {
+		Assert.notNull(statusCode);
+		if (STATE_NEW == this.state.get()) {
+			this.statusCode = statusCode;
+			return true;
+		}
+		else if (logger.isDebugEnabled()) {
+			logger.debug("Can't set the status " + statusCode.toString() +
+					" because the HTTP response has already been committed");
+		}
+		return false;
+	}
+
 	protected HttpStatus getStatusCode() {
-		return statusCode;
+		return this.statusCode;
 	}
 
 	@Override
@@ -98,6 +117,12 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			return CollectionUtils.unmodifiableMultiValueMap(this.cookies);
 		}
 		return this.cookies;
+	}
+
+	@Override
+	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
+		Assert.notNull(action);
+		this.beforeCommitActions.add(action);
 	}
 
 	@Override
@@ -128,6 +153,12 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	/**
+	 * Implement this method to write to the underlying the response.
+	 * @param body the publisher to write with
+	 */
+	protected abstract Mono<Void> writeWithInternal(Publisher<DataBuffer> body);
+
+	/**
 	 * Implement this method to write the status code to the underlying response.
 	 * This method is called once only.
 	 */
@@ -145,35 +176,10 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 */
 	protected abstract void writeCookies();
 
-	/**
-	 * Implement this method to write to the underlying the response.
-	 * @param body the publisher to write with
-	 */
-	protected abstract Mono<Void> writeWithInternal(Publisher<DataBuffer> body);
-
-	@Override
-	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		Assert.notNull(action);
-		this.beforeCommitActions.add(action);
-	}
 
 	@Override
 	public Mono<Void> setComplete() {
 		return applyBeforeCommit();
-	}
-
-	@Override
-	public boolean setStatusCode(HttpStatus statusCode) {
-		Assert.notNull(statusCode);
-		if (STATE_NEW == this.state.get()) {
-			this.statusCode = statusCode;
-			return true;
-		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("Can't set the status " + statusCode.toString() +
-					" because the HTTP response has already been committed");
-		}
-		return false;
 	}
 
 }
