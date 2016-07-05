@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	 * Stores the exporter parameters passed in by the user as passed in by the user. May be keyed as
 	 * {@code String}s with the fully qualified name of the exporter parameter field.
 	 */
-	private Map<?, ?> exporterParameters = new HashMap<Object, Object>();
+	private Map<?, ?> exporterParameters = new HashMap<>();
 
 	/**
 	 * Stores the converted exporter parameters - keyed by {@code JRExporterParameter}.
@@ -317,7 +317,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 				throw new ApplicationContextException(
 						"'reportDataKey' for main report is required when specifying a value for 'subReportDataKeys'");
 			}
-			this.subReports = new HashMap<String, JasperReport>(this.subReportUrls.size());
+			this.subReports = new HashMap<>(this.subReportUrls.size());
 			for (Enumeration<?> urls = this.subReportUrls.propertyNames(); urls.hasMoreElements();) {
 				String key = (String) urls.nextElement();
 				String path = this.subReportUrls.getProperty(key);
@@ -358,7 +358,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 	protected final void convertExporterParameters() {
 		if (!CollectionUtils.isEmpty(this.exporterParameters)) {
 			this.convertedExporterParameters =
-					new HashMap<net.sf.jasperreports.engine.JRExporterParameter, Object>(this.exporterParameters.size());
+					new HashMap<>(this.exporterParameters.size());
 			for (Map.Entry<?, ?> entry : this.exporterParameters.entrySet()) {
 				net.sf.jasperreports.engine.JRExporterParameter exporterParameter = getExporterParameter(entry.getKey());
 				this.convertedExporterParameters.put(

@@ -35,7 +35,7 @@ public class DefaultRequestExpectation implements RequestExpectation {
 
 	private final RequestCount requestCount;
 
-	private final List<RequestMatcher> requestMatchers = new LinkedList<RequestMatcher>();
+	private final List<RequestMatcher> requestMatchers = new LinkedList<>();
 
 	private ResponseCreator responseCreator;
 

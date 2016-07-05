@@ -196,7 +196,7 @@ public abstract class ResponseEntityExceptionHandler {
 		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
 			request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
 		}
-		return new ResponseEntity<Object>(body, headers, status);
+		return new ResponseEntity<>(body, headers, status);
 	}
 
 	/**

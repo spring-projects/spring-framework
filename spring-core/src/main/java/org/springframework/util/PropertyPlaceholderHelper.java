@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class PropertyPlaceholderHelper {
 
 	private static final Log logger = LogFactory.getLog(PropertyPlaceholderHelper.class);
 
-	private static final Map<String, String> wellKnownSimplePrefixes = new HashMap<String, String>(4);
+	private static final Map<String, String> wellKnownSimplePrefixes = new HashMap<>(4);
 
 	static {
 		wellKnownSimplePrefixes.put("}", "{");
@@ -123,7 +123,7 @@ public class PropertyPlaceholderHelper {
 	 */
 	public String replacePlaceholders(String value, PlaceholderResolver placeholderResolver) {
 		Assert.notNull(value, "'value' must not be null");
-		return parseStringValue(value, placeholderResolver, new HashSet<String>());
+		return parseStringValue(value, placeholderResolver, new HashSet<>());
 	}
 
 	protected String parseStringValue(

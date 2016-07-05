@@ -70,7 +70,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 */
 	protected AbstractMessageConverter(Collection<MimeType> supportedMimeTypes) {
 		Assert.notNull(supportedMimeTypes, "supportedMimeTypes must not be null");
-		this.supportedMimeTypes = new ArrayList<MimeType>(supportedMimeTypes);
+		this.supportedMimeTypes = new ArrayList<>(supportedMimeTypes);
 	}
 
 

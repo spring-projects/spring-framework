@@ -253,7 +253,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	}
 
 	private void cookies(MockHttpServletRequest request) {
-		List<Cookie> cookies = new ArrayList<Cookie>();
+		List<Cookie> cookies = new ArrayList<>();
 
 		String cookieHeaderValue = header("Cookie");
 		if (cookieHeaderValue != null) {

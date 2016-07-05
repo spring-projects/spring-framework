@@ -70,7 +70,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		Object source = context.extractSource(element);
 		context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(), source));
 
-		ManagedList<Object> resolvers = new ManagedList<Object>(4);
+		ManagedList<Object> resolvers = new ManagedList<>(4);
 		resolvers.setSource(context.extractSource(element));
 		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "groovy", "script-template", "bean", "ref"};
 
@@ -130,7 +130,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		else if (contentnNegotiationElements.size() == 1) {
 			BeanDefinition beanDef = createContentNegotiatingViewResolver(contentnNegotiationElements.get(0), context);
 			beanDef.getPropertyValues().add("viewResolvers", resolvers);
-			ManagedList<Object> list = new ManagedList<Object>(1);
+			ManagedList<Object> list = new ManagedList<>(1);
 			list.add(beanDef);
 			compositeResolverBeanDef.getPropertyValues().add("order", Ordered.HIGHEST_PRECEDENCE);
 			compositeResolverBeanDef.getPropertyValues().add("viewResolvers", list);
@@ -175,7 +175,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 
 		List<Element> elements = DomUtils.getChildElementsByTagName(resolverElement, new String[] {"default-views"});
 		if (!elements.isEmpty()) {
-			ManagedList<Object> list = new ManagedList<Object>();
+			ManagedList<Object> list = new ManagedList<>();
 			for (Element element : DomUtils.getChildElementsByTagName(elements.get(0), "bean", "ref")) {
 				list.add(context.getDelegate().parsePropertySubElement(element, null));
 			}

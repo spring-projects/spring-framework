@@ -84,7 +84,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 		super(id, config, wsHandler, attributes);
-		this.messageCache = new LinkedBlockingQueue<String>(config.getHttpMessageCacheSize());
+		this.messageCache = new LinkedBlockingQueue<>(config.getHttpMessageCacheSize());
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public class JmsGatewaySupportTests {
 	@Test
 	public void testJmsGatewaySupportWithConnectionFactory() throws Exception {
 		ConnectionFactory mockConnectionFactory = mock(ConnectionFactory.class);
-		final List<String> test = new ArrayList<String>(1);
+		final List<String> test = new ArrayList<>(1);
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
 			@Override
 			protected void initGateway() {
@@ -52,7 +52,7 @@ public class JmsGatewaySupportTests {
 	@Test
 	public void testJmsGatewaySupportWithJmsTemplate() throws Exception {
 		JmsTemplate template = new JmsTemplate();
-		final List<String> test = new ArrayList<String>(1);
+		final List<String> test = new ArrayList<>(1);
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
 			@Override
 			protected void initGateway() {

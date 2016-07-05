@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	@Test
 	public void parameterParsing() throws Exception {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo/bar");
 
 		AbstractJasperReportsView view = new AbstractJasperReportsView() {
@@ -67,7 +67,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void invalidClass() throws Exception {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("foo.net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
@@ -79,7 +79,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void invalidField() {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI_FOO", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
@@ -91,7 +91,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void invalidType() {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("java.lang.Boolean.TRUE", "/foo");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();
@@ -103,7 +103,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	@Test
 	public void typeConversion() {
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN", "true");
 
 		AbstractJasperReportsView view = new JasperReportsHtmlView();

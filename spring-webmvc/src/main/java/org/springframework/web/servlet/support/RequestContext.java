@@ -840,7 +840,7 @@ public class RequestContext {
 	 */
 	public Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {
-			this.errorsMap = new HashMap<String, Errors>();
+			this.errorsMap = new HashMap<>();
 		}
 		Errors errors = this.errorsMap.get(name);
 		boolean put = false;

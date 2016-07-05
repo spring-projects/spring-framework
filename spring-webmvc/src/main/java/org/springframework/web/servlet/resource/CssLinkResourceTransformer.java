@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 
-	private final List<CssLinkParser> linkParsers = new ArrayList<CssLinkParser>();
+	private final List<CssLinkParser> linkParsers = new ArrayList<>();
 
 
 	public CssLinkResourceTransformer() {
@@ -81,7 +81,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
 		String content = new String(bytes, DEFAULT_CHARSET);
 
-		Set<CssLinkInfo> infos = new HashSet<CssLinkInfo>(5);
+		Set<CssLinkInfo> infos = new HashSet<>(5);
 		for (CssLinkParser parser : this.linkParsers) {
 			parser.parseLink(content, infos);
 		}
@@ -93,7 +93,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			return resource;
 		}
 
-		List<CssLinkInfo> sortedInfos = new ArrayList<CssLinkInfo>(infos);
+		List<CssLinkInfo> sortedInfos = new ArrayList<>(infos);
 		Collections.sort(sortedInfos);
 
 		int index = 0;

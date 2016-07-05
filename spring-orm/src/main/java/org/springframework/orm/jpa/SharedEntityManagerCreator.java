@@ -65,9 +65,9 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Class<?>[] NO_ENTITY_MANAGER_INTERFACES = new Class<?>[0];
 
-	private static final Set<String> transactionRequiringMethods = new HashSet<String>(6);
+	private static final Set<String> transactionRequiringMethods = new HashSet<>(6);
 
-	private static final Set<String> queryTerminationMethods = new HashSet<String>(3);
+	private static final Set<String> queryTerminationMethods = new HashSet<>(3);
 
 	static {
 		transactionRequiringMethods.add("joinTransaction");

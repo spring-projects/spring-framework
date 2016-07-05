@@ -570,7 +570,7 @@ public class JodaTimeFormattingTests {
 
 		private MonthDay monthDay;
 
-		private final List<JodaTimeBean> children = new ArrayList<JodaTimeBean>();
+		private final List<JodaTimeBean> children = new ArrayList<>();
 
 		public LocalDate getLocalDate() {
 			return localDate;

@@ -38,7 +38,7 @@ public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMet
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers =
-		new ArrayList<HandlerMethodReturnValueHandler>();
+			new ArrayList<>();
 
 
 	/**

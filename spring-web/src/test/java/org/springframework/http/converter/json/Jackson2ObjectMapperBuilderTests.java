@@ -344,7 +344,7 @@ public class Jackson2ObjectMapperBuilderTests {
 	public void mixIns() {
 		Class<?> target = String.class;
 		Class<?> mixInSource = Object.class;
-		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+		Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 		mixIns.put(target, mixInSource);
 
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modules()
@@ -374,7 +374,7 @@ public class Jackson2ObjectMapperBuilderTests {
 	public void completeSetup() throws JsonMappingException {
 		NopAnnotationIntrospector annotationIntrospector = NopAnnotationIntrospector.instance;
 
-		Map<Class<?>, JsonDeserializer<?>> deserializerMap = new HashMap<Class<?>, JsonDeserializer<?>>();
+		Map<Class<?>, JsonDeserializer<?>> deserializerMap = new HashMap<>();
 		JsonDeserializer<Date> deserializer = new DateDeserializers.DateDeserializer();
 		deserializerMap.put(Date.class, deserializer);
 

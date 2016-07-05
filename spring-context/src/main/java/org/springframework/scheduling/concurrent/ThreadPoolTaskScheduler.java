@@ -236,7 +236,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		try {
 			Callable<T> taskToUse = task;
 			if (this.errorHandler != null) {
-				taskToUse = new DelegatingErrorHandlingCallable<T>(task, this.errorHandler);
+				taskToUse = new DelegatingErrorHandlingCallable<>(task, this.errorHandler);
 			}
 			return executor.submit(taskToUse);
 		}
@@ -249,7 +249,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public ListenableFuture<?> submitListenable(Runnable task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
-			ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+			ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
 			executor.execute(errorHandlingTask(future, false));
 			return future;
 		}
@@ -262,7 +262,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
-			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
 			executor.execute(errorHandlingTask(future, false));
 			return future;
 		}

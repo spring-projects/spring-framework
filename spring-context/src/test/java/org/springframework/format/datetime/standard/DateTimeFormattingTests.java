@@ -421,7 +421,7 @@ public class DateTimeFormattingTests {
 
 		private MonthDay monthDay;
 
-		private final List<DateTimeBean> children = new ArrayList<DateTimeBean>();
+		private final List<DateTimeBean> children = new ArrayList<>();
 
 		public LocalDate getLocalDate() {
 			return localDate;

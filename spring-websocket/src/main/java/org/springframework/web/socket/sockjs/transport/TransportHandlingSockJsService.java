@@ -66,13 +66,13 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
 
 
-	private final Map<TransportType, TransportHandler> handlers = new HashMap<TransportType, TransportHandler>();
+	private final Map<TransportType, TransportHandler> handlers = new HashMap<>();
 
 	private SockJsMessageCodec messageCodec;
 
-	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
-	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<String, SockJsSession>();
+	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<>();
 
 	private ScheduledFuture<?> sessionCleanupTask;
 
@@ -199,7 +199,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 		HandshakeFailureException failure = null;
 
 		try {
-			Map<String, Object> attributes = new HashMap<String, Object>();
+			Map<String, Object> attributes = new HashMap<>();
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;
 			}
@@ -266,7 +266,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			SockJsSession session = this.sessions.get(sessionId);
 			if (session == null) {
 				if (transportHandler instanceof SockJsSessionFactory) {
-					Map<String, Object> attributes = new HashMap<String, Object>();
+					Map<String, Object> attributes = new HashMap<>();
 					if (!chain.applyBeforeHandshake(request, response, attributes)) {
 						return;
 					}
@@ -362,7 +362,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
-					List<String> removedIds = new ArrayList<String>();
+					List<String> removedIds = new ArrayList<>();
 					for (SockJsSession session : sessions.values()) {
 						try {
 							if (session.getTimeSinceLastActive() > getDisconnectDelay()) {

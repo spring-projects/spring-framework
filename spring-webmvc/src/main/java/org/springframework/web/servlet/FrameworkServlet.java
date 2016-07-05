@@ -179,7 +179,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
 	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
-			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+			new ArrayList<>();
 
 	/** Comma-delimited ApplicationContextInitializer class names set through init param */
 	private String contextInitializerClasses;

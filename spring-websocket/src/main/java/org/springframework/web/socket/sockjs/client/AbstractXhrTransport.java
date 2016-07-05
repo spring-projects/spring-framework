@@ -95,7 +95,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 	@Override
 	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
-		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<WebSocketSession>();
+		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<>();
 		XhrClientSockJsSession session = new XhrClientSockJsSession(request, handler, this, connectFuture);
 		request.addTimeoutTask(session.getTimeoutTask());
 

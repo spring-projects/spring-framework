@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -498,7 +498,7 @@ public class SqlQueryTests  {
 			}
 
 			public Customer findCustomer(int id) {
-				Map<String, Integer> params = new HashMap<String, Integer>();
+				Map<String, Integer> params = new HashMap<>();
 				params.put("id", id);
 				return executeByNamedParam(params).get(0);
 			}
@@ -556,7 +556,7 @@ public class SqlQueryTests  {
 			}
 
 			public Customer findCustomer(int id, String country) {
-				Map<String, Object> params = new HashMap<String, Object>();
+				Map<String, Object> params = new HashMap<>();
 				params.put("id", id);
 				params.put("country", country);
 				return executeByNamedParam(params).get(0);
@@ -602,14 +602,14 @@ public class SqlQueryTests  {
 			}
 
 			public List<Customer> findCustomers(List<Integer> ids) {
-				Map<String, Object> params = new HashMap<String, Object>();
+				Map<String, Object> params = new HashMap<>();
 				params.put("ids", ids);
 				return executeByNamedParam(params);
 			}
 		}
 
 		CustomerQuery query = new CustomerQuery(dataSource);
-		List<Integer> ids = new ArrayList<Integer>();
+		List<Integer> ids = new ArrayList<>();
 		ids.add(1);
 		ids.add(2);
 		List<Customer> cust = query.findCustomers(ids);
@@ -654,7 +654,7 @@ public class SqlQueryTests  {
 			}
 
 			public List<Customer> findCustomers(Integer id) {
-				Map<String, Object> params = new HashMap<String, Object>();
+				Map<String, Object> params = new HashMap<>();
 				params.put("id1", id);
 				return executeByNamedParam(params);
 			}
@@ -701,7 +701,7 @@ public class SqlQueryTests  {
 			}
 
 			public List<Customer> findCustomers(Integer id1) {
-				Map<String, Integer> params = new HashMap<String, Integer>();
+				Map<String, Integer> params = new HashMap<>();
 				params.put("id1", id1);
 				return executeByNamedParam(params);
 			}
@@ -737,7 +737,7 @@ public class SqlQueryTests  {
 		}
 
 		CustomerUpdateQuery query = new CustomerUpdateQuery(dataSource);
-		Map<Integer, String> values = new HashMap<Integer, String>(2);
+		Map<Integer, String> values = new HashMap<>(2);
 		values.put(1, "Rod");
 		values.put(2, "Thomas");
 		query.execute(2, values);

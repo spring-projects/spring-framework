@@ -182,7 +182,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 */
 	private static class SseEventBuilderImpl implements SseEventBuilder {
 
-		private final Set<DataWithMediaType> dataToSend = new LinkedHashSet<DataWithMediaType>(4);
+		private final Set<DataWithMediaType> dataToSend = new LinkedHashSet<>(4);
 
 		private StringBuilder sb;
 

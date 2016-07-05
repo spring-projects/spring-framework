@@ -83,7 +83,7 @@ public abstract class MetaAnnotationUtils {
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Class<T> annotationType) {
 
-		return findAnnotationDescriptor(clazz, new HashSet<Annotation>(), annotationType);
+		return findAnnotationDescriptor(clazz, new HashSet<>(), annotationType);
 	}
 
 	/**
@@ -106,7 +106,7 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared locally?
 		if (AnnotationUtils.isAnnotationDeclaredLocally(annotationType, clazz)) {
-			return new AnnotationDescriptor<T>(clazz, clazz.getAnnotation(annotationType));
+			return new AnnotationDescriptor<>(clazz, clazz.getAnnotation(annotationType));
 		}
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
@@ -115,7 +115,7 @@ public abstract class MetaAnnotationUtils {
 				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(
 						composedAnnotation.annotationType(), visited, annotationType);
 				if (descriptor != null) {
-					return new AnnotationDescriptor<T>(
+					return new AnnotationDescriptor<>(
 							clazz, descriptor.getDeclaringClass(), composedAnnotation, descriptor.getAnnotation());
 				}
 			}
@@ -125,8 +125,8 @@ public abstract class MetaAnnotationUtils {
 		for (Class<?> ifc : clazz.getInterfaces()) {
 			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, visited, annotationType);
 			if (descriptor != null) {
-				return new AnnotationDescriptor<T>(clazz, descriptor.getDeclaringClass(),
-					descriptor.getComposedAnnotation(), descriptor.getAnnotation());
+				return new AnnotationDescriptor<>(clazz, descriptor.getDeclaringClass(),
+						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
 			}
 		}
 
@@ -168,7 +168,7 @@ public abstract class MetaAnnotationUtils {
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(
 			Class<?> clazz, Class<? extends Annotation>... annotationTypes) {
 
-		return findAnnotationDescriptorForTypes(clazz, new HashSet<Annotation>(), annotationTypes);
+		return findAnnotationDescriptorForTypes(clazz, new HashSet<>(), annotationTypes);
 	}
 
 	/**

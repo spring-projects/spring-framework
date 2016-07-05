@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class AnnotationAwareAspectJAutoProxyCreator extends AspectJAwareAdvisorA
 	 * <p>Default is to consider all @AspectJ beans as eligible.
 	 */
 	public void setIncludePatterns(List<String> patterns) {
-		this.includePatterns = new ArrayList<Pattern>(patterns.size());
+		this.includePatterns = new ArrayList<>(patterns.size());
 		for (String patternText : patterns) {
 			this.includePatterns.add(Pattern.compile(patternText));
 		}

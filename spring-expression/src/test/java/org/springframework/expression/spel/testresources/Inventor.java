@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.expression.spel.testresources;
 
 import java.util.ArrayList;
@@ -25,16 +41,16 @@ public class Inventor {
 	public Map<String,String> testMap;
 	private boolean wonNobelPrize;
 	private PlaceOfBirth[] placesLived;
-	private List<PlaceOfBirth> placesLivedList = new ArrayList<PlaceOfBirth>();
+	private List<PlaceOfBirth> placesLivedList = new ArrayList<>();
 	public ArrayContainer arrayContainer;
 	public boolean publicBoolean;
 	private boolean accessedThroughGetSet;
-	public List<Integer> listOfInteger = new ArrayList<Integer>();
-	public List<Boolean> booleanList = new ArrayList<Boolean>();
-	public Map<String,Boolean> mapOfStringToBoolean = new LinkedHashMap<String,Boolean>();
-	public Map<Integer,String> mapOfNumbersUpToTen = new LinkedHashMap<Integer,String>();
-	public List<Integer> listOfNumbersUpToTen = new ArrayList<Integer>();
-	public List<Integer> listOneFive = new ArrayList<Integer>();
+	public List<Integer> listOfInteger = new ArrayList<>();
+	public List<Boolean> booleanList = new ArrayList<>();
+	public Map<String,Boolean> mapOfStringToBoolean = new LinkedHashMap<>();
+	public Map<Integer,String> mapOfNumbersUpToTen = new LinkedHashMap<>();
+	public List<Integer> listOfNumbersUpToTen = new ArrayList<>();
+	public List<Integer> listOneFive = new ArrayList<>();
 	public String[] stringArrayOfThreeItems = new String[]{"1","2","3"};
 	private String foo;
 	public int counter;
@@ -46,7 +62,7 @@ public class Inventor {
 		this.birthdate = birthdate;
 		this.nationality = nationality;
 		this.arrayContainer = new ArrayContainer();
-		testMap = new HashMap<String,String>();
+		testMap = new HashMap<>();
 		testMap.put("monday", "montag");
 		testMap.put("tuesday", "dienstag");
 		testMap.put("wednesday", "mittwoch");
@@ -164,7 +180,7 @@ public class Inventor {
 	}
 
 	public List<String> getDoublesAsStringList() {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		result.add("14.35");
 		result.add("15.45");
 		return result;

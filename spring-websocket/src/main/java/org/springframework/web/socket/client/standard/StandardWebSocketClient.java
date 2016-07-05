@@ -59,7 +59,7 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 
 	private final WebSocketContainer webSocketContainer;
 
-	private final Map<String,Object> userProperties = new HashMap<String, Object>();
+	private final Map<String,Object> userProperties = new HashMap<>();
 
 	private AsyncListenableTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
 
@@ -155,14 +155,14 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 			return this.taskExecutor.submitListenable(connectTask);
 		}
 		else {
-			ListenableFutureTask<WebSocketSession> task = new ListenableFutureTask<WebSocketSession>(connectTask);
+			ListenableFutureTask<WebSocketSession> task = new ListenableFutureTask<>(connectTask);
 			task.run();
 			return task;
 		}
 	}
 
 	private static List<Extension> adaptExtensions(List<WebSocketExtension> extensions) {
-		List<Extension> result = new ArrayList<Extension>();
+		List<Extension> result = new ArrayList<>();
 		for (WebSocketExtension extension : extensions) {
 			result.add(new WebSocketToStandardExtensionAdapter(extension));
 		}

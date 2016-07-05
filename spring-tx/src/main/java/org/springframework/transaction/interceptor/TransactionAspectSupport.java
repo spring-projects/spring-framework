@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,11 +82,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * single method (as will be the case for around advice).
 	 */
 	private static final ThreadLocal<TransactionInfo> transactionInfoHolder =
-			new NamedThreadLocal<TransactionInfo>("Current aspect-driven transaction");
+			new NamedThreadLocal<>("Current aspect-driven transaction");
 
 
 	private final ConcurrentHashMap<Object, PlatformTransactionManager> transactionManagerCache =
-			new ConcurrentHashMap<Object, PlatformTransactionManager>();
+			new ConcurrentHashMap<>();
 
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.

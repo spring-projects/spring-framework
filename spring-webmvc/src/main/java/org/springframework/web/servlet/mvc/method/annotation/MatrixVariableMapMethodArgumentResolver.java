@@ -70,7 +70,7 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 			return Collections.emptyMap();
 		}
 
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 		String pathVariable = parameter.getParameterAnnotation(MatrixVariable.class).pathVar();
 
 		if (!pathVariable.equals(ValueConstants.DEFAULT_NONE)) {

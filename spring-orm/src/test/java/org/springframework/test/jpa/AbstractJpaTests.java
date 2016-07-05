@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,9 +92,9 @@ public abstract class AbstractJpaTests extends AbstractTransactionalSpringContex
 	 * Values are intentionally not strongly typed, to avoid potential class cast exceptions
 	 * through use between different class loaders.
 	 */
-	private static Map<String, Object> contextCache = new HashMap<String, Object>();
+	private static Map<String, Object> contextCache = new HashMap<>();
 
-	private static Map<String, ClassLoader> classLoaderCache = new HashMap<String, ClassLoader>();
+	private static Map<String, ClassLoader> classLoaderCache = new HashMap<>();
 
 	protected EntityManagerFactory entityManagerFactory;
 

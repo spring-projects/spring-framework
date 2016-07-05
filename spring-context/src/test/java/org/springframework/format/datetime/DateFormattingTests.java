@@ -260,7 +260,7 @@ public class DateFormattingTests {
 		@DateTimeFormat(iso=ISO.DATE_TIME)
 		private Date isoDateTime;
 
-		private final List<SimpleDateBean> children = new ArrayList<SimpleDateBean>();
+		private final List<SimpleDateBean> children = new ArrayList<>();
 
 		public Long getMillis() {
 			return millis;

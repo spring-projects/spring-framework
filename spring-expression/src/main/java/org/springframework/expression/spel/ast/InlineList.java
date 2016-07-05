@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class InlineList extends SpelNodeImpl {
 			}
 		}
 		if (isConstant) {
-			List<Object> constantList = new ArrayList<Object>();
+			List<Object> constantList = new ArrayList<>();
 			int childcount = getChildCount();
 			for (int c = 0; c < childcount; c++) {
 				SpelNode child = getChild(c);
@@ -89,7 +89,7 @@ public class InlineList extends SpelNodeImpl {
 			return this.constant;
 		}
 		else {
-			List<Object> returnValue = new ArrayList<Object>();
+			List<Object> returnValue = new ArrayList<>();
 			int childCount = getChildCount();
 			for (int c = 0; c < childCount; c++) {
 				returnValue.add(getChild(c).getValue(expressionState));

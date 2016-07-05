@@ -108,13 +108,13 @@ public class Jackson2ObjectMapperBuilder {
 
 	private FilterProvider filters;
 
-	private final Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+	private final Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 
-	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<Class<?>, JsonSerializer<?>>();
+	private final Map<Class<?>, JsonSerializer<?>> serializers = new LinkedHashMap<>();
 
-	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<Class<?>, JsonDeserializer<?>>();
+	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new LinkedHashMap<>();
 
-	private final Map<Object, Boolean> features = new HashMap<Object, Boolean>();
+	private final Map<Object, Boolean> features = new HashMap<>();
 
 	private List<Module> modules;
 
@@ -485,7 +485,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
 	public Jackson2ObjectMapperBuilder modules(List<Module> modules) {
-		this.modules = new LinkedList<Module>(modules);
+		this.modules = new LinkedList<>(modules);
 		this.findModulesViaServiceLoader = false;
 		this.findWellKnownModules = false;
 		return this;

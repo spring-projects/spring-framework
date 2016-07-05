@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,10 +266,10 @@ public class ValidatorFactoryTests {
 		private ValidAddress address = new ValidAddress();
 
 		@Valid
-		private List<ValidAddress> addressList = new LinkedList<ValidAddress>();
+		private List<ValidAddress> addressList = new LinkedList<>();
 
 		@Valid
-		private Set<ValidAddress> addressSet = new LinkedHashSet<ValidAddress>();
+		private Set<ValidAddress> addressSet = new LinkedHashSet<>();
 
 		public boolean expectsAutowiredValidator = false;
 

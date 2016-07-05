@@ -85,7 +85,7 @@ public abstract class TestPropertySourceUtils {
 	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 
-		final List<TestPropertySourceAttributes> attributesList = new ArrayList<TestPropertySourceAttributes>();
+		final List<TestPropertySourceAttributes> attributesList = new ArrayList<>();
 		final Class<TestPropertySource> annotationType = TestPropertySource.class;
 		AnnotationDescriptor<TestPropertySource> descriptor = findAnnotationDescriptor(testClass, annotationType);
 		Assert.notNull(descriptor, String.format(
@@ -115,7 +115,7 @@ public abstract class TestPropertySourceUtils {
 	}
 
 	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {
-		final List<String> locations = new ArrayList<String>();
+		final List<String> locations = new ArrayList<>();
 
 		for (TestPropertySourceAttributes attrs : attributesList) {
 			if (logger.isTraceEnabled()) {
@@ -135,7 +135,7 @@ public abstract class TestPropertySourceUtils {
 	}
 
 	private static String[] mergeProperties(List<TestPropertySourceAttributes> attributesList) {
-		final List<String> properties = new ArrayList<String>();
+		final List<String> properties = new ArrayList<>();
 
 		for (TestPropertySourceAttributes attrs : attributesList) {
 			if (logger.isTraceEnabled()) {
@@ -255,7 +255,7 @@ public abstract class TestPropertySourceUtils {
 			}
 			MapPropertySource ps = (MapPropertySource) environment.getPropertySources().get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
 			if (ps == null) {
-				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME, new LinkedHashMap<String, Object>());
+				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME, new LinkedHashMap<>());
 				environment.getPropertySources().addFirst(ps);
 			}
 			ps.getSource().putAll(convertInlinedPropertiesToMap(inlinedProperties));
@@ -281,7 +281,7 @@ public abstract class TestPropertySourceUtils {
 	 */
 	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		Map<String, Object> map = new LinkedHashMap<>();
 		Properties props = new Properties();
 
 		for (String pair : inlinedProperties) {

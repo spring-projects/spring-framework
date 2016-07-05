@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	 * to the backing {@link List} on demand.
 	 */
 	public AutoPopulatingList(Class<? extends E> elementClass) {
-		this(new ArrayList<E>(), elementClass);
+		this(new ArrayList<>(), elementClass);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	 * {@link List} on demand.
 	 */
 	public AutoPopulatingList(List<E> backingList, Class<? extends E> elementClass) {
-		this(backingList, new ReflectiveElementFactory<E>(elementClass));
+		this(backingList, new ReflectiveElementFactory<>(elementClass));
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	 * {@link ArrayList} and creates new elements on demand using the supplied {@link ElementFactory}.
 	 */
 	public AutoPopulatingList(ElementFactory<E> elementFactory) {
-		this(new ArrayList<E>(), elementFactory);
+		this(new ArrayList<>(), elementFactory);
 	}
 
 	/**

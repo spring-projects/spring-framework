@@ -116,7 +116,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	private String requestContextAttribute;
 
 	/** Map of static attributes, keyed by attribute name (String) */
-	private final Map<String, Object> staticAttributes = new HashMap<String, Object>();
+	private final Map<String, Object> staticAttributes = new HashMap<>();
 
 	private Boolean exposePathVariables;
 

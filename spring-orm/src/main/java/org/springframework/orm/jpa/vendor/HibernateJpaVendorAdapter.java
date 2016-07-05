@@ -101,7 +101,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 
 	@Override
 	public Map<String, Object> getJpaPropertyMap() {
-		Map<String, Object> jpaProperties = new HashMap<String, Object>();
+		Map<String, Object> jpaProperties = new HashMap<>();
 
 		if (getDatabasePlatform() != null) {
 			jpaProperties.put(Environment.DIALECT, getDatabasePlatform());

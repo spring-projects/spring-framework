@@ -154,7 +154,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	private Map<String, MultiValueMap<String, String>> extractMatrixVariables(
 			HttpServletRequest request, Map<String, String> uriVariables) {
 
-		Map<String, MultiValueMap<String, String>> result = new LinkedHashMap<String, MultiValueMap<String, String>>();
+		Map<String, MultiValueMap<String, String>> result = new LinkedHashMap<>();
 		for (Entry<String, String> uriVar : uriVariables.entrySet()) {
 			String uriVarValue = uriVar.getValue();
 
@@ -219,12 +219,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 					throw new HttpMediaTypeNotSupportedException(ex.getMessage());
 				}
 			}
-			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<MediaType>(mediaTypes));
+			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<>(mediaTypes));
 		}
 
 		if (helper.hasProducesMismatch()) {
 			Set<MediaType> mediaTypes = helper.getProducibleMediaTypes();
-			throw new HttpMediaTypeNotAcceptableException(new ArrayList<MediaType>(mediaTypes));
+			throw new HttpMediaTypeNotAcceptableException(new ArrayList<>(mediaTypes));
 		}
 
 		if (helper.hasParamsMismatch()) {
@@ -241,7 +241,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	private static class PartialMatchHelper {
 
-		private final List<PartialMatch> partialMatches = new ArrayList<PartialMatch>();
+		private final List<PartialMatch> partialMatches = new ArrayList<>();
 
 
 		public PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
@@ -312,7 +312,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * Return declared HTTP methods.
 		 */
 		public Set<String> getAllowedMethods() {
-			Set<String> result = new LinkedHashSet<String>();
+			Set<String> result = new LinkedHashSet<>();
 			for (PartialMatch match : this.partialMatches) {
 				for (RequestMethod method : match.getInfo().getMethodsCondition().getMethods()) {
 					result.add(method.name());
@@ -326,7 +326,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods" condition.
 		 */
 		public Set<MediaType> getConsumableMediaTypes() {
-			Set<MediaType> result = new LinkedHashSet<MediaType>();
+			Set<MediaType> result = new LinkedHashSet<>();
 			for (PartialMatch match : this.partialMatches) {
 				if (match.hasMethodsMatch()) {
 					result.addAll(match.getInfo().getConsumesCondition().getConsumableMediaTypes());
@@ -340,7 +340,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods" and "consumes" conditions.
 		 */
 		public Set<MediaType> getProducibleMediaTypes() {
-			Set<MediaType> result = new LinkedHashSet<MediaType>();
+			Set<MediaType> result = new LinkedHashSet<>();
 			for (PartialMatch match : this.partialMatches) {
 				if (match.hasConsumesMatch()) {
 					result.addAll(match.getInfo().getProducesCondition().getProducibleMediaTypes());
@@ -354,7 +354,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		 * match the "methods", "consumes", and "params" conditions.
 		 */
 		public List<String[]> getParamConditions() {
-			List<String[]> result = new ArrayList<String[]>();
+			List<String[]> result = new ArrayList<>();
 			for (PartialMatch match : this.partialMatches) {
 				if (match.hasProducesMatch()) {
 					Set<NameValueExpression<String>> set = match.getInfo().getParamsCondition().getExpressions();
@@ -441,7 +441,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<String> declaredMethods) {
-			Set<HttpMethod> result = new LinkedHashSet<HttpMethod>(declaredMethods.size());
+			Set<HttpMethod> result = new LinkedHashSet<>(declaredMethods.size());
 			if (declaredMethods.isEmpty()) {
 				for (HttpMethod method : HttpMethod.values()) {
 					if (!HttpMethod.TRACE.equals(method)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ abstract class SerializableTypeWrapper {
 			GenericArrayType.class, ParameterizedType.class, TypeVariable.class, WildcardType.class};
 
 	private static final ConcurrentReferenceHashMap<Type, Type> cache =
-			new ConcurrentReferenceHashMap<Type, Type>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 
 	/**

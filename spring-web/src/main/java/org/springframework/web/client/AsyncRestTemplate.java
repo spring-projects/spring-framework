@@ -503,7 +503,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 				requestCallback.doWithRequest(request);
 			}
 			ListenableFuture<ClientHttpResponse> responseFuture = request.executeAsync();
-			return new ResponseExtractorFuture<T>(method, url, responseFuture, responseExtractor);
+			return new ResponseExtractorFuture<>(method, url, responseFuture, responseExtractor);
 		}
 		catch (IOException ex) {
 			throw new ResourceAccessException("I/O error on " + method.name() +

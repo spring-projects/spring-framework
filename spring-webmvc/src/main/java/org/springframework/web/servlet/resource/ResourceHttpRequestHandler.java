@@ -99,11 +99,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
 
-	private final List<Resource> locations = new ArrayList<Resource>(4);
+	private final List<Resource> locations = new ArrayList<>(4);
 
-	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>(4);
+	private final List<ResourceResolver> resourceResolvers = new ArrayList<>(4);
 
-	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>(4);
+	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
 	private ResourceHttpMessageConverter resourceHttpMessageConverter;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ public class Selection extends SpelNodeImpl {
 		if (operand instanceof Map) {
 			Map<?, ?> mapdata = (Map<?, ?>) operand;
 			// TODO don't lose generic info for the new map
-			Map<Object, Object> result = new HashMap<Object, Object>();
+			Map<Object, Object> result = new HashMap<>();
 			Object lastKey = null;
 
 			for (Map.Entry<?, ?> entry : mapdata.entrySet()) {
@@ -115,7 +115,7 @@ public class Selection extends SpelNodeImpl {
 			}
 
 			if (this.variant == LAST) {
-				Map<Object, Object> resultMap = new HashMap<Object, Object>();
+				Map<Object, Object> resultMap = new HashMap<>();
 				Object lastValue = result.get(lastKey);
 				resultMap.put(lastKey,lastValue);
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultMap),this);
@@ -128,7 +128,7 @@ public class Selection extends SpelNodeImpl {
 			Iterable<?> data = (operand instanceof Iterable ?
 					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
-			List<Object> result = new ArrayList<Object>();
+			List<Object> result = new ArrayList<>();
 			int index = 0;
 			for (Object element : data) {
 				try {

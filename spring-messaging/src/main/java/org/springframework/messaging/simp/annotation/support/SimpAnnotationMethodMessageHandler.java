@@ -129,7 +129,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		this.clientMessagingTemplate = new SimpMessagingTemplate(clientOutboundChannel);
 		this.brokerTemplate = brokerTemplate;
 
-		Collection<MessageConverter> converters = new ArrayList<MessageConverter>();
+		Collection<MessageConverter> converters = new ArrayList<>();
 		converters.add(new StringMessageConverter());
 		converters.add(new ByteArrayMessageConverter());
 		this.messageConverter = new CompositeMessageConverter(converters);
@@ -154,7 +154,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		if (CollectionUtils.isEmpty(prefixes)) {
 			return prefixes;
 		}
-		Collection<String> result = new ArrayList<String>(prefixes.size());
+		Collection<String> result = new ArrayList<>(prefixes.size());
 		for (String prefix : prefixes) {
 			if (!prefix.endsWith("/")) {
 				prefix = prefix + "/";
@@ -303,7 +303,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		ConfigurableBeanFactory beanFactory = (getApplicationContext() instanceof ConfigurableApplicationContext ?
 				((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory() : null);
 
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
 		// Annotation-based argument resolution
 		resolvers.add(new HeaderMethodArgumentResolver(this.conversionService, beanFactory));
@@ -322,7 +322,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
 		handlers.add(new ListenableFutureReturnValueHandler());
@@ -419,7 +419,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected Set<String> getDirectLookupDestinations(SimpMessageMappingInfo mapping) {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		for (String pattern : mapping.getDestinationConditions().getPatterns()) {
 			if (!this.pathMatcher.isPattern(pattern)) {
 				result.add(pattern);

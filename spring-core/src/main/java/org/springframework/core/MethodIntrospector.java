@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ public abstract class MethodIntrospector {
 	 * or an empty map in case of no match
 	 */
 	public static <T> Map<Method, T> selectMethods(Class<?> targetType, final MetadataLookup<T> metadataLookup) {
-		final Map<Method, T> methodMap = new LinkedHashMap<Method, T>();
-		Set<Class<?>> handlerTypes = new LinkedHashSet<Class<?>>();
+		final Map<Method, T> methodMap = new LinkedHashMap<>();
+		Set<Class<?>> handlerTypes = new LinkedHashSet<>();
 		Class<?> specificHandlerType = null;
 
 		if (!Proxy.isProxyClass(targetType)) {

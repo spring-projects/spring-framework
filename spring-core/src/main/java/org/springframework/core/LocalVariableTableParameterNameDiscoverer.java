@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
 	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache =
-			new ConcurrentHashMap<Class<?>, Map<Member, String[]>>(32);
+			new ConcurrentHashMap<>(32);
 
 
 	@Override
@@ -110,7 +110,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		}
 		try {
 			ClassReader classReader = new ClassReader(is);
-			Map<Member, String[]> map = new ConcurrentHashMap<Member, String[]>(32);
+			Map<Member, String[]> map = new ConcurrentHashMap<>(32);
 			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), 0);
 			return map;
 		}

@@ -98,7 +98,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 	private final StompDecoder stompDecoder = new StompDecoder();
 
-	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<String, BufferingStompDecoder>();
+	private final Map<String, BufferingStompDecoder> decoders = new ConcurrentHashMap<>();
 
 	private MessageHeaderInitializer headerInitializer;
 

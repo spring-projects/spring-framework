@@ -112,7 +112,7 @@ class StreamConverter implements ConditionalGenericConverter {
 
 
 	private static Set<ConvertiblePair> createConvertibleTypes() {
-		Set<ConvertiblePair> convertiblePairs = new HashSet<ConvertiblePair>();
+		Set<ConvertiblePair> convertiblePairs = new HashSet<>();
 		convertiblePairs.add(new ConvertiblePair(Stream.class, Collection.class));
 		convertiblePairs.add(new ConvertiblePair(Stream.class, Object[].class));
 		convertiblePairs.add(new ConvertiblePair(Collection.class, Stream.class));

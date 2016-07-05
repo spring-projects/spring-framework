@@ -32,7 +32,7 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 
 	private final CompletableFuture<T> completableFuture;
 
-	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<T>();
+	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<>();
 
 
 	public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {

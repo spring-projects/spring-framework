@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 		}
 
 		String[] names = getCacheManager().getCacheNames();
-		Collection<Cache> caches = new LinkedHashSet<Cache>(names.length);
+		Collection<Cache> caches = new LinkedHashSet<>(names.length);
 		for (String name : names) {
 			caches.add(new EhCacheCache(getCacheManager().getEhcache(name)));
 		}

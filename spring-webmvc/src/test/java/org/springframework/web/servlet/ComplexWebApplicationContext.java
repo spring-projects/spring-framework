@@ -158,7 +158,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.add("order", "0");
 		pvs.add("exceptionMappings", "java.lang.Exception=failed1");
-		List<RuntimeBeanReference> mappedHandlers = new ManagedList<RuntimeBeanReference>();
+		List<RuntimeBeanReference> mappedHandlers = new ManagedList<>();
 		mappedHandlers.add(new RuntimeBeanReference("anotherLocaleHandler"));
 		pvs.add("mappedHandlers", mappedHandlers);
 		pvs.add("defaultStatusCode", "500");

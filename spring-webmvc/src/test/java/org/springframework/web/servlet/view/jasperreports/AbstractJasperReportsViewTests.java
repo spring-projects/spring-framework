@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,7 +242,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 		String characterEncoding = "UTF-8";
 		String overiddenCharacterEncoding = "ASCII";
 
-		Map<Object, Object> parameters = new HashMap<Object, Object>();
+		Map<Object, Object> parameters = new HashMap<>();
 		parameters.put(net.sf.jasperreports.engine.JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
 
 		view.setExporterParameters(parameters);
@@ -361,7 +361,7 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 
 		String characterEncoding = "UTF-8";
 
-		Map<Object, Object> parameters = new HashMap<Object, Object>();
+		Map<Object, Object> parameters = new HashMap<>();
 		parameters.put(net.sf.jasperreports.engine.JRExporterParameter.CHARACTER_ENCODING, characterEncoding);
 
 		view.setExporterParameters(parameters);

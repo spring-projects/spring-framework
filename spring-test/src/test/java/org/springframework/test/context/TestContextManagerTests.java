@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ public class TestContextManagerTests {
 	private static final String SECOND = "vidi";
 	private static final String THIRD = "vici";
 
-	private static final List<String> afterTestMethodCalls = new ArrayList<String>();
-	private static final List<String> beforeTestMethodCalls = new ArrayList<String>();
+	private static final List<String> afterTestMethodCalls = new ArrayList<>();
+	private static final List<String> beforeTestMethodCalls = new ArrayList<>();
 
 	protected static final Log logger = LogFactory.getLog(TestContextManagerTests.class);
 
@@ -72,10 +72,10 @@ public class TestContextManagerTests {
 			List<String> expectedAfterTestMethodCalls, final String usageContext) {
 
 		if (expectedBeforeTestMethodCalls == null) {
-			expectedBeforeTestMethodCalls = new ArrayList<String>();
+			expectedBeforeTestMethodCalls = new ArrayList<>();
 		}
 		if (expectedAfterTestMethodCalls == null) {
-			expectedAfterTestMethodCalls = new ArrayList<String>();
+			expectedAfterTestMethodCalls = new ArrayList<>();
 		}
 
 		if (logger.isDebugEnabled()) {

@@ -78,7 +78,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 * <p>Take care of adding the necessary JSR-107 import if it is available.
 	 */
 	private String[] getProxyImports() {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		result.add(AutoProxyRegistrar.class.getName());
 		result.add(ProxyCachingConfiguration.class.getName());
 		if (jsr107Present && jcacheImplPresent) {
@@ -92,7 +92,7 @@ public class CachingConfigurationSelector extends AdviceModeImportSelector<Enabl
 	 * <p>Take care of adding the necessary JSR-107 import if it is available.
 	 */
 	private String[] getAspectJImports() {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		result.add(CACHE_ASPECT_CONFIGURATION_CLASS_NAME);
 		if (jsr107Present && jcacheImplPresent) {
 			result.add(JCACHE_ASPECT_CONFIGURATION_CLASS_NAME);

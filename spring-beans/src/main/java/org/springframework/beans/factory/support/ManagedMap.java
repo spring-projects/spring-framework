@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 		if (!(parent instanceof Map)) {
 			throw new IllegalArgumentException("Cannot merge with object of type [" + parent.getClass() + "]");
 		}
-		Map<K, V> merged = new ManagedMap<K, V>();
+		Map<K, V> merged = new ManagedMap<>();
 		merged.putAll((Map<K, V>) parent);
 		merged.putAll(this);
 		return merged;

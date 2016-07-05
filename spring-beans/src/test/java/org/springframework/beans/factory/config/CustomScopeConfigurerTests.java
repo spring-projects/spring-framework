@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public final class CustomScopeConfigurerTests {
 	public void testSunnyDayWithBonaFideScopeInstance() throws Exception {
 		Scope scope = mock(Scope.class);
 		factory.registerScope(FOO_SCOPE, scope);
-		Map<String, Object> scopes = new HashMap<String, Object>();
+		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, scope);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
@@ -63,7 +63,7 @@ public final class CustomScopeConfigurerTests {
 
 	@Test
 	public void testSunnyDayWithBonaFideScopeClass() throws Exception {
-		Map<String, Object> scopes = new HashMap<String, Object>();
+		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, NoOpScope.class);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
@@ -73,7 +73,7 @@ public final class CustomScopeConfigurerTests {
 
 	@Test
 	public void testSunnyDayWithBonaFideScopeClassname() throws Exception {
-		Map<String, Object> scopes = new HashMap<String, Object>();
+		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, NoOpScope.class.getName());
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
@@ -83,7 +83,7 @@ public final class CustomScopeConfigurerTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWhereScopeMapHasNullScopeValueInEntrySet() throws Exception {
-		Map<String, Object> scopes = new HashMap<String, Object>();
+		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, null);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
@@ -92,7 +92,7 @@ public final class CustomScopeConfigurerTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWhereScopeMapHasNonScopeInstanceInEntrySet() throws Exception {
-		Map<String, Object> scopes = new HashMap<String, Object>();
+		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, this); // <-- not a valid value...
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);

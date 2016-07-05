@@ -81,7 +81,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 
 	@Test
 	public void pathVarsInModel() throws Exception {
-		final Map<String, Object> pathVars = new HashMap<String, Object>();
+		final Map<String, Object> pathVars = new HashMap<>();
 		pathVars.put("hotel", "42");
 		pathVars.put("booking", 21);
 		pathVars.put("other", "other");

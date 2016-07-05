@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 
 	@Test
 	public void testGetValue(){
-		Map<String,String> props1 = new HashMap<String,String>();
+		Map<String,String> props1 = new HashMap<>();
 		props1.put("key1", "value1");
 		props1.put("key2", "value2");
 		props1.put("key3", "value3");
@@ -91,7 +91,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 
 	@Test
 	public void testGetValueFromRootMap() {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("key", "value");
 
 		ExpressionParser spelExpressionParser = new SpelExpressionParser();
@@ -102,7 +102,7 @@ public class MapAccessTests extends AbstractExpressionTests {
 	@Test
 	public void testGetValuePerformance() throws Exception {
 		Assume.group(TestGroup.PERFORMANCE);
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 		map.put("key", "value");
 		EvaluationContext context = new StandardEvaluationContext(map);
 

@@ -37,7 +37,7 @@ public class ExecutorSubscribableChannel extends AbstractSubscribableChannel {
 
 	private final Executor executor;
 
-	private final List<ExecutorChannelInterceptor> executorInterceptors = new ArrayList<ExecutorChannelInterceptor>(4);
+	private final List<ExecutorChannelInterceptor> executorInterceptors = new ArrayList<>(4);
 
 
 	/**

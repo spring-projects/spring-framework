@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 	private final BeanCreatingHandlerProvider<WebSocketHandler> provider;
 
 	private final Map<WebSocketSession, WebSocketHandler> handlers =
-			new ConcurrentHashMap<WebSocketSession, WebSocketHandler>();
+			new ConcurrentHashMap<>();
 
 	private final boolean supportsPartialMessages;
 
@@ -63,7 +63,7 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 	}
 
 	public PerConnectionWebSocketHandler(Class<? extends WebSocketHandler> handlerType, boolean supportsPartialMessages) {
-		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler>(handlerType);
+		this.provider = new BeanCreatingHandlerProvider<>(handlerType);
 		this.supportsPartialMessages = supportsPartialMessages;
 	}
 

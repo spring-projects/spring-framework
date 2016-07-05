@@ -118,7 +118,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 			return super.getInstalledExtensions(container);
 		}
 		catch (UnsupportedOperationException ex) {
-			return new ArrayList<WebSocketExtension>(0);
+			return new ArrayList<>(0);
 		}
 	}
 

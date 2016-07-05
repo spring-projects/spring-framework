@@ -56,7 +56,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 
 
 	/** Cache for byte array per class name */
-	private final Map<String, byte[]> bytesCache = new ConcurrentHashMap<String, byte[]>(256);
+	private final Map<String, byte[]> bytesCache = new ConcurrentHashMap<>(256);
 
 
 	public ContextTypeMatchClassLoader(ClassLoader parent) {

@@ -186,10 +186,10 @@ public class PersistenceAnnotationBeanPostProcessor
 	private transient ListableBeanFactory beanFactory;
 
 	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(256);
+			new ConcurrentHashMap<>(256);
 
 	private final Map<Object, EntityManager> extendedEntityManagersToClose =
-			new ConcurrentHashMap<Object, EntityManager>(16);
+			new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -404,12 +404,12 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	private InjectionMetadata buildPersistenceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
 		Class<?> targetClass = clazz;
 
 		do {
 			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<InjectionMetadata.InjectedElement>();
+					new LinkedList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
 				@Override

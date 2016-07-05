@@ -166,7 +166,7 @@ public class SqlUpdateTests {
 			}
 
 			public int run(int performanceId, int type) {
-				Map<String, Integer> params = new HashMap<String, Integer>();
+				Map<String, Integer> params = new HashMap<>();
 				params.put("perfId", performanceId);
 				params.put("priceId", type);
 				return updateByNamedParam(params);

@@ -66,7 +66,7 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
 public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle, ServletContextAware {
 
 	private static final ThreadLocal<WebSocketHandlerContainer> wsContainerHolder =
-			new NamedThreadLocal<WebSocketHandlerContainer>("WebSocket Handler Container");
+			new NamedThreadLocal<>("WebSocket Handler Container");
 
 
 	private final WebSocketServerFactory factory;
@@ -126,7 +126,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	}
 
 	private List<WebSocketExtension> getWebSocketExtensions() {
-		List<WebSocketExtension> result = new ArrayList<WebSocketExtension>();
+		List<WebSocketExtension> result = new ArrayList<>();
 		for (String name : this.factory.getExtensionFactory().getExtensionNames()) {
 			result.add(new WebSocketExtension(name));
 		}
@@ -213,7 +213,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 				this.extensionConfigs = null;
 			}
 			else {
-				this.extensionConfigs = new ArrayList<ExtensionConfig>();
+				this.extensionConfigs = new ArrayList<>();
 				for (WebSocketExtension e : extensions) {
 					this.extensionConfigs.add(new WebSocketToJettyExtensionConfigAdapter(e));
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,21 +48,21 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * local name of the {@link Element Elements} they handle.
 	 */
 	private final Map<String, BeanDefinitionParser> parsers =
-			new HashMap<String, BeanDefinitionParser>();
+			new HashMap<>();
 
 	/**
 	 * Stores the {@link BeanDefinitionDecorator} implementations keyed by the
 	 * local name of the {@link Element Elements} they handle.
 	 */
 	private final Map<String, BeanDefinitionDecorator> decorators =
-			new HashMap<String, BeanDefinitionDecorator>();
+			new HashMap<>();
 
 	/**
 	 * Stores the {@link BeanDefinitionDecorator} implementations keyed by the local
 	 * name of the {@link Attr Attrs} they handle.
 	 */
 	private final Map<String, BeanDefinitionDecorator> attributeDecorators =
-			new HashMap<String, BeanDefinitionDecorator>();
+			new HashMap<>();
 
 
 	/**

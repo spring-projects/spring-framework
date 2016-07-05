@@ -444,17 +444,17 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public RequestEntity<Void> build() {
-			return new RequestEntity<Void>(this.headers, this.method, this.url);
+			return new RequestEntity<>(this.headers, this.method, this.url);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body) {
-			return new RequestEntity<T>(body, this.headers, this.method, this.url);
+			return new RequestEntity<>(body, this.headers, this.method, this.url);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body, Type type) {
-			return new RequestEntity<T>(body, this.headers, this.method, this.url, type);
+			return new RequestEntity<>(body, this.headers, this.method, this.url, type);
 		}
 	}
 

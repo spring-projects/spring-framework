@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,8 @@ public class CodeFlow implements Opcodes {
 	private int nextFreeVariableId = 1;
 
 	public CodeFlow(String clazzName, ClassWriter cw) {
-		this.compilationScopes = new Stack<ArrayList<String>>();
-		this.compilationScopes.add(new ArrayList<String>());
+		this.compilationScopes = new Stack<>();
+		this.compilationScopes.add(new ArrayList<>());
 		this.cw = cw;
 		this.clazzName = clazzName;
 	}
@@ -114,7 +114,7 @@ public class CodeFlow implements Opcodes {
 	 * each argument will be evaluated in a new scope.
 	 */
 	public void enterCompilationScope() {
-		this.compilationScopes.push(new ArrayList<String>());
+		this.compilationScopes.push(new ArrayList<>());
 	}
 
 	/**
@@ -809,7 +809,7 @@ public class CodeFlow implements Opcodes {
 	 */
 	public void registerNewField(FieldAdder fieldAdder) {
 		if (fieldAdders == null) {
-			fieldAdders = new ArrayList<FieldAdder>();
+			fieldAdders = new ArrayList<>();
 		}
 		fieldAdders.add(fieldAdder);
 	}
@@ -821,7 +821,7 @@ public class CodeFlow implements Opcodes {
 	 */
 	public void registerNewClinit(ClinitAdder clinitAdder) {
 		if (clinitAdders == null) {
-			clinitAdders = new ArrayList<ClinitAdder>();
+			clinitAdders = new ArrayList<>();
 		}
 		clinitAdders.add(clinitAdder);
 	}

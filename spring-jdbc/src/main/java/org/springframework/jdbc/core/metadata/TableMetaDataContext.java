@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class TableMetaDataContext {
 	private String schemaName;
 
 	/** List of columns objects to be used in this context */
-	private List<String> tableColumns = new ArrayList<String>();
+	private List<String> tableColumns = new ArrayList<>();
 
 	/** should we access insert parameter meta data info or not */
 	private boolean accessTableColumnMetaData = true;
@@ -217,13 +217,13 @@ public class TableMetaDataContext {
 			this.generatedKeyColumnsUsed = true;
 		}
 		if (declaredColumns.size() > 0) {
-			return new ArrayList<String>(declaredColumns);
+			return new ArrayList<>(declaredColumns);
 		}
-		Set<String> keys = new LinkedHashSet<String>(generatedKeyNames.length);
+		Set<String> keys = new LinkedHashSet<>(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());
 		}
-		List<String> columns = new ArrayList<String>();
+		List<String> columns = new ArrayList<>();
 		for (TableParameterMetaData meta : metaDataProvider.getTableParameterMetaData()) {
 			if (!keys.contains(meta.getParameterName().toUpperCase())) {
 				columns.add(meta.getParameterName());
@@ -237,7 +237,7 @@ public class TableMetaDataContext {
 	 * @param parameterSource the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(SqlParameterSource parameterSource) {
-		List<Object> values = new ArrayList<Object>();
+		List<Object> values = new ArrayList<>();
 		// for parameter source lookups we need to provide caseinsensitive lookup support since the
 		// database metadata is not necessarily providing case sensitive column names
 		Map<String, String> caseInsensitiveParameterNames =
@@ -277,8 +277,8 @@ public class TableMetaDataContext {
 	 * @param inParameters the parameter names and values
 	 */
 	public List<Object> matchInParameterValuesWithInsertColumns(Map<String, ?> inParameters) {
-		List<Object> values = new ArrayList<Object>();
-		Map<String, Object> source = new LinkedHashMap<String, Object>(inParameters.size());
+		List<Object> values = new ArrayList<>();
+		Map<String, Object> source = new LinkedHashMap<>(inParameters.size());
 		for (String key : inParameters.keySet()) {
 			source.put(key.toLowerCase(), inParameters.get(key));
 		}
@@ -294,7 +294,7 @@ public class TableMetaDataContext {
 	 * @return the insert string to be used
 	 */
 	public String createInsertString(String... generatedKeyNames) {
-		Set<String> keys = new LinkedHashSet<String>(generatedKeyNames.length);
+		Set<String> keys = new LinkedHashSet<>(generatedKeyNames.length);
 		for (String key : generatedKeyNames) {
 			keys.add(key.toUpperCase());
 		}
@@ -345,7 +345,7 @@ public class TableMetaDataContext {
 		int[] types = new int[getTableColumns().size()];
 		List<TableParameterMetaData> parameters = this.metaDataProvider.getTableParameterMetaData();
 		Map<String, TableParameterMetaData> parameterMap =
-				new LinkedHashMap<String, TableParameterMetaData>(parameters.size());
+				new LinkedHashMap<>(parameters.size());
 		for (TableParameterMetaData tpmd : parameters) {
 			parameterMap.put(tpmd.getParameterName().toUpperCase(), tpmd);
 		}

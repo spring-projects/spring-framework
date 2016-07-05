@@ -38,7 +38,7 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 
 	private String baseUrl;
 
-	private final Map<String, Object> defaultUriVariables = new HashMap<String, Object>();
+	private final Map<String, Object> defaultUriVariables = new HashMap<>();
 
 
 	/**
@@ -92,7 +92,7 @@ public abstract class AbstractUriTemplateHandler implements UriTemplateHandler {
 	@Override
 	public URI expand(String uriTemplate, Map<String, ?> uriVariables) {
 		if (!getDefaultUriVariables().isEmpty()) {
-			Map<String, Object> map = new HashMap<String, Object>();
+			Map<String, Object> map = new HashMap<>();
 			map.putAll(getDefaultUriVariables());
 			map.putAll(uriVariables);
 			uriVariables = map;

@@ -38,7 +38,7 @@ import org.springframework.cache.CacheManager;
  */
 public abstract class AbstractCacheManager implements CacheManager, InitializingBean {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
+	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
 	private volatile Set<String> cacheNames = Collections.emptySet();
 
@@ -63,7 +63,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		synchronized (this.cacheMap) {
 			this.cacheNames = Collections.emptySet();
 			this.cacheMap.clear();
-			Set<String> cacheNames = new LinkedHashSet<String>(caches.size());
+			Set<String> cacheNames = new LinkedHashSet<>(caches.size());
 			for (Cache cache : caches) {
 				String name = cache.getName();
 				this.cacheMap.put(name, decorateCache(cache));
@@ -136,7 +136,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * @param name the name of the cache to be added
 	 */
 	private void updateCacheNames(String name) {
-		Set<String> cacheNames = new LinkedHashSet<String>(this.cacheNames.size() + 1);
+		Set<String> cacheNames = new LinkedHashSet<>(this.cacheNames.size() + 1);
 		cacheNames.addAll(this.cacheNames);
 		cacheNames.add(name);
 		this.cacheNames = Collections.unmodifiableSet(cacheNames);

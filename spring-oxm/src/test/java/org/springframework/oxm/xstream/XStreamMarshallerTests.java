@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class XStreamMarshallerTests {
 	@Before
 	public void createMarshaller() throws Exception {
 		marshaller = new XStreamMarshaller();
-		Map<String, String> aliases = new HashMap<String, String>();
+		Map<String, String> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class.getName());
 		marshaller.setAliases(aliases);
 		flight = new Flight();
@@ -231,7 +231,7 @@ public class XStreamMarshallerTests {
 	@Test
 	@Ignore("Fails on JDK 8 build 108")
 	public void aliasesByTypeStringClassMap() throws Exception {
-		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
+		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
 		FlightSubclass flight = new FlightSubclass();
 		flight.setFlightNumber(42);
@@ -245,7 +245,7 @@ public class XStreamMarshallerTests {
 	@Test
 	@Ignore("Fails on JDK 8 build 108")
 	public void aliasesByTypeStringStringMap() throws Exception {
-		Map<String, String> aliases = new HashMap<String, String>();
+		Map<String, String> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class.getName());
 		FlightSubclass flight = new FlightSubclass();
 		flight.setFlightNumber(42);
@@ -282,7 +282,7 @@ public class XStreamMarshallerTests {
 		flights.getFlights().add(flight);
 		flights.getStrings().add("42");
 
-		Map<String, Class<?>> aliases = new HashMap<String, Class<?>>();
+		Map<String, Class<?>> aliases = new HashMap<>();
 		aliases.put("flight", Flight.class);
 		aliases.put("flights", Flights.class);
 		marshaller.setAliases(aliases);

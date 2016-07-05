@@ -41,7 +41,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<ChannelInterceptor> interceptors = new ArrayList<ChannelInterceptor>(5);
+	private final List<ChannelInterceptor> interceptors = new ArrayList<>(5);
 
 	private String beanName;
 

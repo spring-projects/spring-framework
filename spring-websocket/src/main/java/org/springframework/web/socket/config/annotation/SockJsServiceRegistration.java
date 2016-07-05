@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,13 +56,13 @@ public class SockJsServiceRegistration {
 
 	private Boolean webSocketEnabled;
 
-	private final List<TransportHandler> transportHandlers = new ArrayList<TransportHandler>();
+	private final List<TransportHandler> transportHandlers = new ArrayList<>();
 
-	private final List<TransportHandler> transportHandlerOverrides = new ArrayList<TransportHandler>();
+	private final List<TransportHandler> transportHandlerOverrides = new ArrayList<>();
 
-	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
-	private final List<String> allowedOrigins = new ArrayList<String>();
+	private final List<String> allowedOrigins = new ArrayList<>();
 
 	private Boolean suppressCors;
 

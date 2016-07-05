@@ -91,9 +91,9 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 
-	private List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
+	private List<MediaType> supportedMediaTypes = new ArrayList<>();
 
-	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
+	private List<HttpMessageConverter<?>> partConverters = new ArrayList<>();
 
 	private Charset charset = DEFAULT_CHARSET;
 
@@ -230,7 +230,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		String body = StreamUtils.copyToString(inputMessage.getBody(), charset);
 
 		String[] pairs = StringUtils.tokenizeToStringArray(body, "&");
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(pairs.length);
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(pairs.length);
 		for (String pair : pairs) {
 			int idx = pair.indexOf('=');
 			if (idx == -1) {
@@ -399,7 +399,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			return (HttpEntity<?>) part;
 		}
 		else {
-			return new HttpEntity<Object>(part);
+			return new HttpEntity<>(part);
 		}
 	}
 

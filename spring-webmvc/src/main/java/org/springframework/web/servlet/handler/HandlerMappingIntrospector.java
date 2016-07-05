@@ -73,7 +73,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 		Map<String, HandlerMapping> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 				context, HandlerMapping.class, true, false);
 		if (!beans.isEmpty()) {
-			List<HandlerMapping> mappings = new ArrayList<HandlerMapping>(beans.values());
+			List<HandlerMapping> mappings = new ArrayList<>(beans.values());
 			AnnotationAwareOrderComparator.sort(mappings);
 			return mappings;
 		}
@@ -93,7 +93,7 @@ public class HandlerMappingIntrospector implements CorsConfigurationSource {
 
 		String value = props.getProperty(HandlerMapping.class.getName());
 		String[] names = StringUtils.commaDelimitedListToStringArray(value);
-		List<HandlerMapping> result = new ArrayList<HandlerMapping>(names.length);
+		List<HandlerMapping> result = new ArrayList<>(names.length);
 		for (String name : names) {
 			try {
 				Class<?> clazz = ClassUtils.forName(name, DispatcherServlet.class.getClassLoader());

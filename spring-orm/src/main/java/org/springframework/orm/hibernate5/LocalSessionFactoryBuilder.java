@@ -250,9 +250,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 */
 	@SuppressWarnings("unchecked")
 	public LocalSessionFactoryBuilder scanPackages(String... packagesToScan) throws HibernateException {
-		Set<String> entityClassNames = new TreeSet<String>();
-		Set<String> converterClassNames = new TreeSet<String>();
-		Set<String> packageNames = new TreeSet<String>();
+		Set<String> entityClassNames = new TreeSet<>();
+		Set<String> converterClassNames = new TreeSet<>();
+		Set<String> packageNames = new TreeSet<>();
 		try {
 			for (String pkg : packagesToScan) {
 				String pattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +

@@ -183,14 +183,14 @@ public class AnnotatedElementUtils {
 		}
 
 		try {
-			final Set<String> types = new LinkedHashSet<String>();
+			final Set<String> types = new LinkedHashSet<>();
 			searchWithGetSemantics(composed.annotationType(), null, null, null, new SimpleAnnotationProcessor<Object>(true) {
 					@Override
 					public Object process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 						types.add(annotation.annotationType().getName());
 						return CONTINUE;
 					}
-				}, new HashSet<AnnotatedElement>(), 1);
+				}, new HashSet<>(), 1);
 			return (!types.isEmpty() ? types : null);
 		}
 		catch (Throwable ex) {
@@ -560,7 +560,7 @@ public class AnnotatedElementUtils {
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
 			String annotationName, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
-		final MultiValueMap<String, Object> attributesMap = new LinkedMultiValueMap<String, Object>();
+		final MultiValueMap<String, Object> attributesMap = new LinkedMultiValueMap<>();
 
 		searchWithGetSemantics(element, null, annotationName, new SimpleAnnotationProcessor<Object>() {
 			@Override
@@ -853,7 +853,7 @@ public class AnnotatedElementUtils {
 
 		try {
 			return searchWithGetSemantics(element, annotationType, annotationName, containerType, processor,
-					new HashSet<AnnotatedElement>(), 0);
+					new HashSet<>(), 0);
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
@@ -895,7 +895,7 @@ public class AnnotatedElementUtils {
 				}
 
 				if (element instanceof Class) { // otherwise getAnnotations doesn't return anything new
-					List<Annotation> inheritedAnnotations = new ArrayList<Annotation>();
+					List<Annotation> inheritedAnnotations = new ArrayList<>();
 					for (Annotation annotation : element.getAnnotations()) {
 						if (!declaredAnnotations.contains(annotation)) {
 							inheritedAnnotations.add(annotation);
@@ -1037,7 +1037,7 @@ public class AnnotatedElementUtils {
 
 		try {
 			return searchWithFindSemantics(
-					element, annotationType, annotationName, containerType, processor, new HashSet<AnnotatedElement>(), 0);
+					element, annotationType, annotationName, containerType, processor, new HashSet<>(), 0);
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
@@ -1073,7 +1073,7 @@ public class AnnotatedElementUtils {
 			try {
 				// Locally declared annotations (ignoring @Inherited)
 				Annotation[] annotations = element.getDeclaredAnnotations();
-				List<T> aggregatedResults = (processor.aggregates() ? new ArrayList<T>() : null);
+				List<T> aggregatedResults = (processor.aggregates() ? new ArrayList<>() : null);
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
@@ -1302,7 +1302,7 @@ public class AnnotatedElementUtils {
 	private static <A extends Annotation> Set<A> postProcessAndSynthesizeAggregatedResults(AnnotatedElement element,
 			Class<A> annotationType, List<AnnotationAttributes> aggregatedResults) {
 
-		Set<A> annotations = new LinkedHashSet<A>();
+		Set<A> annotations = new LinkedHashSet<>();
 		for (AnnotationAttributes attributes : aggregatedResults) {
 			AnnotationUtils.postProcessAnnotationAttributes(element, attributes, false, false);
 			annotations.add(AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element));
@@ -1502,7 +1502,7 @@ public class AnnotatedElementUtils {
 			this.classValuesAsString = classValuesAsString;
 			this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
 			this.aggregates = aggregates;
-			this.aggregatedResults = (aggregates ? new ArrayList<AnnotationAttributes>() : null);
+			this.aggregatedResults = (aggregates ? new ArrayList<>() : null);
 		}
 
 		@Override
@@ -1533,7 +1533,7 @@ public class AnnotatedElementUtils {
 
 			// Track which attribute values have already been replaced so that we can short
 			// circuit the search algorithms.
-			Set<String> valuesAlreadyReplaced = new HashSet<String>();
+			Set<String> valuesAlreadyReplaced = new HashSet<>();
 
 			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
 				String attributeName = attributeMethod.getName();
@@ -1545,7 +1545,7 @@ public class AnnotatedElementUtils {
 						continue;
 					}
 
-					List<String> targetAttributeNames = new ArrayList<String>();
+					List<String> targetAttributeNames = new ArrayList<>();
 					targetAttributeNames.add(attributeOverrideName);
 					valuesAlreadyReplaced.add(attributeOverrideName);
 

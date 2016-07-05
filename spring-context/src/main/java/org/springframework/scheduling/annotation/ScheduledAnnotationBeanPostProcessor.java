@@ -113,7 +113,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks =
-			new ConcurrentHashMap<Object, Set<ScheduledTask>>(16);
+			new ConcurrentHashMap<>(16);
 
 
 	@Override
@@ -304,7 +304,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 			Set<ScheduledTask> tasks = this.scheduledTasks.get(bean);
 			if (tasks == null) {
-				tasks = new LinkedHashSet<ScheduledTask>(4);
+				tasks = new LinkedHashSet<>(4);
 				this.scheduledTasks.put(bean, tasks);
 			}
 

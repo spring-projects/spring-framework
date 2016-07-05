@@ -90,9 +90,9 @@ public class SimpleTransactionScope implements Scope {
 
 	static class ScopedObjectsHolder {
 
-		final Map<String, Object> scopedInstances = new HashMap<String, Object>();
+		final Map<String, Object> scopedInstances = new HashMap<>();
 
-		final Map<String, Runnable> destructionCallbacks = new LinkedHashMap<String, Runnable>();
+		final Map<String, Runnable> destructionCallbacks = new LinkedHashMap<>();
 	}
 
 

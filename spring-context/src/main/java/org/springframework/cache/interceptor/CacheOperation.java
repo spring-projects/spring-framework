@@ -155,7 +155,7 @@ public abstract class CacheOperation implements BasicOperation {
 		}
 
 		public void setCacheNames(String... cacheNames) {
-			this.cacheNames = new LinkedHashSet<String>(cacheNames.length);
+			this.cacheNames = new LinkedHashSet<>(cacheNames.length);
 			for (String cacheName : cacheNames) {
 				Assert.hasText(cacheName, "Cache name must be non-null if specified");
 				this.cacheNames.add(cacheName);

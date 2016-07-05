@@ -641,7 +641,7 @@ public abstract class WebUtils {
 	public static Map<String, Object> getParametersStartingWith(ServletRequest request, String prefix) {
 		Assert.notNull(request, "Request must not be null");
 		Enumeration<String> paramNames = request.getParameterNames();
-		Map<String, Object> params = new TreeMap<String, Object>();
+		Map<String, Object> params = new TreeMap<>();
 		if (prefix == null) {
 			prefix = "";
 		}
@@ -737,7 +737,7 @@ public abstract class WebUtils {
 	 * @since 3.2
 	 */
 	public static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
 		if (!StringUtils.hasText(matrixVariables)) {
 			return result;
 		}

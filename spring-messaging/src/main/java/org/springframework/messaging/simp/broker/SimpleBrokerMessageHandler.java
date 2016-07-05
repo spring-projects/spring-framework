@@ -48,7 +48,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<String, SessionInfo>();
+	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<>();
 
 	private SubscriptionRegistry subscriptionRegistry;
 

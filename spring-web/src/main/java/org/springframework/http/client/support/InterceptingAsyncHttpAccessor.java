@@ -35,7 +35,7 @@ import org.springframework.util.CollectionUtils;
 public abstract class InterceptingAsyncHttpAccessor extends AsyncHttpAccessor {
 
     private List<AsyncClientHttpRequestInterceptor> interceptors =
-            new ArrayList<AsyncClientHttpRequestInterceptor>();
+			new ArrayList<>();
 
 
     /**

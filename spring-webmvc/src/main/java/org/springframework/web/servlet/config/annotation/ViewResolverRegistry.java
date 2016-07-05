@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class ViewResolverRegistry {
 
 	private ContentNegotiatingViewResolver contentNegotiatingResolver;
 
-	private final List<ViewResolver> viewResolvers = new ArrayList<ViewResolver>(4);
+	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
 	private Integer order;
 
@@ -113,7 +113,7 @@ public class ViewResolverRegistry {
 		if (this.contentNegotiatingResolver != null) {
 			if (!ObjectUtils.isEmpty(defaultViews)) {
 				if (!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
-					List<View> views = new ArrayList<View>(this.contentNegotiatingResolver.getDefaultViews());
+					List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
 					views.addAll(Arrays.asList(defaultViews));
 					this.contentNegotiatingResolver.setDefaultViews(views);
 				}

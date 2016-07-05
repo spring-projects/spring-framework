@@ -119,7 +119,7 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 	 */
 	protected List<EventListenerFactory> getEventListenerFactories() {
 		Map<String, EventListenerFactory> beans = this.applicationContext.getBeansOfType(EventListenerFactory.class);
-		List<EventListenerFactory> allFactories = new ArrayList<EventListenerFactory>(beans.values());
+		List<EventListenerFactory> allFactories = new ArrayList<>(beans.values());
 		AnnotationAwareOrderComparator.sort(allFactories);
 		return allFactories;
 	}

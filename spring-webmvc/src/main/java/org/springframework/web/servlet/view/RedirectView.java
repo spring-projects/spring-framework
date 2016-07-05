@@ -493,7 +493,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @see #isEligibleProperty(String, Object)
 	 */
 	protected Map<String, Object> queryProperties(Map<String, Object> model) {
-		Map<String, Object> result = new LinkedHashMap<String, Object>();
+		Map<String, Object> result = new LinkedHashMap<>();
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			if (isEligibleProperty(entry.getKey(), entry.getValue())) {
 				result.put(entry.getKey(), entry.getValue());

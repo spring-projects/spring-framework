@@ -221,9 +221,9 @@ public abstract class CommonsFileUploadSupport {
 	 * @see CommonsMultipartFile#CommonsMultipartFile(org.apache.commons.fileupload.FileItem)
 	 */
 	protected MultipartParsingResult parseFileItems(List<FileItem> fileItems, String encoding) {
-		MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<String, MultipartFile>();
-		Map<String, String[]> multipartParameters = new HashMap<String, String[]>();
-		Map<String, String> multipartParameterContentTypes = new HashMap<String, String>();
+		MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<>();
+		Map<String, String[]> multipartParameters = new HashMap<>();
+		Map<String, String> multipartParameterContentTypes = new HashMap<>();
 
 		// Extract multipart files and multipart parameters.
 		for (FileItem fileItem : fileItems) {

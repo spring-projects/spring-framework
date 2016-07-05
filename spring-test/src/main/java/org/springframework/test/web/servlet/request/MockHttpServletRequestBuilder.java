@@ -82,15 +82,15 @@ public class MockHttpServletRequestBuilder
 
 	private final URI url;
 
-	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<String, Object>();
+	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
 
 	private String contentType;
 
 	private byte[] content;
 
-	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
+	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
-	private final List<Cookie> cookies = new ArrayList<Cookie>();
+	private final List<Cookie> cookies = new ArrayList<>();
 
 	private Locale locale;
 
@@ -100,13 +100,13 @@ public class MockHttpServletRequestBuilder
 
 	private Principal principal;
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private MockHttpSession session;
 
-	private final Map<String, Object> sessionAttributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> sessionAttributes = new LinkedHashMap<>();
 
-	private final Map<String, Object> flashAttributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> flashAttributes = new LinkedHashMap<>();
 
 	private String contextPath = "";
 
@@ -114,7 +114,7 @@ public class MockHttpServletRequestBuilder
 
 	private String pathInfo = ValueConstants.DEFAULT_NONE;
 
-	private final List<RequestPostProcessor> postProcessors = new ArrayList<RequestPostProcessor>();
+	private final List<RequestPostProcessor> postProcessors = new ArrayList<>();
 
 
 	/**
@@ -250,7 +250,7 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
-		List<MediaType> result = new ArrayList<MediaType>(mediaTypes.length);
+		List<MediaType> result = new ArrayList<>(mediaTypes.length);
 		for (String mediaType : mediaTypes) {
 			result.add(MediaType.parseMediaType(mediaType));
 		}

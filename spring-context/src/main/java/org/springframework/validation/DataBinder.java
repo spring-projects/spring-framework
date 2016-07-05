@@ -145,7 +145,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
-	private final List<Validator> validators = new ArrayList<Validator>();
+	private final List<Validator> validators = new ArrayList<>();
 
 	private ConversionService conversionService;
 
@@ -762,7 +762,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected void checkRequiredFields(MutablePropertyValues mpvs) {
 		String[] requiredFields = getRequiredFields();
 		if (!ObjectUtils.isEmpty(requiredFields)) {
-			Map<String, PropertyValue> propertyValues = new HashMap<String, PropertyValue>();
+			Map<String, PropertyValue> propertyValues = new HashMap<>();
 			PropertyValue[] pvs = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvs) {
 				String canonicalName = PropertyAccessorUtils.canonicalPropertyName(pv.getName());

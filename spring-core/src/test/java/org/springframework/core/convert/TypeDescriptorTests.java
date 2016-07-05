@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -533,7 +533,7 @@ public class TypeDescriptorTests {
 	public void elementTypePreserveContext() throws Exception {
 		TypeDescriptor desc = new TypeDescriptor(getClass().getField("listPreserveContext"));
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getElementTypeDescriptor().getType());
-		List<Integer> value = new ArrayList<Integer>(3);
+		List<Integer> value = new ArrayList<>(3);
 		desc = desc.elementTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(FieldAnnotation.class));
@@ -551,7 +551,7 @@ public class TypeDescriptorTests {
 	public void mapKeyTypePreserveContext() throws Exception {
 		TypeDescriptor desc = new TypeDescriptor(getClass().getField("mapPreserveContext"));
 		assertEquals(Integer.class, desc.getMapKeyTypeDescriptor().getElementTypeDescriptor().getType());
-		List<Integer> value = new ArrayList<Integer>(3);
+		List<Integer> value = new ArrayList<>(3);
 		desc = desc.getMapKeyTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(FieldAnnotation.class));
@@ -569,7 +569,7 @@ public class TypeDescriptorTests {
 	public void mapValueTypePreserveContext() throws Exception {
 		TypeDescriptor desc = new TypeDescriptor(getClass().getField("mapPreserveContext"));
 		assertEquals(Integer.class, desc.getMapValueTypeDescriptor().getElementTypeDescriptor().getType());
-		List<Integer> value = new ArrayList<Integer>(3);
+		List<Integer> value = new ArrayList<>(3);
 		desc = desc.getMapValueTypeDescriptor(value);
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(FieldAnnotation.class));
@@ -841,19 +841,19 @@ public class TypeDescriptorTests {
 
 	public List<String> listOfString;
 
-	public List<List<String>> listOfListOfString = new ArrayList<List<String>>();
+	public List<List<String>> listOfListOfString = new ArrayList<>();
 
-	public List<List> listOfListOfUnknown = new ArrayList<List>();
+	public List<List> listOfListOfUnknown = new ArrayList<>();
 
 	public int[] intArray;
 
 	public List<String>[] arrayOfListOfString;
 
-	public List<Integer> listField = new ArrayList<Integer>();
+	public List<Integer> listField = new ArrayList<>();
 
-	public Map<String, Integer> mapField = new HashMap<String, Integer>();
+	public Map<String, Integer> mapField = new HashMap<>();
 
-	public Map<String, List<Integer>> nestedMapField = new HashMap<String, List<Integer>>();
+	public Map<String, List<Integer>> nestedMapField = new HashMap<>();
 
 	public Map<List<Integer>, List<Long>> fieldMap;
 
@@ -879,9 +879,9 @@ public class TypeDescriptorTests {
 
 	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
 
-	public MultiValueMap<String, Integer> multiValueMap = new LinkedMultiValueMap<String, Integer>();
+	public MultiValueMap<String, Integer> multiValueMap = new LinkedMultiValueMap<>();
 
-	public PassDownGeneric<Integer> passDownGeneric = new PassDownGeneric<Integer>();
+	public PassDownGeneric<Integer> passDownGeneric = new PassDownGeneric<>();
 
 
 	// Classes designed for test introspection

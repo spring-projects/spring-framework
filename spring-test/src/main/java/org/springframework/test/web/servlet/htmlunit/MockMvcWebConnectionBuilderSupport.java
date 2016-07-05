@@ -45,7 +45,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 
 	private final MockMvc mockMvc;
 
-	private final List<WebRequestMatcher> requestMatchers = new ArrayList<WebRequestMatcher>();
+	private final List<WebRequestMatcher> requestMatchers = new ArrayList<>();
 
 	private String contextPath = "";
 
@@ -159,7 +159,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 		if (this.alwaysUseMockMvc) {
 			return connection;
 		}
-		List<DelegateWebConnection> delegates = new ArrayList<DelegateWebConnection>(this.requestMatchers.size());
+		List<DelegateWebConnection> delegates = new ArrayList<>(this.requestMatchers.size());
 		for (WebRequestMatcher matcher : this.requestMatchers) {
 			delegates.add(new DelegateWebConnection(matcher, connection));
 		}

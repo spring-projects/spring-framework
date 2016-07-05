@@ -163,7 +163,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 				return null;
 			}
 
-			List<String> values = new ArrayList<String>();
+			List<String> values = new ArrayList<>();
 			if (!isEmpty1) {
 				values.addAll(values1);
 			}

@@ -111,7 +111,7 @@ public class DefaultPersistenceUnitManager
 	private static final Set<TypeFilter> entityTypeFilters;
 
 	static {
-		entityTypeFilters = new LinkedHashSet<TypeFilter>(4);
+		entityTypeFilters = new LinkedHashSet<>(4);
 		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
@@ -147,9 +147,9 @@ public class DefaultPersistenceUnitManager
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-	private final Set<String> persistenceUnitInfoNames = new HashSet<String>();
+	private final Set<String> persistenceUnitInfoNames = new HashSet<>();
 
-	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<String, PersistenceUnitInfo>();
+	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<>();
 
 
 	/**
@@ -469,7 +469,7 @@ public class DefaultPersistenceUnitManager
 	 * as defined in the JPA specification.
 	 */
 	private List<SpringPersistenceUnitInfo> readPersistenceUnitInfos() {
-		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
+		List<SpringPersistenceUnitInfo> infos = new LinkedList<>();
 		String defaultName = this.defaultPersistenceUnitName;
 		boolean buildDefaultUnit = (this.packagesToScan != null || this.mappingResources != null);
 		boolean foundDefaultUnit = false;

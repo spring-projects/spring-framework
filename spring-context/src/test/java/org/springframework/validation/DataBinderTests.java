@@ -2112,7 +2112,7 @@ public class DataBinderTests {
 		private List<E> list;
 
 		public GrowingList() {
-			this.list = new ArrayList<E>();
+			this.list = new ArrayList<>();
 		}
 
 		public List<E> getWrappedList() {
@@ -2200,8 +2200,8 @@ public class DataBinderTests {
 		private final Map<String, Object> f;
 
 		public Form() {
-			f = new HashMap<String, Object>();
-			f.put("list", new GrowingList<Object>());
+			f = new HashMap<>();
+			f.put("list", new GrowingList<>());
 		}
 
 		public Map<String, Object> getF() {

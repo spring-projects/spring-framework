@@ -62,7 +62,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	private static final Set<Class<?>> BOOLEAN_TYPES;
 
 	static {
-		Set<Class<?>> booleanTypes = new HashSet<Class<?>>();
+		Set<Class<?>> booleanTypes = new HashSet<>();
 		booleanTypes.add(Boolean.class);
 		booleanTypes.add(Boolean.TYPE);
 		BOOLEAN_TYPES = Collections.unmodifiableSet(booleanTypes);
@@ -70,13 +70,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 
 	private final Map<PropertyCacheKey, InvokerPair> readerCache =
-			new ConcurrentHashMap<PropertyCacheKey, InvokerPair>(64);
+			new ConcurrentHashMap<>(64);
 
 	private final Map<PropertyCacheKey, Member> writerCache =
-			new ConcurrentHashMap<PropertyCacheKey, Member>(64);
+			new ConcurrentHashMap<>(64);
 
 	private final Map<PropertyCacheKey, TypeDescriptor> typeDescriptorCache =
-			new ConcurrentHashMap<PropertyCacheKey, TypeDescriptor>(64);
+			new ConcurrentHashMap<>(64);
 
 	private InvokerPair lastReadInvokerPair;
 

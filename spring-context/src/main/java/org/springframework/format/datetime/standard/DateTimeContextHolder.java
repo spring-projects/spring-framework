@@ -30,7 +30,7 @@ import org.springframework.core.NamedThreadLocal;
 public final class DateTimeContextHolder {
 
 	private static final ThreadLocal<DateTimeContext> dateTimeContextHolder =
-			new NamedThreadLocal<DateTimeContext>("DateTime Context");
+			new NamedThreadLocal<>("DateTime Context");
 
 
 	/**

@@ -38,7 +38,7 @@ public class CompletableFutureReturnValueHandler extends AbstractAsyncReturnValu
 	@Override
 	@SuppressWarnings("unchecked")
 	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
-		return new CompletableToListenableFutureAdapter<Object>((CompletableFuture<Object>) returnValue);
+		return new CompletableToListenableFutureAdapter<>((CompletableFuture<Object>) returnValue);
 	}
 
 }

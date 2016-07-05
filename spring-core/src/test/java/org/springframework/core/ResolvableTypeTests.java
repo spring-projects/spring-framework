@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class ResolvableTypeTests {
 
 	@Test
 	public void forInstanceProvider() {
-		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(String.class));
+		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<>(String.class));
 		assertThat(type.getRawClass(), equalTo(MyGenericInterfaceType.class));
 		assertThat(type.getGeneric().resolve(), equalTo(String.class));
 	}
@@ -401,7 +401,7 @@ public class ResolvableTypeTests {
 	public void getInterfaces() throws Exception {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class);
 		assertThat(type.getInterfaces().length, equalTo(0));
-		SortedSet<String> interfaces = new TreeSet<String>();
+		SortedSet<String> interfaces = new TreeSet<>();
 		for (ResolvableType interfaceType : type.getSuperType().getInterfaces()) {
 			interfaces.add(interfaceType.toString());
 		}

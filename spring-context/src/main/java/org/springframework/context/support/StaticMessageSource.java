@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ import org.springframework.util.Assert;
 public class StaticMessageSource extends AbstractMessageSource {
 
 	/** Map from 'code + locale' keys to message Strings */
-	private final Map<String, String> messages = new HashMap<String, String>();
+	private final Map<String, String> messages = new HashMap<>();
 
-	private final Map<String, MessageFormat> cachedMessageFormats = new HashMap<String, MessageFormat>();
+	private final Map<String, MessageFormat> cachedMessageFormats = new HashMap<>();
 
 
 	@Override

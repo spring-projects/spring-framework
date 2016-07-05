@@ -42,9 +42,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractRequestExpectationManager implements RequestExpectationManager {
 
-	private final List<RequestExpectation> expectations = new LinkedList<RequestExpectation>();
+	private final List<RequestExpectation> expectations = new LinkedList<>();
 
-	private final List<ClientHttpRequest> requests = new LinkedList<ClientHttpRequest>();
+	private final List<ClientHttpRequest> requests = new LinkedList<>();
 
 
 	protected List<RequestExpectation> getExpectations() {
@@ -147,7 +147,7 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	 */
 	protected static class RequestExpectationGroup {
 
-		private final Set<RequestExpectation> expectations = new LinkedHashSet<RequestExpectation>();
+		private final Set<RequestExpectation> expectations = new LinkedHashSet<>();
 
 		public Set<RequestExpectation> getExpectations() {
 			return this.expectations;

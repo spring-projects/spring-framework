@@ -223,7 +223,7 @@ public abstract class WebApplicationContextUtils {
 		}
 
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
-			Map<String, String> parameterMap = new HashMap<String, String>();
+			Map<String, String> parameterMap = new HashMap<>();
 			if (servletContext != null) {
 				Enumeration<?> paramNameEnum = servletContext.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
@@ -243,7 +243,7 @@ public abstract class WebApplicationContextUtils {
 		}
 
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
-			Map<String, Object> attributeMap = new HashMap<String, Object>();
+			Map<String, Object> attributeMap = new HashMap<>();
 			if (servletContext != null) {
 				Enumeration<?> attrNameEnum = servletContext.getAttributeNames();
 				while (attrNameEnum.hasMoreElements()) {

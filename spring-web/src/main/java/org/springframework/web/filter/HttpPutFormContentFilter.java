@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 		public HttpPutFormContentRequestWrapper(HttpServletRequest request, MultiValueMap<String, String> parameters) {
 			super(request);
-			this.formParameters = (parameters != null) ? parameters : new LinkedMultiValueMap<String, String>();
+			this.formParameters = (parameters != null) ? parameters : new LinkedMultiValueMap<>();
 		}
 
 		@Override
@@ -122,7 +122,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 		@Override
 		public Map<String, String[]> getParameterMap() {
-			Map<String, String[]> result = new LinkedHashMap<String, String[]>();
+			Map<String, String[]> result = new LinkedHashMap<>();
 			Enumeration<String> names = this.getParameterNames();
 			while (names.hasMoreElements()) {
 				String name = names.nextElement();
@@ -133,7 +133,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 		@Override
 		public Enumeration<String> getParameterNames() {
-			Set<String> names = new LinkedHashSet<String>();
+			Set<String> names = new LinkedHashSet<>();
 			names.addAll(Collections.list(super.getParameterNames()));
 			names.addAll(this.formParameters.keySet());
 			return Collections.enumeration(names);
@@ -150,7 +150,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 				return formValues.toArray(new String[formValues.size()]);
 			}
 			else {
-				List<String> result = new ArrayList<String>();
+				List<String> result = new ArrayList<>();
 				result.addAll(Arrays.asList(queryStringValues));
 				result.addAll(formValues);
 				return result.toArray(new String[result.size()]);

@@ -51,7 +51,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 
 
 	public AllEncompassingFormHttpMessageConverter() {
-		addPartConverter(new SourceHttpMessageConverter<Source>());
+		addPartConverter(new SourceHttpMessageConverter<>());
 
 		if (jaxb2Present && !jackson2XmlPresent) {
 			addPartConverter(new Jaxb2RootElementHttpMessageConverter());

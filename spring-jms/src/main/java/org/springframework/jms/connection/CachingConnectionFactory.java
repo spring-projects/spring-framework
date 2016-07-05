@@ -96,7 +96,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	private volatile boolean active = true;
 
 	private final Map<Integer, LinkedList<Session>> cachedSessions =
-			new HashMap<Integer, LinkedList<Session>>();
+			new HashMap<>();
 
 
 	/**
@@ -216,7 +216,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		synchronized (this.cachedSessions) {
 			sessionList = this.cachedSessions.get(mode);
 			if (sessionList == null) {
-				sessionList = new LinkedList<Session>();
+				sessionList = new LinkedList<>();
 				this.cachedSessions.put(mode, sessionList);
 			}
 		}
@@ -251,7 +251,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	 * @return the wrapped Session
 	 */
 	protected Session getCachedSessionProxy(Session target, LinkedList<Session> sessionList) {
-		List<Class<?>> classes = new ArrayList<Class<?>>(3);
+		List<Class<?>> classes = new ArrayList<>(3);
 		classes.add(SessionProxy.class);
 		if (target instanceof QueueSession) {
 			classes.add(QueueSession.class);
@@ -276,10 +276,10 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		private final LinkedList<Session> sessionList;
 
 		private final Map<DestinationCacheKey, MessageProducer> cachedProducers =
-				new HashMap<DestinationCacheKey, MessageProducer>();
+				new HashMap<>();
 
 		private final Map<ConsumerCacheKey, MessageConsumer> cachedConsumers =
-				new HashMap<ConsumerCacheKey, MessageConsumer>();
+				new HashMap<>();
 
 		private boolean transactionOpen = false;
 

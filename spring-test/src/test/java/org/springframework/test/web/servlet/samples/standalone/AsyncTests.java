@@ -173,10 +173,10 @@ public class AsyncTests {
 	private static class AsyncController {
 
 		private final Collection<DeferredResult<Person>> deferredResults =
-				new CopyOnWriteArrayList<DeferredResult<Person>>();
+				new CopyOnWriteArrayList<>();
 
 		private final Collection<ListenableFutureTask<Person>> futureTasks =
-				new CopyOnWriteArrayList<ListenableFutureTask<Person>>();
+				new CopyOnWriteArrayList<>();
 
 
 		@RequestMapping(params = "callable")
@@ -186,21 +186,21 @@ public class AsyncTests {
 
 		@RequestMapping(params = "deferredResult")
 		public DeferredResult<Person> getDeferredResult() {
-			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			DeferredResult<Person> deferredResult = new DeferredResult<>();
 			this.deferredResults.add(deferredResult);
 			return deferredResult;
 		}
 
 		@RequestMapping(params = "deferredResultWithImmediateValue")
 		public DeferredResult<Person> getDeferredResultWithImmediateValue() {
-			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			DeferredResult<Person> deferredResult = new DeferredResult<>();
 			deferredResult.setResult(new Person("Joe"));
 			return deferredResult;
 		}
 
 		@RequestMapping(params = "deferredResultWithDelayedError")
 		public DeferredResult<Person> getDeferredResultWithDelayedError() {
-			final DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			final DeferredResult<Person> deferredResult = new DeferredResult<>();
 			new Thread() {
 				public void run() {
 					try {
@@ -217,14 +217,14 @@ public class AsyncTests {
 
 		@RequestMapping(params = "listenableFuture")
 		public ListenableFuture<Person> getListenableFuture() {
-			ListenableFutureTask<Person> futureTask = new ListenableFutureTask<Person>(() -> new Person("Joe"));
+			ListenableFutureTask<Person> futureTask = new ListenableFutureTask<>(() -> new Person("Joe"));
 			this.futureTasks.add(futureTask);
 			return futureTask;
 		}
 
 		@RequestMapping(params = "completableFutureWithImmediateValue")
 		public CompletableFuture<Person> getCompletableFutureWithImmediateValue() {
-			CompletableFuture<Person> future = new CompletableFuture<Person>();
+			CompletableFuture<Person> future = new CompletableFuture<>();
 			future.complete(new Person("Joe"));
 			return future;
 		}

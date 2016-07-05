@@ -63,12 +63,12 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		implements HandlerMethodReturnValueHandler {
 
 	/* Extensions associated with the built-in message converters */
-	private static final Set<String> WHITELISTED_EXTENSIONS = new HashSet<String>(Arrays.asList(
+	private static final Set<String> WHITELISTED_EXTENSIONS = new HashSet<>(Arrays.asList(
 			"txt", "text", "yml", "properties", "csv",
 			"json", "xml", "atom", "rss",
 			"png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
 
-	private static final Set<String> WHITELISTED_MEDIA_BASE_TYPES = new HashSet<String>(
+	private static final Set<String> WHITELISTED_MEDIA_BASE_TYPES = new HashSet<>(
 			Arrays.asList("audio", "image", "video"));
 
 	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
@@ -87,7 +87,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private final PathExtensionContentNegotiationStrategy pathStrategy;
 
-	private final Set<String> safeExtensions = new HashSet<String>();
+	private final Set<String> safeExtensions = new HashSet<>();
 
 
 
@@ -188,7 +188,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			throw new IllegalArgumentException("No converter found for return value of type: " + valueType);
 		}
 
-		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
+		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
 		for (MediaType requestedType : requestedMediaTypes) {
 			for (MediaType producibleType : producibleMediaTypes) {
 				if (requestedType.isCompatibleWith(producibleType)) {
@@ -203,7 +203,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			return;
 		}
 
-		List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
+		List<MediaType> mediaTypes = new ArrayList<>(compatibleMediaTypes);
 		MediaType.sortBySpecificityAndQuality(mediaTypes);
 
 		MediaType selectedMediaType = null;
@@ -305,10 +305,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> valueClass, Type declaredType) {
 		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			return new ArrayList<MediaType>(mediaTypes);
+			return new ArrayList<>(mediaTypes);
 		}
 		else if (!this.allSupportedMediaTypes.isEmpty()) {
-			List<MediaType> result = new ArrayList<MediaType>();
+			List<MediaType> result = new ArrayList<>();
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
 				if (converter instanceof GenericHttpMessageConverter && declaredType != null) {
 					if (((GenericHttpMessageConverter<?>) converter).canWrite(declaredType, valueClass, null)) {

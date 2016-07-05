@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  */
 public final class MockMvcWebConnection implements WebConnection {
 
-	private final Map<String, MockHttpSession> sessions = new HashMap<String, MockHttpSession>();
+	private final Map<String, MockHttpSession> sessions = new HashMap<>();
 
 	private final MockMvc mockMvc;
 

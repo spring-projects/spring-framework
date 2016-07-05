@@ -99,7 +99,7 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 
 	private Resource[] mappingLocations;
 
-	private final Map<String, String> validationPropertyMap = new HashMap<String, String>();
+	private final Map<String, String> validationPropertyMap = new HashMap<>();
 
 	private ApplicationContext applicationContext;
 

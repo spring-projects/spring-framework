@@ -81,7 +81,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	private static final Set<String> disconnectedClientExceptions;
 
 	static {
-		Set<String> set = new HashSet<String>(2);
+		Set<String> set = new HashSet<>(2);
 		set.add("ClientAbortException"); // Tomcat
 		set.add("EOFException"); // Tomcat
 		set.add("EofException"); // Jetty
@@ -98,7 +98,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 
 	private final WebSocketHandler handler;
 
-	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 	private volatile State state = State.NEW;
 
@@ -399,7 +399,7 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 	}
 
 	public void delegateMessages(String... messages) throws SockJsMessageDeliveryException {
-		List<String> undelivered = new ArrayList<String>(Arrays.asList(messages));
+		List<String> undelivered = new ArrayList<>(Arrays.asList(messages));
 		for (String message : messages) {
 			try {
 				if (isClosed()) {

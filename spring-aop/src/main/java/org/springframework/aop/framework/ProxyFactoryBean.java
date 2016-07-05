@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -480,7 +480,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	private List<Advisor> freshAdvisorChain() {
 		Advisor[] advisors = getAdvisors();
-		List<Advisor> freshAdvisors = new ArrayList<Advisor>(advisors.length);
+		List<Advisor> freshAdvisors = new ArrayList<>(advisors.length);
 		for (Advisor advisor : advisors) {
 			if (advisor instanceof PrototypePlaceholderAdvisor) {
 				PrototypePlaceholderAdvisor pa = (PrototypePlaceholderAdvisor) advisor;
@@ -513,8 +513,8 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Advisor.class);
 		String[] globalInterceptorNames =
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Interceptor.class);
-		List<Object> beans = new ArrayList<Object>(globalAdvisorNames.length + globalInterceptorNames.length);
-		Map<Object, String> names = new HashMap<Object, String>(beans.size());
+		List<Object> beans = new ArrayList<>(globalAdvisorNames.length + globalInterceptorNames.length);
+		Map<Object, String> names = new HashMap<>(beans.size());
 		for (String name : globalAdvisorNames) {
 			Object bean = beanFactory.getBean(name);
 			beans.add(bean);

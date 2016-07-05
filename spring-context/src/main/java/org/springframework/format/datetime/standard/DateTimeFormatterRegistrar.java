@@ -58,7 +58,7 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 	/**
 	 * User defined formatters.
 	 */
-	private final Map<Type, DateTimeFormatter> formatters = new HashMap<Type, DateTimeFormatter>();
+	private final Map<Type, DateTimeFormatter> formatters = new HashMap<>();
 
 	/**
 	 * Factories used when specific formatters have not been specified.
@@ -67,7 +67,7 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 
 	public DateTimeFormatterRegistrar() {
-		this.factories = new HashMap<Type, DateTimeFormatterFactory>();
+		this.factories = new HashMap<>();
 		for (Type type : Type.values()) {
 			this.factories.put(type, new DateTimeFormatterFactory());
 		}

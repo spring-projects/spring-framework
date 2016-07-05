@@ -62,7 +62,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	 */
 	public StringHttpMessageConverter(Charset defaultCharset) {
 		super(defaultCharset, MediaType.TEXT_PLAIN, MediaType.ALL);
-		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
+		this.availableCharsets = new ArrayList<>(Charset.availableCharsets().values());
 	}
 
 

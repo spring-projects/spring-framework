@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,9 +82,9 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 
 	@Override
 	public String[] getPropertyNames() {
-		List<String> names = new ArrayList<String>();
+		List<String> names = new ArrayList<>();
 		for (OptionSpec<?> spec : this.source.specs()) {
-			List<String> aliases = new ArrayList<String>(spec.options());
+			List<String> aliases = new ArrayList<>(spec.options());
 			if (!aliases.isEmpty()) {
 				// Only the longest name is used for enumerating
 				names.add(aliases.get(aliases.size() - 1));
@@ -96,7 +96,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	@Override
 	public List<String> getOptionValues(String name) {
 		List<?> argValues = this.source.valuesOf(name);
-		List<String> stringArgValues = new ArrayList<String>();
+		List<String> stringArgValues = new ArrayList<>();
 		for (Object argValue : argValues) {
 			stringArgValues.add(argValue instanceof String ? (String) argValue : argValue.toString());
 		}
@@ -109,7 +109,7 @@ public class JOptCommandLinePropertySource extends CommandLinePropertySource<Opt
 	@Override
 	protected List<String> getNonOptionArgs() {
 		List<?> argValues = this.source.nonOptionArguments();
-		List<String> stringArgValues = new ArrayList<String>();
+		List<String> stringArgValues = new ArrayList<>();
 		for (Object argValue : argValues) {
 			Assert.isInstanceOf(String.class, argValue, "Argument values must be of type String");
 			stringArgValues.add((String) argValue);

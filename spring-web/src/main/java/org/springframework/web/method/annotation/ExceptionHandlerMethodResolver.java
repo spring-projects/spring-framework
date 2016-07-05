@@ -60,10 +60,10 @@ public class ExceptionHandlerMethodResolver {
 
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods =
-			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+			new ConcurrentHashMap<>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache =
-			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+			new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -85,7 +85,7 @@ public class ExceptionHandlerMethodResolver {
 	 */
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
-		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
+		List<Class<? extends Throwable>> result = new ArrayList<>();
 		detectAnnotationExceptionMappings(method, result);
 		if (result.isEmpty()) {
 			for (Class<?> paramType : method.getParameterTypes()) {
@@ -154,7 +154,7 @@ public class ExceptionHandlerMethodResolver {
 	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
-		List<Class<? extends Throwable>> matches = new ArrayList<Class<? extends Throwable>>();
+		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
 			if (mappedException.isAssignableFrom(exceptionType)) {
 				matches.add(mappedException);

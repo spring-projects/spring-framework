@@ -60,7 +60,7 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 
 	private ListableBeanFactory beanFactory;
 
-	private final Set<Endpoint> publishedEndpoints = new LinkedHashSet<Endpoint>();
+	private final Set<Endpoint> publishedEndpoints = new LinkedHashSet<>();
 
 
 	/**
@@ -127,7 +127,7 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 * @see #publishEndpoint
 	 */
 	public void publishEndpoints() {
-		Set<String> beanNames = new LinkedHashSet<String>(this.beanFactory.getBeanDefinitionCount());
+		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
 		beanNames.addAll(Arrays.asList(this.beanFactory.getBeanDefinitionNames()));
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));

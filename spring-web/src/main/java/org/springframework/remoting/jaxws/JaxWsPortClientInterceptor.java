@@ -240,7 +240,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	public Map<String, Object> getCustomProperties() {
 		if (this.customProperties == null) {
-			this.customProperties = new HashMap<String, Object>();
+			this.customProperties = new HashMap<>();
 		}
 		return this.customProperties;
 	}
@@ -427,7 +427,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #setCustomProperties
 	 */
 	protected void preparePortStub(Object stub) {
-		Map<String, Object> stubProperties = new HashMap<String, Object>();
+		Map<String, Object> stubProperties = new HashMap<>();
 		String username = getUsername();
 		if (username != null) {
 			stubProperties.put(BindingProvider.USERNAME_PROPERTY, username);

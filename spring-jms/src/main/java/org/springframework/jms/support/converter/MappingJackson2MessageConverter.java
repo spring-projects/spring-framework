@@ -79,9 +79,9 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 
 	private String typeIdPropertyName;
 
-	private Map<String, Class<?>> idClassMappings = new HashMap<String, Class<?>>();
+	private Map<String, Class<?>> idClassMappings = new HashMap<>();
 
-	private Map<Class<?>, String> classIdMappings = new HashMap<Class<?>, String>();
+	private Map<Class<?>, String> classIdMappings = new HashMap<>();
 
 	private ClassLoader beanClassLoader;
 
@@ -156,7 +156,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * @param typeIdMappings a Map with type id values as keys and Java classes as values
 	 */
 	public void setTypeIdMappings(Map<String, Class<?>> typeIdMappings) {
-		this.idClassMappings = new HashMap<String, Class<?>>();
+		this.idClassMappings = new HashMap<>();
 		for (Map.Entry<String, Class<?>> entry : typeIdMappings.entrySet()) {
 			String id = entry.getKey();
 			Class<?> clazz = entry.getValue();

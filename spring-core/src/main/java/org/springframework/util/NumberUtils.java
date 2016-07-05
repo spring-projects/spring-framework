@@ -47,7 +47,7 @@ public abstract class NumberUtils {
 	public static final Set<Class<?>> STANDARD_NUMBER_TYPES;
 
 	static {
-		Set<Class<?>> numberTypes = new HashSet<Class<?>>(8);
+		Set<Class<?>> numberTypes = new HashSet<>(8);
 		numberTypes.add(Byte.class);
 		numberTypes.add(Short.class);
 		numberTypes.add(Integer.class);

@@ -392,7 +392,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Constructs a new, empty instance of the {@code HttpHeaders} object.
 	 */
 	public HttpHeaders() {
-		this(new LinkedCaseInsensitiveMap<List<String>>(8, Locale.ENGLISH), false);
+		this(new LinkedCaseInsensitiveMap<>(8, Locale.ENGLISH), false);
 	}
 
 	/**
@@ -402,7 +402,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {
 			Map<String, List<String>> map =
-					new LinkedCaseInsensitiveMap<List<String>>(headers.size(), Locale.ENGLISH);
+					new LinkedCaseInsensitiveMap<>(headers.size(), Locale.ENGLISH);
 			for (Entry<String, List<String>> entry : headers.entrySet()) {
 				List<String> values = Collections.unmodifiableList(entry.getValue());
 				map.put(entry.getKey(), values);
@@ -483,7 +483,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Access-Control-Allow-Methods} response header.
 	 */
 	public List<HttpMethod> getAccessControlAllowMethods() {
-		List<HttpMethod> result = new ArrayList<HttpMethod>();
+		List<HttpMethod> result = new ArrayList<>();
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
 			String[] tokens = StringUtils.tokenizeToStringArray(value, ",", true, true);
@@ -590,7 +590,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Accept-Charset} header.
 	 */
 	public List<Charset> getAcceptCharset() {
-		List<Charset> result = new ArrayList<Charset>();
+		List<Charset> result = new ArrayList<>();
 		String value = getFirst(ACCEPT_CHARSET);
 		if (value != null) {
 			String[] tokens = value.split(",\\s*");
@@ -627,7 +627,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
 		if (!StringUtils.isEmpty(value)) {
-			List<HttpMethod> result = new LinkedList<HttpMethod>();
+			List<HttpMethod> result = new LinkedList<>();
 			String[] tokens = value.split(",\\s*");
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
@@ -1063,7 +1063,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public List<String> getValuesAsList(String headerName) {
 		List<String> values = get(headerName);
 		if (values != null) {
-			List<String> result = new ArrayList<String>();
+			List<String> result = new ArrayList<>();
 			for (String value : values) {
 				if (value != null) {
 					String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
@@ -1086,7 +1086,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	protected List<String> getETagValuesAsList(String headerName) {
 		List<String> values = get(headerName);
 		if (values != null) {
-			List<String> result = new ArrayList<String>();
+			List<String> result = new ArrayList<>();
 			for (String value : values) {
 				if (value != null) {
 					Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
@@ -1163,7 +1163,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public void add(String headerName, String headerValue) {
 		List<String> headerValues = this.headers.get(headerName);
 		if (headerValues == null) {
-			headerValues = new LinkedList<String>();
+			headerValues = new LinkedList<>();
 			this.headers.put(headerName, headerValues);
 		}
 		headerValues.add(headerValue);
@@ -1179,7 +1179,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public void set(String headerName, String headerValue) {
-		List<String> headerValues = new LinkedList<String>();
+		List<String> headerValues = new LinkedList<>();
 		headerValues.add(headerValue);
 		this.headers.put(headerName, headerValues);
 	}
@@ -1193,7 +1193,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	@Override
 	public Map<String, String> toSingleValueMap() {
-		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<String,String>(this.headers.size());
+		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<>(this.headers.size());
 		for (Entry<String, List<String>> entry : this.headers.entrySet()) {
 			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
 		}

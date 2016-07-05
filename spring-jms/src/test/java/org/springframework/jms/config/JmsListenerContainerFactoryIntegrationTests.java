@@ -164,7 +164,7 @@ public class JmsListenerContainerFactoryIntegrationTests {
 
 	static class JmsEndpointSampleBean implements JmsEndpointSampleInterface {
 
-		private final Map<String, Boolean> invocations = new HashMap<String, Boolean>();
+		private final Map<String, Boolean> invocations = new HashMap<>();
 
 		public void handleIt(@Payload String msg, @Header("my-header") String myHeader) {
 			invocations.put("handleIt", true);

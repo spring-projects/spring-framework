@@ -183,7 +183,7 @@ public class ContextLoader {
 	 * Map from (thread context) ClassLoader to corresponding 'current' WebApplicationContext.
 	 */
 	private static final Map<ClassLoader, WebApplicationContext> currentContextPerThread =
-			new ConcurrentHashMap<ClassLoader, WebApplicationContext>(1);
+			new ConcurrentHashMap<>(1);
 
 	/**
 	 * The 'current' WebApplicationContext, if the ContextLoader class is
@@ -205,7 +205,7 @@ public class ContextLoader {
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
 	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
-			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+			new ArrayList<>();
 
 
 	/**
@@ -494,7 +494,7 @@ public class ContextLoader {
 			determineContextInitializerClasses(ServletContext servletContext) {
 
 		List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> classes =
-				new ArrayList<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>>();
+				new ArrayList<>();
 
 		String globalClassNames = servletContext.getInitParameter(GLOBAL_INITIALIZER_CLASSES_PARAM);
 		if (globalClassNames != null) {

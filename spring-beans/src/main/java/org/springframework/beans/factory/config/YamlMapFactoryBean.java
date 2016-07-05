@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 	 * @see #process(java.util.Map, MatchCallback)
 	 */
 	protected Map<String, Object> createMap() {
-		final Map<String, Object> result = new LinkedHashMap<String, Object>();
+		final Map<String, Object> result = new LinkedHashMap<>();
 		process(new MatchCallback() {
 			@Override
 			public void process(Properties properties, Map<String, Object> map) {
@@ -129,7 +129,7 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 			Object value = entry.getValue();
 			Object existing = output.get(key);
 			if (value instanceof Map && existing instanceof Map) {
-				Map<String, Object> result = new LinkedHashMap<String, Object>((Map) existing);
+				Map<String, Object> result = new LinkedHashMap<>((Map) existing);
 				merge(result, (Map) value);
 				output.put(key, result);
 			}

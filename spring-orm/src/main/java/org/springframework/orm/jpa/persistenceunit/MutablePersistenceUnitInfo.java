@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,15 +53,15 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 
 	private DataSource jtaDataSource;
 
-	private final List<String> mappingFileNames = new LinkedList<String>();
+	private final List<String> mappingFileNames = new LinkedList<>();
 
-	private List<URL> jarFileUrls = new LinkedList<URL>();
+	private List<URL> jarFileUrls = new LinkedList<>();
 
 	private URL persistenceUnitRootUrl;
 
-	private final List<String> managedClassNames = new LinkedList<String>();
+	private final List<String> managedClassNames = new LinkedList<>();
 
-	private final List<String> managedPackages = new LinkedList<String>();
+	private final List<String> managedPackages = new LinkedList<>();
 
 	private boolean excludeUnlistedClasses = false;
 

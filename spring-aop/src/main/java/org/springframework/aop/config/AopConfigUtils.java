@@ -54,7 +54,7 @@ public abstract class AopConfigUtils {
 	/**
 	 * Stores the auto proxy creator classes in escalation order.
 	 */
-	private static final List<Class<?>> APC_PRIORITY_LIST = new ArrayList<Class<?>>();
+	private static final List<Class<?>> APC_PRIORITY_LIST = new ArrayList<>();
 
 	/**
 	 * Setup the escalation list.

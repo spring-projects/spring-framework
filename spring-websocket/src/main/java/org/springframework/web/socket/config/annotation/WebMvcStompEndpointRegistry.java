@@ -58,7 +58,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	private final StompSubProtocolHandler stompHandler;
 
 	private final List<WebMvcStompWebSocketEndpointRegistration> registrations =
-			new ArrayList<WebMvcStompWebSocketEndpointRegistration>();
+			new ArrayList<>();
 
 
 	public WebMvcStompEndpointRegistry(WebSocketHandler webSocketHandler,
@@ -148,7 +148,7 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	 * in case of no registrations.
 	 */
 	public AbstractHandlerMapping getHandlerMapping() {
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (WebMvcStompWebSocketEndpointRegistration registration : this.registrations) {
 			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 			for (HttpRequestHandler httpHandler : mappings.keySet()) {

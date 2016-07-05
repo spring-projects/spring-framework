@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this servlet.
 	 */
-	private final Set<String> requiredProperties = new HashSet<String>();
+	private final Set<String> requiredProperties = new HashSet<>();
 
 	private ConfigurableEnvironment environment;
 
@@ -232,7 +232,7 @@ public abstract class HttpServletBean extends HttpServlet
 			throws ServletException {
 
 			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
-					new HashSet<String>(requiredProperties) : null;
+					new HashSet<>(requiredProperties) : null;
 
 			Enumeration<String> en = config.getInitParameterNames();
 			while (en.hasMoreElements()) {

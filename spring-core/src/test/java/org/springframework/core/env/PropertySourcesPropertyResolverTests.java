@@ -87,7 +87,7 @@ public class PropertySourcesPropertyResolverTests {
 	@Test
 	public void getProperty_withExplicitNullValue() {
 		// java.util.Properties does not allow null values (because Hashtable does not)
-		Map<String, Object> nullableProperties = new HashMap<String, Object>();
+		Map<String, Object> nullableProperties = new HashMap<>();
 		propertySources.addLast(new MapPropertySource("nullableProperties", nullableProperties));
 		nullableProperties.put("foo", null);
 		assertThat(propertyResolver.getProperty("foo"), nullValue());
@@ -127,7 +127,7 @@ public class PropertySourcesPropertyResolverTests {
 		String value1 = "bar";
 		String value2 = "biz";
 
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		map.put(key, value1); // before construction
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MapPropertySource("testProperties", map));
@@ -139,7 +139,7 @@ public class PropertySourcesPropertyResolverTests {
 
 	@Test
 	public void getProperty_doesNotCache_addNewKeyPostConstruction() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MapPropertySource("testProperties", map));
 		PropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);

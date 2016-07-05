@@ -415,7 +415,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyOrderedListener1 implements ApplicationListener<ApplicationEvent>, Ordered {
 
-		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+		public final Set<ApplicationEvent> seenEvents = new HashSet<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
@@ -459,7 +459,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyPayloadListener implements ApplicationListener<PayloadApplicationEvent> {
 
-		public final Set<Object> seenPayloads = new HashSet<Object>();
+		public final Set<Object> seenPayloads = new HashSet<>();
 
 		@Override
 		public void onApplicationEvent(PayloadApplicationEvent event) {
@@ -470,7 +470,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 	public static class MyNonSingletonListener implements ApplicationListener<ApplicationEvent> {
 
-		public static final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+		public static final Set<ApplicationEvent> seenEvents = new HashSet<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
@@ -482,7 +482,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Order(5)
 	public static class MyOrderedListener3 implements ApplicationListener<ApplicationEvent> {
 
-		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
+		public final Set<ApplicationEvent> seenEvents = new HashSet<>();
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {

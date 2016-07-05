@@ -64,7 +64,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	private boolean cacheUnresolved = true;
 
 	/** Fast access cache for Views, returning already cached instances without a global lock */
-	private final Map<Object, View> viewAccessCache = new ConcurrentHashMap<Object, View>(DEFAULT_CACHE_LIMIT);
+	private final Map<Object, View> viewAccessCache = new ConcurrentHashMap<>(DEFAULT_CACHE_LIMIT);
 
 	/** Map from view key to View instance, synchronized for View creation */
 	@SuppressWarnings("serial")

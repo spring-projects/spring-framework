@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -264,7 +264,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 	protected ResponseEntity<String> executeRequest(URI url, HttpString method, HttpHeaders headers, String body) {
 		CountDownLatch latch = new CountDownLatch(1);
-		List<ClientResponse> responses = new CopyOnWriteArrayList<ClientResponse>();
+		List<ClientResponse> responses = new CopyOnWriteArrayList<>();
 
 		try {
 			ClientConnection connection =
@@ -285,8 +285,8 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 				HttpHeaders responseHeaders = toHttpHeaders(response.getResponseHeaders());
 				String responseBody = response.getAttachment(RESPONSE_BODY);
 				return (responseBody != null ?
-						new ResponseEntity<String>(responseBody, responseHeaders, status) :
-						new ResponseEntity<String>(responseHeaders, status));
+						new ResponseEntity<>(responseBody, responseHeaders, status) :
+						new ResponseEntity<>(responseHeaders, status));
 			}
 			finally {
 				IoUtils.safeClose(connection);

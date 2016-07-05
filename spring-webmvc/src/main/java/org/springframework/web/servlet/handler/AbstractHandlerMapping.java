@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,9 +75,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private final List<Object> interceptors = new ArrayList<Object>();
+	private final List<Object> interceptors = new ArrayList<>();
 
-	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
+	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
@@ -329,7 +329,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
 	 */
 	protected final MappedInterceptor[] getMappedInterceptors() {
-		List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
+		List<MappedInterceptor> mappedInterceptors = new ArrayList<>();
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
 				mappedInterceptors.add((MappedInterceptor) interceptor);

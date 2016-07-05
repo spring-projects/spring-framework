@@ -79,7 +79,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final StompHeaders connectHeaders;
 
-	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<StompSession>();
+	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<>();
 
 	private MessageConverter converter = new SimpleMessageConverter();
 
@@ -96,11 +96,11 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final AtomicInteger subscriptionIndex = new AtomicInteger();
 
-	private final Map<String, DefaultSubscription> subscriptions = new ConcurrentHashMap<String, DefaultSubscription>(4);
+	private final Map<String, DefaultSubscription> subscriptions = new ConcurrentHashMap<>(4);
 
 	private final AtomicInteger receiptIndex = new AtomicInteger();
 
-	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<String, ReceiptHandler>(4);
+	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<>(4);
 
 	/* Whether the client is willfully closing the connection */
 	private volatile boolean closing = false;
@@ -503,9 +503,9 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		private final String receiptId;
 
-		private final List<Runnable> receiptCallbacks = new ArrayList<Runnable>(2);
+		private final List<Runnable> receiptCallbacks = new ArrayList<>(2);
 
-		private final List<Runnable> receiptLostCallbacks = new ArrayList<Runnable>(2);
+		private final List<Runnable> receiptLostCallbacks = new ArrayList<>(2);
 
 		private ScheduledFuture<?> future;
 

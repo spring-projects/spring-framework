@@ -58,7 +58,7 @@ public class HttpHeadersTests {
 	public void accept() {
 		MediaType mediaType1 = new MediaType("text", "html");
 		MediaType mediaType2 = new MediaType("text", "plain");
-		List<MediaType> mediaTypes = new ArrayList<MediaType>(2);
+		List<MediaType> mediaTypes = new ArrayList<>(2);
 		mediaTypes.add(mediaType1);
 		mediaTypes.add(mediaType2);
 		headers.setAccept(mediaTypes);
@@ -78,7 +78,7 @@ public class HttpHeadersTests {
 	public void acceptCharsets() {
 		Charset charset1 = Charset.forName("UTF-8");
 		Charset charset2 = Charset.forName("ISO-8859-1");
-		List<Charset> charsets = new ArrayList<Charset>(2);
+		List<Charset> charsets = new ArrayList<>(2);
 		charsets.add(charset1);
 		charsets.add(charset2);
 		headers.setAcceptCharset(charsets);
@@ -184,7 +184,7 @@ public class HttpHeadersTests {
 	public void ifNoneMatchList() {
 		String ifNoneMatch1 = "\"v2.6\"";
 		String ifNoneMatch2 = "\"v2.7\", \"v2.8\"";
-		List<String> ifNoneMatchList = new ArrayList<String>(2);
+		List<String> ifNoneMatchList = new ArrayList<>(2);
 		ifNoneMatchList.add(ifNoneMatch1);
 		ifNoneMatchList.add(ifNoneMatch2);
 		headers.setIfNoneMatch(ifNoneMatchList);

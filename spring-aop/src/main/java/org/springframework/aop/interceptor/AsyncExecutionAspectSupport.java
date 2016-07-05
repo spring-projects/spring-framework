@@ -70,7 +70,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<Method, AsyncTaskExecutor> executors = new ConcurrentHashMap<Method, AsyncTaskExecutor>(16);
+	private final Map<Method, AsyncTaskExecutor> executors = new ConcurrentHashMap<>(16);
 
 	private volatile Executor defaultExecutor;
 

@@ -69,7 +69,7 @@ public class DefaultContextCache implements ContextCache {
 	 * of other contexts.
 	 */
 	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap =
-			new ConcurrentHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(32);
+			new ConcurrentHashMap<>(32);
 
 	private final int maxSize;
 
@@ -143,7 +143,7 @@ public class DefaultContextCache implements ContextCache {
 		while (parent != null) {
 			Set<MergedContextConfiguration> list = this.hierarchyMap.get(parent);
 			if (list == null) {
-				list = new HashSet<MergedContextConfiguration>();
+				list = new HashSet<>();
 				this.hierarchyMap.put(parent, list);
 			}
 			list.add(child);
@@ -168,7 +168,7 @@ public class DefaultContextCache implements ContextCache {
 			}
 		}
 
-		List<MergedContextConfiguration> removedContexts = new ArrayList<MergedContextConfiguration>();
+		List<MergedContextConfiguration> removedContexts = new ArrayList<>();
 		remove(removedContexts, startKey);
 
 		// Remove all remaining references to any removed contexts from the

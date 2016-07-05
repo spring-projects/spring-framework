@@ -83,13 +83,13 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private Collection<String> destinationPrefixes = new ArrayList<String>();
+	private Collection<String> destinationPrefixes = new ArrayList<>();
 
 	private final List<HandlerMethodArgumentResolver> customArgumentResolvers =
-			new ArrayList<HandlerMethodArgumentResolver>(4);
+			new ArrayList<>(4);
 
 	private final List<HandlerMethodReturnValueHandler> customReturnValueHandlers =
-			new ArrayList<HandlerMethodReturnValueHandler>(4);
+			new ArrayList<>(4);
 
 	private final HandlerMethodArgumentResolverComposite argumentResolvers =
 			new HandlerMethodArgumentResolverComposite();
@@ -99,15 +99,15 @@ public abstract class AbstractMethodMessageHandler<T>
 
 	private ApplicationContext applicationContext;
 
-	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<T, HandlerMethod>(64);
+	private final Map<T, HandlerMethod> handlerMethods = new LinkedHashMap<>(64);
 
-	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<String, T>(64);
+	private final MultiValueMap<String, T> destinationLookup = new LinkedMultiValueMap<>(64);
 
 	private final Map<Class<?>, AbstractExceptionHandlerMethodResolver> exceptionHandlerCache =
-			new ConcurrentHashMap<Class<?>, AbstractExceptionHandlerMethodResolver>(64);
+			new ConcurrentHashMap<>(64);
 
 	private final Map<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
-			new LinkedHashMap<MessagingAdviceBean, AbstractExceptionHandlerMethodResolver>(64);
+			new LinkedHashMap<>(64);
 
 
 	/**

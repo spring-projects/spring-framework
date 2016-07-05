@@ -45,7 +45,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 
 
 	public DeferredResultMethodReturnValueHandler() {
-		this.adapterMap = new HashMap<Class<?>, DeferredResultAdapter>(5);
+		this.adapterMap = new HashMap<>(5);
 		this.adapterMap.put(DeferredResult.class, new SimpleDeferredResultAdapter());
 		this.adapterMap.put(ListenableFuture.class, new ListenableFutureAdapter());
 		this.adapterMap.put(CompletionStage.class, new CompletionStageAdapter());
@@ -119,7 +119,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
 			Assert.isInstanceOf(ListenableFuture.class, returnValue);
-			final DeferredResult<Object> result = new DeferredResult<Object>();
+			final DeferredResult<Object> result = new DeferredResult<>();
 			((ListenableFuture<?>) returnValue).addCallback(new ListenableFutureCallback<Object>() {
 				@Override
 				public void onSuccess(Object value) {
@@ -143,7 +143,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
 			Assert.isInstanceOf(CompletionStage.class, returnValue);
-			final DeferredResult<Object> result = new DeferredResult<Object>();
+			final DeferredResult<Object> result = new DeferredResult<>();
 			@SuppressWarnings("unchecked")
 			CompletionStage<?> future = (CompletionStage<?>) returnValue;
 			future.handle(new BiFunction<Object, Throwable, Object>() {

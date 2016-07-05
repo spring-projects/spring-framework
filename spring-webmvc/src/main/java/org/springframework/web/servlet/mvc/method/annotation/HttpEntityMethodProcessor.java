@@ -124,11 +124,11 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		if (RequestEntity.class == parameter.getParameterType()) {
-			return new RequestEntity<Object>(body, inputMessage.getHeaders(),
+			return new RequestEntity<>(body, inputMessage.getHeaders(),
 					inputMessage.getMethod(), inputMessage.getURI());
 		}
 		else {
-			return new HttpEntity<Object>(body, inputMessage.getHeaders());
+			return new HttpEntity<>(body, inputMessage.getHeaders());
 		}
 	}
 
@@ -206,7 +206,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			return entityHeaders.getVary();
 		}
 		List<String> entityHeadersVary = entityHeaders.getVary();
-		List<String> result = new ArrayList<String>(entityHeadersVary);
+		List<String> result = new ArrayList<>(entityHeadersVary);
 		for (String header : responseHeaders.get(HttpHeaders.VARY)) {
 			for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
 				if ("*".equals(existing)) {

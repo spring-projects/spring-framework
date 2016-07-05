@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,10 +91,10 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		JasperReportsMultiFormatView view = (JasperReportsMultiFormatView) getView(UNCOMPILED_REPORT);
 
 		Map<String, Class<? extends AbstractJasperReportsView>> mappings =
-				new HashMap<String, Class<? extends AbstractJasperReportsView>>();
+				new HashMap<>();
 		mappings.put("test", ExporterParameterTestView.class);
 
-		Map<String, String> exporterParameters = new HashMap<String, String>();
+		Map<String, String> exporterParameters = new HashMap<>();
 
 		// test view class performs the assertions - robh
 		exporterParameters.put(ExporterParameterTestView.TEST_PARAM, "foo");
@@ -124,7 +124,7 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	}
 
 	private Map<String, Object> getBaseModel() {
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("ReportTitle", "Foo");
 		model.put("dataSource", getData());
 		return model;

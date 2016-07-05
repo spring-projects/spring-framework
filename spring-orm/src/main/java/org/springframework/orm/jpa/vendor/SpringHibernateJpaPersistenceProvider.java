@@ -44,7 +44,7 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 	@Override
 	@SuppressWarnings("rawtypes")
 	public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map properties) {
-		final List<String> mergedClassesAndPackages = new ArrayList<String>(info.getManagedClassNames());
+		final List<String> mergedClassesAndPackages = new ArrayList<>(info.getManagedClassNames());
 		if (info instanceof SmartPersistenceUnitInfo) {
 			mergedClassesAndPackages.addAll(((SmartPersistenceUnitInfo) info).getManagedPackages());
 		}

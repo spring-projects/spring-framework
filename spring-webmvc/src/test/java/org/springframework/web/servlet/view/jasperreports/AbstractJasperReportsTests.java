@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public abstract class AbstractJasperReportsTests {
 
 
 	protected Map<String, Object> getModel() {
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("ReportTitle", "Dear Lord!");
 		model.put("dataSource", new JRBeanCollectionDataSource(getData()));
 		extendModel(model);
@@ -82,7 +82,7 @@ public abstract class AbstractJasperReportsTests {
 	}
 
 	protected List<Object> getData() {
-		List<Object> list = new ArrayList<Object>();
+		List<Object> list = new ArrayList<>();
 		for (int x = 0; x < 10; x++) {
 			PersonBean bean = new PersonBean();
 			bean.setId(x);
@@ -94,7 +94,7 @@ public abstract class AbstractJasperReportsTests {
 	}
 
 	protected List<Object> getProductData() {
-		List<Object> list = new ArrayList<Object>();
+		List<Object> list = new ArrayList<>();
 		for (int x = 0; x < 10; x++) {
 			ProductBean bean = new ProductBean();
 			bean.setId(x);

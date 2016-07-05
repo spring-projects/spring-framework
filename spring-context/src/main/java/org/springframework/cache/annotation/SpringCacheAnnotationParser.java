@@ -98,7 +98,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	}
 
 	private <T extends Annotation> Collection<CacheOperation> lazyInit(Collection<CacheOperation> ops) {
-		return (ops != null ? ops : new ArrayList<CacheOperation>(1));
+		return (ops != null ? ops : new ArrayList<>(1));
 	}
 
 	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, Cacheable cacheable) {

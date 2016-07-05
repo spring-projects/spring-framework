@@ -50,7 +50,7 @@ public class ExpectedExceptionSpringRunnerTests {
 		// Should Pass.
 		@Test(expected = IndexOutOfBoundsException.class)
 		public void verifyJUnitExpectedException() {
-			new ArrayList<Object>().get(1);
+			new ArrayList<>().get(1);
 		}
 	}
 

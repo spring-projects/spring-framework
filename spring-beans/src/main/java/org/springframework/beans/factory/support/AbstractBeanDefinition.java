@@ -153,7 +153,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private boolean primary = false;
 
 	private final Map<String, AutowireCandidateQualifier> qualifiers =
-			new LinkedHashMap<String, AutowireCandidateQualifier>(0);
+			new LinkedHashMap<>(0);
 
 	private boolean nonPublicAccessAllowed = true;
 
@@ -631,7 +631,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @return the Set of {@link AutowireCandidateQualifier} objects.
 	 */
 	public Set<AutowireCandidateQualifier> getQualifiers() {
-		return new LinkedHashSet<AutowireCandidateQualifier>(this.qualifiers.values());
+		return new LinkedHashSet<>(this.qualifiers.values());
 	}
 
 	/**

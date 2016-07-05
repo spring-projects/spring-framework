@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 		@Bean
 		public CacheManager jCacheManager() {
 			CacheManager cacheManager = this.cachingProvider.getCacheManager();
-			MutableConfiguration<Object, Object> mutableConfiguration = new MutableConfiguration<Object, Object>();
+			MutableConfiguration<Object, Object> mutableConfiguration = new MutableConfiguration<>();
 			mutableConfiguration.setStoreByValue(false);  // otherwise value has to be Serializable
 			cacheManager.createCache("testCache", mutableConfiguration);
 			cacheManager.createCache("primary", mutableConfiguration);

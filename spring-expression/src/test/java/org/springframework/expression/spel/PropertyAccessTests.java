@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public class PropertyAccessTests extends AbstractExpressionTests {
 		ctx.addPropertyAccessor(spa);
 		assertEquals(2,ctx.getPropertyAccessors().size());
 
-		List<PropertyAccessor> copy = new ArrayList<PropertyAccessor>();
+		List<PropertyAccessor> copy = new ArrayList<>();
 		copy.addAll(ctx.getPropertyAccessors());
 		assertTrue(ctx.removePropertyAccessor(spa));
 		assertFalse(ctx.removePropertyAccessor(spa));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,7 +155,7 @@ public class AnnotationConfigUtils {
 			}
 		}
 
-		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<BeanDefinitionHolder>(4);
+		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(4);
 
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(ConfigurationClassPostProcessor.class);
@@ -290,7 +290,7 @@ public class AnnotationConfigUtils {
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
 			String containerClassName, String annotationClassName) {
 
-		Set<AnnotationAttributes> result = new LinkedHashSet<AnnotationAttributes>();
+		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
 
 		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);

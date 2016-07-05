@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class JasperReportsUtilsTests {
 	@Test
 	public void renderAsCsvWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
-		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
+		Map<JRExporterParameter, Object> exporterParameters = new HashMap<>();
 		exporterParameters.put(JRCsvExporterParameter.FIELD_DELIMITER, "~");
 		JasperReportsUtils.renderAsCsv(getReport(), getParameters(), getData(), writer, exporterParameters);
 		String output = writer.getBuffer().toString();
@@ -112,7 +112,7 @@ public class JasperReportsUtilsTests {
 	@Test
 	public void renderAsHtmlWithExporterParameters() throws Exception {
 		StringWriter writer = new StringWriter();
-		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
+		Map<JRExporterParameter, Object> exporterParameters = new HashMap<>();
 		String uri = "/my/uri";
 		exporterParameters.put(JRHtmlExporterParameter.IMAGES_URI, uri);
 		JasperReportsUtils.renderAsHtml(getReport(), getParameters(), getData(), writer, exporterParameters);
@@ -140,7 +140,7 @@ public class JasperReportsUtilsTests {
 	@Test
 	public void renderAsPdfWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
+		Map<JRExporterParameter, Object> exporterParameters = new HashMap<>();
 		exporterParameters.put(JRPdfExporterParameter.PDF_VERSION, JRPdfExporterParameter.PDF_VERSION_1_6.toString());
 		JasperReportsUtils.renderAsPdf(getReport(), getParameters(), getData(), os, exporterParameters);
 		byte[] output = os.toByteArray();
@@ -167,7 +167,7 @@ public class JasperReportsUtilsTests {
 	@Test
 	public void renderAsXlsWithExporterParameters() throws Exception {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		Map<JRExporterParameter, Object> exporterParameters = new HashMap<JRExporterParameter, Object>();
+		Map<JRExporterParameter, Object> exporterParameters = new HashMap<>();
 
 		SimpleProgressMonitor monitor = new SimpleProgressMonitor();
 		exporterParameters.put(JRXlsExporterParameter.PROGRESS_MONITOR, monitor);
@@ -232,7 +232,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	private Map<String, Object> getParameters() {
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("ReportTitle", "Dear Lord!");
 		model.put(JRParameter.REPORT_LOCALE, Locale.GERMAN);
 		model.put(JRParameter.REPORT_RESOURCE_BUNDLE,
@@ -245,7 +245,7 @@ public class JasperReportsUtilsTests {
 	}
 
 	private List<PersonBean> getData() {
-		List<PersonBean> list = new ArrayList<PersonBean>();
+		List<PersonBean> list = new ArrayList<>();
 		for (int x = 0; x < 10; x++) {
 			PersonBean bean = new PersonBean();
 			bean.setId(x);

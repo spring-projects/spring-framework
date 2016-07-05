@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class SimpleJdbcInsertTests {
 		// Shouldn't succeed in inserting into table which doesn't exist
 		thrown.expect(InvalidDataAccessApiUsageException.class);
 		try {
-			insert.execute(new HashMap<String, Object>());
+			insert.execute(new HashMap<>());
 		}
 		finally {
 			verify(resultSet).close();

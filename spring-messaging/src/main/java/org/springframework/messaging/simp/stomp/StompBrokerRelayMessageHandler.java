@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private static final ListenableFutureTask<Void> EMPTY_TASK = new ListenableFutureTask<Void>(new VoidCallable());
+	private static final ListenableFutureTask<Void> EMPTY_TASK = new ListenableFutureTask<>(new VoidCallable());
 
 	// STOMP recommends error of margin for receiving heartbeats
 	private static final long HEARTBEAT_MULTIPLIER = 3;
@@ -122,14 +122,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private String virtualHost;
 
-	private final Map<String, MessageHandler> systemSubscriptions = new HashMap<String, MessageHandler>(4);
+	private final Map<String, MessageHandler> systemSubscriptions = new HashMap<>(4);
 
 	private TcpOperations<byte[]> tcpClient;
 
 	private MessageHeaderInitializer headerInitializer;
 
 	private final Map<String, StompConnectionHandler> connectionHandlers =
-			new ConcurrentHashMap<String, StompConnectionHandler>();
+			new ConcurrentHashMap<>();
 
 	private final Stats stats = new Stats();
 
@@ -974,7 +974,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private static class StompTcpClientFactory {
 
 		public TcpOperations<byte[]> create(String relayHost, int relayPort, Reactor2StompCodec codec) {
-			return new Reactor2TcpClient<byte[]>(relayHost, relayPort, codec);
+			return new Reactor2TcpClient<>(relayHost, relayPort, codec);
 		}
 	}
 

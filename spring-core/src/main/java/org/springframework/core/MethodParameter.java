@@ -277,7 +277,7 @@ public class MethodParameter {
 	 */
 	private Map<Integer, Integer> getTypeIndexesPerLevel() {
 		if (this.typeIndexesPerLevel == null) {
-			this.typeIndexesPerLevel = new HashMap<Integer, Integer>(4);
+			this.typeIndexesPerLevel = new HashMap<>(4);
 		}
 		return this.typeIndexesPerLevel;
 	}

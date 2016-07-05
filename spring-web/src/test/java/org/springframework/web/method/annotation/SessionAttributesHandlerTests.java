@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,14 +64,14 @@ public class SessionAttributesHandlerTests {
 		sessionAttributeStore.storeAttribute(request, "attr4", new TestBean());
 
 		assertEquals("Named attributes (attr1, attr2) should be 'known' right away",
-				new HashSet<String>(asList("attr1", "attr2")),
+				new HashSet<>(asList("attr1", "attr2")),
 				sessionAttributesHandler.retrieveAttributes(request).keySet());
 
 		// Resolve 'attr3' by type
 		sessionAttributesHandler.isHandlerSessionAttribute("attr3", TestBean.class);
 
 		assertEquals("Named attributes (attr1, attr2) and resolved attribute (att3) should be 'known'",
-				new HashSet<String>(asList("attr1", "attr2", "attr3")),
+				new HashSet<>(asList("attr1", "attr2", "attr3")),
 				sessionAttributesHandler.retrieveAttributes(request).keySet());
 	}
 

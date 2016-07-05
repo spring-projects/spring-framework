@@ -132,7 +132,7 @@ public abstract class HttpRange {
 		ranges = ranges.substring(BYTE_RANGE_PREFIX.length());
 
 		String[] tokens = ranges.split(",\\s*");
-		List<HttpRange> result = new ArrayList<HttpRange>(tokens.length);
+		List<HttpRange> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseRange(token));
 		}
@@ -173,7 +173,7 @@ public abstract class HttpRange {
 		if(ranges == null || ranges.size() == 0) {
 			return Collections.emptyList();
 		}
-		List<ResourceRegion> regions = new ArrayList<ResourceRegion>(ranges.size());
+		List<ResourceRegion> regions = new ArrayList<>(ranges.size());
 		for(HttpRange range : ranges) {
 			regions.add(range.toResourceRegion(resource));
 		}

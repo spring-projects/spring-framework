@@ -40,9 +40,9 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 
 	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
 
-	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+	private final Map<Class<? extends Throwable>, Method> mappedMethods = new ConcurrentHashMap<>(16);
 
-	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -60,7 +60,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 */
 	@SuppressWarnings("unchecked")
 	protected static List<Class<? extends Throwable>> getExceptionsFromMethodSignature(Method method) {
-		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
+		List<Class<? extends Throwable>> result = new ArrayList<>();
 		for (Class<?> paramType : method.getParameterTypes()) {
 			if (Throwable.class.isAssignableFrom(paramType)) {
 				result.add((Class<? extends Throwable>) paramType);
@@ -115,7 +115,7 @@ public abstract class AbstractExceptionHandlerMethodResolver {
 	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
 	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
-		List<Class<? extends Throwable>> matches = new ArrayList<Class<? extends Throwable>>();
+		List<Class<? extends Throwable>> matches = new ArrayList<>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
 			if (mappedException.isAssignableFrom(exceptionType)) {
 				matches.add(mappedException);

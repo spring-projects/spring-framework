@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class SpringClassRule implements TestRule {
 	 * Cache of {@code TestContextManagers} keyed by test class.
 	 */
 	private static final Map<Class<?>, TestContextManager> testContextManagerCache =
-			new ConcurrentHashMap<Class<?>, TestContextManager>(64);
+			new ConcurrentHashMap<>(64);
 
 	static {
 		if (!ClassUtils.isPresent("org.junit.internal.Throwables", SpringClassRule.class.getClassLoader())) {

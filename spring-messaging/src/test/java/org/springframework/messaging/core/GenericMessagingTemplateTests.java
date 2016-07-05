@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class GenericMessagingTemplateTests {
 			@Override
 			public void handleMessage(Message<?> message) throws MessagingException {
 				MessageChannel replyChannel = (MessageChannel) message.getHeaders().getReplyChannel();
-				replyChannel.send(new GenericMessage<String>("response"));
+				replyChannel.send(new GenericMessage<>("response"));
 			}
 		});
 
@@ -83,7 +83,7 @@ public class GenericMessagingTemplateTests {
 	@Test
 	public void sendAndReceiveTimeout() throws InterruptedException {
 
-		final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
+		final AtomicReference<Throwable> failure = new AtomicReference<>();
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		this.template.setReceiveTimeout(1);
@@ -96,7 +96,7 @@ public class GenericMessagingTemplateTests {
 				try {
 					Thread.sleep(500);
 					MessageChannel replyChannel = (MessageChannel) message.getHeaders().getReplyChannel();
-					replyChannel.send(new GenericMessage<String>("response"));
+					replyChannel.send(new GenericMessage<>("response"));
 					failure.set(new IllegalStateException("Expected exception"));
 				}
 				catch (InterruptedException e) {

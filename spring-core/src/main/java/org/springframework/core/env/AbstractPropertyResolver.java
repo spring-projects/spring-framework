@@ -52,7 +52,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
 
-	private final Set<String> requiredProperties = new LinkedHashSet<String>();
+	private final Set<String> requiredProperties = new LinkedHashSet<>();
 
 
 	@Override

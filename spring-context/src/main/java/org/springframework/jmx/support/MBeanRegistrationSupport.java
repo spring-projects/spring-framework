@@ -81,7 +81,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * The beans that have been registered by this exporter.
 	 */
-	private final Set<ObjectName> registeredBeans = new LinkedHashSet<ObjectName>();
+	private final Set<ObjectName> registeredBeans = new LinkedHashSet<>();
 
 	/**
 	 * The policy used when registering an MBean and finding that it already exists.
@@ -174,7 +174,7 @@ public class MBeanRegistrationSupport {
 	protected void unregisterBeans() {
 		Set<ObjectName> snapshot;
 		synchronized (this.registeredBeans) {
-			snapshot = new LinkedHashSet<ObjectName>(this.registeredBeans);
+			snapshot = new LinkedHashSet<>(this.registeredBeans);
 		}
 		if (!snapshot.isEmpty()) {
 			logger.info("Unregistering JMX-exposed beans");

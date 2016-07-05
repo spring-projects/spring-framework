@@ -61,13 +61,13 @@ public abstract class ReflectionUtils {
 	 * from Java 8 based interfaces, allowing for fast iteration.
 	 */
 	private static final Map<Class<?>, Method[]> declaredMethodsCache =
-			new ConcurrentReferenceHashMap<Class<?>, Method[]>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	/**
 	 * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
 	 */
 	private static final Map<Class<?>, Field[]> declaredFieldsCache =
-			new ConcurrentReferenceHashMap<Class<?>, Field[]>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 
 	/**
@@ -549,7 +549,7 @@ public abstract class ReflectionUtils {
 	 * @param leafClass the class to introspect
 	 */
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) {
-		final List<Method> methods = new ArrayList<Method>(32);
+		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, new MethodCallback() {
 			@Override
 			public void doWith(Method method) {
@@ -566,7 +566,7 @@ public abstract class ReflectionUtils {
 	 * @param leafClass the class to introspect
 	 */
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass) {
-		final List<Method> methods = new ArrayList<Method>(32);
+		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, new MethodCallback() {
 			@Override
 			public void doWith(Method method) {
@@ -634,7 +634,7 @@ public abstract class ReflectionUtils {
 			for (Method ifcMethod : ifc.getMethods()) {
 				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
 					if (result == null) {
-						result = new LinkedList<Method>();
+						result = new LinkedList<>();
 					}
 					result.add(ifcMethod);
 				}
