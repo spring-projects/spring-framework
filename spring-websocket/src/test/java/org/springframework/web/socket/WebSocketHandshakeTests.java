@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,10 @@ import static org.junit.Assert.*;
  * Client and server-side WebSocket integration tests.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 @RunWith(Parameterized.class)
-public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTests {
+public class WebSocketHandshakeTests extends AbstractWebSocketIntegrationTests {
 
 	@Parameters(name = "server [{0}], client [{1}]")
 	public static Iterable<Object[]> arguments() {
@@ -62,7 +63,7 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] { TestConfig.class };
+		return new Class<?>[] {TestConfig.class};
 	}
 
 	@Test
@@ -75,11 +76,8 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 		session.close();
 	}
 
-	// SPR-12727
-
-	@Test
+	@Test  // SPR-12727
 	public void unsolicitedPongWithEmptyPayload() throws Exception {
-
 		String url = getWsBaseUrl() + "/ws";
 		WebSocketSession session = this.webSocketClient.doHandshake(new AbstractWebSocketHandler() {}, url).get();
 
@@ -125,7 +123,6 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 		private final CountDownLatch latch = new CountDownLatch(1);
 
 		private Throwable transportError;
-
 
 		public void setWaitMessageCount(int waitMessageCount) {
 			this.waitMessageCount = waitMessageCount;

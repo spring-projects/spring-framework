@@ -64,7 +64,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
 /**
  * An XHR transport based on Undertow's {@link io.undertow.client.UndertowClient}.
- * Requires Undertow 1.3 or higher, as of Spring Framework 5.0.
+ * Requires Undertow 1.3 or 1.4, including XNIO, as of Spring Framework 5.0.
  *
  * <p>When used for testing purposes (e.g. load testing) or for specific use cases
  * (like HTTPS configuration), a custom OptionMap should be provided:
@@ -461,7 +461,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 		public void onFailure(Throwable failure) {
 			IoUtils.safeClose(this.connection);
-			if (connectFuture.setException(failure)) {
+			if (this.connectFuture.setException(failure)) {
 				return;
 			}
 			if (this.session.isDisconnected()) {

@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -48,8 +47,6 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
  */
 public abstract class AbstractWebSocketIntegrationTests {
 
-	protected Log logger = LogFactory.getLog(getClass());
-
 	private static Map<Class<?>, Class<?>> upgradeStrategyConfigTypes = new HashMap<>();
 
 	static {
@@ -57,6 +54,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		upgradeStrategyConfigTypes.put(TomcatWebSocketTestServer.class, TomcatUpgradeStrategyConfig.class);
 		upgradeStrategyConfigTypes.put(UndertowTestServer.class, UndertowUpgradeStrategyConfig.class);
 	}
+
 
 	@Rule
 	public final TestName testName = new TestName();
@@ -67,12 +65,13 @@ public abstract class AbstractWebSocketIntegrationTests {
 	@Parameter(1)
 	public WebSocketClient webSocketClient;
 
+	protected final Log logger = LogFactory.getLog(getClass());
+
 	protected AnnotationConfigWebApplicationContext wac;
 
 
 	@Before
 	public void setup() throws Exception {
-
 		logger.debug("Setting up '" + this.testName.getMethodName() + "', client=" +
 				this.webSocketClient.getClass().getSimpleName() + ", server=" +
 				this.server.getClass().getSimpleName());
@@ -155,6 +154,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 		}
 	}
 
+
 	@Configuration
 	static class TomcatUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {
 
@@ -163,6 +163,7 @@ public abstract class AbstractWebSocketIntegrationTests {
 			return new TomcatRequestUpgradeStrategy();
 		}
 	}
+
 
 	@Configuration
 	static class UndertowUpgradeStrategyConfig extends AbstractRequestUpgradeStrategyConfig {

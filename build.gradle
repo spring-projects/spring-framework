@@ -49,7 +49,7 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.4"
 	ext.httpasyncVersion     = "4.1.2"
 	ext.httpclientVersion    = "4.5.2"
-	ext.jackson2Version      = "2.8.0.rc2"
+	ext.jackson2Version      = "2.8.0"
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.5"
 	ext.jettyVersion         = "9.3.10.v20160621"
@@ -58,7 +58,7 @@ configure(allprojects) { project ->
 	ext.junitVersion         = "4.12"
 	ext.junitJupiterVersion  = '5.0.0-SNAPSHOT'
 	ext.junitPlatformVersion = '1.0.0-SNAPSHOT'
-	ext.log4JVersion         = '2.6.1'
+	ext.log4jVersion         = '2.6.1'
 	ext.nettyVersion         = "4.1.1.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.okhttp3Version       = "3.3.1"
@@ -72,7 +72,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.5.3"
 	ext.tyrusVersion         = "1.13"
-	ext.undertowVersion      = "1.4.0.CR2"
+	ext.undertowVersion      = "1.4.0.CR3"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.9"
 
@@ -139,9 +139,8 @@ configure(allprojects) { project ->
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
-
-		testRuntime("org.apache.logging.log4j:log4j-core:${log4JVersion}")
-		testRuntime("org.apache.logging.log4j:log4j-jcl:${log4JVersion}")
+		testRuntime("org.apache.logging.log4j:log4j-core:${log4jVersion}")
+		testRuntime("org.apache.logging.log4j:log4j-jcl:${log4jVersion}")
 
 		sniffer("org.codehaus.mojo:animal-sniffer-ant-tasks:${snifferVersion}")
 		javaApiSignature("org.codehaus.mojo.signature:java18:1.0@signature")
@@ -840,12 +839,15 @@ project("spring-websocket") {
 		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 		}
+		optional("org.jboss.xnio:xnio-api:3.3.7.Final")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testRuntime("org.jboss.xnio:xnio-nio:3.3.7.Final")
+		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 	}
 }
 
