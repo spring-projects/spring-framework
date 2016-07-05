@@ -58,6 +58,7 @@ configure(allprojects) { project ->
 	ext.junitVersion         = "4.12"
 	ext.junitJupiterVersion  = '5.0.0-SNAPSHOT'
 	ext.junitPlatformVersion = '1.0.0-SNAPSHOT'
+	ext.log4JVersion         = '2.6.1'
 	ext.nettyVersion         = "4.1.1.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.okhttp3Version       = "3.3.1"
@@ -138,6 +139,9 @@ configure(allprojects) { project ->
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
+
+		testRuntime("org.apache.logging.log4j:log4j-core:${log4JVersion}")
+		testRuntime("org.apache.logging.log4j:log4j-jcl:${log4JVersion}")
 
 		sniffer("org.codehaus.mojo:animal-sniffer-ant-tasks:${snifferVersion}")
 		javaApiSignature("org.codehaus.mojo.signature:java18:1.0@signature")
