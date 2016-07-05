@@ -144,9 +144,8 @@ loading, and the transparent creation of contexts by, for example, a Servlet con
 The Context module also supports Java EE features such as EJB, JMX, and basic remoting.
 The `ApplicationContext` interface is the focal point of the Context module.
 `spring-context-support` provides support for integrating common third-party libraries
-into a Spring application context for caching (EhCache, Guava, JCache), mailing
-(JavaMail), scheduling (CommonJ, Quartz) and template engines (FreeMarker, JasperReports).
-
+into a Spring application context, in particular for caching (EhCache, JCache) and
+scheduling (CommonJ, Quartz).
 
 The `spring-expression` module provides a powerful <<expressions,__Expression
 Language__>> for querying and manipulating an object graph at runtime. It is an extension
