@@ -547,12 +547,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	}
 
 	@Override
-	@Deprecated
-	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetType) {
-		return this.propertyResolver.getPropertyAsClass(key, targetType);
-	}
-
-	@Override
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		return this.propertyResolver.getRequiredProperty(key);
 	}

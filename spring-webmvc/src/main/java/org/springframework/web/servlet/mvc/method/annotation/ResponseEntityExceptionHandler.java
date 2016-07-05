@@ -98,9 +98,7 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @param ex the target exception
 	 * @param request the current request
 	 */
-	@SuppressWarnings("deprecation")
 	@ExceptionHandler({
-			org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException.class,
 			HttpRequestMethodNotSupportedException.class,
 			HttpMediaTypeNotSupportedException.class,
 			HttpMediaTypeNotAcceptableException.class,
@@ -118,11 +116,7 @@ public abstract class ResponseEntityExceptionHandler {
 		})
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
 		HttpHeaders headers = new HttpHeaders();
-		if (ex instanceof org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException) {
-			HttpStatus status = HttpStatus.NOT_FOUND;
-			return handleNoSuchRequestHandlingMethod((org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException) ex, headers, status, request);
-		}
-		else if (ex instanceof HttpRequestMethodNotSupportedException) {
+		if (ex instanceof HttpRequestMethodNotSupportedException) {
 			HttpStatus status = HttpStatus.METHOD_NOT_ALLOWED;
 			return handleHttpRequestMethodNotSupported((HttpRequestMethodNotSupportedException) ex, headers, status, request);
 		}
@@ -203,25 +197,6 @@ public abstract class ResponseEntityExceptionHandler {
 			request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
 		}
 		return new ResponseEntity<Object>(body, headers, status);
-	}
-
-	/**
-	 * Customize the response for NoSuchRequestHandlingMethodException.
-	 * <p>This method logs a warning and delegates to {@link #handleExceptionInternal}.
-	 * @param ex the exception
-	 * @param headers the headers to be written to the response
-	 * @param status the selected response status
-	 * @param request the current request
-	 * @return a {@code ResponseEntity} instance
-	 * @deprecated as of 4.3, along with {@link org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException}
-	 */
-	@Deprecated
-	protected ResponseEntity<Object> handleNoSuchRequestHandlingMethod(org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
-
-		pageNotFoundLogger.warn(ex.getMessage());
-
-		return handleExceptionInternal(ex, null, headers, status, request);
 	}
 
 	/**

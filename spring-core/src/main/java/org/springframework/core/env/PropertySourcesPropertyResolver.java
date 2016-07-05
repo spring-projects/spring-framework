@@ -93,47 +93,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		return null;
 	}
 
-	@Override
-	@Deprecated
-	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetValueType) {
-		if (this.propertySources != null) {
-			for (PropertySource<?> propertySource : this.propertySources) {
-				if (logger.isTraceEnabled()) {
-					logger.trace(String.format("Searching for key '%s' in [%s]", key, propertySource.getName()));
-				}
-				Object value = propertySource.getProperty(key);
-				if (value != null) {
-					logKeyFound(key, propertySource, value);
-					Class<?> clazz;
-					if (value instanceof String) {
-						try {
-							clazz = ClassUtils.forName((String) value, null);
-						}
-						catch (Exception ex) {
-							throw new ClassConversionException((String) value, targetValueType, ex);
-						}
-					}
-					else if (value instanceof Class) {
-						clazz = (Class<?>) value;
-					}
-					else {
-						clazz = value.getClass();
-					}
-					if (!targetValueType.isAssignableFrom(clazz)) {
-						throw new ClassConversionException(clazz, targetValueType);
-					}
-					@SuppressWarnings("unchecked")
-					Class<T> targetClass = (Class<T>) clazz;
-					return targetClass;
-				}
-			}
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Could not find key '%s' in any property source", key));
-		}
-		return null;
-	}
-
 	/**
 	 * Log the given key as found in the given {@link PropertySource}, resulting in
 	 * the given value.
@@ -148,22 +107,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Found key '%s' in [%s] with type [%s] and value '%s'",
 					key, propertySource.getName(), value.getClass().getSimpleName(), value));
-		}
-	}
-
-
-	@SuppressWarnings("serial")
-	@Deprecated
-	private static class ClassConversionException extends ConversionException {
-
-		public ClassConversionException(Class<?> actual, Class<?> expected) {
-			super(String.format("Actual type %s is not assignable to expected type %s",
-					actual.getName(), expected.getName()));
-		}
-
-		public ClassConversionException(String actual, Class<?> expected, Exception ex) {
-			super(String.format("Could not find/load class %s during attempt to convert to %s",
-					actual, expected.getName()), ex);
 		}
 	}
 

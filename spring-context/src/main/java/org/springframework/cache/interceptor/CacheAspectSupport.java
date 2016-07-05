@@ -172,14 +172,6 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		this.beanFactory = beanFactory;
 	}
 
-	/**
-	 * @deprecated as of 4.3, in favor of {@link #setBeanFactory}
-	 */
-	@Deprecated
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.beanFactory = applicationContext;
-	}
-
 
 	@Override
 	public void afterPropertiesSet() {

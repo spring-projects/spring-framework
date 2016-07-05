@@ -125,34 +125,20 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	}
 
 	/**
-	 * Create a JMS message for the specified payload.
-	 * @see MessageConverter#toMessage(Object, Session)
-	 * @deprecated as of 4.3, use {@link #createMessageForPayload(Object, Session, Object)}
-	 */
-	@Deprecated
-	protected javax.jms.Message createMessageForPayload(Object payload, Session session) throws JMSException {
-		return this.payloadConverter.toMessage(payload, session);
-	}
-
-	/**
 	 * Create a JMS message for the specified payload and conversionHint.
 	 * The conversion hint is an extra object passed to the {@link MessageConverter},
 	 * e.g. the associated {@code MethodParameter} (may be {@code null}}.
 	 * @see MessageConverter#toMessage(Object, Session)
 	 * @since 4.3
 	 */
-	@SuppressWarnings("deprecation")
 	protected javax.jms.Message createMessageForPayload(Object payload, Session session, Object conversionHint)
 			throws JMSException {
 
-		return createMessageForPayload(payload, session);
+		return this.payloadConverter.toMessage(payload, session);
 	}
 
 	protected final MessageHeaders extractHeaders(javax.jms.Message message) {
 		return this.headerMapper.toHeaders(message);
 	}
-
-
-
 
 }

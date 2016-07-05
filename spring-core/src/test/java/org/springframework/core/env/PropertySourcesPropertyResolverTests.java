@@ -23,7 +23,6 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.mock.env.MockPropertySource;
 
@@ -255,78 +254,6 @@ public class PropertySourcesPropertyResolverTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void resolveRequiredPlaceholders_withNullInput() {
 		new PropertySourcesPropertyResolver(new MutablePropertySources()).resolveRequiredPlaceholders(null);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void getPropertyAsClass() throws ClassNotFoundException, LinkageError {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SpecificType.class.getName()));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SpecificType.class));
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void getPropertyAsClass_withInterfaceAsTarget() throws ClassNotFoundException, LinkageError {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SomeType.class.getName()));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SomeType.class));
-	}
-
-	@Test(expected = ConversionException.class)
-	@SuppressWarnings("deprecation")
-	public void getPropertyAsClass_withMismatchedTypeForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", "java.lang.String"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.getPropertyAsClass("some.class", SomeType.class);
-	}
-
-	@Test(expected = ConversionException.class)
-	@SuppressWarnings("deprecation")
-	public void getPropertyAsClass_withNonExistentClassForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", "some.bogus.Class"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.getPropertyAsClass("some.class", SomeType.class);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void getPropertyAsClass_withObjectForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", new SpecificType()));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SpecificType.class));
-	}
-
-	@Test(expected = ConversionException.class)
-	@SuppressWarnings("deprecation")
-	public void getPropertyAsClass_withMismatchedObjectForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", new Integer(42)));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.getPropertyAsClass("some.class", SomeType.class);
-	}
-
-	@Test
-	@SuppressWarnings("deprecation")
-	public void getPropertyAsClass_withRealClassForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SpecificType.class));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SpecificType.class));
-	}
-
-	@Test(expected = ConversionException.class)
-	@SuppressWarnings("deprecation")
-	public void getPropertyAsClass_withMismatchedRealClassForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", Integer.class));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.getPropertyAsClass("some.class", SomeType.class);
 	}
 
 	@Test

@@ -114,7 +114,6 @@ public class LocalJaxWsServiceFactory {
 	/**
 	 * Specify WebServiceFeature objects (e.g. as inner bean definitions)
 	 * to apply to JAX-WS service creation.
-	 * <p>Note: This mechanism requires JAX-WS 2.2 or higher.
 	 * @since 4.0
 	 * @see Service#create(QName, WebServiceFeature...)
 	 */

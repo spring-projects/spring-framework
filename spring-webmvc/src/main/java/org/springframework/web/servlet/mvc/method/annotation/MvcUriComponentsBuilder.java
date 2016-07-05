@@ -381,17 +381,6 @@ public class MvcUriComponentsBuilder {
 				(controllerType != null ? controllerType : method.getDeclaringClass()), method, args);
 	}
 
-	/**
-	 * @see #fromMethod(Class, Method, Object...)
-	 * @see #fromMethod(UriComponentsBuilder, Class, Method, Object...)
-	 * @deprecated as of 4.2, this is deprecated in favor of the overloaded
-	 * method that also accepts a controllerType argument
-	 */
-	@Deprecated
-	public static UriComponentsBuilder fromMethod(Method method, Object... args) {
-		return fromMethodInternal(null, method.getDeclaringClass(), method, args);
-	}
-
 	private static UriComponentsBuilder fromMethodInternal(UriComponentsBuilder baseUrl,
 			Class<?> controllerType, Method method, Object... args) {
 
@@ -775,15 +764,6 @@ public class MvcUriComponentsBuilder {
 			for (int i = 0; i < this.argumentValues.length; i++) {
 				this.argumentValues[i] = null;
 			}
-		}
-
-		/**
-		 * @deprecated as of 4.2, this is deprecated in favor of alternative constructors
-		 * that accept a controllerType argument
-		 */
-		@Deprecated
-		public MethodArgumentBuilder(Method method) {
-			this(method.getDeclaringClass(), method);
 		}
 
 		private static UriComponentsBuilder initBaseUrl() {

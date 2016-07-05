@@ -296,24 +296,6 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * @deprecated As of Spring Framework 4.2, use {@link #getMergedAnnotationAttributes(AnnotatedElement, String)} instead.
-	 */
-	@Deprecated
-	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName) {
-		return getMergedAnnotationAttributes(element, annotationName);
-	}
-
-	/**
-	 * @deprecated As of Spring Framework 4.2, use {@link #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)} instead.
-	 */
-	@Deprecated
-	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName,
-			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-
-		return getMergedAnnotationAttributes(element, annotationName, classValuesAsString, nestedAnnotationsAsMap);
-	}
-
-	/**
 	 * Get the first annotation of the specified {@code annotationType} within
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
@@ -729,35 +711,6 @@ public class AnnotatedElementUtils {
 		// Exhaustive retrieval of merged annotation attributes...
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationType, false, false);
 		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
-	}
-
-	/**
-	 * Find the first annotation of the specified {@code annotationName} within
-	 * the annotation hierarchy <em>above</em> the supplied {@code element},
-	 * merge that annotation's attributes with <em>matching</em> attributes from
-	 * annotations in lower levels of the annotation hierarchy, and synthesize
-	 * the result back into an annotation of the specified {@code annotationName}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
-	 * <p>This method delegates to {@link #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)}
-	 * (supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap})
-	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
-	 * <p>This method follows <em>find semantics</em> as described in the
-	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
-	 * @param element the annotated element
-	 * @param annotationName the fully qualified class name of the annotation type to find
-	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
-	 * @since 4.2
-	 * @see #findMergedAnnotation(AnnotatedElement, Class)
-	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
-	 * @deprecated As of Spring Framework 4.2.3, use {@link #findMergedAnnotation(AnnotatedElement, Class)} instead.
-	 */
-	@Deprecated
-	@SuppressWarnings("unchecked")
-	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, String annotationName) {
-		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationName, false, false);
-		return AnnotationUtils.synthesizeAnnotation(attributes, (Class<A>) attributes.annotationType(), element);
 	}
 
 	/**

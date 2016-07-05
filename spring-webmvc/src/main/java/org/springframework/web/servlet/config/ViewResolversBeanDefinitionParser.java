@@ -66,14 +66,13 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 	public static final String VIEW_RESOLVER_BEAN_NAME = "mvcViewResolver";
 
 
-	@SuppressWarnings("deprecation")
 	public BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 		context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(), source));
 
 		ManagedList<Object> resolvers = new ManagedList<Object>(4);
 		resolvers.setSource(context.extractSource(element));
-		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "velocity", "groovy", "script-template", "bean", "ref"};
+		String[] names = new String[] {"jsp", "tiles", "bean-name", "freemarker", "groovy", "script-template", "bean", "ref"};
 
 		for (Element resolverElement : DomUtils.getChildElementsByTagName(element, names)) {
 			String name = resolverElement.getLocalName();
@@ -81,7 +80,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 				resolvers.add(context.getDelegate().parsePropertySubElement(resolverElement, null));
 				continue;
 			}
-			RootBeanDefinition resolverBeanDef = null;
+			RootBeanDefinition resolverBeanDef;
 			if ("jsp".equals(name)) {
 				resolverBeanDef = new RootBeanDefinition(InternalResourceViewResolver.class);
 				resolverBeanDef.getPropertyValues().add("prefix", "/WEB-INF/");

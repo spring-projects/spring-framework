@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,19 +75,5 @@ public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionH
 		}
 		return result;
 	}
-
-
-	/**
-	 * A filter for selecting annotated exception handling methods.
-	 * @deprecated as of Spring 4.2.3, since it isn't used anymore
-	 */
-	@Deprecated
-	public final static MethodFilter EXCEPTION_HANDLER_METHOD_FILTER = new MethodFilter() {
-
-		@Override
-		public boolean matches(Method method) {
-			return AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class) != null;
-		}
-	};
 
 }

@@ -551,15 +551,8 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see java.net.JarURLConnection
 	 * @see org.springframework.util.PathMatcher
 	 */
-	@SuppressWarnings("deprecation")
 	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, URL rootDirURL, String subPattern)
 			throws IOException {
-
-		// Check deprecated variant for potential overriding first...
-		Set<Resource> result = doFindPathMatchingJarResources(rootDirResource, subPattern);
-		if (result != null) {
-			return result;
-		}
 
 		URLConnection con = rootDirURL.openConnection();
 		JarFile jarFile;
@@ -614,7 +607,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				// The Sun JRE does not return a slash here, but BEA JRockit does.
 				rootEntryPath = rootEntryPath + "/";
 			}
-			result = new LinkedHashSet<Resource>(8);
+			Set<Resource> result = new LinkedHashSet<Resource>(8);
 			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 				JarEntry entry = entries.nextElement();
 				String entryPath = entry.getName();
@@ -632,23 +625,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				jarFile.close();
 			}
 		}
-	}
-
-	/**
-	 * Find all resources in jar files that match the given location pattern
-	 * via the Ant-style PathMatcher.
-	 * @param rootDirResource the root directory as Resource
-	 * @param subPattern the sub pattern to match (below the root directory)
-	 * @return a mutable Set of matching Resource instances
-	 * @throws IOException in case of I/O errors
-	 * @deprecated as of Spring 4.3, in favor of
-	 * {@link #doFindPathMatchingJarResources(Resource, URL, String)}
-	 */
-	@Deprecated
-	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, String subPattern)
-			throws IOException {
-
-		return null;
 	}
 
 	/**

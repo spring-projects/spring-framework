@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,8 +45,8 @@ public class AnnotationConfigWebContextLoaderTests {
 
 		AnnotationConfigWebContextLoader loader = new AnnotationConfigWebContextLoader();
 		WebMergedContextConfiguration mergedConfig = new WebMergedContextConfiguration(getClass(),
-			new String[] { "config.xml" }, EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, "resource/path", loader, null,
-			null);
+				new String[] { "config.xml" }, EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, EMPTY_STRING_ARRAY,
+				EMPTY_STRING_ARRAY, "resource/path", loader, null, null);
 		loader.loadContext(mergedConfig);
 	}
 

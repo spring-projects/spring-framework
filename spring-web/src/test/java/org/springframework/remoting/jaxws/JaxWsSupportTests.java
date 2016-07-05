@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceClient;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.WebServiceRef;
 import javax.xml.ws.soap.AddressingFeature;
 
@@ -43,25 +44,15 @@ public class JaxWsSupportTests {
 
 	@Test
 	public void testJaxWsPortAccess() throws Exception {
-		doTestJaxWsPortAccess((Object[]) null);
+		doTestJaxWsPortAccess((WebServiceFeature[]) null);
 	}
 
 	@Test
-	public void testJaxWsPortAccessWithFeatureObject() throws Exception {
+	public void testJaxWsPortAccessWithFeature() throws Exception {
 		doTestJaxWsPortAccess(new AddressingFeature());
 	}
 
-	@Test
-	public void testJaxWsPortAccessWithFeatureClass() throws Exception {
-		doTestJaxWsPortAccess(AddressingFeature.class);
-	}
-
-	@Test
-	public void testJaxWsPortAccessWithFeatureString() throws Exception {
-		doTestJaxWsPortAccess("javax.xml.ws.soap.AddressingFeature");
-	}
-
-	private void doTestJaxWsPortAccess(Object... features) throws Exception {
+	private void doTestJaxWsPortAccess(WebServiceFeature... features) throws Exception {
 		GenericApplicationContext ac = new GenericApplicationContext();
 
 		GenericBeanDefinition serviceDef = new GenericBeanDefinition();
@@ -83,7 +74,7 @@ public class JaxWsSupportTests {
 		clientDef.getPropertyValues().add("serviceInterface", OrderService.class);
 		clientDef.getPropertyValues().add("lookupServiceOnStartup", Boolean.FALSE);
 		if (features != null) {
-			clientDef.getPropertyValues().add("webServiceFeatures", features);
+			clientDef.getPropertyValues().add("portFeatures", features);
 		}
 		ac.registerBeanDefinition("client", clientDef);
 

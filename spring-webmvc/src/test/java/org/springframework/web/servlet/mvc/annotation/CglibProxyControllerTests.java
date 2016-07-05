@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -42,9 +41,10 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class CgLibProxyServletAnnotationTests {
+public class CglibProxyControllerTests {
 
 	private DispatcherServlet servlet;
+
 
 	@Test
 	public void typeLevel() throws Exception {
@@ -78,13 +78,12 @@ public class CgLibProxyServletAnnotationTests {
 
 
 	@SuppressWarnings("serial")
-	private void initServlet(final Class<?> controllerclass) throws ServletException {
+	private void initServlet(final Class<?> controllerClass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
-					throws BeansException {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
-				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerclass));
+				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
 				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 				autoProxyCreator.setProxyTargetClass(true);
 				autoProxyCreator.setBeanFactory(wac.getBeanFactory());
@@ -97,9 +96,6 @@ public class CgLibProxyServletAnnotationTests {
 		servlet.init(new MockServletConfig());
 	}
 
-	/*
-	 * Controllers
-	 */
 
 	@Controller
 	@RequestMapping("/test")
@@ -111,6 +107,7 @@ public class CgLibProxyServletAnnotationTests {
 		}
 	}
 
+
 	@Controller
 	public static class MethodLevelImpl {
 
@@ -119,6 +116,7 @@ public class CgLibProxyServletAnnotationTests {
 			writer.write("doIt");
 		}
 	}
+
 
 	@Controller
 	@RequestMapping("/hotels")

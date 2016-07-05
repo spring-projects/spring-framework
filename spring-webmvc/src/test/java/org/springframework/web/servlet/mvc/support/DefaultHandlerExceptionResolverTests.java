@@ -43,7 +43,6 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 import static org.junit.Assert.*;
 
@@ -65,15 +64,6 @@ public class DefaultHandlerExceptionResolverTests {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
 		request.setMethod("GET");
-	}
-
-	@Test
-	public void handleNoSuchRequestHandlingMethod() {
-		NoSuchRequestHandlingMethodException ex = new NoSuchRequestHandlingMethodException(request);
-		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
-		assertNotNull("No ModelAndView returned", mav);
-		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
-		assertEquals("Invalid status code", 404, response.getStatus());
 	}
 
 	@Test

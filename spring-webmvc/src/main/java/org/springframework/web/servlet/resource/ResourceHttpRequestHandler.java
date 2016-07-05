@@ -510,13 +510,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @param resource the resource to check
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
-	@SuppressWarnings("deprecation")
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
-		// For backwards compatibility
-		MediaType mediaType = getMediaType(resource);
-		if (mediaType != null) {
-			return mediaType;
-		}
+		MediaType mediaType = null;
 
 		Class<PathExtensionContentNegotiationStrategy> clazz = PathExtensionContentNegotiationStrategy.class;
 		PathExtensionContentNegotiationStrategy strategy = this.contentNegotiationManager.getStrategy(clazz);
@@ -538,18 +533,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		return mediaType;
-	}
-
-	/**
-	 * Determine an appropriate media type for the given resource.
-	 * @param resource the resource to check
-	 * @return the corresponding media type, or {@code null} if none found
-	 * @deprecated as of 4.3 this method is deprecated; please override
-	 * {@link #getMediaType(HttpServletRequest, Resource)} instead.
-	 */
-	@Deprecated
-	protected MediaType getMediaType(Resource resource) {
-		return null;
 	}
 
 	/**

@@ -282,17 +282,6 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	}
 
 	/**
-	 * Return the character set, as indicated by a {@code charset} parameter, if any.
-	 * @return the character set, or {@code null} if not available
-	 * @deprecated as of Spring 4.3, in favor of {@link #getCharset()} with its name
-	 * aligned with the Java return type name
-	 */
-	@Deprecated
-	public Charset getCharSet() {
-		return getCharset();
-	}
-
-	/**
 	 * Return a generic parameter value, given a parameter name.
 	 * @param name the parameter name
 	 * @return the parameter value, or {@code null} if not present

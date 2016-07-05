@@ -22,21 +22,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link AbstractPropertySource} implementations.
+ * Unit tests for {@link PropertySource} implementations.
  *
  * @author Chris Beams
  * @since 3.1
  */
 public class PropertySourceTests {
-	@Test @SuppressWarnings("serial")
+
+	@Test
+	@SuppressWarnings("serial")
 	public void equals() {
 		Map<String, Object> map1 = new HashMap<String, Object>() {{ put("a", "b"); }};
 		Map<String, Object> map2 = new HashMap<String, Object>() {{ put("c", "d"); }};
@@ -59,7 +59,8 @@ public class PropertySourceTests {
 		assertThat(new MapPropertySource("x", map1).equals(new PropertiesPropertySource("y", props2)), is(false));
 	}
 
-	@Test @SuppressWarnings("serial")
+	@Test
+	@SuppressWarnings("serial")
 	public void collectionsOperations() {
 		Map<String, Object> map1 = new HashMap<String, Object>() {{ put("a", "b"); }};
 		Map<String, Object> map2 = new HashMap<String, Object>() {{ put("c", "d"); }};
@@ -87,33 +88,4 @@ public class PropertySourceTests {
 		propertySources.clear();
 	}
 
-	@Test @SuppressWarnings("serial")
-	public void toString_verbosityVariesOnLogLevel() {
-		String name = "props";
-		Map<String, Object> map = new HashMap<String, Object>() {{ put("k1", "v1"); }};
-		MapPropertySource ps = new MapPropertySource(name, map);
-		Logger logger = Logger.getLogger(ps.getClass());
-		Level original = logger.getLevel();
-
-		try {
-			logger.setLevel(Level.DEBUG);
-			assertThat("PropertySource.toString() should render verbose output for log levels <= DEBUG",
-					ps.toString(),
-					equalTo(String.format("%s@%s [name='%s', properties=%s]",
-							ps.getClass().getSimpleName(),
-							System.identityHashCode(ps),
-							name,
-							map)));
-
-			logger.setLevel(Level.INFO);
-			assertThat("PropertySource.toString() should render concise output for log levels >= INFO",
-					ps.toString(),
-					equalTo(String.format("%s [name='%s']",
-							ps.getClass().getSimpleName(),
-							name)));
-		}
-		finally {
-			logger.setLevel(original);
-		}
-	}
 }

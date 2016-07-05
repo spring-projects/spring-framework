@@ -271,15 +271,6 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Get the {@link Environment} associated with this helper instance.
-	 * @deprecated in favor of {@link XmlReaderContext#getEnvironment()}
-	 */
-	@Deprecated
-	public final Environment getEnvironment() {
-		return this.readerContext.getEnvironment();
-	}
-
-	/**
 	 * Invoke the {@link org.springframework.beans.factory.parsing.SourceExtractor} to pull the
 	 * source metadata from the supplied {@link Element}.
 	 */

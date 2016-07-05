@@ -25,7 +25,6 @@ import org.junit.Test;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -42,9 +41,10 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public class JdkProxyServletAnnotationTests {
+public class JdkProxyControllerTests {
 
 	private DispatcherServlet servlet;
+
 
 	@Test
 	public void typeLevel() throws Exception {
@@ -81,8 +81,7 @@ public class JdkProxyServletAnnotationTests {
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
-			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent)
-					throws BeansException {
+			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerclass));
 				DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
@@ -96,9 +95,6 @@ public class JdkProxyServletAnnotationTests {
 		servlet.init(new MockServletConfig());
 	}
 
-	/*
-	 * Controllers
-	 */
 
 	@Controller
 	@RequestMapping("/test")
@@ -106,8 +102,8 @@ public class JdkProxyServletAnnotationTests {
 
 		@RequestMapping
 		void doIt(Writer writer) throws IOException;
-
 	}
+
 
 	public static class TypeLevelImpl implements TypeLevel {
 
@@ -123,8 +119,8 @@ public class JdkProxyServletAnnotationTests {
 
 		@RequestMapping("/test")
 		void doIt(Writer writer) throws IOException;
-
 	}
+
 
 	public static class MethodLevelImpl implements MethodLevel {
 
@@ -134,14 +130,15 @@ public class JdkProxyServletAnnotationTests {
 		}
 	}
 
+
 	@Controller
 	@RequestMapping("/hotels")
 	public interface TypeAndMethodLevel {
 
 		@RequestMapping("/bookings")
 		void doIt(Writer writer) throws IOException;
-
 	}
+
 
 	public static class TypeAndMethodLevelImpl implements TypeAndMethodLevel {
 

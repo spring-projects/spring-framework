@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,21 +126,6 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 */
 	protected final Cache lookupCache(String name) {
 		return this.cacheMap.get(name);
-	}
-
-	/**
-	 * Dynamically register an additional Cache with this manager.
-	 * @param cache the Cache to register
-	 * @deprecated as of Spring 4.3, in favor of {@link #getMissingCache(String)}
-	 */
-	@Deprecated
-	protected final void addCache(Cache cache) {
-		String name = cache.getName();
-		synchronized (this.cacheMap) {
-			if (this.cacheMap.put(name, decorateCache(cache)) == null) {
-				updateCacheNames(name);
-			}
-		}
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -255,9 +255,8 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * perform the conversion
 	 * @since 4.2
 	 */
-	@SuppressWarnings("deprecation")
 	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
-		return convertFromInternal(message, targetClass);
+		return null;
 	}
 
 	/**
@@ -270,28 +269,7 @@ public abstract class AbstractMessageConverter implements SmartMessageConverter 
 	 * cannot perform the conversion
 	 * @since 4.2
 	 */
-	@SuppressWarnings("deprecation")
 	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
-		return convertToInternal(payload, headers);
-	}
-
-	/**
-	 * Convert the message payload from serialized form to an Object.
-	 * @deprecated as of Spring 4.2, in favor of {@link #convertFromInternal(Message, Class, Object)}
-	 * (which is also protected instead of public)
-	 */
-	@Deprecated
-	public Object convertFromInternal(Message<?> message, Class<?> targetClass) {
-		return null;
-	}
-
-	/**
-	 * Convert the payload object to serialized form.
-	 * @deprecated as of Spring 4.2, in favor of {@link #convertFromInternal(Message, Class, Object)}
-	 * (which is also protected instead of public)
-	 */
-	@Deprecated
-	public Object convertToInternal(Object payload, MessageHeaders headers) {
 		return null;
 	}
 

@@ -258,36 +258,6 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Delegates to {@link #getRepeatableAnnotations(AnnotatedElement, Class, Class)}.
-	 * @since 4.0
-	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @deprecated As of Spring Framework 4.2, use {@code getRepeatableAnnotations()}
-	 * or {@code getDeclaredRepeatableAnnotations()} instead.
-	 */
-	@Deprecated
-	public static <A extends Annotation> Set<A> getRepeatableAnnotation(Method method,
-			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
-
-		return getRepeatableAnnotations(method, annotationType, containerAnnotationType);
-	}
-
-	/**
-	 * Delegates to {@link #getRepeatableAnnotations(AnnotatedElement, Class, Class)}.
-	 * @since 4.0
-	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @deprecated As of Spring Framework 4.2, use {@code getRepeatableAnnotations()}
-	 * or {@code getDeclaredRepeatableAnnotations()} instead.
-	 */
-	@Deprecated
-	public static <A extends Annotation> Set<A> getRepeatableAnnotation(AnnotatedElement annotatedElement,
-			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
-
-		return getRepeatableAnnotations(annotatedElement, annotationType, containerAnnotationType);
-	}
-
-	/**
 	 * Get the <em>repeatable</em> {@linkplain Annotation annotations} of
 	 * {@code annotationType} from the supplied {@link AnnotatedElement}, where
 	 * such annotations are either <em>present</em>, <em>indirectly present</em>,

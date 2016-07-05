@@ -400,18 +400,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected abstract SimpUserRegistry createLocalUserRegistry();
 
 	/**
-	 * As of 4.2, UserSessionRegistry is deprecated in favor of SimpUserRegistry
-	 * exposing information about all connected users. The MultiServerUserRegistry
-	 * implementation in combination with UserRegistryMessageHandler can be used
-	 * to share user registries across multiple servers.
-	 */
-	@Deprecated
-	@SuppressWarnings("deprecation")
-	protected org.springframework.messaging.simp.user.UserSessionRegistry userSessionRegistry() {
-		return null;
-	}
-
-	/**
 	 * Return a {@link org.springframework.validation.Validator}s instance for validating
 	 * {@code @Payload} method arguments.
 	 * <p>In order, this method tries to get a Validator instance:

@@ -154,12 +154,6 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	@Override
-	@Deprecated
-	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetValueType) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		String value = getProperty(key);
 		if (value == null) {

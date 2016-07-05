@@ -26,7 +26,6 @@ import javax.xml.ws.Endpoint;
 import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.WebServiceProvider;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
@@ -34,13 +33,10 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Abstract exporter for JAX-WS services, autodetecting annotated service beans
- * (through the JAX-WS {@link javax.jws.WebService} annotation). Compatible with
- * JAX-WS 2.1 and 2.2, as included in JDK 6 update 4+ and Java 7/8.
+ * (through the JAX-WS {@link javax.jws.WebService} annotation).
  *
  * <p>Subclasses need to implement the {@link #publishEndpoint} template methods
  * for actual endpoint exposure.
@@ -61,8 +57,6 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	private String bindingType;
 
 	private WebServiceFeature[] endpointFeatures;
-
-	private Object[] webServiceFeatures;
 
 	private ListableBeanFactory beanFactory;
 
@@ -104,20 +98,6 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 */
 	public void setEndpointFeatures(WebServiceFeature... endpointFeatures) {
 		this.endpointFeatures = endpointFeatures;
-	}
-
-	/**
-	 * Allows for providing JAX-WS 2.2 WebServiceFeature specifications:
-	 * in the form of actual {@link javax.xml.ws.WebServiceFeature} objects,
-	 * WebServiceFeature Class references, or WebServiceFeature class names.
-	 * <p>As of Spring 4.0, this is effectively just an alternative way of
-	 * specifying {@link #setEndpointFeatures "endpointFeatures"}. Do not specify
-	 * both properties at the same time; prefer "endpointFeatures" moving forward.
-	 * @deprecated as of Spring 4.0, in favor of {@link #setEndpointFeatures}
-	 */
-	@Deprecated
-	public void setWebServiceFeatures(Object[] webServiceFeatures) {
-		this.webServiceFeatures = webServiceFeatures;
 	}
 
 	/**
@@ -190,46 +170,9 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 * @see Endpoint#create(String, Object)
 	 */
 	protected Endpoint createEndpoint(Object bean) {
-		if (this.endpointFeatures != null || this.webServiceFeatures != null) {
-			WebServiceFeature[] endpointFeaturesToUse = this.endpointFeatures;
-			if (endpointFeaturesToUse == null) {
-				endpointFeaturesToUse = new WebServiceFeature[this.webServiceFeatures.length];
-				for (int i = 0; i < this.webServiceFeatures.length; i++) {
-					endpointFeaturesToUse[i] = convertWebServiceFeature(this.webServiceFeatures[i]);
-				}
-			}
-			return Endpoint.create(this.bindingType, bean, endpointFeaturesToUse);
-		}
-		else {
-			return Endpoint.create(this.bindingType, bean);
-		}
-	}
-
-	private WebServiceFeature convertWebServiceFeature(Object feature) {
-		Assert.notNull(feature, "WebServiceFeature specification object must not be null");
-		if (feature instanceof WebServiceFeature) {
-			return (WebServiceFeature) feature;
-		}
-		else if (feature instanceof Class) {
-			return (WebServiceFeature) BeanUtils.instantiate((Class<?>) feature);
-		}
-		else if (feature instanceof String) {
-			try {
-				Class<?> featureClass = getBeanClassLoader().loadClass((String) feature);
-				return (WebServiceFeature) BeanUtils.instantiate(featureClass);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException("Could not load WebServiceFeature class [" + feature + "]");
-			}
-		}
-		else {
-			throw new IllegalArgumentException("Unknown WebServiceFeature specification type: " + feature.getClass());
-		}
-	}
-
-	private ClassLoader getBeanClassLoader() {
-		return (beanFactory instanceof ConfigurableBeanFactory ?
-				((ConfigurableBeanFactory) beanFactory).getBeanClassLoader() : ClassUtils.getDefaultClassLoader());
+		return (this.endpointFeatures != null ?
+				Endpoint.create(this.bindingType, bean, this.endpointFeatures) :
+				Endpoint.create(this.bindingType, bean));
 	}
 
 

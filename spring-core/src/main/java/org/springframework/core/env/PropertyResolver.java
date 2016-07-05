@@ -73,19 +73,6 @@ public interface PropertyResolver {
 	<T> T getProperty(String key, Class<T> targetType, T defaultValue);
 
 	/**
-	 * Convert the property value associated with the given key to a {@code Class}
-	 * of type {@code T} or {@code null} if the key cannot be resolved.
-	 * @throws org.springframework.core.convert.ConversionException if class specified
-	 * by property value cannot be found or loaded or if targetType is not assignable
-	 * from class specified by property value
-	 * @see #getProperty(String, Class)
-	 * @deprecated as of 4.3, in favor of {@link #getProperty} with manual conversion
-	 * to {@code Class} via the application's {@code ClassLoader}
-	 */
-	@Deprecated
-	<T> Class<T> getPropertyAsClass(String key, Class<T> targetType);
-
-	/**
 	 * Return the property value associated with the given key (never {@code null}).
 	 * @throws IllegalStateException if the key cannot be resolved
 	 * @see #getRequiredProperty(String, Class)

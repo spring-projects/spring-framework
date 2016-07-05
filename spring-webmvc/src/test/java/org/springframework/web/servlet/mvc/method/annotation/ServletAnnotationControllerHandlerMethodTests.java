@@ -128,7 +128,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
 import org.springframework.web.servlet.ModelAndView;
@@ -1786,10 +1785,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 
-	/*
-	 * Controllers
-	 */
-
 	@Controller
 	static class ControllerWithEmptyValueMapping {
 
@@ -2501,7 +2496,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Retention(RetentionPolicy.RUNTIME)
 	@Controller
 	public @interface MyControllerAnnotation {
-
 	}
 
 	@MyControllerAnnotation
@@ -2935,7 +2929,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	public static class MyEntity {
-
 	}
 
 	@Controller
@@ -2964,8 +2957,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@RequestMapping("/multiValueMap")
-		public void multiValueMap(@RequestParam MultiValueMap<String, String> params, Writer writer)
-				throws IOException {
+		public void multiValueMap(@RequestParam MultiValueMap<String, String> params, Writer writer) throws IOException {
 			for (Iterator<Map.Entry<String, List<String>>> it1 = params.entrySet().iterator(); it1.hasNext();) {
 				Map.Entry<String, List<String>> entry = it1.next();
 				writer.write(entry.getKey() + "=[");
@@ -3135,7 +3127,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 				setValue(null);
 			}
 		}
-
 	}
 
 	@Controller
@@ -3174,6 +3165,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	@RequestMapping("/t1")
 	protected static class NoPathGetAndM2PostController {
+
 		@RequestMapping(method = RequestMethod.GET)
 		public void handle1(Writer writer) throws IOException {
 			writer.write("handle1");
@@ -3308,38 +3300,5 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			return new ModelAndView("view", new ModelMap(), HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
-
-
-// Test cases deleted from the original ServletAnnotationControllerTests:
-
-//	@Ignore("Controller interface => no method-level @RequestMapping annotation")
-//	public void standardHandleMethod() throws Exception {
-
-//	@Ignore("ControllerClassNameHandlerMapping")
-//	public void emptyRequestMapping() throws Exception {
-
-//	@Ignore("Controller interface => no method-level @RequestMapping annotation")
-//	public void proxiedStandardHandleMethod() throws Exception {
-
-//	@Ignore("ServletException no longer thrown for unmatched parameter constraints")
-//	public void constrainedParameterDispatchingController() throws Exception {
-
-//	@Ignore("Method name dispatching")
-//	public void methodNameDispatchingController() throws Exception {
-
-//	@Ignore("Method name dispatching")
-//	public void methodNameDispatchingControllerWithSuffix() throws Exception {
-
-//	@Ignore("ControllerClassNameHandlerMapping")
-//	public void controllerClassNamePlusMethodNameDispatchingController() throws Exception {
-
-//	@Ignore("Method name dispatching")
-//	public void postMethodNameDispatchingController() throws Exception {
-
-//	@Ignore("ControllerClassNameHandlerMapping")
-//	public void controllerClassNameNoTypeLevelAnn() throws Exception {
-
-//	@Ignore("SimpleUrlHandlerMapping")
-//	public void simpleUrlHandlerMapping() throws Exception {
 
 }
