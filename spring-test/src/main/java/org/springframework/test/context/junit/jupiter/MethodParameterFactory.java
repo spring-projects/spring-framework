@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit.jupiter.support;
+package org.springframework.test.context.junit.jupiter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;

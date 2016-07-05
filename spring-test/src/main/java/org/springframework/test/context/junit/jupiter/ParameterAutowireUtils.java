@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit.jupiter.support;
+package org.springframework.test.context.junit.jupiter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -32,8 +32,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
-import static org.springframework.core.annotation.AnnotatedElementUtils.hasAnnotation;
-
 /**
  * Collection of utilities related to autowiring of individual method parameters.
  *
@@ -43,7 +41,7 @@ import static org.springframework.core.annotation.AnnotatedElementUtils.hasAnnot
  * @see #isAutowirable(Parameter)
  * @see #resolveDependency(Parameter, Class, ApplicationContext)
  */
-public abstract class ParameterAutowireUtils {
+abstract class ParameterAutowireUtils {
 
 	private ParameterAutowireUtils() {
 		/* no-op */
@@ -58,11 +56,11 @@ public abstract class ParameterAutowireUtils {
 	 * {@link Qualifier @Qualifier}, or {@link Value @Value}.
 	 * @see #resolveDependency(Parameter, Class, ApplicationContext)
 	 */
-	public static boolean isAutowirable(Parameter parameter) {
+	static boolean isAutowirable(Parameter parameter) {
 		return ApplicationContext.class.isAssignableFrom(parameter.getType())
-				|| hasAnnotation(parameter, Autowired.class)
-				|| hasAnnotation(parameter, Qualifier.class)
-				|| hasAnnotation(parameter, Value.class);
+				|| AnnotatedElementUtils.hasAnnotation(parameter, Autowired.class)
+				|| AnnotatedElementUtils.hasAnnotation(parameter, Qualifier.class)
+				|| AnnotatedElementUtils.hasAnnotation(parameter, Value.class);
 	}
 
 	/**
@@ -91,7 +89,7 @@ public abstract class ParameterAutowireUtils {
 	 * @see MethodParameterFactory#createSynthesizingMethodParameter(Parameter)
 	 * @see AutowireCapableBeanFactory#resolveDependency(DependencyDescriptor, String)
 	 */
-	public static Object resolveDependency(Parameter parameter, Class<?> containingClass,
+	static Object resolveDependency(Parameter parameter, Class<?> containingClass,
 			ApplicationContext applicationContext) {
 
 		boolean required = findMergedAnnotation(parameter, Autowired.class).map(Autowired::required).orElse(true);

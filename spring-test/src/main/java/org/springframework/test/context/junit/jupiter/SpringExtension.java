@@ -38,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContextManager;
-import org.springframework.test.context.junit.jupiter.support.ParameterAutowireUtils;
 import org.springframework.util.Assert;
 
 /**
