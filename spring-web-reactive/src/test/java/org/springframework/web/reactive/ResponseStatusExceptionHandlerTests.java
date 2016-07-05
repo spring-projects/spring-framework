@@ -16,11 +16,12 @@
 package org.springframework.web.reactive;
 
 import java.net.URI;
+import java.time.Duration;
 
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Signal;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -30,12 +31,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
@@ -54,31 +52,29 @@ public class ResponseStatusExceptionHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.handler = new ResponseStatusExceptionHandler();
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
-		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(request, this.response, sessionManager);
+		this.exchange = new DefaultServerWebExchange(
+				new MockServerHttpRequest(HttpMethod.GET, new URI("/path")),
+				this.response,
+				new MockWebSessionManager());
 	}
 
 
 	@Test
 	public void handleException() throws Exception {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
-		Mono<Void> publisher = this.handler.handle(this.exchange, ex);
+		this.handler.handle(this.exchange, ex).block(Duration.ofSeconds(5));
 
-		publisher.block();
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
 	}
 
 	@Test
 	public void unresolvedException() throws Exception {
-		Throwable ex = new IllegalStateException();
-		Mono<Void> publisher = this.handler.handle(this.exchange, ex);
+		Throwable expected = new IllegalStateException();
+		Mono<Void> mono = this.handler.handle(this.exchange, expected);
 
-		Signal<Void> signal = publisher.materialize().block();
-		assertNotNull(signal);
-		assertTrue(signal.hasError());
-		assertSame(ex, signal.getThrowable());
+		TestSubscriber.subscribe(mono)
+				.assertErrorWith(actual -> assertSame(expected, actual));
 	}
 
 }

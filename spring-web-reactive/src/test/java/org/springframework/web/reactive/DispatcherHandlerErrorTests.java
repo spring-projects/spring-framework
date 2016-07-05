@@ -23,14 +23,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Signal;
-import reactor.core.util.SignalKind;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.StringEncoder;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -38,7 +36,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
@@ -52,14 +49,10 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
-import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.session.MockWebSessionManager;
-import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -75,14 +68,12 @@ import static org.junit.Assert.assertThat;
 @SuppressWarnings({"ThrowableResultOfMethodCallIgnored", "ThrowableInstanceNeverThrown"})
 public class DispatcherHandlerErrorTests {
 
-	public static final IllegalStateException EXCEPTION = new IllegalStateException("boo");
+	private static final IllegalStateException EXCEPTION = new IllegalStateException("boo");
 
 
 	private DispatcherHandler dispatcherHandler;
 
 	private MockServerHttpRequest request;
-
-	private MockServerHttpResponse response;
 
 	private ServerWebExchange exchange;
 
@@ -96,127 +87,101 @@ public class DispatcherHandlerErrorTests {
 		this.dispatcherHandler = new DispatcherHandler();
 		this.dispatcherHandler.setApplicationContext(appContext);
 
-		WebSessionManager sessionManager = new MockWebSessionManager();
-
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
-		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultServerWebExchange(this.request, this.response, sessionManager);
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		MockWebSessionManager sessionManager = new MockWebSessionManager();
+		this.exchange = new DefaultServerWebExchange(this.request, response, sessionManager);
 	}
 
 
 	@Test
 	public void noHandler() throws Exception {
 		this.request.setUri(new URI("/does-not-exist"));
-
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
-		Throwable ex = awaitErrorSignal(publisher);
 
-		assertEquals(ResponseStatusException.class, ex.getClass());
-		assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) ex).getStatus());
+		TestSubscriber.subscribe(publisher)
+				.assertError(ResponseStatusException.class)
+				.assertErrorMessage("Request failure [status: 404, reason: \"No matching handler\"]");
 	}
 
 	@Test
-	public void noResolverForArgument() throws Exception {
+	public void unknownMethodArgumentType() throws Exception {
 		this.request.setUri(new URI("/unknown-argument-type"));
-
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
-		Throwable ex = awaitErrorSignal(publisher);
 
-		assertEquals(IllegalStateException.class, ex.getClass());
-		assertThat(ex.getMessage(), startsWith("No resolver for argument [0]"));
+		TestSubscriber.subscribe(publisher)
+				.assertError(IllegalStateException.class)
+				.assertErrorWith(ex -> assertThat(ex.getMessage(), startsWith("No resolver for argument [0]")));
 	}
 
 	@Test
-	public void controllerMethodError() throws Exception {
+	public void controllerReturnsMonoError() throws Exception {
 		this.request.setUri(new URI("/error-signal"));
-
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
-		Throwable ex = awaitErrorSignal(publisher);
 
-		assertSame(EXCEPTION, ex);
+		TestSubscriber.subscribe(publisher)
+				.assertErrorWith(ex -> assertSame(EXCEPTION, ex));
 	}
 
 	@Test
-	public void controllerMethodWithThrownException() throws Exception {
+	public void controllerThrowsException() throws Exception {
 		this.request.setUri(new URI("/raise-exception"));
-
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
-		Throwable ex = awaitErrorSignal(publisher);
 
-		assertSame(EXCEPTION, ex);
+		TestSubscriber.subscribe(publisher)
+				.assertErrorWith(ex -> assertSame(EXCEPTION, ex));
 	}
 
 	@Test
-	public void noHandlerResultHandler() throws Exception {
+	public void unknownReturnType() throws Exception {
 		this.request.setUri(new URI("/unknown-return-type"));
-
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
-		Throwable ex = awaitErrorSignal(publisher);
 
-		assertEquals(IllegalStateException.class, ex.getClass());
-		assertThat(ex.getMessage(), startsWith("No HandlerResultHandler"));
+		TestSubscriber.subscribe(publisher)
+				.assertError(IllegalStateException.class)
+				.assertErrorWith(ex -> assertThat(ex.getMessage(), startsWith("No HandlerResultHandler")));
 	}
 
 	@Test
-	public void notAcceptable() throws Exception {
+	public void responseBodyMessageConversionError() throws Exception {
+		DataBuffer dataBuffer = new DefaultDataBufferFactory().allocateBuffer();
 		this.request.setUri(new URI("/request-body"));
-		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		DataBuffer buffer = new DefaultDataBufferFactory().allocateBuffer()
-				.write("body".getBytes("UTF-8"));
-		this.request.writeWith(Mono.just(buffer));
+		this.request.getHeaders().add("Accept", MediaType.APPLICATION_JSON_VALUE);
+		this.request.writeWith(Mono.just(dataBuffer.write("body".getBytes("UTF-8"))));
 
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
-		Throwable ex = awaitErrorSignal(publisher);
 
-		assertEquals(NotAcceptableStatusException.class, ex.getClass());
+		TestSubscriber.subscribe(publisher)
+				.assertError(NotAcceptableStatusException.class);
 	}
 
 	@Test
 	public void requestBodyError() throws Exception {
 		this.request.setUri(new URI("/request-body"));
 		this.request.writeWith(Mono.error(EXCEPTION));
-
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
-		Throwable ex = awaitErrorSignal(publisher);
 
-		ex.printStackTrace();
-		assertSame(EXCEPTION, ex);
+		TestSubscriber.subscribe(publisher)
+				.assertErrorWith(ex -> assertSame(EXCEPTION, ex));
 	}
 
 	@Test
-	public void dispatcherHandlerWithHttpExceptionHandler() throws Exception {
+	public void webExceptionHandler() throws Exception {
 		this.request.setUri(new URI("/unknown-argument-type"));
 
 		WebExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
 		Mono<Void> publisher = webHandler.handle(this.exchange);
 
-		publisher.block();
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
-	}
+		TestSubscriber.subscribe(publisher)
+				.assertErrorWith(ex -> assertEquals(
+						HttpStatus.INTERNAL_SERVER_ERROR, this.exchange.getResponse().getStatusCode()));
 
-	@Test
-	public void filterChainWithHttpExceptionHandler() throws Exception {
-		this.request.setUri(new URI("/unknown-argument-type"));
-
-		WebHandler webHandler = new FilteringWebHandler(this.dispatcherHandler, new TestWebFilter());
-		webHandler = new ExceptionHandlingWebHandler(webHandler, new ServerError500ExceptionHandler());
-		Mono<Void> publisher = webHandler.handle(this.exchange);
-
-		publisher.block();
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
-	}
-
-
-	private Throwable awaitErrorSignal(Mono<?> mono) throws Exception {
-		Signal<?> signal = mono.materialize().block();
-		assertEquals("Unexpected signal: " + signal, SignalKind.onError, signal.getType());
-		return signal.getThrowable();
 	}
 
 
 	@Configuration
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class TestConfig {
 
 		@Bean
@@ -231,9 +196,9 @@ public class DispatcherHandlerErrorTests {
 
 		@Bean
 		public ResponseBodyResultHandler resultHandler() {
-			HttpMessageConverter<String> converter = new CodecHttpMessageConverter<>(new StringEncoder());
-			ConversionService conversionService = new DefaultConversionService();
-			return new ResponseBodyResultHandler(Collections.singletonList(converter), conversionService);
+			return new ResponseBodyResultHandler(
+					Collections.singletonList(new CodecHttpMessageConverter<>(new StringEncoder())),
+					new DefaultConversionService());
 		}
 
 		@Bean
@@ -282,14 +247,6 @@ public class DispatcherHandlerErrorTests {
 		public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 			exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return Mono.empty();
-		}
-	}
-
-	private static class TestWebFilter implements WebFilter {
-
-		@Override
-		public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-			return chain.filter(exchange);
 		}
 	}
 
