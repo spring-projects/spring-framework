@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @see #createMethodParameter(Parameter)
  * @see #createSynthesizingMethodParameter(Parameter)
  */
-public abstract class MethodParameterFactory {
+abstract class MethodParameterFactory {
 
 	private MethodParameterFactory() {
 		/* no-op */
@@ -51,7 +51,7 @@ public abstract class MethodParameterFactory {
 	 * @return a new {@code MethodParameter}
 	 * @see #createSynthesizingMethodParameter(Parameter)
 	 */
-	public static MethodParameter createMethodParameter(Parameter parameter) {
+	static MethodParameter createMethodParameter(Parameter parameter) {
 		Assert.notNull(parameter, "Parameter must not be null");
 		Executable executable = parameter.getDeclaringExecutable();
 		if (executable instanceof Method) {
@@ -71,7 +71,7 @@ public abstract class MethodParameterFactory {
 	 * in a constructor
 	 * @see #createMethodParameter(Parameter)
 	 */
-	public static SynthesizingMethodParameter createSynthesizingMethodParameter(Parameter parameter) {
+	static SynthesizingMethodParameter createSynthesizingMethodParameter(Parameter parameter) {
 		Assert.notNull(parameter, "Parameter must not be null");
 		Executable executable = parameter.getDeclaringExecutable();
 		if (executable instanceof Method) {
