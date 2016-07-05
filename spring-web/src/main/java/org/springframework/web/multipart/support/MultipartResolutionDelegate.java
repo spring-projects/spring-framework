@@ -98,13 +98,13 @@ public abstract class MultipartResolutionDelegate {
 			}
 		}
 		else if (Part.class == parameter.getNestedParameterType()) {
-			return (isMultipart ? RequestPartResolver.resolvePart(request, name) : null);
+			return (isMultipart ? resolvePart(request, name) : null);
 		}
 		else if (isPartCollection(parameter)) {
-			return (isMultipart ? RequestPartResolver.resolvePartList(request, name) : null);
+			return (isMultipart ? resolvePartList(request, name) : null);
 		}
 		else if (isPartArray(parameter)) {
-			return (isMultipart ? RequestPartResolver.resolvePartArray(request, name) : null);
+			return (isMultipart ? resolvePartArray(request, name) : null);
 		}
 		else {
 			return UNRESOLVABLE;
@@ -138,37 +138,30 @@ public abstract class MultipartResolutionDelegate {
 		return null;
 	}
 
+	private static Part resolvePart(HttpServletRequest servletRequest, String name) throws Exception {
+		return servletRequest.getPart(name);
+	}
 
-	/**
-	 * Inner class to avoid hard-coded dependency on Servlet 3.0 Part type...
-	 */
-	private static class RequestPartResolver {
-
-		public static Object resolvePart(HttpServletRequest servletRequest, String name) throws Exception {
-			return servletRequest.getPart(name);
-		}
-
-		public static Object resolvePartList(HttpServletRequest servletRequest, String name) throws Exception {
-			Collection<Part> parts = servletRequest.getParts();
-			List<Part> result = new ArrayList<Part>(parts.size());
-			for (Part part : parts) {
-				if (part.getName().equals(name)) {
-					result.add(part);
-				}
+	private static List<Part> resolvePartList(HttpServletRequest servletRequest, String name) throws Exception {
+		Collection<Part> parts = servletRequest.getParts();
+		List<Part> result = new ArrayList<Part>(parts.size());
+		for (Part part : parts) {
+			if (part.getName().equals(name)) {
+				result.add(part);
 			}
-			return result;
 		}
+		return result;
+	}
 
-		public static Object resolvePartArray(HttpServletRequest servletRequest, String name) throws Exception {
-			Collection<Part> parts = servletRequest.getParts();
-			List<Part> result = new ArrayList<Part>(parts.size());
-			for (Part part : parts) {
-				if (part.getName().equals(name)) {
-					result.add(part);
-				}
+	private static Part[] resolvePartArray(HttpServletRequest servletRequest, String name) throws Exception {
+		Collection<Part> parts = servletRequest.getParts();
+		List<Part> result = new ArrayList<Part>(parts.size());
+		for (Part part : parts) {
+			if (part.getName().equals(name)) {
+				result.add(part);
 			}
-			return result.toArray(new Part[result.size()]);
 		}
+		return result.toArray(new Part[result.size()]);
 	}
 
 }

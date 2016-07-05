@@ -20,6 +20,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Miscellaneous object utility methods.
@@ -109,6 +110,7 @@ public abstract class ObjectUtils {
 	 * Determine whether the given object is empty.
 	 * <p>This method supports the following object types.
 	 * <ul>
+	 * <li>{@code Optional}: considered empty if {@link Optional#empty()}</li>
 	 * <li>{@code Array}: considered empty if its length is zero</li>
 	 * <li>{@link CharSequence}: considered empty if its length is zero</li>
 	 * <li>{@link Collection}: delegates to {@link Collection#isEmpty()}</li>
@@ -119,6 +121,7 @@ public abstract class ObjectUtils {
 	 * @param obj the object to check
 	 * @return {@code true} if the object is {@code null} or <em>empty</em>
 	 * @since 4.2
+	 * @see Optional#isPresent()
 	 * @see ObjectUtils#isEmpty(Object[])
 	 * @see StringUtils#hasLength(CharSequence)
 	 * @see StringUtils#isEmpty(Object)
@@ -131,6 +134,9 @@ public abstract class ObjectUtils {
 			return true;
 		}
 
+		if (obj instanceof Optional) {
+			return !((Optional) obj).isPresent();
+		}
 		if (obj.getClass().isArray()) {
 			return Array.getLength(obj) == 0;
 		}
@@ -146,6 +152,26 @@ public abstract class ObjectUtils {
 
 		// else
 		return false;
+	}
+
+	/**
+	 * Unwrap the given object which is potentially a {@link java.util.Optional}.
+	 * @param obj the candidate object
+	 * @return either the value held within the {@code Optional}, {@code null}
+	 * if the {@code Optional} is empty, or simply the given object as-is
+	 * @since 5.0
+	 */
+	public static Object unwrapOptional(Object obj) {
+		if (obj instanceof Optional) {
+			Optional<?> optional = (Optional<?>) obj;
+			if (!optional.isPresent()) {
+				return null;
+			}
+			Object result = optional.get();
+			Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
+			return result;
+		}
+		return obj;
 	}
 
 	/**

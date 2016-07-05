@@ -35,7 +35,6 @@ import java.lang.annotation.Target;
  * @since 3.0
  * @see RequestMapping
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
- * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

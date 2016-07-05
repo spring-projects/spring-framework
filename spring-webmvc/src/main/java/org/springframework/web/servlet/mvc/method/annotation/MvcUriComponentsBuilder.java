@@ -38,8 +38,8 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -778,7 +778,6 @@ public class MvcUriComponentsBuilder {
 		}
 
 		/**
-		 * @see #MethodArgumentBuilder(Class, Method)
 		 * @deprecated as of 4.2, this is deprecated in favor of alternative constructors
 		 * that accept a controllerType argument
 		 */

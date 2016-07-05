@@ -38,9 +38,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -74,19 +72,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
 	 */
 	private static final Log logger = LogFactory.getLog(AbstractNestablePropertyAccessor.class);
-
-	private static Class<?> javaUtilOptionalClass = null;
-
-	static {
-		try {
-			javaUtilOptionalClass =
-					ClassUtils.forName("java.util.Optional", AbstractNestablePropertyAccessor.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 not available - Optional references simply not supported then.
-		}
-	}
-
 
 	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
 
@@ -202,13 +187,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param rootObject the root object at the top of the path
 	 */
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
-		Assert.notNull(object, "Target object must not be null");
-		if (object.getClass() == javaUtilOptionalClass) {
-			this.wrappedObject = OptionalUnwrapper.unwrap(object);
-		}
-		else {
-			this.wrappedObject = object;
-		}
+		this.wrappedObject = ObjectUtils.unwrapOptional(object);
+		Assert.notNull(this.wrappedObject, "Target object must not be null");
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
 		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : this.wrappedObject);
 		this.nestedPropertyAccessors = null;
@@ -834,7 +814,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
 		String canonicalName = tokens.canonicalName;
 		Object value = getPropertyValue(tokens);
-		if (value == null || (value.getClass() == javaUtilOptionalClass && OptionalUnwrapper.isEmpty(value))) {
+		if (value == null || (value instanceof Optional && !((Optional) value).isPresent())) {
 			if (isAutoGrowNestedPaths()) {
 				value = setDefaultValue(tokens);
 			}
@@ -845,8 +825,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 		// Lookup cached sub-PropertyAccessor, create new one if not found.
 		AbstractNestablePropertyAccessor nestedPa = this.nestedPropertyAccessors.get(canonicalName);
-		if (nestedPa == null || nestedPa.getWrappedInstance() !=
-				(value.getClass() == javaUtilOptionalClass ? OptionalUnwrapper.unwrap(value) : value)) {
+		if (nestedPa == null || nestedPa.getWrappedInstance() != ObjectUtils.unwrapOptional(value)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Creating new nested " + getClass().getSimpleName() + " for property '" + canonicalName + "'");
 			}
@@ -1035,26 +1014,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		public String actualName;
 
 		public String[] keys;
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class OptionalUnwrapper {
-
-		public static Object unwrap(Object optionalObject) {
-			Optional<?> optional = (Optional<?>) optionalObject;
-			Assert.isTrue(optional.isPresent(), "Optional value must be present");
-			Object result = optional.get();
-			Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
-			return result;
-		}
-
-		public static boolean isEmpty(Object optionalObject) {
-			return !((Optional<?>) optionalObject).isPresent();
-		}
 	}
 
 }

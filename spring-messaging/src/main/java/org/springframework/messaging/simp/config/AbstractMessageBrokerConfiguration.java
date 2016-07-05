@@ -86,7 +86,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
-	private static final boolean jackson2Present= ClassUtils.isPresent(
+	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
 

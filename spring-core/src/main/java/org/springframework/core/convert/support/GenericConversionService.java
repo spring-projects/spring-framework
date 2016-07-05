@@ -25,6 +25,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.core.ResolvableType;
@@ -70,20 +71,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * returned.
 	 */
 	private static final GenericConverter NO_MATCH = new NoOpConverter("NO_MATCH");
-
-
-	/** Java 8's java.util.Optional.empty() */
-	private static Object javaUtilOptionalEmpty = null;
-
-	static {
-		try {
-			Class<?> clazz = ClassUtils.forName("java.util.Optional", GenericConversionService.class.getClassLoader());
-			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
-		}
-		catch (Exception ex) {
-			// Java 8 not available - conversion to Optional not supported then.
-		}
-	}
 
 
 	private final Converters converters = new Converters();
@@ -231,8 +218,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @return the converted null object
 	 */
 	protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (javaUtilOptionalEmpty != null && targetType.getObjectType() == javaUtilOptionalEmpty.getClass()) {
-			return javaUtilOptionalEmpty;
+		if (targetType.getObjectType() == Optional.class) {
+			return Optional.empty();
 		}
 		return null;
 	}

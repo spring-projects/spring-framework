@@ -25,9 +25,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -47,21 +47,6 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.core.annotation.SynthesizingMethodParameter
  */
 public class MethodParameter {
-
-	private static final Class<?> javaUtilOptionalClass;
-
-	static {
-		Class<?> clazz;
-		try {
-			clazz = ClassUtils.forName("java.util.Optional", MethodParameter.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 not available - Optional references simply not supported then.
-			clazz = null;
-		}
-		javaUtilOptionalClass = clazz;
-	}
-
 
 	private final Method method;
 
@@ -320,7 +305,7 @@ public class MethodParameter {
 	 * @since 4.3
 	 */
 	public boolean isOptional() {
-		return (getParameterType() == javaUtilOptionalClass);
+		return (getParameterType() == Optional.class);
 	}
 
 	/**

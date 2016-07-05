@@ -1290,7 +1290,7 @@ a better feel for its functionality
 
 Concrete implementations for the main media (mime) types are provided in the framework
 and are registered by default with the `RestTemplate` on the client-side and with
-`AnnotationMethodHandlerAdapter` on the server-side.
+`RequestMethodHandlerAdapter` on the server-side.
 
 The implementations of ``HttpMessageConverter``s are described in the following sections.
 For all converters a default media type is used but can be overridden by setting the

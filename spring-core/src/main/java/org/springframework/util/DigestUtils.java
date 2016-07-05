@@ -24,13 +24,12 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Miscellaneous methods for calculating digests.
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/codec/">Apache Commons Codec</a> for a
- * more comprehensive suite of digest utilities.
+ * <a href="http://commons.apache.org/codec/">Apache Commons Codec</a>
+ * for a more comprehensive suite of digest utilities.
  *
  * @author Arjen Poutsma
  * @author Craig Andrews
  * @since 3.0
- * @see org.apache.commons.codec.digest.DigestUtils
  */
 public abstract class DigestUtils {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.ContainerProvider;
@@ -39,7 +38,6 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.UsesJava7;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
@@ -50,7 +48,6 @@ import org.springframework.web.socket.adapter.standard.StandardWebSocketHandlerA
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import org.springframework.web.socket.adapter.standard.WebSocketToStandardExtensionAdapter;
 import org.springframework.web.socket.client.AbstractWebSocketClient;
-
 
 /**
  * A WebSocketClient based on standard Java WebSocket API.
@@ -172,7 +169,6 @@ public class StandardWebSocketClient extends AbstractWebSocketClient {
 		return result;
 	}
 
-	@UsesJava7  // fallback to InetAddress.getLoopbackAddress()
 	private InetAddress getLocalHost() {
 		try {
 			return InetAddress.getLocalHost();

@@ -142,22 +142,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import static org.junit.Assert.*;
 
 /**
- * The origin of this test class is {@link ServletAnnotationControllerHandlerMethodTests}.
- *
- * Tests in this class run against the {@link HandlerMethod} infrastructure:
- * <ul>
- * <li>RequestMappingHandlerMapping
- * <li>RequestMappingHandlerAdapter
- * <li>ExceptionHandlerExceptionResolver
- * </ul>
- *
- * <p>Rather than against the existing infrastructure:
- * <ul>
- * <li>DefaultAnnotationHandlerMapping
- * <li>AnnotationMethodHandlerAdapter
- * <li>AnnotationMethodHandlerExceptionResolver
- * </ul>
- *
  * @author Rossen Stoyanchev
  */
 public class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {

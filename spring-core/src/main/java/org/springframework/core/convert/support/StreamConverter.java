@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.lang.UsesJava8;
 
 /**
  * Converts a {@link Stream} to and from a collection or array, converting the
@@ -35,7 +34,6 @@ import org.springframework.lang.UsesJava8;
  * @author Stephane Nicoll
  * @since 4.2
  */
-@UsesJava8
 class StreamConverter implements ConditionalGenericConverter {
 
 	private static final TypeDescriptor STREAM_TYPE = TypeDescriptor.valueOf(Stream.class);

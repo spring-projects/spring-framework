@@ -176,6 +176,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 		return new SessionTransactionData(session, previousFlushMode, null, null);
 	}
 
+	@SuppressWarnings("deprecation")
 	protected FlushMode prepareFlushMode(Session session, boolean readOnly) throws PersistenceException {
 		FlushMode flushMode = (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
 		if (readOnly) {
@@ -330,6 +331,7 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			this.previousIsolationLevel = previousIsolationLevel;
 		}
 
+		@SuppressWarnings("deprecation")
 		public void resetSessionState() {
 			if (this.previousFlushMode != null) {
 				this.session.setFlushMode(this.previousFlushMode);

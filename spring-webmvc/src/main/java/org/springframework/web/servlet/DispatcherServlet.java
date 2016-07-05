@@ -74,7 +74,7 @@ import org.springframework.web.util.WebUtils;
  * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided as part
  * of an application - to control the routing of requests to handler objects. Default is
  * {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping} and
- * {@link org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping}.
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}.
  * HandlerMapping objects can be defined as beans in the servlet's application context,
  * implementing the HandlerMapping interface, overriding the default HandlerMapping if
  * present. HandlerMappings can be given any bean name (they are tested by type).
@@ -84,7 +84,7 @@ import org.springframework.web.util.WebUtils;
  * {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter}, for Spring's
  * {@link org.springframework.web.HttpRequestHandler} and
  * {@link org.springframework.web.servlet.mvc.Controller} interfaces, respectively. A default
- * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter}
  * will be registered as well. HandlerAdapter objects can be added as beans in the
  * application context, overriding the default HandlerAdapters. Like HandlerMappings,
  * HandlerAdapters can be given any bean name (they are tested by type).
@@ -92,7 +92,7 @@ import org.springframework.web.util.WebUtils;
  * <li>The dispatcher's exception resolution strategy can be specified via a
  * {@link HandlerExceptionResolver}, for example mapping certain exceptions to error pages.
  * Default are
- * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver},
+ * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver},
  * {@link org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver}, and
  * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver}.
  * These HandlerExceptionResolvers can be overridden through the application context.
@@ -131,7 +131,7 @@ import org.springframework.web.util.WebUtils;
  * {@code HandlerAdapter} (for method-level annotations) is present in the dispatcher.</b>
  * This is the case by default. However, if you are defining custom {@code HandlerMappings}
  * or {@code HandlerAdapters}, then you need to make sure that a corresponding custom
- * {@code DefaultAnnotationHandlerMapping} and/or {@code AnnotationMethodHandlerAdapter}
+ * {@code RequestMappingHandlerMapping} and/or {@code RequestMappingHandlerAdapter}
  * is defined as well - provided that you intend to use {@code @RequestMapping}.
  *
  * <p><b>A web application can define any number of DispatcherServlets.</b>

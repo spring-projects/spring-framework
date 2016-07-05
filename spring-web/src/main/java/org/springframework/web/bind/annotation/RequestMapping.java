@@ -235,19 +235,8 @@ import org.springframework.core.annotation.AliasFor;
  * <p><b>NOTE:</b> {@code @RequestMapping} will only be processed if an
  * an appropriate {@code HandlerMapping}-{@code HandlerAdapter} pair
  * is configured. If you are defining custom {@code HandlerMappings} or
- * {@code HandlerAdapters}, then you need to add
- * {@code DefaultAnnotationHandlerMapping} and
- * {@code AnnotationMethodHandlerAdapter} to your configuration.</code>.
- *
- * <p><b>NOTE:</b> Spring 3.1 introduced a new set of support classes for
- * {@code @RequestMapping} methods in Servlet environments called
- * {@code RequestMappingHandlerMapping} and
- * {@code RequestMappingHandlerAdapter}. They are recommended for use and
- * even required to take advantage of new features in Spring MVC 3.1 (search
- * {@literal "@MVC 3.1-only"} in this source file) and going forward.
- * The new support classes are enabled by default from the MVC namespace and
- * with use of the MVC Java config ({@code @EnableWebMvc}) but must be
- * configured explicitly if using neither.
+ * {@code HandlerAdapters}, then you need to add {@code RequestMappingHandlerMapping}
+ * and {@code RequestMappingHandlerAdapter} to your configuration.</code>.
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as

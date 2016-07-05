@@ -85,10 +85,9 @@ public abstract class MethodIntrospector {
 
 	/**
 	 * Select methods on the given target type based on a filter.
-	 * <p>Callers define methods of interest through the
-	 * {@link ReflectionUtils.MethodFilter} parameter.
+	 * <p>Callers define methods of interest through the {@code MethodFilter} parameter.
 	 * @param targetType the target type to search methods on
-	 * @param methodFilter a {@link ReflectionUtils.MethodFilter} to help
+	 * @param methodFilter a {@code MethodFilter} to help
 	 * recognize handler methods of interest
 	 * @return the selected methods, or an empty set in case of no match
 	 */

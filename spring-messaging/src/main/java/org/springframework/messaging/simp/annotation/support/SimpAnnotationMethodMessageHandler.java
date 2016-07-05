@@ -67,7 +67,6 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringValueResolver;
@@ -86,10 +85,6 @@ import org.springframework.validation.Validator;
  */
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
 		implements EmbeddedValueResolverAware, SmartLifecycle {
-
-	private static final boolean completableFuturePresent = ClassUtils.isPresent(
-			"java.util.concurrent.CompletableFuture", SimpAnnotationMethodMessageHandler.class.getClassLoader());
-
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -331,9 +326,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		// Single-purpose return value types
 		handlers.add(new ListenableFutureReturnValueHandler());
-		if (completableFuturePresent) {
-			handlers.add(new CompletableFutureReturnValueHandler());
-		}
+		handlers.add(new CompletableFutureReturnValueHandler());
 
 		// Annotation-based return value types
 		SendToMethodReturnValueHandler sendToHandler =

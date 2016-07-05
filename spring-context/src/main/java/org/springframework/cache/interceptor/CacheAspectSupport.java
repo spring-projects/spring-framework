@@ -43,7 +43,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -80,18 +79,6 @@ import org.springframework.util.StringUtils;
  */
 public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		implements BeanFactoryAware, InitializingBean, SmartInitializingSingleton {
-
-	private static Class<?> javaUtilOptionalClass = null;
-
-	static {
-		try {
-			javaUtilOptionalClass =
-					ClassUtils.forName("java.util.Optional", CacheAspectSupport.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 not available - Optional references simply not supported then.
-		}
-	}
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -401,9 +388,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		if (cacheHit != null && cachePutRequests.isEmpty() && !hasCachePut(contexts)) {
 			// If there are no put requests, just use the cache hit
 			cacheValue = cacheHit.get();
-			if (method.getReturnType() == javaUtilOptionalClass &&
-					(cacheValue == null || cacheValue.getClass() != javaUtilOptionalClass)) {
-				returnValue = OptionalUnwrapper.wrap(cacheValue);
+			if (method.getReturnType() == Optional.class &&
+					(cacheValue == null || cacheValue.getClass() != Optional.class)) {
+				returnValue = Optional.ofNullable(cacheValue);
 			}
 			else {
 				returnValue = cacheValue;
@@ -412,12 +399,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		else {
 			// Invoke the method if we don't have a cache hit
 			returnValue = invokeOperation(invoker);
-			if (returnValue != null && returnValue.getClass() == javaUtilOptionalClass) {
-				cacheValue = OptionalUnwrapper.unwrap(returnValue);
-			}
-			else {
-				cacheValue = returnValue;
-			}
+			cacheValue = ObjectUtils.unwrapOptional(returnValue);
 		}
 
 		// Collect any explicit @CachePuts
@@ -825,28 +807,6 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				result = this.methodCacheKey.compareTo(other.methodCacheKey);
 			}
 			return result;
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class OptionalUnwrapper {
-
-		public static Object unwrap(Object optionalObject) {
-			Optional<?> optional = (Optional<?>) optionalObject;
-			if (!optional.isPresent()) {
-				return null;
-			}
-			Object result = optional.get();
-			Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
-			return result;
-		}
-
-		public static Object wrap(Object value) {
-			return Optional.ofNullable(value);
 		}
 	}
 

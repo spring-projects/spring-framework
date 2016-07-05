@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.lang.UsesJava8;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
@@ -158,7 +157,13 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 		if (parameter.isOptional()) {
-			arg = OptionalResolver.resolveValue(arg);
+			if (arg == null || (arg instanceof Collection && ((Collection) arg).isEmpty()) ||
+					(arg instanceof Object[] && ((Object[]) arg).length == 0)) {
+				arg = Optional.empty();
+			}
+			else {
+				arg = Optional.of(arg);
+			}
 		}
 
 		return arg;
@@ -175,22 +180,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 		return partName;
-	}
-
-
-	/**
-	 * Inner class to avoid hard-coded dependency on Java 8 Optional type...
-	 */
-	@UsesJava8
-	private static class OptionalResolver {
-
-		public static Object resolveValue(Object value) {
-			if (value == null || (value instanceof Collection && ((Collection) value).isEmpty()) ||
-					(value instanceof Object[] && ((Object[]) value).length == 0)) {
-				return Optional.empty();
-			}
-			return Optional.of(value);
-		}
 	}
 
 }

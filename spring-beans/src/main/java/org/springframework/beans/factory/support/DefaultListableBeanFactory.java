@@ -69,7 +69,6 @@ import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CompositeIterator;
@@ -114,18 +113,9 @@ import org.springframework.util.StringUtils;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
-	private static Class<?> javaUtilOptionalClass = null;
-
 	private static Class<?> javaxInjectProviderClass = null;
 
 	static {
-		try {
-			javaUtilOptionalClass =
-					ClassUtils.forName("java.util.Optional", DefaultListableBeanFactory.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 not available - Optional references simply not supported then.
-		}
 		try {
 			javaxInjectProviderClass =
 					ClassUtils.forName("javax.inject.Provider", DefaultListableBeanFactory.class.getClassLoader());
@@ -1002,8 +992,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
-		if (descriptor.getDependencyType().equals(javaUtilOptionalClass)) {
-			return new OptionalDependencyFactory().createOptionalDependency(descriptor, beanName);
+		if (descriptor.getDependencyType() == Optional.class) {
+			return createOptionalDependency(descriptor, beanName);
 		}
 		else if (ObjectFactory.class == descriptor.getDependencyType() ||
 				ObjectProvider.class == descriptor.getDependencyType()) {
@@ -1403,6 +1393,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
 
+	private Optional<?> createOptionalDependency(DependencyDescriptor descriptor, String beanName, final Object... args) {
+		DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+			@Override
+			public boolean isRequired() {
+				return false;
+			}
+
+			@Override
+			public Object resolveCandidate(String beanName, BeanFactory beanFactory) {
+				return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, args) :
+						super.resolveCandidate(beanName, beanFactory));
+			}
+		};
+		descriptorToUse.increaseNestingLevel();
+		return Optional.ofNullable(doResolveDependency(descriptorToUse, beanName, null, null));
+	}
+
 
 	@Override
 	public String toString() {
@@ -1467,30 +1474,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
-	 * Separate inner class for avoiding a hard dependency on the {@code javax.inject} API.
-	 */
-	@UsesJava8
-	private class OptionalDependencyFactory {
-
-		public Object createOptionalDependency(DependencyDescriptor descriptor, String beanName, final Object... args) {
-			DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
-				@Override
-				public boolean isRequired() {
-					return false;
-				}
-				@Override
-				public Object resolveCandidate(String beanName, BeanFactory beanFactory) {
-					return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, args) :
-							super.resolveCandidate(beanName, beanFactory));
-				}
-			};
-			descriptorToUse.increaseNestingLevel();
-			return Optional.ofNullable(doResolveDependency(descriptorToUse, beanName, null, null));
-		}
-	}
-
-
-	/**
 	 * Serializable ObjectFactory/ObjectProvider for lazy resolution of a dependency.
 	 */
 	private class DependencyObjectProvider implements ObjectProvider<Object>, Serializable {
@@ -1504,14 +1487,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		public DependencyObjectProvider(DependencyDescriptor descriptor, String beanName) {
 			this.descriptor = new DependencyDescriptor(descriptor);
 			this.descriptor.increaseNestingLevel();
-			this.optional = this.descriptor.getDependencyType().equals(javaUtilOptionalClass);
+			this.optional = (this.descriptor.getDependencyType() == Optional.class);
 			this.beanName = beanName;
 		}
 
 		@Override
 		public Object getObject() throws BeansException {
 			if (this.optional) {
-				return new OptionalDependencyFactory().createOptionalDependency(this.descriptor, this.beanName);
+				return createOptionalDependency(this.descriptor, this.beanName);
 			}
 			else {
 				return doResolveDependency(this.descriptor, this.beanName, null, null);
@@ -1521,7 +1504,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		@Override
 		public Object getObject(final Object... args) throws BeansException {
 			if (this.optional) {
-				return new OptionalDependencyFactory().createOptionalDependency(this.descriptor, this.beanName, args);
+				return createOptionalDependency(this.descriptor, this.beanName, args);
 			}
 			else {
 				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
@@ -1537,7 +1520,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		@Override
 		public Object getIfAvailable() throws BeansException {
 			if (this.optional) {
-				return new OptionalDependencyFactory().createOptionalDependency(this.descriptor, this.beanName);
+				return createOptionalDependency(this.descriptor, this.beanName);
 			}
 			else {
 				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
@@ -1563,7 +1546,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			};
 			if (this.optional) {
-				return new OptionalDependencyFactory().createOptionalDependency(descriptorToUse, this.beanName);
+				return createOptionalDependency(descriptorToUse, this.beanName);
 			}
 			else {
 				return doResolveDependency(descriptorToUse, this.beanName, null, null);

@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -48,9 +47,6 @@ import org.springframework.util.ObjectUtils;
 public class TypeDescriptor implements Serializable {
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
-
-	private static final boolean streamAvailable = ClassUtils.isPresent(
-			"java.util.stream.Stream", TypeDescriptor.class.getClassLoader());
 
 	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>(18);
 
@@ -340,10 +336,10 @@ public class TypeDescriptor implements Serializable {
 		if (this.resolvableType.isArray()) {
 			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
 		}
-		if (streamAvailable && StreamDelegate.isStream(this.type)) {
-			return StreamDelegate.getStreamElementType(this);
+		if (Stream.class.isAssignableFrom(this.type)) {
+			return getRelatedIfResolvable(this, this.resolvableType.as(Stream.class).getGeneric(0));
 		}
-		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
+		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric(0));
 	}
 
 	/**
@@ -692,22 +688,6 @@ public class TypeDescriptor implements Serializable {
 			return null;
 		}
 		return new TypeDescriptor(type, null, source.annotations);
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class StreamDelegate {
-
-		public static boolean isStream(Class<?> type) {
-			return Stream.class.isAssignableFrom(type);
-		}
-
-		public static TypeDescriptor getStreamElementType(TypeDescriptor source) {
-			return getRelatedIfResolvable(source, source.resolvableType.as(Stream.class).getGeneric());
-		}
 	}
 
 }

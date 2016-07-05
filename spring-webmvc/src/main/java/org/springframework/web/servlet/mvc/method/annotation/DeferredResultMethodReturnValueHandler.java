@@ -22,9 +22,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -50,9 +48,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		this.adapterMap = new HashMap<Class<?>, DeferredResultAdapter>(5);
 		this.adapterMap.put(DeferredResult.class, new SimpleDeferredResultAdapter());
 		this.adapterMap.put(ListenableFuture.class, new ListenableFutureAdapter());
-		if (ClassUtils.isPresent("java.util.concurrent.CompletionStage", getClass().getClassLoader())) {
-			this.adapterMap.put(CompletionStage.class, new CompletionStageAdapter());
-		}
+		this.adapterMap.put(CompletionStage.class, new CompletionStageAdapter());
 	}
 
 
@@ -114,6 +110,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		}
 	}
 
+
 	/**
 	 * Adapter for {@code ListenableFuture} return values.
 	 */
@@ -137,10 +134,10 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		}
 	}
 
+
 	/**
 	 * Adapter for {@code CompletionStage} return values.
 	 */
-	@UsesJava8
 	private static class CompletionStageAdapter implements DeferredResultAdapter {
 
 		@Override

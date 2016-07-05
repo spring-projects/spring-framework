@@ -38,8 +38,6 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
-import org.springframework.lang.UsesJava8;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -68,11 +66,6 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @since 4.2.6
 	 */
 	public static final String DEFAULT_TASK_EXECUTOR_BEAN_NAME = "taskExecutor";
-
-
-	// Java 8's CompletableFuture type present?
-	private static final boolean completableFuturePresent = ClassUtils.isPresent(
-			"java.util.concurrent.CompletableFuture", AsyncExecutionInterceptor.class.getClassLoader());
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -257,13 +250,20 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * @return the execution result (potentially a corresponding {@link Future} handle)
 	 */
 	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
-		if (completableFuturePresent) {
-			Future<Object> result = CompletableFutureDelegate.processCompletableFuture(returnType, task, executor);
-			if (result != null) {
-				return result;
-			}
+		if (CompletableFuture.class.isAssignableFrom(returnType)) {
+			return CompletableFuture.supplyAsync(new Supplier<Object>() {
+				@Override
+				public Object get() {
+					try {
+						return task.call();
+					}
+					catch (Throwable ex) {
+						throw new CompletionException(ex);
+					}
+				}
+			}, executor);
 		}
-		if (ListenableFuture.class.isAssignableFrom(returnType)) {
+		else if (ListenableFuture.class.isAssignableFrom(returnType)) {
 			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
 		}
 		else if (Future.class.isAssignableFrom(returnType)) {
@@ -300,31 +300,6 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				logger.error("Exception handler for async method '" + method.toGenericString() +
 						"' threw unexpected exception itself", ex2);
 			}
-		}
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class CompletableFutureDelegate {
-
-		public static <T> Future<T> processCompletableFuture(Class<?> returnType, final Callable<T> task, Executor executor) {
-			if (!CompletableFuture.class.isAssignableFrom(returnType)) {
-				return null;
-			}
-			return CompletableFuture.supplyAsync(new Supplier<T>() {
-				@Override
-				public T get() {
-					try {
-						return task.call();
-					}
-					catch (Throwable ex) {
-						throw new CompletionException(ex);
-					}
-				}
-			}, executor);
 		}
 	}
 

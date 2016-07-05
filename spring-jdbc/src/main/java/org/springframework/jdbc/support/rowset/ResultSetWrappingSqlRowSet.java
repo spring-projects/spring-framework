@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.jdbc.InvalidResultSetAccessException;
-import org.springframework.lang.UsesJava7;
 
 /**
  * The default implementation of Spring's {@link SqlRowSet} interface, wrapping a
@@ -412,7 +411,6 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * @see java.sql.ResultSet#getObject(int, Class)
 	 */
-	@UsesJava7
 	@Override
 	public <T> T getObject(int columnIndex, Class<T> type) throws InvalidResultSetAccessException {
 		try {

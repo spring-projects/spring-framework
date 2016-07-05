@@ -61,7 +61,7 @@ public abstract class TestPropertySourceUtils {
 	/**
 	 * The name of the {@link MapPropertySource} created from <em>inlined properties</em>.
 	 * @since 4.1.5
-	 * @see {@link #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])}
+	 * @see #addInlinedPropertiesToEnvironment
 	 */
 	public static final String INLINED_PROPERTIES_PROPERTY_SOURCE_NAME = "Inlined Test Properties";
 
@@ -224,8 +224,7 @@ public abstract class TestPropertySourceUtils {
 	 * @see TestPropertySource#properties
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
-	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
-			String... inlinedProperties) {
+	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context, String... inlinedProperties) {
 		Assert.notNull(context, "context must not be null");
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		addInlinedPropertiesToEnvironment(context.getEnvironment(), inlinedProperties);
@@ -252,13 +251,11 @@ public abstract class TestPropertySourceUtils {
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		if (!ObjectUtils.isEmpty(inlinedProperties)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Adding inlined properties to environment: "
-						+ ObjectUtils.nullSafeToString(inlinedProperties));
+				logger.debug("Adding inlined properties to environment: " + ObjectUtils.nullSafeToString(inlinedProperties));
 			}
 			MapPropertySource ps = (MapPropertySource) environment.getPropertySources().get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
 			if (ps == null) {
-				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME,
-						new LinkedHashMap<String, Object>());
+				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME, new LinkedHashMap<String, Object>());
 				environment.getPropertySources().addFirst(ps);
 			}
 			ps.getSource().putAll(convertInlinedPropertiesToMap(inlinedProperties));
@@ -285,21 +282,19 @@ public abstract class TestPropertySourceUtils {
 	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
-
 		Properties props = new Properties();
+
 		for (String pair : inlinedProperties) {
 			if (!StringUtils.hasText(pair)) {
 				continue;
 			}
-
 			try {
 				props.load(new StringReader(pair));
 			}
-			catch (Exception e) {
-				throw new IllegalStateException("Failed to load test environment property from [" + pair + "].", e);
+			catch (Exception ex) {
+				throw new IllegalStateException("Failed to load test environment property from [" + pair + "]", ex);
 			}
-			Assert.state(props.size() == 1, "Failed to load exactly one test environment property from [" + pair + "].");
-
+			Assert.state(props.size() == 1, "Failed to load exactly one test environment property from [" + pair + "]");
 			for (String name : props.stringPropertyNames()) {
 				map.put(name, props.getProperty(name));
 			}

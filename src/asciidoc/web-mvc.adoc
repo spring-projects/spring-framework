@@ -2132,7 +2132,7 @@ controller-specific tweaking of the binding rules.
 
 To externalize data binding initialization, you can provide a custom implementation of
 the `WebBindingInitializer` interface, which you then enable by supplying a custom bean
-configuration for an `AnnotationMethodHandlerAdapter`, thus overriding the default
+configuration for an `RequestMappingHandlerAdapter`, thus overriding the default
 configuration.
 
 The following example from the PetClinic application shows a configuration using a

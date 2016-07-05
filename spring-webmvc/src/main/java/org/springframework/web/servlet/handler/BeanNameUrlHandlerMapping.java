@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.springframework.util.StringUtils;
  *
  * <p>This is the default implementation used by the
  * {@link org.springframework.web.servlet.DispatcherServlet}, along with
- * {@link org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping}
- * (on Java 5 and higher). Alternatively, {@link SimpleUrlHandlerMapping} allows for
- * customizing a handler mapping declaratively.
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}.
+ * Alternatively, {@link SimpleUrlHandlerMapping} allows for customizing a
+ * handler mapping declaratively.
  *
  * <p>The mapping is from URL to bean name. Thus an incoming URL "/foo" would map
  * to a handler named "/foo", or to "/foo /foo2" in case of multiple mappings to

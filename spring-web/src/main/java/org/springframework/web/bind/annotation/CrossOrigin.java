@@ -33,9 +33,6 @@ import org.springframework.core.annotation.AliasFor;
  * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
  * {@code RequestMappingHandlerMapping}-{@code RequestMappingHandlerAdapter}
  * pair which are the default in the MVC Java config and the MVC namespace.
- * In particular {@code @CrossOrigin} is not supported with the
- * {@code DefaultAnnotationHandlerMapping}-{@code AnnotationMethodHandlerAdapter}
- * pair both of which are also deprecated.
  *
  * @author Russell Allen
  * @author Sebastien Deleuze

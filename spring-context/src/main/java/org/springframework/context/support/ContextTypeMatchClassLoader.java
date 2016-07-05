@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.core.SmartClassLoader;
-import org.springframework.lang.UsesJava7;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -37,13 +36,10 @@ import org.springframework.util.ReflectionUtils;
  * @see AbstractApplicationContext
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setTempClassLoader
  */
-@UsesJava7
 class ContextTypeMatchClassLoader extends DecoratingClassLoader implements SmartClassLoader {
 
 	static {
-		if (parallelCapableClassLoaderAvailable) {
-			ClassLoader.registerAsParallelCapable();
-		}
+		ClassLoader.registerAsParallelCapable();
 	}
 
 

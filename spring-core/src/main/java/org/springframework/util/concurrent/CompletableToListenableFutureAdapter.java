@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,21 +22,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 
-import org.springframework.lang.UsesJava8;
-
-
 /**
  * Adapts a {@link CompletableFuture} into a {@link ListenableFuture}.
  *
  * @author Sebastien Deleuze
  * @since 4.2
  */
-@UsesJava8
 public class CompletableToListenableFutureAdapter<T> implements ListenableFuture<T> {
 
 	private final CompletableFuture<T> completableFuture;
 
 	private final ListenableFutureCallbackRegistry<T> callbacks = new ListenableFutureCallbackRegistry<T>();
+
 
 	public CompletableToListenableFutureAdapter(CompletableFuture<T> completableFuture) {
 		this.completableFuture = completableFuture;
@@ -53,6 +50,7 @@ public class CompletableToListenableFutureAdapter<T> implements ListenableFuture
 			}
 		});
 	}
+
 
 	@Override
 	public void addCallback(ListenableFutureCallback<? super T> callback) {

@@ -190,14 +190,13 @@ configure(allprojects) { project ->
 		"http://docs.jboss.org/jbossas/javadoc/4.0.5/connector/",
 		"http://docs.jboss.org/jbossas/javadoc/7.1.2.Final/",
 		"http://commons.apache.org/proper/commons-lang/javadocs/api-2.5/",
-		"http://commons.apache.org/proper/commons-codec/apidocs/",
 		"http://commons.apache.org/proper/commons-dbcp/apidocs/",
 		"http://tiles.apache.org/tiles-request/apidocs/",
 		"http://tiles.apache.org/framework/apidocs/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/${ehcacheVersion}",
 		"http://ehcache.org/apidocs/${ehcache3Version}",
-		"http://quartz-scheduler.org/api/2.2.0/",
+		"http://quartz-scheduler.org/api/2.2.1/",
 		"http://fasterxml.github.io/jackson-core/javadoc/2.7/",
 		"http://fasterxml.github.io/jackson-databind/javadoc/2.7/",
 		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.7/",
@@ -347,7 +346,6 @@ project("spring-core") {
 		compile(files(cglibRepackJar))
 		compile(files(objenesisRepackJar))
 		compile("commons-logging:commons-logging:1.2")
-		optional("commons-codec:commons-codec:1.10")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("net.sf.jopt-simple:jopt-simple:5.0.2")
 		optional("log4j:log4j:${log4jVersion}")
@@ -1116,6 +1114,8 @@ configure(rootProject) {
 
 		doFirst {
 			classpath = files(
+                // ensure Servlet 3.x has precedence on the javadoc classpath
+                project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
 				// ensure the javadoc process can resolve types compiled from .aj sources
 				project(":spring-aspects").sourceSets.main.output
 			)

@@ -37,7 +37,6 @@ import org.springframework.http.converter.HttpMessageConverter;
  * @see RequestHeader
  * @see ResponseBody
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
- * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
