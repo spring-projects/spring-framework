@@ -44,6 +44,8 @@ public class StubTextMessage implements TextMessage {
 
 	private String type;
 
+	private long deliveryTime;
+
 	private long timestamp = 0L;
 
 	private long expiration = 0L;
@@ -152,6 +154,11 @@ public class StubTextMessage implements TextMessage {
 		return this.type;
 	}
 
+	@Override
+	public long getJMSDeliveryTime() throws JMSException {
+		return this.deliveryTime;
+	}
+
 	public long getLongProperty(String name) throws JMSException {
 		Object value = this.properties.get(name);
 		return (value instanceof Long) ? ((Long) value).longValue() : 0;
@@ -243,6 +250,11 @@ public class StubTextMessage implements TextMessage {
 		this.type = type;
 	}
 
+	@Override
+	public void setJMSDeliveryTime(long deliveryTime) throws JMSException {
+		this.deliveryTime = deliveryTime;
+	}
+
 	public void setLongProperty(String name, long value) throws JMSException {
 		this.properties.put(name, value);
 	}
@@ -259,5 +271,14 @@ public class StubTextMessage implements TextMessage {
 		this.properties.put(name, value);
 	}
 
-}
+	@Override
+	public <T> T getBody(Class<T> c) throws JMSException {
+		return null;
+	}
 
+	@Override
+	public boolean isBodyAssignableTo(Class c) throws JMSException {
+		return false;
+	}
+
+}

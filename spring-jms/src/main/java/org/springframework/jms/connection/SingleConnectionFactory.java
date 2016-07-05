@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.ExceptionListener;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
@@ -268,6 +269,32 @@ public class SingleConnectionFactory implements ConnectionFactory, QueueConnecti
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
+	}
+
+	@Override
+	public JMSContext createContext() {
+		return obtainTargetConnectionFactory().createContext();
+	}
+
+	@Override
+	public JMSContext createContext(String userName, String password) {
+		return obtainTargetConnectionFactory().createContext(userName, password);
+	}
+
+	@Override
+	public JMSContext createContext(String userName, String password, int sessionMode) {
+		return obtainTargetConnectionFactory().createContext(userName, password, sessionMode);
+	}
+
+	@Override
+	public JMSContext createContext(int sessionMode) {
+		return obtainTargetConnectionFactory().createContext(sessionMode);
+	}
+
+	private ConnectionFactory obtainTargetConnectionFactory() {
+		ConnectionFactory target = getTargetConnectionFactory();
+		Assert.state(target != null, "'targetConnectionFactory' is required");
+		return target;
 	}
 
 

@@ -26,7 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.SmartLifecycle;
 
 /**
- * Generic bean that manages JCA 1.5 message endpoints within a Spring
+ * Generic bean that manages JCA 1.7 message endpoints within a Spring
  * application context, activating and deactivating the endpoint as part
  * of the application context's lifecycle.
  *

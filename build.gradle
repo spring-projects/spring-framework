@@ -32,6 +32,7 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.aspectjVersion       = "1.8.9"
+	ext.beanvalVersion       = "1.1.0.Final"
 	ext.caffeineVersion      = "2.3.1"
 	ext.eclipselinkVersion   = "2.6.3"
 	ext.ehcacheVersion       = "2.10.2"
@@ -52,8 +53,10 @@ configure(allprojects) { project ->
 	ext.jackson2Version      = "2.8.0"
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.5"
+	ext.jcaVersion           = "1.7"
 	ext.jettyVersion         = "9.3.10.v20160621"
 	ext.jodaVersion          = "2.9.4"
+	ext.jpaVersion           = "2.1.1"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.junitJupiterVersion  = '5.0.0-SNAPSHOT'
@@ -458,8 +461,8 @@ project("spring-context") {
 		optional("javax.ejb:ejb-api:${ejbVersion}")
 		optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api:1.0")
 		optional("javax.money:money-api:1.0")
-		optional("org.eclipse.persistence:javax.persistence:2.1.1")
-		optional("javax.validation:validation-api:1.1.0.Final")
+		optional("org.eclipse.persistence:javax.persistence:${jpaVersion}")
+		optional("javax.validation:validation-api:${beanvalVersion}")
 		optional("org.hibernate:hibernate-validator:${hibval5Version}")
 		optional("joda-time:joda-time:${jodaVersion}")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
@@ -494,7 +497,7 @@ project("spring-messaging") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("javax.servlet:javax.servlet-api:3.1.0")
-		testCompile("javax.validation:validation-api:1.1.0.Final")
+		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("org.apache.activemq:activemq-broker:5.8.0")
 		testCompile("org.apache.activemq:activemq-kahadb-store:5.8.0") {
@@ -521,11 +524,11 @@ project("spring-tx") {
 		optional(project(":spring-aop"))
 		optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-		optional("javax.resource:connector-api:1.5")
+		optional("javax.resource:javax.resource-api:${jcaVersion}")
 		optional("javax.ejb:ejb-api:${ejbVersion}")
 		optional("com.ibm.websphere:uow:6.0.2.17")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
-		testCompile("org.eclipse.persistence:javax.persistence:2.1.1")
+		testCompile("org.eclipse.persistence:javax.persistence:${jpaVersion}")
 		testCompile("org.codehaus.groovy:groovy-all:${groovyVersion}")
 	}
 }
@@ -576,10 +579,10 @@ project("spring-jms") {
 		compile(project(":spring-context"))
 		compile(project(":spring-messaging"))
 		compile(project(":spring-tx"))
-		provided("javax.jms:jms-api:1.1-rev-1")
+		provided("javax.jms:javax.jms-api:2.0.1")
 		optional(project(":spring-oxm"))
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-		optional("javax.resource:connector-api:1.5")
+		optional("javax.resource:javax.resource-api:${jcaVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 	}
 }
@@ -665,7 +668,7 @@ project("spring-web") {
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("javax.faces:javax.faces-api:2.2")
-		optional("javax.validation:validation-api:1.1.0.Final")
+		optional("javax.validation:validation-api:${beanvalVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
@@ -711,7 +714,7 @@ project("spring-orm") {
 		optional(project(":spring-aop"))
 		optional(project(":spring-context"))
 		optional(project(":spring-web"))
-		optional("org.eclipse.persistence:javax.persistence:2.1.1")
+		optional("org.eclipse.persistence:javax.persistence:${jpaVersion}")
 		optional("org.eclipse.persistence:org.eclipse.persistence.core:${eclipselinkVersion}")
 		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:${eclipselinkVersion}") {
 			exclude group: 'org.eclipse.persistence', module: 'javax.persistence'
@@ -790,7 +793,7 @@ project("spring-webmvc") {
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet"
 		}
-		testCompile("javax.validation:validation-api:1.1.0.Final")
+		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("commons-fileupload:commons-fileupload:${fileuploadVersion}")
@@ -949,7 +952,7 @@ project("spring-aspects") {
 		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
 		rt("org.aspectj:aspectjrt:${aspectjVersion}")
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
-		provided("org.eclipse.persistence:javax.persistence:2.1.1")
+		provided("org.eclipse.persistence:javax.persistence:${jpaVersion}")
 		optional(project(":spring-aop"))  // for @Async support
 		optional(project(":spring-beans"))  // for @Configurable support
 		optional(project(":spring-context"))  // for @Enable* support
@@ -1069,7 +1072,7 @@ configure(rootProject) {
 		testCompile(project(":spring-web"))
 		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("javax.inject:javax.inject:1")
-		testCompile("javax.resource:connector-api:1.5")
+		testCompile("javax.resource:javax.resource-api:${jcaVersion}")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hibernate:hibernate-core:${hibernate5Version}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")

@@ -18,6 +18,7 @@ package org.springframework.jms.connection;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.QueueConnection;
 import javax.jms.QueueConnectionFactory;
@@ -173,15 +174,14 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.ConnectionFactory#createConnection()
 	 */
 	protected Connection doCreateConnection(String username, String password) throws JMSException {
-		Assert.state(this.targetConnectionFactory != null, "'targetConnectionFactory' is required");
+		ConnectionFactory target = obtainTargetConnectionFactory();
 		if (StringUtils.hasLength(username)) {
-			return this.targetConnectionFactory.createConnection(username, password);
+			return target.createConnection(username, password);
 		}
 		else {
-			return this.targetConnectionFactory.createConnection();
+			return target.createConnection();
 		}
 	}
-
 
 	/**
 	 * Determine whether there are currently thread-bound credentials,
@@ -220,11 +220,11 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.QueueConnectionFactory#createQueueConnection()
 	 */
 	protected QueueConnection doCreateQueueConnection(String username, String password) throws JMSException {
-		Assert.state(this.targetConnectionFactory != null, "'targetConnectionFactory' is required");
-		if (!(this.targetConnectionFactory instanceof QueueConnectionFactory)) {
+		ConnectionFactory target = obtainTargetConnectionFactory();
+		if (!(target instanceof QueueConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a QueueConnectionFactory");
 		}
-		QueueConnectionFactory queueFactory = (QueueConnectionFactory) this.targetConnectionFactory;
+		QueueConnectionFactory queueFactory = (QueueConnectionFactory) target;
 		if (StringUtils.hasLength(username)) {
 			return queueFactory.createQueueConnection(username, password);
 		}
@@ -232,7 +232,6 @@ public class UserCredentialsConnectionFactoryAdapter
 			return queueFactory.createQueueConnection();
 		}
 	}
-
 
 	/**
 	 * Determine whether there are currently thread-bound credentials,
@@ -271,17 +270,42 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * @see javax.jms.TopicConnectionFactory#createTopicConnection()
 	 */
 	protected TopicConnection doCreateTopicConnection(String username, String password) throws JMSException {
-		Assert.state(this.targetConnectionFactory != null, "'targetConnectionFactory' is required");
-		if (!(this.targetConnectionFactory instanceof TopicConnectionFactory)) {
+		ConnectionFactory target = obtainTargetConnectionFactory();
+		if (!(target instanceof TopicConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is not a TopicConnectionFactory");
 		}
-		TopicConnectionFactory queueFactory = (TopicConnectionFactory) this.targetConnectionFactory;
+		TopicConnectionFactory queueFactory = (TopicConnectionFactory) target;
 		if (StringUtils.hasLength(username)) {
 			return queueFactory.createTopicConnection(username, password);
 		}
 		else {
 			return queueFactory.createTopicConnection();
 		}
+	}
+
+	@Override
+	public JMSContext createContext() {
+		return obtainTargetConnectionFactory().createContext();
+	}
+
+	@Override
+	public JMSContext createContext(String userName, String password) {
+		return obtainTargetConnectionFactory().createContext(userName, password);
+	}
+
+	@Override
+	public JMSContext createContext(String userName, String password, int sessionMode) {
+		return obtainTargetConnectionFactory().createContext(userName, password, sessionMode);
+	}
+
+	@Override
+	public JMSContext createContext(int sessionMode) {
+		return obtainTargetConnectionFactory().createContext(sessionMode);
+	}
+
+	private ConnectionFactory obtainTargetConnectionFactory() {
+		Assert.state(this.targetConnectionFactory != null, "'targetConnectionFactory' is required");
+		return this.targetConnectionFactory;
 	}
 
 
