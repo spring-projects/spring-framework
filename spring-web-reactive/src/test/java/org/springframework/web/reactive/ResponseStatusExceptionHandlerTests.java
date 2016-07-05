@@ -67,7 +67,7 @@ public class ResponseStatusExceptionHandlerTests {
 		Mono<Void> publisher = this.handler.handle(this.exchange, ex);
 
 		publisher.block();
-		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
 	}
 
 	@Test

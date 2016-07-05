@@ -40,8 +40,13 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	boolean setStatusCode(HttpStatus status);
 
 	/**
-	 * Return a mutable map with the cookies to send to the server.
+	 * Return the HTTP status code or {@code null} if not set.
 	 */
+	HttpStatus getStatusCode();
+
+		/**
+		 * Return a mutable map with the cookies to send to the server.
+		 */
 	MultiValueMap<String, ResponseCookie> getCookies();
 
 	/**

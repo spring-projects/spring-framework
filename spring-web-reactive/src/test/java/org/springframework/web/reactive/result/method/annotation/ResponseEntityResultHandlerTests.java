@@ -145,7 +145,7 @@ public class ResponseEntityResultHandlerTests {
 		HandlerResult result = handlerResult(value, type);
 		this.resultHandler.handleResult(exchange, result).block(Duration.ofSeconds(5));
 
-		assertEquals(HttpStatus.NO_CONTENT, this.response.getStatus());
+		assertEquals(HttpStatus.NO_CONTENT, this.response.getStatusCode());
 		assertEquals(0, this.response.getHeaders().size());
 		assertNull(this.response.getBody());
 	}
@@ -158,7 +158,7 @@ public class ResponseEntityResultHandlerTests {
 		HandlerResult result = handlerResult(value, type);
 		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 
-		assertEquals(HttpStatus.CREATED, this.response.getStatus());
+		assertEquals(HttpStatus.CREATED, this.response.getStatusCode());
 		assertEquals(1, this.response.getHeaders().size());
 		assertEquals(location, this.response.getHeaders().getLocation());
 		assertNull(this.response.getBody());
@@ -188,7 +188,7 @@ public class ResponseEntityResultHandlerTests {
 		HandlerResult result = handlerResult(returnValue, type);
 		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 
-		assertEquals(HttpStatus.OK, this.response.getStatus());
+		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 		assertEquals("text/plain;charset=UTF-8", this.response.getHeaders().getFirst("Content-Type"));
 		assertResponseBody("abc");
 	}

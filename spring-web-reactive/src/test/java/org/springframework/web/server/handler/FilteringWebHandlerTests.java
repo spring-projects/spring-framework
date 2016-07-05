@@ -117,7 +117,7 @@ public class FilteringWebHandlerTests {
 				.filters(new ExceptionFilter()).exceptionHandlers(exceptionHandler).build();
 		handler.handle(this.request, this.response).block();
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
 
 		Throwable savedException = exceptionHandler.ex;
 		assertNotNull(savedException);

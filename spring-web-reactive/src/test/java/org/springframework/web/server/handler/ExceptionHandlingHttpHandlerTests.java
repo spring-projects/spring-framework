@@ -64,7 +64,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		WebExceptionHandler exceptionHandler = new BadRequestExceptionHandler();
 		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
-		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		};
 		createWebHandler(exceptionHandlers).handle(this.exchange).block();
 
-		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		WebExceptionHandler exceptionHandler = new UnresolvedExceptionHandler();
 		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		WebExceptionHandler exceptionHandler = new BadRequestExceptionHandler();
 		createWebHandler(exceptionHandler).handle(this.exchange).block();
 
-		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatusCode());
 	}
 
 	private WebHandler createWebHandler(WebExceptionHandler... handlers) {

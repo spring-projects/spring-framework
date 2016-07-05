@@ -192,7 +192,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = webHandler.handle(this.exchange);
 
 		publisher.block();
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
 	}
 
 	@Test
@@ -204,7 +204,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = webHandler.handle(this.exchange);
 
 		publisher.block();
-		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatusCode());
 	}
 
 

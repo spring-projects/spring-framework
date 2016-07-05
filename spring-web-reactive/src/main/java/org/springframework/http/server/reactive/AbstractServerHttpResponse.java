@@ -97,7 +97,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		return false;
 	}
 
-	protected HttpStatus getStatusCode() {
+	@Override
+	public HttpStatus getStatusCode() {
 		return this.statusCode;
 	}
 

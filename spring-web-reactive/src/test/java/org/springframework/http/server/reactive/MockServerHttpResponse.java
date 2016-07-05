@@ -54,7 +54,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return true;
 	}
 
-	public HttpStatus getStatus() {
+	public HttpStatus getStatusCode() {
 		return this.status;
 	}
 
