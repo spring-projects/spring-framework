@@ -33,7 +33,7 @@ public class DataBufferTestUtilsTests extends AbstractDataBufferAllocatingTestCa
 
 	@Test
 	public void dumpBytes() {
-		DataBuffer buffer = this.dataBufferFactory.allocateBuffer(4);
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(4);
 		byte[] source = {'a', 'b', 'c', 'd'};
 		buffer.write(source);
 
@@ -46,7 +46,7 @@ public class DataBufferTestUtilsTests extends AbstractDataBufferAllocatingTestCa
 
 	@Test
 	public void dumpString() {
-		DataBuffer buffer = this.dataBufferFactory.allocateBuffer(4);
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(4);
 		String source = "abcd";
 		buffer.write(source.getBytes(StandardCharsets.UTF_8));
 

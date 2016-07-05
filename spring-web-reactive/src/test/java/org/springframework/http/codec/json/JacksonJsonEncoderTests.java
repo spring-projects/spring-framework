@@ -39,10 +39,12 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 
 	private JacksonJsonEncoder encoder;
 
+
 	@Before
 	public void createEncoder() {
 		this.encoder = new JacksonJsonEncoder();
 	}
+
 
 	@Test
 	public void canEncode() {
@@ -57,13 +59,10 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 				new Pojo("foofoo", "barbar"),
 				new Pojo("foofoofoo", "barbarbar")
 		);
-
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
-		Flux<DataBuffer> output =
-				this.encoder.encode(source, this.dataBufferFactory, type, null);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null);
 
-		TestSubscriber
-				.subscribe(output)
+		TestSubscriber.subscribe(output)
 				.assertComplete()
 				.assertNoError()
 				.assertValuesWith(
@@ -80,13 +79,10 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 	@Test
 	public void encodeWithType() {
 		Flux<ParentClass> source = Flux.just(new Foo(), new Bar());
-
 		ResolvableType type = ResolvableType.forClass(ParentClass.class);
-		Flux<DataBuffer> output =
-				this.encoder.encode(source, this.dataBufferFactory, type, null);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null);
 
-		TestSubscriber
-				.subscribe(output)
+		TestSubscriber.subscribe(output)
 				.assertComplete()
 				.assertNoError()
 				.assertValuesWith(stringConsumer("["),
@@ -96,6 +92,7 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 						stringConsumer("]"));
 	}
 
+	
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 	private static class ParentClass {
 	}

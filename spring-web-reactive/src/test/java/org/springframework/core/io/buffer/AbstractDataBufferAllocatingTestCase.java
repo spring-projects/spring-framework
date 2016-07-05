@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public abstract class AbstractDataBufferAllocatingTestCase {
 
 	@Parameterized.Parameter
-	public DataBufferFactory dataBufferFactory;
+	public DataBufferFactory bufferFactory;
 
 	@Parameterized.Parameters(name = "{0}")
 	public static Object[][] dataBufferFactories() {
@@ -53,12 +53,12 @@ public abstract class AbstractDataBufferAllocatingTestCase {
 	}
 
 	protected DataBuffer createDataBuffer(int capacity) {
-		return this.dataBufferFactory.allocateBuffer(capacity);
+		return this.bufferFactory.allocateBuffer(capacity);
 	}
 
 	protected DataBuffer stringBuffer(String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = this.dataBufferFactory.allocateBuffer(bytes.length);
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(bytes.length);
 		buffer.write(bytes);
 		return buffer;
 	}

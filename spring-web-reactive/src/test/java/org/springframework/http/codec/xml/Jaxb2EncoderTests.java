@@ -71,7 +71,7 @@ public class Jaxb2EncoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void encode() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
-		Flux<DataBuffer> output = this.encoder.encode(source, this.dataBufferFactory,
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClass(Pojo.class),
 						MediaType.APPLICATION_XML);
 		TestSubscriber

@@ -64,7 +64,7 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 		event.setComment("bla\nbla bla\nbla bla bla");
 		event.setReconnectTime(123L);
 		Mono<SseEvent> source = Mono.just(event);
-		Flux<DataBuffer> output = encoder.encode(source, this.dataBufferFactory,
+		Flux<DataBuffer> output = encoder.encode(source, this.bufferFactory,
 						ResolvableType.forClass(SseEvent.class), new MimeType("text", "event-stream"));
 		TestSubscriber
 				.subscribe(output)
@@ -84,7 +84,7 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 	public void encodeString() {
 		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		Flux<String> source = Flux.just("foo", "bar");
-		Flux<DataBuffer> output = encoder.encode(source, this.dataBufferFactory,
+		Flux<DataBuffer> output = encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClass(String.class), new MimeType("text", "event-stream"));
 		TestSubscriber
 				.subscribe(output)
@@ -103,7 +103,7 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 	public void encodeMultilineString() {
 		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
-		Flux<DataBuffer> output = encoder.encode(source, this.dataBufferFactory,
+		Flux<DataBuffer> output = encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClass(String.class), new MimeType("text", "event-stream"));
 		TestSubscriber
 				.subscribe(output)
@@ -122,7 +122,7 @@ public class SseEventEncoderTests extends AbstractDataBufferAllocatingTestCase {
 	public void encodePojo() {
 		SseEventEncoder encoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
-		Flux<DataBuffer> output = encoder.encode(source, this.dataBufferFactory,
+		Flux<DataBuffer> output = encoder.encode(source, this.bufferFactory,
 						ResolvableType.forClass(Pojo.class), new MimeType("text", "event-stream"));
 		TestSubscriber
 				.subscribe(output)

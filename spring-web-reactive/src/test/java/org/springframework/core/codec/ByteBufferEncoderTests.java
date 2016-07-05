@@ -61,7 +61,7 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<ByteBuffer> source =
 				Flux.just(ByteBuffer.wrap(fooBytes), ByteBuffer.wrap(barBytes));
 
-		Flux<DataBuffer> output = this.encoder.encode(source, this.dataBufferFactory,
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null);
 		TestSubscriber

@@ -46,13 +46,15 @@ import org.springframework.util.MimeType;
  */
 public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 
-	private final ObjectMapper mapper;
-
 	private static final ByteBuffer START_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{'['});
 
 	private static final ByteBuffer SEPARATOR_BUFFER = ByteBuffer.wrap(new byte[]{','});
 
 	private static final ByteBuffer END_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{']'});
+
+
+	private final ObjectMapper mapper;
+
 
 	public JacksonJsonEncoder() {
 		this(new ObjectMapper());
@@ -66,54 +68,44 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 		this.mapper = mapper;
 	}
 
+
 	@Override
-	public Flux<DataBuffer> encode(Publisher<?> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
-			Object... hints) {
+	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType elementType, MimeType mimeType, Object... hints) {
+
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
+
 		if (inputStream instanceof Mono) {
-			// single object
-			return Flux.from(inputStream)
-					.map(value -> serialize(value, bufferFactory, elementType));
+			return Flux.from(inputStream).map(value -> encodeValue(value, bufferFactory, elementType));
 		}
-		else {
-			// array
-			Mono<DataBuffer> startArray =
-					Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER));
-			Flux<DataBuffer> arraySeparators =
-					Mono.fromSupplier(() -> bufferFactory.wrap(SEPARATOR_BUFFER)).repeat();
-			Mono<DataBuffer> endArray =
-					Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER));
 
-			Flux<DataBuffer> serializedObjects = Flux.from(inputStream)
-					.map(value -> serialize(value, bufferFactory, elementType));
+		Flux<DataBuffer> array = Flux.from(inputStream)
+				.flatMap(value ->
+						Flux.just(encodeValue(value, bufferFactory, elementType),
+								bufferFactory.wrap(SEPARATOR_BUFFER)));
 
-			Flux<DataBuffer> array = Flux.zip(serializedObjects, arraySeparators)
-					.flatMap(tuple -> Flux.just(tuple.getT1(), tuple.getT2()));
-
-			Flux<DataBuffer> arrayWithoutLastSeparator = array.skipLast(1);
-
-			return Flux.concat(startArray, arrayWithoutLastSeparator, endArray);
-		}
+		return Flux.concat(Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER)), array.skipLast(1),
+				Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER)));
 	}
 
-	private DataBuffer serialize(Object value, DataBufferFactory dataBufferFactory,
-			ResolvableType type) {
+	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType type) {
 		TypeFactory typeFactory = this.mapper.getTypeFactory();
 		JavaType javaType = typeFactory.constructType(type.getType());
 		ObjectWriter writer = this.mapper.writerFor(javaType);
-		DataBuffer buffer = dataBufferFactory.allocateBuffer();
+
+		DataBuffer buffer = bufferFactory.allocateBuffer();
 		OutputStream outputStream = buffer.asOutputStream();
+
 		try {
 			writer.writeValue(outputStream, value);
 		}
 		catch (IOException e) {
 			throw new CodecException("Error while writing the data", e);
 		}
+
 		return buffer;
 	}
-
 
 }
