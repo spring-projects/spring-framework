@@ -195,10 +195,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
-		else if (element.hasAttribute("enableMatrixVariables")) {
-			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enableMatrixVariables"));
-			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
-		}
 
 		configurePathMatchingProperties(handlerMappingDef, element, parserContext);
 		readerContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME , handlerMappingDef);
@@ -238,12 +234,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignore-default-model-on-redirect"));
 			handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
 		}
-		else if (element.hasAttribute("ignoreDefaultModelOnRedirect")) {
-			// "ignoreDefaultModelOnRedirect" spelling is deprecated
-			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignoreDefaultModelOnRedirect"));
-			handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
-		}
-
 		if (argumentResolvers != null) {
 			handlerAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
 		}

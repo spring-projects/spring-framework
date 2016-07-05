@@ -16,11 +16,11 @@
 		Hot swappable target source. Note the use of Type 3 IoC.
 	-->
 	<bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource">
-		<constructor-arg><ref local="target1"/></constructor-arg>
+		<constructor-arg><ref bean="target1"/></constructor-arg>
 	</bean>
 
 	<bean id="swappable" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="targetSource"><ref local="swapper"/></property>
+		<property name="targetSource"><ref bean="swapper"/></property>
 	</bean>
 
 </beans>

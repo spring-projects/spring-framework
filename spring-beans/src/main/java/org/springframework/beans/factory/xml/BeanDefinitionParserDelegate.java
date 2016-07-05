@@ -58,7 +58,6 @@ import org.springframework.beans.factory.support.ManagedProperties;
 import org.springframework.beans.factory.support.ManagedSet;
 import org.springframework.beans.factory.support.MethodOverrides;
 import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -142,8 +141,6 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String PRIMARY_ATTRIBUTE = "primary";
 
-	public static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
-
 	public static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
 
 	public static final String INIT_METHOD_ATTRIBUTE = "init-method";
@@ -185,8 +182,6 @@ public class BeanDefinitionParserDelegate {
 	public static final String IDREF_ELEMENT = "idref";
 
 	public static final String BEAN_REF_ATTRIBUTE = "bean";
-
-	public static final String LOCAL_REF_ATTRIBUTE = "local";
 
 	public static final String PARENT_REF_ATTRIBUTE = "parent";
 
@@ -351,10 +346,6 @@ public class BeanDefinitionParserDelegate {
 		}
 		defaults.setAutowire(autowire);
 
-		// Don't fall back to parentDefaults for dependency-check as it's no longer supported in
-		// <beans> as of 3.0. Therefore, no nested <beans> would ever need to fall back to it.
-		defaults.setDependencyCheck(root.getAttribute(DEFAULT_DEPENDENCY_CHECK_ATTRIBUTE));
-
 		if (root.hasAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE)) {
 			defaults.setAutowireCandidates(root.getAttribute(DEFAULT_AUTOWIRE_CANDIDATES_ATTRIBUTE));
 		}
@@ -394,7 +385,6 @@ public class BeanDefinitionParserDelegate {
 	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
 		BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
 		bdd.setLazyInit("TRUE".equalsIgnoreCase(this.defaults.getLazyInit()));
-		bdd.setDependencyCheck(this.getDependencyCheck(DEFAULT_VALUE));
 		bdd.setAutowireMode(this.getAutowireMode(DEFAULT_VALUE));
 		bdd.setInitMethodName(this.defaults.getInitMethod());
 		bdd.setDestroyMethodName(this.defaults.getDestroyMethod());
@@ -593,9 +583,6 @@ public class BeanDefinitionParserDelegate {
 		String autowire = ele.getAttribute(AUTOWIRE_ATTRIBUTE);
 		bd.setAutowireMode(getAutowireMode(autowire));
 
-		String dependencyCheck = ele.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
-		bd.setDependencyCheck(getDependencyCheck(dependencyCheck));
-
 		if (ele.hasAttribute(DEPENDS_ON_ATTRIBUTE)) {
 			String dependsOn = ele.getAttribute(DEPENDS_ON_ATTRIBUTE);
 			bd.setDependsOn(StringUtils.tokenizeToStringArray(dependsOn, MULTI_VALUE_ATTRIBUTE_DELIMITERS));
@@ -701,25 +688,6 @@ public class BeanDefinitionParserDelegate {
 		}
 		// Else leave default value.
 		return autowire;
-	}
-
-	public int getDependencyCheck(String attValue) {
-		String att = attValue;
-		if (DEFAULT_VALUE.equals(att)) {
-			att = this.defaults.getDependencyCheck();
-		}
-		if (DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE.equals(att)) {
-			return AbstractBeanDefinition.DEPENDENCY_CHECK_ALL;
-		}
-		else if (DEPENDENCY_CHECK_OBJECTS_ATTRIBUTE_VALUE.equals(att)) {
-			return AbstractBeanDefinition.DEPENDENCY_CHECK_OBJECTS;
-		}
-		else if (DEPENDENCY_CHECK_SIMPLE_ATTRIBUTE_VALUE.equals(att)) {
-			return AbstractBeanDefinition.DEPENDENCY_CHECK_SIMPLE;
-		}
-		else {
-			return AbstractBeanDefinition.DEPENDENCY_CHECK_NONE;
-		}
 	}
 
 	/**
@@ -1020,16 +988,12 @@ public class BeanDefinitionParserDelegate {
 			String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 			boolean toParent = false;
 			if (!StringUtils.hasLength(refName)) {
-				// A reference to the id of another bean in the same XML file.
-				refName = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
+				// A reference to the id of another bean in a parent context.
+				refName = ele.getAttribute(PARENT_REF_ATTRIBUTE);
+				toParent = true;
 				if (!StringUtils.hasLength(refName)) {
-					// A reference to the id of another bean in a parent context.
-					refName = ele.getAttribute(PARENT_REF_ATTRIBUTE);
-					toParent = true;
-					if (!StringUtils.hasLength(refName)) {
-						error("'bean', 'local' or 'parent' is required for <ref> element", ele);
-						return null;
-					}
+					error("'bean' or 'parent' is required for <ref> element", ele);
+					return null;
 				}
 			}
 			if (!StringUtils.hasText(refName)) {
@@ -1081,12 +1045,8 @@ public class BeanDefinitionParserDelegate {
 		// A generic reference to any name of any bean.
 		String refName = ele.getAttribute(BEAN_REF_ATTRIBUTE);
 		if (!StringUtils.hasLength(refName)) {
-			// A reference to the id of another bean in the same XML file.
-			refName = ele.getAttribute(LOCAL_REF_ATTRIBUTE);
-			if (!StringUtils.hasLength(refName)) {
-				error("Either 'bean' or 'local' is required for <idref> element", ele);
-				return null;
-			}
+			error("'bean' is required for <idref> element", ele);
+			return null;
 		}
 		if (!StringUtils.hasText(refName)) {
 			error("<idref> element contains empty target attribute", ele);
@@ -1469,8 +1429,10 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
-	 * Get the namespace URI for the supplied node. The default implementation uses {@link Node#getNamespaceURI}.
-	 * Subclasses may override the default implementation to provide a different namespace identification mechanism.
+	 * Get the namespace URI for the supplied node.
+	 * <p>The default implementation uses {@link Node#getNamespaceURI}.
+	 * Subclasses may override the default implementation to provide a
+	 * different namespace identification mechanism.
 	 * @param node the node
 	 */
 	public String getNamespaceURI(Node node) {
@@ -1478,8 +1440,10 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Ges the local name for the supplied {@link Node}. The default implementation calls {@link Node#getLocalName}.
-	 * Subclasses may override the default implementation to provide a different mechanism for getting the local name.
+	 * Ges the local name for the supplied {@link Node}.
+	 * <p>The default implementation calls {@link Node#getLocalName}.
+	 * Subclasses may override the default implementation to provide a
+	 * different mechanism for getting the local name.
 	 * @param node the {@code Node}
 	 */
 	public String getLocalName(Node node) {

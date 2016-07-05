@@ -278,11 +278,6 @@ public class MvcNamespaceTests {
 		doTestCustomValidator("mvc-config-custom-validator.xml");
 	}
 
-	@Test
-	public void testCustomValidator32() throws Exception {
-		doTestCustomValidator("mvc-config-custom-validator-32.xml");
-	}
-
 	private void doTestCustomValidator(String xml) throws Exception {
 		loadBeanDefinitions(xml, 14);
 

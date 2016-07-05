@@ -81,7 +81,7 @@
 	</bean>
 
 	<bean id="rod11" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean" scope="prototype">
-		<constructor-arg index="0"><ref local="kerry2"/></constructor-arg>
+		<constructor-arg index="0"><ref bean="kerry2"/></constructor-arg>
 	</bean>
 
 	<bean id="rod12" class="org.springframework.beans.factory.xml.ConstructorDependenciesBean">

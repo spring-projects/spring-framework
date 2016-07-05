@@ -11,7 +11,7 @@
 	<bean id="kerryX" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 		<property name="age"><value>34</value></property>
-		<property name="spouse"><ref local="rod"/></property>
+		<property name="spouse"><ref bean="rod"/></property>
 	</bean>
 
 </beans>

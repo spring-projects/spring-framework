@@ -43,10 +43,6 @@ class Jaxb2MarshallerBeanDefinitionParser extends AbstractSingleBeanDefinitionPa
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder beanDefinitionBuilder) {
 		String contextPath = element.getAttribute("context-path");
-		if (!StringUtils.hasText(contextPath)) {
-			// Backwards compatibility with 3.x version of the xsd
-			contextPath = element.getAttribute("contextPath");
-		}
 		if (StringUtils.hasText(contextPath)) {
 			beanDefinitionBuilder.addPropertyValue("contextPath", contextPath);
 		}

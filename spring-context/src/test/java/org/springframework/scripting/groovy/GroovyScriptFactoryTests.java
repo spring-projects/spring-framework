@@ -541,15 +541,6 @@ public class GroovyScriptFactoryTests {
 		ContextScriptBean bean2 = (ContextScriptBean) ctx.getBean("bean2");
 		assertEquals(tb, bean2.getTestBean());
 		assertEquals(ctx, bean2.getApplicationContext());
-
-		try {
-			ctx.getBean("bean3");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			assertTrue(ex.contains(UnsatisfiedDependencyException.class));
-		}
 	}
 
 	@Test

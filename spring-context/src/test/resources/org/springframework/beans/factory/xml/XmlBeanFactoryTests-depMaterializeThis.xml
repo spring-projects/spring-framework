@@ -13,7 +13,7 @@
 	</bean>
 
 	<bean id="prototypeBenchmark" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="target"><ref local="prototypeTargetSource"/></property>
+		<property name="target"><ref bean="prototypeTargetSource"/></property>
 		<property name="proxyInterfaces"><value>org.springframework.beans.factory.xml.DummyBo</value></property>
 	</bean>
 

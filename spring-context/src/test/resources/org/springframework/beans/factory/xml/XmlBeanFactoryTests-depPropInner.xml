@@ -6,8 +6,8 @@
 	<bean id="holdingBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$HoldingBean">
 		<property name="dependingBean">
 			<bean id="dependingBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$DependingBean">
-				<property name="bean1"><ref local="preparingBean1"/></property>
-				<property name="bean2"><ref local="preparingBean2"/></property>
+				<property name="bean1"><ref bean="preparingBean1"/></property>
+				<property name="bean2"><ref bean="preparingBean2"/></property>
 			</bean>
 		</property>
 	</bean>

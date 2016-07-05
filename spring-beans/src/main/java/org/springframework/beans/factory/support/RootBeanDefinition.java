@@ -125,7 +125,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		setBeanClass(beanClass);
 		setAutowireMode(autowireMode);
 		if (dependencyCheck && getResolvedAutowireMode() != AUTOWIRE_CONSTRUCTOR) {
-			setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
+			setDependencyCheck(DEPENDENCY_CHECK_OBJECTS);
 		}
 	}
 
