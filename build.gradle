@@ -94,7 +94,7 @@ configure(allprojects) { project ->
 		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
 		"-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
 		"-Xlint:try", "-Xlint:fallthrough", "-Xlint:rawtypes", "-Xlint:deprecation",
-		"-Xlint:unchecked", "-Xlint:-options" //, "-Werror"
+		"-Xlint:unchecked", "-Xlint:-options", "-Werror"
 	]
 
 	compileTestJava.options*.compilerArgs = [
