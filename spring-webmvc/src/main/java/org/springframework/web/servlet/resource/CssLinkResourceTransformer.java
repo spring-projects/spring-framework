@@ -123,8 +123,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 	private boolean hasScheme(String link) {
 		int schemeIndex = link.indexOf(":");
-		return (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/"))
-				|| link.indexOf("//") == 0;
+		return (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")) || link.indexOf("//") == 0;
 	}
 
 
@@ -132,8 +131,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	protected interface CssLinkParser {
 
 		void parseLink(String content, Set<CssLinkInfo> linkInfos);
-
 	}
+
 
 	protected static abstract class AbstractCssLinkParser implements CssLinkParser {
 
@@ -190,6 +189,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 	}
 
+
 	private static class ImportStatementCssLinkParser extends AbstractCssLinkParser {
 
 		@Override
@@ -208,6 +208,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			return index;
 		}
 	}
+
 
 	private static class UrlFunctionCssLinkParser extends AbstractCssLinkParser {
 
@@ -230,8 +231,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		private final int end;
 
-
-		private CssLinkInfo(int start, int end) {
+		public CssLinkInfo(int start, int end) {
 			this.start = start;
 			this.end = end;
 		}
