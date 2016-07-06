@@ -18,10 +18,10 @@ package org.springframework.web.reactive.result;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
-import org.bouncycastle.util.Arrays;
+import java.util.function.Predicate;
 
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
@@ -101,24 +101,23 @@ public class ResolvableMethod {
 		return this;
 	}
 
+	// Resolve methods
 
 	public Method resolve() {
-		// String comparison (ResolvableType's with different providers)
-		String expectedReturnType = getReturnType();
-
 		Set<Method> methods = MethodIntrospector.selectMethods(this.targetClass,
 				(ReflectionUtils.MethodFilter) method -> {
 					if (this.methodName != null && !this.methodName.equals(method.getName())) {
 						return false;
 					}
 					if (getReturnType() != null) {
+						// String comparison (ResolvableType's with different providers)
 						String actual = ResolvableType.forMethodReturnType(method).toString();
 						if (!actual.equals(getReturnType()) && !Object.class.equals(method.getDeclaringClass())) {
 							return false;
 						}
 					}
 					if (!ObjectUtils.isEmpty(this.argumentTypes)) {
-						if (!Arrays.areEqual(this.argumentTypes, method.getParameterTypes())) {
+						if (!Arrays.equals(this.argumentTypes, method.getParameterTypes())) {
 							return false;
 						}
 					}
@@ -144,6 +143,41 @@ public class ResolvableMethod {
 		Method method = resolve();
 		return new MethodParameter(method, -1);
 	}
+
+	@SafeVarargs
+	public final MethodParameter resolveParam(Predicate<MethodParameter>... predicates) {
+		return resolveParam(null, predicates);
+	}
+
+	@SafeVarargs
+	public final MethodParameter resolveParam(ResolvableType type,
+			Predicate<MethodParameter>... predicates) {
+
+		List<MethodParameter> matches = new ArrayList<>();
+
+		Method method = resolve();
+		for (int i = 0; i < method.getParameterCount(); i++) {
+			MethodParameter param = new MethodParameter(method, i);
+			if (type != null) {
+				if (!ResolvableType.forMethodParameter(param).toString().equals(type.toString())) {
+					continue;
+				}
+			}
+			if (!ObjectUtils.isEmpty(predicates)) {
+				if (Arrays.stream(predicates).filter(p -> !p.test(param)).findFirst().isPresent()) {
+					continue;
+				}
+			}
+			matches.add(param);
+		}
+
+		Assert.isTrue(!matches.isEmpty(), "No matching method argument: " + this);
+		Assert.isTrue(matches.size() == 1, "Multiple matching method arguments: " + matches);
+
+		return matches.get(0);
+	}
+
+
 
 
 	@Override

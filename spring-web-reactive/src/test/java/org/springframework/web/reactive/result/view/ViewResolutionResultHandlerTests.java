@@ -79,6 +79,8 @@ public class ViewResolutionResultHandlerTests {
 
 	private ServerWebExchange exchange;
 
+	private ModelMap model = new ExtendedModelMap();
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -102,7 +104,7 @@ public class ViewResolutionResultHandlerTests {
 		testSupports(ResolvableType.forClass(TestBean.class), true);
 		testSupports(ResolvableType.forClass(Integer.class), false);
 
-		testSupports(resolvableMethod().annotated(ModelAttribute.class), true);
+		testSupports(ResolvableMethod.on(TestController.class).annotated(ModelAttribute.class), true);
 	}
 
 	@Test
@@ -151,7 +153,7 @@ public class ViewResolutionResultHandlerTests {
 		String responseBody = "account: {id=123, testBean=TestBean[name=Joe]}";
 		testHandle("/account", returnType, returnValue, responseBody, resolver);
 
-		testHandle("/account", resolvableMethod().annotated(ModelAttribute.class),
+		testHandle("/account", ResolvableMethod.on(TestController.class).annotated(ModelAttribute.class),
 				99L, "account: {id=123, num=99}", resolver);
 	}
 
@@ -194,8 +196,7 @@ public class ViewResolutionResultHandlerTests {
 	public void unresolvedViewName() throws Exception {
 		String returnValue = "account";
 		ResolvableType type = ResolvableType.forClass(String.class);
-		ExtendedModelMap model = new ExtendedModelMap();
-		HandlerResult handlerResult = new HandlerResult(new Object(), returnValue, returnType(type), model);
+		HandlerResult handlerResult = new HandlerResult(new Object(), returnValue, returnType(type), this.model);
 
 		this.request.setUri(new URI("/path"));
 		Mono<Void> mono = createResultHandler().handleResult(this.exchange, handlerResult);
@@ -207,8 +208,7 @@ public class ViewResolutionResultHandlerTests {
 	public void contentNegotiation() throws Exception {
 		TestBean value = new TestBean("Joe");
 		ResolvableType type = ResolvableType.forClass(TestBean.class);
-		ExtendedModelMap model = new ExtendedModelMap();
-		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), model);
+		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), this.model);
 
 		this.request.getHeaders().setAccept(Collections.singletonList(APPLICATION_JSON));
 		this.request.setUri(new URI("/account"));
@@ -227,8 +227,7 @@ public class ViewResolutionResultHandlerTests {
 	public void contentNegotiationWith406() throws Exception {
 		TestBean value = new TestBean("Joe");
 		ResolvableType type = ResolvableType.forClass(TestBean.class);
-		ExtendedModelMap model = new ExtendedModelMap();
-		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), model);
+		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), this.model);
 
 		this.request.getHeaders().setAccept(Collections.singletonList(APPLICATION_JSON));
 		this.request.setUri(new URI("/account"));
@@ -240,23 +239,7 @@ public class ViewResolutionResultHandlerTests {
 
 
 	private MethodParameter returnType(ResolvableType type) {
-		return resolvableMethod().returning(type).resolveReturnType();
-	}
-
-	private ResolvableMethod resolvableMethod() {
-		return ResolvableMethod.on(TestController.class);
-	}
-
-	private void testSupports(ResolvableType type, boolean result) {
-		testSupports(resolvableMethod().returning(type), result);
-	}
-
-	private void testSupports(ResolvableMethod resolvableMethod, boolean result) {
-		ViewResolutionResultHandler resultHandler = createResultHandler(mock(ViewResolver.class));
-		MethodParameter returnType = resolvableMethod.resolveReturnType();
-		ExtendedModelMap model = new ExtendedModelMap();
-		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, model);
-		assertEquals(result, resultHandler.supports(handlerResult));
+		return ResolvableMethod.on(TestController.class).returning(type).resolveReturnType();
 	}
 
 	private ViewResolutionResultHandler createResultHandler(ViewResolver... resolvers) {
@@ -264,7 +247,6 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private ViewResolutionResultHandler createResultHandler(List<View> defaultViews, ViewResolver... resolvers) {
-
 		FormattingConversionService service = new DefaultFormattingConversionService();
 		service.addConverter(new MonoToCompletableFutureConverter());
 		service.addConverter(new ReactorToRxJava1Converter());
@@ -275,10 +257,22 @@ public class ViewResolutionResultHandlerTests {
 		return handler;
 	}
 
+	private void testSupports(ResolvableType type, boolean result) {
+		testSupports(ResolvableMethod.on(TestController.class).returning(type), result);
+	}
+
+	private void testSupports(ResolvableMethod resolvableMethod, boolean result) {
+		ViewResolutionResultHandler resultHandler = createResultHandler(mock(ViewResolver.class));
+		MethodParameter returnType = resolvableMethod.resolveReturnType();
+		HandlerResult handlerResult = new HandlerResult(new Object(), null, returnType, this.model);
+		assertEquals(result, resultHandler.supports(handlerResult));
+	}
+
 	private void testHandle(String path, ResolvableType returnType, Object returnValue,
 			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
 
-		testHandle(path, resolvableMethod().returning(returnType), returnValue, responseBody, resolvers);
+		testHandle(path,  ResolvableMethod.on(TestController.class).returning(returnType),
+				returnValue, responseBody, resolvers);
 	}
 
 	private void testHandle(String path, ResolvableMethod resolvableMethod, Object returnValue,
@@ -306,11 +300,11 @@ public class ViewResolutionResultHandlerTests {
 		private int order = Ordered.LOWEST_PRECEDENCE;
 
 
-		public TestViewResolver(String... viewNames) {
+		TestViewResolver(String... viewNames) {
 			Arrays.stream(viewNames).forEach(name -> this.views.put(name, new TestView(name)));
 		}
 
-		public void setOrder(int order) {
+		void setOrder(int order) {
 			this.order = order;
 		}
 
@@ -327,19 +321,19 @@ public class ViewResolutionResultHandlerTests {
 
 	}
 
-	public static final class TestView implements View {
+	private static final class TestView implements View {
 
 		private final String name;
 
 		private final List<MediaType> mediaTypes;
 
 
-		public TestView(String name) {
+		TestView(String name) {
 			this.name = name;
 			this.mediaTypes = Collections.singletonList(MediaType.TEXT_HTML);
 		}
 
-		public TestView(String name, MediaType... mediaTypes) {
+		TestView(String name, MediaType... mediaTypes) {
 			this.name = name;
 			this.mediaTypes = Arrays.asList(mediaTypes);
 		}
@@ -371,7 +365,7 @@ public class ViewResolutionResultHandlerTests {
 
 		private final String name;
 
-		public TestBean(String name) {
+		TestBean(String name) {
 			this.name = name;
 		}
 

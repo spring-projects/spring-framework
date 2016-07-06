@@ -83,7 +83,7 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void invokeMethodWithValue() throws Exception {
-		InvocableHandlerMethod hm = handlerMethod("singleArg", String.class);
+		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.just("value1"));
 		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
 
@@ -92,7 +92,7 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void noMatchingResolver() throws Exception {
-		InvocableHandlerMethod hm = handlerMethod("singleArg", String.class);
+		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
 
 		TestSubscriber.subscribe(mono)
@@ -103,7 +103,7 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void resolverThrowsException() throws Exception {
-		InvocableHandlerMethod hm = handlerMethod("singleArg", String.class);
+		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.error(new IllegalStateException("boo")));
 		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
 
@@ -115,7 +115,7 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void resolverWithErrorSignal() throws Exception {
-		InvocableHandlerMethod hm = handlerMethod("singleArg", String.class);
+		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.error(new IllegalStateException("boo")));
 		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
 
@@ -127,7 +127,7 @@ public class InvocableHandlerMethodTests {
 
 	@Test
 	public void illegalArgumentExceptionIsWrappedWithInvocationDetails() throws Exception {
-		InvocableHandlerMethod hm = handlerMethod("singleArg", String.class);
+		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.just(1));
 		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
 
@@ -149,8 +149,8 @@ public class InvocableHandlerMethodTests {
 	}
 
 
-	private InvocableHandlerMethod handlerMethod(String name, Class<?>... args) throws Exception {
-		Method method = ResolvableMethod.on(TestController.class).name(name).argumentTypes(args).resolve();
+	private InvocableHandlerMethod handlerMethod(String name) throws Exception {
+		Method method = ResolvableMethod.on(TestController.class).name(name).resolve();
 		return new InvocableHandlerMethod(new HandlerMethod(new TestController(), method));
 	}
 

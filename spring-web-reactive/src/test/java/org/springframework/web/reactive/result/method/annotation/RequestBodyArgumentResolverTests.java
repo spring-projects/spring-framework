@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -37,10 +36,8 @@ import reactor.core.test.TestSubscriber;
 import rx.Observable;
 import rx.Single;
 
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
@@ -57,23 +54,24 @@ import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.session.DefaultWebSessionManager;
+import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link RequestBodyArgumentResolver}.
@@ -81,23 +79,20 @@ import static org.junit.Assert.assertTrue;
  */
 public class RequestBodyArgumentResolverTests {
 
-	private RequestBodyArgumentResolver resolver;
+	private RequestBodyArgumentResolver resolver = resolver(new JacksonJsonDecoder());
 
 	private ServerWebExchange exchange;
 
 	private MockServerHttpRequest request;
 
-	private ModelMap model;
+	private ResolvableMethod testMethod = ResolvableMethod.on(this.getClass()).name("handle");
 
 
 	@Before
 	public void setUp() throws Exception {
-		this.resolver = resolver(new JacksonJsonDecoder());
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		DefaultWebSessionManager sessionManager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(this.request, response, sessionManager);
-		this.model = new ExtendedModelMap();
+		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
 
 
@@ -105,15 +100,21 @@ public class RequestBodyArgumentResolverTests {
 	public void supports() throws Exception {
 		RequestBodyArgumentResolver resolver = resolver(new StringDecoder());
 
-		assertTrue(resolver.supportsParameter(parameter("monoTestBean")));
-		assertFalse(resolver.supportsParameter(parameter("paramWithoutAnnotation")));
+		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		assertTrue(resolver.supportsParameter(param));
+
+		MethodParameter parameter = this.testMethod.resolveParam(p -> !p.hasParameterAnnotations());
+		assertFalse(resolver.supportsParameter(parameter));
 	}
 
 	@Test
 	public void missingContentType() throws Exception {
 		String body = "{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}";
 		this.request.writeWith(Flux.just(dataBuffer(body)));
-		Mono<Object> result = this.resolver.resolveArgument(parameter("monoTestBean"), this.model, this.exchange);
+		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
 
 		TestSubscriber.subscribe(result)
 				.assertError(UnsupportedMediaTypeStatusException.class);
@@ -122,28 +123,41 @@ public class RequestBodyArgumentResolverTests {
 	@Test @SuppressWarnings("unchecked")
 	public void monoTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		Mono<TestBean> mono = (Mono<TestBean>) resolveValue("monoTestBean", Mono.class, body);
+		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Mono<TestBean> mono = (Mono<TestBean>) resolveValue(param, Mono.class, body);
+
 		assertEquals(new TestBean("f1", "b1"), mono.block());
 	}
 
 	@Test @SuppressWarnings("unchecked")
 	public void fluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		Flux<TestBean> flux = (Flux<TestBean>) resolveValue("fluxTestBean", Flux.class, body);
-		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")), flux.collectList().block());
+		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Flux<TestBean> flux = (Flux<TestBean>) resolveValue(param, Flux.class, body);
+
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
+				flux.collectList().block());
 	}
 
 	@Test @SuppressWarnings("unchecked")
 	public void singleTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		Single<TestBean> single = (Single<TestBean>) resolveValue("singleTestBean", Single.class, body);
+		ResolvableType type = forClassWithGenerics(Single.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Single<TestBean> single = (Single<TestBean>) resolveValue(param, Single.class, body);
+
 		assertEquals(new TestBean("f1", "b1"), single.toBlocking().value());
 	}
 
 	@Test @SuppressWarnings("unchecked")
 	public void observableTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		Observable<?> observable = (Observable<?>) resolveValue("observableTestBean", Observable.class, body);
+		ResolvableType type = forClassWithGenerics(Observable.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Observable<?> observable = (Observable<?>) resolveValue(param, Observable.class, body);
+
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
 				observable.toList().toBlocking().first());
 	}
@@ -151,13 +165,21 @@ public class RequestBodyArgumentResolverTests {
 	@Test @SuppressWarnings("unchecked")
 	public void futureTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		assertEquals(new TestBean("f1", "b1"), resolveValue("futureTestBean", CompletableFuture.class, body).get());
+		ResolvableType type = forClassWithGenerics(CompletableFuture.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		CompletableFuture future = resolveValue(param, CompletableFuture.class, body);
+
+		assertEquals(new TestBean("f1", "b1"), future.get());
 	}
 
 	@Test
 	public void testBean() throws Exception {
 		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
-		assertEquals(new TestBean("f1", "b1"), resolveValue("testBean", TestBean.class, body));
+		MethodParameter param = this.testMethod.resolveParam(
+				forClass(TestBean.class), p -> p.hasParameterAnnotation(RequestBody.class));
+		TestBean value = resolveValue(param, TestBean.class, body);
+
+		assertEquals(new TestBean("f1", "b1"), value);
 	}
 
 	@Test
@@ -166,47 +188,65 @@ public class RequestBodyArgumentResolverTests {
 		Map<String, String> map = new HashMap<>();
 		map.put("foo", "f1");
 		map.put("bar", "b1");
-		assertEquals(map, resolveValue("map", Map.class, body));
+		ResolvableType type = forClassWithGenerics(Map.class, String.class, String.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Map actual = resolveValue(param, Map.class, body);
+
+		assertEquals(map, actual);
 	}
 
 	@Test
 	public void list() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
-				resolveValue("list", List.class, body));
+		ResolvableType type = forClassWithGenerics(List.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		List<?> list = resolveValue(param, List.class, body);
+
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")), list);
 	}
 
 	@Test
 	public void array() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
-		assertArrayEquals(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")},
-				resolveValue("array", TestBean[].class, body));
+		ResolvableType type = forClass(TestBean[].class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		TestBean[] value = resolveValue(param, TestBean[].class, body);
+
+		assertArrayEquals(new TestBean[] {new TestBean("f1", "b1"), new TestBean("f2", "b2")}, value);
 	}
 
 	@Test @SuppressWarnings("unchecked")
 	public void validateMonoTestBean() throws Exception {
 		String body = "{\"bar\":\"b1\"}";
-		Mono<TestBean> mono = (Mono<TestBean>) resolveValue("monoTestBean", Mono.class, body);
-		TestSubscriber.subscribe(mono).assertNoValues().assertError(ServerWebInputException.class);
+		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Mono<TestBean> mono = resolveValue(param, Mono.class, body);
+
+		TestSubscriber.subscribe(mono)
+				.assertNoValues()
+				.assertError(ServerWebInputException.class);
 	}
 
 	@Test @SuppressWarnings("unchecked")
 	public void validateFluxTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\"}]";
-		Flux<TestBean> flux = (Flux<TestBean>) resolveValue("fluxTestBean", Flux.class, body);
+		ResolvableType type = forClassWithGenerics(Flux.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Flux<TestBean> flux = resolveValue(param, Flux.class, body);
 
-		TestSubscriber.subscribe(flux).assertValues(new TestBean("f1", "b1"))
+		TestSubscriber.subscribe(flux)
+				.assertValues(new TestBean("f1", "b1"))
 				.assertError(ServerWebInputException.class);
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private <T> T resolveValue(String paramName, Class<T> valueType, String body) {
+	private <T> T resolveValue(MethodParameter param, Class<T> valueType, String body) {
 
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		this.request.writeWith(Flux.just(dataBuffer(body)));
 
-		Mono<Object> result = this.resolver.resolveArgument(parameter(paramName), this.model, this.exchange);
+		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);
@@ -226,20 +266,6 @@ public class RequestBodyArgumentResolverTests {
 		service.addConverter(new ReactorToRxJava1Converter());
 
 		return new RequestBodyArgumentResolver(converters, service, new TestBeanValidator());
-	}
-
-	@SuppressWarnings("ConfusingArgumentToVarargsMethod")
-	private MethodParameter parameter(String name) {
-		ParameterNameDiscoverer nameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
-		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
-		String[] names = nameDiscoverer.getParameterNames(method);
-		for (int i=0; i < names.length; i++) {
-			if (name.equals(names[i])) {
-				return new SynthesizingMethodParameter(method, i);
-			}
-		}
-		throw new IllegalArgumentException("Invalid parameter name '" + name + "'. Actual parameters: " +
-				Arrays.toString(names));
 	}
 
 	private DataBuffer dataBuffer(String body) {
@@ -266,16 +292,17 @@ public class RequestBodyArgumentResolverTests {
 
 
 	@XmlRootElement
-	static class TestBean {
+	private static class TestBean {
 
 		private String foo;
 
 		private String bar;
 
+		@SuppressWarnings("unused")
 		public TestBean() {
 		}
 
-		public TestBean(String foo, String bar) {
+		TestBean(String foo, String bar) {
 			this.foo = foo;
 			this.bar = bar;
 		}
@@ -319,7 +346,7 @@ public class RequestBodyArgumentResolverTests {
 		}
 	}
 
-	static class TestBeanValidator implements Validator {
+	private static class TestBeanValidator implements Validator {
 
 		@Override
 		public boolean supports(Class<?> clazz) {
