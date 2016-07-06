@@ -21,11 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.bouncycastle.util.Arrays;
+
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -66,6 +69,8 @@ public class ResolvableMethod {
 
 	private String methodName;
 
+	private Class<?>[] argumentTypes;
+
 	private ResolvableType returnType;
 
 	private final List<Class<? extends Annotation>> annotationTypes = new ArrayList<>(4);
@@ -78,6 +83,11 @@ public class ResolvableMethod {
 
 	public ResolvableMethod name(String methodName) {
 		this.methodName = methodName;
+		return this;
+	}
+
+	public ResolvableMethod argumentTypes(Class<?>... argumentTypes) {
+		this.argumentTypes = argumentTypes;
 		return this;
 	}
 
@@ -94,16 +104,21 @@ public class ResolvableMethod {
 
 	public Method resolve() {
 		// String comparison (ResolvableType's with different providers)
-		String expected = this.returnType != null ? this.returnType.toString() : null;
+		String expectedReturnType = getReturnType();
 
 		Set<Method> methods = MethodIntrospector.selectMethods(this.targetClass,
 				(ReflectionUtils.MethodFilter) method -> {
-					String actual = ResolvableType.forMethodReturnType(method).toString();
 					if (this.methodName != null && !this.methodName.equals(method.getName())) {
 						return false;
 					}
-					if (expected != null) {
-						if (!actual.equals(expected) && !Object.class.equals(method.getDeclaringClass())) {
+					if (getReturnType() != null) {
+						String actual = ResolvableType.forMethodReturnType(method).toString();
+						if (!actual.equals(getReturnType()) && !Object.class.equals(method.getDeclaringClass())) {
+							return false;
+						}
+					}
+					if (!ObjectUtils.isEmpty(this.argumentTypes)) {
+						if (!Arrays.areEqual(this.argumentTypes, method.getParameterTypes())) {
 							return false;
 						}
 					}
@@ -119,6 +134,10 @@ public class ResolvableMethod {
 		Assert.isTrue(methods.size() == 1, "Multiple matching methods: " + this);
 
 		return methods.iterator().next();
+	}
+
+	private String getReturnType() {
+		return this.returnType != null ? this.returnType.toString() : null;
 	}
 
 	public MethodParameter resolveReturnType() {

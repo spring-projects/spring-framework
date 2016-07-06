@@ -52,7 +52,7 @@ import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_T
  */
 public class ContentNegotiatingResultHandlerSupportTests {
 
-	private TestHandlerSupport handlerSupport;
+	private TestResultHandler resultHandler;
 
 	private MockServerHttpRequest request;
 
@@ -61,7 +61,7 @@ public class ContentNegotiatingResultHandlerSupportTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.handlerSupport = new TestHandlerSupport();
+		this.resultHandler = new TestResultHandler();
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
 		this.exchange = new DefaultServerWebExchange(
 				this.request, new MockServerHttpResponse(), new MockWebSessionManager());
@@ -70,11 +70,9 @@ public class ContentNegotiatingResultHandlerSupportTests {
 
 	@Test
 	public void usesContentTypeResolver() throws Exception {
-		RequestedContentTypeResolver resolver = new FixedContentTypeResolver(IMAGE_GIF);
-		TestHandlerSupport handlerSupport = new TestHandlerSupport(resolver);
-
+		TestResultHandler resultHandler = new TestResultHandler(new FixedContentTypeResolver(IMAGE_GIF));
 		List<MediaType> mediaTypes = Arrays.asList(IMAGE_JPEG, IMAGE_GIF, IMAGE_PNG);
-		MediaType actual = handlerSupport.selectMediaType(this.exchange, mediaTypes);
+		MediaType actual = resultHandler.selectMediaType(this.exchange, mediaTypes);
 
 		assertEquals(IMAGE_GIF, actual);
 	}
@@ -85,7 +83,7 @@ public class ContentNegotiatingResultHandlerSupportTests {
 		this.exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, producible);
 
 		List<MediaType> mediaTypes = Arrays.asList(IMAGE_JPEG, IMAGE_GIF, IMAGE_PNG);
-		MediaType actual = handlerSupport.selectMediaType(this.exchange, mediaTypes);
+		MediaType actual = resultHandler.selectMediaType(this.exchange, mediaTypes);
 
 		assertEquals(IMAGE_GIF, actual);
 	}
@@ -95,7 +93,7 @@ public class ContentNegotiatingResultHandlerSupportTests {
 		this.request.getHeaders().add("Accept", "text/plain; q=0.5, application/json");
 
 		List<MediaType> mediaTypes = Arrays.asList(TEXT_PLAIN, APPLICATION_JSON_UTF8);
-		MediaType actual = this.handlerSupport.selectMediaType(this.exchange, mediaTypes);
+		MediaType actual = this.resultHandler.selectMediaType(this.exchange, mediaTypes);
 
 		assertEquals(APPLICATION_JSON_UTF8, actual);
 	}
@@ -104,9 +102,8 @@ public class ContentNegotiatingResultHandlerSupportTests {
 	public void charsetFromAcceptHeader() throws Exception {
 		MediaType text8859 = MediaType.parseMediaType("text/plain;charset=ISO-8859-1");
 		MediaType textUtf8 = MediaType.parseMediaType("text/plain;charset=UTF-8");
-
 		this.request.getHeaders().setAccept(Collections.singletonList(text8859));
-		MediaType actual = this.handlerSupport.selectMediaType(this.exchange, Collections.singletonList(textUtf8));
+		MediaType actual = this.resultHandler.selectMediaType(this.exchange, Collections.singletonList(textUtf8));
 
 		assertEquals(text8859, actual);
 	}
@@ -114,21 +111,20 @@ public class ContentNegotiatingResultHandlerSupportTests {
 	@Test // SPR-12894
 	public void noConcreteMediaType() throws Exception {
 		List<MediaType> producible = Collections.singletonList(ALL);
-		MediaType actual = this.handlerSupport.selectMediaType(this.exchange, producible);
+		MediaType actual = this.resultHandler.selectMediaType(this.exchange, producible);
 
 		assertEquals(APPLICATION_OCTET_STREAM, actual);
 	}
 
 
+	@SuppressWarnings("WeakerAccess")
+	private static class TestResultHandler extends ContentNegotiatingResultHandlerSupport {
 
-
-	private static class TestHandlerSupport extends ContentNegotiatingResultHandlerSupport {
-
-		protected TestHandlerSupport() {
+		protected TestResultHandler() {
 			this(new HeaderContentTypeResolver());
 		}
 
-		public TestHandlerSupport(RequestedContentTypeResolver contentTypeResolver) {
+		public TestResultHandler(RequestedContentTypeResolver contentTypeResolver) {
 			super(new GenericConversionService(), contentTypeResolver);
 		}
 	}

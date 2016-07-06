@@ -49,7 +49,6 @@ import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for {@link AbstractHandlerMethodMapping}.
- *
  * @author Rossen Stoyanchev
  */
 public class HandlerMethodMappingTests {
@@ -82,8 +81,8 @@ public class HandlerMethodMappingTests {
 	public void directMatch() throws Exception {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
-
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
+
 		assertEquals(this.method1, ((HandlerMethod) result.block()).getMethod());
 	}
 
@@ -102,9 +101,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
 
-		TestSubscriber
-				.subscribe(result)
-				.assertError(IllegalStateException.class);
+		TestSubscriber.subscribe(result).assertError(IllegalStateException.class);
 	}
 
 	@Test
@@ -115,6 +112,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key2, this.handler, this.method2);
 
 		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+
 		assertNotNull(directUrlMatches);
 		assertEquals(1, directUrlMatches.size());
 		assertEquals(key1, directUrlMatches.get(0));
@@ -130,6 +128,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping(key2, handler2, this.method1);
 
 		List directUrlMatches = this.mapping.getMappingRegistry().getMappingsByUrl(key1);
+
 		assertNotNull(directUrlMatches);
 		assertEquals(1, directUrlMatches.size());
 		assertEquals(key1, directUrlMatches.get(0));
@@ -140,13 +139,16 @@ public class HandlerMethodMappingTests {
 		String key = "foo";
 		this.mapping.registerMapping(key, this.handler, this.method1);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
+
 		assertNotNull(result.block());
 
 		this.mapping.unregisterMapping(key);
 		result = this.mapping.getHandler(createExchange(HttpMethod.GET, key));
+
 		assertNull(result.block());
 		assertNull(this.mapping.getMappingRegistry().getMappingsByUrl(key));
 	}
+
 
 	private ServerWebExchange createExchange(HttpMethod httpMethod, String path) throws URISyntaxException {
 		ServerHttpRequest request = new MockServerHttpRequest(httpMethod, new URI(path));
