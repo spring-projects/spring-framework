@@ -75,7 +75,6 @@ public abstract class TestPropertySourceUtils {
 			return new MergedTestPropertySources();
 		}
 
-		// else...
 		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(testClass);
 		String[] locations = mergeLocations(attributesList);
 		String[] properties = mergeProperties(attributesList);
@@ -84,30 +83,27 @@ public abstract class TestPropertySourceUtils {
 
 	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
+		List<TestPropertySourceAttributes> attributesList = new ArrayList<TestPropertySourceAttributes>();
+		Class<TestPropertySource> annotationType = TestPropertySource.class;
 
-		final List<TestPropertySourceAttributes> attributesList = new ArrayList<TestPropertySourceAttributes>();
-		final Class<TestPropertySource> annotationType = TestPropertySource.class;
 		AnnotationDescriptor<TestPropertySource> descriptor = findAnnotationDescriptor(testClass, annotationType);
 		Assert.notNull(descriptor, String.format(
-			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-			annotationType.getName(), testClass.getName()));
+				"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
+				annotationType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
 			TestPropertySource testPropertySource = descriptor.synthesizeAnnotation();
 			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
-
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @TestPropertySource [%s] for declaring class [%s].",
 					testPropertySource, rootDeclaringClass.getName()));
 			}
-
-			TestPropertySourceAttributes attributes = new TestPropertySourceAttributes(rootDeclaringClass,
-				testPropertySource);
+			TestPropertySourceAttributes attributes =
+					new TestPropertySourceAttributes(rootDeclaringClass, testPropertySource);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved TestPropertySource attributes: " + attributes);
 			}
 			attributesList.add(attributes);
-
 			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
 		}
 
@@ -116,39 +112,31 @@ public abstract class TestPropertySourceUtils {
 
 	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {
 		final List<String> locations = new ArrayList<String>();
-
 		for (TestPropertySourceAttributes attrs : attributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations for TestPropertySource attributes %s", attrs));
 			}
-
 			String[] locationsArray = TestContextResourceUtils.convertToClasspathResourcePaths(
-				attrs.getDeclaringClass(), attrs.getLocations());
+					attrs.getDeclaringClass(), attrs.getLocations());
 			locations.addAll(0, Arrays.<String> asList(locationsArray));
-
 			if (!attrs.isInheritLocations()) {
 				break;
 			}
 		}
-
 		return StringUtils.toStringArray(locations);
 	}
 
 	private static String[] mergeProperties(List<TestPropertySourceAttributes> attributesList) {
 		final List<String> properties = new ArrayList<String>();
-
 		for (TestPropertySourceAttributes attrs : attributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing inlined properties for TestPropertySource attributes %s", attrs));
 			}
-
-			properties.addAll(0, Arrays.<String> asList(attrs.getProperties()));
-
+			properties.addAll(0, Arrays.<String>asList(attrs.getProperties()));
 			if (!attrs.isInheritProperties()) {
 				break;
 			}
 		}
-
 		return StringUtils.toStringArray(properties);
 	}
 
@@ -168,8 +156,8 @@ public abstract class TestPropertySourceUtils {
 	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 */
 	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context, String... locations) {
-		Assert.notNull(context, "context must not be null");
-		Assert.notNull(locations, "locations must not be null");
+		Assert.notNull(context, "'context' must not be null");
+		Assert.notNull(locations, "'locations' must not be null");
 		addPropertiesFilesToEnvironment(context.getEnvironment(), context, locations);
 	}
 
@@ -196,9 +184,9 @@ public abstract class TestPropertySourceUtils {
 	public static void addPropertiesFilesToEnvironment(ConfigurableEnvironment environment,
 			ResourceLoader resourceLoader, String... locations) {
 
-		Assert.notNull(environment, "environment must not be null");
-		Assert.notNull(resourceLoader, "resourceLoader must not be null");
-		Assert.notNull(locations, "locations must not be null");
+		Assert.notNull(environment, "'environment' must not be null");
+		Assert.notNull(resourceLoader, "'resourceLoader' must not be null");
+		Assert.notNull(locations, "'locations' must not be null");
 		try {
 			for (String location : locations) {
 				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
@@ -225,8 +213,8 @@ public abstract class TestPropertySourceUtils {
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
 	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context, String... inlinedProperties) {
-		Assert.notNull(context, "context must not be null");
-		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
+		Assert.notNull(context, "'context' must not be null");
+		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
 		addInlinedPropertiesToEnvironment(context.getEnvironment(), inlinedProperties);
 	}
 
@@ -247,15 +235,18 @@ public abstract class TestPropertySourceUtils {
 	 * @see #convertInlinedPropertiesToMap
 	 */
 	public static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String... inlinedProperties) {
-		Assert.notNull(environment, "environment must not be null");
-		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
+		Assert.notNull(environment, "'environment' must not be null");
+		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
 		if (!ObjectUtils.isEmpty(inlinedProperties)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Adding inlined properties to environment: " + ObjectUtils.nullSafeToString(inlinedProperties));
+				logger.debug("Adding inlined properties to environment: " +
+						ObjectUtils.nullSafeToString(inlinedProperties));
 			}
-			MapPropertySource ps = (MapPropertySource) environment.getPropertySources().get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
+			MapPropertySource ps = (MapPropertySource)
+					environment.getPropertySources().get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
 			if (ps == null) {
-				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME, new LinkedHashMap<String, Object>());
+				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME,
+						new LinkedHashMap<String, Object>());
 				environment.getPropertySources().addFirst(ps);
 			}
 			ps.getSource().putAll(convertInlinedPropertiesToMap(inlinedProperties));
@@ -280,7 +271,7 @@ public abstract class TestPropertySourceUtils {
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
 	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
-		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
+		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		Properties props = new Properties();
 
