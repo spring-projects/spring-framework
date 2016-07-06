@@ -55,7 +55,7 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 	}
 
 	@Override
-	public Mono<T> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType, Object... hints) {
 		throw new UnsupportedOperationException();
 	}
 }

@@ -66,7 +66,7 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 
 		Method method = getClass().getDeclaredMethod("handle", List.class);
 		ResolvableType elementType = ResolvableType.forMethodParameter(method, 0);
-		Mono<Object> mono = new JacksonJsonDecoder().decodeOne(source, elementType, null);
+		Mono<Object> mono = new JacksonJsonDecoder().decodeToMono(source, elementType, null);
 
 		TestSubscriber.subscribe(mono).assertNoError().assertComplete().
 				assertValues(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")));

@@ -78,7 +78,7 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 	}
 
 	@Override
-	public Mono<Object> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
 		JsonObjectDecoder objectDecoder = this.monoObjectDecoder;

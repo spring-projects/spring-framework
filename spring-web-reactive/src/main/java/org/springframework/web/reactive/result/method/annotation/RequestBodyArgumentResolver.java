@@ -151,14 +151,16 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 					return Mono.just(getConversionService().convert(flux, FLUX_TYPE, typeDescriptor));
 				}
 				else {
-					Mono<?> mono = converter.readOne(elementType, request);
+					Mono<?> mono = converter.readMono(elementType, request);
 					if (this.validator != null) {
 						mono = mono.map(applyValidationIfApplicable(parameter));
 					}
-					if (!convertFromMono) {
-						return mono.map(value-> value); // TODO: MonoToObjectConverter
+					if (convertFromMono) {
+						return Mono.just(getConversionService().convert(mono, MONO_TYPE, typeDescriptor));
 					}
-					return Mono.just(getConversionService().convert(mono, MONO_TYPE, typeDescriptor));
+					else {
+						return Mono.from(mono);
+					}
 				}
 			}
 		}

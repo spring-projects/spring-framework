@@ -95,7 +95,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 	}
 
 	@Override
-	public Mono<String> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	public Mono<String> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
 		return decodeInternal(Flux.from(inputStream), mimeType).

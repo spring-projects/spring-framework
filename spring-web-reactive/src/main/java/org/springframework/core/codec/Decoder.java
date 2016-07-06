@@ -72,7 +72,7 @@ public interface Decoder<T> {
 	 * @param hints additional information about how to do decode, optional
 	 * @return the output stream with the decoded element
 	 */
-	Mono<T> decodeOne(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+	Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints);
 
 	/**

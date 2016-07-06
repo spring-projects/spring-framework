@@ -69,7 +69,7 @@ public interface HttpMessageConverter<T> {
 	 * @param inputMessage the HTTP input message to read from
 	 * @return the converted {@link Mono} of object
 	 */
-	Mono<T> readOne(ResolvableType type, ReactiveHttpInputMessage inputMessage);
+	Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage);
 
 	/**
 	 * Indicates whether the given class can be written by this converter.

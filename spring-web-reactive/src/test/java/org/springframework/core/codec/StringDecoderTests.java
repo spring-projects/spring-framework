@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -37,37 +36,25 @@ import static org.junit.Assert.assertTrue;
  */
 public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
-	private StringDecoder decoder;
-
-	@Before
-	public void createEncoder() {
-		this.decoder = new StringDecoder();
-	}
+	private StringDecoder decoder = new StringDecoder();
 
 
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder
-				.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
-		assertTrue(this.decoder
-				.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_HTML));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class),
-				MediaType.APPLICATION_JSON));
-		assertFalse(this.decoder
-				.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Object.class),
-				MediaType.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_HTML));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Object.class), MediaType.APPLICATION_JSON));
 	}
 
 	@Test
 	public void decode() throws InterruptedException {
 		this.decoder = new StringDecoder(false);
-		Flux<DataBuffer> source =
-				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
-		Flux<String> output =
-				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
-		TestSubscriber
-				.subscribe(output)
+		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
+		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class), null);
+
+		TestSubscriber.subscribe(output)
 				.assertNoError()
 				.assertComplete()
 				.assertValues("foo", "bar", "baz");
@@ -78,10 +65,9 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		DataBuffer fooBar = stringBuffer("\nfoo\r\nbar\r");
 		DataBuffer baz = stringBuffer("\nbaz");
 		Flux<DataBuffer> source = Flux.just(fooBar, baz);
-		Flux<String> output =
-				decoder.decode(source, ResolvableType.forClass(String.class), null);
-		TestSubscriber
-				.subscribe(output)
+		Flux<String> output = decoder.decode(source, ResolvableType.forClass(String.class), null);
+
+		TestSubscriber.subscribe(output)
 				.assertNoError()
 				.assertComplete().assertValues("\n", "foo\r", "\n", "bar\r", "\n", "baz");
 	}
@@ -89,22 +75,18 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeEmpty() throws InterruptedException {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(""));
-		Flux<String> output =
-				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("");
+		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class), null);
+
+		TestSubscriber.subscribe(output).assertValues("");
 	}
 
 	@Test
-	public void decodeOne() throws InterruptedException {
+	public void decodeToMono() throws InterruptedException {
 		this.decoder = new StringDecoder(false);
-		Flux<DataBuffer> source =
-				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
-		Mono<String> output =
-				this.decoder.decodeOne(source, ResolvableType.forClass(String.class), null);
-		TestSubscriber
-				.subscribe(output)
+		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
+		Mono<String> output = this.decoder.decodeToMono(source, ResolvableType.forClass(String.class), null);
+
+		TestSubscriber.subscribe(output)
 				.assertNoError()
 				.assertComplete()
 				.assertValues("foobarbaz");
