@@ -81,13 +81,16 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 			return Flux.from(inputStream).map(value -> encodeValue(value, bufferFactory, elementType));
 		}
 
-		Flux<DataBuffer> array = Flux.from(inputStream)
-				.flatMap(value ->
-						Flux.just(encodeValue(value, bufferFactory, elementType),
-								bufferFactory.wrap(SEPARATOR_BUFFER)));
+		Mono<DataBuffer> startArray = Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER));
+		Mono<DataBuffer> endArray = Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER));
 
-		return Flux.concat(Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER)), array.skipLast(1),
-				Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER)));
+		Flux<DataBuffer> array = Flux.from(inputStream)
+				.flatMap(value -> {
+					DataBuffer arraySeparator = bufferFactory.wrap(SEPARATOR_BUFFER);
+					return Flux.just(encodeValue(value, bufferFactory, elementType), arraySeparator);
+				});
+
+		return Flux.concat(startArray, array.skipLast(1), endArray);
 	}
 
 	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType type) {
