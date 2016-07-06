@@ -196,6 +196,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	@Override
 	public Message toMessage(Object object, Session session, Object conversionHint)
 			throws JMSException, MessageConversionException {
+
 		return toMessage(object, session, getSerializationView(conversionHint));
 	}
 
@@ -234,6 +235,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 
 	protected Message toMessage(Object object, Session session, ObjectWriter objectWriter)
 			throws JMSException, MessageConversionException {
+
 		Message message;
 		try {
 			switch (this.targetType) {
@@ -319,8 +321,8 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 * @return the resulting message
 	 * @throws JMSException if thrown by JMS methods
 	 * @throws IOException in case of I/O errors
-	 * @see Session#createBytesMessage
 	 * @since 4.3
+	 * @see Session#createBytesMessage
 	 */
 	protected BytesMessage mapToBytesMessage(Object object, Session session, ObjectWriter objectWriter)
 			throws JMSException, IOException {
@@ -399,7 +401,6 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 			message.setStringProperty(this.typeIdPropertyName, typeId);
 		}
 	}
-
 
 	/**
 	 * Convenience method to dispatch to converters for individual message types.

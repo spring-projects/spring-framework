@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,9 @@ import org.springframework.web.multipart.MultipartRequest;
  */
 public class WebRequestDataBinder extends WebDataBinder {
 
+	private static final boolean servlet3Parts = ClassUtils.hasMethod(HttpServletRequest.class, "getParts");
+
+
 	/**
 	 * Create a new WebRequestDataBinder instance, with default object name.
 	 * @param target the target object to bind onto (or {@code null}
@@ -116,7 +119,7 @@ public class WebRequestDataBinder extends WebDataBinder {
 			if (multipartRequest != null) {
 				bindMultipart(multipartRequest.getMultiFileMap(), mpvs);
 			}
-			else if (ClassUtils.hasMethod(HttpServletRequest.class, "getParts")) {
+			else if (servlet3Parts) {
 				HttpServletRequest serlvetRequest = ((NativeWebRequest) request).getNativeRequest(HttpServletRequest.class);
 				new Servlet3MultipartHelper(isBindEmptyMultipartFiles()).bindParts(serlvetRequest, mpvs);
 			}

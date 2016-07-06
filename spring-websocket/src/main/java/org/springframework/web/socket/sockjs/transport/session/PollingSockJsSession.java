@@ -35,7 +35,6 @@ import org.springframework.web.socket.sockjs.transport.SockJsServiceConfig;
  */
 public class PollingSockJsSession extends AbstractHttpSockJsSession {
 
-
 	public PollingSockJsSession(String sessionId, SockJsServiceConfig config,
 			WebSocketHandler wsHandler, Map<String, Object> attributes) {
 

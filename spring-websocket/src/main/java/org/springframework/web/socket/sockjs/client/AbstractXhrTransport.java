@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 		}
 		PRELUDE = new String(bytes, SockJsFrame.CHARSET);
 	}
+
 
 	protected Log logger = LogFactory.getLog(getClass());
 
@@ -137,6 +138,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 			URI receiveUrl, HttpHeaders handshakeHeaders, XhrClientSockJsSession session,
 			SettableListenableFuture<WebSocketSession> connectFuture);
 
+
 	// InfoReceiver methods
 
 	@Override
@@ -165,6 +167,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 	protected abstract ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers);
 
+
 	// XhrTransport methods
 
 	@Override
@@ -184,8 +187,8 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 		}
 	}
 
-	protected abstract ResponseEntity<String> executeSendRequestInternal(URI url,
-			HttpHeaders headers, TextMessage message);
+	protected abstract ResponseEntity<String> executeSendRequestInternal(
+			URI url, HttpHeaders headers, TextMessage message);
 
 
 	@Override

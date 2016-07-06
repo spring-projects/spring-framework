@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ import java.util.concurrent.TimeoutException;
 import org.springframework.util.Assert;
 
 /**
- * Abstract class that adapts a {@link Future} parameterized over S into a {@code
- * Future} parameterized over T. All methods are delegated to the adaptee, where {@link
- * #get()} and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's
- * result.
+ * Abstract class that adapts a {@link Future} parameterized over S into a {@code Future}
+ * parameterized over T. All methods are delegated to the adaptee, where {@link #get()}
+ * and {@link #get(long, TimeUnit)} call {@link #adapt(Object)} on the adaptee's result.
  *
  * @author Arjen Poutsma
  * @since 4.0

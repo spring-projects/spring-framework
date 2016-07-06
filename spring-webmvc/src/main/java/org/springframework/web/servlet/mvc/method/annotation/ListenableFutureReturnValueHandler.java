@@ -31,7 +31,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
- *
  * @deprecated as of 4.3 {@link DeferredResultMethodReturnValueHandler} supports
  * ListenableFuture return values via an adapter mechanism.
  */

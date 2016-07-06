@@ -132,8 +132,8 @@ public class InlineList extends SpelNodeImpl {
 	
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-		final String constantFieldName = "inlineList$"+codeflow.nextFieldId();
-		final String clazzname = codeflow.getClassname();
+		final String constantFieldName = "inlineList$" + codeflow.nextFieldId();
+		final String className = codeflow.getClassName();
 
 		codeflow.registerNewField(new CodeFlow.FieldAdder() {
 			public void generateField(ClassWriter cw, CodeFlow codeflow) {
@@ -143,11 +143,11 @@ public class InlineList extends SpelNodeImpl {
 		
 		codeflow.registerNewClinit(new CodeFlow.ClinitAdder() {
 			public void generateCode(MethodVisitor mv, CodeFlow codeflow) {
-				generateClinitCode(clazzname,constantFieldName, mv,codeflow,false);
+				generateClinitCode(className, constantFieldName, mv, codeflow, false);
 			}
 		});
 		
-		mv.visitFieldInsn(GETSTATIC, clazzname, constantFieldName, "Ljava/util/List;");
+		mv.visitFieldInsn(GETSTATIC, className, constantFieldName, "Ljava/util/List;");
 		codeflow.pushDescriptor("Ljava/util/List");
 	}
 	
@@ -158,8 +158,8 @@ public class InlineList extends SpelNodeImpl {
 		if (!nested) {
 			mv.visitFieldInsn(PUTSTATIC, clazzname, constantFieldName, "Ljava/util/List;");
 		}
-		int childcount = getChildCount();		
-		for (int c=0; c < childcount; c++) {
+		int childCount = getChildCount();
+		for (int c = 0; c < childCount; c++) {
 			if (!nested) {
 				mv.visitFieldInsn(GETSTATIC, clazzname, constantFieldName, "Ljava/util/List;");
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,7 @@ public class JdbcTestUtils {
 	 */
 	public static int deleteFromTableWhere(JdbcTemplate jdbcTemplate, String tableName, String whereClause,
 			Object... args) {
+
 		String sql = "DELETE FROM " + tableName;
 		if (StringUtils.hasText(whereClause)) {
 			sql += " WHERE " + whereClause;
@@ -170,6 +171,7 @@ public class JdbcTestUtils {
 	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, ResourceLoader resourceLoader,
 			String sqlResourcePath, boolean continueOnError) throws DataAccessException {
+
 		Resource resource = resourceLoader.getResource(sqlResourcePath);
 		executeSqlScript(jdbcTemplate, resource, continueOnError);
 	}
@@ -197,6 +199,7 @@ public class JdbcTestUtils {
 	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, Resource resource, boolean continueOnError)
 			throws DataAccessException {
+
 		executeSqlScript(jdbcTemplate, new EncodedResource(resource), continueOnError);
 	}
 
@@ -220,6 +223,7 @@ public class JdbcTestUtils {
 	@Deprecated
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, EncodedResource resource, boolean continueOnError)
 			throws DataAccessException {
+
 		new ResourceDatabasePopulator(continueOnError, false, resource.getEncoding(), resource.getResource()).execute(jdbcTemplate.getDataSource());
 	}
 
@@ -288,4 +292,5 @@ public class JdbcTestUtils {
 	public static void splitSqlScript(String script, char delim, List<String> statements) {
 		ScriptUtils.splitSqlScript(script, delim, statements);
 	}
+
 }

@@ -114,6 +114,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		}
 	}
 
+
 	/**
 	 * Adapter for {@code ListenableFuture} return values.
 	 */
@@ -136,6 +137,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 			return result;
 		}
 	}
+
 
 	/**
 	 * Adapter for {@code CompletionStage} return values.

@@ -152,7 +152,4 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 		return this.headerMapper.toHeaders(message);
 	}
 
-
-
-
 }

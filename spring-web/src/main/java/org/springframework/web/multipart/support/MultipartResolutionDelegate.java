@@ -122,7 +122,7 @@ public abstract class MultipartResolutionDelegate {
 				return null;
 			}
 		}
-		else if (parameter.getNestedParameterType() == servletPartClass) {
+		else if (servletPartClass == parameter.getNestedParameterType()) {
 			return (isMultipart ? RequestPartResolver.resolvePart(request, name) : null);
 		}
 		else if (isPartCollection(parameter)) {

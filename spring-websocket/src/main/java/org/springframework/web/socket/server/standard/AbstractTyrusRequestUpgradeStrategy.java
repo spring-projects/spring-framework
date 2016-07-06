@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 
 		private static final Method registerMethod;
 
-		private static final Method unRegisterMethod;
+		private static final Method unregisterMethod;
 
 		static {
 			try {
@@ -204,7 +204,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 					throw new IllegalStateException("Expected TyrusEndpointWrapper constructor with 9 or 10 arguments");
 				}
 				registerMethod = TyrusWebSocketEngine.class.getDeclaredMethod("register", TyrusEndpointWrapper.class);
-				unRegisterMethod = TyrusWebSocketEngine.class.getDeclaredMethod("unregister", TyrusEndpointWrapper.class);
+				unregisterMethod = TyrusWebSocketEngine.class.getDeclaredMethod("unregister", TyrusEndpointWrapper.class);
 				ReflectionUtils.makeAccessible(registerMethod);
 			}
 			catch (Exception ex) {
@@ -259,7 +259,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		@Override
 		public void unregister(TyrusWebSocketEngine engine, Object endpoint) {
 			try {
-				unRegisterMethod.invoke(engine, endpoint);
+				unregisterMethod.invoke(engine, endpoint);
 			}
 			catch (Exception ex) {
 				throw new HandshakeFailureException("Failed to unregister " + endpoint, ex);

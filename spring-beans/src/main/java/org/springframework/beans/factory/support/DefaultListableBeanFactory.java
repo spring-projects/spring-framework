@@ -1002,7 +1002,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
-		if (descriptor.getDependencyType().equals(javaUtilOptionalClass)) {
+		if (javaUtilOptionalClass == descriptor.getDependencyType()) {
 			return new OptionalDependencyFactory().createOptionalDependency(descriptor, beanName);
 		}
 		else if (ObjectFactory.class == descriptor.getDependencyType() ||

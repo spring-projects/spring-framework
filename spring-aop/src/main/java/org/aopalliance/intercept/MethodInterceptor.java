@@ -46,7 +46,7 @@ public interface MethodInterceptor extends Interceptor {
 	 * after the invocation. Polite implementations would certainly
 	 * like to invoke {@link Joinpoint#proceed()}.
 	 * @param invocation the method invocation joinpoint
-	 * @return the result of the call to {@link Joinpoint#proceed();
+	 * @return the result of the call to {@link Joinpoint#proceed()};
 	 * might be intercepted by the interceptor
 	 * @throws Throwable if the interceptors or the target object
 	 * throws an exception

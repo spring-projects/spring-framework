@@ -115,11 +115,11 @@ public abstract class SharedEntityManagerCreator {
 	 */
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {
-		Class<?> entityManagerInterface = (emf instanceof EntityManagerFactoryInfo ?
+
+		Class<?> emIfc = (emf instanceof EntityManagerFactoryInfo ?
 				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
 		return createSharedEntityManager(emf, properties, synchronizedWithTransaction,
-				(entityManagerInterface == null ? NO_ENTITY_MANAGER_INTERFACES :
-					new Class<?>[] { entityManagerInterface }));
+				(emIfc == null ? NO_ENTITY_MANAGER_INTERFACES : new Class<?>[] {emIfc}));
 	}
 
 	/**

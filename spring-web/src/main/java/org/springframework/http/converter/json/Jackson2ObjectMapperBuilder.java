@@ -812,7 +812,7 @@ public class Jackson2ObjectMapperBuilder {
 			return new XmlMapper(new XmlFactory(xmlInputFactory()), module);
 		}
 
-		private static final XMLInputFactory xmlInputFactory() {
+		private static XMLInputFactory xmlInputFactory() {
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);

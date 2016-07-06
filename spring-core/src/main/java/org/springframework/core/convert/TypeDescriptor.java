@@ -343,7 +343,7 @@ public class TypeDescriptor implements Serializable {
 		if (streamAvailable && StreamDelegate.isStream(this.type)) {
 			return StreamDelegate.getStreamElementType(this);
 		}
-		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
+		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric(0));
 	}
 
 	/**
@@ -706,7 +706,7 @@ public class TypeDescriptor implements Serializable {
 		}
 
 		public static TypeDescriptor getStreamElementType(TypeDescriptor source) {
-			return getRelatedIfResolvable(source, source.resolvableType.as(Stream.class).getGeneric());
+			return getRelatedIfResolvable(source, source.resolvableType.as(Stream.class).getGeneric(0));
 		}
 	}
 
