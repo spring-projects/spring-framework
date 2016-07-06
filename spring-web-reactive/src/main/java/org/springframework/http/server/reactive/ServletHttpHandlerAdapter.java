@@ -233,9 +233,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		@Override
-		protected void receiveBuffer(DataBuffer dataBuffer) {
-			super.receiveBuffer(dataBuffer);
-
+		protected void checkOnWritePossible() {
 			try {
 				if (outputStream().isReady()) {
 					onWritePossible();
