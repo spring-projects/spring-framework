@@ -124,15 +124,13 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model,
-			ServerWebExchange exchange) {
-
-		ResolvableType type = ResolvableType.forMethodParameter(parameter);
+	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange) {
 
 		TypeDescriptor typeDescriptor = new TypeDescriptor(parameter);
 		boolean convertFromMono = getConversionService().canConvert(MONO_TYPE, typeDescriptor);
 		boolean convertFromFlux = getConversionService().canConvert(FLUX_TYPE, typeDescriptor);
 
+		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 		ResolvableType elementType = convertFromMono || convertFromFlux ? type.getGeneric(0) : type;
 
 		ServerHttpRequest request = exchange.getRequest();

@@ -15,6 +15,8 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -29,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -112,6 +115,17 @@ public class RequestBodyArgumentResolverTests {
 	public void missingContentType() throws Exception {
 		String body = "{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}";
 		this.request.writeWith(Flux.just(dataBuffer(body)));
+		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
+
+		TestSubscriber.subscribe(result)
+				.assertError(UnsupportedMediaTypeStatusException.class);
+	}
+
+	@Test // SPR-9942
+	public void missingContent() throws Exception {
+		this.request.writeWith(Flux.empty());
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
@@ -206,6 +220,17 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	@Test
+	public void monoList() throws Exception {
+		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
+		ResolvableType type = forClassWithGenerics(Mono.class, forClassWithGenerics(List.class, TestBean.class));
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Mono<?> mono = resolveValue(param, Mono.class, body);
+
+		List<?> list = (List<?>) mono.block(Duration.ofSeconds(5));
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")), list);
+	}
+
+	@Test
 	public void array() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClass(TestBean[].class);
@@ -239,6 +264,17 @@ public class RequestBodyArgumentResolverTests {
 				.assertError(ServerWebInputException.class);
 	}
 
+	@Test // SPR-9964
+	@Ignore
+	public void parameterizedMethodArgument() throws Exception {
+		Class<?> clazz = ConcreteParameterizedController.class;
+		MethodParameter param = ResolvableMethod.on(clazz).name("handleDto").resolveParam();
+		SimpleBean simpleBean = resolveValue(param, SimpleBean.class, "{\"name\" : \"Jad\"}");
+
+		assertEquals("Jad", simpleBean.getName());
+	}
+
+
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, Class<T> valueType, String body) {
@@ -250,7 +286,7 @@ public class RequestBodyArgumentResolverTests {
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);
-		assertTrue("Actual type: " + value.getClass(), valueType.isAssignableFrom(value.getClass()));
+		assertTrue("Unexpected return value type: " + value, valueType.isAssignableFrom(value.getClass()));
 
 		return (T) value;
 	}
@@ -285,6 +321,7 @@ public class RequestBodyArgumentResolverTests {
 			@RequestBody TestBean testBean,
 			@RequestBody Map<String, String> map,
 			@RequestBody List<TestBean> list,
+			@RequestBody Mono<List<TestBean>> monoList,
 			@RequestBody Set<TestBean> set,
 			@RequestBody TestBean[] array,
 			TestBean paramWithoutAnnotation) {
@@ -361,4 +398,47 @@ public class RequestBodyArgumentResolverTests {
 			}
 		}
 	}
+
+	private static abstract class AbstractParameterizedController<DTO extends Identifiable> {
+
+		@SuppressWarnings("unused")
+		public void handleDto(@RequestBody DTO dto) {}
+	}
+
+	private static class ConcreteParameterizedController extends AbstractParameterizedController<SimpleBean> {
+	}
+
+	private interface Identifiable extends Serializable {
+
+		Long getId();
+
+		void setId(Long id);
+	}
+
+	@SuppressWarnings({ "serial" })
+	private static class SimpleBean implements Identifiable {
+
+		private Long id;
+
+		private String name;
+
+		@Override
+		public Long getId() {
+			return id;
+		}
+
+		@Override
+		public void setId(Long id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+
 }
