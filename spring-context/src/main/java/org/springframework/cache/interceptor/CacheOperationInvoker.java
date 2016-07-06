@@ -27,6 +27,7 @@ package org.springframework.cache.interceptor;
  * @author Stephane Nicoll
  * @since 4.1
  */
+@FunctionalInterface
 public interface CacheOperationInvoker {
 
 	/**

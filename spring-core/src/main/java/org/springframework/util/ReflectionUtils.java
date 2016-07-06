@@ -755,6 +755,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Action to take on each method.
 	 */
+	@FunctionalInterface
 	public interface MethodCallback {
 
 		/**
@@ -768,6 +769,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback optionally used to filter methods to be operated on by a method callback.
 	 */
+	@FunctionalInterface
 	public interface MethodFilter {
 
 		/**
@@ -781,6 +783,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback interface invoked on each field in the hierarchy.
 	 */
+	@FunctionalInterface
 	public interface FieldCallback {
 
 		/**
@@ -794,6 +797,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback optionally used to filter fields to be operated on by a field callback.
 	 */
+	@FunctionalInterface
 	public interface FieldFilter {
 
 		/**

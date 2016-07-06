@@ -32,6 +32,7 @@ package org.springframework.core.task;
  * @see TaskExecutor#execute(Runnable)
  * @see SimpleAsyncTaskExecutor#setTaskDecorator
  */
+@FunctionalInterface
 public interface TaskDecorator {
 
 	/**

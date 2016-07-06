@@ -30,6 +30,7 @@ import org.hibernate.Session;
  * @see HibernateTemplate
  * @see HibernateTransactionManager
  */
+@FunctionalInterface
 public interface HibernateCallback<T> {
 
 	/**

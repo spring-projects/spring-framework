@@ -143,7 +143,8 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 	}
 
 
-	private static interface SectionTransformer {
+	@FunctionalInterface
+	private interface SectionTransformer {
 
 		/**
 		 * Transforms a line in a section of the manifest.

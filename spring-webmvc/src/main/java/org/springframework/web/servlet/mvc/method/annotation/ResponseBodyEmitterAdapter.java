@@ -24,6 +24,7 @@ import org.springframework.http.server.ServerHttpResponse;
  * @author Rossen Stoyanchev
  * @since 4.3
  */
+@FunctionalInterface
 public interface ResponseBodyEmitterAdapter {
 
 	/**

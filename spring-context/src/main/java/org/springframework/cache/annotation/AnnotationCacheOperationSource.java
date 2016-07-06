@@ -181,6 +181,7 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	 * Callback interface providing {@link CacheOperation} instance(s) based on
 	 * a given {@link CacheAnnotationParser}.
 	 */
+	@FunctionalInterface
 	protected interface CacheOperationProvider {
 
 		/**

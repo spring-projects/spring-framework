@@ -41,6 +41,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @since 2.5.2
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setCustomArgumentResolvers
  */
+@FunctionalInterface
 public interface WebArgumentResolver {
 
 	/**

@@ -36,6 +36,7 @@ import javax.mail.internet.MimeMessage;
  * @see JavaMailSender#send(MimeMessagePreparator[])
  * @see MimeMessageHelper
  */
+@FunctionalInterface
 public interface MimeMessagePreparator {
 
 	/**

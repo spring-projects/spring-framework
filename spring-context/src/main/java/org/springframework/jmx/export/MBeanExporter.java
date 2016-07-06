@@ -1077,7 +1077,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	/**
 	 * Internal callback interface for the autodetection process.
 	 */
-	private static interface AutodetectCallback {
+	@FunctionalInterface
+	private interface AutodetectCallback {
 
 		/**
 		 * Called during the autodetection process to decide whether

@@ -212,7 +212,8 @@ public class PropertyPlaceholderHelper {
 	/**
 	 * Strategy interface used to resolve replacement values for placeholders contained in Strings.
 	 */
-	public static interface PlaceholderResolver {
+	@FunctionalInterface
+	public interface PlaceholderResolver {
 
 		/**
 		 * Resolve the supplied placeholder name to the replacement value.

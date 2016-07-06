@@ -146,6 +146,7 @@ public abstract class MethodIntrospector {
 	 * A callback interface for metadata lookup on a given method.
 	 * @param <T> the type of metadata returned
 	 */
+	@FunctionalInterface
 	public interface MetadataLookup<T> {
 
 		/**

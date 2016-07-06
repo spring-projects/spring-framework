@@ -30,6 +30,7 @@ import org.springframework.dao.DataAccessException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@FunctionalInterface
 public interface PersistenceExceptionTranslator {
 
 	/**

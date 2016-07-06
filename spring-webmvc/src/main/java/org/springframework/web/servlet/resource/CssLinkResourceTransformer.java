@@ -128,7 +128,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 	}
 
 
-	protected static interface CssLinkParser {
+	@FunctionalInterface
+	protected interface CssLinkParser {
 
 		void parseLink(String content, Set<CssLinkInfo> linkInfos);
 

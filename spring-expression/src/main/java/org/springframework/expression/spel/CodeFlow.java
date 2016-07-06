@@ -838,12 +838,14 @@ public class CodeFlow implements Opcodes {
 		return clazzName;
 	}
 
+	@FunctionalInterface
 	public interface FieldAdder {
-		public void generateField(ClassWriter cw, CodeFlow codeflow);
+		void generateField(ClassWriter cw, CodeFlow codeflow);
 	}
 
+	@FunctionalInterface
 	public interface ClinitAdder {
-		public void generateCode(MethodVisitor mv, CodeFlow codeflow);
+		void generateCode(MethodVisitor mv, CodeFlow codeflow);
 	}
 
 	/**
