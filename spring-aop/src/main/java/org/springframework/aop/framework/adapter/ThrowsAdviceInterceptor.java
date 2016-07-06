@@ -77,11 +77,11 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		Method[] methods = throwsAdvice.getClass().getMethods();
 		for (Method method : methods) {
 			if (method.getName().equals(AFTER_THROWING) &&
-					(method.getParameterTypes().length == 1 || method.getParameterTypes().length == 4) &&
-					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterTypes().length - 1])
+					(method.getParameterCount() == 1 || method.getParameterCount() == 4) &&
+					Throwable.class.isAssignableFrom(method.getParameterTypes()[method.getParameterCount() - 1])
 				) {
 				// Have an exception handler
-				this.exceptionHandlerMap.put(method.getParameterTypes()[method.getParameterTypes().length - 1], method);
+				this.exceptionHandlerMap.put(method.getParameterTypes()[method.getParameterCount() - 1], method);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Found exception handler method: " + method);
 				}
@@ -135,7 +135,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 
 	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
-		if (method.getParameterTypes().length == 1) {
+		if (method.getParameterCount() == 1) {
 			handlerArgs = new Object[] { ex };
 		}
 		else {

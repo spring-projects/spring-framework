@@ -1217,7 +1217,7 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadVoids) {
 			@Override
 			public boolean matches(Method m, Class<?> targetClass) {
-				return m.getName().equals("overload") && m.getParameterTypes().length == 0;
+				return m.getName().equals("overload") && m.getParameterCount() == 0;
 			}
 		});
 
@@ -1225,7 +1225,7 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadInts) {
 			@Override
 			public boolean matches(Method m, Class<?> targetClass) {
-				return m.getName().equals("overload") && m.getParameterTypes().length == 1 &&
+				return m.getName().equals("overload") && m.getParameterCount() == 1 &&
 						m.getParameterTypes()[0].equals(int.class);
 			}
 		});
@@ -1314,7 +1314,7 @@ public abstract class AbstractAopProxyTests {
 		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cba) {
 			@Override
 			public boolean matches(Method m, Class<?> targetClass) {
-				return m.getParameterTypes().length == 0;
+				return m.getParameterCount() == 0;
 			}
 		};
 		TestBean target = new TestBean();
@@ -1395,7 +1395,7 @@ public abstract class AbstractAopProxyTests {
 		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cca) {
 			@Override
 			public boolean matches(Method m, Class<?> targetClass) {
-				return m.getParameterTypes().length == 0 || "exceptional".equals(m.getName());
+				return m.getParameterCount() == 0 || "exceptional".equals(m.getName());
 			}
 		};
 		TestBean target = new TestBean();
@@ -1694,7 +1694,7 @@ public abstract class AbstractAopProxyTests {
 				@Override
 				public boolean matches(Method m, Class<?> targetClass) {
 					return m.getName().startsWith("set") &&
-						m.getParameterTypes().length == 1 &&
+						m.getParameterCount() == 1 &&
 						m.getParameterTypes()[0].equals(String.class);
 				}
 			});

@@ -396,7 +396,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 							if (Modifier.isStatic(method.getModifiers())) {
 								throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
 							}
-							if (method.getParameterTypes().length != 1) {
+							if (method.getParameterCount() != 1) {
 								throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
 							}
 							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
@@ -406,7 +406,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 							if (Modifier.isStatic(method.getModifiers())) {
 								throw new IllegalStateException("@EJB annotation is not supported on static methods");
 							}
-							if (method.getParameterTypes().length != 1) {
+							if (method.getParameterCount() != 1) {
 								throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
 							}
 							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);

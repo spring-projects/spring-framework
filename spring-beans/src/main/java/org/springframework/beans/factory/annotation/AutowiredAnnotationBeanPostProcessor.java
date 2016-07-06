@@ -292,7 +292,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 										". Found constructor with 'required' Autowired annotation already: " +
 										requiredConstructor);
 							}
-							if (candidate.getParameterTypes().length == 0) {
+							if (candidate.getParameterCount() == 0) {
 								throw new IllegalStateException(
 										"Autowired annotation requires at least one argument: " + candidate);
 							}
@@ -308,7 +308,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 							candidates.add(candidate);
 						}
-						else if (candidate.getParameterTypes().length == 0) {
+						else if (candidate.getParameterCount() == 0) {
 							defaultConstructor = candidate;
 						}
 					}
@@ -327,7 +327,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						}
 						candidateConstructors = candidates.toArray(new Constructor<?>[candidates.size()]);
 					}
-					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterTypes().length > 0) {
+					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
 					}
 					else {
@@ -444,7 +444,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 							return;
 						}
-						if (method.getParameterTypes().length == 0) {
+						if (method.getParameterCount() == 0) {
 							if (logger.isWarnEnabled()) {
 								logger.warn("Autowired annotation should be used on methods with parameters: " + method);
 							}

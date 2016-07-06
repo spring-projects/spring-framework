@@ -437,7 +437,7 @@ public class PersistenceAnnotationBeanPostProcessor
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("Persistence annotations are not supported on static methods");
 						}
-						if (method.getParameterTypes().length != 1) {
+						if (method.getParameterCount() != 1) {
 							throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
 						}
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);

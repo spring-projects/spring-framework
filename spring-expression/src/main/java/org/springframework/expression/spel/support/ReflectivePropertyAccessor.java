@@ -374,7 +374,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		for (String methodSuffix : methodSuffixes) {
 			for (Method method : methods) {
 				if (method.getName().equals(prefix + methodSuffix) &&
-						method.getParameterTypes().length == numberOfParams &&
+						method.getParameterCount() == numberOfParams &&
 						(!mustBeStatic || Modifier.isStatic(method.getModifiers())) &&
 						(requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
 					return method;

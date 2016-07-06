@@ -123,8 +123,8 @@ public class ReflectiveMethodResolver implements MethodResolver {
 				Collections.sort(methods, new Comparator<Method>() {
 					@Override
 					public int compare(Method m1, Method m2) {
-						int m1pl = m1.getParameterTypes().length;
-						int m2pl = m2.getParameterTypes().length;
+						int m1pl = m1.getParameterCount();
+						int m2pl = m2.getParameterCount();
 						// varargs methods go last
 						if (m1pl == m2pl) {
 						    if (!m1.isVarArgs() && m2.isVarArgs()) {

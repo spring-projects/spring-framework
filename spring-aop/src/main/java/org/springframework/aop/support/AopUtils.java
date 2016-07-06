@@ -168,7 +168,7 @@ public abstract class AopUtils {
 	 */
 	public static boolean isFinalizeMethod(Method method) {
 		return (method != null && method.getName().equals("finalize") &&
-				method.getParameterTypes().length == 0);
+				method.getParameterCount() == 0);
 	}
 
 	/**

@@ -384,7 +384,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public static boolean isHashCodeMethod(Method method) {
-		return (method != null && method.getName().equals("hashCode") && method.getParameterTypes().length == 0);
+		return (method != null && method.getName().equals("hashCode") && method.getParameterCount() == 0);
 	}
 
 	/**
@@ -392,7 +392,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#toString()
 	 */
 	public static boolean isToStringMethod(Method method) {
-		return (method != null && method.getName().equals("toString") && method.getParameterTypes().length == 0);
+		return (method != null && method.getName().equals("toString") && method.getParameterCount() == 0);
 	}
 
 	/**

@@ -79,7 +79,7 @@ public class ReplaceOverride extends MethodOverride {
 			return true;
 		}
 		// If we get here, we need to insist on precise argument matching...
-		if (this.typeIdentifiers.size() != method.getParameterTypes().length) {
+		if (this.typeIdentifiers.size() != method.getParameterCount()) {
 			return false;
 		}
 		for (int i = 0; i < this.typeIdentifiers.size(); i++) {

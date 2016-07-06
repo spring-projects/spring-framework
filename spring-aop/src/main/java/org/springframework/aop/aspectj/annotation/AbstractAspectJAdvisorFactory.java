@@ -305,7 +305,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		@Override
 		public String[] getParameterNames(Method method) {
-			if (method.getParameterTypes().length == 0) {
+			if (method.getParameterCount() == 0) {
 				return new String[0];
 			}
 			AspectJAnnotation<?> annotation = findAspectJAnnotationOnMethod(method);

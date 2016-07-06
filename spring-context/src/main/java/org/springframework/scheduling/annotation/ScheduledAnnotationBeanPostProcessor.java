@@ -293,7 +293,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		try {
-			Assert.isTrue(method.getParameterTypes().length == 0,
+			Assert.isTrue(method.getParameterCount() == 0,
 					"Only no-arg methods may be annotated with @Scheduled");
 
 			Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());

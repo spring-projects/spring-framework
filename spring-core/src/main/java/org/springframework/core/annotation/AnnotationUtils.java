@@ -1682,7 +1682,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	static boolean isAttributeMethod(Method method) {
-		return (method != null && method.getParameterTypes().length == 0 && method.getReturnType() != void.class);
+		return (method != null && method.getParameterCount() == 0 && method.getReturnType() != void.class);
 	}
 
 	/**
@@ -1692,7 +1692,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	static boolean isAnnotationTypeMethod(Method method) {
-		return (method != null && method.getName().equals("annotationType") && method.getParameterTypes().length == 0);
+		return (method != null && method.getName().equals("annotationType") && method.getParameterCount() == 0);
 	}
 
 	/**

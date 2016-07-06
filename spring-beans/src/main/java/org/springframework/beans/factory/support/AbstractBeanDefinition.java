@@ -516,7 +516,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			// otherwise we'll try constructor autowiring.
 			Constructor<?>[] constructors = getBeanClass().getConstructors();
 			for (Constructor<?> constructor : constructors) {
-				if (constructor.getParameterTypes().length == 0) {
+				if (constructor.getParameterCount() == 0) {
 					return AUTOWIRE_BY_TYPE;
 				}
 			}

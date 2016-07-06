@@ -93,7 +93,7 @@ public abstract class BridgeMethodResolver {
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
 		return (!candidateMethod.isBridge() && !candidateMethod.equals(bridgeMethod) &&
 				candidateMethod.getName().equals(bridgeMethod.getName()) &&
-				candidateMethod.getParameterTypes().length == bridgeMethod.getParameterTypes().length);
+				candidateMethod.getParameterCount() == bridgeMethod.getParameterCount());
 	}
 
 	/**

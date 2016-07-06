@@ -439,7 +439,7 @@ public class MvcUriComponentsBuilder {
 			@Override
 			public boolean matches(Method method) {
 				String name = method.getName();
-				int argLength = method.getParameterTypes().length;
+				int argLength = method.getParameterCount();
 				return (name.equals(methodName) && argLength == args.length);
 			}
 		};
@@ -465,7 +465,7 @@ public class MvcUriComponentsBuilder {
 			contributor = defaultUriComponentsContributor;
 		}
 
-		int paramCount = method.getParameterTypes().length;
+		int paramCount = method.getParameterCount();
 		int argCount = args.length;
 		if (paramCount != argCount) {
 			throw new IllegalArgumentException("Number of method parameters " + paramCount +
@@ -760,7 +760,7 @@ public class MvcUriComponentsBuilder {
 			this.baseUrl = (baseUrl != null ? baseUrl : initBaseUrl());
 			this.controllerType = controllerType;
 			this.method = method;
-			this.argumentValues = new Object[method.getParameterTypes().length];
+			this.argumentValues = new Object[method.getParameterCount()];
 			for (int i = 0; i < this.argumentValues.length; i++) {
 				this.argumentValues[i] = null;
 			}

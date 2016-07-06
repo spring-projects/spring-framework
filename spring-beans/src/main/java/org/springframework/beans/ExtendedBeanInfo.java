@@ -157,7 +157,7 @@ class ExtendedBeanInfo implements BeanInfo {
 	}
 
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {
-		int nParams = method.getParameterTypes().length;
+		int nParams = method.getParameterCount();
 		String propertyName = propertyNameFor(method);
 		Class<?> propertyType = method.getParameterTypes()[nParams - 1];
 		PropertyDescriptor existingPd = findExistingPropertyDescriptor(propertyName, propertyType);

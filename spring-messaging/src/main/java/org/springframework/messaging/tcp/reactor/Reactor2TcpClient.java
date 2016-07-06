@@ -289,7 +289,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 	private static Method initEventLoopGroupMethod() {
 		for (Method method : NettyClientSocketOptions.class.getMethods()) {
-			if (method.getName().equals("eventLoopGroup") && method.getParameterTypes().length == 1) {
+			if (method.getName().equals("eventLoopGroup") && method.getParameterCount() == 1) {
 				return method;
 			}
 		}

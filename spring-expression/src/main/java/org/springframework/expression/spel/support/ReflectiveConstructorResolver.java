@@ -61,8 +61,8 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Arrays.sort(ctors, new Comparator<Constructor<?>>() {
 				@Override
 				public int compare(Constructor<?> c1, Constructor<?> c2) {
-					int c1pl = c1.getParameterTypes().length;
-					int c2pl = c2.getParameterTypes().length;
+					int c1pl = c1.getParameterCount();
+					int c2pl = c2.getParameterCount();
 					return (c1pl < c2pl ? -1 : (c1pl > c2pl ? 1 : 0));
 				}
 			});

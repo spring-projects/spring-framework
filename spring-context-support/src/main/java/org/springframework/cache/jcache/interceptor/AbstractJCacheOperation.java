@@ -139,7 +139,7 @@ abstract class AbstractJCacheOperation<A extends Annotation> implements JCacheOp
 
 	private static List<CacheParameterDetail> initializeAllParameterDetails(Method method) {
 		List<CacheParameterDetail> result = new ArrayList<>();
-		for (int i = 0; i < method.getParameterTypes().length; i++) {
+		for (int i = 0; i < method.getParameterCount(); i++) {
 			CacheParameterDetail detail = new CacheParameterDetail(method, i);
 			result.add(detail);
 		}
