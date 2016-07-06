@@ -45,6 +45,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class that simplifies Hibernate data access code. Automatically
@@ -82,6 +83,20 @@ import org.springframework.util.Assert;
  * @see org.springframework.orm.hibernate5.support.OpenSessionInViewInterceptor
  */
 public class HibernateTemplate implements HibernateOperations, InitializingBean {
+
+	private static final Method createQueryMethod;
+
+	static {
+		// Hibernate 5.2's createQuery method declares a new subtype as return type,
+		// so we need to use reflection for binary compatibility with 5.0/5.1 here.
+		try {
+			createQueryMethod = Session.class.getMethod("createQuery", String.class);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Incompatible Hibernate Session API", ex);
+		}
+	}
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -863,7 +878,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@Override
 			@SuppressWarnings({"rawtypes", "deprecation"})
 			public List<?> doInHibernate(Session session) throws HibernateException {
-				org.hibernate.Query queryObject = session.createQuery(queryString);
+				org.hibernate.Query queryObject = (org.hibernate.Query)
+						ReflectionUtils.invokeMethod(createQueryMethod, session, queryString);
 				prepareQuery(queryObject);
 				if (values != null) {
 					for (int i = 0; i < values.length; i++) {
@@ -893,7 +909,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@Override
 			@SuppressWarnings({"rawtypes", "deprecation"})
 			public List<?> doInHibernate(Session session) throws HibernateException {
-				org.hibernate.Query queryObject = session.createQuery(queryString);
+				org.hibernate.Query queryObject = (org.hibernate.Query)
+						ReflectionUtils.invokeMethod(createQueryMethod, session, queryString);
 				prepareQuery(queryObject);
 				for (int i = 0; i < values.length; i++) {
 					applyNamedParameterToQuery(queryObject, paramNames[i], values[i]);
@@ -911,7 +928,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@Override
 			@SuppressWarnings({"rawtypes", "deprecation"})
 			public List<?> doInHibernate(Session session) throws HibernateException {
-				org.hibernate.Query queryObject = session.createQuery(queryString);
+				org.hibernate.Query queryObject = (org.hibernate.Query)
+						ReflectionUtils.invokeMethod(createQueryMethod, session, queryString);
 				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
 				return queryObject.list();
@@ -1072,7 +1090,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@Override
 			@SuppressWarnings({"rawtypes", "deprecation"})
 			public Iterator<?> doInHibernate(Session session) throws HibernateException {
-				org.hibernate.Query queryObject = session.createQuery(queryString);
+				org.hibernate.Query queryObject = (org.hibernate.Query)
+						ReflectionUtils.invokeMethod(createQueryMethod, session, queryString);
 				prepareQuery(queryObject);
 				if (values != null) {
 					for (int i = 0; i < values.length; i++) {
@@ -1100,7 +1119,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@Override
 			@SuppressWarnings({"rawtypes", "deprecation"})
 			public Integer doInHibernate(Session session) throws HibernateException {
-				org.hibernate.Query queryObject = session.createQuery(queryString);
+				org.hibernate.Query queryObject = (org.hibernate.Query)
+						ReflectionUtils.invokeMethod(createQueryMethod, session, queryString);
 				prepareQuery(queryObject);
 				if (values != null) {
 					for (int i = 0; i < values.length; i++) {
