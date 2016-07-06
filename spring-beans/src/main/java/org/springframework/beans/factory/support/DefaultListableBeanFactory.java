@@ -992,7 +992,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
-		if (descriptor.getDependencyType() == Optional.class) {
+		if (Optional.class == descriptor.getDependencyType()) {
 			return createOptionalDependency(descriptor, beanName);
 		}
 		else if (ObjectFactory.class == descriptor.getDependencyType() ||

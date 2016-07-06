@@ -49,12 +49,11 @@ import org.springframework.util.StringUtils;
  */
 public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
-	private static final Log logger = LogFactory.getLog(CssLinkResourceTransformer.class);
-
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
+	private static final Log logger = LogFactory.getLog(CssLinkResourceTransformer.class);
 
-	private final List<CssLinkParser> linkParsers = new ArrayList<>();
+	private final List<CssLinkParser> linkParsers = new ArrayList<>(2);
 
 
 	public CssLinkResourceTransformer() {
@@ -81,7 +80,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
 		String content = new String(bytes, DEFAULT_CHARSET);
 
-		Set<CssLinkInfo> infos = new HashSet<>(5);
+		Set<CssLinkInfo> infos = new HashSet<>(8);
 		for (CssLinkParser parser : this.linkParsers) {
 			parser.parseLink(content, infos);
 		}

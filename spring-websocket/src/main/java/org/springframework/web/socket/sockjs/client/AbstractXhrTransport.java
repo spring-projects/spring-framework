@@ -143,6 +143,7 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 	protected abstract ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers);
 
+
 	// XhrTransport methods
 
 	@Override

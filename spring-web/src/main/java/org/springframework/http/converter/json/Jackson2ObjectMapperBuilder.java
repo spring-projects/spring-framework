@@ -580,8 +580,9 @@ public class Jackson2ObjectMapperBuilder {
 	public <T extends ObjectMapper> T build() {
 		ObjectMapper mapper;
 		if (this.createXmlMapper) {
-			mapper = (this.defaultUseWrapper == null ? new XmlObjectMapperInitializer().create()
-					: new XmlObjectMapperInitializer().create(this.defaultUseWrapper));
+			mapper = (this.defaultUseWrapper != null ?
+					new XmlObjectMapperInitializer().create(this.defaultUseWrapper) :
+					new XmlObjectMapperInitializer().create());
 		}
 		else {
 			mapper = new ObjectMapper();
