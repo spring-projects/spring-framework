@@ -214,7 +214,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void forMethodParameter() throws Exception {
 		Method method = Methods.class.getMethod("charSequenceParameter", List.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.getType(), equalTo(method.getGenericParameterTypes()[0]));
 	}
@@ -222,7 +222,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void forMethodParameterWithNesting() throws Exception {
 		Method method = Methods.class.getMethod("nested", Map.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		methodParameter.increaseNestingLevel();
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve(), equalTo((Class) Map.class));
@@ -233,7 +233,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void forMethodParameterWithNestingAndLevels() throws Exception {
 		Method method = Methods.class.getMethod("nested", Map.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		methodParameter.increaseNestingLevel();
 		methodParameter.setTypeIndexForCurrentLevel(0);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
@@ -782,7 +782,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveTypeVariableFromMethodParameterType() throws Exception {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve(), nullValue());
 		assertThat(type.getType().toString(), equalTo("T"));
@@ -791,7 +791,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveTypeVariableFromMethodParameterTypeWithImplementsClass() throws Exception {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		methodParameter.setContainingClass(TypedMethods.class);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve(), equalTo((Class) String.class));
@@ -801,7 +801,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveTypeVariableFromMethodParameterTypeWithImplementsType() throws Exception {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		ResolvableType implementationType = ResolvableType.forClassWithGenerics(Methods.class, Integer.class);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter, implementationType);
 		assertThat(type.resolve(), equalTo((Class) Integer.class));
@@ -893,7 +893,7 @@ public class ResolvableTypeTests {
 		Field basicField = Fields.class.getField("classType");
 		Field field = Fields.class.getField("charSequenceList");
 		Method method = Methods.class.getMethod("charSequenceParameter", List.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		assertThat(ResolvableType.forField(basicField).getSource(), equalTo((Object) basicField));
 		assertThat(ResolvableType.forField(field).getSource(), equalTo((Object) field));
 		assertThat(ResolvableType.forMethodParameter(methodParameter).getSource(), equalTo((Object) methodParameter));

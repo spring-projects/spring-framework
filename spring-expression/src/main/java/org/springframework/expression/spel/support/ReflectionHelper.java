@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -241,7 +242,7 @@ public class ReflectionHelper {
 	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)
 			throws SpelEvaluationException {
 
-		Integer varargsPosition = (method.isVarArgs() ? method.getParameterTypes().length - 1 : null);
+		Integer varargsPosition = (method.isVarArgs() ? method.getParameterCount() - 1 : null);
 		return convertArguments(converter, arguments, method, varargsPosition);
 	}
 
@@ -250,19 +251,19 @@ public class ReflectionHelper {
 	 * required parameter types. The arguments are converted 'in-place' in the input array.
 	 * @param converter the type converter to use for attempting conversions
 	 * @param arguments the actual arguments that need conversion
-	 * @param methodOrCtor the target Method or Constructor
+	 * @param executable the target Method or Constructor
 	 * @param varargsPosition the known position of the varargs argument, if any
 	 * ({@code null} if not varargs)
 	 * @return {@code true} if some kind of conversion occurred on an argument
 	 * @throws EvaluationException if a problem occurs during conversion
 	 */
-	static boolean convertArguments(TypeConverter converter, Object[] arguments, Object methodOrCtor,
+	static boolean convertArguments(TypeConverter converter, Object[] arguments, Executable executable,
 			Integer varargsPosition) throws EvaluationException {
 
 		boolean conversionOccurred = false;
 		if (varargsPosition == null) {
 			for (int i = 0; i < arguments.length; i++) {
-				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, i));
+				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forExecutable(executable, i));
 				Object argument = arguments[i];
 				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
 				conversionOccurred |= (argument != arguments[i]);
@@ -271,12 +272,12 @@ public class ReflectionHelper {
 		else {
 			// Convert everything up to the varargs position
 			for (int i = 0; i < varargsPosition; i++) {
-				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forMethodOrConstructor(methodOrCtor, i));
+				TypeDescriptor targetType = new TypeDescriptor(MethodParameter.forExecutable(executable, i));
 				Object argument = arguments[i];
 				arguments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);
 				conversionOccurred |= (argument != arguments[i]);
 			}
-			MethodParameter methodParam = MethodParameter.forMethodOrConstructor(methodOrCtor, varargsPosition);
+			MethodParameter methodParam = MethodParameter.forExecutable(executable, varargsPosition);
 			if (varargsPosition == arguments.length - 1) {
 				// If the target is varargs and there is just one more argument
 				// then convert it here

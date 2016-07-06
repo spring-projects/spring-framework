@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package org.springframework.core;
+package org.springframework.core.annotation;
 
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.core.MethodParameter;
+
 import static org.junit.Assert.*;
 
 /**
- * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
-public class MethodParameterTests {
+public class SynthesizingMethodParameterTests {
 
 	private Method method;
 
-	private MethodParameter stringParameter;
+	private SynthesizingMethodParameter stringParameter;
 
-	private MethodParameter longParameter;
+	private SynthesizingMethodParameter longParameter;
 
-	private MethodParameter intReturnType;
+	private SynthesizingMethodParameter intReturnType;
 
 
 	@Before
 	public void setUp() throws NoSuchMethodException {
 		method = getClass().getMethod("method", String.class, Long.TYPE);
-		stringParameter = new MethodParameter(method, 0);
-		longParameter = new MethodParameter(method, 1);
-		intReturnType = new MethodParameter(method, -1);
+		stringParameter = new SynthesizingMethodParameter(method, 0);
+		longParameter = new SynthesizingMethodParameter(method, 1);
+		intReturnType = new SynthesizingMethodParameter(method, -1);
 	}
 
 
@@ -61,9 +62,15 @@ public class MethodParameterTests {
 		assertFalse(intReturnType.equals(longParameter));
 
 		Method method = getClass().getMethod("method", String.class, Long.TYPE);
-		MethodParameter methodParameter = new MethodParameter(method, 0);
+		MethodParameter methodParameter = new SynthesizingMethodParameter(method, 0);
 		assertEquals(stringParameter, methodParameter);
 		assertEquals(methodParameter, stringParameter);
+		assertNotEquals(longParameter, methodParameter);
+		assertNotEquals(methodParameter, longParameter);
+
+		methodParameter = new MethodParameter(method, 0);
+		assertNotEquals(stringParameter, methodParameter);
+		assertNotEquals(methodParameter, stringParameter);
 		assertNotEquals(longParameter, methodParameter);
 		assertNotEquals(methodParameter, longParameter);
 	}
@@ -75,27 +82,23 @@ public class MethodParameterTests {
 		assertEquals(intReturnType.hashCode(), intReturnType.hashCode());
 
 		Method method = getClass().getMethod("method", String.class, Long.TYPE);
-		MethodParameter methodParameter = new MethodParameter(method, 0);
+		SynthesizingMethodParameter methodParameter = new SynthesizingMethodParameter(method, 0);
 		assertEquals(stringParameter.hashCode(), methodParameter.hashCode());
 		assertNotEquals(longParameter.hashCode(), methodParameter.hashCode());
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void testFactoryMethods() {
-		assertEquals(stringParameter, MethodParameter.forMethodOrConstructor(method, 0));
-		assertEquals(longParameter, MethodParameter.forMethodOrConstructor(method, 1));
+		assertEquals(stringParameter, SynthesizingMethodParameter.forExecutable(method, 0));
+		assertEquals(longParameter, SynthesizingMethodParameter.forExecutable(method, 1));
 
-		assertEquals(stringParameter, MethodParameter.forExecutable(method, 0));
-		assertEquals(longParameter, MethodParameter.forExecutable(method, 1));
-
-		assertEquals(stringParameter, MethodParameter.forParameter(method.getParameters()[0]));
-		assertEquals(longParameter, MethodParameter.forParameter(method.getParameters()[1]));
+		assertEquals(stringParameter, SynthesizingMethodParameter.forParameter(method.getParameters()[0]));
+		assertEquals(longParameter, SynthesizingMethodParameter.forParameter(method.getParameters()[1]));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testIndexValidation() {
-		new MethodParameter(method, 2);
+		new SynthesizingMethodParameter(method, 2);
 	}
 
 

@@ -158,7 +158,7 @@ public class GenericTypeResolverTests {
 	@Test
 	public void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
 		// SPR-11044
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(
+		MethodParameter methodParameter = MethodParameter.forExecutable(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
 		Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
 		assertThat(resolved, equalTo((Class<?>) Object[].class));

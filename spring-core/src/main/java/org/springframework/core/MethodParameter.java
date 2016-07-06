@@ -19,8 +19,10 @@ package org.springframework.core;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -53,6 +55,8 @@ public class MethodParameter {
 	private final Constructor<?> constructor;
 
 	private final int parameterIndex;
+
+	private volatile Parameter parameter;
 
 	private int nestingLevel = 1;
 
@@ -98,7 +102,7 @@ public class MethodParameter {
 	public MethodParameter(Method method, int parameterIndex, int nestingLevel) {
 		Assert.notNull(method, "Method must not be null");
 		this.method = method;
-		this.parameterIndex = parameterIndex;
+		this.parameterIndex = validateIndex(method, parameterIndex);
 		this.nestingLevel = nestingLevel;
 		this.constructor = null;
 	}
@@ -123,7 +127,7 @@ public class MethodParameter {
 	public MethodParameter(Constructor<?> constructor, int parameterIndex, int nestingLevel) {
 		Assert.notNull(constructor, "Constructor must not be null");
 		this.constructor = constructor;
-		this.parameterIndex = parameterIndex;
+		this.parameterIndex = validateIndex(constructor, parameterIndex);
 		this.nestingLevel = nestingLevel;
 		this.method = null;
 	}
@@ -138,6 +142,7 @@ public class MethodParameter {
 		this.method = original.method;
 		this.constructor = original.constructor;
 		this.parameterIndex = original.parameterIndex;
+		this.parameter = original.parameter;
 		this.nestingLevel = original.nestingLevel;
 		this.typeIndexesPerLevel = original.typeIndexesPerLevel;
 		this.containingClass = original.containingClass;
@@ -179,15 +184,7 @@ public class MethodParameter {
 	 * @return the Method or Constructor as Member
 	 */
 	public Member getMember() {
-		// NOTE: no ternary expression to retain JDK <8 compatibility even when using
-		// the JDK 8 compiler (potentially selecting java.lang.reflect.Executable
-		// as common type, with that new base class not available on older JDKs)
-		if (this.method != null) {
-			return this.method;
-		}
-		else {
-			return this.constructor;
-		}
+		return getExecutable();
 	}
 
 	/**
@@ -197,15 +194,27 @@ public class MethodParameter {
 	 * @return the Method or Constructor as AnnotatedElement
 	 */
 	public AnnotatedElement getAnnotatedElement() {
-		// NOTE: no ternary expression to retain JDK <8 compatibility even when using
-		// the JDK 8 compiler (potentially selecting java.lang.reflect.Executable
-		// as common type, with that new base class not available on older JDKs)
-		if (this.method != null) {
-			return this.method;
+		return getExecutable();
+	}
+
+	/**
+	 * Return the wrapped executable.
+	 * @return the Method or Constructor as Executable
+	 * @since 5.0
+	 */
+	public Executable getExecutable() {
+		return (this.method != null ? this.method : this.constructor);
+	}
+
+	/**
+	 * Return the {@link Parameter} descriptor for method/constructor parameter.
+	 * @since 5.0
+	 */
+	public Parameter getParameter() {
+		if (this.parameter == null) {
+			this.parameter = getExecutable().getParameters()[this.parameterIndex];
 		}
-		else {
-			return this.constructor;
-		}
+		return this.parameter;
 	}
 
 	/**
@@ -570,11 +579,11 @@ public class MethodParameter {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof MethodParameter)) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
 		MethodParameter otherParam = (MethodParameter) other;
-		return (this.parameterIndex == otherParam.parameterIndex && getMember().equals(otherParam.getMember()));
+		return (this.parameterIndex == otherParam.parameterIndex && getExecutable().equals(otherParam.getExecutable()));
 	}
 
 	@Override
@@ -596,23 +605,73 @@ public class MethodParameter {
 
 	/**
 	 * Create a new MethodParameter for the given method or constructor.
-	 * <p>This is a convenience constructor for scenarios where a
+	 * <p>This is a convenience factory method for scenarios where a
 	 * Method or Constructor reference is treated in a generic fashion.
 	 * @param methodOrConstructor the Method or Constructor to specify a parameter for
 	 * @param parameterIndex the index of the parameter
 	 * @return the corresponding MethodParameter instance
+	 * @deprecated as of 5.0, in favor of {@link #forExecutable}
 	 */
+	@Deprecated
 	public static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {
-		if (methodOrConstructor instanceof Method) {
-			return new MethodParameter((Method) methodOrConstructor, parameterIndex);
-		}
-		else if (methodOrConstructor instanceof Constructor) {
-			return new MethodParameter((Constructor<?>) methodOrConstructor, parameterIndex);
-		}
-		else {
+		if (!(methodOrConstructor instanceof Executable)) {
 			throw new IllegalArgumentException(
 					"Given object [" + methodOrConstructor + "] is neither a Method nor a Constructor");
 		}
+		return forExecutable((Executable) methodOrConstructor, parameterIndex);
+	}
+
+	/**
+	 * Create a new MethodParameter for the given method or constructor.
+	 * <p>This is a convenience factory method for scenarios where a
+	 * Method or Constructor reference is treated in a generic fashion.
+	 * @param executable the Method or Constructor to specify a parameter for
+	 * @param parameterIndex the index of the parameter
+	 * @return the corresponding MethodParameter instance
+	 * @since 5.0
+	 */
+	public static MethodParameter forExecutable(Executable executable, int parameterIndex) {
+		if (executable instanceof Method) {
+			return new MethodParameter((Method) executable, parameterIndex);
+		}
+		else if (executable instanceof Constructor) {
+			return new MethodParameter((Constructor<?>) executable, parameterIndex);
+		}
+		else {
+			throw new IllegalArgumentException("Not a Method/Constructor: " + executable);
+		}
+	}
+
+	/**
+	 * Create a new MethodParameter for the given parameter descriptor.
+	 * <p>This is a convenience factory method for scenarios where a
+	 * Java 8 {@link Parameter} descriptor is already available.
+	 * @param parameter the parameter descriptor
+	 * @return the corresponding MethodParameter instance
+	 * @since 5.0
+	 */
+	public static MethodParameter forParameter(Parameter parameter) {
+		return forExecutable(parameter.getDeclaringExecutable(), findParameterIndex(parameter));
+	}
+
+	protected static int findParameterIndex(Parameter parameter) {
+		Executable executable = parameter.getDeclaringExecutable();
+		Parameter[] allParams = executable.getParameters();
+		for (int i = 0; i < allParams.length; i++) {
+			if (parameter == allParams[i]) {
+				return i;
+			}
+		}
+		throw new IllegalArgumentException("Given parameter [" + parameter +
+				"] does not match any parameter in the declaring executable");
+	}
+
+	private static int validateIndex(Executable executable, int parameterIndex) {
+		int count = executable.getParameterCount();
+		if (parameterIndex >= count) {
+			throw new IllegalArgumentException("Parameter index needs to be between 0 and " + (count - 1));
+		}
+		return parameterIndex;
 	}
 
 }
