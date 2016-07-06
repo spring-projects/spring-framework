@@ -266,7 +266,7 @@ class TypeConverterDelegate {
 			}
 			else {
 				// convertedValue == null
-				if (javaUtilOptionalEmpty != null && requiredType.equals(javaUtilOptionalEmpty.getClass())) {
+				if (javaUtilOptionalEmpty != null && requiredType == javaUtilOptionalEmpty.getClass()) {
 					convertedValue = javaUtilOptionalEmpty;
 				}
 			}

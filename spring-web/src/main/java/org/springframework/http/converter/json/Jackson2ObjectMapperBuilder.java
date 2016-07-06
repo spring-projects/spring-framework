@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -279,8 +279,7 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Configure custom serializers. Each serializer is registered for the type
-	 * returned by {@link JsonSerializer#handledType()}, which must not be
-	 * {@code null}.
+	 * returned by {@link JsonSerializer#handledType()}, which must not be {@code null}.
 	 * @see #serializersByType(Map)
 	 */
 	public Jackson2ObjectMapperBuilder serializers(JsonSerializer<?>... serializers) {

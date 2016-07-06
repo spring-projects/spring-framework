@@ -30,11 +30,11 @@ import org.springframework.lang.UsesJava8;
  * Codec present, {@link #encode}/{@link #decode} calls will throw an IllegalStateException.
  * However, as of Spring 4.2, {@link #encodeToString} and {@link #decodeFromString} will
  * nevertheless work since they can delegate to the JAXB DatatypeConverter as a fallback.
- * However, this does not apply when using the ...UrlSafe... methods for RFC 4648 "URL and
+ * However, this does not apply when using the "UrlSafe" methods for RFC 4648 "URL and
  * Filename Safe Alphabet"; a delegate is required.
- * <p>
- * <em>Note:</em> Apache Commons Codec does not add padding ({@code =}) when encoding with
- * the URL and Filename Safe Alphabet.
+ *
+ * <p><em>Note:</em> Apache Commons Codec does not add padding ({@code =}) when encoding
+ * with the URL and Filename Safe Alphabet.
  *
  * @author Juergen Hoeller
  * @author Gary Russell

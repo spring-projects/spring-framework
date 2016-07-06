@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import static org.junit.Assert.*;
 public class UriTemplateServletAnnotationControllerTests {
 
 	private DispatcherServlet servlet;
+
 
 	@Test
 	public void simple() throws Exception {
@@ -318,8 +319,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("test-42", response.getContentAsString());
 	}
 
-	// SPR-6640
-	@Test
+	@Test  // SPR-6640
 	public void menuTree() throws Exception {
 		initServlet(MenuTreeController.class);
 
@@ -329,8 +329,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("M5", response.getContentAsString());
 	}
 
-	// SPR-6876
-	@Test
+	@Test  // SPR-6876
 	public void variableNames() throws Exception {
 		initServlet(VariableNamesController.class);
 
@@ -345,8 +344,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("bar-bar", response.getContentAsString());
 	}
 
-	// SPR-8543
-	@Test
+	@Test  // SPR-8543
 	public void variableNamesWithUrlExtension() throws Exception {
 		initServlet(VariableNamesController.class);
 
@@ -356,8 +354,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("foo-foo", response.getContentAsString());
 	}
 
-	// SPR-9333
-	@Test
+	@Test  // SPR-9333
 	@SuppressWarnings("serial")
 	public void suppressDefaultSuffixPattern() throws Exception {
 		servlet = new DispatcherServlet() {
@@ -381,8 +378,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("foo-jsmith@mail.com", response.getContentAsString());
 	}
 
-	// SPR-6906
-	@Test
+	@Test  // SPR-6906
 	@SuppressWarnings("serial")
 	public void controllerClassName() throws Exception {
 		servlet = new DispatcherServlet() {
@@ -416,8 +412,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		assertEquals("plain-bar", response.getContentAsString());
 	}
 
-	// SPR-6978
-	@Test
+	@Test  // SPR-6978
 	public void doIt() throws Exception {
 		initServlet(Spr6978Controller.class);
 

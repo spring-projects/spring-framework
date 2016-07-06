@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,9 @@ import static org.junit.Assert.*;
 @SuppressWarnings("deprecation")
 public class OxmNamespaceHandlerTests {
 
-	private final ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
-			"oxmNamespaceHandlerTest.xml", getClass());
+	private final ApplicationContext applicationContext =
+			new ClassPathXmlApplicationContext("oxmNamespaceHandlerTest.xml", getClass());
+
 
 	@Test
 	public void xmlBeansMarshaller() throws Exception {
@@ -85,4 +86,5 @@ public class OxmNamespaceHandlerTests {
 		CastorMarshaller castorMarshaller = applicationContext.getBean("castorMappingLocationMarshaller", CastorMarshaller.class);
 		assertNotNull(castorMarshaller);
 	}
+
 }

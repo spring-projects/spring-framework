@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,8 +67,8 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 			org.springframework.messaging.simp.user.UserSessionRegistry userSessionRegistry,
 			TaskScheduler defaultSockJsTaskScheduler) {
 
-		Assert.notNull(webSocketHandler, "'webSocketHandler' is required ");
-		Assert.notNull(transportRegistration, "'transportRegistration' is required");
+		Assert.notNull(webSocketHandler, "WebSocketHandler is required ");
+		Assert.notNull(transportRegistration, "WebSocketTransportRegistration is required");
 
 		this.webSocketHandler = webSocketHandler;
 		this.subProtocolWebSocketHandler = unwrapSubProtocolWebSocketHandler(webSocketHandler);
@@ -87,19 +87,17 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 			this.stompHandler.setMessageSizeLimit(transportRegistration.getMessageSizeLimit());
 		}
 
-
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 
 	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler handler) {
 		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(handler);
-		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual, "No SubProtocolWebSocketHandler in " + handler);
+		if (!(actual instanceof SubProtocolWebSocketHandler)) {
+			throw new IllegalArgumentException("No SubProtocolWebSocketHandler in " + handler);
+		};
 		return (SubProtocolWebSocketHandler) actual;
 	}
 
-	protected void setApplicationContext(ApplicationContext applicationContext) {
-		this.stompHandler.setApplicationEventPublisher(applicationContext);
-	}
 
 	@Override
 	public StompWebSocketEndpointRegistration addEndpoint(String... paths) {
@@ -143,6 +141,11 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		this.stompHandler.setErrorHandler(errorHandler);
 		return this;
 	}
+
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.stompHandler.setApplicationEventPublisher(applicationContext);
+	}
+
 
 	/**
 	 * Return a handler mapping with the mapped ViewControllers; or {@code null}

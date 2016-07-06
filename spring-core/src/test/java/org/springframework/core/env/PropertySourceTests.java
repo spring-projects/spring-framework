@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,15 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link AbstractPropertySource} implementations.
+ * Unit tests for {@link PropertySource} implementations.
  *
  * @author Chris Beams
  * @since 3.1
  */
 public class PropertySourceTests {
-	@Test @SuppressWarnings("serial")
+
+	@Test
+	@SuppressWarnings("serial")
 	public void equals() {
 		Map<String, Object> map1 = new HashMap<String, Object>() {{ put("a", "b"); }};
 		Map<String, Object> map2 = new HashMap<String, Object>() {{ put("c", "d"); }};
@@ -59,14 +61,15 @@ public class PropertySourceTests {
 		assertThat(new MapPropertySource("x", map1).equals(new PropertiesPropertySource("y", props2)), is(false));
 	}
 
-	@Test @SuppressWarnings("serial")
+	@Test
+	@SuppressWarnings("serial")
 	public void collectionsOperations() {
 		Map<String, Object> map1 = new HashMap<String, Object>() {{ put("a", "b"); }};
 		Map<String, Object> map2 = new HashMap<String, Object>() {{ put("c", "d"); }};
 
 		PropertySource<?> ps1 = new MapPropertySource("ps1", map1);
 		ps1.getSource();
-		List<PropertySource<?>> propertySources = new ArrayList<PropertySource<?>>();
+		List<PropertySource<?>> propertySources = new ArrayList<>();
 		assertThat(propertySources.add(ps1), equalTo(true));
 		assertThat(propertySources.contains(ps1), is(true));
 		assertThat(propertySources.contains(PropertySource.named("ps1")), is(true));
@@ -116,4 +119,5 @@ public class PropertySourceTests {
 			logger.setLevel(original);
 		}
 	}
+
 }

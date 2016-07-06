@@ -879,10 +879,10 @@ project("spring-webmvc") {
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testCompile("org.jruby:jruby:${jrubyVersion}")
-		testCompile("org.python:jython-standalone:2.5.3")
 		testCompile("org.mozilla:rhino:1.7.7.1")
-		testCompile("org.webjars:underscorejs:1.8.3")
+		testRuntime("org.jruby:jruby:${jrubyVersion}")
+		testRuntime("org.python:jython-standalone:2.5.3")
+		testRuntime("org.webjars:underscorejs:1.8.3")
 	}
 }
 

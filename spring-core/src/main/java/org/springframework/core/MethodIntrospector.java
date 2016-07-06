@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,10 +85,9 @@ public abstract class MethodIntrospector {
 
 	/**
 	 * Select methods on the given target type based on a filter.
-	 * <p>Callers define methods of interest through the
-	 * {@link ReflectionUtils.MethodFilter} parameter.
+	 * <p>Callers define methods of interest through the {@code MethodFilter} parameter.
 	 * @param targetType the target type to search methods on
-	 * @param methodFilter a {@link ReflectionUtils.MethodFilter} to help
+	 * @param methodFilter a {@code MethodFilter} to help
 	 * recognize handler methods of interest
 	 * @return the selected methods, or an empty set in case of no match
 	 */
