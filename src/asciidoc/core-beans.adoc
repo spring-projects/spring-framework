@@ -5253,7 +5253,7 @@ comma/semicolon/space-separated list that includes the parent package of each cl
 [NOTE]
 ====
 for concision, the above may have used the `value` attribute of the
-annotation, i.e. `ComponentScan("org.example")`
+annotation, i.e. `@ComponentScan("org.example")`
 ====
 
 The following is an alternative using XML
