@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package org.springframework.core.env;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 
 /**
- * Configuration interface to be implemented by most if not all {@link PropertyResolver
- * PropertyResolver} types. Provides facilities for accessing and customizing the
- * {@link org.springframework.core.convert.ConversionService ConversionService} used when
- * converting property values from one type to another.
+ * Configuration interface to be implemented by most if not all {@link PropertyResolver}
+ * types. Provides facilities for accessing and customizing the
+ * {@link org.springframework.core.convert.ConversionService ConversionService}
+ * used when converting property values from one type to another.
  *
  * @author Chris Beams
  * @since 3.1
@@ -30,7 +30,7 @@ import org.springframework.core.convert.support.ConfigurableConversionService;
 public interface ConfigurablePropertyResolver extends PropertyResolver {
 
 	/**
-	 * @return the {@link ConfigurableConversionService} used when performing type
+	 * Return the {@link ConfigurableConversionService} used when performing type
 	 * conversions on properties.
 	 * <p>The configurable nature of the returned conversion service allows for
 	 * the convenient addition and removal of individual {@code Converter} instances:
@@ -46,10 +46,10 @@ public interface ConfigurablePropertyResolver extends PropertyResolver {
 	/**
 	 * Set the {@link ConfigurableConversionService} to be used when performing type
 	 * conversions on properties.
-	 * <p><strong>Note:</strong> as an alternative to fully replacing the {@code
-	 * ConversionService}, consider adding or removing individual {@code Converter}
-	 * instances by drilling into {@link #getConversionService()} and calling methods
-	 * such as {@code #addConverter}.
+	 * <p><strong>Note:</strong> as an alternative to fully replacing the
+	 * {@code ConversionService}, consider adding or removing individual
+	 * {@code Converter} instances by drilling into {@link #getConversionService()}
+	 * and calling methods such as {@code #addConverter}.
 	 * @see PropertyResolver#getProperty(String, Class)
 	 * @see #getConversionService()
 	 * @see org.springframework.core.convert.converter.ConverterRegistry#addConverter
