@@ -58,8 +58,8 @@ configure(allprojects) { project ->
 	ext.jpaVersion           = "2.1.1"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.junitJupiterVersion  = '5.0.0-SNAPSHOT'
-	ext.junitPlatformVersion = '1.0.0-SNAPSHOT'
+	ext.junitJupiterVersion  = '5.0.0-M1'
+	ext.junitPlatformVersion = '1.0.0-M1'
 	ext.log4jVersion         = '2.6.1'
 	ext.nettyVersion         = "4.1.1.Final"
 	ext.okhttpVersion        = "2.7.5"
@@ -129,8 +129,6 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
-		// For JUnit Platform and Jupiter snapshots:
-		maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 	}
 
 	dependencies {

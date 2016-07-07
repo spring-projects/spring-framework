@@ -19,6 +19,7 @@ package org.springframework.test.context.junit;
 import org.junit.platform.runner.IncludeEngines;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.platform.runner.SelectPackages;
+import org.junit.platform.runner.UseTechnicalNames;
 import org.junit.runner.RunWith;
 
 /**
@@ -36,5 +37,6 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitPlatform.class)
 @IncludeEngines("junit-jupiter")
 @SelectPackages("org.springframework.test.context.junit.jupiter")
+@UseTechnicalNames
 public class SpringJUnitJupiterTestSuite {
 }
