@@ -91,16 +91,16 @@ public class StringDecoder extends AbstractDecoder<String> {
 		if (this.splitOnNewline) {
 			inputFlux = Flux.from(inputStream).flatMap(StringDecoder::splitOnNewline);
 		}
-		return decodeInternal(inputFlux, mimeType);
+		return inputFlux.map(buffer ->  decodeDataBuffer(buffer, mimeType));
 	}
 
 	@Override
 	public Mono<String> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
-		return decodeInternal(Flux.from(inputStream), mimeType).
-				collect(StringBuilder::new, StringBuilder::append).
-				map(StringBuilder::toString);
+		return Flux.from(inputStream)
+				.reduce(DataBuffer::write)
+				.map(buffer -> decodeDataBuffer(buffer, mimeType));
 	}
 
 	private static Flux<DataBuffer> splitOnNewline(DataBuffer dataBuffer) {
@@ -120,13 +120,11 @@ public class StringDecoder extends AbstractDecoder<String> {
 		return Flux.fromIterable(results);
 	}
 
-	private Flux<String> decodeInternal(Flux<DataBuffer> inputFlux, MimeType mimeType) {
+	private String decodeDataBuffer(DataBuffer dataBuffer, MimeType mimeType) {
 		Charset charset = getCharset(mimeType);
-		return inputFlux.map(dataBuffer -> {
-			CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
-			DataBufferUtils.release(dataBuffer);
-			return charBuffer.toString();
-		});
+		CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
+		DataBufferUtils.release(dataBuffer);
+		return charBuffer.toString();
 	}
 
 	private Charset getCharset(MimeType mimeType) {

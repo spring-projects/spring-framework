@@ -73,7 +73,18 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	}
 
 	@Test
-	public void decodeEmpty() throws InterruptedException {
+	public void decodeEmptyFlux() throws InterruptedException {
+		Flux<DataBuffer> source = Flux.empty();
+		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class), null);
+
+		TestSubscriber.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertNoValues();
+	}
+
+	@Test
+	public void decodeEmptyString() throws InterruptedException {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(""));
 		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class), null);
 
@@ -90,6 +101,17 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 				.assertNoError()
 				.assertComplete()
 				.assertValues("foobarbaz");
+	}
+
+	@Test
+	public void decodeToMonoWithEmptyFlux() throws InterruptedException {
+		Flux<DataBuffer> source = Flux.empty();
+		Mono<String> output = this.decoder.decodeToMono(source, ResolvableType.forClass(String.class), null);
+
+		TestSubscriber.subscribe(output)
+				.assertNoError()
+				.assertComplete()
+				.assertNoValues();
 	}
 
 }
