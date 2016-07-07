@@ -159,13 +159,28 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		public void registerListener() throws IOException {
-			this.synchronizer.getRequest().getInputStream()
-					.setReadListener(this.readListener);
+			inputStream().setReadListener(this.readListener);
+		}
+
+		private ServletInputStream inputStream() throws IOException {
+			return this.synchronizer.getRequest().getInputStream();
+		}
+
+		@Override
+		protected void checkOnDataAvailable() {
+			try {
+				if (!inputStream().isFinished() && inputStream().isReady()) {
+					onDataAvailable();
+				}
+			}
+			catch (IOException ex) {
+				onError(ex);
+			}
 		}
 
 		@Override
 		protected DataBuffer read() throws IOException {
-			ServletInputStream input = this.synchronizer.getRequest().getInputStream();
+			ServletInputStream input = inputStream();
 			if (input.isReady()) {
 				int read = input.read(this.buffer);
 				if (logger.isTraceEnabled()) {

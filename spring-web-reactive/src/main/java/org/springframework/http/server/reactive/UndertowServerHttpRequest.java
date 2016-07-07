@@ -130,6 +130,11 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 		}
 
 		@Override
+		protected void checkOnDataAvailable() {
+			onDataAvailable();
+		}
+
+		@Override
 		protected DataBuffer read() throws IOException {
 			ByteBuffer byteBuffer = this.pooledByteBuffer.getBuffer();
 			int read = this.requestChannel.read(byteBuffer);
