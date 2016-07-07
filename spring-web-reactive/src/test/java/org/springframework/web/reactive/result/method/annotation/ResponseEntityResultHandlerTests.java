@@ -120,13 +120,13 @@ public class ResponseEntityResultHandlerTests {
 		ResolvableType type = responseEntity(String.class);
 		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
-		type = classWithGenerics(Mono.class, responseEntity(String.class));
+		type = forClassWithGenerics(Mono.class, responseEntity(String.class));
 		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
-		type = classWithGenerics(Single.class, responseEntity(String.class));
+		type = forClassWithGenerics(Single.class, responseEntity(String.class));
 		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
-		type = classWithGenerics(CompletableFuture.class, responseEntity(String.class));
+		type = forClassWithGenerics(CompletableFuture.class, responseEntity(String.class));
 		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
 		type = ResolvableType.forClass(String.class);
@@ -195,11 +195,7 @@ public class ResponseEntityResultHandlerTests {
 
 
 	private ResolvableType responseEntity(Class<?> bodyType) {
-		return classWithGenerics(ResponseEntity.class, ResolvableType.forClass(bodyType));
-	}
-
-	private ResolvableType classWithGenerics(Class<?> sourceType, ResolvableType genericType) {
-		return ResolvableType.forClassWithGenerics(sourceType, genericType);
+		return forClassWithGenerics(ResponseEntity.class, ResolvableType.forClass(bodyType));
 	}
 
 	private HandlerResult handlerResult(Object returnValue, ResolvableType type) {

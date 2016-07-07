@@ -59,13 +59,13 @@ import static org.junit.Assert.assertEquals;
 
 
 /**
- * Unit tests for {@link ResponseBodyResultHandler}.
- *
+ * Unit tests for {@link ResponseBodyResultHandler}.When adding a test also
  * consider whether the logic under test is in a parent class, then see:
  * <ul>
  * 	<li>{@code MessageConverterResultHandlerTests},
  *  <li>{@code ContentNegotiatingResultHandlerSupportTests}
  * </ul>
+ *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */

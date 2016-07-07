@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
@@ -23,28 +22,24 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.ServerWebInputException;
 
 /**
- * Resolves method arguments annotated with {@code @RequestBody} by reading the
- * body of the request through a compatible {@code HttpMessageConverter}.
+ * Resolves method arguments of type {@link HttpEntity} or {@link RequestEntity}
+ * by reading the body of the request through a compatible
+ * {@code HttpMessageConverter}.
  *
- * <p>An {@code @RequestBody} method argument is also validated if it is
- * annotated with {@code @javax.validation.Valid} or
- * {@link org.springframework.validation.annotation.Validated}. Validation
- * failure results in an {@link ServerWebInputException}.
- *
- * @author Sebastien Deleuze
- * @author Stephane Maldini
  * @author Rossen Stoyanchev
  */
-public class RequestBodyArgumentResolver extends AbstractMessageConverterArgumentResolver
+public class HttpEntityArgumentResolver extends AbstractMessageConverterArgumentResolver
 		implements HandlerMethodArgumentResolver {
 
 
@@ -53,7 +48,7 @@ public class RequestBodyArgumentResolver extends AbstractMessageConverterArgumen
 	 * @param converters converters for reading the request body with
 	 * @param service for converting to other reactive types from Flux and Mono
 	 */
-	public RequestBodyArgumentResolver(List<HttpMessageConverter<?>> converters,
+	public HttpEntityArgumentResolver(List<HttpMessageConverter<?>> converters,
 			ConversionService service) {
 
 		this(converters, service, null);
@@ -65,7 +60,7 @@ public class RequestBodyArgumentResolver extends AbstractMessageConverterArgumen
 	 * @param service for converting to other reactive types from Flux and Mono
 	 * @param validator validator to validate decoded objects with
 	 */
-	public RequestBodyArgumentResolver(List<HttpMessageConverter<?>> converters,
+	public HttpEntityArgumentResolver(List<HttpMessageConverter<?>> converters,
 			ConversionService service, Validator validator) {
 
 		super(converters, service, validator);
@@ -74,12 +69,39 @@ public class RequestBodyArgumentResolver extends AbstractMessageConverterArgumen
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(RequestBody.class);
+		Class<?> clazz = parameter.getParameterType();
+		return (HttpEntity.class.equals(clazz) || RequestEntity.class.equals(clazz));
 	}
 
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter param, ModelMap model, ServerWebExchange exchange) {
-		return readBody(param, exchange);
+
+		ResolvableType entityType;
+		MethodParameter bodyParameter;
+
+		if (getConversionService().canConvert(Mono.class, param.getParameterType())) {
+			entityType = ResolvableType.forMethodParameter(param).getGeneric(0);
+			bodyParameter = new MethodParameter(param);
+			bodyParameter.increaseNestingLevel();
+			bodyParameter.increaseNestingLevel();
+		}
+		else {
+			entityType = ResolvableType.forMethodParameter(param);
+			bodyParameter = new MethodParameter(param);
+			bodyParameter.increaseNestingLevel();
+		}
+
+		return readBody(bodyParameter, exchange)
+				.map(body -> {
+					ServerHttpRequest request = exchange.getRequest();
+					HttpHeaders headers = request.getHeaders();
+					if (RequestEntity.class == entityType.getRawClass()) {
+						return new RequestEntity<>(body, headers, request.getMethod(), request.getURI());
+					}
+					else {
+						return new HttpEntity<>(body, headers);
+					}
+				});
 	}
 
 }
