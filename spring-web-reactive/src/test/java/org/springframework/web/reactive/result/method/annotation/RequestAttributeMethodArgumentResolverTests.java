@@ -154,7 +154,8 @@ public class RequestAttributeMethodArgumentResolverTests {
 			@RequestAttribute Foo foo,
 			@RequestAttribute("specialFoo") Foo namedFoo,
 			@RequestAttribute(name="foo", required = false) Foo notRequiredFoo,
-			@RequestAttribute(name="foo") Optional<Foo> optionalFoo) {
+			@RequestAttribute(name="foo") Optional<Foo> optionalFoo,
+			String notSupported) {
 	}
 
 	private static class Foo {

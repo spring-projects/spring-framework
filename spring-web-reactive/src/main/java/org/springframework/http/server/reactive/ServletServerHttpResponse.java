@@ -86,7 +86,7 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		if (this.response.getContentType() == null && contentType != null) {
 			this.response.setContentType(contentType.toString());
 		}
-		Charset charset = (contentType != null ? contentType.getCharSet() : null);
+		Charset charset = (contentType != null ? contentType.getCharset() : null);
 		if (this.response.getCharacterEncoding() == null && charset != null) {
 			this.response.setCharacterEncoding(charset.name());
 		}

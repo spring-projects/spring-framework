@@ -94,7 +94,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 				headers.setContentType(contentType);
 			}
 		}
-		if (contentType != null && contentType.getCharSet() == null) {
+		if (contentType != null && contentType.getCharset() == null) {
 			String encoding = getServletRequest().getCharacterEncoding();
 			if (StringUtils.hasLength(encoding)) {
 				Charset charset = Charset.forName(encoding);

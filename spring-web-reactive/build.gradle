@@ -27,7 +27,7 @@ repositories {
 }
 
 ext {
-	springVersion = '4.3.0.RELEASE'
+	springVersion = '5.0.0.BUILD-SNAPSHOT'
 	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
 	rxJavaVersion = '1.1.6'
@@ -112,7 +112,7 @@ dependencies {
 	optional "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
 	optional("org.freemarker:freemarker:2.3.23")
 	optional("com.fasterxml:aalto-xml:1.0.0")
-	optional("javax.validation:validation-api:1.0.0.GA")
+	optional("javax.validation:validation-api:1.1.0.Final")
 
 	provided "javax.servlet:javax.servlet-api:3.1.0"
 

@@ -161,7 +161,8 @@ public class SessionAttributeMethodArgumentResolverTests {
 			@SessionAttribute Foo foo,
 			@SessionAttribute("specialFoo") Foo namedFoo,
 			@SessionAttribute(name="foo", required = false) Foo notRequiredFoo,
-			@SessionAttribute(name="foo") Optional<Foo> optionalFoo) {
+			@SessionAttribute(name="foo") Optional<Foo> optionalFoo,
+			String notSupported) {
 	}
 
 	private static class Foo {
