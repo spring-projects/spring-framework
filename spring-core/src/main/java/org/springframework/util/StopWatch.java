@@ -67,7 +67,6 @@ public class StopWatch {
 	/** Total running time */
 	private long totalTimeMillis;
 
-
 	/**
 	 * Construct a new stop watch. Does not start any task.
 	 */
@@ -85,7 +84,6 @@ public class StopWatch {
 	public StopWatch(String id) {
 		this.id = id;
 	}
-
 
 	/**
 	 * Return the id of this stop watch, as specified on construction.
@@ -105,7 +103,6 @@ public class StopWatch {
 	public void setKeepTaskList(boolean keepTaskList) {
 		this.keepTaskList = keepTaskList;
 	}
-
 
 	/**
 	 * Start an unnamed task. The results are undefined if {@link #stop()}
@@ -134,7 +131,7 @@ public class StopWatch {
 	/**
 	 * Stop the current task. The results are undefined if timing
 	 * methods are called without invoking at least one pair
-	 * {@code #start()} / {@code #stop()} methods.
+	 * {@link #start()} / {@link #stop()} methods.
 	 * @see #start()
 	 */
 	public void stop() throws IllegalStateException {
@@ -169,7 +166,6 @@ public class StopWatch {
 		return this.currentTaskName;
 	}
 
-
 	/**
 	 * Return the time taken by the last task.
 	 */
@@ -199,7 +195,6 @@ public class StopWatch {
 		}
 		return this.lastTaskInfo;
 	}
-
 
 	/**
 	 * Return the total time in milliseconds for all tasks.
@@ -231,7 +226,6 @@ public class StopWatch {
 		}
 		return this.taskList.toArray(new TaskInfo[this.taskList.size()]);
 	}
-
 
 	/**
 	 * Return a short description of the total running time.
@@ -288,7 +282,6 @@ public class StopWatch {
 		}
 		return sb.toString();
 	}
-
 
 	/**
 	 * Inner class to hold data about one task executed within the stop watch.
