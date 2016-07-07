@@ -49,6 +49,7 @@ import org.springframework.web.reactive.result.method.annotation.ResponseBodyRes
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -163,7 +164,8 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		TestSubscriber.subscribe(publisher)
-				.assertErrorWith(ex -> assertSame(EXCEPTION, ex));
+				.assertError(ServerWebInputException.class)
+				.assertErrorWith(ex -> assertSame(EXCEPTION, ex.getCause()));
 	}
 
 	@Test

@@ -21,7 +21,6 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.ui.ModelMap;
@@ -79,7 +78,8 @@ public class RequestBodyArgumentResolver extends AbstractMessageConverterArgumen
 
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter param, ModelMap model, ServerWebExchange exchange) {
-		return readBody(param, exchange);
+		boolean isRequired = param.getParameterAnnotation(RequestBody.class).required();
+		return readBody(param, isRequired, exchange);
 	}
 
 }

@@ -25,6 +25,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.converter.RxJava1ObservableConverter;
+import reactor.core.converter.RxJava1SingleConverter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
@@ -51,12 +53,14 @@ import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
@@ -104,6 +108,68 @@ public class HttpEntityArgumentResolverTests {
 
 		type = ResolvableType.forClass(String.class);
 		assertFalse(this.resolver.supportsParameter(this.testMethod.resolveParam(type)));
+	}
+
+	@Test
+	public void emptyBodyWithString() throws Exception {
+		ResolvableType type = httpEntity(String.class);
+		HttpEntity<Object> entity = resolveValueWithEmptyBody(type);
+
+		assertNull(entity.getBody());
+	}
+
+	@Test
+	public void emptyBodyWithMono() throws Exception {
+		ResolvableType type = httpEntity(forClassWithGenerics(Mono.class, String.class));
+		HttpEntity<Mono<String>> entity = resolveValueWithEmptyBody(type);
+
+		TestSubscriber.subscribe(entity.getBody())
+				.assertNoError()
+				.assertComplete()
+				.assertNoValues();
+	}
+
+	@Test
+	public void emptyBodyWithFlux() throws Exception {
+		ResolvableType type = httpEntity(forClassWithGenerics(Flux.class, String.class));
+		HttpEntity<Flux<String>> entity = resolveValueWithEmptyBody(type);
+
+		TestSubscriber.subscribe(entity.getBody())
+				.assertNoError()
+				.assertComplete()
+				.assertNoValues();
+	}
+
+	@Test
+	public void emptyBodyWithSingle() throws Exception {
+		ResolvableType type = httpEntity(forClassWithGenerics(Single.class, String.class));
+		HttpEntity<Single<String>> entity = resolveValueWithEmptyBody(type);
+
+		TestSubscriber.subscribe(RxJava1SingleConverter.from(entity.getBody()))
+				.assertNoValues()
+				.assertError(ServerWebInputException.class);
+	}
+
+	@Test
+	public void emptyBodyWithObservable() throws Exception {
+		ResolvableType type = httpEntity(forClassWithGenerics(Observable.class, String.class));
+		HttpEntity<Observable<String>> entity = resolveValueWithEmptyBody(type);
+
+		TestSubscriber.subscribe(RxJava1ObservableConverter.from(entity.getBody()))
+				.assertNoError()
+				.assertComplete()
+				.assertNoValues();
+	}
+
+	@Test
+	public void emptyBodyWithCompletableFuture() throws Exception {
+		ResolvableType type = httpEntity(forClassWithGenerics(CompletableFuture.class, String.class));
+		HttpEntity<CompletableFuture<String>> entity = resolveValueWithEmptyBody(type);
+
+		entity.getBody().whenComplete((body, ex) -> {
+			assertNull(body);
+			assertNull(ex);
+		});
 	}
 
 	@Test
@@ -211,6 +277,17 @@ public class HttpEntityArgumentResolverTests {
 		return (T) value;
 	}
 
+	@SuppressWarnings("unchecked")
+	private <T> HttpEntity<T> resolveValueWithEmptyBody(ResolvableType type) {
+		this.request.writeWith(Flux.empty());
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
+		HttpEntity<String> httpEntity = (HttpEntity<String>) result.block(Duration.ofSeconds(5));
+
+		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
+		return (HttpEntity<T>) httpEntity;
+	}
+
 	private DataBuffer dataBuffer(String body) {
 		byte[] bytes = body.getBytes(Charset.forName("UTF-8"));
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
@@ -224,10 +301,10 @@ public class HttpEntityArgumentResolverTests {
 			Mono<String> monoString,
 			HttpEntity<String> httpEntity,
 			HttpEntity<Mono<String>> monoBody,
-			HttpEntity<Single<String>> singleBody,
-			HttpEntity<CompletableFuture<String>> completableFutureBody,
 			HttpEntity<Flux<String>> fluxBody,
+			HttpEntity<Single<String>> singleBody,
 			HttpEntity<Observable<String>> observableBody,
+			HttpEntity<CompletableFuture<String>> completableFutureBody,
 			RequestEntity<String> requestEntity) {}
 
 }

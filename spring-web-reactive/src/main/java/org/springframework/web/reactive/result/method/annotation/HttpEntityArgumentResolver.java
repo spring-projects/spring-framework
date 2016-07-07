@@ -91,17 +91,22 @@ public class HttpEntityArgumentResolver extends AbstractMessageConverterArgument
 			bodyParameter.increaseNestingLevel();
 		}
 
-		return readBody(bodyParameter, exchange)
-				.map(body -> {
-					ServerHttpRequest request = exchange.getRequest();
-					HttpHeaders headers = request.getHeaders();
-					if (RequestEntity.class == entityType.getRawClass()) {
-						return new RequestEntity<>(body, headers, request.getMethod(), request.getURI());
-					}
-					else {
-						return new HttpEntity<>(body, headers);
-					}
-				});
+		return readBody(bodyParameter, false, exchange)
+				.map(body -> createHttpEntity(body, entityType, exchange))
+				.defaultIfEmpty(createHttpEntity(null, entityType, exchange));
+	}
+
+	private Object createHttpEntity(Object body, ResolvableType entityType,
+			ServerWebExchange exchange) {
+
+		ServerHttpRequest request = exchange.getRequest();
+		HttpHeaders headers = request.getHeaders();
+		if (RequestEntity.class == entityType.getRawClass()) {
+			return new RequestEntity<>(body, headers, request.getMethod(), request.getURI());
+		}
+		else {
+			return new HttpEntity<>(body, headers);
+		}
 	}
 
 }

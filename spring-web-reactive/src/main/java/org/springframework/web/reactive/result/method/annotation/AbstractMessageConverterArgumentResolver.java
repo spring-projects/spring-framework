@@ -105,7 +105,8 @@ public abstract class AbstractMessageConverterArgumentResolver {
 	}
 
 
-	protected Mono<Object> readBody(MethodParameter bodyParameter, ServerWebExchange exchange) {
+	protected Mono<Object> readBody(MethodParameter bodyParameter, boolean isBodyRequired,
+			ServerWebExchange exchange) {
 
 		TypeDescriptor typeDescriptor = new TypeDescriptor(bodyParameter);
 		boolean convertFromMono = getConversionService().canConvert(MONO_TYPE, typeDescriptor);
@@ -125,14 +126,22 @@ public abstract class AbstractMessageConverterArgumentResolver {
 		for (HttpMessageConverter<?> converter : getMessageConverters()) {
 			if (converter.canRead(elementType, mediaType)) {
 				if (convertFromFlux) {
-					Flux<?> flux = converter.read(elementType, request);
+					Flux<?> flux = converter.read(elementType, request)
+							.onErrorResumeWith(ex -> Flux.error(getReadError(ex, bodyParameter)));
+					if (checkRequired(bodyParameter, isBodyRequired)) {
+						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
+					}
 					if (this.validator != null) {
 						flux = flux.map(applyValidationIfApplicable(bodyParameter));
 					}
 					return Mono.just(getConversionService().convert(flux, FLUX_TYPE, typeDescriptor));
 				}
 				else {
-					Mono<?> mono = converter.readMono(elementType, request);
+					Mono<?> mono = converter.readMono(elementType, request)
+							.otherwise(ex -> Mono.error(getReadError(ex, bodyParameter)));
+					if (checkRequired(bodyParameter, isBodyRequired)) {
+						mono = mono.otherwiseIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));
+					}
 					if (this.validator != null) {
 						mono = mono.map(applyValidationIfApplicable(bodyParameter));
 					}
@@ -147,6 +156,22 @@ public abstract class AbstractMessageConverterArgumentResolver {
 		}
 
 		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
+	}
+
+	protected boolean checkRequired(MethodParameter bodyParameter, boolean isBodyRequired) {
+		if ("rx.Single".equals(bodyParameter.getNestedParameterType().getName())) {
+			return true;
+		}
+		return isBodyRequired;
+	}
+
+	protected ServerWebInputException getReadError(Throwable ex, MethodParameter parameter) {
+		return new ServerWebInputException("Failed to read HTTP message", parameter, ex);
+	}
+
+	protected ServerWebInputException getRequiredBodyError(MethodParameter parameter) {
+		return new ServerWebInputException("Required request body is missing: " +
+				parameter.getMethod().toGenericString());
 	}
 
 	protected <T> Function<T, T> applyValidationIfApplicable(MethodParameter methodParam) {

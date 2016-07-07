@@ -171,8 +171,8 @@ public class ResolvableMethod {
 			matches.add(param);
 		}
 
-		Assert.isTrue(!matches.isEmpty(), "No matching method argument: " + this);
-		Assert.isTrue(matches.size() == 1, "Multiple matching method arguments: " + matches);
+		Assert.isTrue(!matches.isEmpty(), "No matching arg on " + method.toString());
+		Assert.isTrue(matches.size() == 1, "Multiple matching args: " + matches + " on " + method.toString());
 
 		return matches.get(0);
 	}

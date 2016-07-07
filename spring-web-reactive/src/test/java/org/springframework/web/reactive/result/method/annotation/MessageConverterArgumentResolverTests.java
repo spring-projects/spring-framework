@@ -88,7 +88,7 @@ public class MessageConverterArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		this.request = new MockServerHttpRequest(HttpMethod.POST, new URI("/path"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
@@ -100,20 +100,23 @@ public class MessageConverterArgumentResolverTests {
 		this.request.writeWith(Flux.just(dataBuffer(body)));
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
-		Mono<Object> result = this.resolver.readBody(param, this.exchange);
+		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
 
 		TestSubscriber.subscribe(result)
 				.assertError(UnsupportedMediaTypeStatusException.class);
 	}
 
-	@Test // SPR-9942
-	public void noContent() throws Exception {
+	// More extensive "empty body" tests in RequestBody- and HttpEntityArgumentResolverTests
+
+	@Test @SuppressWarnings("unchecked") // SPR-9942
+	public void emptyBody() throws Exception {
 		this.request.writeWith(Flux.empty());
+		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
-		Mono<Object> result = this.resolver.readBody(param, this.exchange);
+		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(param, true, this.exchange).block();
 
-		TestSubscriber.subscribe(result).assertError(UnsupportedMediaTypeStatusException.class);
+		TestSubscriber.subscribe(result).assertError(ServerWebInputException.class);
 	}
 
 	@Test
@@ -262,7 +265,7 @@ public class MessageConverterArgumentResolverTests {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		this.request.writeWith(Flux.just(dataBuffer(body)));
 
-		Mono<Object> result = this.resolver.readBody(param, this.exchange);
+		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);
