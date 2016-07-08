@@ -512,7 +512,7 @@ public abstract class StringUtils {
 	}
 
 	private static String changeFirstCharacterCase(String str, boolean capitalize) {
-		if (str == null || str.length() == 0) {
+		if (!hasLength(str)) {
 			return str;
 		}
 		StringBuilder sb = new StringBuilder(str.length());
