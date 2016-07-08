@@ -37,7 +37,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -47,6 +46,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ZeroCopyIntegrationTests;
@@ -65,7 +65,12 @@ import org.springframework.web.reactive.config.WebReactiveConfiguration;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.*;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.RequestEntity.get;
 
 
 /**
@@ -75,6 +80,12 @@ import static org.junit.Assert.*;
  * @author Stephane Maldini
  */
 public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+
+	private static final ParameterizedTypeReference<List<Person>> PERSON_LIST =
+			new ParameterizedTypeReference<List<Person>>() {};
+
+	private static final MediaType JSON = MediaType.APPLICATION_JSON;
+
 
 	private AnnotationConfigApplicationContext wac;
 
@@ -87,286 +98,274 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		this.wac.register(FrameworkConfig.class, ApplicationConfig.class);
 		this.wac.refresh();
 
-		DispatcherHandler webHandler = new DispatcherHandler();
-		webHandler.setApplicationContext(this.wac);
+		DispatcherHandler handler = new DispatcherHandler();
+		handler.setApplicationContext(this.wac);
 
-		return WebHttpHandlerBuilder.webHandler(webHandler).build();
+		return WebHttpHandlerBuilder.webHandler(handler).build();
 	}
 
 	@Test
-	public void helloWithQueryParam() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/param?name=George");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-
-		assertEquals("Hello George!", response.getBody());
+	public void handleWithParam() throws Exception {
+		String expected = "Hello George!";
+		assertEquals(expected, performGet("/param?name=George", null, String.class).getBody());
 	}
 
 	@Test
 	public void rawPojoResponse() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/raw");
-		RequestEntity<Void> request =
-				RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
-		Person person = restTemplate.exchange(request, Person.class).getBody();
-
-		assertEquals(new Person("Robert"), person);
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/raw", JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void rawFluxResponse() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/raw-flux");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-
-		assertEquals("Hello!", response.getBody());
+		String expected = "Hello!";
+		assertEquals(expected, performGet("/raw-flux", null, String.class).getBody());
 	}
 
 	@Test
 	public void rawObservableResponse() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/raw-observable");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-
-		assertEquals("Hello!", response.getBody());
+		String expected = "Hello!";
+		assertEquals(expected, performGet("/raw-observable", null, String.class).getBody());
 	}
 
 	@Test
 	public void handleWithThrownException() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/thrown-exception");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-
-		assertEquals("Recovered from error: Boo", response.getBody());
+		String expected = "Recovered from error: Boo";
+		assertEquals(expected, performGet("/thrown-exception", null, String.class).getBody());
 	}
 
 	@Test
 	public void handleWithErrorSignal() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/error-signal");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-
-		assertEquals("Recovered from error: Boo", response.getBody());
+		String expected = "Recovered from error: Boo";
+		assertEquals(expected, performGet("/error-signal", null, String.class).getBody());
 	}
 
 	@Test
 	public void streamResult() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/stream-result");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<String[]> response = restTemplate.exchange(request, String[].class);
-
-		assertArrayEquals(new String[]{"0", "1", "2", "3", "4"}, response.getBody());
+		String[] expected = {"0", "1", "2", "3", "4"};
+		assertArrayEquals(expected, performGet("/stream-result", null, String[].class).getBody());
 	}
 
 	@Test
 	public void serializeAsPojo() throws Exception {
-		serializeAsPojo("http://localhost:" + port + "/person");
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/person", JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void serializeAsCompletableFuture() throws Exception {
-		serializeAsPojo("http://localhost:" + port + "/completable-future");
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/completable-future", JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void serializeAsMonoResponseEntity() throws Exception {
-		serializeAsPojo("http://localhost:" + port + "/monoResponseEntity");
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/monoResponseEntity", JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void serializeAsMono() throws Exception {
-		serializeAsPojo("http://localhost:" + port + "/mono");
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/mono", JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void serializeAsSingle() throws Exception {
-		serializeAsPojo("http://localhost:" + port + "/single");
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/single", JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void serializeAsList() throws Exception {
-		serializeAsCollection("http://localhost:" + port + "/list");
+		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
+		assertEquals(expected, performGet("/list", JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
 	public void serializeAsPublisher() throws Exception {
-		serializeAsCollection("http://localhost:" + port + "/publisher");
+		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
+		assertEquals(expected, performGet("/publisher", JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
 	public void serializeAsFlux() throws Exception {
-		serializeAsCollection("http://localhost:" + port + "/flux");
+		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
+		assertEquals(expected, performGet("/flux", JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
 	public void serializeAsObservable() throws Exception {
-		serializeAsCollection("http://localhost:" + port + "/observable");
+		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
+		assertEquals(expected, performGet("/observable", JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
 	public void serializeAsReactorStream() throws Exception {
-		serializeAsCollection("http://localhost:" + port + "/stream");
+		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
+		assertEquals(expected, performGet("/stream", JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
 	public void publisherCapitalize() throws Exception {
-		capitalizeCollection("http://localhost:" + port + "/publisher-capitalize");
+		List<?> req = asList(new Person("Robert"), new Person("Marie"));
+		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
+		assertEquals(res, performPost("/publisher-capitalize", JSON, req, JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
 	public void fluxCapitalize() throws Exception {
-		capitalizeCollection("http://localhost:" + port + "/flux-capitalize");
+		List<?> req = asList(new Person("Robert"), new Person("Marie"));
+		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
+		assertEquals(res, performPost("/flux-capitalize", JSON, req, JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
 	public void observableCapitalize() throws Exception {
-		capitalizeCollection("http://localhost:" + port + "/observable-capitalize");
+		List<?> req = asList(new Person("Robert"), new Person("Marie"));
+		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
+		assertEquals(res, performPost("/observable-capitalize", JSON, req, JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
 	public void personCapitalize() throws Exception {
-		capitalizePojo("http://localhost:" + port + "/person-capitalize");
+		assertEquals(new Person("ROBERT"),
+				performPost("/person-capitalize", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
 	}
 	
 	@Test
 	public void completableFutureCapitalize() throws Exception {
-		capitalizePojo("http://localhost:" + port + "/completable-future-capitalize");
+		assertEquals(new Person("ROBERT"),
+				performPost("/completable-future-capitalize", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void monoCapitalize() throws Exception {
-		capitalizePojo("http://localhost:" + port + "/mono-capitalize");
+		assertEquals(new Person("ROBERT"),
+				performPost("/mono-capitalize", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void singleCapitalize() throws Exception {
-		capitalizePojo("http://localhost:" + port + "/single-capitalize");
+		assertEquals(new Person("ROBERT"),
+				performPost("/single-capitalize", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
 	}
 
 	@Test
 	public void publisherCreate() throws Exception {
-		createJson("http://localhost:" + this.port + "/publisher-create");
+		ResponseEntity<Void> entity = performPost("/publisher-create", JSON,
+				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
 	public void publisherCreateXml() throws Exception {
-		createXml("http://localhost:" + this.port + "/publisher-create");
+		People people = new People(new Person("Robert"), new Person("Marie"));
+		ResponseEntity<Void> response = performPost("/publisher-create", APPLICATION_XML, people, null, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
 	public void fluxCreate() throws Exception {
-		createJson("http://localhost:" + this.port + "/flux-create");
+		ResponseEntity<Void> entity = performPost("/flux-create", JSON,
+				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
 	public void fluxCreateXml() throws Exception {
-		createXml("http://localhost:" + this.port + "/flux-create");
+		People people = new People(new Person("Robert"), new Person("Marie"));
+		ResponseEntity<Void> response = performPost("/flux-create", APPLICATION_XML, people, null, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
 	public void observableCreate() throws Exception {
-		createJson("http://localhost:" + this.port + "/observable-create");
+		ResponseEntity<Void> entity = performPost("/observable-create", JSON,
+				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
 	public void observableCreateXml() throws Exception {
-		createXml("http://localhost:" + this.port + "/observable-create");
+		People people = new People(new Person("Robert"), new Person("Marie"));
+		ResponseEntity<Void> response = performPost("/observable-create", APPLICATION_XML, people, null, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
 	public void html() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/html?name=Jason");
-		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.TEXT_HTML).build();
-		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-
-		assertEquals("<html><body>Hello: Jason!</body></html>", response.getBody());
+		String expected = "<html><body>Hello: Jason!</body></html>";
+		assertEquals(expected, performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody());
 	}
 
 	@Test
 	public void resource() throws Exception {
-		URI url = new URI("http://localhost:" + port + "/resource");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
-		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
+		ResponseEntity<byte[]> response = performGet("/resource", null, byte[].class);
 
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue(response.hasBody());
 		assertEquals(951, response.getHeaders().getContentLength());
 		assertEquals(951, response.getBody().length);
-		assertEquals(new MediaType("image", "x-png"),
-				response.getHeaders().getContentType());
-	}
-
-	private void serializeAsPojo(String requestUrl) throws Exception {
-		RequestEntity<Void> request = RequestEntity.get(new URI(requestUrl))
-				.accept(MediaType.APPLICATION_JSON)
-				.build();
-		ResponseEntity<Person> response = restTemplate.exchange(request, Person.class);
-
-		assertEquals(new Person("Robert"), response.getBody());
-	}
-
-	private void serializeAsCollection(String requestUrl) throws Exception {
-		RequestEntity<Void> request = RequestEntity.get(new URI(requestUrl))
-				.accept(MediaType.APPLICATION_JSON)
-				.build();
-		List<Person> results = restTemplate.exchange(request,
-				new ParameterizedTypeReference<List<Person>>(){}).getBody();
-
-		assertEquals(2, results.size());
-		assertEquals(new Person("Robert"), results.get(0));
-		assertEquals(new Person("Marie"), results.get(1));
+		assertEquals(new MediaType("image", "x-png"), response.getHeaders().getContentType());
 	}
 
 
-	private void capitalizePojo(String requestUrl) throws Exception {
-		RequestEntity<Person> request = RequestEntity.post(new URI(requestUrl))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.body(new Person("Robert"));
-		ResponseEntity<Person> response = restTemplate.exchange(request, Person.class);
+	private <T> ResponseEntity<T> performGet(String url, MediaType acceptHeader,
+			Class<T> type) throws Exception {
 
-		assertEquals(new Person("ROBERT"), response.getBody());
+		return this.restTemplate.exchange(prepareGet(url, acceptHeader), type);
 	}
 
-	private void capitalizeCollection(String requestUrl) throws Exception {
-		RequestEntity<List<Person>> request = RequestEntity.post(new URI(requestUrl))
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.body(Arrays.asList(new Person("Robert"), new Person("Marie")));
-		List<Person> results = restTemplate.exchange(request,
-				new ParameterizedTypeReference<List<Person>>(){}).getBody();
+	private <T> ResponseEntity<T> performGet(String url, MediaType acceptHeader,
+			ParameterizedTypeReference<T> type) throws Exception {
 
-		assertEquals(2, results.size());
-		assertEquals("ROBERT", results.get(0).getName());
-		assertEquals("MARIE", results.get(1).getName());
+		return this.restTemplate.exchange(prepareGet(url, acceptHeader), type);
 	}
 
-	private void createJson(String requestUrl) throws Exception {
-		URI url = new URI(requestUrl);
-		RequestEntity<List<Person>> request = RequestEntity.post(url)
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(Arrays.asList(new Person("Robert"), new Person("Marie")));
-		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+	private <T> ResponseEntity<T> performPost(String url, MediaType in, Object body,
+			MediaType out, Class<T> type) throws Exception {
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+		return  this.restTemplate.exchange(preparePost(url, in, body, out), type);
 	}
 
-	private void createXml(String requestUrl) throws Exception {
-		URI url = new URI(requestUrl);
-		People people = new People();
-		people.getPerson().add(new Person("Robert"));
-		people.getPerson().add(new Person("Marie"));
-		RequestEntity<People> request =
-				RequestEntity.post(url).contentType(MediaType.APPLICATION_XML)
-						.body(people);
-		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+	private <T> ResponseEntity<T> performPost(String url, MediaType in, Object body,
+			MediaType out, ParameterizedTypeReference<T> type) throws Exception {
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+		return this.restTemplate.exchange(preparePost(url, in, body, out), type);
+	}
+
+	private RequestEntity<Void> prepareGet(String url, MediaType accept) throws Exception {
+		URI uri = new URI("http://localhost:" + this.port + url);
+		return (accept != null ? get(uri).accept(accept).build() : get(uri).build());
+	}
+
+	private RequestEntity<?> preparePost(String url, MediaType in, Object body, MediaType out) throws Exception {
+		URI uri = new URI("http://localhost:" + this.port + url);
+		return (out != null ?
+				RequestEntity.post(uri).contentType(in).accept(out).body(body) :
+				RequestEntity.post(uri).contentType(in).body(body));
 	}
 
 
 	@Configuration
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class FrameworkConfig extends WebReactiveConfiguration {
 
 		@Override
@@ -385,7 +384,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Configuration
-	@SuppressWarnings("unused")
+	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class ApplicationConfig {
 
 		@Bean
@@ -426,7 +425,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
 			return encoder.encode(Mono.just(new Person("Robert")), dataBufferFactory,
-					ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON).map(DataBuffer::asByteBuffer);
+					ResolvableType.forClass(Person.class), JSON).map(DataBuffer::asByteBuffer);
 		}
 
 		@RequestMapping("/stream-result")
@@ -462,7 +461,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/list")
 		public List<Person> listResponseBody() {
-			return Arrays.asList(new Person("Robert"), new Person("Marie"));
+			return asList(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/publisher")
@@ -580,7 +579,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	}
 
-	@XmlRootElement
+	@XmlRootElement @SuppressWarnings("WeakerAccess")
 	private static class Person {
 
 		private String name;
@@ -626,16 +625,23 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 	}
 
-	@XmlRootElement
+	@XmlRootElement @SuppressWarnings({"WeakerAccess", "unused"})
 	private static class People {
 
 		private List<Person> persons = new ArrayList<>();
+
+		public People() {
+		}
+
+		public People(Person... persons) {
+			this.persons.addAll(Arrays.asList(persons));
+		}
 
 		@XmlElement
 		public List<Person> getPerson() {
 			return this.persons;
 		}
-	}
 
+	}
 
 }
