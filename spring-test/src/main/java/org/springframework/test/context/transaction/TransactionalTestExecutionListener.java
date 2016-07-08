@@ -19,9 +19,10 @@ package org.springframework.test.context.transaction;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -442,13 +443,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * as well as annotated interface default methods
 	 */
 	private List<Method> getAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
-		List<Method> methods = new ArrayList<>(4);
-		for (Method method : ReflectionUtils.getUniqueDeclaredMethods(clazz)) {
-			if (AnnotationUtils.getAnnotation(method, annotationType) != null) {
-				methods.add(method);
-			}
-		}
-		return methods;
+		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(clazz))
+				.filter(method -> AnnotatedElementUtils.hasAnnotation(method, annotationType))
+				.collect(Collectors.toList());
 	}
 
 	/**

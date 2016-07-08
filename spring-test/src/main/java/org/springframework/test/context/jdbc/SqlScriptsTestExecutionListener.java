@@ -40,10 +40,8 @@ import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -244,12 +242,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
 				testContext, new DefaultTransactionAttribute(propagation));
 
-			new TransactionTemplate(transactionManager, transactionAttribute).execute(new TransactionCallbackWithoutResult() {
-
-				@Override
-				public void doInTransactionWithoutResult(TransactionStatus status) {
-					populator.execute(finalDataSource);
-				}
+			new TransactionTemplate(transactionManager, transactionAttribute).execute(status -> {
+				populator.execute(finalDataSource);
+				return null;
 			});
 		}
 	}
