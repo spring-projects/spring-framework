@@ -21,6 +21,10 @@ package org.springframework.test.context;
  * test execution events published by the {@link TestContextManager} with which
  * the listener is registered.
  *
+ * <p>This interface provides empty {@code default} implementations for all methods.
+ * Concrete implementations can therefore choose to override only those methods
+ * suitable for the task at hand.
+ *
  * <p>Concrete implementations must provide a {@code public} no-args constructor,
  * so that listeners can be instantiated transparently by tools and configuration
  * mechanisms.
@@ -51,6 +55,7 @@ package org.springframework.test.context;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
+ * @see org.springframework.test.context.support.AbstractTestExecutionListener
  */
 public interface TestExecutionListener {
 
@@ -61,20 +66,28 @@ public interface TestExecutionListener {
 	 * <em>before class</em> lifecycle callbacks.
 	 * <p>If a given testing framework does not support <em>before class</em>
 	 * lifecycle callbacks, this method will not be called for that framework.
+	 * <p>The default implementation is <em>empty</em>. Can be overridden by
+	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
-	void beforeTestClass(TestContext testContext) throws Exception;
+	default void beforeTestClass(TestContext testContext) throws Exception {
+		/* no-op */
+	}
 
 	/**
 	 * Prepares the {@link Object test instance} of the supplied
 	 * {@link TestContext test context}, for example by injecting dependencies.
 	 * <p>This method should be called immediately after instantiation of the test
 	 * instance but prior to any framework-specific lifecycle callbacks.
+	 * <p>The default implementation is <em>empty</em>. Can be overridden by
+	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
-	void prepareTestInstance(TestContext testContext) throws Exception;
+	default void prepareTestInstance(TestContext testContext) throws Exception {
+		/* no-op */
+	}
 
 	/**
 	 * Pre-processes a test <em>before</em> execution of the
@@ -83,11 +96,15 @@ public interface TestExecutionListener {
 	 * fixtures.
 	 * <p>This method should be called immediately prior to framework-specific
 	 * <em>before</em> lifecycle callbacks.
+	 * <p>The default implementation is <em>empty</em>. Can be overridden by
+	 * concrete classes as necessary.
 	 * @param testContext the test context in which the test method will be
 	 * executed; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
-	void beforeTestMethod(TestContext testContext) throws Exception;
+	default void beforeTestMethod(TestContext testContext) throws Exception {
+		/* no-op */
+	}
 
 	/**
 	 * Post-processes a test <em>after</em> execution of the
@@ -96,11 +113,15 @@ public interface TestExecutionListener {
 	 * fixtures.
 	 * <p>This method should be called immediately after framework-specific
 	 * <em>after</em> lifecycle callbacks.
+	 * <p>The default implementation is <em>empty</em>. Can be overridden by
+	 * concrete classes as necessary.
 	 * @param testContext the test context in which the test method was
 	 * executed; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
-	void afterTestMethod(TestContext testContext) throws Exception;
+	default void afterTestMethod(TestContext testContext) throws Exception {
+		/* no-op */
+	}
 
 	/**
 	 * Post-processes a test class <em>after</em> execution of all tests within
@@ -109,9 +130,13 @@ public interface TestExecutionListener {
 	 * <em>after class</em> lifecycle callbacks.
 	 * <p>If a given testing framework does not support <em>after class</em>
 	 * lifecycle callbacks, this method will not be called for that framework.
+	 * <p>The default implementation is <em>empty</em>. Can be overridden by
+	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
-	void afterTestClass(TestContext testContext) throws Exception;
+	default void afterTestClass(TestContext testContext) throws Exception {
+		/* no-op */
+	}
 
 }
