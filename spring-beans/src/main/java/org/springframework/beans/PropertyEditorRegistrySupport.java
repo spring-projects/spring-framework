@@ -59,6 +59,7 @@ import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
 import org.springframework.beans.propertyeditors.LocaleEditor;
+import org.springframework.beans.propertyeditors.PathEditor;
 import org.springframework.beans.propertyeditors.PatternEditor;
 import org.springframework.beans.propertyeditors.PropertiesEditor;
 import org.springframework.beans.propertyeditors.ReaderEditor;
@@ -87,11 +88,21 @@ import org.springframework.util.ClassUtils;
  */
 public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 
+	private static Class<?> pathClass;
+
 	private static Class<?> zoneIdClass;
 
 	static {
+		ClassLoader cl = PropertyEditorRegistrySupport.class.getClassLoader();
 		try {
-			zoneIdClass = ClassUtils.forName("java.time.ZoneId", PropertyEditorRegistrySupport.class.getClassLoader());
+			pathClass = ClassUtils.forName("java.nio.file.Path", cl);
+		}
+		catch (ClassNotFoundException ex) {
+			// Java 7 Path class not available
+			pathClass = null;
+		}
+		try {
+			zoneIdClass = ClassUtils.forName("java.time.ZoneId", cl);
 		}
 		catch (ClassNotFoundException ex) {
 			// Java 8 ZoneId class not available
@@ -211,6 +222,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		this.defaultEditors.put(InputStream.class, new InputStreamEditor());
 		this.defaultEditors.put(InputSource.class, new InputSourceEditor());
 		this.defaultEditors.put(Locale.class, new LocaleEditor());
+		if (pathClass != null) {
+			this.defaultEditors.put(pathClass, new PathEditor());
+		}
 		this.defaultEditors.put(Pattern.class, new PatternEditor());
 		this.defaultEditors.put(Properties.class, new PropertiesEditor());
 		this.defaultEditors.put(Reader.class, new ReaderEditor());
