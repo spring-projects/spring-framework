@@ -123,7 +123,7 @@ public class BeanCreationException extends FatalBeanException {
 
 	/**
 	 * Add a related cause to this bean creation exception,
-	 * not being a direct cause of the failure but having occured
+	 * not being a direct cause of the failure but having occurred
 	 * earlier in the creation of the same bean instance.
 	 * @param ex the related cause to add
 	 */
