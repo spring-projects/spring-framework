@@ -39,8 +39,7 @@ import org.springframework.core.serializer.support.SerializationDelegate;
  * caching scenarios. For advanced local caching needs, consider
  * {@link org.springframework.cache.jcache.JCacheCacheManager},
  * {@link org.springframework.cache.ehcache.EhCacheCacheManager},
- * {@link org.springframework.cache.caffeine.CaffeineCacheManager} or
- * {@link org.springframework.cache.guava.GuavaCacheManager}.
+ * {@link org.springframework.cache.caffeine.CaffeineCacheManager}.
  *
  * @author Juergen Hoeller
  * @since 3.1
