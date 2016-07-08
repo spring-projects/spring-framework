@@ -72,7 +72,7 @@ public class SimpleResultHandlerTests {
 	}
 
 	private void testSupports(ResolvableType type, boolean result) {
-		MethodParameter param = ResolvableMethod.on(TestController.class).returning(type).resolveReturnType();
+		MethodParameter param = ResolvableMethod.onClass(TestController.class).returning(type).resolveReturnType();
 		HandlerResult handlerResult = new HandlerResult(new TestController(), null, param);
 		assertEquals(result, this.resultHandler.supports(handlerResult));
 	}

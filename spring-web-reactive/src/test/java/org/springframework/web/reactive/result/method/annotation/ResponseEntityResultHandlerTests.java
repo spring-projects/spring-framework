@@ -199,7 +199,7 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	private HandlerResult handlerResult(Object returnValue, ResolvableType type) {
-		MethodParameter param = ResolvableMethod.on(TestController.class).returning(type).resolveReturnType();
+		MethodParameter param = ResolvableMethod.onClass(TestController.class).returning(type).resolveReturnType();
 		return new HandlerResult(new TestController(), returnValue, param);
 	}
 

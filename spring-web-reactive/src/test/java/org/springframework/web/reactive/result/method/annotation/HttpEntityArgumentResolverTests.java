@@ -73,13 +73,13 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
  */
 public class HttpEntityArgumentResolverTests {
 
-	private HttpEntityArgumentResolver resolver = resolver();
+	private HttpEntityArgumentResolver resolver = createResolver();
 
 	private ServerWebExchange exchange;
 
 	private MockServerHttpRequest request;
 
-	private ResolvableMethod testMethod = ResolvableMethod.on(getClass()).name("handle");
+	private ResolvableMethod testMethod = ResolvableMethod.onClass(getClass()).name("handle");
 
 
 	@Before
@@ -89,15 +89,26 @@ public class HttpEntityArgumentResolverTests {
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
 
+	private HttpEntityArgumentResolver createResolver() {
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new CodecHttpMessageConverter<>(new StringDecoder()));
+
+		FormattingConversionService service = new DefaultFormattingConversionService();
+		service.addConverter(new MonoToCompletableFutureConverter());
+		service.addConverter(new ReactorToRxJava1Converter());
+
+		return new HttpEntityArgumentResolver(converters, service);
+	}
+
 
 	@Test
 	public void supports() throws Exception {
-		testSupports(httpEntity(String.class));
-		testSupports(httpEntity(forClassWithGenerics(Mono.class, String.class)));
-		testSupports(httpEntity(forClassWithGenerics(Single.class, String.class)));
-		testSupports(httpEntity(forClassWithGenerics(CompletableFuture.class, String.class)));
-		testSupports(httpEntity(forClassWithGenerics(Flux.class, String.class)));
-		testSupports(httpEntity(forClassWithGenerics(Observable.class, String.class)));
+		testSupports(httpEntityType(String.class));
+		testSupports(httpEntityType(forClassWithGenerics(Mono.class, String.class)));
+		testSupports(httpEntityType(forClassWithGenerics(Single.class, String.class)));
+		testSupports(httpEntityType(forClassWithGenerics(CompletableFuture.class, String.class)));
+		testSupports(httpEntityType(forClassWithGenerics(Flux.class, String.class)));
+		testSupports(httpEntityType(forClassWithGenerics(Observable.class, String.class)));
 		testSupports(forClassWithGenerics(RequestEntity.class, String.class));
 	}
 
@@ -112,7 +123,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@Test
 	public void emptyBodyWithString() throws Exception {
-		ResolvableType type = httpEntity(String.class);
+		ResolvableType type = httpEntityType(String.class);
 		HttpEntity<Object> entity = resolveValueWithEmptyBody(type);
 
 		assertNull(entity.getBody());
@@ -120,7 +131,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@Test
 	public void emptyBodyWithMono() throws Exception {
-		ResolvableType type = httpEntity(forClassWithGenerics(Mono.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(Mono.class, String.class));
 		HttpEntity<Mono<String>> entity = resolveValueWithEmptyBody(type);
 
 		TestSubscriber.subscribe(entity.getBody())
@@ -131,7 +142,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@Test
 	public void emptyBodyWithFlux() throws Exception {
-		ResolvableType type = httpEntity(forClassWithGenerics(Flux.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(Flux.class, String.class));
 		HttpEntity<Flux<String>> entity = resolveValueWithEmptyBody(type);
 
 		TestSubscriber.subscribe(entity.getBody())
@@ -142,7 +153,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@Test
 	public void emptyBodyWithSingle() throws Exception {
-		ResolvableType type = httpEntity(forClassWithGenerics(Single.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(Single.class, String.class));
 		HttpEntity<Single<String>> entity = resolveValueWithEmptyBody(type);
 
 		TestSubscriber.subscribe(RxJava1SingleConverter.from(entity.getBody()))
@@ -152,7 +163,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@Test
 	public void emptyBodyWithObservable() throws Exception {
-		ResolvableType type = httpEntity(forClassWithGenerics(Observable.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(Observable.class, String.class));
 		HttpEntity<Observable<String>> entity = resolveValueWithEmptyBody(type);
 
 		TestSubscriber.subscribe(RxJava1ObservableConverter.from(entity.getBody()))
@@ -163,7 +174,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@Test
 	public void emptyBodyWithCompletableFuture() throws Exception {
-		ResolvableType type = httpEntity(forClassWithGenerics(CompletableFuture.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(CompletableFuture.class, String.class));
 		HttpEntity<CompletableFuture<String>> entity = resolveValueWithEmptyBody(type);
 
 		entity.getBody().whenComplete((body, ex) -> {
@@ -175,7 +186,7 @@ public class HttpEntityArgumentResolverTests {
 	@Test
 	public void httpEntityWithStringBody() throws Exception {
 		String body = "line1";
-		ResolvableType type = httpEntity(String.class);
+		ResolvableType type = httpEntityType(String.class);
 		HttpEntity<String> httpEntity = resolveValue(type, body);
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
@@ -185,7 +196,7 @@ public class HttpEntityArgumentResolverTests {
 	@Test
 	public void httpEntityWithMonoBody() throws Exception {
 		String body = "line1";
-		ResolvableType type = httpEntity(forClassWithGenerics(Mono.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(Mono.class, String.class));
 		HttpEntity<Mono<String>> httpEntity = resolveValue(type, body);
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
@@ -195,7 +206,7 @@ public class HttpEntityArgumentResolverTests {
 	@Test
 	public void httpEntityWithSingleBody() throws Exception {
 		String body = "line1";
-		ResolvableType type = httpEntity(forClassWithGenerics(Single.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(Single.class, String.class));
 		HttpEntity<Single<String>> httpEntity = resolveValue(type, body);
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
@@ -205,7 +216,7 @@ public class HttpEntityArgumentResolverTests {
 	@Test
 	public void httpEntityWithCompletableFutureBody() throws Exception {
 		String body = "line1";
-		ResolvableType type = httpEntity(forClassWithGenerics(CompletableFuture.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(CompletableFuture.class, String.class));
 		HttpEntity<CompletableFuture<String>> httpEntity = resolveValue(type, body);
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
@@ -215,7 +226,7 @@ public class HttpEntityArgumentResolverTests {
 	@Test
 	public void httpEntityWithFluxBody() throws Exception {
 		String body = "line1\nline2\nline3\n";
-		ResolvableType type = httpEntity(forClassWithGenerics(Flux.class, String.class));
+		ResolvableType type = httpEntityType(forClassWithGenerics(Flux.class, String.class));
 		HttpEntity<Flux<String>> httpEntity = resolveValue(type, body);
 
 		assertEquals(this.request.getHeaders(), httpEntity.getHeaders());
@@ -235,23 +246,12 @@ public class HttpEntityArgumentResolverTests {
 	}
 
 
-	private ResolvableType httpEntity(Class<?> bodyType) {
-		return httpEntity(ResolvableType.forClass(bodyType));
+	private ResolvableType httpEntityType(Class<?> bodyType) {
+		return httpEntityType(ResolvableType.forClass(bodyType));
 	}
 
-	private ResolvableType httpEntity(ResolvableType type) {
+	private ResolvableType httpEntityType(ResolvableType type) {
 		return forClassWithGenerics(HttpEntity.class, type);
-	}
-
-	private HttpEntityArgumentResolver resolver() {
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new CodecHttpMessageConverter<>(new StringDecoder()));
-
-		FormattingConversionService service = new DefaultFormattingConversionService();
-		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new ReactorToRxJava1Converter());
-
-		return new HttpEntityArgumentResolver(converters, service);
 	}
 
 	private void testSupports(ResolvableType type) {

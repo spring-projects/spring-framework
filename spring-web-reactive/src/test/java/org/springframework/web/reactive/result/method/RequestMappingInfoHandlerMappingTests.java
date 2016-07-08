@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -69,44 +70,31 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
+import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
+import static org.springframework.web.reactive.result.method.RequestMappingInfo.paths;
 
 /**
  * Unit tests for {@link RequestMappingInfoHandlerMapping}.
- *
  * @author Rossen Stoyanchev
  */
 public class RequestMappingInfoHandlerMappingTests {
 
 	private TestRequestMappingInfoHandlerMapping handlerMapping;
 
-	private HandlerMethod fooMethod;
-
-	private HandlerMethod fooParamMethod;
-
-	private HandlerMethod barMethod;
-
-	private HandlerMethod emptyMethod;
-
 
 	@Before
 	public void setUp() throws Exception {
-		TestController testController = new TestController();
-
-		this.fooMethod = new HandlerMethod(testController, "foo");
-		this.fooParamMethod = new HandlerMethod(testController, "fooParam");
-		this.barMethod = new HandlerMethod(testController, "bar");
-		this.emptyMethod = new HandlerMethod(testController, "empty");
-
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
-		this.handlerMapping.registerHandler(testController);
+		this.handlerMapping.registerHandler(new TestController());
 	}
 
 
 	@Test
 	public void getMappingPathPatterns() throws Exception {
 		String[] patterns = {"/foo/*", "/foo", "/bar/*", "/bar"};
-		RequestMappingInfo info = RequestMappingInfo.paths(patterns).build();
+		RequestMappingInfo info = paths(patterns).build();
 		Set<String> actual = this.handlerMapping.getMappingPathPatterns(info);
 
 		assertEquals(new HashSet<>(Arrays.asList(patterns)), actual);
@@ -114,38 +102,53 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerDirectMatch() throws Exception {
+		String[] patterns = new String[] {"/foo"};
+		String[] params = new String[] {};
+		Method expected = resolveMethod(new TestController(), patterns, null, params);
+
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/foo");
-		HandlerMethod handlerMethod = getHandler(exchange);
-		assertEquals(this.fooMethod.getMethod(), handlerMethod.getMethod());
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+
+		assertEquals(expected, hm.getMethod());
 	}
 
 	@Test
 	public void getHandlerGlobMatch() throws Exception {
+		String[] patterns = new String[] {"/ba*"};
+		RequestMethod[] methods = new RequestMethod[] {GET, HEAD};
+		Method expected = resolveMethod(new TestController(), patterns, methods, null);
+
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/bar");
-		HandlerMethod handlerMethod = getHandler(exchange);
-		assertEquals(this.barMethod.getMethod(), handlerMethod.getMethod());
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+
+		assertEquals(expected, hm.getMethod());
 	}
 
 	@Test
 	public void getHandlerEmptyPathMatch() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "");
-		HandlerMethod handlerMethod = getHandler(exchange);
+		String[] patterns = new String[] {""};
+		Method expected = resolveMethod(new TestController(), patterns, null, null);
 
-		assertEquals(this.emptyMethod.getMethod(), handlerMethod.getMethod());
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "");
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		assertEquals(expected, hm.getMethod());
 
 		exchange = createExchange(HttpMethod.GET, "/");
-		handlerMethod = getHandler(exchange);
-
-		assertEquals(this.emptyMethod.getMethod(), handlerMethod.getMethod());
+		hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
+		assertEquals(expected, hm.getMethod());
 	}
 
 	@Test
 	public void getHandlerBestMatch() throws Exception {
+		String[] patterns = new String[] {"/foo"};
+		String[] params = new String[] {"p"};
+		Method expected = resolveMethod(new TestController(), patterns, null, params);
+
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/foo");
 		exchange.getRequest().getQueryParams().add("p", "anything");
-		HandlerMethod handlerMethod = getHandler(exchange);
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
-		assertEquals(this.fooParamMethod.getMethod(), handlerMethod.getMethod());
+		assertEquals(expected, hm.getMethod());
 	}
 
 	@Test
@@ -179,24 +182,21 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = createExchange(HttpMethod.PUT, "/person/1");
 		exchange.getRequest().getHeaders().add("Content-Type", "bogus");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
+
 		assertError(mono, UnsupportedMediaTypeStatusException.class,
 				ex -> assertEquals("Request failure [status: 415, " +
 						"reason: \"Invalid mime type \"bogus\": does not contain '/'\"]",
 						ex.getMessage()));
 	}
 
-	// SPR-8462
-
-	@Test
+	@Test // SPR-8462
 	public void getHandlerTestMediaTypeNotAcceptable() throws Exception {
 		testMediaTypeNotAcceptable("/persons");
 		testMediaTypeNotAcceptable("/persons/");
 		testMediaTypeNotAcceptable("/persons.json");
 	}
 
-	// SPR-12854
-
-	@Test
+	@Test // SPR-12854
 	public void getHandlerTestRequestParamMismatch() throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/params");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
@@ -218,23 +218,22 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void getHandlerProducibleMediaTypesAttribute() throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/content");
 		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_XML));
-		getHandler(exchange);
+		this.handlerMapping.getHandler(exchange).block();
 
 		String name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 		assertEquals(Collections.singleton(MediaType.APPLICATION_XML), exchange.getAttributes().get(name));
 
 		exchange = createExchange(HttpMethod.GET, "/content");
 		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		getHandler(exchange);
+		this.handlerMapping.getHandler(exchange).block();
 
 		assertNull("Negated expression shouldn't be listed as producible type",
 				exchange.getAttributes().get(name));
 	}
 
-	@SuppressWarnings("unchecked")
-	@Test
+	@Test @SuppressWarnings("unchecked")
 	public void handleMatchUriTemplateVariables() throws Exception {
-		RequestMappingInfo key = RequestMappingInfo.paths("/{path1}/{path2}").build();
+		RequestMappingInfo key = paths("/{path1}/{path2}").build();
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/1/2");
 		String lookupPath = exchange.getRequest().getURI().getPath();
 		this.handlerMapping.handleMatch(key, lookupPath, exchange);
@@ -247,11 +246,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("2", uriVariables.get("path2"));
 	}
 
-	// SPR-9098
-
-	@Test
+	@Test // SPR-9098
 	public void handleMatchUriTemplateVariablesDecode() throws Exception {
-		RequestMappingInfo key = RequestMappingInfo.paths("/{group}/{identifier}").build();
+		RequestMappingInfo key = paths("/{group}/{identifier}").build();
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/group/a%2Fb");
 
 		HttpRequestPathHelper pathHelper = new HttpRequestPathHelper();
@@ -272,7 +269,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void handleMatchBestMatchingPatternAttribute() throws Exception {
-		RequestMappingInfo key = RequestMappingInfo.paths("/{path1}/2", "/**").build();
+		RequestMappingInfo key = paths("/{path1}/2", "/**").build();
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/1/2");
 		this.handlerMapping.handleMatch(key, "/1/2", exchange);
 
@@ -281,7 +278,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void handleMatchBestMatchingPatternAttributeNoPatternsDefined() throws Exception {
-		RequestMappingInfo key = RequestMappingInfo.paths().build();
+		RequestMappingInfo key = paths().build();
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/1/2");
 
 		this.handlerMapping.handleMatch(key, "/1/2", exchange);
@@ -333,8 +330,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void handleMatchMatrixVariablesDecoding() throws Exception {
 		HttpRequestPathHelper urlPathHelper = new HttpRequestPathHelper();
 		urlPathHelper.setUrlDecode(false);
-
-		this.handlerMapping.setPathHelper(urlPathHelper );
+		this.handlerMapping.setPathHelper(urlPathHelper);
 
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/");
 		handleMatch(exchange, "/path{filter}", "/path;mvar=a%2fb");
@@ -365,11 +361,6 @@ public class RequestMappingInfoHandlerMappingTests {
 				});
 	}
 
-	@SuppressWarnings("ConstantConditions")
-	private HandlerMethod getHandler(ServerWebExchange exchange) throws Exception {
-		Mono<Object> handler = this.handlerMapping.getHandler(exchange);
-		return (HandlerMethod) handler.block();
-	}
 
 	private void testHttpMediaTypeNotSupportedException(String url) throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.PUT, url);
@@ -384,7 +375,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private void testHttpOptions(String requestURI, String allowHeader) throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, requestURI);
-		HandlerMethod handlerMethod = getHandler(exchange);
+		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
 		ModelMap model = new ExtendedModelMap();
 		Mono<HandlerResult> mono = new InvocableHandlerMethod(handlerMethod).invokeForRequest(exchange, model);
@@ -410,7 +401,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	private void handleMatch(ServerWebExchange exchange, String pattern, String lookupPath) {
-		RequestMappingInfo info = RequestMappingInfo.paths(pattern).build();
+		RequestMappingInfo info = paths(pattern).build();
 		this.handlerMapping.handleMatch(info, lookupPath, exchange);
 	}
 
@@ -426,6 +417,29 @@ public class RequestMappingInfoHandlerMappingTests {
 		return (Map<String, String>) exchange.getAttributes().get(attrName);
 	}
 
+	private Method resolveMethod(Object controller, String[] patterns,
+			RequestMethod[] methods, String[] params) {
+
+		return ResolvableMethod.on(controller)
+				.matching(method -> {
+					RequestMapping annot = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
+					if (annot == null) {
+						return false;
+					}
+					else if (patterns != null && !Arrays.equals(annot.path(), patterns)) {
+						return false;
+					}
+					else if (methods != null && !Arrays.equals(annot.method(), methods)) {
+						return false;
+					}
+					else if (params != null && (!Arrays.equals(annot.params(), params))) {
+						return false;
+					}
+					return true;
+				})
+				.resolve();
+	}
+
 
 	@SuppressWarnings("unused")
 	@Controller
@@ -439,11 +453,11 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void fooParam() {
 		}
 
-		@RequestMapping(path = "/ba*", method = { RequestMethod.GET, RequestMethod.HEAD })
+		@RequestMapping(path = "/ba*", method = { GET, HEAD })
 		public void bar() {
 		}
 
-		@RequestMapping(value = "")
+		@RequestMapping(path = "")
 		public void empty() {
 		}
 
@@ -451,32 +465,32 @@ public class RequestMappingInfoHandlerMappingTests {
 		public void consumes(@RequestBody String text) {
 		}
 
-		@RequestMapping(value = "/persons", produces="application/xml")
+		@RequestMapping(path = "/persons", produces="application/xml")
 		public String produces() {
 			return "";
 		}
 
-		@RequestMapping(value = "/params", params="foo=bar")
+		@RequestMapping(path = "/params", params="foo=bar")
 		public String param() {
 			return "";
 		}
 
-		@RequestMapping(value = "/params", params="bar=baz")
+		@RequestMapping(path = "/params", params="bar=baz")
 		public String param2() {
 			return "";
 		}
 
-		@RequestMapping(value = "/content", produces="application/xml")
+		@RequestMapping(path = "/content", produces="application/xml")
 		public String xmlContent() {
 			return "";
 		}
 
-		@RequestMapping(value = "/content", produces="!application/xml")
+		@RequestMapping(path = "/content", produces="!application/xml")
 		public String nonXmlContent() {
 			return "";
 		}
 
-		@RequestMapping(value = "/something", method = RequestMethod.OPTIONS)
+		@RequestMapping(path = "/something", method = OPTIONS)
 		public HttpHeaders fooOptions() {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Allow", "PUT,POST");
@@ -499,7 +513,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingInfoHandlerMapping {
 
-		public void registerHandler(Object handler) {
+		void registerHandler(Object handler) {
 			super.detectHandlerMethods(handler);
 		}
 
@@ -517,7 +531,7 @@ public class RequestMappingInfoHandlerMappingTests {
 				options.setPathMatcher(getPathMatcher());
 				options.setSuffixPatternMatch(true);
 				options.setTrailingSlashMatch(true);
-				return RequestMappingInfo.paths(annot.value()).methods(annot.method())
+				return paths(annot.value()).methods(annot.method())
 						.params(annot.params()).headers(annot.headers())
 						.consumes(annot.consumes()).produces(annot.produces())
 						.options(options).build();

@@ -83,7 +83,7 @@ public class MessageConverterArgumentResolverTests {
 
 	private MockServerHttpRequest request;
 
-	private ResolvableMethod testMethod = ResolvableMethod.on(this.getClass()).name("handle");
+	private ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
 
 
 	@Before
@@ -252,7 +252,7 @@ public class MessageConverterArgumentResolverTests {
 	@Ignore
 	public void parameterizedMethodArgument() throws Exception {
 		Class<?> clazz = ConcreteParameterizedController.class;
-		MethodParameter param = ResolvableMethod.on(clazz).name("handleDto").resolveParam();
+		MethodParameter param = ResolvableMethod.onClass(clazz).name("handleDto").resolveParam();
 		SimpleBean simpleBean = resolveValue(param, "{\"name\" : \"Jad\"}");
 
 		assertEquals("Jad", simpleBean.getName());

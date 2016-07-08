@@ -72,7 +72,7 @@ public class HttpMessageConverterViewTests {
 
 	@Before
 	public void setup() throws Exception {
-		MethodParameter param = ResolvableMethod.on(this.getClass()).name("handle").resolveReturnType();
+		MethodParameter param = ResolvableMethod.onClass(this.getClass()).name("handle").resolveReturnType();
 		this.result = new HandlerResult(this, null, param, this.model);
 	}
 

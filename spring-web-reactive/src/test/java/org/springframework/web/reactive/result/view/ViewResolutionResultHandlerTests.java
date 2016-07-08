@@ -104,7 +104,7 @@ public class ViewResolutionResultHandlerTests {
 		testSupports(ResolvableType.forClass(TestBean.class), true);
 		testSupports(ResolvableType.forClass(Integer.class), false);
 
-		testSupports(ResolvableMethod.on(TestController.class).annotated(ModelAttribute.class), true);
+		testSupports(ResolvableMethod.onClass(TestController.class).annotated(ModelAttribute.class), true);
 	}
 
 	@Test
@@ -153,7 +153,7 @@ public class ViewResolutionResultHandlerTests {
 		String responseBody = "account: {id=123, testBean=TestBean[name=Joe]}";
 		testHandle("/account", returnType, returnValue, responseBody, resolver);
 
-		testHandle("/account", ResolvableMethod.on(TestController.class).annotated(ModelAttribute.class),
+		testHandle("/account", ResolvableMethod.onClass(TestController.class).annotated(ModelAttribute.class),
 				99L, "account: {id=123, num=99}", resolver);
 	}
 
@@ -239,7 +239,7 @@ public class ViewResolutionResultHandlerTests {
 
 
 	private MethodParameter returnType(ResolvableType type) {
-		return ResolvableMethod.on(TestController.class).returning(type).resolveReturnType();
+		return ResolvableMethod.onClass(TestController.class).returning(type).resolveReturnType();
 	}
 
 	private ViewResolutionResultHandler createResultHandler(ViewResolver... resolvers) {
@@ -258,7 +258,7 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private void testSupports(ResolvableType type, boolean result) {
-		testSupports(ResolvableMethod.on(TestController.class).returning(type), result);
+		testSupports(ResolvableMethod.onClass(TestController.class).returning(type), result);
 	}
 
 	private void testSupports(ResolvableMethod resolvableMethod, boolean result) {
@@ -271,7 +271,7 @@ public class ViewResolutionResultHandlerTests {
 	private void testHandle(String path, ResolvableType returnType, Object returnValue,
 			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
 
-		testHandle(path,  ResolvableMethod.on(TestController.class).returning(returnType),
+		testHandle(path,  ResolvableMethod.onClass(TestController.class).returning(returnType),
 				returnValue, responseBody, resolvers);
 	}
 

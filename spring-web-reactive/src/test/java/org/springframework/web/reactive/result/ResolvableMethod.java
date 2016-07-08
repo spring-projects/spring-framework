@@ -30,6 +30,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 
 /**
  * Convenience class for use in tests to resolve a {@link Method} and/or any of
@@ -47,7 +48,7 @@ import org.springframework.util.ReflectionUtils;
  * response handling, the return type may be used as a hint:
  *
  * <pre>
- * ResolvableMethod resolvableMethod = ResolvableMethod.on(TestController.class);
+ * ResolvableMethod resolvableMethod = ResolvableMethod.onClass(TestController.class);
 
  * ResolvableType type = ResolvableType.forClassWithGenerics(Mono.class, View.class);
  * Method method = resolvableMethod.returning(type).resolve();
@@ -65,7 +66,10 @@ import org.springframework.util.ReflectionUtils;
  */
 public class ResolvableMethod {
 
-	private final Class<?> targetClass;
+	private final Class<?> objectClass;
+
+	private final Object object;
+
 
 	private String methodName;
 
@@ -75,36 +79,67 @@ public class ResolvableMethod {
 
 	private final List<Class<? extends Annotation>> annotationTypes = new ArrayList<>(4);
 
+	private final List<Predicate<Method>> predicates = new ArrayList<>(4);
 
-	private ResolvableMethod(Class<?> targetClass) {
-		this.targetClass = targetClass;
+
+
+	private ResolvableMethod(Class<?> objectClass) {
+		Assert.notNull(objectClass);
+		this.objectClass = objectClass;
+		this.object = null;
+	}
+
+	private ResolvableMethod(Object object) {
+		Assert.notNull(object);
+		this.object = object;
+		this.objectClass = object.getClass();
 	}
 
 
+	/**
+	 * Methods that match the given name (regardless of arguments).
+	 */
 	public ResolvableMethod name(String methodName) {
 		this.methodName = methodName;
 		return this;
 	}
 
+	/**
+	 * Methods that match the given argument types.
+	 */
 	public ResolvableMethod argumentTypes(Class<?>... argumentTypes) {
 		this.argumentTypes = argumentTypes;
 		return this;
 	}
 
+	/**
+	 * Methods declared to return the given type.
+	 */
 	public ResolvableMethod returning(ResolvableType resolvableType) {
 		this.returnType = resolvableType;
 		return this;
 	}
 
+	/**
+	 * Methods with the given annotation.
+	 */
 	public ResolvableMethod annotated(Class<? extends Annotation> annotationType) {
 		this.annotationTypes.add(annotationType);
+		return this;
+	}
+
+	/**
+	 * Methods matching the given predicate.
+	 */
+	public final ResolvableMethod matching(Predicate<Method> methodPredicate) {
+		this.predicates.add(methodPredicate);
 		return this;
 	}
 
 	// Resolve methods
 
 	public Method resolve() {
-		Set<Method> methods = MethodIntrospector.selectMethods(this.targetClass,
+		Set<Method> methods = MethodIntrospector.selectMethods(this.objectClass,
 				(ReflectionUtils.MethodFilter) method -> {
 					if (this.methodName != null && !this.methodName.equals(method.getName())) {
 						return false;
@@ -116,15 +151,19 @@ public class ResolvableMethod {
 							return false;
 						}
 					}
-					if (!ObjectUtils.isEmpty(this.argumentTypes)) {
+					else if (!ObjectUtils.isEmpty(this.argumentTypes)) {
 						if (!Arrays.equals(this.argumentTypes, method.getParameterTypes())) {
 							return false;
 						}
 					}
-					for (Class<? extends Annotation> annotationType : this.annotationTypes) {
-						if (AnnotationUtils.findAnnotation(method, annotationType) == null) {
-							return false;
-						}
+					else if (this.annotationTypes.stream()
+							.filter(annotType -> AnnotationUtils.findAnnotation(method, annotType) == null)
+							.findFirst()
+							.isPresent()) {
+						return false;
+					}
+					else if (this.predicates.stream().filter(p -> !p.test(method)).findFirst().isPresent()) {
+						return false;
 					}
 					return true;
 				});
@@ -137,6 +176,11 @@ public class ResolvableMethod {
 
 	private String getReturnType() {
 		return this.returnType != null ? this.returnType.toString() : null;
+	}
+
+	public InvocableHandlerMethod resolveHandlerMethod() {
+		Assert.notNull(this.object);
+		return new InvocableHandlerMethod(this.object, resolve());
 	}
 
 	public MethodParameter resolveReturnType() {
@@ -177,18 +221,21 @@ public class ResolvableMethod {
 		return matches.get(0);
 	}
 
-
-
-
 	@Override
 	public String toString() {
-		return "Class=" + this.targetClass + ", name= " + this.methodName +
-				", returnType=" + this.returnType + ", annotations=" + this.annotationTypes;
+		return "Class=" + this.objectClass +
+				", name=" + (this.methodName != null ? this.methodName : "<not specified>") +
+				", returnType=" + (this.returnType != null ? this.returnType : "<not specified>") +
+				", annotations=" + this.annotationTypes;
 	}
 
 
-	public static ResolvableMethod on(Class<?> clazz) {
+	public static ResolvableMethod onClass(Class<?> clazz) {
 		return new ResolvableMethod(clazz);
+	}
+
+	public static ResolvableMethod on(Object object) {
+		return new ResolvableMethod(object);
 	}
 
 }

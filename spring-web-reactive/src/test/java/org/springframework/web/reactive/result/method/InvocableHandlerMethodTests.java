@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.result.method;
 
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Optional;
@@ -30,7 +29,6 @@ import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
@@ -150,8 +148,8 @@ public class InvocableHandlerMethodTests {
 
 
 	private InvocableHandlerMethod handlerMethod(String name) throws Exception {
-		Method method = ResolvableMethod.on(TestController.class).name(name).resolve();
-		return new InvocableHandlerMethod(new HandlerMethod(new TestController(), method));
+		TestController controller = new TestController();
+		return ResolvableMethod.on(controller).name(name).resolveHandlerMethod();
 	}
 
 	private void addResolver(InvocableHandlerMethod handlerMethod, Mono<Object> resolvedValue) {

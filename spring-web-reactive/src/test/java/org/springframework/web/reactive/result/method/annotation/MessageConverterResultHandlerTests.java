@@ -172,7 +172,7 @@ public class MessageConverterResultHandlerTests {
 
 
 	private MethodParameter returnType(ResolvableType bodyType) {
-		return ResolvableMethod.on(TestController.class).returning(bodyType).resolveReturnType();
+		return ResolvableMethod.onClass(TestController.class).returning(bodyType).resolveReturnType();
 	}
 
 	private AbstractMessageConverterResultHandler createResultHandler(HttpMessageConverter<?>... converters) {

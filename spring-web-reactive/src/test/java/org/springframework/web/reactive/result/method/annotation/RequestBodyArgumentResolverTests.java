@@ -79,7 +79,7 @@ public class RequestBodyArgumentResolverTests {
 
 	private MockServerHttpRequest request;
 
-	private ResolvableMethod testMethod = ResolvableMethod.on(this.getClass()).name("handle");
+	private ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
 
 
 	@Before
@@ -87,6 +87,17 @@ public class RequestBodyArgumentResolverTests {
 		this.request = new MockServerHttpRequest(HttpMethod.POST, new URI("/path"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
+	}
+
+	private RequestBodyArgumentResolver resolver() {
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new CodecHttpMessageConverter<>(new StringDecoder()));
+
+		FormattingConversionService service = new DefaultFormattingConversionService();
+		service.addConverter(new MonoToCompletableFutureConverter());
+		service.addConverter(new ReactorToRxJava1Converter());
+
+		return new RequestBodyArgumentResolver(converters, service);
 	}
 
 
@@ -197,17 +208,6 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 
-	private RequestBodyArgumentResolver resolver() {
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new CodecHttpMessageConverter<>(new StringDecoder()));
-
-		FormattingConversionService service = new DefaultFormattingConversionService();
-		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new ReactorToRxJava1Converter());
-
-		return new RequestBodyArgumentResolver(converters, service);
-	}
-
 	private <T> T resolveValue(MethodParameter param, String body) {
 		this.request.writeWith(Flux.just(dataBuffer(body)));
 		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
@@ -221,9 +221,9 @@ public class RequestBodyArgumentResolverTests {
 		return (T) value;
 	}
 
-	private <T> T resolveValueWithEmptyBody(ResolvableType type, boolean required) {
+	private <T> T resolveValueWithEmptyBody(ResolvableType bodyType, boolean isRequired) {
 		this.request.writeWith(Flux.empty());
-		MethodParameter param = this.testMethod.resolveParam(type, requestBody(required));
+		MethodParameter param = this.testMethod.resolveParam(bodyType, requestBody(isRequired));
 		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
