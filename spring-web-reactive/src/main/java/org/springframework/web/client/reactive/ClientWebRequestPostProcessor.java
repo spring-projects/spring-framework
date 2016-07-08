@@ -16,25 +16,21 @@
 
 package org.springframework.web.client.reactive;
 
-import java.util.List;
-
-import org.springframework.core.codec.Encoder;
-import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.http.client.reactive.ClientHttpRequestFactory;
-
 /**
- * Build {@link ClientHttpRequest} using a {@link ClientHttpRequestFactory}
- * which wraps an HTTP client implementation.
+ * Allow post processing and/or wrapping the {@link ClientWebRequest} before
+ * it's sent to the origin server.
  *
+ * @author Rob Winch
  * @author Brian Clozel
+ * @see DefaultClientWebRequestBuilder#apply(ClientWebRequestPostProcessor)
  */
-public interface HttpRequestBuilder {
+public interface ClientWebRequestPostProcessor {
 
 	/**
-	 * Build a {@link ClientHttpRequest}
+	 * Implementations can modify and/or wrap the {@link ClientWebRequest} passed in
+	 * and return it
 	 *
-	 * @param factory the factory that creates the actual {@link ClientHttpRequest}
-	 * @param messageEncoders the {@link Encoder}s to use for encoding the request body
+	 * @param request the {@link ClientWebRequest} to be modified and/or wrapped.
 	 */
-	ClientHttpRequest build(ClientHttpRequestFactory factory, List<Encoder<?>> messageEncoders);
+	ClientWebRequest postProcess(ClientWebRequest request);
 }

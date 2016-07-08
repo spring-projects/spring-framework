@@ -17,15 +17,12 @@
 package org.springframework.web.client.reactive;
 
 /**
- * A {@code WebResponseExtractor} extracts the relevant part of a
- * raw {@link org.springframework.http.client.reactive.ClientHttpResponse},
- * optionally decoding the response body and using a target composition API.
- *
- * <p>See static factory methods in {@link WebResponseExtractors}.
+ * Build {@link ClientWebRequest}s
  *
  * @author Brian Clozel
  */
-public interface WebResponseExtractor<T> {
+public interface ClientWebRequestBuilder {
 
-	T extract(WebResponse webResponse);
+	ClientWebRequest build();
+
 }

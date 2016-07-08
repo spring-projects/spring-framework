@@ -17,7 +17,6 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
-import java.util.Collection;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -26,45 +25,40 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.io.netty.http.HttpClient;
+import reactor.io.netty.http.HttpClientRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBuffer;
-import org.springframework.http.HttpHeaders;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
 
 /**
- * {@link ClientHttpRequest} implementation for the Reactor Net HTTP client
+ * {@link ClientHttpRequest} implementation for the Reactor-Netty HTTP client
  *
  * @author Brian Clozel
- * @see HttpClient
+ * @see reactor.io.netty.http.HttpClient
  */
 public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
-
-	private final DataBufferFactory dataBufferFactory;
 
 	private final HttpMethod httpMethod;
 
 	private final URI uri;
 
-	private final HttpClient httpClient;
+	private final HttpClientRequest httpRequest;
 
-	private Flux<ByteBuf> body;
+	private final NettyDataBufferFactory bufferFactory;
 
-
-	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri, HttpClient httpClient, HttpHeaders headers) {
-		super(headers);
-		//FIXME use Netty factory
-		this.dataBufferFactory = new DefaultDataBufferFactory();
+	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri, HttpClientRequest httpRequest) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
-		this.httpClient = httpClient;
+		this.httpRequest = httpRequest;
+		this.bufferFactory = new NettyDataBufferFactory(httpRequest.delegate().alloc());
 	}
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		return this.dataBufferFactory;
+		return this.bufferFactory;
 	}
 
 	@Override
@@ -77,51 +71,15 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		return this.uri;
 	}
 
-	/**
-	 * Set the body of the message to the given {@link Publisher}.
-	 *
-	 * <p>Since the HTTP channel is not yet created when this method
-	 * is called, the {@code Mono<Void>} return value completes immediately.
-	 * For an event that signals that we're done writing the request, check the
-	 * {@link #execute()} method.
-	 *
-	 * @return a publisher that completes immediately.
-	 * @see #execute()
-	 */
 	@Override
 	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
-
-		this.body = Flux.from(body).map(this::toByteBuf);
-		return Mono.empty();
+		return applyBeforeCommit()
+				.then(httpRequest.send(Flux.from(body).map(this::toByteBuf)));
 	}
 
 	@Override
-	public Mono<ClientHttpResponse> execute() {
-
-		return this.httpClient.request(new io.netty.handler.codec.http.HttpMethod(httpMethod.toString()), uri.toString(),
-				channel -> {
-					// see https://github.com/reactor/reactor-io/pull/8
-					if (body == null) {
-						channel.removeTransferEncodingChunked();
-					}
-					return applyBeforeCommit()
-							.then(() -> {
-								getHeaders().entrySet().stream().forEach(e ->
-										channel.headers().set(e.getKey(), e.getValue()));
-								getCookies().values().stream().flatMap(Collection::stream).forEach(cookie ->
-										channel.addCookie(new DefaultCookie(cookie.getName(), cookie.getValue())));
-								return Mono.empty();
-							})
-							.then(() -> {
-								if (body != null) {
-									return channel.send(body);
-								}
-								else {
-									return channel.sendHeaders();
-								}
-							});
-				}).map(httpChannel -> new ReactorClientHttpResponse(httpChannel,
-				dataBufferFactory));
+	public Mono<Void> setComplete() {
+		return applyBeforeCommit().then(httpRequest.sendHeaders());
 	}
 
 	private ByteBuf toByteBuf(DataBuffer buffer) {
@@ -133,5 +91,18 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		}
 	}
 
-}
+	@Override
+	protected void writeHeaders() {
+		getHeaders().entrySet().stream()
+				.forEach(e -> this.httpRequest.headers().set(e.getKey(), e.getValue()));
+	}
 
+	@Override
+	protected void writeCookies() {
+		getCookies().values()
+				.stream().flatMap(cookies -> cookies.stream())
+				.map(cookie -> new DefaultCookie(cookie.getName(), cookie.getValue()))
+				.forEach(cookie -> this.httpRequest.addCookie(cookie));
+	}
+
+}

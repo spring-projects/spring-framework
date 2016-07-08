@@ -20,33 +20,19 @@ import java.util.List;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.codec.Decoder;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
 
 /**
- * Default implementation of the {@link WebResponse} interface
+ * A {@code ResponseExtractor} extracts the relevant part of a
+ * raw {@link org.springframework.http.client.reactive.ClientHttpResponse},
+ * optionally decoding the response body and using a target composition API.
+ *
+ * <p>See static factory methods in {@link ResponseExtractors}.
  *
  * @author Brian Clozel
  */
-public class DefaultWebResponse implements WebResponse {
+public interface ResponseExtractor<T> {
 
-	private final Mono<ClientHttpResponse> clientResponse;
-
-	private final List<Decoder<?>> messageDecoders;
-
-
-	public DefaultWebResponse(Mono<ClientHttpResponse> clientResponse, List<Decoder<?>> messageDecoders) {
-		this.clientResponse = clientResponse;
-		this.messageDecoders = messageDecoders;
-	}
-
-	@Override
-	public Mono<ClientHttpResponse> getClientResponse() {
-		return this.clientResponse;
-	}
-
-	@Override
-	public List<Decoder<?>> getMessageDecoders() {
-		return this.messageDecoders;
-	}
+	T extract(Mono<ClientHttpResponse> clientResponse, List<HttpMessageConverter<?>> messageConverters);
 }

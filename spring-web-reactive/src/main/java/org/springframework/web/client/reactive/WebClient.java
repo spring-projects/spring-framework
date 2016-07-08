@@ -16,12 +16,17 @@
 
 package org.springframework.web.client.reactive;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.logging.Level;
 
-import reactor.core.publisher.Mono;
+import org.reactivestreams.Publisher;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ByteBufferDecoder;
@@ -31,105 +36,194 @@ import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
-import org.springframework.http.client.reactive.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.codec.xml.Jaxb2Decoder;
+import org.springframework.http.codec.xml.Jaxb2Encoder;
+import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
+import org.springframework.util.ClassUtils;
+
+import reactor.core.publisher.Mono;
 
 /**
  * Reactive Web client supporting the HTTP/1.1 protocol
  *
  * <p>Here is a simple example of a GET request:
+ *
  * <pre class="code">
- * WebClient client = new WebClient(new ReactorHttpClientRequestFactory());
+ * // should be shared between HTTP calls
+ * WebClient client = new WebClient(new ReactorHttpClient());
+ *
  * Mono&lt;String&gt; result = client
- * 		.perform(HttpRequestBuilders.get("http://example.org/resource")
- * 			.accept(MediaType.TEXT_PLAIN))
- * 		.extract(WebResponseExtractors.body(String.class));
+ * 		.perform(ClientWebRequestBuilders.get("http://example.org/resource")
+ * 				.accept(MediaType.TEXT_PLAIN))
+ * 		.extract(ResponseExtractors.body(String.class));
  * </pre>
  *
  * <p>This Web client relies on
  * <ul>
- *     <li>a {@link ClientHttpRequestFactory} that drives the underlying library (e.g. Reactor-Net, RxNetty...)</li>
- *     <li>an {@link HttpRequestBuilder} which create a Web request with a builder API (see {@link HttpRequestBuilders})</li>
- *     <li>an {@link WebResponseExtractor} which extracts the relevant part of the server response
- *     with the composition API of choice (see {@link WebResponseExtractors}</li>
+ * <li>an {@link ClientHttpConnector} implementation that drives the underlying library (e.g. Reactor-Netty)</li>
+ * <li>a {@link ClientWebRequestBuilder} which creates a Web request with a builder API (see
+ * {@link ClientWebRequestBuilders})</li>
+ * <li>an {@link ResponseExtractor} which extracts the relevant part of the server
+ * response with the composition API of choice (see {@link ResponseExtractors}</li>
  * </ul>
  *
  * @author Brian Clozel
- * @see HttpRequestBuilders
- * @see WebResponseExtractors
+ * @see ClientWebRequestBuilders
+ * @see ResponseExtractors
  */
 public final class WebClient {
 
-	private ClientHttpRequestFactory requestFactory;
+	private static final ClassLoader classLoader = WebClient.class.getClassLoader();
 
-	private List<Encoder<?>> messageEncoders;
+	private static final boolean jackson2Present = ClassUtils
+			.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader)
+			&& ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+			classLoader);
 
-	private List<Decoder<?>> messageDecoders;
+	private static final boolean jaxb2Present = ClassUtils
+			.isPresent("javax.xml.bind.Binder", classLoader);
+
+	private ClientHttpConnector clientHttpConnector;
+
+	private List<HttpMessageConverter<?>> messageConverters;
 
 	/**
-	 * Create a {@code ReactiveRestClient} instance, using the {@link ClientHttpRequestFactory}
-	 * implementation given as an argument to drive the underlying HTTP client implementation.
+	 * Create a {@code WebClient} instance, using the {@link ClientHttpConnector}
+	 * implementation given as an argument to drive the underlying
+	 * implementation.
 	 *
 	 * Register by default the following Encoders and Decoders:
 	 * <ul>
-	 *     <li>{@link ByteBufferEncoder} / {@link ByteBufferDecoder}</li>
-	 *     <li>{@link StringEncoder} / {@link StringDecoder}</li>
-	 *     <li>{@link JacksonJsonEncoder} / {@link JacksonJsonDecoder}</li>
+	 * <li>{@link ByteBufferEncoder} / {@link ByteBufferDecoder}</li>
+	 * <li>{@link StringEncoder} / {@link StringDecoder}</li>
+	 * <li>{@link Jaxb2Encoder} / {@link Jaxb2Decoder}</li>
+	 * <li>{@link JacksonJsonEncoder} / {@link JacksonJsonDecoder}</li>
 	 * </ul>
 	 *
-	 * @param requestFactory the {@code ClientHttpRequestFactory} to use
+	 * @param clientHttpConnector the {@code ClientHttpRequestFactory} to use
 	 */
-	public WebClient(ClientHttpRequestFactory requestFactory) {
-		this.requestFactory = requestFactory;
-		this.messageEncoders = Arrays.asList(new ByteBufferEncoder(), new StringEncoder(),
-				new JacksonJsonEncoder());
-		this.messageDecoders = Arrays.asList(new ByteBufferDecoder(), new StringDecoder(),
-				new JacksonJsonDecoder());
+	public WebClient(ClientHttpConnector clientHttpConnector) {
+		this.clientHttpConnector = clientHttpConnector;
+		this.messageConverters = new ArrayList<>();
+		addDefaultHttpMessageConverters(this.messageConverters);
 	}
 
 	/**
-	 * Set the list of {@link Encoder}s to use for encoding messages
+	 * Adds default HTTP message converters
 	 */
-	public void setMessageEncoders(List<Encoder<?>> messageEncoders) {
-		this.messageEncoders = messageEncoders;
+	protected final void addDefaultHttpMessageConverters(
+			List<HttpMessageConverter<?>> converters) {
+		converters.add(converter(new ByteBufferEncoder(), new ByteBufferDecoder()));
+		converters.add(converter(new StringEncoder(), new StringDecoder()));
+		converters.add(new ResourceHttpMessageConverter());
+		if (jaxb2Present) {
+			converters.add(converter(new Jaxb2Encoder(), new Jaxb2Decoder()));
+		}
+		if (jackson2Present) {
+			converters.add(converter(new JacksonJsonEncoder(), new JacksonJsonDecoder()));
+		}
+	}
+
+	private static <T> HttpMessageConverter<T> converter(Encoder<T> encoder,
+			Decoder<T> decoder) {
+		return new CodecHttpMessageConverter<>(encoder, decoder);
 	}
 
 	/**
-	 * Set the list of {@link Decoder}s to use for decoding messages
+	 * Set the list of {@link HttpMessageConverter}s to use for encoding and decoding HTTP
+	 * messages
 	 */
-	public void setMessageDecoders(List<Decoder<?>> messageDecoders) {
-		this.messageDecoders = messageDecoders;
+	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
+		this.messageConverters = messageConverters;
 	}
 
 	/**
 	 * Perform the actual HTTP request/response exchange
 	 *
-	 * <p>Pulling demand from the exposed {@code Flux} will result in:
+	 * <p>
+	 * Requesting from the exposed {@code Flux} will result in:
 	 * <ul>
-	 *     <li>building the actual HTTP request using the provided {@code RequestBuilder}</li>
-	 *     <li>encoding the HTTP request body with the configured {@code Encoder}s</li>
-	 *     <li>returning the response with a publisher of the body</li>
+	 * <li>building the actual HTTP request using the provided {@code ClientWebRequestBuilder}</li>
+	 * <li>encoding the HTTP request body with the configured {@code HttpMessageConverter}s</li>
+	 * <li>returning the response with a publisher of the body</li>
 	 * </ul>
 	 */
-	public WebResponseActions perform(HttpRequestBuilder builder) {
+	public WebResponseActions perform(ClientWebRequestBuilder builder) {
 
-		ClientHttpRequest request = builder.build(this.requestFactory, this.messageEncoders);
-		final Mono<ClientHttpResponse> clientResponse = request.execute()
-				.log("org.springframework.http.client.reactive");
+		ClientWebRequest clientWebRequest = builder.build();
+
+		final Mono<ClientHttpResponse> clientResponse = this.clientHttpConnector
+				.connect(clientWebRequest.getMethod(), clientWebRequest.getUrl(),
+						new DefaultRequestCallback(clientWebRequest))
+				.log("org.springframework.web.client.reactive", Level.FINE);
 
 		return new WebResponseActions() {
 			@Override
 			public void doWithStatus(Consumer<HttpStatus> consumer) {
-				// TODO: implement
+				clientResponse.doOnNext(clientHttpResponse ->
+						consumer.accept(clientHttpResponse.getStatusCode()));
 			}
 
 			@Override
-			public <T> T extract(WebResponseExtractor<T> extractor) {
-				return extractor.extract(new DefaultWebResponse(clientResponse, messageDecoders));
+			public <T> T extract(ResponseExtractor<T> extractor) {
+				return extractor.extract(clientResponse, messageConverters);
 			}
-
 		};
+	}
+
+	protected class DefaultRequestCallback implements Function<ClientHttpRequest, Mono<Void>> {
+
+		private final ClientWebRequest clientWebRequest;
+
+		public DefaultRequestCallback(ClientWebRequest clientWebRequest) {
+			this.clientWebRequest = clientWebRequest;
+		}
+
+		@Override
+		public Mono<Void> apply(ClientHttpRequest clientHttpRequest) {
+			clientHttpRequest.getHeaders().putAll(this.clientWebRequest.getHttpHeaders());
+			if (clientHttpRequest.getHeaders().getAccept().isEmpty()) {
+				clientHttpRequest.getHeaders().setAccept(
+						Collections.singletonList(MediaType.ALL));
+			}
+			clientWebRequest.getCookies().values()
+					.stream().flatMap(cookies -> cookies.stream())
+					.forEach(cookie -> clientHttpRequest.getCookies().add(cookie.getName(), cookie));
+			if (this.clientWebRequest.getBody() != null) {
+				return writeRequestBody(this.clientWebRequest.getBody(),
+						this.clientWebRequest.getElementType(), clientHttpRequest, messageConverters);
+			}
+			else {
+				return clientHttpRequest.setComplete();
+			}
+		}
+
+		protected Mono<Void> writeRequestBody(Publisher<?> content,
+				ResolvableType requestType, ClientHttpRequest request,
+				List<HttpMessageConverter<?>> messageConverters) {
+
+			MediaType contentType = request.getHeaders().getContentType();
+			Optional<HttpMessageConverter<?>> converter = resolveConverter(messageConverters, requestType, contentType);
+			if (!converter.isPresent()) {
+				return Mono.error(new IllegalStateException(
+						"Could not encode request body of type '" + contentType
+								+ "' with target type '" + requestType.toString() + "'"));
+			}
+			// noinspection unchecked
+			return converter.get().write((Publisher) content, requestType, contentType, request);
+		}
+
+		protected Optional<HttpMessageConverter<?>> resolveConverter(
+				List<HttpMessageConverter<?>> messageConverters, ResolvableType type,
+				MediaType mediaType) {
+			return messageConverters.stream().filter(e -> e.canWrite(type, mediaType)).findFirst();
+		}
 	}
 
 }

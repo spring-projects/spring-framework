@@ -17,12 +17,15 @@
 package org.springframework.http.client.reactive;
 
 import java.util.Collection;
+import java.util.function.Function;
 
+import io.netty.buffer.ByteBuf;
 import reactor.core.publisher.Flux;
-import reactor.io.netty.http.HttpInbound;
+import reactor.io.netty.http.HttpClientResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -31,44 +34,47 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@link ClientHttpResponse} implementation for the Reactor Net HTTP client
+ * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client
  *
  * @author Brian Clozel
  * @see reactor.io.netty.http.HttpClient
  */
 public class ReactorClientHttpResponse implements ClientHttpResponse {
 
-	private final DataBufferFactory dataBufferFactory;
+	private final NettyDataBufferFactory dataBufferFactory;
 
-	private final HttpInbound channel;
+	private final HttpClientResponse response;
 
-	public ReactorClientHttpResponse(HttpInbound channel,
-			DataBufferFactory dataBufferFactory) {
-		this.dataBufferFactory = dataBufferFactory;
-		this.channel = channel;
+	public ReactorClientHttpResponse(HttpClientResponse response) {
+		this.response = response;
+		this.dataBufferFactory = new NettyDataBufferFactory(response.delegate().alloc());
 	}
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return channel.receiveByteBuffer().map(dataBufferFactory::wrap);
+		return response.receive()
+				.map(buf -> {
+					buf.retain();
+					return dataBufferFactory.wrap(buf);
+				});
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.channel.responseHeaders().entries().stream().forEach(e -> headers.add(e.getKey(), e.getValue()));
+		this.response.responseHeaders().entries().stream().forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
 	}
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.channel.status().code());
+		return HttpStatus.valueOf(this.response.status().code());
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
 		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
-		this.channel.cookies().values().stream().flatMap(Collection::stream)
+		this.response.cookies().values().stream().flatMap(Collection::stream)
 				.forEach(cookie -> {
 					ResponseCookie responseCookie = ResponseCookie.from(cookie.name(), cookie.value())
 							.domain(cookie.domain())
@@ -85,7 +91,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
-				"request=" + this.channel.method().name() + " " + this.channel.uri() + "," +
+				"request=" + this.response.method().name() + " " + this.response.uri() + "," +
 				"status=" + getStatusCode() +
 				'}';
 	}

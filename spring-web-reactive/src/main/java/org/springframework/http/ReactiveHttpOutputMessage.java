@@ -62,4 +62,15 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 */
 	DataBufferFactory bufferFactory();
 
+	/**
+	 * Indicate that message handling is complete, allowing for any cleanup or
+	 * end-of-processing tasks to be performed such as applying header changes
+	 * made via {@link #getHeaders()} to the underlying HTTP message (if not
+	 * applied already).
+	 * <p>This method should be automatically invoked at the end of message
+	 * processing so typically applications should not have to invoke it.
+	 * If invoked multiple times it should have no side effects.
+	 */
+	Mono<Void> setComplete();
+
 }

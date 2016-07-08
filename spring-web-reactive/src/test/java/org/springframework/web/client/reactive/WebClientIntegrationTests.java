@@ -17,8 +17,8 @@
 package org.springframework.web.client.reactive;
 
 import static org.junit.Assert.*;
-import static org.springframework.web.client.reactive.HttpRequestBuilders.*;
-import static org.springframework.web.client.reactive.WebResponseExtractors.*;
+import static org.springframework.web.client.reactive.ClientWebRequestBuilders.*;
+import static org.springframework.web.client.reactive.ResponseExtractors.*;
 
 import java.util.function.Consumer;
 
@@ -38,9 +38,11 @@ import org.springframework.http.codec.Pojo;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 
 /**
+ * {@link WebClient} integration tests with the {@code Flux} and {@code Mono} API.
+ *
  * @author Brian Clozel
  */
 public class WebClientIntegrationTests {
@@ -52,7 +54,7 @@ public class WebClientIntegrationTests {
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
-		this.webClient = new WebClient(new ReactorHttpClientRequestFactory());
+		this.webClient = new WebClient(new ReactorClientHttpConnector());
 	}
 
 	@Test
@@ -228,12 +230,14 @@ public class WebClientIntegrationTests {
 	public void shouldPostPojoAsJson() throws Exception {
 
 		HttpUrl baseUrl = server.url("/pojo/capitalize");
-		this.server.enqueue(new MockResponse().setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}"));
+		this.server.enqueue(new MockResponse()
+				.setHeader("Content-Type", "application/json")
+				.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}"));
 
 		Pojo spring = new Pojo("foofoo", "barbar");
 		Mono<Pojo> result = this.webClient
 				.perform(post(baseUrl.toString())
-						.content(spring)
+						.body(spring)
 						.contentType(MediaType.APPLICATION_JSON)
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(body(Pojo.class));
@@ -253,6 +257,28 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
+	public void shouldSendCookieHeader() throws Exception {
+		HttpUrl baseUrl = server.url("/test");
+		this.server.enqueue(new MockResponse()
+				.setHeader("Content-Type", "text/plain").setBody("test"));
+
+		Mono<String> result = this.webClient
+				.perform(get(baseUrl.toString())
+						.cookie("testkey", "testvalue"))
+				.extract(body(String.class));
+
+		TestSubscriber
+				.subscribe(result)
+				.awaitAndAssertNextValues("test")
+				.assertComplete();
+
+		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/test", request.getPath());
+		assertEquals("testkey=testvalue", request.getHeader(HttpHeaders.COOKIE));
+	}
+
+	@Test
 	public void shouldGetErrorWhen404() throws Exception {
 
 		HttpUrl baseUrl = server.url("/greeting?name=Spring");
@@ -262,7 +288,6 @@ public class WebClientIntegrationTests {
 				.perform(get(baseUrl.toString()))
 				.extract(body(String.class));
 
-		// TODO: error message should be converted to a ClientException
 		TestSubscriber
 				.subscribe(result)
 				.await()

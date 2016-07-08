@@ -18,15 +18,16 @@ package org.springframework.http.server.reactive;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.springframework.web.client.reactive.HttpRequestBuilders.get;
-import static org.springframework.web.client.reactive.WebResponseExtractors.bodyStream;
+
+import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
+import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.FlushingDataBuffer;
-import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.client.reactive.WebClient;
 
 /**
@@ -39,7 +40,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		this.webClient = new WebClient(new ReactorHttpClientRequestFactory());
+		this.webClient = new WebClient(new ReactorClientHttpConnector());
 	}
 
 	@Test

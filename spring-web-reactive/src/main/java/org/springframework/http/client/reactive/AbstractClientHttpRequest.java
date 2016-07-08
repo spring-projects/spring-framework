@@ -46,13 +46,13 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private final List<Supplier<? extends Mono<Void>>> beforeCommitActions = new ArrayList<>(4);
 
-	public AbstractClientHttpRequest(HttpHeaders httpHeaders) {
-		if (httpHeaders == null) {
-			this.headers = new HttpHeaders();
-		}
-		else {
-			this.headers = httpHeaders;
-		}
+	public AbstractClientHttpRequest() {
+		this(new HttpHeaders());
+	}
+
+	public AbstractClientHttpRequest(HttpHeaders headers) {
+		Assert.notNull(headers);
+		this.headers = headers;
 		this.cookies = new LinkedMultiValueMap<>();
 	}
 
@@ -85,8 +85,8 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 					})
 					.then(() -> {
 						this.state.set(State.COMITTED);
-						//writeHeaders();
-						//writeCookies();
+						writeHeaders();
+						writeCookies();
 						return Mono.empty();
 					});
 		}
@@ -98,6 +98,10 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		Assert.notNull(action);
 		this.beforeCommitActions.add(action);
 	}
+
+	protected abstract void writeHeaders();
+
+	protected abstract void writeCookies();
 
 	private enum State {NEW, COMMITTING, COMITTED}
 }

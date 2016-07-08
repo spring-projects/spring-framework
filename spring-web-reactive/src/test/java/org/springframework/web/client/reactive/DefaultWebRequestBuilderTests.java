@@ -16,33 +16,41 @@
 
 package org.springframework.web.client.reactive;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+
 import org.springframework.http.HttpMethod;
 
 /**
  *
  * @author Rob Winch
- *
  */
-public class DefaultHttpRequestBuilderTests {
-	private DefaultHttpRequestBuilder builder;
+public class DefaultWebRequestBuilderTests {
+	private DefaultClientWebRequestBuilder builder;
 
 	@Before
 	public void setup() {
-		builder = new DefaultHttpRequestBuilder(HttpMethod.GET, "https://example.com/foo");
+		builder = new DefaultClientWebRequestBuilder(HttpMethod.GET, "https://example.com/foo");
 	}
 
 	@Test
 	public void apply() {
-		RequestPostProcessor postProcessor = mock(RequestPostProcessor.class);
+		ClientWebRequestPostProcessor postProcessor = mock(ClientWebRequestPostProcessor.class);
+		when(postProcessor.postProcess(any(ClientWebRequest.class))).thenAnswer(new Answer<ClientWebRequest>() {
+			@Override
+			public ClientWebRequest answer(InvocationOnMock invocation) throws Throwable {
+				return (ClientWebRequest) invocation.getArguments()[0];
+			}
+		});
 
-		builder.apply(postProcessor);
+		ClientWebRequest webRequest = builder.apply(postProcessor).build();
 
-		verify(postProcessor).postProcess(builder);
+		verify(postProcessor).postProcess(webRequest);
 	}
 
 	@Test(expected = IllegalArgumentException.class)

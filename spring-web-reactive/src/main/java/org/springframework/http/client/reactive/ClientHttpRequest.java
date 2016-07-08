@@ -18,8 +18,6 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ReactiveHttpOutputMessage;
@@ -47,15 +45,5 @@ public interface ClientHttpRequest extends ReactiveHttpOutputMessage {
 	 * Return a mutable map of request cookies to send to the server.
 	 */
 	MultiValueMap<String, HttpCookie> getCookies();
-
-	/**
-	 * Execute this request, resulting in a reactive stream of a single
-	 * {@link org.springframework.http.client.ClientHttpResponse}.
-	 *
-	 * @return a {@code Mono<ClientHttpResponse>} that signals when the the response
-	 * status and headers have been received. The response body is made available with
-	 * a separate Publisher within the {@code ClientHttpResponse}.
-	 */
-	Mono<ClientHttpResponse> execute();
 
 }

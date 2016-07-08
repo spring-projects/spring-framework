@@ -13,31 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.function.Function;
 
-import org.reactivestreams.Publisher;
-
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
+import reactor.core.publisher.Mono;
+
 /**
- * Factory for {@link ClientHttpRequest} objects.
+ * Reactor-Netty implementation of {@link ClientHttpConnector}
  *
  * @author Brian Clozel
  */
-public interface ClientHttpRequestFactory {
+public class ReactorClientHttpConnector implements ClientHttpConnector {
 
-	/**
-	 * Create a new {@link ClientHttpRequest} for the specified HTTP method, URI and headers
-	 * <p>The returned request can be {@link ClientHttpRequest#writeWith(Publisher) written to},
-	 * and then executed by calling {@link ClientHttpRequest#execute()}
-	 *
-	 * @param httpMethod the HTTP method to execute
-	 * @param uri the URI to create a request for
-	 * @param headers the HTTP request headers
-	 */
-	ClientHttpRequest createRequest(HttpMethod httpMethod, URI uri, HttpHeaders headers);
+	@Override
+	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
+			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
+		return reactor.io.netty.http.HttpClient.create(uri.getHost(), uri.getPort())
+				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()),
+						uri.toString(),
+						httpOutbound -> requestCallback.apply(new ReactorClientHttpRequest(method, uri, httpOutbound)))
+				.map(httpInbound -> new ReactorClientHttpResponse(httpInbound));
+	}
 }

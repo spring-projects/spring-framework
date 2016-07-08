@@ -45,5 +45,5 @@ public interface WebResponseActions {
 	 *   .extract(response(String.class));
 	 * </pre>
 	 */
-	<T> T extract(WebResponseExtractor<T> extractor);
+	<T> T extract(ResponseExtractor<T> extractor);
 }

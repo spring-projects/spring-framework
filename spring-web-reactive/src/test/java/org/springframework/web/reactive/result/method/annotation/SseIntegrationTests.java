@@ -16,7 +16,11 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import static org.springframework.web.client.reactive.ClientWebRequestBuilders.*;
+import static org.springframework.web.client.reactive.ResponseExtractors.*;
+
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,14 +33,16 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ByteBufferDecoder;
+import org.springframework.core.codec.ByteBufferEncoder;
+import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.StringDecoder;
+import org.springframework.core.codec.StringEncoder;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.core.codec.StringDecoder;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
-import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
@@ -48,9 +54,6 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 import org.springframework.web.reactive.sse.SseEvent;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
-
-import static org.springframework.web.client.reactive.HttpRequestBuilders.get;
-import static org.springframework.web.client.reactive.WebResponseExtractors.bodyStream;
 
 /**
  * @author Sebastien Deleuze
@@ -64,11 +67,12 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		this.webClient = new WebClient(new ReactorHttpClientRequestFactory());
-		this.webClient.setMessageDecoders(Arrays.asList(
-				new ByteBufferDecoder(),
-				new StringDecoder(false),
-				new JacksonJsonDecoder()));
+		this.webClient = new WebClient(new ReactorClientHttpConnector());
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new CodecHttpMessageConverter<>(new ByteBufferEncoder(), new ByteBufferDecoder()));
+		converters.add(new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder(false)));
+		converters.add(new CodecHttpMessageConverter<>(new JacksonJsonEncoder(), new JacksonJsonDecoder()));
+		this.webClient.setMessageConverters(converters);
 	}
 
 	@Override
