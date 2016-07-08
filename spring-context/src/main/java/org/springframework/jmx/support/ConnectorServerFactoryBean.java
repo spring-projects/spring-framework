@@ -138,7 +138,7 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	 * the {@code JMXConnectorServer} will be started in a separate thread.
 	 * If the {@code daemon} flag is set to {@code true}, that thread will be
 	 * started as a daemon thread.
-	 * @throws JMException if a problem occured when registering the connector server
+	 * @throws JMException if a problem occurred when registering the connector server
 	 * with the {@code MBeanServer}
 	 * @throws IOException if there is a problem starting the connector server
 	 */
