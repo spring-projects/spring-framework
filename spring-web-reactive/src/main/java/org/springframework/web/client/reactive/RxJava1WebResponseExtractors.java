@@ -53,7 +53,7 @@ public class RxJava1WebResponseExtractors {
 
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
 		//noinspection unchecked
-		return webResponse -> (Single<T>) RxJava1SingleConverter.from(webResponse.getClientResponse()
+		return webResponse -> (Single<T>) RxJava1SingleConverter.fromPublisher(webResponse.getClientResponse()
 				.flatMap(resp -> decodeResponseBody(resp, resolvableType, webResponse.getMessageDecoders()))
 				.next());
 	}
@@ -64,7 +64,7 @@ public class RxJava1WebResponseExtractors {
 	public static <T> WebResponseExtractor<Observable<T>> bodyStream(Class<T> sourceClass) {
 
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return webResponse -> RxJava1ObservableConverter.from(webResponse.getClientResponse()
+		return webResponse -> RxJava1ObservableConverter.fromPublisher(webResponse.getClientResponse()
 				.flatMap(resp -> decodeResponseBody(resp, resolvableType, webResponse.getMessageDecoders())));
 	}
 
@@ -76,7 +76,7 @@ public class RxJava1WebResponseExtractors {
 
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
 		return webResponse -> (Single<ResponseEntity<T>>)
-				RxJava1SingleConverter.from(webResponse.getClientResponse()
+				RxJava1SingleConverter.fromPublisher(webResponse.getClientResponse()
 						.then(response ->
 								Mono.when(
 										decodeResponseBody(response, resolvableType, webResponse.getMessageDecoders()).next(),
@@ -94,10 +94,10 @@ public class RxJava1WebResponseExtractors {
 	 */
 	public static <T> WebResponseExtractor<Single<ResponseEntity<Observable<T>>>> responseStream(Class<T> sourceClass) {
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return webResponse -> RxJava1SingleConverter.from(webResponse.getClientResponse()
+		return webResponse -> RxJava1SingleConverter.fromPublisher(webResponse.getClientResponse()
 				.map(response -> new ResponseEntity<>(
 						RxJava1ObservableConverter
-								.from(decodeResponseBody(response, resolvableType, webResponse.getMessageDecoders())),
+								.fromPublisher(decodeResponseBody(response, resolvableType, webResponse.getMessageDecoders())),
 						response.getHeaders(),
 						response.getStatusCode())));
 	}
@@ -107,7 +107,7 @@ public class RxJava1WebResponseExtractors {
 	 */
 	public static WebResponseExtractor<Single<HttpHeaders>> headers() {
 		return webResponse -> RxJava1SingleConverter
-				.from(webResponse.getClientResponse().map(resp -> resp.getHeaders()));
+				.fromPublisher(webResponse.getClientResponse().map(resp -> resp.getHeaders()));
 	}
 
 	protected static <T> Flux<T> decodeResponseBody(ClientHttpResponse response, ResolvableType responseType,

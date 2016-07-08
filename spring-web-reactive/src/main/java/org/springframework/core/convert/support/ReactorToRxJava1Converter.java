@@ -56,22 +56,22 @@ public final class ReactorToRxJava1Converter implements GenericConverter {
 			return null;
 		}
 		if (Observable.class.isAssignableFrom(sourceType.getType())) {
-			return RxJava1ObservableConverter.from((Observable) source);
+			return RxJava1ObservableConverter.toPublisher((Observable) source);
 		}
 		else if (Observable.class.isAssignableFrom(targetType.getType())) {
-			return RxJava1ObservableConverter.from((Publisher) source);
+			return RxJava1ObservableConverter.fromPublisher((Publisher) source);
 		}
 		else if (Single.class.isAssignableFrom(sourceType.getType())) {
-			return RxJava1SingleConverter.from((Single) source);
+			return RxJava1SingleConverter.toPublisher((Single) source);
 		}
 		else if (Single.class.isAssignableFrom(targetType.getType())) {
-			return RxJava1SingleConverter.from((Publisher) source);
+			return RxJava1SingleConverter.fromPublisher((Publisher) source);
 		}
 		else if (Completable.class.isAssignableFrom(sourceType.getType())) {
-			return RxJava1CompletableConverter.from((Completable) source);
+			return RxJava1CompletableConverter.toPublisher((Completable) source);
 		}
 		else if (Completable.class.isAssignableFrom(targetType.getType())) {
-			return RxJava1CompletableConverter.from((Publisher) source);
+			return RxJava1CompletableConverter.fromPublisher((Publisher) source);
 		}
 		return null;
 	}

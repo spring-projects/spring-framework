@@ -71,8 +71,8 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
-		Observable<ByteBuf> content = RxJava1ObservableConverter.from(body).map(this::toByteBuf);
-		return RxJava1ObservableConverter.from(this.response.write(content, bb -> bb instanceof FlushingByteBuf)).then();
+		Observable<ByteBuf> content = RxJava1ObservableConverter.fromPublisher(body).map(this::toByteBuf);
+		return RxJava1ObservableConverter.toPublisher(this.response.write(content, bb -> bb instanceof FlushingByteBuf)).then();
 	}
 
 	private ByteBuf toByteBuf(DataBuffer buffer) {

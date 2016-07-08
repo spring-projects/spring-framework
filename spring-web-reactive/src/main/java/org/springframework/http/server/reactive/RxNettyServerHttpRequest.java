@@ -94,7 +94,7 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		Observable<DataBuffer> content = this.request.getContent().map(dataBufferFactory::wrap);
-		return RxJava1ObservableConverter.from(content);
+		return RxJava1ObservableConverter.toPublisher(content);
 	}
 
 }

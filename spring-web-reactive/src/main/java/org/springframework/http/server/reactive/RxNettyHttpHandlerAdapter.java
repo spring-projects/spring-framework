@@ -49,7 +49,7 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 		RxNettyServerHttpResponse adaptedResponse =
 				new RxNettyServerHttpResponse(response, dataBufferFactory);
 		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
-		return RxJava1ObservableConverter.from(result);
+		return RxJava1ObservableConverter.fromPublisher(result);
 	}
 
 }

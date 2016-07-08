@@ -79,7 +79,7 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
 
-		this.body = RxJava1ObservableConverter.from(Flux.from(body)
+		this.body = RxJava1ObservableConverter.fromPublisher(Flux.from(body)
 				.map(b -> dataBufferFactory.wrap(b.asByteBuffer()).getNativeBuffer()));
 
 		return Mono.empty();
@@ -119,10 +119,10 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 					})
 					.map(req -> {
 						if (this.body != null) {
-							return RxJava1ObservableConverter.from(req.writeContent(this.body));
+							return RxJava1ObservableConverter.toPublisher(req.writeContent(this.body));
 						}
 						else {
-							return RxJava1ObservableConverter.from(req);
+							return RxJava1ObservableConverter.toPublisher(req);
 						}
 					})
 					.flatMap(resp -> resp)

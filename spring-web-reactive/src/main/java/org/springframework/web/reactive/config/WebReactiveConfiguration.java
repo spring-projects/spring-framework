@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import reactor.core.converter.DependencyUtils;
+import reactor.core.converter.Converters;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -288,7 +288,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(new MonoToCompletableFutureConverter());
-		if (DependencyUtils.hasRxJava1()) {
+		if (Converters.hasRxJava1()) {
 			registry.addConverter(new ReactorToRxJava1Converter());
 		}
 	}

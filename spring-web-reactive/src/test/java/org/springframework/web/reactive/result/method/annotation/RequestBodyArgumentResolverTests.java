@@ -165,12 +165,12 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Single.class, String.class);
 
 		Single<String> single = resolveValueWithEmptyBody(type, true);
-		TestSubscriber.subscribe(RxJava1SingleConverter.from(single))
+		TestSubscriber.subscribe(RxJava1SingleConverter.toPublisher(single))
 				.assertNoValues()
 				.assertError(ServerWebInputException.class);
 
 		single = resolveValueWithEmptyBody(type, false);
-		TestSubscriber.subscribe(RxJava1SingleConverter.from(single))
+		TestSubscriber.subscribe(RxJava1SingleConverter.toPublisher(single))
 				.assertNoValues()
 				.assertError(ServerWebInputException.class);
 	}
@@ -180,12 +180,12 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Observable.class, String.class);
 
 		Observable<String> observable = resolveValueWithEmptyBody(type, true);
-		TestSubscriber.subscribe(RxJava1ObservableConverter.from(observable))
+		TestSubscriber.subscribe(RxJava1ObservableConverter.toPublisher(observable))
 				.assertNoValues()
 				.assertError(ServerWebInputException.class);
 
 		observable = resolveValueWithEmptyBody(type, false);
-		TestSubscriber.subscribe(RxJava1ObservableConverter.from(observable))
+		TestSubscriber.subscribe(RxJava1ObservableConverter.toPublisher(observable))
 				.assertNoValues()
 				.assertComplete();
 	}

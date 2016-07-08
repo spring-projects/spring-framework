@@ -85,7 +85,7 @@ public class RxNettyClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return RxJava1ObservableConverter
-				.from(this.response.getContent().map(dataBufferFactory::wrap));
+				.toPublisher(this.response.getContent().map(dataBufferFactory::wrap));
 	}
 
 	@Override

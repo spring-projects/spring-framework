@@ -156,7 +156,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Single.class, String.class));
 		HttpEntity<Single<String>> entity = resolveValueWithEmptyBody(type);
 
-		TestSubscriber.subscribe(RxJava1SingleConverter.from(entity.getBody()))
+		TestSubscriber.subscribe(RxJava1SingleConverter.toPublisher(entity.getBody()))
 				.assertNoValues()
 				.assertError(ServerWebInputException.class);
 	}
@@ -166,7 +166,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Observable.class, String.class));
 		HttpEntity<Observable<String>> entity = resolveValueWithEmptyBody(type);
 
-		TestSubscriber.subscribe(RxJava1ObservableConverter.from(entity.getBody()))
+		TestSubscriber.subscribe(RxJava1ObservableConverter.toPublisher(entity.getBody()))
 				.assertNoError()
 				.assertComplete()
 				.assertNoValues();
