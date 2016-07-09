@@ -27,7 +27,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,26 +36,21 @@ import static org.junit.Assert.*;
 import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
- * JUnit 4 based integration test for verifying that '<i>before</i>' and '<i>after</i>'
+ * Integration tests which verify that '<i>before</i>' and '<i>after</i>'
  * methods of {@link TestExecutionListener TestExecutionListeners} as well as
- * {@link BeforeTransaction &#064;BeforeTransaction} and
- * {@link AfterTransaction &#064;AfterTransaction} methods can fail a test in a
- * JUnit environment, as requested in
- * <a href="https://jira.spring.io/browse/SPR-3960" target="_blank">SPR-3960</a>.
+ * {@code @BeforeTransaction} and {@code @AfterTransaction} methods can fail
+ * tests run via the {@link SpringRunner} in a JUnit 4 environment.
  *
- * <p>Indirectly, this class also verifies that all {@link TestExecutionListener}
+ * <p>See: <a href="https://jira.spring.io/browse/SPR-3960" target="_blank">SPR-3960</a>.
+ *
+ * <p>Indirectly, this class also verifies that all {@code TestExecutionListener}
  * lifecycle callbacks are called.
- *
- * <p>As of Spring 3.0, this class also tests support for the new
- * {@link TestExecutionListener#beforeTestClass(TestContext) beforeTestClass()}
- * and {@link TestExecutionListener#afterTestClass(TestContext)
- * afterTestClass()} lifecycle callback methods.
  *
  * @author Sam Brannen
  * @since 2.5
  */
 @RunWith(Parameterized.class)
-public class FailingBeforeAndAfterMethodsJUnitTests {
+public class FailingBeforeAndAfterMethodsSpringRunnerTests {
 
 	protected final Class<?> clazz;
 
@@ -68,13 +62,15 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 			AlwaysFailingAfterTestClassTestCase.class.getSimpleName(),//
 			AlwaysFailingPrepareTestInstanceTestCase.class.getSimpleName(),//
 			AlwaysFailingBeforeTestMethodTestCase.class.getSimpleName(),//
+			AlwaysFailingBeforeTestExecutionTestCase.class.getSimpleName(), //
+			AlwaysFailingAfterTestExecutionTestCase.class.getSimpleName(), //
 			AlwaysFailingAfterTestMethodTestCase.class.getSimpleName(),//
 			FailingBeforeTransactionTestCase.class.getSimpleName(),//
 			FailingAfterTransactionTestCase.class.getSimpleName() //
 		};
 	}
 
-	public FailingBeforeAndAfterMethodsJUnitTests(String testClassName) throws Exception {
+	public FailingBeforeAndAfterMethodsSpringRunnerTests(String testClassName) throws Exception {
 		this.clazz = ClassUtils.forName(getClass().getName() + "." + testClassName, getClass().getClassLoader());
 	}
 
@@ -93,7 +89,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 
 	// -------------------------------------------------------------------
 
-	protected static class AlwaysFailingBeforeTestClassTestExecutionListener extends AbstractTestExecutionListener {
+	protected static class AlwaysFailingBeforeTestClassTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void beforeTestClass(TestContext testContext) {
@@ -101,7 +97,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 		}
 	}
 
-	protected static class AlwaysFailingAfterTestClassTestExecutionListener extends AbstractTestExecutionListener {
+	protected static class AlwaysFailingAfterTestClassTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void afterTestClass(TestContext testContext) {
@@ -109,7 +105,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 		}
 	}
 
-	protected static class AlwaysFailingPrepareTestInstanceTestExecutionListener extends AbstractTestExecutionListener {
+	protected static class AlwaysFailingPrepareTestInstanceTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void prepareTestInstance(TestContext testContext) throws Exception {
@@ -117,7 +113,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 		}
 	}
 
-	protected static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
+	protected static class AlwaysFailingBeforeTestMethodTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void beforeTestMethod(TestContext testContext) {
@@ -125,7 +121,15 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 		}
 	}
 
-	protected static class AlwaysFailingAfterTestMethodTestExecutionListener extends AbstractTestExecutionListener {
+	protected static class AlwaysFailingBeforeTestExecutionTestExecutionListener implements TestExecutionListener {
+
+		@Override
+		public void beforeTestExecution(TestContext testContext) {
+			fail("always failing beforeTestExecution()");
+		}
+	}
+
+	protected static class AlwaysFailingAfterTestMethodTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void afterTestMethod(TestContext testContext) {
@@ -133,8 +137,15 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 		}
 	}
 
+	protected static class AlwaysFailingAfterTestExecutionTestExecutionListener implements TestExecutionListener {
+
+		@Override
+		public void afterTestExecution(TestContext testContext) {
+			fail("always failing afterTestExecution()");
+		}
+	}
+
 	@RunWith(SpringRunner.class)
-	@TestExecutionListeners({})
 	public static abstract class BaseTestCase {
 
 		@Test
@@ -160,6 +171,16 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
+	}
+
+	@Ignore("TestCase classes are run manually by the enclosing test class")
+	@TestExecutionListeners(AlwaysFailingBeforeTestExecutionTestExecutionListener.class)
+	public static class AlwaysFailingBeforeTestExecutionTestCase extends BaseTestCase {
+	}
+
+	@Ignore("TestCase classes are run manually by the enclosing test class")
+	@TestExecutionListeners(AlwaysFailingAfterTestExecutionTestExecutionListener.class)
+	public static class AlwaysFailingAfterTestExecutionTestCase extends BaseTestCase {
 	}
 
 	@Ignore("TestCase classes are run manually by the enclosing test class")
