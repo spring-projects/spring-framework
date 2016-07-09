@@ -16,38 +16,13 @@
 
 package org.springframework.beans.factory.annotation;
 
-import java.beans.PropertyDescriptor;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.TypeConverter;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.InjectionPoint;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.*;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessorAdapter;
@@ -60,10 +35,17 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
@@ -409,13 +391,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<InjectionMetadata.InjectedElement>();
+			final List<InjectionMetadata.InjectedElement> currElements =
+					new ArrayList<InjectionMetadata.InjectedElement>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
 				@Override
 				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 					AnnotationAttributes ann = findAutowiredAnnotation(field);
+
 					if (ann != null) {
 						if (Modifier.isStatic(field.getModifiers())) {
 							if (logger.isWarnEnabled()) {
@@ -428,6 +411,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					}
 				}
 			});
+
+			int methodsOffset = currElements.size();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
 				@Override
@@ -444,17 +429,23 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 							return;
 						}
-						if (method.getParameterTypes().length == 0) {
-							if (logger.isWarnEnabled()) {
-								logger.warn("Autowired annotation should be used on methods with parameters: " + method);
-							}
-						}
 						boolean required = determineRequiredStatus(ann);
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 						currElements.add(new AutowiredMethodElement(method, required, pd));
 					}
 				}
 			});
+
+			if (methodsOffset < currElements.size()) {
+				final AnnotationAwareOrderComparator orderComparator = new AnnotationAwareOrderComparator();
+				Comparator<InjectionMetadata.InjectedElement> comparator = new Comparator<InjectionMetadata.InjectedElement>() {
+					@Override
+					public int compare(InjectionMetadata.InjectedElement o1, InjectionMetadata.InjectedElement o2) {
+						return orderComparator.compare(o1.getMember(), o2.getMember());
+					}
+				};
+				Collections.sort(currElements.subList(methodsOffset, currElements.size()), comparator);
+			}
 
 			elements.addAll(0, currElements);
 			targetClass = targetClass.getSuperclass();
