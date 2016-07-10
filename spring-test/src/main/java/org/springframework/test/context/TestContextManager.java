@@ -366,9 +366,9 @@ public class TestContextManager {
 				if (logger.isWarnEnabled()) {
 					logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener +
 							"] to process 'after class' callback for test class [" + testClass + "]", ex);
-					if (afterTestClassException == null) {
-						afterTestClassException = ex;
-					}
+				}
+				if (afterTestClassException == null) {
+					afterTestClassException = ex;
 				}
 			}
 		}
