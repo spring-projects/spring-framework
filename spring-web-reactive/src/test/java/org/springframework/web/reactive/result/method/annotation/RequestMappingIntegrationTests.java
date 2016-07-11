@@ -129,24 +129,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	public void handleWithThrownException() throws Exception {
-		String expected = "Recovered from error: Boo";
-		assertEquals(expected, performGet("/thrown-exception", null, String.class).getBody());
-	}
-
-	@Test
-	public void handleWithErrorSignal() throws Exception {
-		String expected = "Recovered from error: Boo";
-		assertEquals(expected, performGet("/error-signal", null, String.class).getBody());
-	}
-
-	@Test
-	public void streamResult() throws Exception {
-		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/stream-result", null, String[].class).getBody());
-	}
-
-	@Test
 	public void serializeAsPojo() throws Exception {
 		Person expected = new Person("Robert");
 		assertEquals(expected, performGet("/person", JSON, Person.class).getBody());
@@ -159,12 +141,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	public void serializeAsMonoResponseEntity() throws Exception {
-		Person expected = new Person("Robert");
-		assertEquals(expected, performGet("/monoResponseEntity", JSON, Person.class).getBody());
-	}
-
-	@Test
 	public void serializeAsMono() throws Exception {
 		Person expected = new Person("Robert");
 		assertEquals(expected, performGet("/mono", JSON, Person.class).getBody());
@@ -174,6 +150,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	public void serializeAsSingle() throws Exception {
 		Person expected = new Person("Robert");
 		assertEquals(expected, performGet("/single", JSON, Person.class).getBody());
+	}
+
+	@Test
+	public void serializeAsMonoResponseEntity() throws Exception {
+		Person expected = new Person("Robert");
+		assertEquals(expected, performGet("/monoResponseEntity", JSON, Person.class).getBody());
 	}
 
 	@Test
@@ -201,9 +183,42 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	public void serializeAsReactorStream() throws Exception {
-		List<?> expected = asList(new Person("Robert"), new Person("Marie"));
-		assertEquals(expected, performGet("/stream", JSON, PERSON_LIST).getBody());
+	public void resource() throws Exception {
+		ResponseEntity<byte[]> response = performGet("/resource", null, byte[].class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertTrue(response.hasBody());
+		assertEquals(951, response.getHeaders().getContentLength());
+		assertEquals(951, response.getBody().length);
+		assertEquals(new MediaType("image", "x-png"), response.getHeaders().getContentType());
+	}
+
+	@Test
+	public void personCapitalize() throws Exception {
+		assertEquals(new Person("ROBERT"),
+				performPost("/person-capitalize", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
+	}
+
+	@Test
+	public void completableFutureCapitalize() throws Exception {
+		assertEquals(new Person("ROBERT"),
+				performPost("/completable-future-capitalize", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
+	}
+
+	@Test
+	public void monoCapitalize() throws Exception {
+		assertEquals(new Person("ROBERT"),
+				performPost("/mono-capitalize", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
+	}
+
+	@Test
+	public void singleCapitalize() throws Exception {
+		assertEquals(new Person("ROBERT"),
+				performPost("/single-capitalize", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
 	}
 
 	@Test
@@ -225,34 +240,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
 		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
 		assertEquals(res, performPost("/observable-capitalize", JSON, req, JSON, PERSON_LIST).getBody());
-	}
-
-	@Test
-	public void personCapitalize() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/person-capitalize", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
-	}
-	
-	@Test
-	public void completableFutureCapitalize() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/completable-future-capitalize", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
-	}
-
-	@Test
-	public void monoCapitalize() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/mono-capitalize", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
-	}
-
-	@Test
-	public void singleCapitalize() throws Exception {
-		assertEquals(new Person("ROBERT"),
-				performPost("/single-capitalize", JSON, new Person("Robert"),
-						JSON, Person.class).getBody());
 	}
 
 	@Test
@@ -310,20 +297,27 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	public void html() throws Exception {
-		String expected = "<html><body>Hello: Jason!</body></html>";
-		assertEquals(expected, performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody());
+	public void streamResult() throws Exception {
+		String[] expected = {"0", "1", "2", "3", "4"};
+		assertArrayEquals(expected, performGet("/stream-result", null, String[].class).getBody());
 	}
 
 	@Test
-	public void resource() throws Exception {
-		ResponseEntity<byte[]> response = performGet("/resource", null, byte[].class);
+	public void handleWithThrownException() throws Exception {
+		String expected = "Recovered from error: Boo";
+		assertEquals(expected, performGet("/thrown-exception", null, String.class).getBody());
+	}
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertTrue(response.hasBody());
-		assertEquals(951, response.getHeaders().getContentLength());
-		assertEquals(951, response.getBody().length);
-		assertEquals(new MediaType("image", "x-png"), response.getHeaders().getContentType());
+	@Test
+	public void handleWithErrorSignal() throws Exception {
+		String expected = "Recovered from error: Boo";
+		assertEquals(expected, performGet("/error-signal", null, String.class).getBody());
+	}
+
+	@Test
+	public void html() throws Exception {
+		String expected = "<html><body>Hello: Jason!</body></html>";
+		assertEquals(expected, performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody());
 	}
 
 
@@ -410,15 +404,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			return Flux.just("Hello ", name, "!");
 		}
 
-		@RequestMapping("/person")
-		public Person personResponseBody() {
-			return new Person("Robert");
-		}
-
-		@RequestMapping("/completable-future")
-		public CompletableFuture<Person> completableFutureResponseBody() {
-			return CompletableFuture.completedFuture(new Person("Robert"));
-		}
+		// Response body with "raw" data (DataBuffer)
 
 		@RequestMapping("/raw")
 		public Publisher<ByteBuffer> rawResponseBody() {
@@ -426,11 +412,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
 			return encoder.encode(Mono.just(new Person("Robert")), dataBufferFactory,
 					ResolvableType.forClass(Person.class), JSON).map(DataBuffer::asByteBuffer);
-		}
-
-		@RequestMapping("/stream-result")
-		public Publisher<Long> stringStreamResponseBody() {
-			return Flux.interval(100).take(5);
 		}
 
 		@RequestMapping("/raw-flux")
@@ -443,10 +424,16 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			return Observable.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
-		@RequestMapping("/monoResponseEntity")
-		public ResponseEntity<Mono<Person>> monoResponseEntity() {
-			Mono<Person> body = Mono.just(new Person("Robert"));
-			return ResponseEntity.ok(body);
+		// Response body with Person Object(s) to "serialize"
+
+		@RequestMapping("/person")
+		public Person personResponseBody() {
+			return new Person("Robert");
+		}
+
+		@RequestMapping("/completable-future")
+		public CompletableFuture<Person> completableFutureResponseBody() {
+			return CompletableFuture.completedFuture(new Person("Robert"));
 		}
 
 		@RequestMapping("/mono")
@@ -457,6 +444,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/single")
 		public Single<Person> singleResponseBody() {
 			return Single.just(new Person("Robert"));
+		}
+
+		@RequestMapping("/monoResponseEntity")
+		public ResponseEntity<Mono<Person>> monoResponseEntity() {
+			Mono<Person> body = Mono.just(new Person("Robert"));
+			return ResponseEntity.ok(body);
 		}
 
 		@RequestMapping("/list")
@@ -479,9 +472,35 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			return Observable.just(new Person("Robert"), new Person("Marie"));
 		}
 
-		@RequestMapping("/stream")
-		public Flux<Person> reactorStreamResponseBody() {
-			return Flux.just(new Person("Robert"), new Person("Marie"));
+		// ResponseBody with Resource
+
+		@RequestMapping("/resource")
+		@ResponseBody
+		public Resource resource() {
+			return new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
+		}
+
+		// RequestBody -> ResponseBody with Person "capitalize" name transformation
+
+		@RequestMapping("/person-capitalize")
+		public Person personCapitalize(@RequestBody Person person) {
+			return new Person(person.getName().toUpperCase());
+		}
+
+		@RequestMapping("/completable-future-capitalize")
+		public CompletableFuture<Person> completableFutureCapitalize(
+				@RequestBody CompletableFuture<Person> personFuture) {
+			return personFuture.thenApply(person -> new Person(person.getName().toUpperCase()));
+		}
+
+		@RequestMapping("/mono-capitalize")
+		public Mono<Person> monoCapitalize(@RequestBody Mono<Person> personFuture) {
+			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
+		}
+
+		@RequestMapping("/single-capitalize")
+		public Single<Person> singleCapitalize(@RequestBody Single<Person> personFuture) {
+			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/publisher-capitalize")
@@ -501,30 +520,11 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
+		// Request body with Objects to "create"
+
 		@RequestMapping("/stream-create")
 		public Publisher<Void> streamCreate(@RequestBody Flux<Person> personStream) {
 			return personStream.collectList().doOnSuccess(persons::addAll).then();
-		}
-
-		@RequestMapping("/person-capitalize")
-		public Person personCapitalize(@RequestBody Person person) {
-			return new Person(person.getName().toUpperCase());
-		}
-		
-		@RequestMapping("/completable-future-capitalize")
-		public CompletableFuture<Person> completableFutureCapitalize(
-				@RequestBody CompletableFuture<Person> personFuture) {
-			return personFuture.thenApply(person -> new Person(person.getName().toUpperCase()));
-		}
-
-		@RequestMapping("/mono-capitalize")
-		public Mono<Person> monoCapitalize(@RequestBody Mono<Person> personFuture) {
-			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
-		}
-
-		@RequestMapping("/single-capitalize")
-		public Single<Person> singleCapitalize(@RequestBody Single<Person> personFuture) {
-			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/publisher-create")
@@ -542,6 +542,15 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			return personStream.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
 		}
 
+		// Async stream
+
+		@RequestMapping("/stream-result")
+		public Publisher<Long> stringStreamResponseBody() {
+			return Flux.interval(100).take(5);
+		}
+
+		// Error handling
+
 		@RequestMapping("/thrown-exception")
 		public Publisher<String> handleAndThrowException() {
 			throw new IllegalStateException("Boo");
@@ -555,12 +564,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@ExceptionHandler
 		public Publisher<String> handleException(IllegalStateException ex) {
 			return Mono.just("Recovered from error: " + ex.getMessage());
-		}
-
-		@RequestMapping("/resource")
-		@ResponseBody
-		public Resource resource() {
-			return new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
 		}
 
 		//TODO add mixed and T request mappings tests
