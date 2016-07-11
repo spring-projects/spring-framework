@@ -23,8 +23,10 @@ import java.lang.reflect.Parameter;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ContainerExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
@@ -54,7 +56,8 @@ import org.springframework.util.Assert;
  * @see org.springframework.test.context.TestContextManager
  */
 public class SpringExtension implements BeforeAllCallback, AfterAllCallback, TestInstancePostProcessor,
-		BeforeEachCallback, AfterEachCallback, ParameterResolver {
+		BeforeEachCallback, AfterEachCallback, BeforeTestExecutionCallback, AfterTestExecutionCallback,
+		ParameterResolver {
 
 	/**
 	 * {@link Namespace} in which {@code TestContextManagers} are stored, keyed
@@ -99,6 +102,27 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Object testInstance = context.getTestInstance();
 		Method testMethod = context.getTestMethod().get();
 		getTestContextManager(context).beforeTestMethod(testInstance, testMethod);
+	}
+
+	/**
+	 * Delegates to {@link TestContextManager#beforeTestExecution}.
+	 */
+	@Override
+	public void beforeTestExecution(TestExtensionContext context) throws Exception {
+		Object testInstance = context.getTestInstance();
+		Method testMethod = context.getTestMethod().get();
+		getTestContextManager(context).beforeTestExecution(testInstance, testMethod);
+	}
+
+	/**
+	 * Delegates to {@link TestContextManager#afterTestExecution}.
+	 */
+	@Override
+	public void afterTestExecution(TestExtensionContext context) throws Exception {
+		Object testInstance = context.getTestInstance();
+		Method testMethod = context.getTestMethod().get();
+		Throwable testException = context.getTestException().orElse(null);
+		getTestContextManager(context).afterTestExecution(testInstance, testMethod, testException);
 	}
 
 	/**

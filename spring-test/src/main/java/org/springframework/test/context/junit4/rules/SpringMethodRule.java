@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@code SpringMethodRule} is a custom JUnit {@link MethodRule} that
+ * {@code SpringMethodRule} is a custom JUnit 4 {@link MethodRule} that
  * supports instance-level and method-level features of the
  * <em>Spring TestContext Framework</em> in standard JUnit tests by means
  * of the {@link TestContextManager} and associated support classes and
@@ -81,6 +81,12 @@ import org.springframework.util.ReflectionUtils;
  * </ul>
  *
  * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
+ *
+ * <p><strong>WARNING:</strong> Due to the shortcomings of JUnit rules, the
+ * {@code SpringMethodRule} does <strong>not</strong> support the
+ * {@code beforeTestExecution()} and {@code afterTestExecution()} callbacks of the
+ * {@link org.springframework.test.context.TestExecutionListener TestExecutionListener}
+ * API.
  *
  * @author Sam Brannen
  * @author Philippe Marschall
