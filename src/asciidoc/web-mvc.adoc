@@ -399,7 +399,7 @@ implementations is ignored.
 In <<mvc-config>> you'll learn about other options for configuring Spring MVC including
 MVC Java config and the MVC XML namespace both of which provide a simple starting point
 and assume little knowledge of how Spring MVC works. Regardless of how you choose to
-configure your application, the concepts explained in this section are fundamental
+configure your application, the concepts explained in this section are fundamental and
 should be of help to you.
 
 
@@ -972,7 +972,7 @@ are effective at preventing RFD attacks.
 
 For comprehensive protection against RFD, prior to rendering the response body
 Spring MVC adds a `Content-Disposition:inline;filename=f.txt` header to
-suggest a fixed and safe download file filename. This is done only if the URL
+suggest a fixed and safe download file. This is done only if the URL
 path contains a file extension that is neither whitelisted nor explicitly
 registered for content negotiation purposes. However it may potentially have
 side effects when URLs are typed directly into a browser.
@@ -1295,7 +1295,7 @@ The following are the supported method arguments:
 
 * Request or response objects (Servlet API). Choose any specific request or response
   type, for example `ServletRequest` or `HttpServletRequest`.
-* Session object (Servlet API): of type `HttpSession`. An argument of this type enforces
+* Session object (Servlet API) of type `HttpSession`. An argument of this type enforces
   the presence of a corresponding session. As a consequence, such an argument is never
   `null`.
 
