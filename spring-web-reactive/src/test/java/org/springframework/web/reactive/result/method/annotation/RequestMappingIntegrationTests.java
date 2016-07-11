@@ -53,10 +53,10 @@ import org.springframework.http.server.reactive.ZeroCopyIntegrationTests;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -399,14 +399,14 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		final List<Person> persons = new ArrayList<>();
 
-		@RequestMapping("/param")
+		@GetMapping("/param")
 		public Publisher<String> handleWithParam(@RequestParam String name) {
 			return Flux.just("Hello ", name, "!");
 		}
 
-		// Response body with "raw" data (DataBuffer)
+		// GET with "raw" data (DataBuffer) response body
 
-		@RequestMapping("/raw")
+		@GetMapping("/raw")
 		public Publisher<ByteBuffer> rawResponseBody() {
 			DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
@@ -414,149 +414,148 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 					ResolvableType.forClass(Person.class), JSON).map(DataBuffer::asByteBuffer);
 		}
 
-		@RequestMapping("/raw-flux")
+		@GetMapping("/raw-flux")
 		public Flux<ByteBuffer> rawFluxResponseBody() {
 			return Flux.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
-		@RequestMapping("/raw-observable")
+		@GetMapping("/raw-observable")
 		public Observable<ByteBuffer> rawObservableResponseBody() {
 			return Observable.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
-		// Response body with Person Object(s) to "serialize"
+		// GET with Person Object(s) response body to "serialize"
 
-		@RequestMapping("/person")
+		@GetMapping("/person")
 		public Person personResponseBody() {
 			return new Person("Robert");
 		}
 
-		@RequestMapping("/completable-future")
+		@GetMapping("/completable-future")
 		public CompletableFuture<Person> completableFutureResponseBody() {
 			return CompletableFuture.completedFuture(new Person("Robert"));
 		}
 
-		@RequestMapping("/mono")
+		@GetMapping("/mono")
 		public Mono<Person> monoResponseBody() {
 			return Mono.just(new Person("Robert"));
 		}
 
-		@RequestMapping("/single")
+		@GetMapping("/single")
 		public Single<Person> singleResponseBody() {
 			return Single.just(new Person("Robert"));
 		}
 
-		@RequestMapping("/monoResponseEntity")
+		@GetMapping("/monoResponseEntity")
 		public ResponseEntity<Mono<Person>> monoResponseEntity() {
 			Mono<Person> body = Mono.just(new Person("Robert"));
 			return ResponseEntity.ok(body);
 		}
 
-		@RequestMapping("/list")
+		@GetMapping("/list")
 		public List<Person> listResponseBody() {
 			return asList(new Person("Robert"), new Person("Marie"));
 		}
 
-		@RequestMapping("/publisher")
+		@GetMapping("/publisher")
 		public Publisher<Person> publisherResponseBody() {
 			return Flux.just(new Person("Robert"), new Person("Marie"));
 		}
 
-		@RequestMapping("/flux")
+		@GetMapping("/flux")
 		public Flux<Person> fluxResponseBody() {
 			return Flux.just(new Person("Robert"), new Person("Marie"));
 		}
 
-		@RequestMapping("/observable")
+		@GetMapping("/observable")
 		public Observable<Person> observableResponseBody() {
 			return Observable.just(new Person("Robert"), new Person("Marie"));
 		}
 
-		// ResponseBody with Resource
+		// GET with Resource response body
 
-		@RequestMapping("/resource")
-		@ResponseBody
+		@GetMapping("/resource")
 		public Resource resource() {
 			return new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
 		}
 
-		// RequestBody -> ResponseBody with Person "capitalize" name transformation
+		// POST with Person "capitalize" name transformation
 
-		@RequestMapping("/person-capitalize")
+		@PostMapping("/person-capitalize")
 		public Person personCapitalize(@RequestBody Person person) {
 			return new Person(person.getName().toUpperCase());
 		}
 
-		@RequestMapping("/completable-future-capitalize")
+		@PostMapping("/completable-future-capitalize")
 		public CompletableFuture<Person> completableFutureCapitalize(
 				@RequestBody CompletableFuture<Person> personFuture) {
 			return personFuture.thenApply(person -> new Person(person.getName().toUpperCase()));
 		}
 
-		@RequestMapping("/mono-capitalize")
+		@PostMapping("/mono-capitalize")
 		public Mono<Person> monoCapitalize(@RequestBody Mono<Person> personFuture) {
 			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
-		@RequestMapping("/single-capitalize")
+		@PostMapping("/single-capitalize")
 		public Single<Person> singleCapitalize(@RequestBody Single<Person> personFuture) {
 			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
-		@RequestMapping("/publisher-capitalize")
+		@PostMapping("/publisher-capitalize")
 		public Publisher<Person> publisherCapitalize(@RequestBody Publisher<Person> persons) {
 			return Flux
 					.from(persons)
 					.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
-		@RequestMapping("/flux-capitalize")
+		@PostMapping("/flux-capitalize")
 		public Flux<Person> fluxCapitalize(@RequestBody Flux<Person> persons) {
 			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
-		@RequestMapping("/observable-capitalize")
+		@PostMapping("/observable-capitalize")
 		public Observable<Person> observableCapitalize(@RequestBody Observable<Person> persons) {
 			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
-		// Request body with Objects to "create"
+		// POST with Objects to "create"
 
-		@RequestMapping("/stream-create")
+		@PostMapping("/stream-create")
 		public Publisher<Void> streamCreate(@RequestBody Flux<Person> personStream) {
 			return personStream.collectList().doOnSuccess(persons::addAll).then();
 		}
 
-		@RequestMapping("/publisher-create")
+		@PostMapping("/publisher-create")
 		public Publisher<Void> publisherCreate(@RequestBody Publisher<Person> personStream) {
 			return Flux.from(personStream).doOnNext(persons::add).then();
 		}
 
-		@RequestMapping("/flux-create")
+		@PostMapping("/flux-create")
 		public Mono<Void> fluxCreate(@RequestBody Flux<Person> personStream) {
 			return personStream.doOnNext(persons::add).then();
 		}
 
-		@RequestMapping("/observable-create")
+		@PostMapping("/observable-create")
 		public Observable<Void> observableCreate(@RequestBody Observable<Person> personStream) {
 			return personStream.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
 		}
 
 		// Async stream
 
-		@RequestMapping("/stream-result")
+		@GetMapping("/stream-result")
 		public Publisher<Long> stringStreamResponseBody() {
 			return Flux.interval(100).take(5);
 		}
 
 		// Error handling
 
-		@RequestMapping("/thrown-exception")
+		@GetMapping("/thrown-exception")
 		public Publisher<String> handleAndThrowException() {
 			throw new IllegalStateException("Boo");
 		}
 
-		@RequestMapping("/error-signal")
+		@GetMapping("/error-signal")
 		public Publisher<String> handleWithError() {
 			return Mono.error(new IllegalStateException("Boo"));
 		}
@@ -574,7 +573,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	@SuppressWarnings("unused")
 	private static class TestController {
 
-		@RequestMapping("/html")
+		@GetMapping("/html")
 		public String getHtmlPage(@RequestParam String name, Model model) {
 			model.addAttribute("hello", "Hello: " + name + "!");
 			return "test";
