@@ -1396,7 +1396,7 @@ this working you have to reorder the parameters as follows:
 [NOTE]
 ====
 JDK 1.8's `java.util.Optional` is supported as a method parameter type with annotations
-that have a `required` attribute (e.g. `@RequestParam`, `@RequestHeader`, etc. The use
+that have a `required` attribute (e.g. `@RequestParam`, `@RequestHeader`, etc). The use
 of `java.util.Optional` in those cases is equivalent to having `required=false`.
 ====
 
@@ -1537,7 +1537,7 @@ the MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
 				<ref bean="stringHttpMessageConverter"/>
 				<ref bean="marshallingHttpMessageConverter"/>
 			</util:list>
-		</property
+		</property>
 	</bean>
 
 	<bean id="stringHttpMessageConverter"
@@ -1624,7 +1624,7 @@ so:
 ----
 	@RequestMapping("/something")
 	public ResponseEntity<String> handle(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
-		String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader"));
+		String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader");
 		byte[] requestBody = requestEntity.getBody();
 
 		// do something with request header and body
@@ -2655,7 +2655,7 @@ The following example shows how to configure an interceptor:
 				<bean class="example.MyInterceptor"/>
 			</property>
 		</bean>
-	<beans>
+	</beans>
 ----
 
 
