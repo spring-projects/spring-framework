@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 
 	@Override
 	public Object cache(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	@Override
 	@Cacheable(cacheNames = "testCache", sync = true)
 	public Object cacheSync(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
@@ -110,55 +110,55 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	@Override
 	@Cacheable(cacheNames = "testCache", key = "#p0")
 	public Object key(Object arg1, Object arg2) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable("testCache")
 	public Object varArgsKey(Object... args) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", key = "#root.methodName + #root.caches[0].name")
 	public Object name(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", key = "#root.methodName + #root.method.name + #root.targetClass + #root.target")
 	public Object rootVars(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", keyGenerator = "customKyeGenerator")
 	public Object customKeyGenerator(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", keyGenerator = "unknownBeanName")
 	public Object unknownCustomKeyGenerator(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", cacheManager = "customCacheManager")
 	public Object customCacheManager(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", cacheManager = "unknownBeanName")
 	public Object unknownCustomCacheManager(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@CachePut("testCache")
 	public Object update(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
@@ -205,25 +205,25 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	@Override
 	@Caching(cacheable = { @Cacheable("primary"), @Cacheable("secondary") })
 	public Object multiCache(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#a0"),  @CacheEvict(cacheNames = "primary", key = "#p0 + 'A'") })
 	public Object multiEvict(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Caching(cacheable = { @Cacheable(cacheNames = "primary", key = "#root.methodName") }, evict = { @CacheEvict("secondary") })
 	public Object multiCacheAndEvict(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Caching(cacheable = { @Cacheable(cacheNames = "primary", condition = "#a0 == 3") }, evict = { @CacheEvict("secondary") })
 	public Object multiConditionalCacheAndEvict(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
