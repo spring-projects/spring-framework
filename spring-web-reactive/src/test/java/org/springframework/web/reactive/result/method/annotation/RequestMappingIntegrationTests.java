@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.Single;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,7 +80,7 @@ import static org.springframework.http.RequestEntity.get;
  * @author Sebastien Deleuze
  * @author Stephane Maldini
  */
-public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
 	private static final ParameterizedTypeReference<List<Person>> PERSON_LIST =
 			new ParameterizedTypeReference<List<Person>>() {};
@@ -87,21 +88,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	private static final MediaType JSON = MediaType.APPLICATION_JSON;
 
 
-	private AnnotationConfigApplicationContext wac;
-
-	private RestTemplate restTemplate = new RestTemplate();
-
-
 	@Override
-	protected HttpHandler createHttpHandler() {
-		this.wac = new AnnotationConfigApplicationContext();
-		this.wac.register(FrameworkConfig.class, ApplicationConfig.class);
-		this.wac.refresh();
-
-		DispatcherHandler handler = new DispatcherHandler();
-		handler.setApplicationContext(this.wac);
-
-		return WebHttpHandlerBuilder.webHandler(handler).build();
+	protected ApplicationContext initApplicationContext() {
+		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
+		wac.register(FrameworkConfig.class, ApplicationConfig.class);
+		wac.refresh();
+		return wac;
 	}
 
 	@Test
@@ -248,7 +240,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+		assertEquals(2, getApplicationContext().getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
@@ -257,7 +249,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		ResponseEntity<Void> response = performPost("/publisher-create", APPLICATION_XML, people, null, Void.class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+		assertEquals(2, getApplicationContext().getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
@@ -266,7 +258,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+		assertEquals(2, getApplicationContext().getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
@@ -275,7 +267,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		ResponseEntity<Void> response = performPost("/flux-create", APPLICATION_XML, people, null, Void.class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+		assertEquals(2, getApplicationContext().getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
@@ -284,7 +276,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
 
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+		assertEquals(2, getApplicationContext().getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
@@ -293,7 +285,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		ResponseEntity<Void> response = performPost("/observable-create", APPLICATION_XML, people, null, Void.class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+		assertEquals(2, getApplicationContext().getBean(TestRestController.class).persons.size());
 	}
 
 	@Test
@@ -318,43 +310,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	public void html() throws Exception {
 		String expected = "<html><body>Hello: Jason!</body></html>";
 		assertEquals(expected, performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody());
-	}
-
-
-	private <T> ResponseEntity<T> performGet(String url, MediaType acceptHeader,
-			Class<T> type) throws Exception {
-
-		return this.restTemplate.exchange(prepareGet(url, acceptHeader), type);
-	}
-
-	private <T> ResponseEntity<T> performGet(String url, MediaType acceptHeader,
-			ParameterizedTypeReference<T> type) throws Exception {
-
-		return this.restTemplate.exchange(prepareGet(url, acceptHeader), type);
-	}
-
-	private <T> ResponseEntity<T> performPost(String url, MediaType in, Object body,
-			MediaType out, Class<T> type) throws Exception {
-
-		return  this.restTemplate.exchange(preparePost(url, in, body, out), type);
-	}
-
-	private <T> ResponseEntity<T> performPost(String url, MediaType in, Object body,
-			MediaType out, ParameterizedTypeReference<T> type) throws Exception {
-
-		return this.restTemplate.exchange(preparePost(url, in, body, out), type);
-	}
-
-	private RequestEntity<Void> prepareGet(String url, MediaType accept) throws Exception {
-		URI uri = new URI("http://localhost:" + this.port + url);
-		return (accept != null ? get(uri).accept(accept).build() : get(uri).build());
-	}
-
-	private RequestEntity<?> preparePost(String url, MediaType in, Object body, MediaType out) throws Exception {
-		URI uri = new URI("http://localhost:" + this.port + url);
-		return (out != null ?
-				RequestEntity.post(uri).contentType(in).accept(out).body(body) :
-				RequestEntity.post(uri).contentType(in).body(body));
 	}
 
 
