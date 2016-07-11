@@ -16,9 +16,6 @@
 
 package org.springframework.core.env;
 
-import org.springframework.core.convert.ConversionException;
-import org.springframework.util.ClassUtils;
-
 /**
  * {@link PropertyResolver} implementation that resolves property values against
  * an underlying set of {@link PropertySources}.
