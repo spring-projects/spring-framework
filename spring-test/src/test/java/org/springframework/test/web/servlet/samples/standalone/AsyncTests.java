@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.samples.standalone;
 
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +27,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -69,6 +72,34 @@ public class AsyncTests {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
+	@Test
+	public void streaming() throws Exception {
+		this.mockMvc.perform(get("/1").param("streaming", "true"))
+				.andExpect(request().asyncStarted())
+				.andDo(r -> r.getAsyncResult()) // fetch async result similar to "asyncDispatch" builder
+				.andExpect(status().isOk())
+				.andExpect(content().string("name=Joe"));
+	}
+
+	@Test
+	public void streamingSlow() throws Exception {
+		this.mockMvc.perform(get("/1").param("streamingSlow", "true"))
+				.andExpect(request().asyncStarted())
+				.andDo(r -> r.getAsyncResult())
+				.andExpect(status().isOk())
+				.andExpect(content().string("name=Joe&someBoolean=true"));
+	}
+
+	@Test
+	public void streamingJson() throws Exception {
+		this.mockMvc.perform(get("/1").param("streamingJson", "true"))
+				.andExpect(request().asyncStarted())
+				.andDo(r -> r.getAsyncResult())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.5}"));
 	}
 
 	@Test
@@ -182,6 +213,31 @@ public class AsyncTests {
 		@RequestMapping(params = "callable")
 		public Callable<Person> getCallable() {
 			return () -> new Person("Joe");
+		}
+
+		@RequestMapping(params = "streaming")
+		public StreamingResponseBody getStreaming() {
+			return os -> os.write("name=Joe".getBytes());
+		}
+
+		@RequestMapping(params = "streamingSlow")
+		public StreamingResponseBody getStreamingSlow() {
+			return os -> {
+				os.write("name=Joe".getBytes());
+				try {
+					Thread.sleep(200);
+					os.write("&someBoolean=true".getBytes());
+				}
+				catch (InterruptedException e) {
+					/* no-op */
+				}
+			};
+		}
+
+		@RequestMapping(params = "streamingJson")
+		public ResponseEntity<StreamingResponseBody> getStreamingJson() {
+			return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8)
+					.body(os -> os.write("{\"name\":\"Joe\",\"someDouble\":0.5}".getBytes(StandardCharsets.UTF_8)));
 		}
 
 		@RequestMapping(params = "deferredResult")
