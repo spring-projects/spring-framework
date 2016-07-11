@@ -18,31 +18,27 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 
 /**
- * Integration tests with {@code @RequestMapping} handler methods.
- *
- * <p>Before adding tests here consider if they are a better fit for any of the
- * other {@code RequestMapping*IntegrationTests}.
+ * {@code @RequestMapping} integration tests with exception handling scenarios.
  *
  * @author Rossen Stoyanchev
- * @author Stephane Maldini
  */
-public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTests {
+public class RequestMappingExceptionHandlingIntegrationTests extends AbstractRequestMappingIntegrationTests {
+
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -52,37 +48,45 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 		return wac;
 	}
 
+
 	@Test
-	public void handleWithParam() throws Exception {
-		String expected = "Hello George!";
-		assertEquals(expected, performGet("/param?name=George", null, String.class).getBody());
+	public void controllerThrowingException() throws Exception {
+		String expected = "Recovered from error: Boo";
+		assertEquals(expected, performGet("/thrown-exception", null, String.class).getBody());
 	}
 
 	@Test
-	public void streamResult() throws Exception {
-		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/stream-result", null, String[].class).getBody());
+	public void controllerReturnsMonoError() throws Exception {
+		String expected = "Recovered from error: Boo";
+		assertEquals(expected, performGet("/mono-error", null, String.class).getBody());
 	}
 
 
 	@Configuration
-	@ComponentScan(resourcePattern = "**/RequestMappingIntegrationTests$*.class")
+	@ComponentScan(resourcePattern = "**/RequestMappingExceptionHandlingIntegrationTests$*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig extends WebReactiveConfiguration {
+
 	}
+
 
 	@RestController
 	@SuppressWarnings("unused")
-	private static class TestRestController {
+	private static class TestController {
 
-		@GetMapping("/param")
-		public Publisher<String> handleWithParam(@RequestParam String name) {
-			return Flux.just("Hello ", name, "!");
+		@GetMapping("/thrown-exception")
+		public Publisher<String> handleAndThrowException() {
+			throw new IllegalStateException("Boo");
 		}
 
-		@GetMapping("/stream-result")
-		public Publisher<Long> stringStreamResponseBody() {
-			return Flux.interval(100).take(5);
+		@GetMapping("/mono-error")
+		public Publisher<String> handleWithError() {
+			return Mono.error(new IllegalStateException("Boo"));
+		}
+
+		@ExceptionHandler
+		public Publisher<String> handleException(IllegalStateException ex) {
+			return Mono.just("Recovered from error: " + ex.getMessage());
 		}
 
 	}

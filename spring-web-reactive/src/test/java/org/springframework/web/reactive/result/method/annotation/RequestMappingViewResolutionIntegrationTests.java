@@ -17,32 +17,31 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.config.ViewResolverRegistry;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
+import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 
 /**
- * Integration tests with {@code @RequestMapping} handler methods.
- *
- * <p>Before adding tests here consider if they are a better fit for any of the
- * other {@code RequestMapping*IntegrationTests}.
+ * {@code @RequestMapping} integration tests with view resolution scenarios.
  *
  * @author Rossen Stoyanchev
- * @author Stephane Maldini
  */
-public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegrationTests {
+public class RequestMappingViewResolutionIntegrationTests extends AbstractRequestMappingIntegrationTests {
+
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
@@ -52,39 +51,43 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 		return wac;
 	}
 
-	@Test
-	public void handleWithParam() throws Exception {
-		String expected = "Hello George!";
-		assertEquals(expected, performGet("/param?name=George", null, String.class).getBody());
-	}
 
 	@Test
-	public void streamResult() throws Exception {
-		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/stream-result", null, String[].class).getBody());
+	public void html() throws Exception {
+		String expected = "<html><body>Hello: Jason!</body></html>";
+		assertEquals(expected, performGet("/html?name=Jason", MediaType.TEXT_HTML, String.class).getBody());
 	}
 
 
 	@Configuration
-	@ComponentScan(resourcePattern = "**/RequestMappingIntegrationTests$*.class")
+	@ComponentScan(resourcePattern = "**/RequestMappingViewResolutionIntegrationTests$*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig extends WebReactiveConfiguration {
+
+		@Override
+		protected void configureViewResolvers(ViewResolverRegistry registry) {
+			registry.freeMarker();
+		}
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfig() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setPreferFileSystemAccess(false);
+			configurer.setTemplateLoaderPath("classpath*:org/springframework/web/reactive/view/freemarker/");
+			return configurer;
+		}
+
 	}
 
-	@RestController
+	@Controller
 	@SuppressWarnings("unused")
-	private static class TestRestController {
+	private static class TestController {
 
-		@GetMapping("/param")
-		public Publisher<String> handleWithParam(@RequestParam String name) {
-			return Flux.just("Hello ", name, "!");
+		@GetMapping("/html")
+		public String getHtmlPage(@RequestParam String name, Model model) {
+			model.addAttribute("hello", "Hello: " + name + "!");
+			return "test";
 		}
-
-		@GetMapping("/stream-result")
-		public Publisher<Long> stringStreamResponseBody() {
-			return Flux.interval(100).take(5);
-		}
-
 	}
 
 }
