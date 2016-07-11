@@ -102,7 +102,12 @@ public class NoOpCacheManager implements CacheManager {
 
 		@Override
 		public <T> T get(Object key, Callable<T> valueLoader) {
-			return null;
+			try {
+				return valueLoader.call();
+			}
+			catch (Exception ex) {
+				throw new ValueRetrievalException(key, valueLoader, ex);
+			}
 		}
 
 		@Override
