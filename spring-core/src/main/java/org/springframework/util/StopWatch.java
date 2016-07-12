@@ -134,7 +134,7 @@ public class StopWatch {
 	/**
 	 * Stop the current task. The results are undefined if timing
 	 * methods are called without invoking at least one pair
-	 * {@code #start()} / {@code #stop()} methods.
+	 * {@code start()} / {@code stop()} methods.
 	 * @see #start()
 	 */
 	public void stop() throws IllegalStateException {
