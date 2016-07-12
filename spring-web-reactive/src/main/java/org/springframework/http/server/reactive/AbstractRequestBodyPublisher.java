@@ -124,11 +124,6 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 	 */
 	protected abstract DataBuffer read() throws IOException;
 
-	/**
-	 * Closes the input.
-	 */
-	protected abstract void close();
-
 	private boolean hasDemand() {
 		return this.demand.get() > 0;
 	}
@@ -294,9 +289,7 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 		}
 
 		void cancel(AbstractRequestBodyPublisher publisher) {
-			if (publisher.changeState(this, COMPLETED)) {
-				publisher.close();
-			}
+			publisher.changeState(this, COMPLETED);
 		}
 
 		void onDataAvailable(AbstractRequestBodyPublisher publisher) {
@@ -305,7 +298,6 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 
 		void onAllDataRead(AbstractRequestBodyPublisher publisher) {
 			if (publisher.changeState(this, COMPLETED)) {
-				publisher.close();
 				if (publisher.subscriber != null) {
 					publisher.subscriber.onComplete();
 				}
@@ -314,7 +306,6 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 
 		void onError(AbstractRequestBodyPublisher publisher, Throwable t) {
 			if (publisher.changeState(this, COMPLETED)) {
-				publisher.close();
 				if (publisher.subscriber != null) {
 					publisher.subscriber.onError(t);
 				}

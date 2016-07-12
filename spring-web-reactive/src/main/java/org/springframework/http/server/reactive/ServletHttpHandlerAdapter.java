@@ -51,7 +51,6 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private static Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
 
-
 	private HttpHandler handler;
 
 	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
@@ -59,7 +58,6 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
-
 
 	public void setHandler(HttpHandler handler) {
 		Assert.notNull(handler, "'handler' must not be null");
@@ -77,21 +75,21 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 	}
 
 	@Override
-	protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
-			throws ServletException, IOException {
+	protected void service(HttpServletRequest servletRequest,
+			HttpServletResponse servletResponse) throws ServletException, IOException {
 
-		AsyncContext context = servletRequest.startAsync();
-		ServletAsyncContextSynchronizer synchronizer = new ServletAsyncContextSynchronizer(context);
+		AsyncContext asyncContext = servletRequest.startAsync();
 
 		RequestBodyPublisher requestBody =
-				new RequestBodyPublisher(synchronizer, this.dataBufferFactory,
-						this.bufferSize);
+				new RequestBodyPublisher(servletRequest.getInputStream(),
+						this.dataBufferFactory, this.bufferSize);
 		requestBody.registerListener();
 		ServletServerHttpRequest request =
 				new ServletServerHttpRequest(servletRequest, requestBody);
 
 		ResponseBodyProcessor responseBody =
-				new ResponseBodyProcessor(synchronizer, this.bufferSize);
+				new ResponseBodyProcessor(servletResponse.getOutputStream(),
+						this.bufferSize);
 		responseBody.registerListener();
 		ServletServerHttpResponse response =
 				new ServletServerHttpResponse(servletResponse, this.dataBufferFactory,
@@ -101,19 +99,18 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 						}));
 
 		HandlerResultSubscriber resultSubscriber =
-				new HandlerResultSubscriber(synchronizer);
+				new HandlerResultSubscriber(asyncContext);
 
 		this.handler.handle(request, response).subscribe(resultSubscriber);
 	}
 
 	private static class HandlerResultSubscriber implements Subscriber<Void> {
 
-		private final ServletAsyncContextSynchronizer synchronizer;
+		private final AsyncContext asyncContext;
 
-		public HandlerResultSubscriber(ServletAsyncContextSynchronizer synchronizer) {
-			this.synchronizer = synchronizer;
+		public HandlerResultSubscriber(AsyncContext asyncContext) {
+			this.asyncContext = asyncContext;
 		}
-
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
@@ -129,14 +126,14 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		public void onError(Throwable ex) {
 			logger.error("Error from request handling. Completing the request.", ex);
 			HttpServletResponse response =
-					(HttpServletResponse) this.synchronizer.getResponse();
+					(HttpServletResponse) this.asyncContext.getResponse();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			this.synchronizer.complete();
+			this.asyncContext.complete();
 		}
 
 		@Override
 		public void onComplete() {
-			this.synchronizer.complete();
+			this.asyncContext.complete();
 		}
 	}
 
@@ -145,44 +142,34 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		private final RequestBodyPublisher.RequestBodyReadListener readListener =
 				new RequestBodyPublisher.RequestBodyReadListener();
 
-		private final ServletAsyncContextSynchronizer synchronizer;
+		private final ServletInputStream inputStream;
 
 		private final DataBufferFactory dataBufferFactory;
 
 		private final byte[] buffer;
 
-		public RequestBodyPublisher(ServletAsyncContextSynchronizer synchronizer,
+		public RequestBodyPublisher(ServletInputStream inputStream,
 				DataBufferFactory dataBufferFactory, int bufferSize) {
-			this.synchronizer = synchronizer;
+			this.inputStream = inputStream;
 			this.dataBufferFactory = dataBufferFactory;
 			this.buffer = new byte[bufferSize];
 		}
 
 		public void registerListener() throws IOException {
-			inputStream().setReadListener(this.readListener);
-		}
-
-		private ServletInputStream inputStream() throws IOException {
-			return this.synchronizer.getRequest().getInputStream();
+			inputStream.setReadListener(this.readListener);
 		}
 
 		@Override
 		protected void checkOnDataAvailable() {
-			try {
-				if (!inputStream().isFinished() && inputStream().isReady()) {
-					onDataAvailable();
-				}
-			}
-			catch (IOException ex) {
-				onError(ex);
+			if (!inputStream.isFinished() && inputStream.isReady()) {
+				onDataAvailable();
 			}
 		}
 
 		@Override
 		protected DataBuffer read() throws IOException {
-			ServletInputStream input = inputStream();
-			if (input.isReady()) {
-				int read = input.read(this.buffer);
+			if (inputStream.isReady()) {
+				int read = inputStream.read(this.buffer);
 				if (logger.isTraceEnabled()) {
 					logger.trace("read:" + read);
 				}
@@ -194,12 +181,6 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				}
 			}
 			return null;
-		}
-
-		@Override
-		protected void close() {
-			this.synchronizer.readComplete();
-
 		}
 
 		private class RequestBodyReadListener implements ReadListener {
@@ -227,46 +208,33 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		private final ResponseBodyWriteListener writeListener =
 				new ResponseBodyWriteListener();
 
-		private final ServletAsyncContextSynchronizer synchronizer;
+		private final ServletOutputStream outputStream;
 
 		private final int bufferSize;
 
 		private volatile boolean flushOnNext;
 
-		public ResponseBodyProcessor(ServletAsyncContextSynchronizer synchronizer,
-				int bufferSize) {
-			this.synchronizer = synchronizer;
+		public ResponseBodyProcessor(ServletOutputStream outputStream, int bufferSize) {
+			this.outputStream = outputStream;
 			this.bufferSize = bufferSize;
 		}
 
 		public void registerListener() throws IOException {
-			outputStream().setWriteListener(this.writeListener);
-		}
-
-		private ServletOutputStream outputStream() throws IOException {
-			return this.synchronizer.getResponse().getOutputStream();
+			outputStream.setWriteListener(this.writeListener);
 		}
 
 		@Override
 		protected boolean isWritePossible() {
-			try {
-				return outputStream().isReady();
-			}
-			catch (IOException ex) {
-				onError(ex);
-				return false;
-			}
+			return outputStream.isReady();
 		}
 
 		@Override
 		protected boolean write(DataBuffer dataBuffer) throws IOException {
-			ServletOutputStream output = outputStream();
-
 			if (this.flushOnNext) {
 				flush();
 			}
 
-			boolean ready = output.isReady();
+			boolean ready = outputStream.isReady();
 
 			if (this.logger.isTraceEnabled()) {
 				this.logger.trace("write: " + dataBuffer + " ready: " + ready);
@@ -288,13 +256,12 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		@Override
 		protected void flush() throws IOException {
-			ServletOutputStream output = outputStream();
-			if (output.isReady()) {
+			if (outputStream.isReady()) {
 				if (logger.isTraceEnabled()) {
 					this.logger.trace("flush");
 				}
 				try {
-					output.flush();
+					outputStream.flush();
 					this.flushOnNext = false;
 				}
 				catch (IOException ignored) {
@@ -308,14 +275,13 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		private int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
 			InputStream input = dataBuffer.asInputStream();
-			ServletOutputStream output = outputStream();
 
 			int bytesWritten = 0;
 			byte[] buffer = new byte[this.bufferSize];
 			int bytesRead = -1;
 
-			while (output.isReady() && (bytesRead = input.read(buffer)) != -1) {
-				output.write(buffer, 0, bytesRead);
+			while (outputStream.isReady() && (bytesRead = input.read(buffer)) != -1) {
+				outputStream.write(buffer, 0, bytesRead);
 				bytesWritten += bytesRead;
 			}
 

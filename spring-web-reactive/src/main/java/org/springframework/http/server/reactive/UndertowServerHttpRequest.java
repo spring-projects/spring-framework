@@ -26,7 +26,6 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
 import org.xnio.ChannelListener;
-import org.xnio.IoUtils;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Flux;
 
@@ -150,16 +149,6 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 				onAllDataRead();
 			}
 			return null;
-		}
-
-		@Override
-		protected void close() {
-			if (this.pooledByteBuffer != null) {
-				IoUtils.safeClose(this.pooledByteBuffer);
-			}
-			if (this.requestChannel != null) {
-				IoUtils.safeClose(this.requestChannel);
-			}
 		}
 
 		private class ReadListener implements ChannelListener<StreamSourceChannel> {
