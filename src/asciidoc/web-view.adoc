@@ -1387,6 +1387,7 @@ The HTML would look like:
 					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
+        </table>
 	</form>
 ----
 

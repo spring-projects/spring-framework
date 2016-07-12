@@ -2541,7 +2541,7 @@ For applications configured with a `web.xml` be sure to update to version 3.0:
 ----
 
 Asynchronous support must be enabled on the `DispatcherServlet` through the
-`<async-supported>true</async-supported>` web.xml sub-element. Additionally
+`<async-supported>true</async-supported>` sub-element in `web.xml`. Additionally
 any `Filter` that participates in asyncrequest processing must be configured
 to support the ASYNC dispatcher type. It should be safe to enable the ASYNC
 dispatcher type for all filters provided with the Spring Framework since they
@@ -2703,7 +2703,7 @@ the example below:
 			<property name="openingTime" value="9"/>
 			<property name="closingTime" value="18"/>
 		</bean>
-	<beans>
+	</beans>
 ----
 
 [source,java,indent=0]
@@ -3331,7 +3331,7 @@ Spring MVC also provides a mechanism for building links to controller methods. F
 		public String getBooking(@PathVariable Long booking) {
 
 		// ...
-
+        }
 	}
 ----
 
@@ -3502,7 +3502,7 @@ maximum age. Find below an example of defining a `CookieLocaleResolver`.
 		<property name="cookieName" value="clientlanguage"/>
 
 		<!-- in seconds. If set to -1, the cookie is not persisted (deleted when browser shuts down) -->
-		<property name="cookieMaxAge" value="100000">
+		<property name="cookieMaxAge" value="100000"/>
 
 	</bean>
 ----
