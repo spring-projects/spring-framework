@@ -132,7 +132,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Specify whether to trim tokenized paths and patterns.
-	 * <p>Default is {@code true}.
+	 * <p>Default is {@code false}.
 	 */
 	public void setTrimTokens(boolean trimTokens) {
 		this.trimTokens = trimTokens;
