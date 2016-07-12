@@ -17,6 +17,8 @@
 package org.springframework.test.web.servlet.samples.standalone;
 
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -26,6 +28,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -36,7 +39,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -72,6 +77,34 @@ public class AsyncTests {
 	}
 
 	@Test
+	public void streaming() throws Exception {
+		this.mockMvc.perform(get("/1").param("streaming", "true"))
+				.andExpect(request().asyncStarted())
+				.andDo(MvcResult::getAsyncResult) // fetch async result similar to "asyncDispatch" builder
+				.andExpect(status().isOk())
+				.andExpect(content().string("name=Joe"));
+	}
+
+	@Test
+	public void streamingSlow() throws Exception {
+		this.mockMvc.perform(get("/1").param("streamingSlow", "true"))
+				.andExpect(request().asyncStarted())
+				.andDo(MvcResult::getAsyncResult)
+				.andExpect(status().isOk())
+				.andExpect(content().string("name=Joe&someBoolean=true"));
+	}
+
+	@Test
+	public void streamingJson() throws Exception {
+		this.mockMvc.perform(get("/1").param("streamingJson", "true"))
+				.andExpect(request().asyncStarted())
+				.andDo(MvcResult::getAsyncResult)
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.5}"));
+	}
+
+	@Test
 	public void deferredResult() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
 				.andExpect(request().asyncStarted())
@@ -98,10 +131,7 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	/**
-	 * SPR-13079
-	 */
-	@Test
+	@Test // SPR-13079
 	public void deferredResultWithDelayedError() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithDelayedError", "true"))
 				.andExpect(request().asyncStarted())
@@ -170,6 +200,7 @@ public class AsyncTests {
 
 	@RestController
 	@RequestMapping(path = "/{id}", produces = "application/json")
+	@SuppressWarnings("unused")
 	private static class AsyncController {
 
 		private final Collection<DeferredResult<Person>> deferredResults =
@@ -182,6 +213,31 @@ public class AsyncTests {
 		@RequestMapping(params = "callable")
 		public Callable<Person> getCallable() {
 			return () -> new Person("Joe");
+		}
+
+		@RequestMapping(params = "streaming")
+		public StreamingResponseBody getStreaming() {
+			return os -> os.write("name=Joe".getBytes(UTF_8));
+		}
+
+		@RequestMapping(params = "streamingSlow")
+		public StreamingResponseBody getStreamingSlow() {
+			return os -> {
+				os.write("name=Joe".getBytes());
+				try {
+					Thread.sleep(200);
+					os.write("&someBoolean=true".getBytes(UTF_8));
+				}
+				catch (InterruptedException e) {
+					/* no-op */
+				}
+			};
+		}
+
+		@RequestMapping(params = "streamingJson")
+		public ResponseEntity<StreamingResponseBody> getStreamingJson() {
+			return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8)
+					.body(os -> os.write("{\"name\":\"Joe\",\"someDouble\":0.5}".getBytes(UTF_8)));
 		}
 
 		@RequestMapping(params = "deferredResult")
@@ -235,7 +291,7 @@ public class AsyncTests {
 			return e.getMessage();
 		}
 
-		public void onMessage(String name) {
+		void onMessage(String name) {
 			for (DeferredResult<Person> deferredResult : this.deferredResults) {
 				deferredResult.setResult(new Person(name));
 				this.deferredResults.remove(deferredResult);
