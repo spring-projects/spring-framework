@@ -224,10 +224,9 @@ public abstract class GenericTypeResolver {
 	}
 
 	private static Class<?> getSingleGeneric(ResolvableType resolvableType) {
-		if (resolvableType.getGenerics().length > 1) {
-			throw new IllegalArgumentException("Expected 1 type argument on generic interface [" +
-					resolvableType + "] but found " + resolvableType.getGenerics().length);
-		}
+		Assert.isTrue(resolvableType.getGenerics().length == 1,
+				() -> "Expected 1 type argument on generic interface [" + resolvableType +
+				"] but found " + resolvableType.getGenerics().length);
 		return resolvableType.getGeneric().resolve();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -480,18 +480,14 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	private void assertAttributePresence(String attributeName, Object attributeValue) {
-		if (attributeValue == null) {
-			throw new IllegalArgumentException(String.format(
-					"Attribute '%s' not found in attributes for annotation [%s]", attributeName, this.displayName));
-		}
+		Assert.notNull(attributeValue, () -> String.format("Attribute '%s' not found in attributes for annotation [%s]",
+				attributeName, this.displayName));
 	}
 
 	private void assertAttributePresence(String attributeName, List<String> aliases, Object attributeValue) {
-		if (attributeValue == null) {
-			throw new IllegalArgumentException(String.format(
-					"Neither attribute '%s' nor one of its aliases %s was found in attributes for annotation [%s]",
-					attributeName, aliases, this.displayName));
-		}
+		Assert.notNull(attributeValue, () -> String.format(
+				"Neither attribute '%s' nor one of its aliases %s was found in attributes for annotation [%s]",
+				attributeName, aliases, this.displayName));
 	}
 
 	private void assertNotException(String attributeName, Object attributeValue) {
