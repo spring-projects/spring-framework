@@ -46,7 +46,8 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * Configure options related to the processing of messages received from and
 	 * sent to WebSocket clients.
 	 */
-	void configureWebSocketTransport(WebSocketTransportRegistration registry);
+	default void configureWebSocketTransport(WebSocketTransportRegistration registration) {
+	}
 
 	/**
 	 * Configure the {@link org.springframework.messaging.MessageChannel} used for
@@ -54,7 +55,8 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * by a thread pool of size 1. It is recommended to customize thread pool
 	 * settings for production use.
 	 */
-	void configureClientInboundChannel(ChannelRegistration registration);
+	default void configureClientInboundChannel(ChannelRegistration registration) {
+	}
 
 	/**
 	 * Configure the {@link org.springframework.messaging.MessageChannel} used for
@@ -62,7 +64,8 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * by a thread pool of size 1. It is recommended to customize thread pool
 	 * settings for production use.
 	 */
-	void configureClientOutboundChannel(ChannelRegistration registration);
+	default void configureClientOutboundChannel(ChannelRegistration registration) {
+	}
 
 	/**
 	 * Add resolvers to support custom controller method argument types.
@@ -72,7 +75,8 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * @param argumentResolvers the resolvers to register (initially an empty list)
 	 * @since 4.1.1
 	 */
-	void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
+	default void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
 
 	/**
 	 * Add handlers to support custom controller method return value types.
@@ -82,7 +86,8 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * @param returnValueHandlers the handlers to register (initially an empty list)
 	 * @since 4.1.1
 	 */
-	void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
+	default void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	}
 
 	/**
 	 * Configure the message converters to use when extracting the payload of
@@ -94,11 +99,14 @@ public interface WebSocketMessageBrokerConfigurer {
 	 * @param messageConverters the converters to configure (initially an empty list)
 	 * @return whether to also add default converter or not
 	 */
-	boolean configureMessageConverters(List<MessageConverter> messageConverters);
+	default boolean configureMessageConverters(List<MessageConverter> messageConverters) {
+		return true;
+	}
 
 	/**
 	 * Configure message broker options.
 	 */
-	void configureMessageBroker(MessageBrokerRegistry registry);
+	default void configureMessageBroker(MessageBrokerRegistry registry) {
+	}
 
 }

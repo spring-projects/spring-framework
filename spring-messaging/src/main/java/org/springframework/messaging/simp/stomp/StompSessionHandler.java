@@ -40,7 +40,8 @@ public interface StompSessionHandler extends StompFrameHandler {
 	 * @param session the client STOMP session
 	 * @param connectedHeaders the STOMP CONNECTED frame headers
 	 */
-	void afterConnected(StompSession session, StompHeaders connectedHeaders);
+	default void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+	}
 
 	/**
 	 * Handle any exception arising while processing a STOMP frame such as a
@@ -52,8 +53,9 @@ public interface StompSessionHandler extends StompFrameHandler {
 	 * @param payload the raw payload
 	 * @param exception the exception
 	 */
-	void handleException(StompSession session, StompCommand command, StompHeaders headers,
-			byte[] payload, Throwable exception);
+	default void handleException(StompSession session, StompCommand command, StompHeaders headers,
+			byte[] payload, Throwable exception) {
+	}
 
 	/**
 	 * Handle a low level transport error which could be an I/O error or a
@@ -66,6 +68,7 @@ public interface StompSessionHandler extends StompFrameHandler {
 	 * @param session the client STOMP session
 	 * @param exception the exception that occurred
 	 */
-	void handleTransportError(StompSession session, Throwable exception);
+	default void handleTransportError(StompSession session, Throwable exception) {
+	}
 
 }

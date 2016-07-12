@@ -145,12 +145,6 @@ public abstract class AbstractBrokerMessageHandler
 	}
 
 	@Override
-	public int getPhase() {
-		return Integer.MAX_VALUE;
-	}
-
-
-	@Override
 	public void start() {
 		synchronized (this.lifecycleMonitor) {
 			if (logger.isInfoEnabled()) {

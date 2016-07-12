@@ -132,46 +132,6 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	}
 
 	@Override
-	public boolean containsProperty(String key) {
-		return (getProperty(key) != null);
-	}
-
-	@Override
-	public String getProperty(String key) {
-		return getProperty(key, String.class);
-	}
-
-	@Override
-	public String getProperty(String key, String defaultValue) {
-		String value = getProperty(key);
-		return (value != null ? value : defaultValue);
-	}
-
-	@Override
-	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
-		T value = getProperty(key, targetType);
-		return (value != null ? value : defaultValue);
-	}
-
-	@Override
-	public String getRequiredProperty(String key) throws IllegalStateException {
-		String value = getProperty(key);
-		if (value == null) {
-			throw new IllegalStateException(String.format("required key [%s] not found", key));
-		}
-		return value;
-	}
-
-	@Override
-	public <T> T getRequiredProperty(String key, Class<T> valueType) throws IllegalStateException {
-		T value = getProperty(key, valueType);
-		if (value == null) {
-			throw new IllegalStateException(String.format("required key [%s] not found", key));
-		}
-		return value;
-	}
-
-	@Override
 	public String resolvePlaceholders(String text) {
 		if (this.nonStrictHelper == null) {
 			this.nonStrictHelper = createPlaceholderHelper(true);

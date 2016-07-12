@@ -76,7 +76,9 @@ public interface NativeJdbcExtractor {
 	 * still receive native Statements and ResultSet via working on the
 	 * native JDBC Connection.
 	 */
-	boolean isNativeConnectionNecessaryForNativeStatements();
+	default boolean isNativeConnectionNecessaryForNativeStatements() {
+		return false;
+	}
 
 	/**
 	 * Return whether it is necessary to work on the native Connection to
@@ -87,7 +89,9 @@ public interface NativeJdbcExtractor {
 	 * applications can still receive native Statements and ResultSet via
 	 * working on the native JDBC Connection.
 	 */
-	boolean isNativeConnectionNecessaryForNativePreparedStatements();
+	default boolean isNativeConnectionNecessaryForNativePreparedStatements() {
+		return false;
+	}
 
 	/**
 	 * Return whether it is necessary to work on the native Connection to
@@ -98,7 +102,9 @@ public interface NativeJdbcExtractor {
 	 * applications can still receive native Statements and ResultSet via
 	 * working on the native JDBC Connection.
 	 */
-	boolean isNativeConnectionNecessaryForNativeCallableStatements();
+	default boolean isNativeConnectionNecessaryForNativeCallableStatements() {
+		return false;
+	}
 
 	/**
 	 * Retrieve the underlying native JDBC Connection for the given Connection.
@@ -124,7 +130,12 @@ public interface NativeJdbcExtractor {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.Statement#getConnection()
 	 */
-	Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException;
+	default Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
+		if (stmt == null) {
+			return null;
+		}
+		return getNativeConnection(stmt.getConnection());
+	}
 
 	/**
 	 * Retrieve the underlying native JDBC Statement for the given Statement.
@@ -134,7 +145,9 @@ public interface NativeJdbcExtractor {
 	 * else, the original Statement
 	 * @throws SQLException if thrown by JDBC methods
 	 */
-	Statement getNativeStatement(Statement stmt) throws SQLException;
+	default Statement getNativeStatement(Statement stmt) throws SQLException {
+		return stmt;
+	}
 
 	/**
 	 * Retrieve the underlying native JDBC PreparedStatement for the given statement.
@@ -144,7 +157,9 @@ public interface NativeJdbcExtractor {
 	 * else, the original PreparedStatement
 	 * @throws SQLException if thrown by JDBC methods
 	 */
-	PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException;
+	default PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
+		return ps;
+	}
 
 	/**
 	 * Retrieve the underlying native JDBC CallableStatement for the given statement.
@@ -154,7 +169,9 @@ public interface NativeJdbcExtractor {
 	 * else, the original CallableStatement
 	 * @throws SQLException if thrown by JDBC methods
 	 */
-	CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException;
+	default CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
+		return cs;
+	}
 
 	/**
 	 * Retrieve the underlying native JDBC ResultSet for the given statement.
@@ -164,6 +181,8 @@ public interface NativeJdbcExtractor {
 	 * else, the original ResultSet
 	 * @throws SQLException if thrown by JDBC methods
 	 */
-	ResultSet getNativeResultSet(ResultSet rs) throws SQLException;
+	default ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
+		return rs;
+	}
 
 }

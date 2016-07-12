@@ -75,28 +75,6 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	// --- SmartContextLoader -----------------------------------------------
 
 	/**
-	 * For backwards compatibility with the {@link ContextLoader} SPI, the
-	 * default implementation simply delegates to {@link #processLocations(Class, String...)},
-	 * passing it the {@link ContextConfigurationAttributes#getDeclaringClass()
-	 * declaring class} and {@link ContextConfigurationAttributes#getLocations()
-	 * resource locations} retrieved from the supplied
-	 * {@link ContextConfigurationAttributes configuration attributes}. The
-	 * processed locations are then
-	 * {@link ContextConfigurationAttributes#setLocations(String[]) set} in
-	 * the supplied configuration attributes.
-	 * <p>Can be overridden in subclasses &mdash; for example, to process
-	 * annotated classes instead of resource locations.
-	 * @since 3.1
-	 * @see #processLocations(Class, String...)
-	 */
-	@Override
-	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
-		String[] processedLocations =
-				processLocations(configAttributes.getDeclaringClass(), configAttributes.getLocations());
-		configAttributes.setLocations(processedLocations);
-	}
-
-	/**
 	 * Prepare the {@link ConfigurableApplicationContext} created by this
 	 * {@code SmartContextLoader} <i>before</i> bean definitions are read.
 	 * <p>The default implementation:

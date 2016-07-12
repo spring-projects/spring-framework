@@ -50,7 +50,9 @@ public interface SpelNode {
 	 * @throws EvaluationException if something went wrong trying to determine
 	 * if the node supports writing
 	 */
-	boolean isWritable(ExpressionState expressionState) throws EvaluationException;
+	default boolean isWritable(ExpressionState expressionState) throws EvaluationException {
+		return false;
+	}
 
 	/**
 	 * Evaluate the expression to a node and then set the new value on that node.
@@ -61,12 +63,17 @@ public interface SpelNode {
 	 * @throws EvaluationException if any problem occurs evaluating the expression or
 	 * setting the new value
 	 */
-	void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException;
+	default void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
+		throw new SpelEvaluationException(getStartPosition(),
+				SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
+	}
 
 	/**
 	 * @return the string form of this AST node
 	 */
-	String toStringAST();
+	default String toStringAST() {
+		return toString();
+	}
 
 	/**
 	 * @return the number of children under this node
@@ -85,7 +92,12 @@ public interface SpelNode {
 	 * @return the class of the object if it is not already a class object,
 	 * or {@code null} if the object is {@code null}
 	 */
-	Class<?> getObjectClass(Object obj);
+	default Class<?> getObjectClass(Object obj) {
+		if (obj == null) {
+			return null;
+		}
+		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
+	}
 
 	/**
 	 * @return the start position of this Ast node in the expression string

@@ -38,7 +38,6 @@ import org.glassfish.tyrus.core.RequestContext;
 import org.glassfish.tyrus.core.TyrusEndpointWrapper;
 import org.glassfish.tyrus.core.TyrusUpgradeResponse;
 import org.glassfish.tyrus.core.TyrusWebSocketEngine;
-import org.glassfish.tyrus.core.Version;
 import org.glassfish.tyrus.server.TyrusServerContainer;
 import org.glassfish.tyrus.spi.WebSocketEngine.UpgradeInfo;
 
@@ -47,7 +46,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
@@ -107,11 +105,6 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 
 	private final ComponentProviderService componentProvider = ComponentProviderService.create();
 
-
-	@Override
-	public String[] getSupportedVersions() {
-		return StringUtils.commaDelimitedListToStringArray(Version.getSupportedWireProtocolVersions());
-	}
 
 	protected List<WebSocketExtension> getInstalledExtensions(WebSocketContainer container) {
 		try {

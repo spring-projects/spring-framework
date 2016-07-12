@@ -161,7 +161,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @return the resolved object, or {@code null} if none found
 	 * @throws BeansException if dependency resolution failed
 	 */
-	Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException;
+	default Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException {
+		return resolveDependency(descriptor, beanName, null, null);
+	}
 
 
 	//-------------------------------------------------------------------------

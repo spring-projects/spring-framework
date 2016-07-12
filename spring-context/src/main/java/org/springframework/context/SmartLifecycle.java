@@ -87,6 +87,9 @@ public interface SmartLifecycle extends Lifecycle, Phased {
 	 * @see #stop()
 	 * @see #getPhase()
 	 */
-	void stop(Runnable callback);
+	default void stop(Runnable callback) {
+		stop();
+		callback.run();
+	}
 
 }

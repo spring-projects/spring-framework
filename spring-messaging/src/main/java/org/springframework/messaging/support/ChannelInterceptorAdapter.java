@@ -16,9 +16,6 @@
 
 package org.springframework.messaging.support;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-
 /**
  * A {@link ChannelInterceptor} base class with empty method implementations
  * as a convenience.
@@ -28,31 +25,5 @@ import org.springframework.messaging.MessageChannel;
  * @since 4.0
  */
 public abstract class ChannelInterceptorAdapter implements ChannelInterceptor {
-
-	@Override
-	public Message<?> preSend(Message<?> message, MessageChannel channel) {
-		return message;
-	}
-
-	@Override
-	public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
-	}
-
-	@Override
-	public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, Exception ex) {
-	}
-
-	public boolean preReceive(MessageChannel channel) {
-		return true;
-	}
-
-	@Override
-	public Message<?> postReceive(Message<?> message, MessageChannel channel) {
-		return message;
-	}
-
-	@Override
-	public void afterReceiveCompletion(Message<?> message, MessageChannel channel, Exception ex) {
-	}
 
 }

@@ -51,6 +51,8 @@ public interface InputStreamSource {
 	 * @throws IOException if the stream could not be opened
 	 * @see org.springframework.mail.javamail.MimeMessageHelper#addAttachment(String, InputStreamSource)
 	 */
-	InputStream getInputStream() throws IOException;
+	default InputStream getInputStream() throws IOException {
+		return null;
+	}
 
 }

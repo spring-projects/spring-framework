@@ -54,12 +54,6 @@ public abstract class Literal extends SpelNodeImpl {
 		return getLiteralValue().getValue().toString();
 	}
 
-	@Override
-	public String toStringAST() {
-		return toString();
-	}
-
-
 	public abstract TypedValue getLiteralValue();
 
 

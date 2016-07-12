@@ -45,7 +45,9 @@ public interface AsyncHandlerMethodReturnValueHandler extends HandlerMethodRetur
 	 * @param returnType the type of the return value.
 	 * @return true if the return value type represents an async value.
 	 */
-	boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType);
+	default boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
+		return true;
+	}
 
 	/**
 	 * Adapt the asynchronous return value to a {@link ListenableFuture}.

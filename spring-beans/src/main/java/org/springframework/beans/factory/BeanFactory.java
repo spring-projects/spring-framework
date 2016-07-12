@@ -290,7 +290,9 @@ public interface BeanFactory {
 	 * @see #getBean
 	 * @see #getType
 	 */
-	boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException;
+	default boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+		return isTypeMatch(name, ResolvableType.forRawClass(typeToMatch));
+	}
 
 	/**
 	 * Determine the type of the bean with the given name. More specifically,

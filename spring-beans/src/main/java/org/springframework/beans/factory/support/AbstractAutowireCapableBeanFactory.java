@@ -324,10 +324,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return initializeBean(beanName, existingBean, bd);
 	}
 
-	@Override
-	public Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException {
-		return resolveDependency(descriptor, beanName, null, null);
-	}
+	
 
 
 	//-------------------------------------------------------------------------

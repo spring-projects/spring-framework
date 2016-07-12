@@ -99,7 +99,9 @@ public interface LobHandler {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getBytes
 	 */
-	byte[] getBlobAsBytes(ResultSet rs, String columnName) throws SQLException;
+	default byte[] getBlobAsBytes(ResultSet rs, String columnName) throws SQLException {
+		return getBlobAsBytes(rs, rs.findColumn(columnName));
+	}
 
 	/**
 	 * Retrieve the given column as bytes from the given ResultSet.
@@ -123,7 +125,9 @@ public interface LobHandler {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getBinaryStream
 	 */
-	InputStream getBlobAsBinaryStream(ResultSet rs, String columnName) throws SQLException;
+	default InputStream getBlobAsBinaryStream(ResultSet rs, String columnName) throws SQLException {
+		return getBlobAsBinaryStream(rs, rs.findColumn(columnName));
+	}
 
 	/**
 	 * Retrieve the given column as binary stream from the given ResultSet.
@@ -147,7 +151,9 @@ public interface LobHandler {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getString
 	 */
-	String getClobAsString(ResultSet rs, String columnName) throws SQLException;
+	default String getClobAsString(ResultSet rs, String columnName) throws SQLException {
+		return getClobAsString(rs, rs.findColumn(columnName));
+	}
 
 	/**
 	 * Retrieve the given column as String from the given ResultSet.
@@ -171,7 +177,9 @@ public interface LobHandler {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getAsciiStream
 	 */
-	InputStream getClobAsAsciiStream(ResultSet rs, String columnName) throws SQLException;
+	default InputStream getClobAsAsciiStream(ResultSet rs, String columnName) throws SQLException {
+		return getClobAsAsciiStream(rs, rs.findColumn(columnName));
+	}
 
 	/**
 	 * Retrieve the given column as ASCII stream from the given ResultSet.
@@ -195,7 +203,9 @@ public interface LobHandler {
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getCharacterStream
 	 */
-	Reader getClobAsCharacterStream(ResultSet rs, String columnName) throws SQLException;
+	default Reader getClobAsCharacterStream(ResultSet rs, String columnName) throws SQLException {
+		return getClobAsCharacterStream(rs, rs.findColumn(columnName));
+	}
 
 	/**
 	 * Retrieve the given column as character stream from the given ResultSet.

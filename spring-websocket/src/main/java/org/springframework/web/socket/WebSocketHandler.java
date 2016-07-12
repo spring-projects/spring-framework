@@ -40,7 +40,8 @@ public interface WebSocketHandler {
 	 * @throws Exception this method can handle or propagate exceptions; see class-level
 	 * Javadoc for details.
 	 */
-	void afterConnectionEstablished(WebSocketSession session) throws Exception;
+	default void afterConnectionEstablished(WebSocketSession session) throws Exception {
+	}
 
 	/**
 	 * Invoked when a new WebSocket message arrives.
@@ -54,7 +55,8 @@ public interface WebSocketHandler {
 	 * @throws Exception this method can handle or propagate exceptions; see class-level
 	 * Javadoc for details.
 	 */
-	void handleTransportError(WebSocketSession session, Throwable exception) throws Exception;
+	default void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+	}
 
 	/**
 	 * Invoked after the WebSocket connection has been closed by either side, or after a
@@ -64,7 +66,8 @@ public interface WebSocketHandler {
 	 * @throws Exception this method can handle or propagate exceptions; see class-level
 	 * Javadoc for details.
 	 */
-	void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception;
+	default void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+	}
 
 	/**
 	 * Whether the WebSocketHandler handles partial messages. If this flag is set to
@@ -75,6 +78,8 @@ public interface WebSocketHandler {
 	 * {@link org.springframework.web.socket.WebSocketMessage#isLast()} indicates if
 	 * the message is partial and whether it is the last part.
 	 */
-	boolean supportsPartialMessages();
+	default boolean supportsPartialMessages() {
+		return false;
+	}
 
 }

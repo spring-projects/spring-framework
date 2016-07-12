@@ -65,10 +65,6 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 	}
 
 	@Override
-	public void beforeCommit(boolean readOnly) {
-	}
-
-	@Override
 	public void beforeCompletion() {
 		if (shouldUnbindAtCompletion()) {
 			TransactionSynchronizationManager.unbindResource(this.resourceKey);

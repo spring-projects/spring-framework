@@ -474,7 +474,9 @@ interface OverrideInterface {
 
 	TestBean getPrototypeDependency();
 
-	TestBean getPrototypeDependency(Object someParam);
+	default TestBean getPrototypeDependency(Object someParam) {
+		return new TestBean();
+	}
 }
 
 
@@ -485,11 +487,6 @@ interface OverrideInterface {
 abstract class OverrideOneMethod extends MethodReplaceCandidate implements OverrideInterface {
 
 	protected abstract TestBean protectedOverrideSingleton();
-
-	@Override
-	public TestBean getPrototypeDependency(Object someParam) {
-		return new TestBean();
-	}
 
 	public TestBean invokesOverriddenMethodOnSelf() {
 		return getPrototypeDependency();

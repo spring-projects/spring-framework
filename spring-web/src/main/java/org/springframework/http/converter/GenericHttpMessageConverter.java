@@ -48,7 +48,9 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * Typically the value of a {@code Content-Type} header.
 	 * @return {@code true} if readable; {@code false} otherwise
 	 */
-	boolean canRead(Type type, Class<?> contextClass, MediaType mediaType);
+	default boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+		return canRead(contextClass, mediaType);
+	}
 
 	/**
 	 * Read an object of the given type form the given input message, and returns it.
@@ -78,7 +80,9 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * @return {@code true} if writable; {@code false} otherwise
 	 * @since 4.2
 	 */
-	boolean canWrite(Type type, Class<?> clazz, MediaType mediaType);
+	default boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
+		return canWrite(clazz, mediaType);
+	}
 
 	/**
 	 * Write an given object to the given output message.

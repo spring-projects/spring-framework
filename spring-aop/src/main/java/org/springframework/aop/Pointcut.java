@@ -36,7 +36,9 @@ public interface Pointcut {
 	 * Return the ClassFilter for this pointcut.
 	 * @return the ClassFilter (never {@code null})
 	 */
-	ClassFilter getClassFilter();
+	default ClassFilter getClassFilter() {
+		return ClassFilter.TRUE;
+	}
 
 	/**
 	 * Return the MethodMatcher for this pointcut.

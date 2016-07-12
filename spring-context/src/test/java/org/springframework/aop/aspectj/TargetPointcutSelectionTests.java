@@ -83,17 +83,14 @@ public final class TargetPointcutSelectionTests {
 
 	public static interface TestInterface {
 
-		public void interfaceMethod();
+		public default void interfaceMethod() {
+		}
 	}
 
 
 	// Reproducing bug requires that the class specified in target() pointcut doesn't
 	// include the advised method's implementation (instead a base class should include it)
 	public static abstract class AbstractTestImpl implements TestInterface {
-
-		@Override
-		public void interfaceMethod() {
-		}
 	}
 
 

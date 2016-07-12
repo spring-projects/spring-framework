@@ -434,11 +434,6 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 
 	public static abstract class MyOrderedListenerBase implements MyOrderedListenerIfc<MyEvent> {
-
-		@Override
-		public int getOrder() {
-			return 1;
-		}
 	}
 
 

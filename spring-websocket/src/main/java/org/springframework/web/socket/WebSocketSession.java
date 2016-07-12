@@ -87,22 +87,30 @@ public interface WebSocketSession extends Closeable {
 	/**
 	 * Configure the maximum size for an incoming text message.
 	 */
-	void setTextMessageSizeLimit(int messageSizeLimit);
+	default void setTextMessageSizeLimit(int messageSizeLimit) {
+		// ignore
+	}
 
 	/**
 	 * Get the configured maximum size for an incoming text message.
 	 */
-	int getTextMessageSizeLimit();
+	default int getTextMessageSizeLimit() {
+		return -1;
+	}
 
 	/**
 	 * Configure the maximum size for an incoming binary message.
 	 */
-	void setBinaryMessageSizeLimit(int messageSizeLimit);
+	default void setBinaryMessageSizeLimit(int messageSizeLimit) {
+		// ignore
+	}
 
 	/**
 	 * Get the configured maximum size for an incoming binary message.
 	 */
-	int getBinaryMessageSizeLimit();
+	default int getBinaryMessageSizeLimit() {
+		return -1;
+	}
 
 	/**
 	 * Return the negotiated extensions or {@code null} if none was specified or

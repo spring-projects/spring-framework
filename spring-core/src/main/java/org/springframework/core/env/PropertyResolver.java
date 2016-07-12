@@ -31,7 +31,9 @@ public interface PropertyResolver {
 	 * Return whether the given property key is available for resolution,
 	 * i.e. if the value for the given key is not {@code null}.
 	 */
-	boolean containsProperty(String key);
+	default boolean containsProperty(String key) {
+		return (getProperty(key) != null);
+	}
 
 	/**
 	 * Return the property value associated with the given key,
@@ -41,7 +43,9 @@ public interface PropertyResolver {
 	 * @see #getProperty(String, Class)
 	 * @see #getRequiredProperty(String)
 	 */
-	String getProperty(String key);
+	default String getProperty(String key) {
+		return getProperty(key, String.class);
+	}
 
 	/**
 	 * Return the property value associated with the given key, or
@@ -51,7 +55,10 @@ public interface PropertyResolver {
 	 * @see #getRequiredProperty(String)
 	 * @see #getProperty(String, Class)
 	 */
-	String getProperty(String key, String defaultValue);
+	default String getProperty(String key, String defaultValue) {
+		String value = getProperty(key);
+		return (value != null ? value : defaultValue);
+	}
 
 	/**
 	 * Return the property value associated with the given key,
@@ -70,21 +77,36 @@ public interface PropertyResolver {
 	 * @param defaultValue the default value to return if no value is found
 	 * @see #getRequiredProperty(String, Class)
 	 */
-	<T> T getProperty(String key, Class<T> targetType, T defaultValue);
+	default <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+		T value = getProperty(key, targetType);
+		return (value != null ? value : defaultValue);
+	}
 
 	/**
 	 * Return the property value associated with the given key (never {@code null}).
 	 * @throws IllegalStateException if the key cannot be resolved
 	 * @see #getRequiredProperty(String, Class)
 	 */
-	String getRequiredProperty(String key) throws IllegalStateException;
+	default String getRequiredProperty(String key) throws IllegalStateException {
+		String value = getProperty(key);
+		if (value == null) {
+			throw new IllegalStateException(String.format("required key [%s] not found", key));
+		}
+		return value;
+	}
 
 	/**
 	 * Return the property value associated with the given key, converted to the given
 	 * targetType (never {@code null}).
 	 * @throws IllegalStateException if the given key cannot be resolved
 	 */
-	<T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException;
+	default <T> T getRequiredProperty(String key, Class<T> valueType) throws IllegalStateException {
+		T value = getProperty(key, valueType);
+		if (value == null) {
+			throw new IllegalStateException(String.format("required key [%s] not found", key));
+		}
+		return value;
+	}
 
 	/**
 	 * Resolve ${...} placeholders in the given text, replacing them with corresponding

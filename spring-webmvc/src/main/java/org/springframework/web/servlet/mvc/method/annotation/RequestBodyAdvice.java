@@ -60,8 +60,11 @@ public interface RequestBodyAdvice {
 	 * @return the value to use or {@code null} which may then raise an
 	 * {@code HttpMessageNotReadableException} if the argument is required.
 	 */
-	Object handleEmptyBody(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
-			Type targetType, Class<? extends HttpMessageConverter<?>> converterType);
+	default Object handleEmptyBody(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+	
+		return body;
+	}
 
 	/**
 	 * Invoked second before the request body is read and converted.
@@ -72,8 +75,11 @@ public interface RequestBodyAdvice {
 	 * @param converterType the converter used to deserialize the body
 	 * @return the input request or a new instance, never {@code null}
 	 */
-	HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter,
-			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException;
+	default HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter,
+			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
+	
+		return inputMessage;
+	}
 
 	/**
 	 * Invoked third (and last) after the request body is converted to an Object.
@@ -85,7 +91,10 @@ public interface RequestBodyAdvice {
 	 * @param converterType the converter used to deserialize the body
 	 * @return the same body or a new instance
 	 */
-	Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
-			Type targetType, Class<? extends HttpMessageConverter<?>> converterType);
+	default Object afterBodyRead(Object body, HttpInputMessage inputMessage, MethodParameter parameter,
+			Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
+	
+		return body;
+	}
 
 }

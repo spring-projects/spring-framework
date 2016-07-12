@@ -147,26 +147,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	@Override
-	public void setTextMessageSizeLimit(int messageSizeLimit) {
-		// ignore
-	}
-
-	@Override
-	public int getTextMessageSizeLimit() {
-		return -1;
-	}
-
-	@Override
-	public void setBinaryMessageSizeLimit(int messageSizeLimit) {
-		// ignore
-	}
-
-	@Override
-	public int getBinaryMessageSizeLimit() {
-		return -1;
-	}
-
-	@Override
 	public List<WebSocketExtension> getExtensions() {
 		return Collections.emptyList();
 	}

@@ -16,9 +16,7 @@
 
 package org.springframework.core.convert.support;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -284,22 +282,12 @@ public class CollectionToCollectionConverterTests {
 	public static abstract class BaseResource implements Resource {
 
 		@Override
-		public InputStream getInputStream() throws IOException {
-			return null;
-		}
-
-		@Override
 		public boolean exists() {
 			return false;
 		}
 
 		@Override
 		public boolean isReadable() {
-			return false;
-		}
-
-		@Override
-		public boolean isOpen() {
 			return false;
 		}
 
@@ -314,32 +302,7 @@ public class CollectionToCollectionConverterTests {
 		}
 
 		@Override
-		public File getFile() throws IOException {
-			return null;
-		}
-
-		@Override
-		public long contentLength() throws IOException {
-			return 0;
-		}
-
-		@Override
-		public long lastModified() throws IOException {
-			return 0;
-		}
-
-		@Override
 		public Resource createRelative(String relativePath) throws IOException {
-			return null;
-		}
-
-		@Override
-		public String getFilename() {
-			return null;
-		}
-
-		@Override
-		public String getDescription() {
 			return null;
 		}
 	}

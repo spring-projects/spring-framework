@@ -59,13 +59,4 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 			throws Exception {
 	}
 
-	/**
-	 * This implementation is empty.
-	 */
-	@Override
-	public void afterConcurrentHandlingStarted(
-			HttpServletRequest request, HttpServletResponse response, Object handler)
-			throws Exception {
-	}
-
 }

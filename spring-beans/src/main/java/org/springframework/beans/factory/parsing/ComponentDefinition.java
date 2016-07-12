@@ -88,7 +88,9 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * <p>Implementations are encouraged to return the same value from
 	 * {@code toString()}.
 	 */
-	String getDescription();
+	default String getDescription() {
+		return getName();
+	}
 
 	/**
 	 * Return the {@link BeanDefinition BeanDefinitions} that were registered
@@ -99,7 +101,9 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * Important {@link BeanReference BeanReferences} are available from {@link #getBeanReferences()}.
 	 * @return the array of BeanDefinitions, or an empty array if none
 	 */
-	BeanDefinition[] getBeanDefinitions();
+	default BeanDefinition[] getBeanDefinitions() {
+		return new BeanDefinition[0];
+	}
 
 	/**
 	 * Return the {@link BeanDefinition BeanDefinitions} that represent all relevant
@@ -108,7 +112,9 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * however these are not considered to be needed for validation or for user visualization.
 	 * @return the array of BeanDefinitions, or an empty array if none
 	 */
-	BeanDefinition[] getInnerBeanDefinitions();
+	default BeanDefinition[] getInnerBeanDefinitions() {
+		return new BeanDefinition[0];
+	}
 
 	/**
 	 * Return the set of {@link BeanReference BeanReferences} that are considered
@@ -118,6 +124,8 @@ public interface ComponentDefinition extends BeanMetadataElement {
 	 * to be needed for validation or for user visualization.
 	 * @return the array of BeanReferences, or an empty array if none
 	 */
-	BeanReference[] getBeanReferences();
+	default BeanReference[] getBeanReferences() {
+		return new BeanReference[0];
+	}
 
 }

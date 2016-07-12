@@ -19,6 +19,7 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 
 /**
  * Simple interface for bean definition readers.
@@ -93,7 +94,14 @@ public interface BeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException;
+	default int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException {
+		Assert.notNull(resources, "Resource array must not be null");
+		int counter = 0;
+		for (Resource resource : resources) {
+			counter += loadBeanDefinitions(resource);
+		}
+		return counter;
+	}
 
 	/**
 	 * Load bean definitions from the specified resource location.
@@ -116,6 +124,13 @@ public interface BeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
-	int loadBeanDefinitions(String... locations) throws BeanDefinitionStoreException;
+	default int loadBeanDefinitions(String... locations) throws BeanDefinitionStoreException {
+		Assert.notNull(locations, "Location array must not be null");
+		int counter = 0;
+		for (String location : locations) {
+			counter += loadBeanDefinitions(location);
+		}
+		return counter;
+	}
 
 }

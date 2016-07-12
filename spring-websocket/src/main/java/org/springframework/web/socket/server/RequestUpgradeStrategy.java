@@ -20,8 +20,10 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
+import org.glassfish.tyrus.core.Version;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 
@@ -36,7 +38,9 @@ public interface RequestUpgradeStrategy {
 	/**
 	 * Return the supported WebSocket protocol versions.
 	 */
-	String[] getSupportedVersions();
+	default String[] getSupportedVersions() {
+		return StringUtils.commaDelimitedListToStringArray(Version.getSupportedWireProtocolVersions());
+	}
 
 	/**
 	 * Return the WebSocket protocol extensions supported by the underlying WebSocket server.

@@ -88,7 +88,11 @@ public interface SmartContextLoader extends ContextLoader {
 	 * this {@code SmartContextLoader} was not able to generate or detect defaults.
 	 * @param configAttributes the context configuration attributes to process
 	 */
-	void processContextConfiguration(ContextConfigurationAttributes configAttributes);
+	default void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
+		String[] processedLocations =
+				processLocations(configAttributes.getDeclaringClass(), configAttributes.getLocations());
+		configAttributes.setLocations(processedLocations);
+	}
 
 	/**
 	 * Loads a new {@link ApplicationContext context} based on the supplied

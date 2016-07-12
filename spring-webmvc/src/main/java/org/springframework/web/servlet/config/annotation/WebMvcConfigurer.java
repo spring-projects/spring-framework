@@ -50,7 +50,8 @@ public interface WebMvcConfigurer {
 	 * Add {@link Converter}s and {@link Formatter}s in addition to the ones
 	 * registered by default.
 	 */
-	void addFormatters(FormatterRegistry registry);
+	default void addFormatters(FormatterRegistry registry) {
+	}
 
 	/**
 	 * Configure the {@link HttpMessageConverter}s to use for reading or writing
@@ -62,7 +63,8 @@ public interface WebMvcConfigurer {
 	 * {@link #extendMessageConverters(java.util.List)} instead.
 	 * @param converters initially an empty list of converters
 	 */
-	void configureMessageConverters(List<HttpMessageConverter<?>> converters);
+	default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	}
 
 	/**
 	 * A hook for extending or modifying the list of converters after it has been
@@ -71,7 +73,8 @@ public interface WebMvcConfigurer {
 	 * @param converters the list of configured converters to extend.
 	 * @since 4.1.3
 	 */
-	void extendMessageConverters(List<HttpMessageConverter<?>> converters);
+	default void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+	}
 
 	/**
 	 * Provide a custom {@link Validator} instead of the one created by default.
@@ -79,17 +82,21 @@ public interface WebMvcConfigurer {
 	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
 	 * Leave the return value as {@code null} to keep the default.
 	 */
-	Validator getValidator();
+	default Validator getValidator() {
+		return null;
+	}
 
 	/**
 	 * Configure content negotiation options.
 	 */
-	void configureContentNegotiation(ContentNegotiationConfigurer configurer);
+	default void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+	}
 
 	/**
 	 * Configure asynchronous request handling options.
 	 */
-	void configureAsyncSupport(AsyncSupportConfigurer configurer);
+	default void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
 
 	/**
 	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
@@ -102,7 +109,8 @@ public interface WebMvcConfigurer {
 	 * </ul>
 	 * @since 4.0.3
 	 */
-	void configurePathMatch(PathMatchConfigurer configurer);
+	default void configurePathMatch(PathMatchConfigurer configurer) {
+	}
 
 	/**
 	 * Add resolvers to support custom controller method argument types.
@@ -111,7 +119,8 @@ public interface WebMvcConfigurer {
 	 * resolution, configure {@link RequestMappingHandlerAdapter} directly.
 	 * @param argumentResolvers initially an empty list
 	 */
-	void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
+	default void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
 
 	/**
 	 * Add handlers to support custom controller method return value types.
@@ -120,7 +129,8 @@ public interface WebMvcConfigurer {
 	 * values, configure RequestMappingHandlerAdapter directly.
 	 * @param returnValueHandlers initially an empty list
 	 */
-	void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
+	default void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	}
 
 	/**
 	 * Configure the {@link HandlerExceptionResolver}s to handle unresolved
@@ -128,7 +138,8 @@ public interface WebMvcConfigurer {
 	 * exception resolvers are added instead.
 	 * @param exceptionResolvers initially an empty list
 	 */
-	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
+	default void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	}
 
 	/**
 	 * A hook for extending or modifying the list of
@@ -138,7 +149,8 @@ public interface WebMvcConfigurer {
 	 * @param exceptionResolvers the list of configured resolvers to extend.
 	 * @since 4.3
 	 */
-	void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
+	default void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	}
 
 	/**
 	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of
@@ -152,14 +164,17 @@ public interface WebMvcConfigurer {
 	 * {@link org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
 	 * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
 	 */
-	void addInterceptors(InterceptorRegistry registry);
+	default void addInterceptors(InterceptorRegistry registry) {
+	}
 
 	/**
 	 * Provide a custom {@link MessageCodesResolver} for building message codes
 	 * from data binding and validation error codes. Leave the return value as
 	 * {@code null} to keep the default.
 	 */
-	MessageCodesResolver getMessageCodesResolver();
+	default MessageCodesResolver getMessageCodesResolver() {
+		return null;
+	}
 
 	/**
 	 * Configure simple automated controllers pre-configured with the response
@@ -168,21 +183,24 @@ public interface WebMvcConfigurer {
 	 * home page, perform simple site URL redirects, return a 404 status with
 	 * HTML content, a 204 with no content, and more.
 	 */
-	void addViewControllers(ViewControllerRegistry registry);
+	default void addViewControllers(ViewControllerRegistry registry) {
+	}
 
 	/**
 	 * Configure view resolvers to translate String-based view names returned from
 	 * controllers into concrete {@link org.springframework.web.servlet.View}
 	 * implementations to perform rendering with.
 	 */
-	void configureViewResolvers(ViewResolverRegistry registry);
+	default void configureViewResolvers(ViewResolverRegistry registry) {
+	}
 
 	/**
 	 * Add handlers to serve static resources such as images, js, and, css
 	 * files from specific locations under web application root, the classpath,
 	 * and others.
 	 */
-	void addResourceHandlers(ResourceHandlerRegistry registry);
+	default void addResourceHandlers(ResourceHandlerRegistry registry) {
+	}
 
 	/**
 	 * Configure a handler to delegate unhandled requests by forwarding to the
@@ -190,12 +208,14 @@ public interface WebMvcConfigurer {
 	 * the {@link DispatcherServlet} is mapped to "/" thus overriding the
 	 * Servlet container's default handling of static resources.
 	 */
-	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
+	default void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+	}
 
 	/**
 	 * Configure cross origin requests processing.
 	 * @since 4.2
 	 */
-	void addCorsMappings(CorsRegistry registry);
+	default void addCorsMappings(CorsRegistry registry) {
+	}
 
 }

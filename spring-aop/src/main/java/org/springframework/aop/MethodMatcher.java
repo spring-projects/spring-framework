@@ -57,7 +57,9 @@ public interface MethodMatcher {
 	 * the candidate class must be taken to be the method's declaring class)
 	 * @return whether or not this method matches statically
 	 */
-	boolean matches(Method method, Class<?> targetClass);
+	default boolean matches(Method method, Class<?> targetClass) {
+		return true;
+	}
 
 	/**
 	 * Is this MethodMatcher dynamic, that is, must a final call be made on the

@@ -58,16 +58,6 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 	}
 
 
-	@Override
-	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		return canRead(contextClass, mediaType);
-	}
-
-	@Override
-	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
-		return canWrite(clazz, mediaType);
-	}
-
 	/**
 	 * This implementation sets the default headers by calling {@link #addDefaultHeaders},
 	 * and then calls {@link #writeInternal}.

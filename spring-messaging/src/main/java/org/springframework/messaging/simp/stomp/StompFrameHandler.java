@@ -31,7 +31,9 @@ public interface StompFrameHandler {
 	 * type of Object the payload should be converted to.
 	 * @param headers the headers of a message
 	 */
-	Type getPayloadType(StompHeaders headers);
+	default Type getPayloadType(StompHeaders headers) {
+		return String.class;
+	}
 
 	/**
 	 * Handle a STOMP frame with the payload converted to the target type returned
@@ -39,6 +41,7 @@ public interface StompFrameHandler {
 	 * @param headers the headers of the frame
 	 * @param payload the payload or {@code null} if there was no payload
 	 */
-	void handleFrame(StompHeaders headers, Object payload);
+	default void handleFrame(StompHeaders headers, Object payload) {
+	}
 
 }

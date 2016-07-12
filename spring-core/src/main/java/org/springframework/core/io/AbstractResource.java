@@ -20,13 +20,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
-import org.springframework.core.NestedIOException;
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
 
 /**
  * Convenience base class for {@link Resource} implementations,
@@ -40,70 +35,6 @@ import org.springframework.util.ResourceUtils;
  * @since 28.12.2003
  */
 public abstract class AbstractResource implements Resource {
-
-	/**
-	 * This implementation checks whether a File can be opened,
-	 * falling back to whether an InputStream can be opened.
-	 * This will cover both directories and content resources.
-	 */
-	@Override
-	public boolean exists() {
-		// Try file existence: can we find the file in the file system?
-		try {
-			return getFile().exists();
-		}
-		catch (IOException ex) {
-			// Fall back to stream existence: can we open the stream?
-			try {
-				InputStream is = getInputStream();
-				is.close();
-				return true;
-			}
-			catch (Throwable isEx) {
-				return false;
-			}
-		}
-	}
-
-	/**
-	 * This implementation always returns {@code true}.
-	 */
-	@Override
-	public boolean isReadable() {
-		return true;
-	}
-
-	/**
-	 * This implementation always returns {@code false}.
-	 */
-	@Override
-	public boolean isOpen() {
-		return false;
-	}
-
-	/**
-	 * This implementation throws a FileNotFoundException, assuming
-	 * that the resource cannot be resolved to a URL.
-	 */
-	@Override
-	public URL getURL() throws IOException {
-		throw new FileNotFoundException(getDescription() + " cannot be resolved to URL");
-	}
-
-	/**
-	 * This implementation builds a URI based on the URL returned
-	 * by {@link #getURL()}.
-	 */
-	@Override
-	public URI getURI() throws IOException {
-		URL url = getURL();
-		try {
-			return ResourceUtils.toURI(url);
-		}
-		catch (URISyntaxException ex) {
-			throw new NestedIOException("Invalid URI [" + url + "]", ex);
-		}
-	}
 
 	/**
 	 * This implementation throws a FileNotFoundException, assuming
@@ -168,25 +99,6 @@ public abstract class AbstractResource implements Resource {
 	protected File getFileForLastModifiedCheck() throws IOException {
 		return getFile();
 	}
-
-	/**
-	 * This implementation throws a FileNotFoundException, assuming
-	 * that relative resources cannot be created for this resource.
-	 */
-	@Override
-	public Resource createRelative(String relativePath) throws IOException {
-		throw new FileNotFoundException("Cannot create a relative resource for " + getDescription());
-	}
-
-	/**
-	 * This implementation always returns {@code null},
-	 * assuming that this resource type does not have a filename.
-	 */
-	@Override
-	public String getFilename() {
-		return null;
-	}
-
 
 	/**
 	 * This implementation returns the description of this resource.

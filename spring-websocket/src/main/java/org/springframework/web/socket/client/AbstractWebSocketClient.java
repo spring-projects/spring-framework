@@ -33,7 +33,6 @@ import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Abstract base class for {@link WebSocketClient} implementations.
@@ -59,15 +58,6 @@ public abstract class AbstractWebSocketClient implements WebSocketClient {
 		specialHeaders.add("upgrade");
 	}
 
-
-	@Override
-	public ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
-			String uriTemplate, Object... uriVars) {
-
-		Assert.notNull(uriTemplate, "uriTemplate must not be null");
-		URI uri = UriComponentsBuilder.fromUriString(uriTemplate).buildAndExpand(uriVars).encode().toUri();
-		return doHandshake(webSocketHandler, null, uri);
-	}
 
 	@Override
 	public final ListenableFuture<WebSocketSession> doHandshake(WebSocketHandler webSocketHandler,
