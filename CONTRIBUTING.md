@@ -311,8 +311,7 @@ need to issue a new pull request when asked to make changes.
 
 [help documentation]: http://help.github.com/send-pull-requests
 [JIRA issue tracker]: https://jira.spring.io/browse/SPR
-[spring-framework-contrib]: https://groups.google.com/forum/#!forum/spring-framework-contrib
-[Spring ICLA form]: https://support.springsource.com/spring_committer_signup
+[Spring ICLA form]: https://cla.pivotal.io/sign/spring
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
 [Spring Framework Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style
 [Rewriting History section of Pro Git]: http://git-scm.com/book/en/Git-Tools-Rewriting-History
