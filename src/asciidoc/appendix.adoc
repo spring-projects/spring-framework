@@ -1,6 +1,13 @@
 [[spring-appendices]]
 = Appendices
 
+
+[[spring-whats-new]]
+== What's New in the Spring Framework
+"What's New" guides for releases of the Spring Framework are now provided as a
+link:{wiki-spring-framework}/++What's-New-in-the-Spring-Framework++[Wiki page].
+
+
 [[migration-4.x]]
 == Migrating to Spring Framework 4.x
 Migration guides for upgrading from previous releases of the Spring Framework are now provided as a
