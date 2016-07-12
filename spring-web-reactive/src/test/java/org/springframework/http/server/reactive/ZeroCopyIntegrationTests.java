@@ -28,8 +28,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
-import org.springframework.http.server.reactive.boot.ReactorHttpServer;
-import org.springframework.http.server.reactive.boot.UndertowHttpServer;
+import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertEquals;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive.boot;
+package org.springframework.http.server.reactive.bootstrap;
 
 
 import org.springframework.beans.factory.InitializingBean;

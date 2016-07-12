@@ -23,12 +23,12 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import org.springframework.http.server.reactive.boot.HttpServer;
-import org.springframework.http.server.reactive.boot.JettyHttpServer;
-import org.springframework.http.server.reactive.boot.ReactorHttpServer;
-import org.springframework.http.server.reactive.boot.RxNettyHttpServer;
-import org.springframework.http.server.reactive.boot.TomcatHttpServer;
-import org.springframework.http.server.reactive.boot.UndertowHttpServer;
+import org.springframework.http.server.reactive.bootstrap.HttpServer;
+import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
+import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
+import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
+import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
+import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 import org.springframework.util.SocketUtils;
 
 

@@ -14,37 +14,25 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive.boot;
+package org.springframework.http.server.reactive.bootstrap;
 
-import java.io.File;
-
-import org.apache.catalina.Context;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.startup.Tomcat;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.Assert;
 
-
 /**
  * @author Rossen Stoyanchev
  */
-public class TomcatHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
+public class JettyHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
 
-	private Tomcat tomcatServer;
+	private Server jettyServer;
 
 	private boolean running;
-
-	private String baseDir;
-
-
-	public TomcatHttpServer() {
-	}
-
-	public TomcatHttpServer(String baseDir) {
-		this.baseDir = baseDir;
-	}
 
 
 	@Override
@@ -55,32 +43,30 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		this.tomcatServer = new Tomcat();
-		if (this.baseDir != null) {
-			this.tomcatServer.setBaseDir(baseDir);
-		}
-		this.tomcatServer.setHostname(getHost());
-		this.tomcatServer.setPort(getPort());
+		this.jettyServer = new Server();
 
 		Assert.notNull(getHttpHandler());
 		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter();
 		servlet.setHandler(getHttpHandler());
+		ServletHolder servletHolder = new ServletHolder(servlet);
 
-		File base = new File(System.getProperty("java.io.tmpdir"));
-		Context rootContext = tomcatServer.addContext("", base.getAbsolutePath());
-		Tomcat.addServlet(rootContext, "httpHandlerServlet", servlet);
-		rootContext.addServletMapping("/", "httpHandlerServlet");
+		ServletContextHandler contextHandler = new ServletContextHandler(this.jettyServer, "", false, false);
+		contextHandler.addServlet(servletHolder, "/");
+
+		ServerConnector connector = new ServerConnector(this.jettyServer);
+		connector.setHost(getHost());
+		connector.setPort(getPort());
+		this.jettyServer.addConnector(connector);
 	}
-
 
 	@Override
 	public void start() {
 		if (!this.running) {
 			try {
 				this.running = true;
-				this.tomcatServer.start();
+				this.jettyServer.start();
 			}
-			catch (LifecycleException ex) {
+			catch (Exception ex) {
 				throw new IllegalStateException(ex);
 			}
 		}
@@ -91,10 +77,10 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 		if (this.running) {
 			try {
 				this.running = false;
-				this.tomcatServer.stop();
-				this.tomcatServer.destroy();
+				jettyServer.stop();
+				jettyServer.destroy();
 			}
-			catch (LifecycleException ex) {
+			catch (Exception ex) {
 				throw new IllegalStateException(ex);
 			}
 		}
