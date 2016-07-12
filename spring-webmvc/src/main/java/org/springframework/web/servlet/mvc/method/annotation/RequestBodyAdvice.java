@@ -51,6 +51,9 @@ public interface RequestBodyAdvice {
 
 	/**
 	 * Invoked second (and last) if the body is empty.
+	 * 
+	 * The default implementation returns the body that was passed in.
+	 * 
 	 * @param body set to {@code null} before the first advice is called
 	 * @param inputMessage the request
 	 * @param parameter the method parameter
@@ -68,6 +71,9 @@ public interface RequestBodyAdvice {
 
 	/**
 	 * Invoked second before the request body is read and converted.
+	 * 
+	 * The default implementation returns the InputMessage that was passed in.
+	 * 
 	 * @param inputMessage the request
 	 * @param parameter the target method parameter
 	 * @param targetType the target type, not necessarily the same as the method
@@ -83,6 +89,9 @@ public interface RequestBodyAdvice {
 
 	/**
 	 * Invoked third (and last) after the request body is converted to an Object.
+	 * 
+	 * The default implementation returns the body that was passed in.
+	 * 
 	 * @param body set to the converter Object before the 1st advice is called
 	 * @param inputMessage the request
 	 * @param parameter the target method parameter

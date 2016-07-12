@@ -45,6 +45,9 @@ public interface SpelNode {
 
 	/**
 	 * Determine if this expression node will support a setValue() call.
+	 * 
+	 * By default, AST nodes are not writable.
+	 * 
 	 * @param expressionState the current expression state (includes the context)
 	 * @return true if the expression node will allow setValue()
 	 * @throws EvaluationException if something went wrong trying to determine

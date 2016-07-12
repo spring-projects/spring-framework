@@ -75,6 +75,8 @@ public interface NativeJdbcExtractor {
 	 * to retrieve the native JDBC Connection. This way, applications can
 	 * still receive native Statements and ResultSet via working on the
 	 * native JDBC Connection.
+	 *
+	 * Returns {@code false} by default.
 	 */
 	default boolean isNativeConnectionNecessaryForNativeStatements() {
 		return false;
@@ -88,6 +90,8 @@ public interface NativeJdbcExtractor {
 	 * supports a way to retrieve the native JDBC Connection. This way,
 	 * applications can still receive native Statements and ResultSet via
 	 * working on the native JDBC Connection.
+	 *
+	 * Returns {@code false} by default.
 	 */
 	default boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return false;
@@ -101,6 +105,8 @@ public interface NativeJdbcExtractor {
 	 * supports a way to retrieve the native JDBC Connection. This way,
 	 * applications can still receive native Statements and ResultSet via
 	 * working on the native JDBC Connection.
+	 * 
+	 * Returns {@code false} by default.
 	 */
 	default boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return false;
@@ -143,6 +149,9 @@ public interface NativeJdbcExtractor {
 	 * @param stmt the Statement handle, potentially wrapped by a connection pool
 	 * @return the underlying native JDBC Statement, if possible;
 	 * else, the original Statement
+	 * 
+	 * By default, returns the passed-in Statement.
+	 * 
 	 * @throws SQLException if thrown by JDBC methods
 	 */
 	default Statement getNativeStatement(Statement stmt) throws SQLException {
@@ -152,6 +161,9 @@ public interface NativeJdbcExtractor {
 	/**
 	 * Retrieve the underlying native JDBC PreparedStatement for the given statement.
 	 * Supposed to return the given PreparedStatement if not capable of unwrapping.
+	 * 
+	 * By default, returns the passed-in PreparedStatement.
+	 * 
 	 * @param ps the PreparedStatement handle, potentially wrapped by a connection pool
 	 * @return the underlying native JDBC PreparedStatement, if possible;
 	 * else, the original PreparedStatement
@@ -164,6 +176,9 @@ public interface NativeJdbcExtractor {
 	/**
 	 * Retrieve the underlying native JDBC CallableStatement for the given statement.
 	 * Supposed to return the given CallableStatement if not capable of unwrapping.
+	 * 
+	 * By default, returns the passed-in CallableStatement.
+	 * 
 	 * @param cs the CallableStatement handle, potentially wrapped by a connection pool
 	 * @return the underlying native JDBC CallableStatement, if possible;
 	 * else, the original CallableStatement
@@ -176,6 +191,9 @@ public interface NativeJdbcExtractor {
 	/**
 	 * Retrieve the underlying native JDBC ResultSet for the given statement.
 	 * Supposed to return the given ResultSet if not capable of unwrapping.
+	 * 
+	 * By default, returns the passed-in ResultSet.
+	 * 
 	 * @param rs the ResultSet handle, potentially wrapped by a connection pool
 	 * @return the underlying native JDBC ResultSet, if possible;
 	 * else, the original ResultSet

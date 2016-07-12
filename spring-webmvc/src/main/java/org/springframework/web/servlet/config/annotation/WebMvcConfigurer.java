@@ -49,6 +49,8 @@ public interface WebMvcConfigurer {
 	/**
 	 * Add {@link Converter}s and {@link Formatter}s in addition to the ones
 	 * registered by default.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
 	default void addFormatters(FormatterRegistry registry) {
 	}
@@ -61,6 +63,9 @@ public interface WebMvcConfigurer {
 	 * default converter registration. To simply add a converter without impacting
 	 * default registration, consider using the method
 	 * {@link #extendMessageConverters(java.util.List)} instead.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param converters initially an empty list of converters
 	 */
 	default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -70,6 +75,9 @@ public interface WebMvcConfigurer {
 	 * A hook for extending or modifying the list of converters after it has been
 	 * configured. This may be useful for example to allow default converters to
 	 * be registered and then insert a custom converter through this method.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param converters the list of configured converters to extend.
 	 * @since 4.1.3
 	 */
@@ -81,6 +89,8 @@ public interface WebMvcConfigurer {
 	 * The default implementation, assuming JSR-303 is on the classpath, is:
 	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
 	 * Leave the return value as {@code null} to keep the default.
+	 * 
+	 * <p>The default implementation returns {@code null}.
 	 */
 	default Validator getValidator() {
 		return null;
@@ -88,12 +98,16 @@ public interface WebMvcConfigurer {
 
 	/**
 	 * Configure content negotiation options.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
 	default void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 	}
 
 	/**
 	 * Configure asynchronous request handling options.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
 	default void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 	}
@@ -107,6 +121,8 @@ public interface WebMvcConfigurer {
 	 * <li>ViewControllerMappings</li>
 	 * <li>ResourcesMappings</li>
 	 * </ul>
+	 * 
+	 * <p>The default implementation is empty.
 	 * @since 4.0.3
 	 */
 	default void configurePathMatch(PathMatchConfigurer configurer) {
@@ -117,6 +133,9 @@ public interface WebMvcConfigurer {
 	 * <p>This does not override the built-in support for resolving handler
 	 * method arguments. To customize the built-in support for argument
 	 * resolution, configure {@link RequestMappingHandlerAdapter} directly.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param argumentResolvers initially an empty list
 	 */
 	default void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
@@ -127,6 +146,9 @@ public interface WebMvcConfigurer {
 	 * <p>Using this option does not override the built-in support for handling
 	 * return values. To customize the built-in support for handling return
 	 * values, configure RequestMappingHandlerAdapter directly.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param returnValueHandlers initially an empty list
 	 */
 	default void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
@@ -136,6 +158,9 @@ public interface WebMvcConfigurer {
 	 * Configure the {@link HandlerExceptionResolver}s to handle unresolved
 	 * controller exceptions. If no resolvers are added to the list, default
 	 * exception resolvers are added instead.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param exceptionResolvers initially an empty list
 	 */
 	default void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
@@ -146,6 +171,9 @@ public interface WebMvcConfigurer {
 	 * {@link HandlerExceptionResolver}s after it has been configured. This may
 	 * be useful for example to allow default resolvers to be registered and then
 	 * insert a custom one through this method.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param exceptionResolvers the list of configured resolvers to extend.
 	 * @since 4.3
 	 */
@@ -163,6 +191,8 @@ public interface WebMvcConfigurer {
 	 * bean or switch to advanced configuration mode by extending
 	 * {@link org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
 	 * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
 	default void addInterceptors(InterceptorRegistry registry) {
 	}
@@ -171,6 +201,8 @@ public interface WebMvcConfigurer {
 	 * Provide a custom {@link MessageCodesResolver} for building message codes
 	 * from data binding and validation error codes. Leave the return value as
 	 * {@code null} to keep the default.
+	 * 
+	 * <p>The default implementation returns {@code null}.
 	 */
 	default MessageCodesResolver getMessageCodesResolver() {
 		return null;
@@ -182,6 +214,8 @@ public interface WebMvcConfigurer {
 	 * cases where there is no need for custom controller logic -- e.g. render a
 	 * home page, perform simple site URL redirects, return a 404 status with
 	 * HTML content, a 204 with no content, and more.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
 	default void addViewControllers(ViewControllerRegistry registry) {
 	}
@@ -190,6 +224,8 @@ public interface WebMvcConfigurer {
 	 * Configure view resolvers to translate String-based view names returned from
 	 * controllers into concrete {@link org.springframework.web.servlet.View}
 	 * implementations to perform rendering with.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
 	default void configureViewResolvers(ViewResolverRegistry registry) {
 	}
@@ -198,6 +234,8 @@ public interface WebMvcConfigurer {
 	 * Add handlers to serve static resources such as images, js, and, css
 	 * files from specific locations under web application root, the classpath,
 	 * and others.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
 	default void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
@@ -207,12 +245,17 @@ public interface WebMvcConfigurer {
 	 * Servlet container's "default" servlet. A common use case for this is when
 	 * the {@link DispatcherServlet} is mapped to "/" thus overriding the
 	 * Servlet container's default handling of static resources.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
 	default void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 	}
 
 	/**
 	 * Configure cross origin requests processing.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @since 4.2
 	 */
 	default void addCorsMappings(CorsRegistry registry) {

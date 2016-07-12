@@ -46,6 +46,9 @@ public interface DeferredResultProcessingInterceptor {
 	 * Invoked immediately before the start of concurrent handling, in the same
 	 * thread that started it. This method may be used to capture state just prior
 	 * to the start of concurrent processing with the given {@code DeferredResult}.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
 	 * @throws Exception in case of errors
@@ -59,6 +62,9 @@ public interface DeferredResultProcessingInterceptor {
 	 * concurrent processing with the given {@code DeferredResult}.
 	 * <p>The {@code DeferredResult} may have already been set, for example at
 	 * the time of its creation or by another thread.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
 	 * @throws Exception in case of errors
@@ -74,6 +80,9 @@ public interface DeferredResultProcessingInterceptor {
 	 * <p>This method may also be invoked after a timeout when the
 	 * {@code DeferredResult} was created with a constructor accepting a default
 	 * timeout result.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
 	 * @param concurrentResult the result to which the {@code DeferredResult}
@@ -87,6 +96,10 @@ public interface DeferredResultProcessingInterceptor {
 	 * the {@code DeferredResult} has been set. Implementations may invoke
 	 * {@link DeferredResult#setResult(Object) setResult} or
 	 * {@link DeferredResult#setErrorResult(Object) setErrorResult} to resume processing.
+	 * 
+	 * The default implementation returns {@code true} allowing other interceptors
+	 * to be given a chance to handle the timeout.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request; if the
 	 * {@code DeferredResult} is set, then concurrent processing is resumed and
@@ -103,6 +116,9 @@ public interface DeferredResultProcessingInterceptor {
 	 * Invoked from a container thread when an async request completed for any
 	 * reason including timeout and network error. This method is useful for
 	 * detecting that a {@code DeferredResult} instance is no longer usable.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
 	 * @throws Exception in case of errors

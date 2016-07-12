@@ -86,7 +86,22 @@ public interface SmartContextLoader extends ContextLoader {
 	 * {@link ContextConfigurationAttributes}. Consequently, leaving the
 	 * {@code locations} or {@code classes} property empty signals that
 	 * this {@code SmartContextLoader} was not able to generate or detect defaults.
+	 * 
+	 * For backwards compatibility with the {@link ContextLoader} SPI, the
+	 * default implementation simply delegates to {@link #processLocations(Class, String...)},
+	 * passing it the {@link ContextConfigurationAttributes#getDeclaringClass()
+	 * declaring class} and {@link ContextConfigurationAttributes#getLocations()
+	 * resource locations} retrieved from the supplied
+	 * {@link ContextConfigurationAttributes configuration attributes}. The
+	 * processed locations are then
+	 * {@link ContextConfigurationAttributes#setLocations(String[]) set} in
+	 * the supplied configuration attributes.
+	 * <p>The default implementation can be overridden in subclasses &mdash; for example, to process
+	 * annotated classes instead of resource locations.
+	 *
 	 * @param configAttributes the context configuration attributes to process
+	 * @since 3.1
+	 * @see AbstractContextLoader#processLocations(Class, String...)
 	 */
 	default void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations =

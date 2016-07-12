@@ -58,6 +58,9 @@ public interface CallableProcessingInterceptor {
 	 * {@link #preProcess(NativeWebRequest, Callable)}. Capturing the state of
 	 * Spring Security's SecurityContextHolder and migrating it to the new Thread
 	 * is a concrete example of where this is useful.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
@@ -69,6 +72,9 @@ public interface CallableProcessingInterceptor {
 	 * Invoked <em>after</em> the start of concurrent handling in the async
 	 * thread in which the {@code Callable} is executed and <em>before</em> the
 	 * actual invocation of the {@code Callable}.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
@@ -81,6 +87,9 @@ public interface CallableProcessingInterceptor {
 	 * async thread in which the {@code Callable} is executed. This method may
 	 * be invoked later than {@code afterTimeout} or {@code afterCompletion}
 	 * depending on when the {@code Callable} finishes processing.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @param concurrentResult the result of concurrent processing, which could
@@ -95,6 +104,10 @@ public interface CallableProcessingInterceptor {
 	 * the {@code Callable} task completes. Implementations may return a value,
 	 * including an {@link Exception}, to use instead of the value the
 	 * {@link Callable} did not return in time.
+	 * 
+	 * The default implementation always returns
+	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
+	 * 
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @return a concurrent result value; if the value is anything other than
@@ -109,6 +122,9 @@ public interface CallableProcessingInterceptor {
 	/**
 	 * Invoked from a container thread when async processing completes for any
 	 * reason including timeout or network error.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors

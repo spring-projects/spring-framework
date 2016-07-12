@@ -57,6 +57,10 @@ public interface Resource extends InputStreamSource {
 	 * <p>This method performs a definitive existence check, whereas the
 	 * existence of a {@code Resource} handle only guarantees a
 	 * valid descriptor handle.
+	 * 
+	 * The default implementation checks whether a File can be opened,
+	 * falling back to whether an InputStream can be opened.
+	 * This will cover both directories and content resources.
 	 */
 	default boolean exists() {
 		// Try file existence: can we find the file in the file system?
@@ -83,6 +87,9 @@ public interface Resource extends InputStreamSource {
 	 * note that actual content reading may still fail when attempted.
 	 * However, a value of {@code false} is a definitive indication
 	 * that the resource content cannot be read.
+	 * 
+	 * The default implementation always returns {@code true}.
+	 * 
 	 * @see #getInputStream()
 	 */
 	default boolean isReadable() {
@@ -94,6 +101,8 @@ public interface Resource extends InputStreamSource {
 	 * stream. If true, the InputStream cannot be read multiple times,
 	 * and must be read and closed to avoid resource leaks.
 	 * <p>Will be {@code false} for typical resource descriptors.
+	 * 
+	 * The default implementation always returns {@code false}.
 	 */
 	default boolean isOpen() {
 		return false;
@@ -103,6 +112,9 @@ public interface Resource extends InputStreamSource {
 	 * Return a URL handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URL,
 	 * i.e. if the resource is not available as descriptor
+	 * 
+	 * The default implementation throws a FileNotFoundException, assuming
+	 * that the resource cannot be resolved to a URL.
 	 */
 	default URL getURL() throws IOException {
 		throw new FileNotFoundException(getDescription() + " cannot be resolved to URL");
@@ -112,6 +124,9 @@ public interface Resource extends InputStreamSource {
 	 * Return a URI handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URI,
 	 * i.e. if the resource is not available as descriptor
+	 * 
+	 * The default implementation builds a URI based on the URL returned
+	 * by {@link #getURL()}.
 	 */
 	default URI getURI() throws IOException {
 		URL url = getURL();
@@ -152,6 +167,10 @@ public interface Resource extends InputStreamSource {
 
 	/**
 	 * Create a resource relative to this resource.
+     *
+	 * The default implementation throws a FileNotFoundException, assuming
+	 * that relative resources cannot be created for this resource.
+	 * 
 	 * @param relativePath the relative path (relative to this resource)
 	 * @return the resource handle for the relative resource
 	 * @throws IOException if the relative resource cannot be determined
@@ -165,6 +184,9 @@ public interface Resource extends InputStreamSource {
 	 * part of the path: for example, "myfile.txt".
 	 * <p>Returns {@code null} if this type of resource does not
 	 * have a filename.
+	 * 
+	 * The default implementation always returns {@code null},
+	 * assuming that this resource type does not have a filename.
 	 */
 	default String getFilename() {
 		return null;

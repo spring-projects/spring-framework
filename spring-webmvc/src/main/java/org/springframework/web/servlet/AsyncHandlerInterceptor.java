@@ -66,6 +66,9 @@ public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 	 * avoid modifying them in ways that would conflict with the concurrent
 	 * execution of the handler. A typical use of this method would be to
 	 * clean up thread-local variables.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param response the current response
 	 * @param handler the handler (or {@link HandlerMethod}) that started async

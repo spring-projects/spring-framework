@@ -29,6 +29,10 @@ public interface StompFrameHandler {
 	/**
 	 * Invoked before {@link #handleFrame(StompHeaders, Object)} to determine the
 	 * type of Object the payload should be converted to.
+	 * 
+	 * The default implementation returns String as the expected payload type
+	 * for STOMP ERROR frames.
+	 * 
 	 * @param headers the headers of a message
 	 */
 	default Type getPayloadType(StompHeaders headers) {
@@ -38,6 +42,9 @@ public interface StompFrameHandler {
 	/**
 	 * Handle a STOMP frame with the payload converted to the target type returned
 	 * from {@link #getPayloadType(StompHeaders)}.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param headers the headers of the frame
 	 * @param payload the payload or {@code null} if there was no payload
 	 */
