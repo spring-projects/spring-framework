@@ -30,8 +30,6 @@ import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Publisher;
 import org.xnio.ChannelListener;
-import org.xnio.ChannelListeners;
-import org.xnio.IoUtils;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
 
@@ -204,23 +202,6 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		protected void releaseBuffer() {
 			super.releaseBuffer();
 			this.byteBuffer = null;
-		}
-
-		@Override
-		protected void close() {
-			try {
-				this.responseChannel.shutdownWrites();
-
-				if (!this.responseChannel.flush()) {
-					this.responseChannel.getWriteSetter().set(ChannelListeners
-							.flushingChannelListener(
-									o -> IoUtils.safeClose(this.responseChannel),
-									ChannelListeners.closingChannelExceptionHandler()));
-					this.responseChannel.resumeWrites();
-				}
-			}
-			catch (IOException ignored) {
-			}
 		}
 
 		private class WriteListener implements ChannelListener<StreamSinkChannel> {

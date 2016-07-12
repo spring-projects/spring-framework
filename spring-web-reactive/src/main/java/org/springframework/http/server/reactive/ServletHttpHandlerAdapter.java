@@ -248,14 +248,13 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		@Override
-		protected void checkOnWritePossible() {
+		protected boolean isWritePossible() {
 			try {
-				if (outputStream().isReady()) {
-					onWritePossible();
-				}
+				return outputStream().isReady();
 			}
 			catch (IOException ex) {
 				onError(ex);
+				return false;
 			}
 		}
 
@@ -305,11 +304,6 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				this.flushOnNext = true;
 			}
 
-		}
-
-		@Override
-		protected void close() {
-			this.synchronizer.writeComplete();
 		}
 
 		private int writeDataBuffer(DataBuffer dataBuffer) throws IOException {

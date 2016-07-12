@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.FlushingDataBuffer;
@@ -46,80 +45,57 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final AtomicReference<SubscriberState> subscriberState =
-			new AtomicReference<>(SubscriberState.UNSUBSCRIBED);
+	private final ResponseBodyWriteResultPublisher publisherDelegate =
+			new ResponseBodyWriteResultPublisher();
 
-	private final AtomicReference<PublisherState> publisherState =
-			new AtomicReference<>(PublisherState.UNSUBSCRIBED);
+	private final AtomicReference<State> state =
+			new AtomicReference<>(State.UNSUBSCRIBED);
 
 	private volatile DataBuffer currentBuffer;
 
 	private volatile boolean subscriberCompleted;
 
-	private volatile boolean publisherCompleted;
-
-	private volatile Throwable publisherError;
-
 	private Subscription subscription;
-
-	private Subscriber<? super Void> subscriber;
 
 	// Subscriber
 
 	@Override
 	public final void onSubscribe(Subscription subscription) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("SUB " + this.subscriberState + " onSubscribe: " + subscription);
+			logger.trace(this.state + " onSubscribe: " + subscription);
 		}
-		this.subscriberState.get().onSubscribe(this, subscription);
+		this.state.get().onSubscribe(this, subscription);
 	}
 
 	@Override
 	public final void onNext(DataBuffer dataBuffer) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("SUB " + this.subscriberState + " onNext: " + dataBuffer);
+			logger.trace(this.state + " onNext: " + dataBuffer);
 		}
-		this.subscriberState.get().onNext(this, dataBuffer);
+		this.state.get().onNext(this, dataBuffer);
 	}
 
 	@Override
 	public final void onError(Throwable t) {
 		if (logger.isErrorEnabled()) {
-			logger.error("SUB " + this.subscriberState + " publishError: " + t, t);
+			logger.error(this.state + " onError: " + t, t);
 		}
-		this.subscriberState.get().onError(this, t);
+		this.state.get().onError(this, t);
 	}
 
 	@Override
 	public final void onComplete() {
 		if (logger.isTraceEnabled()) {
-			logger.trace("SUB " + this.subscriberState + " onComplete");
+			logger.trace(this.state + " onComplete");
 		}
-		this.subscriberState.get().onComplete(this);
+		this.state.get().onComplete(this);
 	}
 
 	// Publisher
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("PUB " + this.publisherState + " subscribe: " + subscriber);
-		}
-		this.publisherState.get().subscribe(this, subscriber);
-	}
-
-	private void publishComplete() {
-		if (logger.isTraceEnabled()) {
-			logger.trace("PUB " + this.publisherState + " publishComplete");
-		}
-		this.publisherState.get().publishComplete(this);
-	}
-
-	private void publishError(Throwable t) {
-		if (logger.isTraceEnabled()) {
-			logger.trace("PUB " + this.publisherState + " publishError: " + t);
-		}
-		this.publisherState.get().publishError(this, t);
+		this.publisherDelegate.subscribe(subscriber);
 	}
 
 	// listener methods
@@ -130,7 +106,7 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	 * @see org.xnio.ChannelListener#handleEvent(Channel)
 	 */
 	protected final void onWritePossible() {
-		this.subscriberState.get().onWritePossible(this);
+		this.state.get().onWritePossible(this);
 	}
 
 	/**
@@ -140,16 +116,6 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	protected void receiveBuffer(DataBuffer dataBuffer) {
 		Assert.state(this.currentBuffer == null);
 		this.currentBuffer = dataBuffer;
-
-		checkOnWritePossible();
-	}
-
-	/**
-	 * Called when a {@link DataBuffer} is received via {@link Subscriber#onNext(Object)}
-	 * or when only partial data from the {@link DataBuffer} was written.
-	 */
-	protected void checkOnWritePossible() {
-		// no-op
 	}
 
 	/**
@@ -162,6 +128,23 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		}
 		DataBufferUtils.release(this.currentBuffer);
 		this.currentBuffer = null;
+	}
+
+	/**
+	 * Called when a {@link DataBuffer} is received via {@link Subscriber#onNext(Object)}
+	 * or when only partial data from the {@link DataBuffer} was written.
+	 */
+	private void writeIfPossible() {
+		if (isWritePossible()) {
+			onWritePossible();
+		}
+	}
+
+	/**
+	 * Called via a listener interface to determine whether writing is possible.
+	 */
+	protected boolean isWritePossible() {
+		return false;
 	}
 
 	/**
@@ -178,49 +161,8 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	 */
 	protected abstract void flush() throws IOException;
 
-	/**
-	 * Closes the output.
-	 */
-	protected abstract void close();
-
-	private boolean changeSubscriberState(SubscriberState oldState,
-			SubscriberState newState) {
-		return this.subscriberState.compareAndSet(oldState, newState);
-	}
-
-	private boolean changePublisherState(PublisherState oldState,
-			PublisherState newState) {
-		return this.publisherState.compareAndSet(oldState, newState);
-	}
-
-	private static final class ResponseBodySubscription implements Subscription {
-
-		private final AbstractResponseBodyProcessor processor;
-
-		public ResponseBodySubscription(AbstractResponseBodyProcessor processor) {
-			this.processor = processor;
-		}
-
-		@Override
-		public final void request(long n) {
-			if (this.processor.logger.isTraceEnabled()) {
-				this.processor.logger.trace("PUB " + state() + " request: " + n);
-			}
-			state().request(this.processor, n);
-		}
-
-		@Override
-		public final void cancel() {
-			if (this.processor.logger.isTraceEnabled()) {
-				this.processor.logger.trace("PUB " + state() + " cancel");
-			}
-			state().cancel(this.processor);
-		}
-
-		private PublisherState state() {
-			return this.processor.publisherState.get();
-		}
-
+	private boolean changeState(State oldState, State newState) {
+		return this.state.compareAndSet(oldState, newState);
 	}
 
 	/**
@@ -241,7 +183,7 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	 * </pre>
 	 * Refer to the individual states for more information.
 	 */
-	private enum SubscriberState {
+	private enum State {
 
 		/**
 		 * The initial unsubscribed state. Will respond to {@code onSubscribe} by
@@ -253,7 +195,7 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 			void onSubscribe(AbstractResponseBodyProcessor processor,
 					Subscription subscription) {
 				Objects.requireNonNull(subscription, "Subscription cannot be null");
-				if (processor.changeSubscriberState(this, REQUESTED)) {
+				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
 					subscription.request(1);
 				}
@@ -271,17 +213,17 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		REQUESTED {
 			@Override
 			void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
-				if (processor.changeSubscriberState(this, RECEIVED)) {
+				if (processor.changeState(this, RECEIVED)) {
 					processor.receiveBuffer(dataBuffer);
+					processor.writeIfPossible();
 				}
 			}
 
 			@Override
 			void onComplete(AbstractResponseBodyProcessor processor) {
-				if (processor.changeSubscriberState(this, COMPLETED)) {
+				if (processor.changeState(this, COMPLETED)) {
 					processor.subscriberCompleted = true;
-					processor.close();
-					processor.publishComplete();
+					processor.publisherDelegate.publishComplete();
 				}
 			}
 		},
@@ -297,7 +239,7 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		RECEIVED {
 			@Override
 			void onWritePossible(AbstractResponseBodyProcessor processor) {
-				if (processor.changeSubscriberState(this, WRITING)) {
+				if (processor.changeState(this, WRITING)) {
 					DataBuffer dataBuffer = processor.currentBuffer;
 					try {
 						boolean writeCompleted = processor.write(dataBuffer);
@@ -307,18 +249,17 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 							}
 							processor.releaseBuffer();
 							if (!processor.subscriberCompleted) {
-								processor.changeSubscriberState(WRITING, REQUESTED);
+								processor.changeState(WRITING, REQUESTED);
 								processor.subscription.request(1);
 							}
 							else {
-								processor.changeSubscriberState(WRITING, COMPLETED);
-								processor.close();
-								processor.publishComplete();
+								processor.changeState(WRITING, COMPLETED);
+								processor.publisherDelegate.publishComplete();
 							}
 						}
 						else {
-							processor.changeSubscriberState(WRITING, RECEIVED);
-							processor.checkOnWritePossible();
+							processor.changeState(WRITING, RECEIVED);
+							processor.writeIfPossible();
 						}
 					}
 					catch (IOException ex) {
@@ -371,114 +312,16 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		}
 
 		void onError(AbstractResponseBodyProcessor processor, Throwable t) {
-			if (processor.changeSubscriberState(this, COMPLETED)) {
-				processor.publishError(t);
+			if (processor.changeState(this, COMPLETED)) {
+				processor.publisherDelegate.publishError(t);
 			}
 		}
 
 		void onComplete(AbstractResponseBodyProcessor processor) {
 			throw new IllegalStateException(toString());
 		}
-
 		void onWritePossible(AbstractResponseBodyProcessor processor) {
 			// ignore
-		}
-	}
-
-	private enum PublisherState {
-		UNSUBSCRIBED {
-			@Override
-			void subscribe(AbstractResponseBodyProcessor processor,
-					Subscriber<? super Void> subscriber) {
-				Objects.requireNonNull(subscriber);
-				if (processor.changePublisherState(this, SUBSCRIBED)) {
-					Subscription subscription = new ResponseBodySubscription(processor);
-					processor.subscriber = subscriber;
-					subscriber.onSubscribe(subscription);
-					if (processor.publisherCompleted) {
-						processor.publishComplete();
-					}
-					else if (processor.publisherError != null) {
-						processor.publishError(processor.publisherError);
-					}
-				}
-				else {
-					throw new IllegalStateException(toString());
-				}
-			}
-
-			@Override
-			void publishComplete(AbstractResponseBodyProcessor processor) {
-				processor.publisherCompleted = true;
-			}
-
-			@Override
-			void publishError(AbstractResponseBodyProcessor processor, Throwable t) {
-				processor.publisherError = t;
-			}
-		},
-		SUBSCRIBED {
-			@Override
-			void request(AbstractResponseBodyProcessor processor, long n) {
-				BackpressureUtils.checkRequest(n, processor.subscriber);
-			}
-
-			@Override
-			void publishComplete(AbstractResponseBodyProcessor processor) {
-				if (processor.changePublisherState(this, COMPLETED)) {
-					processor.subscriber.onComplete();
-				}
-			}
-
-			@Override
-			void publishError(AbstractResponseBodyProcessor processor, Throwable t) {
-				if (processor.changePublisherState(this, COMPLETED)) {
-					processor.subscriber.onError(t);
-				}
-			}
-
-		},
-		COMPLETED {
-			@Override
-			void request(AbstractResponseBodyProcessor processor, long n) {
-				// ignore
-			}
-
-			@Override
-			void cancel(AbstractResponseBodyProcessor processor) {
-				// ignore
-			}
-
-			@Override
-			void publishComplete(AbstractResponseBodyProcessor processor) {
-				// ignore
-			}
-
-			@Override
-			void publishError(AbstractResponseBodyProcessor processor, Throwable t) {
-				// ignore
-			}
-		};
-
-		void subscribe(AbstractResponseBodyProcessor processor,
-				Subscriber<? super Void> subscriber) {
-			throw new IllegalStateException(toString());
-		}
-
-		void request(AbstractResponseBodyProcessor processor, long n) {
-			throw new IllegalStateException(toString());
-		}
-
-		void cancel(AbstractResponseBodyProcessor processor) {
-			processor.changePublisherState(this, COMPLETED);
-		}
-
-		void publishComplete(AbstractResponseBodyProcessor processor) {
-			throw new IllegalStateException(toString());
-		}
-
-		void publishError(AbstractResponseBodyProcessor processor, Throwable t) {
-			throw new IllegalStateException(toString());
 		}
 
 	}
