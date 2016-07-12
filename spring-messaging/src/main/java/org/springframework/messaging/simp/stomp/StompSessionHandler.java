@@ -37,6 +37,9 @@ public interface StompSessionHandler extends StompFrameHandler {
 	 * Invoked when the session is ready to use, i.e. after the underlying
 	 * transport (TCP, WebSocket) is connected and a STOMP CONNECTED frame is
 	 * received from the broker.
+	 * 
+	 * The implementation is empty by default.
+	 * 
 	 * @param session the client STOMP session
 	 * @param connectedHeaders the STOMP CONNECTED frame headers
 	 */
@@ -47,6 +50,9 @@ public interface StompSessionHandler extends StompFrameHandler {
 	 * Handle any exception arising while processing a STOMP frame such as a
 	 * failure to convert the payload or an unhandled exception in the
 	 * application {@code StompFrameHandler}.
+	 * 
+	 * The implementation is empty by default.
+	 * 
 	 * @param session the client STOMP session
 	 * @param command the STOMP command of the frame
 	 * @param headers the headers
@@ -65,6 +71,9 @@ public interface StompSessionHandler extends StompFrameHandler {
 	 * ConnectionLostException} will be passed into this method when the
 	 * connection is lost rather than closed normally via
 	 * {@link StompSession#disconnect()}.
+	 * 
+	 * The implementation is empty by default.
+	 * 
 	 * @param session the client STOMP session
 	 * @param exception the exception that occurred
 	 */
