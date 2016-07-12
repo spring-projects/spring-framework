@@ -156,20 +156,20 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		public void registerListener() throws IOException {
-			inputStream.setReadListener(this.readListener);
+			this.inputStream.setReadListener(this.readListener);
 		}
 
 		@Override
 		protected void checkOnDataAvailable() {
-			if (!inputStream.isFinished() && inputStream.isReady()) {
+			if (!this.inputStream.isFinished() && this.inputStream.isReady()) {
 				onDataAvailable();
 			}
 		}
 
 		@Override
 		protected DataBuffer read() throws IOException {
-			if (inputStream.isReady()) {
-				int read = inputStream.read(this.buffer);
+			if (this.inputStream.isReady()) {
+				int read = this.inputStream.read(this.buffer);
 				if (logger.isTraceEnabled()) {
 					logger.trace("read:" + read);
 				}
@@ -220,12 +220,12 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		public void registerListener() throws IOException {
-			outputStream.setWriteListener(this.writeListener);
+			this.outputStream.setWriteListener(this.writeListener);
 		}
 
 		@Override
 		protected boolean isWritePossible() {
-			return outputStream.isReady();
+			return this.outputStream.isReady();
 		}
 
 		@Override
@@ -234,7 +234,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				flush();
 			}
 
-			boolean ready = outputStream.isReady();
+			boolean ready = this.outputStream.isReady();
 
 			if (this.logger.isTraceEnabled()) {
 				this.logger.trace("write: " + dataBuffer + " ready: " + ready);
@@ -256,20 +256,19 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		@Override
 		protected void flush() throws IOException {
-			if (outputStream.isReady()) {
+			if (this.outputStream.isReady()) {
 				if (logger.isTraceEnabled()) {
-					this.logger.trace("flush");
+					logger.trace("flush");
 				}
 				try {
-					outputStream.flush();
+					this.outputStream.flush();
 					this.flushOnNext = false;
+					return;
 				}
 				catch (IOException ignored) {
 				}
 			}
-			else {
-				this.flushOnNext = true;
-			}
+			this.flushOnNext = true;
 
 		}
 
@@ -280,8 +279,9 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 			byte[] buffer = new byte[this.bufferSize];
 			int bytesRead = -1;
 
-			while (outputStream.isReady() && (bytesRead = input.read(buffer)) != -1) {
-				outputStream.write(buffer, 0, bytesRead);
+			while (this.outputStream.isReady() &&
+					(bytesRead = input.read(buffer)) != -1) {
+				this.outputStream.write(buffer, 0, bytesRead);
 				bytesWritten += bytesRead;
 			}
 

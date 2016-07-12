@@ -140,14 +140,11 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 
 		private final ChannelListener<StreamSinkChannel> listener = new WriteListener();
 
-		private final HttpServerExchange exchange;
-
 		private final StreamSinkChannel responseChannel;
 
 		private volatile ByteBuffer byteBuffer;
 
 		public ResponseBodyProcessor(HttpServerExchange exchange) {
-			this.exchange = exchange;
 			this.responseChannel = exchange.getResponseChannel();
 		}
 
