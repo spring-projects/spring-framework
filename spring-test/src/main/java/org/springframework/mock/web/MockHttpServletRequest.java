@@ -328,9 +328,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * throwing an IllegalStateException if not active anymore.
 	 */
 	protected void checkActive() throws IllegalStateException {
-		if (!this.active) {
-			throw new IllegalStateException("Request is not active anymore");
-		}
+		Assert.state(this.active, "Request is not active anymore");
 	}
 
 
@@ -807,9 +805,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
-		if (!this.asyncSupported) {
-			throw new IllegalStateException("Async not supported");
-		}
+		Assert.state(this.asyncSupported, "Async not supported");
 		this.asyncStarted = true;
 		this.asyncContext = new MockAsyncContext(request, response);
 		return this.asyncContext;

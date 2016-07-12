@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -151,11 +152,9 @@ abstract class BootstrapUtils {
 		if (annotations.size() < 1) {
 			return null;
 		}
-		if (annotations.size() > 1) {
-			throw new IllegalStateException(String.format(
+		Assert.state(annotations.size() <= 1, () -> String.format(
 				"Configuration error: found multiple declarations of @BootstrapWith for test class [%s]: %s",
 				testClass.getName(), annotations));
-		}
 		return annotations.iterator().next().value();
 	}
 

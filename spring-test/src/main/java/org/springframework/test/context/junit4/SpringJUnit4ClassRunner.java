@@ -49,6 +49,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestExecution
 import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -100,15 +101,12 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	private static final Method withRulesMethod;
 
 	static {
-		if (!ClassUtils.isPresent("org.junit.internal.Throwables", SpringJUnit4ClassRunner.class.getClassLoader())) {
-			throw new IllegalStateException("SpringJUnit4ClassRunner requires JUnit 4.12 or higher.");
-		}
+		Assert.state(ClassUtils.isPresent("org.junit.internal.Throwables", SpringJUnit4ClassRunner.class.getClassLoader()),
+				"SpringJUnit4ClassRunner requires JUnit 4.12 or higher.");
 
 		withRulesMethod = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules",
 				FrameworkMethod.class, Object.class, Statement.class);
-		if (withRulesMethod == null) {
-			throw new IllegalStateException("SpringJUnit4ClassRunner requires JUnit 4.12 or higher.");
-		}
+		Assert.state(withRulesMethod != null, "SpringJUnit4ClassRunner requires JUnit 4.12 or higher.");
 		ReflectionUtils.makeAccessible(withRulesMethod);
 	}
 
@@ -118,14 +116,12 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	private static void ensureSpringRulesAreNotPresent(Class<?> testClass) {
 		for (Field field : testClass.getFields()) {
-			if (SpringClassRule.class.isAssignableFrom(field.getType())) {
-				throw new IllegalStateException(String.format("Detected SpringClassRule field in test class [%s], " +
-						"but SpringClassRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
-			}
-			if (SpringMethodRule.class.isAssignableFrom(field.getType())) {
-				throw new IllegalStateException(String.format("Detected SpringMethodRule field in test class [%s], " +
-						"but SpringMethodRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
-			}
+			Assert.state(!SpringClassRule.class.isAssignableFrom(field.getType()), () -> String.format(
+					"Detected SpringClassRule field in test class [%s], " +
+					"but SpringClassRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
+			Assert.state(!SpringMethodRule.class.isAssignableFrom(field.getType()), () -> String.format(
+					"Detected SpringMethodRule field in test class [%s], " +
+					"but SpringMethodRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
 		}
 	}
 

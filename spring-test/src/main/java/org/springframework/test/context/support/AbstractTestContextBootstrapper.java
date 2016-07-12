@@ -387,13 +387,11 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Set<ContextCustomizer> contextCustomizers = getContextCustomizers(testClass,
 				Collections.unmodifiableList(configAttributesList));
 
-		if (requireLocationsClassesOrInitializers &&
-				areAllEmpty(locations, classes, initializers, contextCustomizers)) {
-			throw new IllegalStateException(String.format(
-					"%s was unable to detect defaults, and no ApplicationContextInitializers " +
-					"or ContextCustomizers were declared for context configuration attributes %s",
-					contextLoader.getClass().getSimpleName(), configAttributesList));
-		}
+		Assert.state(!(requireLocationsClassesOrInitializers &&
+				areAllEmpty(locations, classes, initializers, contextCustomizers)), () -> String.format(
+				"%s was unable to detect defaults, and no ApplicationContextInitializers " +
+				"or ContextCustomizers were declared for context configuration attributes %s",
+				contextLoader.getClass().getSimpleName(), configAttributesList));
 
 		MergedTestPropertySources mergedTestPropertySources =
 				TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
@@ -463,9 +461,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Class<? extends ContextLoader> contextLoaderClass = resolveExplicitContextLoaderClass(configAttributesList);
 		if (contextLoaderClass == null) {
 			contextLoaderClass = getDefaultContextLoaderClass(testClass);
-			if (contextLoaderClass == null) {
-				throw new IllegalStateException("getDefaultContextLoaderClass() must not return null");
-			}
+			Assert.state(contextLoaderClass != null, "getDefaultContextLoaderClass() must not return null");
 		}
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format("Using ContextLoader class [%s] for test class [%s]",

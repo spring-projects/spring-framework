@@ -248,9 +248,7 @@ public class MockHttpSession implements HttpSession {
 	 * @throws IllegalStateException if this session has been invalidated
 	 */
 	private void assertIsValid() {
-		if (isInvalid()) {
-			throw new IllegalStateException("The session has already been invalidated");
-		}
+		Assert.state(!isInvalid(), "The session has already been invalidated");
 	}
 
 	public void setNew(boolean value) {

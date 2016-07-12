@@ -751,10 +751,8 @@ public class MockHttpServletRequestBuilder
 	public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
 		for (RequestPostProcessor postProcessor : this.postProcessors) {
 			request = postProcessor.postProcessRequest(request);
-			if (request == null) {
-				throw new IllegalStateException(
-						"Post-processor [" + postProcessor.getClass().getName() + "] returned null");
-			}
+			Assert.state(request != null,
+					() -> "Post-processor [" + postProcessor.getClass().getName() + "] returned null");
 		}
 		return request;
 	}

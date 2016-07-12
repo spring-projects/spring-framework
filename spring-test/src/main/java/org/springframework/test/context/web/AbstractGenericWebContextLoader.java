@@ -104,12 +104,10 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 */
 	@Override
 	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
-
-		if (!(mergedConfig instanceof WebMergedContextConfiguration)) {
-			throw new IllegalArgumentException(String.format(
+		Assert.isTrue(mergedConfig instanceof WebMergedContextConfiguration, () -> String.format(
 				"Cannot load WebApplicationContext from non-web merged context configuration %s. "
 						+ "Consider annotating your test class with @WebAppConfiguration.", mergedConfig));
-		}
+
 		WebMergedContextConfiguration webMergedConfig = (WebMergedContextConfiguration) mergedConfig;
 
 		if (logger.isDebugEnabled()) {

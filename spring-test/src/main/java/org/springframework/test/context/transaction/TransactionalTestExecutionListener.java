@@ -161,9 +161,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
 		TransactionContext txContext = TransactionContextHolder.removeCurrentTransactionContext();
-		if (txContext != null) {
-			throw new IllegalStateException("Cannot start a new transaction without ending the existing transaction.");
-		}
+		Assert.state(txContext == null, "Cannot start a new transaction without ending the existing transaction.");
 
 		PlatformTransactionManager tm = null;
 		TransactionAttribute transactionAttribute = this.attributeSource.getTransactionAttribute(testMethod, testClass);
@@ -183,11 +181,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 			tm = getTransactionManager(testContext, transactionAttribute.getQualifier());
 
-			if (tm == null) {
-				throw new IllegalStateException(String.format(
-						"Failed to retrieve PlatformTransactionManager for @Transactional test for test context %s.",
-						testContext));
-			}
+			Assert.state(tm != null, () -> String.format(
+					"Failed to retrieve PlatformTransactionManager for @Transactional test for test context %s.",
+					testContext));
 		}
 
 		if (tm != null) {

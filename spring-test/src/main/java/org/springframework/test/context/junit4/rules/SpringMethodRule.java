@@ -33,6 +33,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCal
 import org.springframework.test.context.junit4.statements.RunPrepareTestInstanceCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -101,9 +102,8 @@ public class SpringMethodRule implements MethodRule {
 	private static final Log logger = LogFactory.getLog(SpringMethodRule.class);
 
 	static {
-		if (!ClassUtils.isPresent("org.junit.internal.Throwables", SpringMethodRule.class.getClassLoader())) {
-			throw new IllegalStateException("SpringMethodRule requires JUnit 4.12 or higher.");
-		}
+		Assert.state(ClassUtils.isPresent("org.junit.internal.Throwables", SpringMethodRule.class.getClassLoader()),
+				"SpringMethodRule requires JUnit 4.12 or higher.");
 	}
 
 
@@ -220,28 +220,26 @@ public class SpringMethodRule implements MethodRule {
 	 * that is annotated with {@code @ClassRule}.
 	 */
 	private static SpringClassRule validateSpringClassRuleConfiguration(Class<?> testClass) {
-		Field ruleField = null;
+		Field ruleField = findSpringClassRuleField(testClass);
 
-		for (Field field : testClass.getFields()) {
-			if (ReflectionUtils.isPublicStaticFinal(field) && SpringClassRule.class.isAssignableFrom(field.getType())) {
-				ruleField = field;
-				break;
-			}
-		}
+		Assert.state(ruleField != null, () -> String.format(
+				"Failed to find 'public static final SpringClassRule' field in test class [%s]. " +
+				"Consult the javadoc for SpringClassRule for details.", testClass.getName()));
 
-		if (ruleField == null) {
-			throw new IllegalStateException(String.format(
-					"Failed to find 'public static final SpringClassRule' field in test class [%s]. " +
-					"Consult the javadoc for SpringClassRule for details.", testClass.getName()));
-		}
-
-		if (!ruleField.isAnnotationPresent(ClassRule.class)) {
-			throw new IllegalStateException(String.format(
-					"SpringClassRule field [%s] must be annotated with JUnit's @ClassRule annotation. " +
-					"Consult the javadoc for SpringClassRule for details.", ruleField));
-		}
+		Assert.state(ruleField.isAnnotationPresent(ClassRule.class), () -> String.format(
+				"SpringClassRule field [%s] must be annotated with JUnit's @ClassRule annotation. " +
+				"Consult the javadoc for SpringClassRule for details.", ruleField));
 
 		return (SpringClassRule) ReflectionUtils.getField(ruleField, null);
+	}
+
+	private static Field findSpringClassRuleField(Class<?> testClass) {
+		for (Field field : testClass.getFields()) {
+			if (ReflectionUtils.isPublicStaticFinal(field) && SpringClassRule.class.isAssignableFrom(field.getType())) {
+				return field;
+			}
+		}
+		return null;
 	}
 
 }
