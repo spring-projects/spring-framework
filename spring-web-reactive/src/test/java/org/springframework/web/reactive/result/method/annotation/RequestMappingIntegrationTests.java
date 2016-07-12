@@ -82,7 +82,7 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 
 		@GetMapping("/stream-result")
 		public Publisher<Long> stringStreamResponseBody() {
-			return Flux.interval(100).take(5);
+			return Flux.intervalMillis(100).take(5);
 		}
 
 	}

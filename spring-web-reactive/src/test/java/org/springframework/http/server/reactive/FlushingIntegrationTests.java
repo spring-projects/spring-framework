@@ -72,7 +72,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			Flux<DataBuffer> responseBody = Flux
-					.interval(50)
+					.intervalMillis(50)
 					.map(l -> {
 						byte[] data = ("data" + l).getBytes();
 						DataBuffer buffer = response.bufferFactory().allocateBuffer(data.length);
