@@ -16,10 +16,13 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,31 +38,26 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link ServerHttpResponse} to the Servlet {@link HttpServletResponse}.
- *
  * @author Rossen Stoyanchev
  */
 public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final HttpServletResponse response;
 
-	private final Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter;
-
+	private ResponseBodyProcessor bodyProcessor;
 
 	public ServletServerHttpResponse(HttpServletResponse response,
-			DataBufferFactory dataBufferFactory,
-			Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter) {
+			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
 		super(dataBufferFactory);
 		Assert.notNull(response, "'response' must not be null");
-		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.response = response;
-		this.responseBodyWriter = responseBodyWriter;
+		this.bodyProcessor =
+				new ResponseBodyProcessor(response.getOutputStream(), bufferSize);
 	}
-
 
 	public HttpServletResponse getServletResponse() {
 		return this.response;
 	}
-
 
 	@Override
 	protected void writeStatusCode() {
@@ -71,7 +69,10 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		return this.responseBodyWriter.apply(publisher);
+		return Mono.from(subscriber -> {
+			publisher.subscribe(this.bodyProcessor);
+			this.bodyProcessor.subscribe(subscriber);
+		});
 	}
 
 	@Override
@@ -109,4 +110,109 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		}
 	}
 
+	public void registerListener() throws IOException {
+		this.bodyProcessor.registerListener();
+	}
+
+	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
+
+		private final ResponseBodyWriteListener writeListener =
+				new ResponseBodyWriteListener();
+
+		private final ServletOutputStream outputStream;
+
+		private final int bufferSize;
+
+		private volatile boolean flushOnNext;
+
+		public ResponseBodyProcessor(ServletOutputStream outputStream, int bufferSize) {
+			this.outputStream = outputStream;
+			this.bufferSize = bufferSize;
+		}
+
+		public void registerListener() throws IOException {
+			this.outputStream.setWriteListener(this.writeListener);
+		}
+
+		@Override
+		protected boolean isWritePossible() {
+			return this.outputStream.isReady();
+		}
+
+		@Override
+		protected boolean write(DataBuffer dataBuffer) throws IOException {
+			if (this.flushOnNext) {
+				flush();
+			}
+
+			boolean ready = this.outputStream.isReady();
+
+			if (this.logger.isTraceEnabled()) {
+				this.logger.trace("write: " + dataBuffer + " ready: " + ready);
+			}
+
+			if (ready) {
+				int total = dataBuffer.readableByteCount();
+				int written = writeDataBuffer(dataBuffer);
+
+				if (this.logger.isTraceEnabled()) {
+					this.logger.trace("written: " + written + " total: " + total);
+				}
+				return written == total;
+			}
+			else {
+				return false;
+			}
+		}
+
+		@Override
+		protected void flush() throws IOException {
+			if (this.outputStream.isReady()) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("flush");
+				}
+				try {
+					this.outputStream.flush();
+					this.flushOnNext = false;
+					return;
+				}
+				catch (IOException ignored) {
+				}
+			}
+			this.flushOnNext = true;
+
+		}
+
+		private int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
+			InputStream input = dataBuffer.asInputStream();
+
+			int bytesWritten = 0;
+			byte[] buffer = new byte[this.bufferSize];
+			int bytesRead = -1;
+
+			while (this.outputStream.isReady() &&
+					(bytesRead = input.read(buffer)) != -1) {
+				this.outputStream.write(buffer, 0, bytesRead);
+				bytesWritten += bytesRead;
+			}
+
+			return bytesWritten;
+		}
+
+		private class ResponseBodyWriteListener implements WriteListener {
+
+			@Override
+			public void onWritePossible() throws IOException {
+				ResponseBodyProcessor.this.onWritePossible();
+			}
+
+			@Override
+			public void onError(Throwable ex) {
+				// Error on writing to the HTTP stream, so any further writes will probably
+				// fail. Let's log instead of calling {@link #writeError}.
+				ResponseBodyProcessor.this.logger
+						.error("ResponseBodyWriteListener error", ex);
+			}
+		}
+	}
 }

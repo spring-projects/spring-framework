@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.util.Arrays;
@@ -20,8 +21,8 @@ import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
-import reactor.core.publisher.Flux;
 
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.util.MultiValueMap;
 
@@ -70,10 +71,10 @@ public class ServerHttpRequestTests {
 		assertEquals(Collections.singletonList(null), params.get("a"));
 	}
 
-
-	private ServerHttpRequest createHttpRequest(String path) {
+	private ServerHttpRequest createHttpRequest(String path) throws Exception {
 		HttpServletRequest servletRequest = new MockHttpServletRequest("GET", path);
-		return new ServletServerHttpRequest(servletRequest, Flux.empty());
+		return new ServletServerHttpRequest(servletRequest,
+				new DefaultDataBufferFactory(), 1024);
 	}
 
 }

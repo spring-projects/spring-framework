@@ -16,18 +16,21 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -40,23 +43,23 @@ import org.springframework.util.StringUtils;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Servlet {@link HttpServletRequest}.
- *
  * @author Rossen Stoyanchev
  */
 public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServletRequest request;
 
-	private final Flux<DataBuffer> requestBodyPublisher;
+	private final RequestBodyPublisher bodyPublisher;
 
 	public ServletServerHttpRequest(HttpServletRequest request,
-			Publisher<DataBuffer> body) {
+			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
 		Assert.notNull(request, "'request' must not be null.");
-		Assert.notNull(body, "'body' must not be null.");
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		this.request = request;
-		this.requestBodyPublisher = Flux.from(body);
+		this.bodyPublisher =
+				new RequestBodyPublisher(request.getInputStream(), dataBufferFactory,
+						bufferSize);
 	}
-
 
 	public HttpServletRequest getServletRequest() {
 		return this.request;
@@ -80,9 +83,11 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	protected HttpHeaders initHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		for (Enumeration<?> names = getServletRequest().getHeaderNames(); names.hasMoreElements(); ) {
+		for (Enumeration<?> names = getServletRequest().getHeaderNames();
+		     names.hasMoreElements(); ) {
 			String name = (String) names.nextElement();
-			for (Enumeration<?> values = getServletRequest().getHeaders(name); values.hasMoreElements(); ) {
+			for (Enumeration<?> values = getServletRequest().getHeaders(name);
+			     values.hasMoreElements(); ) {
 				headers.add(name, (String) values.nextElement());
 			}
 		}
@@ -101,7 +106,9 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 				Map<String, String> params = new LinkedCaseInsensitiveMap<>();
 				params.putAll(contentType.getParameters());
 				params.put("charset", charset.toString());
-				headers.setContentType(new MediaType(contentType.getType(), contentType.getSubtype(), params));
+				headers.setContentType(
+						new MediaType(contentType.getType(), contentType.getSubtype(),
+								params));
 			}
 		}
 		if (headers.getContentLength() == -1) {
@@ -129,7 +136,76 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.requestBodyPublisher;
+		return Flux.from(this.bodyPublisher);
 	}
 
+	public void registerListener() throws IOException {
+		this.bodyPublisher.registerListener();
+	}
+
+	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
+
+		private final RequestBodyPublisher.RequestBodyReadListener readListener =
+				new RequestBodyPublisher.RequestBodyReadListener();
+
+		private final ServletInputStream inputStream;
+
+		private final DataBufferFactory dataBufferFactory;
+
+		private final byte[] buffer;
+
+		public RequestBodyPublisher(ServletInputStream inputStream,
+				DataBufferFactory dataBufferFactory, int bufferSize) {
+			this.inputStream = inputStream;
+			this.dataBufferFactory = dataBufferFactory;
+			this.buffer = new byte[bufferSize];
+		}
+
+		public void registerListener() throws IOException {
+			this.inputStream.setReadListener(this.readListener);
+		}
+
+		@Override
+		protected void checkOnDataAvailable() {
+			if (!this.inputStream.isFinished() && this.inputStream.isReady()) {
+				onDataAvailable();
+			}
+		}
+
+		@Override
+		protected DataBuffer read() throws IOException {
+			if (this.inputStream.isReady()) {
+				int read = this.inputStream.read(this.buffer);
+				if (logger.isTraceEnabled()) {
+					logger.trace("read:" + read);
+				}
+
+				if (read > 0) {
+					DataBuffer dataBuffer = this.dataBufferFactory.allocateBuffer(read);
+					dataBuffer.write(this.buffer, 0, read);
+					return dataBuffer;
+				}
+			}
+			return null;
+		}
+
+		private class RequestBodyReadListener implements ReadListener {
+
+			@Override
+			public void onDataAvailable() throws IOException {
+				RequestBodyPublisher.this.onDataAvailable();
+			}
+
+			@Override
+			public void onAllDataRead() throws IOException {
+				RequestBodyPublisher.this.onAllDataRead();
+			}
+
+			@Override
+			public void onError(Throwable throwable) {
+				RequestBodyPublisher.this.onError(throwable);
+
+			}
+		}
+	}
 }
