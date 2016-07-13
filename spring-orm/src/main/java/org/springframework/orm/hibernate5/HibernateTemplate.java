@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import javax.persistence.PersistenceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -356,6 +357,12 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 		catch (HibernateException ex) {
 			throw SessionFactoryUtils.convertHibernateAccessException(ex);
+		}
+		catch (PersistenceException ex) {
+			if (ex.getCause() instanceof HibernateException) {
+				throw SessionFactoryUtils.convertHibernateAccessException((HibernateException) ex.getCause());
+			}
+			throw ex;
 		}
 		catch (RuntimeException ex) {
 			// Callback code threw application exception...
