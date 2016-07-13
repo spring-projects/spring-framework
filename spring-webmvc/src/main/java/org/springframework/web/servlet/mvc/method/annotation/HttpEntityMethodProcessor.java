@@ -184,8 +184,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		if (responseEntity instanceof ResponseEntity) {
 			outputMessage.getServletResponse().setStatus(((ResponseEntity<?>) responseEntity).getStatusCodeValue());
 			HttpMethod method = inputMessage.getMethod();
-			boolean isGetOrHead = (HttpMethod.GET == method || HttpMethod.HEAD == method);
-			if (isGetOrHead && isResourceNotModified(inputMessage, outputMessage)) {
+			boolean isEligibleForChaching = (HttpMethod.GET == method || HttpMethod.HEAD == method || HttpMethod.REPORT == method);
+			if (isEligibleForChaching && isResourceNotModified(inputMessage, outputMessage)) {
 				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
 				// Ensure headers are flushed, no body should be written.
 				outputMessage.flush();

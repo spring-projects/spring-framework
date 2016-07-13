@@ -180,7 +180,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void getHandlerHttpOptions() throws Exception {
 		testHttpOptions("/foo", "GET,HEAD");
 		testHttpOptions("/person/1", "PUT");
-		testHttpOptions("/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS");
+		testHttpOptions("/persons", "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS,REPORT");
 		testHttpOptions("/something", "PUT,POST");
 	}
 

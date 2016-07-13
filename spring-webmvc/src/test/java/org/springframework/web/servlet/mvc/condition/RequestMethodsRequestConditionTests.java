@@ -38,6 +38,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.REPORT;
 
 /**
  * @author Arjen Poutsma
@@ -58,6 +59,13 @@ public class RequestMethodsRequestConditionTests {
 		testMatch(new RequestMethodsRequestCondition(GET), GET);
 		testNoMatch(new RequestMethodsRequestCondition(POST), HEAD);
 	}
+
+    @Test
+    public void getMatchingConditionWithHttpReport(){
+        testMatch(new RequestMethodsRequestCondition(REPORT), REPORT);
+        testMatch(new RequestMethodsRequestCondition(GET), GET);
+        testNoMatch(new RequestMethodsRequestCondition(POST), REPORT);
+    }
 
 	@Test
 	public void getMatchingConditionWithEmptyConditions() {
