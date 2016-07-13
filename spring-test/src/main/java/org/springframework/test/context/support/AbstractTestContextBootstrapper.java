@@ -555,12 +555,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 
 	private static boolean areAllEmpty(Collection<?>... collections) {
-		for (Collection<?> collection : collections) {
-			if (!collection.isEmpty()) {
-				return false;
-			}
-		}
-		return true;
+		return Arrays.stream(collections).allMatch(Collection::isEmpty);
 	}
 
 }
