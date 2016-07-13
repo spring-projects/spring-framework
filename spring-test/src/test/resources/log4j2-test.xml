@@ -9,6 +9,7 @@
 		</File>
 	</Appenders>
 	<Loggers>
+		<Logger name="org.junit.platform" level="info" />
 		<Logger name="org.springframework.test.context" level="warn" />
 		<Logger name="org.springframework.test.context.TestContext" level="warn" />
 		<Logger name="org.springframework.test.context.TestContextManager" level="warn" />

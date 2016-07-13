@@ -890,6 +890,8 @@ project("spring-test") {
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("javax.cache:cache-api:1.0.0")
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+		// Java Util Logging for JUnit 5.
+		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 		testRuntime("org.terracotta:management-model:2.0.0")
 	}
@@ -911,6 +913,8 @@ project("spring-test") {
 		scanForTestClasses = false
 		include(['**/*Tests.class', '**/*Test.class', '**/SpringJUnitJupiterTestSuite.class'])
 		exclude(['**/testng/**/*.*'])
+		// Java Util Logging for JUnit 5.
+		// systemProperty('java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager')
 	}
 
 	task aggregateTestReports(type: TestReport) {

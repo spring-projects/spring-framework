@@ -31,6 +31,16 @@ import org.junit.runner.RunWith;
  * build. This class is therefore responsible for executing all JUnit
  * Jupiter based tests in Spring's official test suite.
  *
+ * <h3>Logging Configuration</h3>
+ *
+ * <p>In order for our log4j2 configuration to be used in an IDE, you must
+ * set the following system property before running any tests &mdash; for
+ * example, in <em>Run Configurations</em> in Eclipse.
+ *
+ * <pre style="code">
+ * -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager
+ * </pre>
+ *
  * @author Sam Brannen
  * @since 5.0
  */
