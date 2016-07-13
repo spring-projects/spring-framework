@@ -65,6 +65,9 @@ configure(allprojects) { project ->
 	ext.okhttp3Version       = "3.3.1"
 	ext.poiVersion           = "3.14"
 	ext.reactorVersion       = "2.0.8.RELEASE"
+	ext.reactorCoreVersion   = '2.5.0.BUILD-SNAPSHOT'
+	ext.reactorNettyVersion  = '2.5.0.BUILD-SNAPSHOT'
+	ext.rxJavaVersion        = '1.1.6'
 	ext.romeVersion          = "1.6.0"
 	ext.slf4jVersion         = "1.7.21"
 	ext.snakeyamlVersion     = "1.17"
@@ -87,6 +90,18 @@ configure(allprojects) { project ->
 	configurations {
 		sniffer
 		javaApiSignature
+	}
+
+	configurations.all {
+		// check for updates every build
+		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+
+		// consistent netty version (e.g. clashes between netty-all vs netty-common)
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.group == 'io.netty') {
+				details.useVersion nettyVersion
+			}
+		}
 	}
 
 	compileJava.options*.compilerArgs = [
@@ -128,6 +143,8 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
+		maven { url 'https://oss.jfrog.org/libs-snapshot' }  // RxNetty 0.5.x snapshots
+		maven { url 'http://repo.spring.io/snapshot' }       // Reactor snapshots
 	}
 
 	dependencies {
@@ -481,7 +498,9 @@ project("spring-messaging") {
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
 		optional(project(":spring-oxm"))
-		optional("io.projectreactor:reactor-core:${reactorVersion}")
+		optional("io.projectreactor:reactor-core:${reactorVersion}") {
+			force = true // enforce 2.0.x
+		}
 		optional("io.projectreactor:reactor-net:${reactorVersion}") {
 			exclude group: "io.netty", module: "netty-all"
 		}
@@ -786,6 +805,38 @@ project("spring-webmvc") {
 	}
 }
 
+project("spring-web-reactive") {
+	description = "Spring Web Reactive"
+
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-web"))
+		compile "org.reactivestreams:reactive-streams:1.0.0"
+		compile "io.projectreactor:reactor-core:${reactorCoreVersion}"
+		compile "io.netty:netty-buffer:${nettyVersion}" // Temporarily for JsonObjectDecoder
+		optional(project(":spring-context-support"))  // for FreeMarker support
+		provided "javax.servlet:javax.servlet-api:3.1.0"
+		optional "org.apache.tomcat:tomcat-util:${tomcatVersion}"
+		optional "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+		optional "org.eclipse.jetty:jetty-server:${jettyVersion}"
+		optional "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
+		optional 'io.undertow:undertow-core:1.3.20.Final'
+		optional "io.projectreactor:reactor-netty:${reactorNettyVersion}"
+		optional "io.reactivex:rxjava:${rxJavaVersion}"
+		optional("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+			exclude group: 'io.reactivex', module: 'rxjava'
+		}
+		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+		optional("com.fasterxml:aalto-xml:1.0.0")
+		optional("org.freemarker:freemarker:${freemarkerVersion}")
+		optional "org.apache.httpcomponents:httpclient:4.5.1" // Needed to run Javadoc without error
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile "com.squareup.okhttp3:mockwebserver:3.0.1"
+		testCompile("javax.validation:validation-api:${beanvalVersion}")
+		testCompile("xmlunit:xmlunit:1.6")
+	}
+}
+
 project("spring-websocket") {
 	description = "Spring WebSocket"
 
@@ -825,6 +876,9 @@ project("spring-websocket") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
+		testCompile("io.projectreactor:reactor-core:${reactorVersion}") {
+			force = true // enforce 2.0.x
+		}
 		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -864,7 +918,9 @@ project("spring-test") {
 		optional("xmlunit:xmlunit:${xmlunitVersion}")
 		optional("net.sourceforge.htmlunit:htmlunit:2.22")
 		optional("org.seleniumhq.selenium:htmlunit-driver:2.21")
-		optional("org.seleniumhq.selenium:selenium-java:2.53.1")
+		optional("org.seleniumhq.selenium:selenium-java:2.53.1") {
+			exclude group: "io.netty", module: "netty"
+		}
 		optional("org.skyscreamer:jsonassert:1.3.0")
 		optional("com.jayway.jsonpath:json-path:2.2.0")
 		testCompile(project(":spring-context-support"))
