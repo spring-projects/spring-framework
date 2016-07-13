@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.junit.jupiter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import javax.sql.DataSource;
@@ -24,10 +26,14 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.launcher.Launcher;
+import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
+
+import org.opentest4j.AssertionFailedError;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -85,7 +91,7 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 
 	private void runTestAndAssertCounters(Class<?> testClass) {
 		Launcher launcher = LauncherFactory.create();
-		SummaryGeneratingListener listener = new SummaryGeneratingListener();
+		ExceptionTrackingListener listener = new ExceptionTrackingListener();
 		launcher.registerTestExecutionListeners(listener);
 
 		launcher.execute(request().selectors(selectClass(testClass)).build());
@@ -106,6 +112,18 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 			() -> assertEquals(expectedFailedCount, summary.getTestsFailedCount(), () -> name + ": tests failed")
 		);
 		// @formatter:on
+
+		// Ensure it was an AssertionFailedError that failed the test and not
+		// something else like an error in the @Configuration class, etc.
+		if (expectedFailedCount > 0) {
+			assertEquals(1, listener.exceptions.size(), "exceptions expected");
+			Throwable exception = listener.exceptions.get(0);
+			if (!(exception instanceof AssertionFailedError)) {
+				throw new AssertionFailedError(
+					exception.getClass().getName() + " is not an instance of " + AssertionFailedError.class.getName(),
+					exception);
+			}
+		}
 	}
 
 	private int getExpectedStartedCount(Class<?> testClass) {
@@ -247,8 +265,9 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 		}
 	}
 
+	// Must not be private.
 	@Configuration
-	private static class DatabaseConfig {
+	static class DatabaseConfig {
 
 		@Bean
 		PlatformTransactionManager transactionManager() {
@@ -258,6 +277,18 @@ class FailingBeforeAndAfterMethodsSpringExtensionTestCase {
 		@Bean
 		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder().generateUniqueName(true).build();
+		}
+	}
+
+	private static class ExceptionTrackingListener extends SummaryGeneratingListener {
+
+		List<Throwable> exceptions = new ArrayList<>();
+
+
+		@Override
+		public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
+			super.executionFinished(testIdentifier, testExecutionResult);
+			testExecutionResult.getThrowable().ifPresent(exceptions::add);
 		}
 	}
 
