@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import org.springframework.beans.FatalBeanException;
  * factory-aware initialization code fails. BeansExceptions thrown by
  * bean factory methods themselves should simply be propagated as-is.
  *
- * <p>Note that non-factory-aware initialization methods like afterPropertiesSet()
- * or a custom "init-method" can throw any exception.
+ * <p>Note that {@code afterPropertiesSet()} or a custom "init-method"
+ * can throw any exception.
  *
  * @author Juergen Hoeller
  * @since 13.11.2003

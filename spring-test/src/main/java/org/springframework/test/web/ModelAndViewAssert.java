@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +200,7 @@ public abstract class ModelAndViewAssert {
 	private static void appendNonMatchingSetsErrorMessage(Set<String> assertionSet, Set<String> incorrectSet,
 			StringBuilder sb) {
 
-		Set<String> tempSet = new HashSet<String>();
+		Set<String> tempSet = new HashSet<>();
 		tempSet.addAll(incorrectSet);
 		tempSet.removeAll(assertionSet);
 
@@ -213,7 +213,7 @@ public abstract class ModelAndViewAssert {
 			}
 		}
 
-		tempSet = new HashSet<String>();
+		tempSet = new HashSet<>();
 		tempSet.addAll(assertionSet);
 		tempSet.removeAll(incorrectSet);
 

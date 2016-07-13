@@ -1,6 +1,13 @@
 [[spring-appendices]]
 = Appendices
 
+
+[[spring-whats-new]]
+== What's New in the Spring Framework
+"What's New" guides for releases of the Spring Framework are now provided as a
+link:{wiki-spring-framework}/++What's-New-in-the-Spring-Framework++[Wiki page].
+
+
 [[migration-4.x]]
 == Migrating to Spring Framework 4.x
 Migration guides for upgrading from previous releases of the Spring Framework are now provided as a
@@ -1726,7 +1733,7 @@ proxies for beans containing that annotation:
 The `TransactionInterceptor` defined here depends on a `PlatformTransactionManager`
 definition, which is not included in this generic file (although it could be) because it
 will be specific to the application's transaction requirements (typically JTA, as in
-this example, or Hibernate, JDO or JDBC):
+this example, or Hibernate or JDBC):
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -3163,9 +3170,9 @@ the correct schema so that the tags in the `cache` namespace are available to yo
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:jdbc="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
+		__xmlns:cache="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/jdbc/spring-cache.xsd"__> <!-- bean definitions here -->
+			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
 
 /**
  * Default implementation of the {@link org.springframework.web.servlet.HandlerExceptionResolver
@@ -64,7 +63,6 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
  * @author Juergen Hoeller
  * @since 3.0
  * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
- * @see #handleNoSuchRequestHandlingMethod
  * @see #handleHttpRequestMethodNotSupported
  * @see #handleHttpMediaTypeNotSupported
  * @see #handleMissingServletRequestParameter
@@ -105,11 +103,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			Object handler, Exception ex) {
 
 		try {
-			if (ex instanceof NoSuchRequestHandlingMethodException) {
-				return handleNoSuchRequestHandlingMethod((NoSuchRequestHandlingMethodException) ex, request, response,
-						handler);
-			}
-			else if (ex instanceof HttpRequestMethodNotSupportedException) {
+			if (ex instanceof HttpRequestMethodNotSupportedException) {
 				return handleHttpRequestMethodNotSupported((HttpRequestMethodNotSupportedException) ex, request,
 						response, handler);
 			}
@@ -166,27 +160,6 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Handle the case where no request handler method was found.
-	 * <p>The default implementation logs a warning, sends an HTTP 404 error, and returns
-	 * an empty {@code ModelAndView}. Alternatively, a fallback view could be chosen,
-	 * or the NoSuchRequestHandlingMethodException could be rethrown as-is.
-	 * @param ex the NoSuchRequestHandlingMethodException to be handled
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param handler the executed handler, or {@code null} if none chosen
-	 * at the time of the exception (for example, if multipart resolution failed)
-	 * @return an empty ModelAndView indicating the exception was handled
-	 * @throws IOException potentially thrown from response.sendError()
-	 */
-	protected ModelAndView handleNoSuchRequestHandlingMethod(NoSuchRequestHandlingMethodException ex,
-			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
-
-		pageNotFoundLogger.warn(ex.getMessage());
-		response.sendError(HttpServletResponse.SC_NOT_FOUND);
-		return new ModelAndView();
 	}
 
 	/**

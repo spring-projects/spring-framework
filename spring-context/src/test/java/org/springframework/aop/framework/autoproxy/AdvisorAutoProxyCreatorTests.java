@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.junit.Test;
 import test.mixin.Lockable;
 
+import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.autoproxy.target.AbstractBeanFactoryBasedTargetSourceCreator;
 import org.springframework.aop.support.AopUtils;
@@ -48,7 +49,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  */
 @SuppressWarnings("resource")
-public final class AdvisorAutoProxyCreatorTests {
+public class AdvisorAutoProxyCreatorTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -59,12 +60,14 @@ public final class AdvisorAutoProxyCreatorTests {
 	private static final String QUICK_TARGETSOURCE_CONTEXT = CLASSNAME + "-quick-targetsource.xml";
 	private static final String OPTIMIZED_CONTEXT = CLASSNAME + "-optimized.xml";
 
+
 	/**
 	 * Return a bean factory with attributes and EnterpriseServices configured.
 	 */
 	protected BeanFactory getBeanFactory() throws IOException {
 		return new ClassPathXmlApplicationContext(DEFAULT_CONTEXT, CLASS);
 	}
+
 
 	/**
 	 * Check that we can provide a common interceptor that will
@@ -78,8 +81,8 @@ public final class AdvisorAutoProxyCreatorTests {
 		assertTrue(AopUtils.isAopProxy(test1));
 
 		Lockable lockable1 = (Lockable) test1;
-		NopInterceptor nop = (NopInterceptor) bf.getBean("nopInterceptor");
-		assertEquals(0, nop.getCount());
+		NopInterceptor nop1 = (NopInterceptor) bf.getBean("nopInterceptor");
+		NopInterceptor nop2 = (NopInterceptor) bf.getBean("pointcutAdvisor", Advisor.class).getAdvice();
 
 		ITestBean test2 = (ITestBean) bf.getBean("test2");
 		Lockable lockable2 = (Lockable) test2;
@@ -87,14 +90,28 @@ public final class AdvisorAutoProxyCreatorTests {
 		// Locking should be independent; nop is shared
 		assertFalse(lockable1.locked());
 		assertFalse(lockable2.locked());
-		// equals 2 calls on shared nop, because it's first
-		// and sees calls against the Lockable interface introduced
-		// by the specific advisor
-		assertEquals(2, nop.getCount());
+		// equals 2 calls on shared nop, because it's first and sees calls
+		// against the Lockable interface introduced by the specific advisor
+		assertEquals(2, nop1.getCount());
+		assertEquals(0, nop2.getCount());
 		lockable1.lock();
 		assertTrue(lockable1.locked());
 		assertFalse(lockable2.locked());
-		assertEquals(5, nop.getCount());
+		assertEquals(5, nop1.getCount());
+		assertEquals(0, nop2.getCount());
+
+		PackageVisibleMethod packageVisibleMethod = (PackageVisibleMethod) bf.getBean("packageVisibleMethod");
+		assertEquals(5, nop1.getCount());
+		assertEquals(0, nop2.getCount());
+		packageVisibleMethod.doSomething();
+		assertEquals(6, nop1.getCount());
+		assertEquals(1, nop2.getCount());
+		assertTrue(packageVisibleMethod instanceof Lockable);
+		Lockable lockable3 = (Lockable) packageVisibleMethod;
+		lockable3.lock();
+		assertTrue(lockable3.locked());
+		lockable3.unlock();
+		assertFalse(lockable3.locked());
 	}
 
 	/**
@@ -201,6 +218,7 @@ public final class AdvisorAutoProxyCreatorTests {
 	}
 
 }
+
 
 class SelectivePrototypeTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 

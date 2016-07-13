@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class PathMatchingResourcePatternResolverTests {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");
 		// Have to exclude Clover-generated class files here,
 		// as we might be running as part of a Clover test run.
-		List<Resource> noCloverResources = new ArrayList<Resource>();
+		List<Resource> noCloverResources = new ArrayList<>();
 		for (Resource resource : resources) {
 			if (!resource.getFilename().contains("$__CLOVER_")) {
 				noCloverResources.add(resource);

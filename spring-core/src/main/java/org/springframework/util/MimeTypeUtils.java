@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,6 +220,9 @@ public abstract class MimeTypeUtils {
 			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
 		}
 		String[] parts = StringUtils.tokenizeToStringArray(mimeType, ";");
+		if (parts.length == 0) {
+			throw new InvalidMimeTypeException(mimeType, "'mimeType' must not be empty");
+		}
 
 		String fullType = parts[0].trim();
 		// java.net.HttpURLConnection returns a *; q=.2 Accept header
@@ -241,7 +244,7 @@ public abstract class MimeTypeUtils {
 
 		Map<String, String> parameters = null;
 		if (parts.length > 1) {
-			parameters = new LinkedHashMap<String, String>(parts.length - 1);
+			parameters = new LinkedHashMap<>(parts.length - 1);
 			for (int i = 1; i < parts.length; i++) {
 				String parameter = parts[i];
 				int eqIndex = parameter.indexOf('=');
@@ -275,7 +278,7 @@ public abstract class MimeTypeUtils {
 			return Collections.emptyList();
 		}
 		String[] tokens = mimeTypes.split(",\\s*");
-		List<MimeType> result = new ArrayList<MimeType>(tokens.length);
+		List<MimeType> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMimeType(token));
 		}
@@ -355,6 +358,6 @@ public abstract class MimeTypeUtils {
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 */
-	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new SpecificityComparator<MimeType>();
+	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>();
 
 }

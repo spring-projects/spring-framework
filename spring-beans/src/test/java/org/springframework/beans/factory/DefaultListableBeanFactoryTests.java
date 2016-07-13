@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -2215,7 +2216,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testPrototypeWithArrayConversionForConstructor() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		List<String> list = new ManagedList<String>();
+		List<String> list = new ManagedList<>();
 		list.add("myName");
 		list.add("myBeanName");
 		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
@@ -2234,7 +2235,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testPrototypeWithArrayConversionForFactoryMethod() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		List<String> list = new ManagedList<String>();
+		List<String> list = new ManagedList<>();
 		list.add("myName");
 		list.add("myBeanName");
 		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
@@ -2711,7 +2712,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	public void resolveEmbeddedValue() throws Exception {
+	public void resolveEmbeddedValue() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		StringValueResolver r1 = mock(StringValueResolver.class);
 		StringValueResolver r2 = mock(StringValueResolver.class);
@@ -2728,6 +2729,25 @@ public class DefaultListableBeanFactoryTests {
 		verify(r1).resolveStringValue("A");
 		verify(r2).resolveStringValue("B");
 		verify(r3, never()).resolveStringValue(isNull(String.class));
+	}
+
+	@Test
+	public void populatedJavaUtilOptionalBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(Optional.class);
+		bd.setFactoryMethodName("of");
+		bd.getConstructorArgumentValues().addGenericArgumentValue("CONTENT");
+		bf.registerBeanDefinition("optionalBean", bd);
+		assertEquals(Optional.of("CONTENT"), bf.getBean(Optional.class));
+	}
+
+	@Test
+	public void emptyJavaUtilOptionalBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(Optional.class);
+		bd.setFactoryMethodName("empty");
+		bf.registerBeanDefinition("optionalBean", bd);
+		assertSame(Optional.empty(), bf.getBean(Optional.class));
 	}
 
 	/**
@@ -2890,7 +2910,13 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
-	public static class BeanWithDestroyMethod {
+	public static abstract class BaseClassWithDestroyMethod {
+
+		public abstract BaseClassWithDestroyMethod close();
+	}
+
+
+	public static class BeanWithDestroyMethod extends BaseClassWithDestroyMethod {
 
 		private static int closeCount = 0;
 
@@ -2900,8 +2926,10 @@ public class DefaultListableBeanFactoryTests {
 			this.inner = inner;
 		}
 
-		public void close() {
+		@Override
+		public BeanWithDestroyMethod close() {
 			closeCount++;
+			return this;
 		}
 	}
 

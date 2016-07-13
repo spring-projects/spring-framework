@@ -1512,7 +1512,8 @@ it acts as a "relay" that forwards messages in both directions.
 
 [NOTE]
 ====
-Please add a dependency on `org.projectreactor:reactor-net` for TCP connection management.
+Please `org.projectreactor:reactor-net` and `io.netty:netty-all`
+dependencies to your project for TCP connection management.
 ====
 
 Furthermore, application components (e.g. HTTP request handling methods,
@@ -1530,13 +1531,13 @@ This connection is used for messages originating from the server-side applicatio
 only, not for receiving messages. You can configure the STOMP credentials
 for this connection, i.e. the STOMP frame `login` and `passcode` headers. This
 is exposed in both the XML namespace and the Java config as the
-++systemLogin++/++systemPasscode++ properties with default values ++guest++/++guest++.
+``systemLogin``/``systemPasscode`` properties with default values ``guest``/``guest``.
 
 The STOMP broker relay also creates a separate TCP connection for every connected
 WebSocket client. You can configure the STOMP credentials to use for all TCP
 connections created on behalf of clients. This is exposed in both the XML namespace
-and the Java config as the ++clientLogin++/++clientPasscode++ properties with default
-values ++guest++/++guest++.
+and the Java config as the ``clientLogin``/``clientPasscode`` properties with default
+values ``guest``/``guest``.
 
 [NOTE]
 ====
@@ -1700,7 +1701,8 @@ than their name and the generic destination. This is also supported through an
 annotation as well as a messaging template.
 
 For example, a message-handling method can send messages to the user associated with
-the message being handled through the `@SendToUser` annotation:
+the message being handled through the `@SendToUser` annotation (also supported on
+the class-level to share a common destination):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1883,41 +1885,40 @@ to access information about the message.
 [[websocket-stomp-client]]
 === STOMP Client
 
-Spring provides STOMP/WebSocket client and STOMP/TCP client support with the
-following built-in choices (other libraries can be adapted):
+Spring provides a STOMP over WebSocket client and a STOMP over TCP client.
 
-* `WebSocketStompClient` built on the Spring WebSocket API with
-  support for standard JSR-356 WebSocket, Jetty 9, as well as SockJS
-  for HTTP-based WebSocket emulation (see <<websocket-fallback-sockjs-client>>).
-* `Reactor11TcpStompClient` built on `NettyTcpClient` from the reactor-net project.
-
-To begin, create and configure the client:
+To begin create and configure `WebSocketStompClient`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-WebSocketClient transport = new StandardWebSocketClient();
-WebSocketStompClient stompClient = new WebSocketStompClient(transport);
+WebSocketClient webSocketClient = new StandardWebSocketClient();
+WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
 stompClient.setMessageConverter(new StringMessageConverter());
-stompClient.setTaskScheduler(taskScheduler); // for heartbeats, receipts
+stompClient.setTaskScheduler(taskScheduler); // for heartbeats
 ----
 
-Then connect to the WebSocket and provide a handler for the STOMP session:
+In the above example `StandardWebSocketClient` could be replaced with `SockJsClient`
+since that is also an implementation of `WebSocketClient`. The `SockJsClient` can
+use WebSocket or HTTP-based transport as a fallback. For more details see
+<<websocket-fallback-sockjs-client>>.
+
+Next establish a connection and provide a handler for the STOMP session:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 String url = "ws://127.0.0.1:8080/endpoint";
-StompSessionHandler handler = ... ;
-stompClient.connect(url, handler);
+StompSessionHandler sessionHandler = new MyStompSessionHandler();
+stompClient.connect(url, sessionHandler);
 ----
 
-When the session is ready for use, the handler is notified:
+When the session is ready for use the handler is notified:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-public class MySessionHandler extends StompSessionHandlerAdapter {
+public class MyStompSessionHandler extends StompSessionHandlerAdapter {
 
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
@@ -1926,7 +1927,8 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
 }
 ----
 
-Send any Object as the payload and it will be serialized with a `MessageConverter`:
+Once the session is established any payload can be sent and that will be
+serialized with the configured `MessageConverter`:
  
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1934,10 +1936,10 @@ Send any Object as the payload and it will be serialized with a `MessageConverte
 session.send("/topic/foo", "payload");
 ----
 
-The subscribe methods take a `StompFrameHandler` for messages on the subscription
-and return a `Subscription` handle for unsubscribing. For each received message,
-the handler must help to select the target type and then handle the
-deserialized payload:
+You can also subscribe to destinations. The `subscribe` methods require a handler
+for messages on the subscription and return a `Subscription` handle that can be
+used to unsubscribe. For each received message the handler can specify the target
+Object type the payload should be deserialized to:
  
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1957,11 +1959,19 @@ session.subscribe("/topic/foo", new StompFrameHandler() {
 });
 ----
 
-STOMP supports heartbeats. To use this feature simply configure the
-`WebSocketStompClient` with a `TaskScheduler` and if desired customize the
-default heartbeat intervals (10, 10 seconds respectively by default) for
-write inactivity which causes a heartbeat to be sent and for read
-inactivity which closes the connection.
+To enable STOMP heartbeat configure `WebSocketStompClient` with a `TaskScheduler`
+and optionally customize the heartbeat intervals, 10 seconds for write inactivity
+which causes a heartbeat to be sent and 10 seconds for read inactivity which
+closes the connection.
+
+[NOTE]
+====
+When using `WebSocketStompClient` for performance tests to simulate thousands
+of clients from the same machine consider turning off heartbeats since each
+connection schedules its own heartbeat tasks and that's not optimized for a
+a large number of clients running on the same machine.
+====
+
 
 The STOMP protocol also supports receipts where the client must add a "receipt"
 header to which the server responds with a RECEIPT frame after the send or
@@ -2001,7 +2011,7 @@ public class MyController {
 }
 ----
 
-It is also possible to declare a Spring-managed bean in the `"websocket"` scope.
+It is also possible to declare a Spring-managed bean in the `websocket` scope.
 WebSocket-scoped beans can be injected into controllers and any channel interceptors
 registered on the "clientInboundChannel". Those are typically singletons and live
 longer than any individual WebSocket session. Therefore you will need to use a
@@ -2011,7 +2021,7 @@ scope proxy mode for WebSocket-scoped beans:
 [subs="verbatim,quotes"]
 ----
 @Component
-@Scope(name = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(scopeName = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MyBean {
 
     @PostConstruct

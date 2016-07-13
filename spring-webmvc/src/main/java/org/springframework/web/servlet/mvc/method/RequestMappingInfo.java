@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package org.springframework.web.servlet.mvc.method;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
 import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
@@ -36,7 +35,7 @@ import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondit
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Encapsulates the following request mapping conditions:
+ * A {@link RequestCondition} that consists of the following other conditions:
  * <ol>
  * <li>{@link PatternsRequestCondition}
  * <li>{@link RequestMethodsRequestCondition}
@@ -215,15 +214,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(request);
 
 		if (methods == null || params == null || headers == null || consumes == null || produces == null) {
-			if (CorsUtils.isPreFlightRequest(request)) {
-				methods = getAccessControlRequestMethodCondition(request);
-				if (methods == null || params == null) {
-					return null;
-				}
-			}
-			else {
-				return null;
-			}
+			return null;
 		}
 
 		PatternsRequestCondition patterns = this.patternsCondition.getMatchingCondition(request);
@@ -241,22 +232,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
-	 * Return a matching RequestMethodsRequestCondition based on the expected
-	 * HTTP method specified in a CORS pre-flight request.
-	 */
-	private RequestMethodsRequestCondition getAccessControlRequestMethodCondition(HttpServletRequest request) {
-		String expectedMethod = request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
-		if (StringUtils.hasText(expectedMethod)) {
-			for (RequestMethod method : getMethodsCondition().getMethods()) {
-				if (expectedMethod.equalsIgnoreCase(method.name())) {
-					return new RequestMethodsRequestCondition(method);
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Compares "this" info (i.e. the current instance) with another info in the context of a request.
 	 * <p>Note: It is assumed both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} to ensure they have conditions with
@@ -264,7 +239,15 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	@Override
 	public int compareTo(RequestMappingInfo other, HttpServletRequest request) {
-		int result = this.patternsCondition.compareTo(other.getPatternsCondition(), request);
+		int result;
+		// Automatic vs explicit HTTP HEAD mapping
+		if (HttpMethod.HEAD.matches(request.getMethod())) {
+			result = this.methodsCondition.compareTo(other.getMethodsCondition(), request);
+			if (result != 0) {
+				return result;
+			}
+		}
+		result = this.patternsCondition.compareTo(other.getPatternsCondition(), request);
 		if (result != 0) {
 			return result;
 		}
@@ -284,6 +267,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (result != 0) {
 			return result;
 		}
+		// Implicit (no method) vs explicit HTTP method mappings
 		result = this.methodsCondition.compareTo(other.getMethodsCondition(), request);
 		if (result != 0) {
 			return result;

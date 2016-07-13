@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,22 +160,22 @@ public class EnableAsyncTests {
 
 		@Async
 		public Future<Thread> work0() {
-			return new AsyncResult<Thread>(Thread.currentThread());
+			return new AsyncResult<>(Thread.currentThread());
 		}
 
 		@Async("e1")
 		public Future<Thread> work() {
-			return new AsyncResult<Thread>(Thread.currentThread());
+			return new AsyncResult<>(Thread.currentThread());
 		}
 
 		@Async("otherExecutor")
 		public Future<Thread> work2() {
-			return new AsyncResult<Thread>(Thread.currentThread());
+			return new AsyncResult<>(Thread.currentThread());
 		}
 
 		@Async("e2")
 		public Future<Thread> work3() {
-			return new AsyncResult<Thread>(Thread.currentThread());
+			return new AsyncResult<>(Thread.currentThread());
 		}
 	}
 

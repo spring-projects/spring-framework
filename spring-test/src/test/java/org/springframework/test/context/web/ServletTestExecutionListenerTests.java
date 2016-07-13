@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,41 +38,18 @@ import static org.springframework.test.context.web.ServletTestExecutionListener.
  * Unit tests for {@link ServletTestExecutionListener}.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.2.6
  */
 public class ServletTestExecutionListenerTests {
 
-	private static final String SET_UP_OUTSIDE_OF_STEL = "SET_UP_OUTSIDE_OF_STEL";
+	private static final String SET_UP_OUTSIDE_OF_STEL = "setUpOutsideOfStel";
 
 	private final WebApplicationContext wac = mock(WebApplicationContext.class);
 	private final MockServletContext mockServletContext = new MockServletContext();
 	private final TestContext testContext = mock(TestContext.class);
 	private final ServletTestExecutionListener listener = new ServletTestExecutionListener();
 
-
-	private void assertAttributesAvailable() {
-		assertNotNull("request attributes should be available", RequestContextHolder.getRequestAttributes());
-	}
-
-	private void assertAttributesNotAvailable() {
-		assertNull("request attributes should not be available", RequestContextHolder.getRequestAttributes());
-	}
-
-	private void assertAttributeExists() {
-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		assertNotNull("request attributes should exist", requestAttributes);
-		Object setUpOutsideOfStel = requestAttributes.getAttribute(SET_UP_OUTSIDE_OF_STEL,
-			RequestAttributes.SCOPE_REQUEST);
-		assertNotNull(SET_UP_OUTSIDE_OF_STEL + " should exist as a request attribute", setUpOutsideOfStel);
-	}
-
-	private void assertAttributeDoesNotExist() {
-		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-		assertNotNull("request attributes should exist", requestAttributes);
-		Object setUpOutsideOfStel = requestAttributes.getAttribute(SET_UP_OUTSIDE_OF_STEL,
-			RequestAttributes.SCOPE_REQUEST);
-		assertNull(SET_UP_OUTSIDE_OF_STEL + " should NOT exist as a request attribute", setUpOutsideOfStel);
-	}
 
 	@Before
 	public void setUp() {
@@ -86,7 +63,7 @@ public class ServletTestExecutionListenerTests {
 		request.setAttribute(SET_UP_OUTSIDE_OF_STEL, "true");
 
 		RequestContextHolder.setRequestAttributes(servletWebRequest);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 	}
 
 	@Test
@@ -95,16 +72,16 @@ public class ServletTestExecutionListenerTests {
 		given(testContext.getApplicationContext()).willReturn(mock(ApplicationContext.class));
 
 		listener.beforeTestClass(testContext);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 
 		listener.prepareTestInstance(testContext);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 
 		listener.beforeTestMethod(testContext);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 
 		listener.afterTestMethod(testContext);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 	}
 
 	@Test
@@ -112,22 +89,22 @@ public class ServletTestExecutionListenerTests {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(LegacyWebTestCase.class);
 
 		RequestContextHolder.resetRequestAttributes();
-		assertAttributesNotAvailable();
+		assertRequestAttributesDoNotExist();
 
 		listener.beforeTestClass(testContext);
 
 		listener.prepareTestInstance(testContext);
-		assertAttributesNotAvailable();
+		assertRequestAttributesDoNotExist();
 		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		given(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(null);
 
 		listener.beforeTestMethod(testContext);
-		assertAttributesNotAvailable();
+		assertRequestAttributesDoNotExist();
 		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 
 		listener.afterTestMethod(testContext);
 		verify(testContext, times(1)).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
-		assertAttributesNotAvailable();
+		assertRequestAttributesDoNotExist();
 	}
 
 	@Test
@@ -135,21 +112,21 @@ public class ServletTestExecutionListenerTests {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(LegacyWebTestCase.class);
 
 		listener.beforeTestClass(testContext);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 
 		listener.prepareTestInstance(testContext);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		given(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(null);
 
 		listener.beforeTestMethod(testContext);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 		verify(testContext, times(0)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		given(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(null);
 
 		listener.afterTestMethod(testContext);
 		verify(testContext, times(1)).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
-		assertAttributeExists();
+		assertSetUpOutsideOfStelAttributeExists();
 	}
 
 	@Test
@@ -158,7 +135,7 @@ public class ServletTestExecutionListenerTests {
 
 		RequestContextHolder.resetRequestAttributes();
 		listener.beforeTestClass(testContext);
-		assertAttributesNotAvailable();
+		assertRequestAttributesDoNotExist();
 
 		assertWebAppConfigTestCase();
 	}
@@ -168,28 +145,70 @@ public class ServletTestExecutionListenerTests {
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(AtWebAppConfigWebTestCase.class);
 
 		listener.beforeTestClass(testContext);
-		assertAttributesAvailable();
+		assertRequestAttributesExist();
 
 		assertWebAppConfigTestCase();
 	}
 
+	/**
+	 * @since 4.3
+	 */
+	@Test
+	public void activateListenerWithoutExistingRequestAttributes() throws Exception {
+		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(NoAtWebAppConfigWebTestCase.class);
+		given(testContext.getAttribute(ServletTestExecutionListener.ACTIVATE_LISTENER)).willReturn(true);
+
+		RequestContextHolder.resetRequestAttributes();
+		listener.beforeTestClass(testContext);
+		assertRequestAttributesDoNotExist();
+
+		assertWebAppConfigTestCase();
+	}
+
+
+	private RequestAttributes assertRequestAttributesExist() {
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		assertNotNull("request attributes should exist", requestAttributes);
+		return requestAttributes;
+	}
+
+	private void assertRequestAttributesDoNotExist() {
+		assertNull("request attributes should not exist", RequestContextHolder.getRequestAttributes());
+	}
+
+	private void assertSetUpOutsideOfStelAttributeExists() {
+		RequestAttributes requestAttributes = assertRequestAttributesExist();
+		Object setUpOutsideOfStel = requestAttributes.getAttribute(SET_UP_OUTSIDE_OF_STEL,
+			RequestAttributes.SCOPE_REQUEST);
+		assertNotNull(SET_UP_OUTSIDE_OF_STEL + " should exist as a request attribute", setUpOutsideOfStel);
+	}
+
+	private void assertSetUpOutsideOfStelAttributeDoesNotExist() {
+		RequestAttributes requestAttributes = assertRequestAttributesExist();
+		Object setUpOutsideOfStel = requestAttributes.getAttribute(SET_UP_OUTSIDE_OF_STEL,
+			RequestAttributes.SCOPE_REQUEST);
+		assertNull(SET_UP_OUTSIDE_OF_STEL + " should NOT exist as a request attribute", setUpOutsideOfStel);
+	}
+
 	private void assertWebAppConfigTestCase() throws Exception {
 		listener.prepareTestInstance(testContext);
-		assertAttributeDoesNotExist();
+		assertRequestAttributesExist();
+		assertSetUpOutsideOfStelAttributeDoesNotExist();
 		verify(testContext, times(1)).setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		verify(testContext, times(1)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		given(testContext.getAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(Boolean.TRUE);
 		given(testContext.getAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE)).willReturn(Boolean.TRUE);
 
 		listener.beforeTestMethod(testContext);
-		assertAttributeDoesNotExist();
+		assertRequestAttributesExist();
+		assertSetUpOutsideOfStelAttributeDoesNotExist();
 		verify(testContext, times(1)).setAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 		verify(testContext, times(1)).setAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE, Boolean.TRUE);
 
 		listener.afterTestMethod(testContext);
 		verify(testContext).removeAttribute(POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
 		verify(testContext).removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
-		assertAttributesNotAvailable();
+		assertRequestAttributesDoNotExist();
 	}
 
 
@@ -198,6 +217,9 @@ public class ServletTestExecutionListenerTests {
 
 	@WebAppConfiguration
 	static class AtWebAppConfigWebTestCase {
+	}
+
+	static class NoAtWebAppConfigWebTestCase {
 	}
 
 }

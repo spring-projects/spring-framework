@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  */
 class DefaultResourceResolverChain implements ResourceResolverChain {
 
-	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+	private final List<ResourceResolver> resolvers = new ArrayList<>();
 
 	private int index = -1;
 
@@ -78,12 +78,11 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 	private ResourceResolver getNext() {
 		Assert.state(this.index <= this.resolvers.size(),
-				"Current index exceeds the number of configured ResourceResolver's");
+				"Current index exceeds the number of configured ResourceResolvers");
 
 		if (this.index == (this.resolvers.size() - 1)) {
 			return null;
 		}
-
 		this.index++;
 		return this.resolvers.get(this.index);
 	}

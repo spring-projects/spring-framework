@@ -103,7 +103,7 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 	private String determineEncoding() {
 		MediaType contentType = getHeaders().getContentType();
 		if (contentType != null) {
-			Charset charset = contentType.getCharSet();
+			Charset charset = contentType.getCharset();
 			if (charset != null) {
 				return charset.name();
 			}

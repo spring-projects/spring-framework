@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class WebSocketExtension {
 		Assert.hasLength(name, "extension name must not be empty");
 		this.name = name;
 		if (!CollectionUtils.isEmpty(parameters)) {
-			Map<String, String> m = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
+			Map<String, String> m = new LinkedCaseInsensitiveMap<>(parameters.size(), Locale.ENGLISH);
 			m.putAll(parameters);
 			this.parameters = Collections.unmodifiableMap(m);
 		}
@@ -106,7 +106,7 @@ public class WebSocketExtension {
 			return Collections.emptyList();
 		}
 		else {
-			List<WebSocketExtension> result = new ArrayList<WebSocketExtension>();
+			List<WebSocketExtension> result = new ArrayList<>();
 			for (String token : extensions.split(",")) {
 				result.add(parseExtension(token));
 			}
@@ -121,7 +121,7 @@ public class WebSocketExtension {
 
 		Map<String, String> parameters = null;
 		if (parts.length > 1) {
-			parameters = new LinkedHashMap<String, String>(parts.length - 1);
+			parameters = new LinkedHashMap<>(parts.length - 1);
 			for (int i = 1; i < parts.length; i++) {
 				String parameter = parts[i];
 				int eqIndex = parameter.indexOf('=');

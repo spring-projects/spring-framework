@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,6 +318,14 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindDateTimeOverflow() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateTimeAnnotatedPattern", "02/29/09 12:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getErrorCount());
+	}
+
+	@Test
 	public void testBindDateTimeAnnotatedDefault() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateTimeAnnotatedDefault", new DateTime(2009, 10, 31, 12, 0, ISOChronology.getInstanceUTC()));
@@ -562,7 +570,7 @@ public class JodaTimeFormattingTests {
 
 		private MonthDay monthDay;
 
-		private final List<JodaTimeBean> children = new ArrayList<JodaTimeBean>();
+		private final List<JodaTimeBean> children = new ArrayList<>();
 
 		public LocalDate getLocalDate() {
 			return localDate;

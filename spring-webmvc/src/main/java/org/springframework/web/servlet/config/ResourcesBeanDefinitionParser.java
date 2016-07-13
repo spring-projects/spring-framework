@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -95,7 +96,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			return null;
 		}
 
-		Map<String, String> urlMap = new ManagedMap<String, String>();
+		Map<String, String> urlMap = new ManagedMap<>();
 		String resourceRequestPath = element.getAttribute("mapping");
 		if (!StringUtils.hasText(resourceRequestPath)) {
 			parserContext.getReaderContext().error("The 'mapping' attribute is required.", parserContext.extractSource(element));
@@ -159,28 +160,35 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			return null;
 		}
 
-		ManagedList<String> locations = new ManagedList<String>();
+		ManagedList<String> locations = new ManagedList<>();
 		locations.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(locationAttr)));
 
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getPropertyValues().add("locations", locations);
+
+		MutablePropertyValues values = resourceHandlerDef.getPropertyValues();
+		values.add("locations", locations);
 
 		String cacheSeconds = element.getAttribute("cache-period");
 		if (StringUtils.hasText(cacheSeconds)) {
-			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
+			values.add("cacheSeconds", cacheSeconds);
 		}
 
 		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cache-control");
 		if (cacheControlElement != null) {
 			CacheControl cacheControl = parseCacheControl(cacheControlElement);
-			resourceHandlerDef.getPropertyValues().add("cacheControl", cacheControl);
+			values.add("cacheControl", cacheControl);
 		}
 
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
 		if (resourceChainElement != null) {
 			parseResourceChain(resourceHandlerDef, parserContext, resourceChainElement, source);
+		}
+
+		Object manager = MvcNamespaceUtils.getContentNegotiationManager(parserContext);
+		if (manager != null) {
+			values.add("contentNegotiationManager", manager);
 		}
 
 		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
@@ -196,9 +204,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		String autoRegistration = element.getAttribute("auto-registration");
 		boolean isAutoRegistration = !(StringUtils.hasText(autoRegistration) && "false".equals(autoRegistration));
 
-		ManagedList<? super Object> resourceResolvers = new ManagedList<Object>();
+		ManagedList<? super Object> resourceResolvers = new ManagedList<>();
 		resourceResolvers.setSource(source);
-		ManagedList<? super Object> resourceTransformers = new ManagedList<Object>();
+		ManagedList<? super Object> resourceTransformers = new ManagedList<>();
 		resourceTransformers.setSource(source);
 
 		parseResourceCache(resourceResolvers, resourceTransformers, element, source);
@@ -340,7 +348,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private RootBeanDefinition parseVersionResolver(ParserContext parserContext, Element element, Object source) {
-		ManagedMap<String, ? super Object> strategyMap = new ManagedMap<String, Object>();
+		ManagedMap<String, ? super Object> strategyMap = new ManagedMap<>();
 		strategyMap.setSource(source);
 		RootBeanDefinition versionResolverDef = new RootBeanDefinition(VersionResourceResolver.class);
 		versionResolverDef.setSource(source);

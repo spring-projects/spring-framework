@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		int realAge = 65;
 		target.setAge(realAge);
 
-		List<Advisor> advisors = new LinkedList<Advisor>();
+		List<Advisor> advisors = new LinkedList<>();
 		PerTargetAspect aspect1 = new PerTargetAspect();
 		aspect1.count = 100;
 		aspect1.setOrder(10);
@@ -166,7 +166,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		int realAge = 65;
 		target.setAge(realAge);
 
-		List<Advisor> advisors = new LinkedList<Advisor>();
+		List<Advisor> advisors = new LinkedList<>();
 		PerTargetAspectWithOrderAnnotation10 aspect1 = new PerTargetAspectWithOrderAnnotation10();
 		aspect1.count = 100;
 		advisors.addAll(
@@ -402,7 +402,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 
 	@Test
 	public void testIntroductionOnTargetExcludedByTypePattern() {
-		LinkedList<Object> target = new LinkedList<Object>();
+		LinkedList<Object> target = new LinkedList<>();
 		List<?> proxy = (List<?>) createProxy(target,
 				AopUtils.findAdvisorsThatCanApply(
 						getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new MakeLockable(), "someBean")),
@@ -691,6 +691,11 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		@Override
 		public AspectMetadata getAspectMetadata() {
 			return new AspectMetadata(PerTypeWithinAspect.class, "perTypeWithin");
+		}
+
+		@Override
+		public Object getAspectCreationMutex() {
+			return this;
 		}
 
 		@Override

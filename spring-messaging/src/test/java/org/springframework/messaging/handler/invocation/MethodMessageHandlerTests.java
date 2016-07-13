@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
@@ -141,7 +142,7 @@ public class MethodMessageHandlerTests {
 
 		public String method;
 
-		private Map<String, Object> arguments = new LinkedHashMap<String, Object>();
+		private Map<String, Object> arguments = new LinkedHashMap<>();
 
 		public void handlerPathMatchWildcard() {
 			this.method = "pathMatchWildcard";
@@ -195,15 +196,15 @@ public class MethodMessageHandlerTests {
 
 		@Override
 		protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
-			List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
-			resolvers.add(new MessageMethodArgumentResolver());
+			List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+			resolvers.add(new MessageMethodArgumentResolver(new SimpleMessageConverter()));
 			resolvers.addAll(getCustomArgumentResolvers());
 			return resolvers;
 		}
 
 		@Override
 		protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
-			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+			List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 			handlers.addAll(getCustomReturnValueHandlers());
 			return handlers;
 		}
@@ -224,7 +225,7 @@ public class MethodMessageHandlerTests {
 
 		@Override
 		protected Set<String> getDirectLookupDestinations(String mapping) {
-			Set<String> result = new LinkedHashSet<String>();
+			Set<String> result = new LinkedHashSet<>();
 			if (!this.pathMatcher.isPattern(mapping)) {
 				result.add(mapping);
 			}
@@ -272,9 +273,9 @@ public class MethodMessageHandlerTests {
 		}
 
 		private static Map<Class<? extends Throwable>, Method> initExceptionMappings(Class<?> handlerType) {
-			Map<Class<? extends Throwable>, Method> result = new HashMap<Class<? extends Throwable>, Method>();
+			Map<Class<? extends Throwable>, Method> result = new HashMap<>();
 			for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHOD_FILTER)) {
-				for(Class<? extends Throwable> exception : getExceptionsFromMethodSignature(method)) {
+				for (Class<? extends Throwable> exception : getExceptionsFromMethodSignature(method)) {
 					result.put(exception, method);
 				}
 			}

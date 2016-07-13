@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2Http
 	 * @see Jackson2ObjectMapperBuilder#xml()
 	 */
 	public MappingJackson2XmlHttpMessageConverter(ObjectMapper objectMapper) {
-		super(objectMapper, new MediaType("application", "xml", DEFAULT_CHARSET),
-				new MediaType("text", "xml", DEFAULT_CHARSET),
-				new MediaType("application", "*+xml", DEFAULT_CHARSET));
+		super(objectMapper, new MediaType("application", "xml"),
+				new MediaType("text", "xml"),
+				new MediaType("application", "*+xml"));
 		Assert.isAssignable(XmlMapper.class, objectMapper.getClass());
 	}
 

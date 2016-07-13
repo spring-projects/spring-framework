@@ -39,8 +39,7 @@ import org.springframework.core.serializer.support.SerializationDelegate;
  * caching scenarios. For advanced local caching needs, consider
  * {@link org.springframework.cache.jcache.JCacheCacheManager},
  * {@link org.springframework.cache.ehcache.EhCacheCacheManager},
- * {@link com.github.benmanes.caffeine.cache.CaffeineCacheManager} or
- * {@link org.springframework.cache.guava.GuavaCacheManager}.
+ * {@link org.springframework.cache.caffeine.CaffeineCacheManager}.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -48,7 +47,7 @@ import org.springframework.core.serializer.support.SerializationDelegate;
  */
 public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderAware {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
+	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
 	private boolean dynamic = true;
 
@@ -106,9 +105,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 		if (allowNullValues != this.allowNullValues) {
 			this.allowNullValues = allowNullValues;
 			// Need to recreate all Cache instances with the new null-value configuration...
-			for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
-				entry.setValue(createConcurrentMapCache(entry.getKey()));
-			}
+			recreateCaches();
 		}
 	}
 
@@ -127,14 +124,13 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	 * contract is required on cached values.
 	 * <p>Note: A change of the store-by-value setting will reset all existing caches,
 	 * if any, to reconfigure them with the new store-by-value requirement.
+	 * @since 4.3
 	 */
 	public void setStoreByValue(boolean storeByValue) {
 		if (storeByValue != this.storeByValue) {
 			this.storeByValue = storeByValue;
 			// Need to recreate all Cache instances with the new store-by-value configuration...
-			for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
-				entry.setValue(createConcurrentMapCache(entry.getKey()));
-			}
+			recreateCaches();
 		}
 	}
 
@@ -142,6 +138,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	 * Return whether this cache manager stores a copy of each entry or
 	 * a reference for all its caches. If store by value is enabled, any
 	 * cache entry must be serializable.
+	 * @since 4.3
 	 */
 	public boolean isStoreByValue() {
 		return this.storeByValue;
@@ -150,7 +147,12 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.serialization = new SerializationDelegate(classLoader);
+		// Need to recreate all Cache instances with new ClassLoader in store-by-value mode...
+		if (isStoreByValue()) {
+			recreateCaches();
+		}
 	}
+
 
 	@Override
 	public Collection<String> getCacheNames() {
@@ -172,15 +174,20 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 		return cache;
 	}
 
+	private void recreateCaches() {
+		for (Map.Entry<String, Cache> entry : this.cacheMap.entrySet()) {
+			entry.setValue(createConcurrentMapCache(entry.getKey()));
+		}
+	}
+
 	/**
 	 * Create a new ConcurrentMapCache instance for the specified cache name.
 	 * @param name the name of the cache
 	 * @return the ConcurrentMapCache (or a decorator thereof)
 	 */
 	protected Cache createConcurrentMapCache(String name) {
-		SerializationDelegate actualSerialization =
-				this.storeByValue ? this.serialization : null;
-		return new ConcurrentMapCache(name, new ConcurrentHashMap<Object, Object>(256),
+		SerializationDelegate actualSerialization = (isStoreByValue() ? this.serialization : null);
+		return new ConcurrentMapCache(name, new ConcurrentHashMap<>(256),
 				isAllowNullValues(), actualSerialization);
 
 	}

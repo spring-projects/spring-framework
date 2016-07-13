@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
-
 import javax.ejb.TransactionAttributeType;
 
+import groovy.lang.GroovyObject;
+import groovy.lang.MetaClass;
 import org.junit.Test;
 
 import org.springframework.aop.framework.Advised;
@@ -54,7 +55,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		TransactionInterceptor ti = new TransactionInterceptor(ptm, tas);
 
 		ProxyFactory proxyFactory = new ProxyFactory();
-		proxyFactory.setInterfaces(new Class[] {ITestBean.class});
+		proxyFactory.setInterfaces(ITestBean.class);
 		proxyFactory.addAdvice(ti);
 		proxyFactory.setTarget(tb);
 		ITestBean proxy = (ITestBean) proxyFactory.getProxy();
@@ -369,6 +370,20 @@ public class AnnotationTransactionAttributeSourceTests {
 		assertEquals(TransactionAttribute.PROPAGATION_SUPPORTS, getNameAttr.getPropagationBehavior());
 	}
 
+	@Test
+	public void transactionAttributeDeclaredOnGroovyClass() throws Exception {
+		Method getAgeMethod = ITestBean.class.getMethod("getAge");
+		Method getNameMethod = ITestBean.class.getMethod("getName");
+		Method getMetaClassMethod = GroovyObject.class.getMethod("getMetaClass");
+
+		AnnotationTransactionAttributeSource atas = new AnnotationTransactionAttributeSource();
+		TransactionAttribute getAgeAttr = atas.getTransactionAttribute(getAgeMethod, GroovyTestBean.class);
+		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getAgeAttr.getPropagationBehavior());
+		TransactionAttribute getNameAttr = atas.getTransactionAttribute(getNameMethod, GroovyTestBean.class);
+		assertEquals(TransactionAttribute.PROPAGATION_REQUIRED, getNameAttr.getPropagationBehavior());
+		assertNull(atas.getTransactionAttribute(getMetaClassMethod, GroovyTestBean.class));
+	}
+
 
 	interface ITestBean {
 
@@ -470,7 +485,7 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@Transactional(rollbackFor=Exception.class)
+		@Transactional(rollbackFor = Exception.class)
 		public int getAge() {
 			return age;
 		}
@@ -543,8 +558,8 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 
 		@Override
-		@Transactional(propagation=Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ, timeout=5,
-				readOnly=true, rollbackFor=Exception.class, noRollbackFor={IOException.class})
+		@Transactional(propagation = Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ,
+				timeout = 5, readOnly = true, rollbackFor = Exception.class, noRollbackFor = IOException.class)
 		public int getAge() {
 			return age;
 		}
@@ -556,7 +571,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
-	@Transactional(rollbackFor=Exception.class, noRollbackFor={IOException.class})
+	@Transactional(rollbackFor = Exception.class, noRollbackFor = IOException.class)
 	static class TestBean4 implements ITestBean3 {
 
 		private String name;
@@ -594,7 +609,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional(rollbackFor=Exception.class, noRollbackFor={IOException.class})
+	@Transactional(rollbackFor = Exception.class, noRollbackFor = IOException.class)
 	@interface Tx {
 	}
 
@@ -618,13 +633,13 @@ public class AnnotationTransactionAttributeSourceTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional(rollbackFor=Exception.class, noRollbackFor={IOException.class})
+	@Transactional(rollbackFor = Exception.class, noRollbackFor = IOException.class)
 	@interface TxWithAttribute {
 		boolean readOnly();
 	}
 
 
-	@TxWithAttribute(readOnly=true)
+	@TxWithAttribute(readOnly = true)
 	static class TestBean7 {
 
 		public int getAge() {
@@ -641,10 +656,13 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 	}
 
+
 	@TxWithAttribute(readOnly = true)
 	interface TestInterface9 {
+
 		int getAge();
 	}
+
 
 	static class TestBean9 implements TestInterface9 {
 
@@ -654,11 +672,13 @@ public class AnnotationTransactionAttributeSourceTests {
 		}
 	}
 
+
 	interface TestInterface10 {
 
-		@TxWithAttribute(readOnly=true)
+		@TxWithAttribute(readOnly = true)
 		int getAge();
 	}
+
 
 	static class TestBean10 implements TestInterface10 {
 
@@ -885,6 +905,58 @@ public class AnnotationTransactionAttributeSourceTests {
 		@Override
 		public void setAge(int age) {
 			this.age = age;
+		}
+	}
+
+
+	@Transactional
+	static class GroovyTestBean implements ITestBean, GroovyObject {
+
+		private String name;
+
+		private int age;
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public int getAge() {
+			return age;
+		}
+
+		@Override
+		public void setAge(int age) {
+			this.age = age;
+		}
+
+		@Override
+		public Object invokeMethod(String name, Object args) {
+			return null;
+		}
+
+		@Override
+		public Object getProperty(String propertyName) {
+			return null;
+		}
+
+		@Override
+		public void setProperty(String propertyName, Object newValue) {
+		}
+
+		@Override
+		public MetaClass getMetaClass() {
+			return null;
+		}
+
+		@Override
+		public void setMetaClass(MetaClass metaClass) {
 		}
 	}
 

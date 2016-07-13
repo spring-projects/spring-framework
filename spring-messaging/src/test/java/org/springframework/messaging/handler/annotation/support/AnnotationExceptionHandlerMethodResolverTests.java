@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link AnnotationExceptionHandlerMethodResolver} tests.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class AnnotationExceptionHandlerMethodResolverTests {
 
@@ -48,6 +49,13 @@ public class AnnotationExceptionHandlerMethodResolverTests {
 		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
 		IllegalArgumentException exception = new IllegalArgumentException();
 		assertEquals("handleIllegalArgumentException", resolver.resolveMethod(exception).getName());
+	}
+
+	@Test
+	public void resolveMethodFromArgumentWithErrorType() {
+		AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(ExceptionController.class);
+		AssertionError exception = new AssertionError();
+		assertEquals("handleAssertionError", resolver.resolveMethod(new IllegalStateException(exception)).getName());
 	}
 
 	@Test
@@ -91,6 +99,7 @@ public class AnnotationExceptionHandlerMethodResolverTests {
 		new AnnotationExceptionHandlerMethodResolver(NoExceptionController.class);
 	}
 
+
 	@Controller
 	static class ExceptionController {
 
@@ -107,7 +116,12 @@ public class AnnotationExceptionHandlerMethodResolverTests {
 		@MessageExceptionHandler
 		public void handleIllegalArgumentException(IllegalArgumentException exception) {
 		}
+
+		@MessageExceptionHandler
+		public void handleAssertionError(AssertionError exception) {
+		}
 	}
+
 
 	@Controller
 	static class InheritedController extends ExceptionController {
@@ -116,6 +130,7 @@ public class AnnotationExceptionHandlerMethodResolverTests {
 		public void handleIOException()	{
 		}
 	}
+
 
 	@Controller
 	static class AmbiguousController {
@@ -132,6 +147,7 @@ public class AnnotationExceptionHandlerMethodResolverTests {
 			return ClassUtils.getShortName(ex.getClass());
 		}
 	}
+
 
 	@Controller
 	static class NoExceptionController {

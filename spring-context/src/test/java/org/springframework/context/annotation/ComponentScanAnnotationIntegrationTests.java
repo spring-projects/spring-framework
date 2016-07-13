@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,18 +33,31 @@ import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImp
 import example.scannable_implicitbasepackage.ConfigurableComponent;
 import example.scannable_scoped.CustomScopeAnnotationBean;
 import example.scannable_scoped.MyScope;
+
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.CustomAutowireConfigurer;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.ComponentScanParserTests.KustomAnnotationAutowiredBean;
 import org.springframework.context.annotation.componentscan.simple.ClassWithNestedComponents;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.classreading.MetadataReader;
+import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.tests.context.SimpleMapScope;
 import org.springframework.util.SerializationTestUtils;
 
@@ -178,6 +191,12 @@ public class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
+	public void withAwareTypeFilter() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ComponentScanWithAwareTypeFilter.class);
+		assertTrue(ctx.getEnvironment().acceptsProfiles("the-filter-ran"));
+	}
+
+	@Test
 	public void withScopedProxy() throws IOException, ClassNotFoundException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ComponentScanWithScopedProxy.class);
@@ -257,6 +276,47 @@ public class ComponentScanAnnotationIntegrationTests {
 	@ComposedConfiguration(basePackages = "org.springframework.context.annotation.componentscan.simple")
 	public static class ComposedAnnotationConfig {
 	}
+
+	public static class AwareTypeFilter implements TypeFilter, EnvironmentAware,
+			ResourceLoaderAware, BeanClassLoaderAware, BeanFactoryAware {
+
+		private BeanFactory beanFactory;
+		private ClassLoader classLoader;
+		private ResourceLoader resourceLoader;
+		private Environment environment;
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			this.beanFactory = beanFactory;
+		}
+
+		@Override
+		public void setBeanClassLoader(ClassLoader classLoader) {
+			this.classLoader = classLoader;
+		}
+
+		@Override
+		public void setResourceLoader(ResourceLoader resourceLoader) {
+			this.resourceLoader = resourceLoader;
+		}
+
+		@Override
+		public void setEnvironment(Environment environment) {
+			this.environment = environment;
+		}
+
+		@Override
+		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) {
+			((ConfigurableEnvironment) this.environment).addActiveProfile("the-filter-ran");
+			assertNotNull(this.beanFactory);
+			assertNotNull(this.classLoader);
+			assertNotNull(this.resourceLoader);
+			assertNotNull(this.environment);
+			return false;
+		}
+
+	}
+
 
 }
 
@@ -341,6 +401,14 @@ class ComponentScanWithCustomTypeFilter {
 }
 
 @Configuration
+@ComponentScan(
+		basePackages = "org.springframework.context.annotation",
+		useDefaultFilters = false,
+		includeFilters = @Filter(type = FilterType.CUSTOM, classes = ComponentScanAnnotationIntegrationTests.AwareTypeFilter.class),
+		lazyInit = true)
+class ComponentScanWithAwareTypeFilter {}
+
+@Configuration
 @ComponentScan(basePackages = "example.scannable",
 		scopedProxy = ScopedProxyMode.INTERFACES,
 		useDefaultFilters = false,
@@ -384,3 +452,5 @@ class ComponentScanWithMultipleAnnotationIncludeFilters2 {}
 		basePackages = "example.scannable",
 		basePackageClasses = example.scannable._package.class)
 class ComponentScanWithBasePackagesAndValueAlias {}
+
+

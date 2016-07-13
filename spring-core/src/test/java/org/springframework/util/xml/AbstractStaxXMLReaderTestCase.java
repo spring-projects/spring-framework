@@ -194,8 +194,8 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	private static class SkipLocatorArgumentsAdapter implements InvocationArgumentsAdapter {
 		@Override
 		public Object[] adaptArguments(Object[] arguments) {
-			for(int i=0; i<arguments.length; i++) {
-				if(arguments[i] instanceof Locator) {
+			for (int i = 0; i < arguments.length; i++) {
+				if (arguments[i] instanceof Locator) {
 					arguments[i] = null;
 				}
 			}
@@ -206,7 +206,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	private static class CharArrayToStringAdapter implements InvocationArgumentsAdapter {
 		@Override
 		public Object[] adaptArguments(Object[] arguments) {
-			if(arguments.length == 3 && arguments[0] instanceof char[]
+			if (arguments.length == 3 && arguments[0] instanceof char[]
 					&& arguments[1] instanceof Integer && arguments[2] instanceof Integer) {
 				return new Object[] {new String((char[]) arguments[0], (Integer) arguments[1], (Integer) arguments[2])};
 			}
@@ -218,7 +218,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 		@Override
 		public Object[] adaptArguments(Object[] arguments) {
 			for (int i = 0; i < arguments.length; i++) {
-				if(arguments[i] instanceof Attributes) {
+				if (arguments[i] instanceof Attributes) {
 					arguments[i] = new PartialAttributes((Attributes) arguments[i]);
 				}
 			};

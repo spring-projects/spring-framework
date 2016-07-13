@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,10 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.jms.config.JmsListenerConfigUtils;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
@@ -49,6 +50,7 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Bean post-processor that registers methods annotated with {@link JmsListener}
@@ -94,6 +96,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 	private String containerFactoryBeanName = DEFAULT_JMS_LISTENER_CONTAINER_FACTORY_BEAN_NAME;
 
 	private BeanFactory beanFactory;
+
+	private StringValueResolver embeddedValueResolver;
 
 	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory = new MessageHandlerMethodFactoryAdapter();
 
@@ -146,6 +150,9 @@ public class JmsListenerAnnotationBeanPostProcessor
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
+		}
 	}
 
 
@@ -198,8 +205,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 					new MethodIntrospector.MetadataLookup<Set<JmsListener>>() {
 						@Override
 						public Set<JmsListener> inspect(Method method) {
-							Set<JmsListener> listenerMethods =
-									AnnotationUtils.getRepeatableAnnotations(method, JmsListener.class, JmsListeners.class);
+							Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+									method, JmsListener.class, JmsListeners.class);
 							return (!listenerMethods.isEmpty() ? listenerMethods : null);
 						}
 					});
@@ -243,6 +250,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 		endpoint.setMethod(invocableMethod);
 		endpoint.setMostSpecificMethod(mostSpecificMethod);
 		endpoint.setMessageHandlerMethodFactory(this.messageHandlerMethodFactory);
+		endpoint.setEmbeddedValueResolver(this.embeddedValueResolver);
 		endpoint.setBeanFactory(this.beanFactory);
 		endpoint.setId(getEndpointId(jmsListener));
 		endpoint.setDestination(resolve(jmsListener.destination()));
@@ -293,15 +301,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 		}
 	}
 
-	/**
-	 * Resolve the specified value if possible.
-	 * @see ConfigurableBeanFactory#resolveEmbeddedValue
-	 */
 	private String resolve(String value) {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).resolveEmbeddedValue(value);
-		}
-		return value;
+		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
 

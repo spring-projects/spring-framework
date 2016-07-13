@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.aop.aspectj;
 
 import java.lang.annotation.Documented;
@@ -97,11 +113,13 @@ public class TrickyAspectJPointcutExpressionTests {
 		try {
 			bean.sayHello();
 			fail("Expected exception");
-		} catch (TestException e) {
-			assertEquals(message, e.getMessage());
+		}
+		catch (TestException ex) {
+			assertEquals(message, ex.getMessage());
 		}
 		assertEquals(1, logAdvice.getCountThrows());
 	}
+
 
 	public static class SimpleThrowawayClassLoader extends OverridingClassLoader {
 
@@ -115,14 +133,15 @@ public class TrickyAspectJPointcutExpressionTests {
 
 	}
 
+
 	@SuppressWarnings("serial")
 	public static class TestException extends RuntimeException {
 
 		public TestException(String string) {
 			super(string);
 		}
-
 	}
+
 
 	@Target({ ElementType.METHOD, ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
@@ -131,17 +150,22 @@ public class TrickyAspectJPointcutExpressionTests {
 	public static @interface Log {
 	}
 
+
 	public static interface TestService {
+
 		public String sayHello();
 	}
 
+
 	@Log
 	public static class TestServiceImpl implements TestService {
+
 		@Override
 		public String sayHello() {
 			throw new TestException("TestServiceImpl");
 		}
 	}
+
 
 	public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
 
@@ -154,9 +178,9 @@ public class TrickyAspectJPointcutExpressionTests {
 			countBefore++;
 		}
 
-		public void afterThrowing(Exception e) throws Throwable {
+		public void afterThrowing(Exception ex) throws Throwable {
 			countThrows++;
-			throw e;
+			throw ex;
 		}
 
 		public int getCountBefore() {
@@ -171,7 +195,6 @@ public class TrickyAspectJPointcutExpressionTests {
 			countThrows = 0;
 			countBefore = 0;
 		}
-
 	}
 
 }

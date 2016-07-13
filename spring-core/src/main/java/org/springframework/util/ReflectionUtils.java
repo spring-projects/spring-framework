@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,13 +61,13 @@ public abstract class ReflectionUtils {
 	 * from Java 8 based interfaces, allowing for fast iteration.
 	 */
 	private static final Map<Class<?>, Method[]> declaredMethodsCache =
-			new ConcurrentReferenceHashMap<Class<?>, Method[]>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	/**
 	 * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
 	 */
 	private static final Map<Class<?>, Field[]> declaredFieldsCache =
-			new ConcurrentReferenceHashMap<Class<?>, Field[]>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 
 	/**
@@ -265,7 +265,8 @@ public abstract class ReflectionUtils {
 	 * checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of an
 	 * InvocationTargetException with such a root cause. Throws an
-	 * IllegalStateException with an appropriate message else.
+	 * IllegalStateException with an appropriate message or
+	 * UndeclaredThrowableException otherwise.
 	 * @param ex the reflection exception to handle
 	 */
 	public static void handleReflectionException(Exception ex) {
@@ -288,7 +289,7 @@ public abstract class ReflectionUtils {
 	 * Handle the given invocation target exception. Should only be called if no
 	 * checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of such a root
-	 * cause. Throws an IllegalStateException else.
+	 * cause. Throws an UndeclaredThrowableException otherwise.
 	 * @param ex the invocation target exception to handle
 	 */
 	public static void handleInvocationTargetException(InvocationTargetException ex) {
@@ -300,8 +301,9 @@ public abstract class ReflectionUtils {
 	 * <em>target exception</em> of an {@link InvocationTargetException}.
 	 * Should only be called if no checked exception is expected to be thrown
 	 * by the target method.
-	 * <p>Rethrows the underlying exception cast to an {@link RuntimeException} or
-	 * {@link Error} if appropriate; otherwise, throws an {@link IllegalStateException}.
+	 * <p>Rethrows the underlying exception cast to a {@link RuntimeException} or
+	 * {@link Error} if appropriate; otherwise, throws an
+	 * {@link UndeclaredThrowableException}.
 	 * @param ex the exception to rethrow
 	 * @throws RuntimeException the rethrown exception
 	 */
@@ -321,7 +323,8 @@ public abstract class ReflectionUtils {
 	 * Should only be called if no checked exception is expected to be thrown
 	 * by the target method.
 	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
-	 * {@link Error} if appropriate; otherwise, throws an {@link IllegalStateException}.
+	 * {@link Error} if appropriate; otherwise, throws an
+	 * {@link UndeclaredThrowableException}.
 	 * @param ex the exception to rethrow
 	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */
@@ -381,7 +384,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public static boolean isHashCodeMethod(Method method) {
-		return (method != null && method.getName().equals("hashCode") && method.getParameterTypes().length == 0);
+		return (method != null && method.getName().equals("hashCode") && method.getParameterCount() == 0);
 	}
 
 	/**
@@ -389,7 +392,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#toString()
 	 */
 	public static boolean isToStringMethod(Method method) {
-		return (method != null && method.getName().equals("toString") && method.getParameterTypes().length == 0);
+		return (method != null && method.getName().equals("toString") && method.getParameterCount() == 0);
 	}
 
 	/**
@@ -546,7 +549,7 @@ public abstract class ReflectionUtils {
 	 * @param leafClass the class to introspect
 	 */
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) {
-		final List<Method> methods = new ArrayList<Method>(32);
+		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, new MethodCallback() {
 			@Override
 			public void doWith(Method method) {
@@ -563,7 +566,7 @@ public abstract class ReflectionUtils {
 	 * @param leafClass the class to introspect
 	 */
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass) {
-		final List<Method> methods = new ArrayList<Method>(32);
+		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, new MethodCallback() {
 			@Override
 			public void doWith(Method method) {
@@ -631,7 +634,7 @@ public abstract class ReflectionUtils {
 			for (Method ifcMethod : ifc.getMethods()) {
 				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
 					if (result == null) {
-						result = new LinkedList<Method>();
+						result = new LinkedList<>();
 					}
 					result.add(ifcMethod);
 				}
@@ -752,6 +755,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Action to take on each method.
 	 */
+	@FunctionalInterface
 	public interface MethodCallback {
 
 		/**
@@ -765,6 +769,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback optionally used to filter methods to be operated on by a method callback.
 	 */
+	@FunctionalInterface
 	public interface MethodFilter {
 
 		/**
@@ -778,6 +783,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback interface invoked on each field in the hierarchy.
 	 */
+	@FunctionalInterface
 	public interface FieldCallback {
 
 		/**
@@ -791,6 +797,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback optionally used to filter fields to be operated on by a field callback.
 	 */
+	@FunctionalInterface
 	public interface FieldFilter {
 
 		/**
@@ -804,7 +811,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
-	public static FieldFilter COPYABLE_FIELDS = new FieldFilter() {
+	public static final FieldFilter COPYABLE_FIELDS = new FieldFilter() {
 
 		@Override
 		public boolean matches(Field field) {
@@ -816,7 +823,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods.
 	 */
-	public static MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
+	public static final MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {
@@ -829,7 +836,7 @@ public abstract class ReflectionUtils {
 	 * Pre-built MethodFilter that matches all non-bridge methods
 	 * which are not declared on {@code java.lang.Object}.
 	 */
-	public static MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
+	public static final MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {

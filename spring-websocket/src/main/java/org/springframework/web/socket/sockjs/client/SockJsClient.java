@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private static final Log logger = LogFactory.getLog(SockJsClient.class);
 
-	private static final Set<String> supportedProtocols = new HashSet<String>(4);
+	private static final Set<String> supportedProtocols = new HashSet<>(4);
 
 	static {
 		supportedProtocols.add("ws");
@@ -88,7 +88,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private volatile boolean running = false;
 
-	private final Map<URI, ServerInfo> serverInfoCache = new ConcurrentHashMap<URI, ServerInfo>();
+	private final Map<URI, ServerInfo> serverInfoCache = new ConcurrentHashMap<>();
 
 
 	/**
@@ -101,7 +101,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	 */
 	public SockJsClient(List<Transport> transports) {
 		Assert.notEmpty(transports, "No transports provided");
-		this.transports = new ArrayList<Transport>(transports);
+		this.transports = new ArrayList<>(transports);
 		this.infoReceiver = initInfoReceiver(transports);
 		if (jackson2Present) {
 			this.messageCodec = new Jackson2SockJsMessageCodec();
@@ -248,7 +248,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 			throw new IllegalArgumentException("Invalid scheme: '" + scheme + "'");
 		}
 
-		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<WebSocketSession>();
+		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<>();
 		try {
 			SockJsUrlInfo sockJsUrlInfo = new SockJsUrlInfo(url);
 			ServerInfo serverInfo = getServerInfo(sockJsUrlInfo, getHttpRequestHeaders(headers));
@@ -292,7 +292,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 	}
 
 	private DefaultTransportRequest createRequest(SockJsUrlInfo urlInfo, HttpHeaders headers, ServerInfo serverInfo) {
-		List<DefaultTransportRequest> requests = new ArrayList<DefaultTransportRequest>(this.transports.size());
+		List<DefaultTransportRequest> requests = new ArrayList<>(this.transports.size());
 		for (Transport transport : this.transports) {
 			for (TransportType type : transport.getTransportTypes()) {
 				if (serverInfo.isWebSocketEnabled() || !TransportType.WEBSOCKET.equals(type)) {

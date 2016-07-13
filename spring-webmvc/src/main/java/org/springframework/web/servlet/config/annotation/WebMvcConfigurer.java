@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,6 +129,16 @@ public interface WebMvcConfigurer {
 	 * @param exceptionResolvers initially an empty list
 	 */
 	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
+
+	/**
+	 * A hook for extending or modifying the list of
+	 * {@link HandlerExceptionResolver}s after it has been configured. This may
+	 * be useful for example to allow default resolvers to be registered and then
+	 * insert a custom one through this method.
+	 * @param exceptionResolvers the list of configured resolvers to extend.
+	 * @since 4.3
+	 */
+	void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
 	/**
 	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of

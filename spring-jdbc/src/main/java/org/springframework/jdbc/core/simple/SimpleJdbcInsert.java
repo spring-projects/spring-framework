@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * name of the table and a Map containing the column names and the column values.
  *
  * <p>The meta data processing is based on the DatabaseMetaData provided by the
- * JDBC driver. As long as the JBDC driver can provide the names of the columns
+ * JDBC driver. As long as the JDBC driver can provide the names of the columns
  * for a specified table than we can rely on this auto-detection feature. If that
  * is not the case, then the column names must be specified explicitly.
  *
@@ -148,6 +148,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public int[] executeBatch(Map<String, ?>... batch) {
 		return doExecuteBatch(batch);
 	}

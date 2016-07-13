@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,8 +64,6 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	private static final String SCOPE_ATTRIBUTE = "scope";
 
 	private static final String AUTOWIRE_ATTRIBUTE = "autowire";
-
-	private static final String DEPENDENCY_CHECK_ATTRIBUTE = "dependency-check";
 
 	private static final String DEPENDS_ON_ATTRIBUTE = "depends-on";
 
@@ -141,10 +139,6 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			autowireMode = GenericBeanDefinition.AUTOWIRE_NO;
 		}
 		bd.setAutowireMode(autowireMode);
-
-		// Determine dependency check setting.
-		String dependencyCheck = element.getAttribute(DEPENDENCY_CHECK_ATTRIBUTE);
-		bd.setDependencyCheck(parserContext.getDelegate().getDependencyCheck(dependencyCheck));
 
 		// Parse depends-on list of bean names.
 		String dependsOn = element.getAttribute(DEPENDS_ON_ATTRIBUTE);

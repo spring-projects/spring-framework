@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -81,7 +86,7 @@ public class RequestMappingHandlerMappingTests {
 		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(fileExtensions);
 		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
 
-		final Set<String> extensions = new HashSet<String>();
+		final Set<String> extensions = new HashSet<>();
 
 		RequestMappingHandlerMapping hm = new RequestMappingHandlerMapping() {
 			@Override
@@ -132,12 +137,64 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void resolveRequestMappingViaComposedAnnotation() throws Exception {
+		RequestMappingInfo info = assertComposedAnnotationMapping("postJson", "/postJson", RequestMethod.POST);
+
+		assertEquals(MediaType.APPLICATION_JSON_VALUE,
+			info.getConsumesCondition().getConsumableMediaTypes().iterator().next().toString());
+		assertEquals(MediaType.APPLICATION_JSON_VALUE,
+			info.getProducesCondition().getProducibleMediaTypes().iterator().next().toString());
+	}
+
+	@Test
+	public void getMapping() throws Exception {
+		assertComposedAnnotationMapping(RequestMethod.GET);
+	}
+
+	@Test
+	public void postMapping() throws Exception {
+		assertComposedAnnotationMapping(RequestMethod.POST);
+	}
+
+	@Test
+	public void putMapping() throws Exception {
+		assertComposedAnnotationMapping(RequestMethod.PUT);
+	}
+
+	@Test
+	public void deleteMapping() throws Exception {
+		assertComposedAnnotationMapping(RequestMethod.DELETE);
+	}
+
+	@Test
+	public void patchMapping() throws Exception {
+		assertComposedAnnotationMapping(RequestMethod.PATCH);
+	}
+
+	private RequestMappingInfo assertComposedAnnotationMapping(RequestMethod requestMethod) throws Exception {
+		String methodName = requestMethod.name().toLowerCase();
+		String path = "/" + methodName;
+
+		return assertComposedAnnotationMapping(methodName, path, requestMethod);
+	}
+
+	private RequestMappingInfo assertComposedAnnotationMapping(String methodName, String path,
+			RequestMethod requestMethod) throws Exception {
+
 		Class<?> clazz = ComposedAnnotationController.class;
-		Method method = clazz.getMethod("handleInput");
+		Method method = clazz.getMethod(methodName);
 		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, clazz);
 
 		assertNotNull(info);
-		assertEquals(Collections.singleton("/input"), info.getPatternsCondition().getPatterns());
+
+		Set<String> paths = info.getPatternsCondition().getPatterns();
+		assertEquals(1, paths.size());
+		assertEquals(path, paths.iterator().next());
+
+		Set<RequestMethod> methods = info.getMethodsCondition().getMethods();
+		assertEquals(1, methods.size());
+		assertEquals(requestMethod, methods.iterator().next());
+
+		return info;
 	}
 
 
@@ -148,9 +205,30 @@ public class RequestMappingHandlerMappingTests {
 		public void handle() {
 		}
 
-		@PostJson("/input")
-		public void handleInput() {
+		@PostJson("/postJson")
+		public void postJson() {
 		}
+
+		@GetMapping("/get")
+		public void get() {
+		}
+
+		@PostMapping("/post")
+		public void post() {
+		}
+
+		@PutMapping("/put")
+		public void put() {
+		}
+
+		@DeleteMapping("/delete")
+		public void delete() {
+		}
+
+		@PatchMapping("/patch")
+		public void patch() {
+		}
+
 	}
 
 	@RequestMapping(method = RequestMethod.POST,

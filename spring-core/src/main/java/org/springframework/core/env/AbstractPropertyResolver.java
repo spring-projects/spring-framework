@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private String valueSeparator = SystemPropertyUtils.VALUE_SEPARATOR;
 
-	private final Set<String> requiredProperties = new LinkedHashSet<String>();
+	private final Set<String> requiredProperties = new LinkedHashSet<>();
 
 
 	@Override
@@ -131,6 +131,15 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		}
 	}
 
+	@Override
+	public boolean containsProperty(String key) {
+		return (getProperty(key) != null);
+	}
+
+	@Override
+	public String getProperty(String key) {
+		return getProperty(key, String.class);
+	}
 
 	@Override
 	public String getProperty(String key, String defaultValue) {

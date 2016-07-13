@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,18 +41,14 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class ContentNegotiationManager implements ContentNegotiationStrategy,
-		MediaTypeFileExtensionResolver {
+public class ContentNegotiationManager implements ContentNegotiationStrategy, MediaTypeFileExtensionResolver {
 
-	private static final List<MediaType> MEDIA_TYPE_ALL =
-			Collections.<MediaType>singletonList(MediaType.ALL);
+	private static final List<MediaType> MEDIA_TYPE_ALL = Collections.<MediaType>singletonList(MediaType.ALL);
 
 
-	private final List<ContentNegotiationStrategy> strategies =
-			new ArrayList<ContentNegotiationStrategy>();
+	private final List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
-	private final Set<MediaTypeFileExtensionResolver> resolvers =
-			new LinkedHashSet<MediaTypeFileExtensionResolver>();
+	private final Set<MediaTypeFileExtensionResolver> resolvers = new LinkedHashSet<>();
 
 
 	/**
@@ -97,6 +93,22 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy,
 	}
 
 	/**
+	 * Find a {@code ContentNegotiationStrategy} of the given type.
+	 * @param strategyType the strategy type
+	 * @return the first matching strategy or {@code null}.
+	 * @since 4.3
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends ContentNegotiationStrategy> T getStrategy(Class<T> strategyType) {
+		for (ContentNegotiationStrategy strategy : getStrategies()) {
+			if (strategyType.isInstance(strategy)) {
+				return (T) strategy;
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Register more {@code MediaTypeFileExtensionResolver} instances in addition
 	 * to those detected at construction.
 	 * @param resolvers the resolvers to add
@@ -121,11 +133,11 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy,
 
 	@Override
 	public List<String> resolveFileExtensions(MediaType mediaType) {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		for (MediaTypeFileExtensionResolver resolver : this.resolvers) {
 			result.addAll(resolver.resolveFileExtensions(mediaType));
 		}
-		return new ArrayList<String>(result);
+		return new ArrayList<>(result);
 	}
 
 	/**
@@ -140,11 +152,11 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy,
 	 */
 	@Override
 	public List<String> getAllFileExtensions() {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		for (MediaTypeFileExtensionResolver resolver : this.resolvers) {
 			result.addAll(resolver.getAllFileExtensions());
 		}
-		return new ArrayList<String>(result);
+		return new ArrayList<>(result);
 	}
 
 }

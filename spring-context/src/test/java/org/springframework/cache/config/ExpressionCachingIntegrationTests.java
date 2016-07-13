@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class ExpressionCachingIntegrationTests {
@@ -65,7 +64,7 @@ public class ExpressionCachingIntegrationTests {
 	}
 
 
-	private static interface BaseDao<T> {
+	private interface BaseDao<T> {
 		T persist(T t);
 	}
 
@@ -94,7 +93,7 @@ public class ExpressionCachingIntegrationTests {
 
 		@SuppressWarnings("unused")
 		public String getId() {
-			return id;
+			return this.id;
 		}
 	}
 
@@ -107,7 +106,7 @@ public class ExpressionCachingIntegrationTests {
 
 		@SuppressWarnings("unused")
 		public String getId() {
-			return id;
+			return this.id;
 		}
 	}
 

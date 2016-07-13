@@ -39,6 +39,7 @@ import org.springframework.jms.support.converter.SimpleMessageConverter;
 import org.springframework.jms.support.converter.SmartMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
 
 /**
@@ -293,8 +294,8 @@ public abstract class AbstractAdaptableMessageListener
 	/**
 	 * Pre-process the given result before it is converted to a {@link Message}.
 	 * @param result the result of the invocation
-	 * @return the payload response to handle, either the {@code result} argument or any other
-	 * object (for instance wrapping the result).
+	 * @return the payload response to handle, either the {@code result} argument
+	 * or any other object (for instance wrapping the result).
 	 * @since 4.3
 	 */
 	protected Object preProcessResponse(Object result) {
@@ -417,10 +418,20 @@ public abstract class AbstractAdaptableMessageListener
 
 
 	/**
-	 * Delegates payload extraction to {@link #extractMessage(javax.jms.Message)} to
-	 * enforce backward compatibility.
+	 * A {@link MessagingMessageConverter} that lazily invoke payload extraction and
+	 * delegate it to {@link #extractMessage(javax.jms.Message)} in order to enforce
+	 * backward compatibility.
 	 */
 	private class MessagingMessageConverterAdapter extends MessagingMessageConverter {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
+			if (message == null) {
+				return null;
+			}
+			return new LazyResolutionMessage(message);
+		}
 
 		@Override
 		protected Object extractPayload(Message message) throws JMSException {
@@ -452,6 +463,57 @@ public abstract class AbstractAdaptableMessageListener
 			}
 			return converter.toMessage(payload, session);
 		}
+
+		protected class LazyResolutionMessage implements org.springframework.messaging.Message<Object> {
+
+			private final javax.jms.Message message;
+
+			private Object payload;
+
+			private MessageHeaders headers;
+
+			public LazyResolutionMessage(javax.jms.Message message) {
+				this.message = message;
+			}
+
+			@Override
+			public Object getPayload() {
+				if (this.payload == null) {
+					try {
+						this.payload = unwrapPayload();
+					}
+					catch (JMSException ex) {
+						throw new MessageConversionException(
+								"Failed to extract payload from [" + this.message + "]", ex);
+					}
+				}
+				//
+				return this.payload;
+			}
+
+			/**
+			 * Extract the payload of the current message. Since we deferred the resolution
+			 * of the payload, a custom converter may still return a full message for it. In
+			 * this case, its payload is returned.
+			 * @return the payload of the message
+			 */
+			private Object unwrapPayload() throws JMSException {
+				Object payload = extractPayload(this.message);
+				if (payload instanceof org.springframework.messaging.Message) {
+					return ((org.springframework.messaging.Message) payload).getPayload();
+				}
+				return payload;
+			}
+
+			@Override
+			public MessageHeaders getHeaders() {
+				if (this.headers == null) {
+					this.headers = extractHeaders(this.message);
+				}
+				return this.headers;
+			}
+		}
+
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -68,9 +67,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertTrue(converter.canWrite(Map.class, new MediaType("application", "json")));
 	}
 
-	// SPR-7905
-
-	@Test
+	@Test  // SPR-7905
 	public void canReadAndWriteMicroformats() {
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "vnd.test-micro-type+json")));
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "vnd.test-micro-type+json")));
@@ -102,7 +99,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertEquals("Foo", result.get("string"));
 		assertEquals(42, result.get("number"));
 		assertEquals(42D, (Double) result.get("fraction"), 0D);
-		List<String> array = new ArrayList<String>();
+		List<String> array = new ArrayList<>();
 		array.add("Foo");
 		array.add("Bar");
 		assertEquals(array, result.get("array"));
@@ -332,7 +329,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test  // SPR-13318
 	public void writeSubTypeList() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		List<MyBean> beans = new ArrayList<MyBean>();
+		List<MyBean> beans = new ArrayList<>();
 		MyBean foo = new MyBean();
 		foo.setString("Foo");
 		foo.setNumber(42);
@@ -439,8 +436,11 @@ public class MappingJackson2HttpMessageConverterTests {
 		}
 	}
 
+
 	private interface MyJacksonView1 {};
+
 	private interface MyJacksonView2 {};
+
 
 	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
@@ -478,11 +478,13 @@ public class MappingJackson2HttpMessageConverterTests {
 		}
 	}
 
+
 	@JsonFilter("myJacksonFilter")
 	@SuppressWarnings("unused")
 	private static class JacksonFilteredBean {
 
 		private String property1;
+
 		private String property2;
 
 		public String getProperty1() {

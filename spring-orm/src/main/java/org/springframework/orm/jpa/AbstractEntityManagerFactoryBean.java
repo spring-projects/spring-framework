@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import java.util.concurrent.Future;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
@@ -96,7 +97,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	private String persistenceUnitName;
 
-	private final Map<String, Object> jpaPropertyMap = new HashMap<String, Object>();
+	private final Map<String, Object> jpaPropertyMap = new HashMap<>();
 
 	private Class<? extends EntityManagerFactory> entityManagerFactoryInterface;
 
@@ -391,7 +392,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @return proxy entity manager
 	 */
 	protected EntityManagerFactory createEntityManagerFactoryProxy(EntityManagerFactory emf) {
-		Set<Class<?>> ifcs = new LinkedHashSet<Class<?>>();
+		Set<Class<?>> ifcs = new LinkedHashSet<>();
 		if (this.entityManagerFactoryInterface != null) {
 			ifcs.add(this.entityManagerFactoryInterface);
 		}
@@ -437,6 +438,24 @@ public abstract class AbstractEntityManagerFactoryBean implements
 					getNativeEntityManagerFactory().createEntityManager((Map<?, ?>) args[1]) :
 					getNativeEntityManagerFactory().createEntityManager());
 			return ExtendedEntityManagerCreator.createApplicationManagedEntityManager(rawEntityManager, this, true);
+		}
+
+		// Look for Query arguments, primarily JPA 2.1's addNamedQuery(String, Query)
+		if (args != null) {
+			for (int i = 0; i < args.length; i++) {
+				Object arg = args[i];
+				if (arg instanceof Query && Proxy.isProxyClass(arg.getClass())) {
+					// Assumably a Spring-generated proxy from SharedEntityManagerCreator:
+					// since we're passing it back to the native EntityManagerFactory,
+					// let's unwrap it to the original Query object from the provider.
+					try {
+						args[i] = ((Query) arg).unwrap(null);
+					}
+					catch (RuntimeException ex) {
+						// Ignore - simply proceed with given Query object then
+					}
+				}
+			}
 		}
 
 		// Standard delegation to the native factory, just post-processing EntityManager return values
@@ -604,7 +623,10 @@ public abstract class AbstractEntityManagerFactoryBean implements
 				else if (method.getName().equals("unwrap")) {
 					// Handle JPA 2.1 unwrap method - could be a proxy match.
 					Class<?> targetClass = (Class<?>) args[0];
-					if (targetClass == null || targetClass.isInstance(proxy)) {
+					if (targetClass == null) {
+						return this.entityManagerFactoryBean.getNativeEntityManagerFactory();
+					}
+					else if (targetClass.isInstance(proxy)) {
 						return proxy;
 					}
 				}

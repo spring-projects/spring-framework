@@ -14,8 +14,6 @@ Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas
 
 include::overview.adoc[]
 
-include::whats-new.adoc[]
-
 include::core.adoc[]
 
 include::testing.adoc[]

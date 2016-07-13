@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 import java.util.Properties;
@@ -104,20 +105,21 @@ public class WebContentInterceptorTests {
 		assertThat(cacheControlHeaders, Matchers.emptyIterable());
 	}
 
-	// SPR-13252
+	// SPR-13252, SPR-14053
 	@Test
 	public void cachingConfigAndPragmaHeader() throws Exception {
 		WebContentInterceptor interceptor = new WebContentInterceptor();
 		interceptor.setCacheSeconds(10);
 		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Expires", "0");
 
 		interceptor.preHandle(request, response, null);
 
-		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
-		assertThat(pragmaHeaders, Matchers.contains(""));
+		assertThat(response.getHeader("Pragma"), is(""));
+		assertThat(response.getHeader("Expires"), is(""));
 	}
 
-	// SPR-13252
+	// SPR-13252, SPR-14053
 	@SuppressWarnings("deprecation")
 	@Test
 	public void http10CachingConfigAndPragmaHeader() throws Exception {
@@ -125,11 +127,12 @@ public class WebContentInterceptorTests {
 		interceptor.setCacheSeconds(10);
 		interceptor.setAlwaysMustRevalidate(true);
 		response.setHeader("Pragma", "no-cache");
+		response.setHeader("Expires", "0");
 
 		interceptor.preHandle(request, response, null);
 
-		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
-		assertThat(pragmaHeaders, Matchers.contains(""));
+		assertThat(response.getHeader("Pragma"), is(""));
+		assertThat(response.getHeader("Expires"), is(""));
 	}
 
 	@SuppressWarnings("deprecation")

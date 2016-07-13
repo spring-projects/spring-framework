@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,10 +120,7 @@ public class MockFilterChain implements FilterChain {
 	public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
-
-		if (this.request != null) {
-			 throw new IllegalStateException("This FilterChain has already been called!");
-		}
+		Assert.state(this.request == null, "This FilterChain has already been called!");
 
 		if (this.iterator == null) {
 			this.iterator = this.filters.iterator();

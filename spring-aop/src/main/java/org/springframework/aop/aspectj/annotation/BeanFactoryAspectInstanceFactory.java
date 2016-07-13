@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.OrderUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -69,6 +70,8 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @param type the type that should be introspected by AspectJ
 	 */
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name, Class<?> type) {
+		Assert.notNull(beanFactory, "BeanFactory must not be null");
+		Assert.notNull(name, "Bean name must not be null");
 		this.beanFactory = beanFactory;
 		this.name = name;
 		this.aspectMetadata = new AspectMetadata(type, name);
@@ -82,17 +85,20 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 
 	@Override
 	public ClassLoader getAspectClassLoader() {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
-		}
-		else {
-			return ClassUtils.getDefaultClassLoader();
-		}
+		return (this.beanFactory instanceof ConfigurableBeanFactory ?
+				((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() :
+				ClassUtils.getDefaultClassLoader());
 	}
 
 	@Override
 	public AspectMetadata getAspectMetadata() {
 		return this.aspectMetadata;
+	}
+
+	@Override
+	public Object getAspectCreationMutex() {
+		return (this.beanFactory instanceof ConfigurableBeanFactory ?
+				((ConfigurableBeanFactory) this.beanFactory).getSingletonMutex() : this);
 	}
 
 	/**

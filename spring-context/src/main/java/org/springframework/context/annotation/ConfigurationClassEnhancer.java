@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.Assert;
@@ -151,6 +151,7 @@ class ConfigurationClassEnhancer {
 	 * must remain public in order to allow access to subclasses generated from other
 	 * packages (i.e. user code).
 	 */
+	@FunctionalInterface
 	public interface EnhancedConfiguration extends BeanFactoryAware {
 	}
 
@@ -159,7 +160,8 @@ class ConfigurationClassEnhancer {
 	 * Conditional {@link Callback}.
 	 * @see ConditionalCallbackFilter
 	 */
-	private static interface ConditionalCallback extends Callback {
+	@FunctionalInterface
+	private interface ConditionalCallback extends Callback {
 
 		boolean isMatch(Method candidateMethod);
 	}
@@ -282,7 +284,7 @@ class ConfigurationClassEnhancer {
 		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return (candidateMethod.getName().equals("setBeanFactory") &&
-					candidateMethod.getParameterTypes().length == 1 &&
+					candidateMethod.getParameterCount() == 1 &&
 					BeanFactory.class == candidateMethod.getParameterTypes()[0] &&
 					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass()));
 		}
@@ -311,7 +313,7 @@ class ConfigurationClassEnhancer {
 			String beanName = BeanAnnotationHelper.determineBeanNameFor(beanMethod);
 
 			// Determine whether this bean is a scoped-proxy
-			Scope scope = AnnotationUtils.findAnnotation(beanMethod, Scope.class);
+			Scope scope = AnnotatedElementUtils.findMergedAnnotation(beanMethod, Scope.class);
 			if (scope != null && scope.proxyMode() != ScopedProxyMode.NO) {
 				String scopedBeanName = ScopedProxyCreator.getTargetBeanName(beanName);
 				if (beanFactory.isCurrentlyInCreation(scopedBeanName)) {
@@ -343,7 +345,8 @@ class ConfigurationClassEnhancer {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
 				// create the bean instance.
-				if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
+				if (logger.isWarnEnabled() &&
+						BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
 					logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " +
 							"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
 							"result in a failure to process annotations such as @Autowired, " +
@@ -364,8 +367,20 @@ class ConfigurationClassEnhancer {
 					if (alreadyInCreation) {
 						beanFactory.setCurrentlyInCreation(beanName, false);
 					}
-					Object beanInstance = (!ObjectUtils.isEmpty(beanMethodArgs) ?
-							beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName));
+					boolean useArgs = !ObjectUtils.isEmpty(beanMethodArgs);
+					if (useArgs && beanFactory.isSingleton(beanName)) {
+						// Stubbed null arguments just for reference purposes,
+						// expecting them to be autowired for regular singleton references?
+						// A safe assumption since @Bean singleton arguments cannot be optional...
+						for (Object arg : beanMethodArgs) {
+							if (arg == null) {
+								useArgs = false;
+								break;
+							}
+						}
+					}
+					Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
+							beanFactory.getBean(beanName));
 					if (beanInstance != null && !ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
 						String msg = String.format("@Bean method %s.%s called as a bean reference " +
 									"for type [%s] but overridden by non-compatible bean instance of type [%s].",

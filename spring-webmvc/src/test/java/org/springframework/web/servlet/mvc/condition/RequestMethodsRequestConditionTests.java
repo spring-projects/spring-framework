@@ -18,17 +18,26 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collections;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
+import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 /**
  * @author Arjen Poutsma
@@ -37,66 +46,59 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 public class RequestMethodsRequestConditionTests {
 
 	@Test
-	public void methodMatch() {
-		RequestCondition condition = new RequestMethodsRequestCondition(GET);
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
-
-		assertNotNull(condition.getMatchingCondition(request));
+	public void getMatchingCondition() {
+		testMatch(new RequestMethodsRequestCondition(GET), GET);
+		testMatch(new RequestMethodsRequestCondition(GET, POST), GET);
+		testNoMatch(new RequestMethodsRequestCondition(GET), POST);
 	}
 
 	@Test
-	public void methodNoMatch() {
-		RequestCondition condition = new RequestMethodsRequestCondition(GET);
-		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/foo");
-
-		assertNull(condition.getMatchingCondition(request));
+	public void getMatchingConditionWithHttpHead() {
+		testMatch(new RequestMethodsRequestCondition(HEAD), HEAD);
+		testMatch(new RequestMethodsRequestCondition(GET), GET);
+		testNoMatch(new RequestMethodsRequestCondition(POST), HEAD);
 	}
 
 	@Test
-	public void multipleMethodsMatch() {
-		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(GET, POST);
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
-		RequestMethodsRequestCondition actual = condition.getMatchingCondition(request);
-
-		assertNotNull(actual);
-		assertEquals(Collections.singleton(GET), actual.getContent());
+	public void getMatchingConditionWithEmptyConditions() {
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition();
+		for (RequestMethod method : RequestMethod.values()) {
+			if (!OPTIONS.equals(method)) {
+				HttpServletRequest request = new MockHttpServletRequest(method.name(), "");
+				assertNotNull(condition.getMatchingCondition(request));
+			}
+		}
+		testNoMatch(condition, OPTIONS);
 	}
 
 	@Test
-	public void methodHeadMatch() throws Exception {
-		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(GET, POST);
-		MockHttpServletRequest request = new MockHttpServletRequest("HEAD", "/foo");
-		RequestMethodsRequestCondition actual = condition.getMatchingCondition(request);
-
-		assertNotNull(actual);
-		assertEquals("GET should also match HEAD", Collections.singleton(HEAD), actual.getContent());
+	public void getMatchingConditionWithCustomMethod() {
+		HttpServletRequest request = new MockHttpServletRequest("PROPFIND", "");
+		assertNotNull(new RequestMethodsRequestCondition().getMatchingCondition(request));
+		assertNull(new RequestMethodsRequestCondition(GET, POST).getMatchingCondition(request));
 	}
 
 	@Test
-	public void methodHeadNoMatch() throws Exception {
-		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(POST);
-		MockHttpServletRequest request = new MockHttpServletRequest("HEAD", "/foo");
-		RequestMethodsRequestCondition actual = condition.getMatchingCondition(request);
+	public void getMatchingConditionWithCorsPreFlight() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "");
+		request.addHeader("Origin", "http://example.com");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT");
 
-		assertNull("HEAD should match only if GET is declared", actual);
+		assertNotNull(new RequestMethodsRequestCondition().getMatchingCondition(request));
+		assertNotNull(new RequestMethodsRequestCondition(PUT).getMatchingCondition(request));
+		assertNull(new RequestMethodsRequestCondition(DELETE).getMatchingCondition(request));
 	}
 
-	@Test
-	public void noDeclaredMethodsMatchesAllMethodsExceptOptions() {
-		RequestCondition condition = new RequestMethodsRequestCondition();
+	@Test // SPR-14410
+	public void getMatchingConditionWithHttpOptionsInErrorDispatch() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/path");
+		request.setDispatcherType(DispatcherType.ERROR);
 
-		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("GET", "")));
-		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("POST", "")));
-		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("HEAD", "")));
-		assertNull(condition.getMatchingCondition(new MockHttpServletRequest("OPTIONS", "")));
-	}
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition();
+		RequestMethodsRequestCondition result = condition.getMatchingCondition(request);
 
-	@Test
-	public void unknownMethodType() throws Exception {
-		RequestCondition condition = new RequestMethodsRequestCondition(GET, POST);
-		MockHttpServletRequest request = new MockHttpServletRequest("PROPFIND", "/foo");
-
-		assertNull(condition.getMatchingCondition(request));
+		assertNotNull(result);
+		assertSame(condition, result);
 	}
 
 	@Test
@@ -127,6 +129,19 @@ public class RequestMethodsRequestConditionTests {
 
 		RequestMethodsRequestCondition result = condition1.combine(condition2);
 		assertEquals(2, result.getContent().size());
+	}
+
+
+	private void testMatch(RequestMethodsRequestCondition condition, RequestMethod method) {
+		MockHttpServletRequest request = new MockHttpServletRequest(method.name(), "");
+		RequestMethodsRequestCondition actual = condition.getMatchingCondition(request);
+		assertNotNull(actual);
+		assertEquals(Collections.singleton(method), actual.getContent());
+	}
+
+	private void testNoMatch(RequestMethodsRequestCondition condition, RequestMethod method) {
+		MockHttpServletRequest request = new MockHttpServletRequest(method.name(), "");
+		assertNull(condition.getMatchingCondition(request));
 	}
 
 }

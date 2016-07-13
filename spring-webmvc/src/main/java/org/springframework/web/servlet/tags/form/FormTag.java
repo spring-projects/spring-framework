@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,23 +140,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * Get the name of the form attribute in the model.
 	 */
 	protected String getModelAttribute() {
-		return this.modelAttribute;
-	}
-
-	/**
-	 * Set the name of the form attribute in the model.
-	 * <p>May be a runtime expression.
-	 * @see #setModelAttribute
-	 */
-	public void setCommandName(String commandName) {
-		this.modelAttribute = commandName;
-	}
-
-	/**
-	 * Get the name of the form attribute in the model.
-	 * @see #getModelAttribute
-	 */
-	protected String getCommandName() {
 		return this.modelAttribute;
 	}
 
@@ -327,18 +310,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * Get the name of the request param for non-browser supported HTTP methods.
 	 * @since 4.2.3
 	 */
-	@SuppressWarnings("deprecation")
 	protected String getMethodParam() {
-		return getMethodParameter();
-	}
-
-	/**
-	 * Get the name of the request param for non-browser supported HTTP methods.
-	 * @deprecated as of 4.2.3, in favor of {@link #getMethodParam()} which is
-	 * a proper pairing for {@link #setMethodParam(String)}
-	 */
-	@Deprecated
-	protected String getMethodParameter() {
 		return this.methodParam;
 	}
 

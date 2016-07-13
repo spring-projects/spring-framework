@@ -118,7 +118,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setValidator(new StubValidator());
 
-		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<>();
 		customResolvers.add(new ServletWebArgumentResolverAdapter(new ColorArgumentResolver()));
 
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
@@ -148,10 +148,10 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handle() throws Exception {
-		Class<?>[] parameterTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
+		Class<?>[] parameterTypes = new Class<?>[] {int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, TestBean.class, TestBean.class,
-				User.class, OtherUser.class, Model.class, UriComponentsBuilder.class };
+				User.class, OtherUser.class, Model.class, UriComponentsBuilder.class};
 
 		String datePattern = "yyyy.MM.dd";
 		String formattedDate = "2011.03.16";
@@ -172,7 +172,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		request.setContextPath("/contextPath");
 		request.setServletPath("/main");
 		System.setProperty("systemHeader", "systemHeaderValue");
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("pathvar", "pathvarValue");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 		request.getSession().setAttribute("sessionAttribute", sessionAttribute);
@@ -188,12 +188,12 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertEquals("headerValue", model.get("header"));
 		assertEquals(date, model.get("dateParam"));
 
-		Map<?,?> map = (Map<?,?>) model.get("headerMap");
+		Map<?, ?> map = (Map<?, ?>) model.get("headerMap");
 		assertEquals("headerValue", map.get("header"));
 		assertEquals("anotherHeaderValue", map.get("anotherHeader"));
 		assertEquals("systemHeaderValue", model.get("systemHeader"));
 
-		map = (Map<?,?>) model.get("paramMap");
+		map = (Map<?, ?>) model.get("paramMap");
 		assertEquals(formattedDate, map.get("dateParam"));
 		assertEquals("paramByConventionValue", map.get("paramByConvention"));
 
@@ -229,7 +229,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handleRequestBody() throws Exception {
-		Class<?>[] parameterTypes = new Class<?>[] { byte[].class };
+		Class<?>[] parameterTypes = new Class<?>[] {byte[].class};
 
 		request.setMethod("POST");
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -246,7 +246,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handleAndValidateRequestBody() throws Exception {
-		Class<?>[] parameterTypes = new Class<?>[] { TestBean.class, Errors.class };
+		Class<?>[] parameterTypes = new Class<?>[] {TestBean.class, Errors.class};
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.setContent("Hello Server".getBytes("UTF-8"));
@@ -262,7 +262,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handleHttpEntity() throws Exception {
-		Class<?>[] parameterTypes = new Class<?>[] { HttpEntity.class };
+		Class<?>[] parameterTypes = new Class<?>[] {HttpEntity.class};
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.setContent("Hello Server".getBytes("UTF-8"));
@@ -282,7 +282,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	// SPR-13867
 	@Test
 	public void handleHttpEntityWithCacheControl() throws Exception {
-		Class<?>[] parameterTypes = new Class<?>[] { HttpEntity.class };
+		Class<?>[] parameterTypes = new Class<?>[] {HttpEntity.class};
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.setContent("Hello Server".getBytes("UTF-8"));
 
@@ -357,27 +357,27 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		}
 
 		public String handle(
-							@CookieValue("cookie") int cookie,
-						 	@PathVariable("pathvar") String pathvar,
-						 	@RequestHeader("header") String header,
-						 	@RequestHeader(defaultValue="#{systemProperties.systemHeader}") String systemHeader,
-						 	@RequestHeader Map<String, Object> headerMap,
-						 	@RequestParam("dateParam") Date dateParam,
-						 	@RequestParam Map<String, Object> paramMap,
-						 	String paramByConvention,
-						 	@Value("#{request.contextPath}") String value,
-						 	@ModelAttribute("modelAttr") @Valid TestBean modelAttr,
-						 	Errors errors,
-						 	TestBean modelAttrByConvention,
-						 	Color customArg,
-						 	HttpServletRequest request,
-						 	HttpServletResponse response,
-							@SessionAttribute TestBean sessionAttribute,
-							@RequestAttribute TestBean requestAttribute,
-						 	User user,
-						 	@ModelAttribute OtherUser otherUser,
-						 	Model model,
-						 	UriComponentsBuilder builder) throws Exception {
+				@CookieValue("cookie") int cookie,
+				@PathVariable("pathvar") String pathvar,
+				@RequestHeader("header") String header,
+				@RequestHeader(defaultValue = "#{systemProperties.systemHeader}") String systemHeader,
+				@RequestHeader Map<String, Object> headerMap,
+				@RequestParam("dateParam") Date dateParam,
+				@RequestParam Map<String, Object> paramMap,
+				String paramByConvention,
+				@Value("#{request.contextPath}") String value,
+				@ModelAttribute("modelAttr") @Valid TestBean modelAttr,
+				Errors errors,
+				TestBean modelAttrByConvention,
+				Color customArg,
+				HttpServletRequest request,
+				HttpServletResponse response,
+				@SessionAttribute TestBean sessionAttribute,
+				@RequestAttribute TestBean requestAttribute,
+				User user,
+				@ModelAttribute OtherUser otherUser,
+				Model model,
+				UriComponentsBuilder builder) throws Exception {
 
 			model.addAttribute("cookie", cookie).addAttribute("pathvar", pathvar).addAttribute("header", header)
 					.addAttribute("systemHeader", systemHeader).addAttribute("headerMap", headerMap)

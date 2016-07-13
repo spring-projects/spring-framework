@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	 */
 	public AnnotationTransactionAttributeSource(boolean publicMethodsOnly) {
 		this.publicMethodsOnly = publicMethodsOnly;
-		this.annotationParsers = new LinkedHashSet<TransactionAnnotationParser>(2);
+		this.annotationParsers = new LinkedHashSet<>(2);
 		this.annotationParsers.add(new SpringTransactionAnnotationParser());
 		if (jta12Present) {
 			this.annotationParsers.add(new JtaTransactionAnnotationParser());
@@ -112,7 +112,7 @@ public class AnnotationTransactionAttributeSource extends AbstractFallbackTransa
 	public AnnotationTransactionAttributeSource(TransactionAnnotationParser... annotationParsers) {
 		this.publicMethodsOnly = true;
 		Assert.notEmpty(annotationParsers, "At least one TransactionAnnotationParser needs to be specified");
-		Set<TransactionAnnotationParser> parsers = new LinkedHashSet<TransactionAnnotationParser>(annotationParsers.length);
+		Set<TransactionAnnotationParser> parsers = new LinkedHashSet<>(annotationParsers.length);
 		Collections.addAll(parsers, annotationParsers);
 		this.annotationParsers = parsers;
 	}

@@ -474,7 +474,6 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	public void handle(
 			@RequestParam(name = "name", defaultValue = "bar") String param1,
 			@RequestParam("name") String[] param2,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,15 +46,17 @@ public class ResourceChainRegistration {
 			"org.webjars.WebJarAssetLocator", ResourceChainRegistration.class.getClassLoader());
 
 
-	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>(4);
+	private final List<ResourceResolver> resolvers = new ArrayList<>(4);
 
-	private final List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>(4);
+	private final List<ResourceTransformer> transformers = new ArrayList<>(4);
 
 	private boolean hasVersionResolver;
 
 	private boolean hasPathResolver;
 
 	private boolean hasCssLinkTransformer;
+
+	private boolean hasWebjarsResolver;
 
 
 	public ResourceChainRegistration(boolean cacheResources) {
@@ -84,6 +86,9 @@ public class ResourceChainRegistration {
 		else if (resolver instanceof PathResourceResolver) {
 			this.hasPathResolver = true;
 		}
+		else if (resolver instanceof WebJarsResourceResolver) {
+			this.hasWebjarsResolver = true;
+		}
 		return this;
 	}
 
@@ -103,8 +108,8 @@ public class ResourceChainRegistration {
 
 	protected List<ResourceResolver> getResourceResolvers() {
 		if (!this.hasPathResolver) {
-			List<ResourceResolver> result = new ArrayList<ResourceResolver>(this.resolvers);
-			if (isWebJarsAssetLocatorPresent) {
+			List<ResourceResolver> result = new ArrayList<>(this.resolvers);
+			if (isWebJarsAssetLocatorPresent && !this.hasWebjarsResolver) {
 				result.add(new WebJarsResourceResolver());
 			}
 			result.add(new PathResourceResolver());
@@ -114,8 +119,8 @@ public class ResourceChainRegistration {
 	}
 
 	protected List<ResourceTransformer> getResourceTransformers() {
-		if (this.hasVersionResolver  && !this.hasCssLinkTransformer) {
-			List<ResourceTransformer> result = new ArrayList<ResourceTransformer>(this.transformers);
+		if (this.hasVersionResolver && !this.hasCssLinkTransformer) {
+			List<ResourceTransformer> result = new ArrayList<>(this.transformers);
 			boolean hasTransformers = !this.transformers.isEmpty();
 			boolean hasCaching = hasTransformers && this.transformers.get(0) instanceof CachingResourceTransformer;
 			result.add(hasCaching ? 1 : 0, new CssLinkResourceTransformer());

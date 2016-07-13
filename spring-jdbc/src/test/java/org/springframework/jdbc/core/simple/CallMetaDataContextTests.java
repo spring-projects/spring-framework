@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class CallMetaDataContextTests {
 		given(databaseMetaData.getUserName()).willReturn(USER);
 		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
 
-		List<SqlParameter> parameters = new ArrayList<SqlParameter>();
+		List<SqlParameter> parameters = new ArrayList<>();
 		parameters.add(new SqlParameter("id", Types.NUMERIC));
 		parameters.add(new SqlInOutParameter("name", Types.NUMERIC));
 		parameters.add(new SqlOutParameter("customer_no", Types.NUMERIC));

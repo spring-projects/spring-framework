@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.test.context;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +29,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.support.GenericXmlContextLoader;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link MergedContextConfiguration}.
@@ -37,6 +39,7 @@ import static org.junit.Assert.*;
  * {@link org.springframework.test.context.cache.ContextCache ContextCache}.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.1
  */
 public class MergedContextConfigurationTests {
@@ -169,12 +172,12 @@ public class MergedContextConfigurationTests {
 	@Test
 	public void hashCodeWithSameInitializers() {
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses1 =
-				new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+				new HashSet<>();
 		initializerClasses1.add(FooInitializer.class);
 		initializerClasses1.add(BarInitializer.class);
 
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses2 =
-				new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+				new HashSet<>();
 		initializerClasses2.add(BarInitializer.class);
 		initializerClasses2.add(FooInitializer.class);
 
@@ -188,11 +191,11 @@ public class MergedContextConfigurationTests {
 	@Test
 	public void hashCodeWithDifferentInitializers() {
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses1 =
-				new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+				new HashSet<>();
 		initializerClasses1.add(FooInitializer.class);
 
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses2 =
-				new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+				new HashSet<>();
 		initializerClasses2.add(BarInitializer.class);
 
 		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(),
@@ -366,12 +369,12 @@ public class MergedContextConfigurationTests {
 	@Test
 	public void equalsWithSameInitializers() {
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses1 =
-				new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+				new HashSet<>();
 		initializerClasses1.add(FooInitializer.class);
 		initializerClasses1.add(BarInitializer.class);
 
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses2 =
-				new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+				new HashSet<>();
 		initializerClasses2.add(BarInitializer.class);
 		initializerClasses2.add(FooInitializer.class);
 
@@ -385,17 +388,46 @@ public class MergedContextConfigurationTests {
 	@Test
 	public void equalsWithDifferentInitializers() {
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses1 =
-				new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+				new HashSet<>();
 		initializerClasses1.add(FooInitializer.class);
 
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses2 =
-				new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+				new HashSet<>();
 		initializerClasses2.add(BarInitializer.class);
 
 		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(),
 				EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, initializerClasses1, EMPTY_STRING_ARRAY, loader);
 		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(),
 				EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, initializerClasses2, EMPTY_STRING_ARRAY, loader);
+		assertNotEquals(mergedConfig1, mergedConfig2);
+		assertNotEquals(mergedConfig2, mergedConfig1);
+	}
+
+	/**
+	 * @since 4.3
+	 */
+	@Test
+	public void equalsWithSameContextCustomizers() {
+		Set<ContextCustomizer> customizers = Collections.singleton(mock(ContextCustomizer.class));
+		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers, loader, null, null);
+		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers, loader, null, null);
+		assertEquals(mergedConfig1, mergedConfig2);
+	}
+
+	/**
+	 * @since 4.3
+	 */
+	@Test
+	public void equalsWithDifferentContextCustomizers() {
+		Set<ContextCustomizer> customizers1 = Collections.singleton(mock(ContextCustomizer.class));
+		Set<ContextCustomizer> customizers2 = Collections.singleton(mock(ContextCustomizer.class));
+
+		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers1, loader, null, null);
+		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers2, loader, null, null);
 		assertNotEquals(mergedConfig1, mergedConfig2);
 		assertNotEquals(mergedConfig2, mergedConfig1);
 	}

@@ -65,7 +65,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 
 	/**
 	 * Private constructor to share common code between impl-based delegate and reference-based delegate
-	 * (cannot use method such as init() to share common code, due the the use of final fields)
+	 * (cannot use method such as init() to share common code, due the use of final fields)
 	 * @param interfaceType static field defining the introduction
 	 * @param typePattern type pattern the introduction is restricted to
 	 * @param implementationClass implementation class

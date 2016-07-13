@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -55,15 +56,23 @@ public class ResourceHandlerRegistry {
 
 	private final ApplicationContext appContext;
 
-	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
+	private final ContentNegotiationManager contentNegotiationManager;
+
+	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
 	private int order = Integer.MAX_VALUE -1;
 
 
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
+		this(applicationContext, servletContext, null);
+	}
+
+	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
+			ContentNegotiationManager contentNegotiationManager) {
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.appContext = applicationContext;
 		this.servletContext = servletContext;
+		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
 
@@ -107,12 +116,13 @@ public class ResourceHandlerRegistry {
 			return null;
 		}
 
-		Map<String, HttpRequestHandler> urlMap = new LinkedHashMap<String, HttpRequestHandler>();
+		Map<String, HttpRequestHandler> urlMap = new LinkedHashMap<>();
 		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
 				handler.setServletContext(this.servletContext);
 				handler.setApplicationContext(this.appContext);
+				handler.setContentNegotiationManager(this.contentNegotiationManager);
 				try {
 					handler.afterPropertiesSet();
 				}

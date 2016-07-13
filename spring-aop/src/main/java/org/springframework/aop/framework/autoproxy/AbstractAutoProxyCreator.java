@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyFactory;
@@ -131,11 +132,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(16));
 
 	private final Set<Object> earlyProxyReferences =
-			Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>(16));
+			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
-	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>(16);
+	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<>(16);
 
-	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<Object, Boolean>(256);
+	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -370,6 +371,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	protected boolean isInfrastructureClass(Class<?> beanClass) {
 		boolean retVal = Advice.class.isAssignableFrom(beanClass) ||
+				Pointcut.class.isAssignableFrom(beanClass) ||
 				Advisor.class.isAssignableFrom(beanClass) ||
 				AopInfrastructureBean.class.isAssignableFrom(beanClass);
 		if (retVal && logger.isTraceEnabled()) {
@@ -508,7 +510,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		// Handle prototypes correctly...
 		Advisor[] commonInterceptors = resolveInterceptorNames();
 
-		List<Object> allInterceptors = new ArrayList<Object>();
+		List<Object> allInterceptors = new ArrayList<>();
 		if (specificInterceptors != null) {
 			allInterceptors.addAll(Arrays.asList(specificInterceptors));
 			if (commonInterceptors.length > 0) {
@@ -541,7 +543,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	private Advisor[] resolveInterceptorNames() {
 		ConfigurableBeanFactory cbf = (this.beanFactory instanceof ConfigurableBeanFactory ?
 				(ConfigurableBeanFactory) this.beanFactory : null);
-		List<Advisor> advisors = new ArrayList<Advisor>();
+		List<Advisor> advisors = new ArrayList<>();
 		for (String beanName : this.interceptorNames) {
 			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
 				Object next = this.beanFactory.getBean(beanName);

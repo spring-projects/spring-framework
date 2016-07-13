@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,13 +45,13 @@ public class MockAsyncContext implements AsyncContext {
 
 	private final HttpServletResponse response;
 
-	private final List<AsyncListener> listeners = new ArrayList<AsyncListener>();
+	private final List<AsyncListener> listeners = new ArrayList<>();
 
 	private String dispatchedPath;
 
 	private long timeout = 10 * 1000L;	// 10 seconds is Tomcat's default
 
-	private final List<Runnable> dispatchHandlers = new ArrayList<Runnable>();
+	private final List<Runnable> dispatchHandlers = new ArrayList<>();
 
 
 	public MockAsyncContext(ServletRequest request, ServletResponse response) {

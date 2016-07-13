@@ -1,29 +1,32 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.gargoylesoftware.htmlunit.CookieManager;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -41,8 +44,7 @@ import org.springframework.util.Assert;
  * <pre class="code">
  * WebClient webClient = new WebClient();
  * MockMvc mockMvc = ...
- * MockMvcWebConnection webConnection = new MockMvcWebConnection(mockMvc);
- * mockConnection.setWebClient(webClient);
+ * MockMvcWebConnection webConnection = new MockMvcWebConnection(mockMvc, webClient);
  * webClient.setWebConnection(webConnection);
  *
  * // Use webClient as normal ...
@@ -55,7 +57,7 @@ import org.springframework.util.Assert;
  */
 public final class MockMvcWebConnection implements WebConnection {
 
-	private final Map<String, MockHttpSession> sessions = new HashMap<String, MockHttpSession>();
+	private final Map<String, MockHttpSession> sessions = new HashMap<>();
 
 	private final MockMvc mockMvc;
 
@@ -70,9 +72,10 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * <p>For example, the URL {@code http://localhost/test/this} would use
 	 * {@code ""} as the context path.
 	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
+	 * @param webClient the {@link WebClient} to use. never {@code null}
 	 */
-	public MockMvcWebConnection(MockMvc mockMvc) {
-		this(mockMvc, "");
+	public MockMvcWebConnection(MockMvc mockMvc, WebClient webClient) {
+		this(mockMvc, webClient, "");
 	}
 
 	/**
@@ -83,15 +86,33 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * which states that it can be an empty string and otherwise must start
 	 * with a "/" character and not end with a "/" character.
 	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
+	 * @param webClient  the {@link WebClient} to use. never {@code null}
 	 * @param contextPath the contextPath to use
 	 */
-	public MockMvcWebConnection(MockMvc mockMvc, String contextPath) {
+	public MockMvcWebConnection(MockMvc mockMvc, WebClient webClient, String contextPath) {
 		Assert.notNull(mockMvc, "MockMvc must not be null");
+		Assert.notNull(webClient, "WebClient must not be null");
 		validateContextPath(contextPath);
 
-		this.webClient = new WebClient();
+		this.webClient = webClient;
 		this.mockMvc = mockMvc;
 		this.contextPath = contextPath;
+	}
+
+	/**
+	 * Validate the supplied {@code contextPath}.
+	 * <p>If the value is not {@code null}, it must conform to
+	 * {@link javax.servlet.http.HttpServletRequest#getContextPath()} which
+	 * states that it can be an empty string and otherwise must start with
+	 * a "/" character and not end with a "/" character.
+	 * @param contextPath the path to validate
+	 */
+	static void validateContextPath(String contextPath) {
+		if (contextPath == null || "".equals(contextPath)) {
+			return;
+		}
+		Assert.isTrue(contextPath.startsWith("/"), () -> "contextPath '" + contextPath + "' must start with '/'.");
+		Assert.isTrue(!contextPath.endsWith("/"), () -> "contextPath '" + contextPath + "' must not end with '/'.");
 	}
 
 
@@ -113,6 +134,7 @@ public final class MockMvcWebConnection implements WebConnection {
 			httpServletResponse = getResponse(requestBuilder);
 			forwardedUrl = httpServletResponse.getForwardedUrl();
 		}
+		storeCookies(webRequest, httpServletResponse.getCookies());
 
 		return new MockWebResponseBuilder(startTime, webRequest, httpServletResponse).build();
 	}
@@ -129,29 +151,29 @@ public final class MockMvcWebConnection implements WebConnection {
 		return resultActions.andReturn().getResponse();
 	}
 
-	@Override
-	public void close() {
-	}
-
-
-	/**
-	 * Validate the supplied {@code contextPath}.
-	 * <p>If the value is not {@code null}, it must conform to
-	 * {@link javax.servlet.http.HttpServletRequest#getContextPath()} which
-	 * states that it can be an empty string and otherwise must start with
-	 * a "/" character and not end with a "/" character.
-	 * @param contextPath the path to validate
-	 */
-	static void validateContextPath(String contextPath) {
-		if (contextPath == null || "".equals(contextPath)) {
+	private void storeCookies(WebRequest webRequest, javax.servlet.http.Cookie[] cookies) {
+		if (cookies == null) {
 			return;
 		}
-		if (!contextPath.startsWith("/")) {
-			throw new IllegalArgumentException("contextPath '" + contextPath + "' must start with '/'.");
+		Date now = new Date();
+		CookieManager cookieManager = this.webClient.getCookieManager();
+		for (javax.servlet.http.Cookie cookie : cookies) {
+			if (cookie.getDomain() == null) {
+				cookie.setDomain(webRequest.getUrl().getHost());
+			}
+			Cookie toManage = MockWebResponseBuilder.createCookie(cookie);
+			Date expires = toManage.getExpires();
+			if (expires == null || expires.after(now)) {
+				cookieManager.addCookie(toManage);
+			}
+			else {
+				cookieManager.removeCookie(toManage);
+			}
 		}
-		if (contextPath.endsWith("/")) {
-			throw new IllegalArgumentException("contextPath '" + contextPath + "' must not end with '/'.");
-		}
+	}
+
+	@Override
+	public void close() {
 	}
 
 }

@@ -51,7 +51,7 @@ import org.springframework.util.ClassUtils;
  * HttpMessageConverter} that can read and write XML using JAXB2.
  *
  * <p>This converter can read classes annotated with {@link XmlRootElement} and
- * {@link XmlType}, and write classes annotated with with {@link XmlRootElement},
+ * {@link XmlType}, and write classes annotated with {@link XmlRootElement},
  * or subclasses thereof.
  *
  * <p>Note that if using Spring's Marshaller/Unmarshaller abstractions from the
@@ -195,8 +195,8 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	private void setCharset(MediaType contentType, Marshaller marshaller) throws PropertyException {
-		if (contentType != null && contentType.getCharSet() != null) {
-			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharSet().name());
+		if (contentType != null && contentType.getCharset() != null) {
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharset().name());
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,7 +177,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		Collection<ViewResolver> matchingBeans =
 				BeanFactoryUtils.beansOfTypeIncludingAncestors(getApplicationContext(), ViewResolver.class).values();
 		if (this.viewResolvers == null) {
-			this.viewResolvers = new ArrayList<ViewResolver>(matchingBeans.size());
+			this.viewResolvers = new ArrayList<>(matchingBeans.size());
 			for (ViewResolver viewResolver : matchingBeans) {
 				if (this != viewResolver) {
 					this.viewResolvers.add(viewResolver);
@@ -249,7 +249,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 					Collections.singletonList(MediaType.ALL));
 
 			List<MediaType> producibleMediaTypes = getProducibleMediaTypes(request);
-			Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
+			Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
 			for (MediaType acceptable : acceptableMediaTypes) {
 				for (MediaType producible : producibleMediaTypes) {
 					if (acceptable.isCompatibleWith(producible)) {
@@ -257,7 +257,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 					}
 				}
 			}
-			List<MediaType> selectedMediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
+			List<MediaType> selectedMediaTypes = new ArrayList<>(compatibleMediaTypes);
 			MediaType.sortBySpecificityAndQuality(selectedMediaTypes);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Requested media types are " + selectedMediaTypes + " based on Accept header types " +
@@ -275,7 +275,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		Set<MediaType> mediaTypes = (Set<MediaType>)
 				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			return new ArrayList<MediaType>(mediaTypes);
+			return new ArrayList<>(mediaTypes);
 		}
 		else {
 			return Collections.singletonList(MediaType.ALL);
@@ -294,7 +294,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 	private List<View> getCandidateViews(String viewName, Locale locale, List<MediaType> requestedMediaTypes)
 			throws Exception {
 
-		List<View> candidateViews = new ArrayList<View>();
+		List<View> candidateViews = new ArrayList<>();
 		for (ViewResolver viewResolver : this.viewResolvers) {
 			View view = viewResolver.resolveViewName(viewName, locale);
 			if (view != null) {

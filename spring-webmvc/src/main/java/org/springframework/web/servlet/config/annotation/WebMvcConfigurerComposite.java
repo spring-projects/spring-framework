@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * An {@link WebMvcConfigurer} implementation that delegates to other {@link WebMvcConfigurer} instances.
+ * A {@link WebMvcConfigurer} that delegates to one or more others.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
-	private final List<WebMvcConfigurer> delegates = new ArrayList<WebMvcConfigurer>();
+	private final List<WebMvcConfigurer> delegates = new ArrayList<>();
 
 	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {
 		if (configurers != null) {
@@ -107,6 +107,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureHandlerExceptionResolvers(exceptionResolvers);
+		}
+	}
+
+	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addInterceptors(registry);
@@ -143,7 +150,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
 	@Override
 	public Validator getValidator() {
-		List<Validator> candidates = new ArrayList<Validator>();
+		List<Validator> candidates = new ArrayList<>();
 		for (WebMvcConfigurer configurer : this.delegates) {
 			Validator validator = configurer.getValidator();
 			if (validator != null) {
@@ -175,7 +182,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
 	@Override
 	public MessageCodesResolver getMessageCodesResolver() {
-		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
+		List<MessageCodesResolver> candidates = new ArrayList<>();
 		for (WebMvcConfigurer configurer : this.delegates) {
 			MessageCodesResolver messageCodesResolver = configurer.getMessageCodesResolver();
 			if (messageCodesResolver != null) {

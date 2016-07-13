@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,6 +243,26 @@ public class DefaultConversionServiceTests {
 	public void testEnumToString() {
 		assertEquals("BAR", conversionService.convert(Foo.BAR, String.class));
 	}
+	
+	@Test
+	public void testIntegerToEnum() throws Exception {
+		assertEquals(Foo.BAR, conversionService.convert(0, Foo.class));
+	}
+	
+	@Test
+	public void testIntegerToEnumWithSubclass() throws Exception {
+		assertEquals(SubFoo.BAZ, conversionService.convert(1, SubFoo.BAR.getClass()));
+	}
+	
+	@Test
+	public void testIntegerToEnumNull() {
+		assertEquals(null, conversionService.convert(null, Foo.class));
+	}
+	
+	@Test
+	public void testEnumToInteger() {
+		assertEquals(Integer.valueOf(0), conversionService.convert(Foo.BAR, Integer.class));
+	}
 
 	@Test
 	public void testStringToEnumSet() throws Exception {
@@ -457,7 +477,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertCollectionToArray() {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		list.add("1");
 		list.add("2");
 		list.add("3");
@@ -469,7 +489,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertCollectionToArrayWithElementConversion() {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		list.add("1");
 		list.add("2");
 		list.add("3");
@@ -538,7 +558,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertCollectionToObjectAssignableTarget() throws Exception {
-		Collection<String> source = new ArrayList<String>();
+		Collection<String> source = new ArrayList<>();
 		source.add("foo");
 		Object result = conversionService.convert(source, new TypeDescriptor(getClass().getField("assignableTarget")));
 		assertEquals(source, result);
@@ -547,7 +567,7 @@ public class DefaultConversionServiceTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void convertCollectionToObjectWithCustomConverter() throws Exception {
-		List<String> source = new ArrayList<String>();
+		List<String> source = new ArrayList<>();
 		source.add("A");
 		source.add("B");
 		conversionService.addConverter(new Converter<List, ListWrapper>() {
@@ -620,7 +640,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertCollectionToCollection() throws Exception {
-		Set<String> foo = new LinkedHashSet<String>();
+		Set<String> foo = new LinkedHashSet<>();
 		foo.add("1");
 		foo.add("2");
 		foo.add("3");
@@ -643,7 +663,7 @@ public class DefaultConversionServiceTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void convertCollectionToCollectionNotGeneric() throws Exception {
-		Set<String> foo = new LinkedHashSet<String>();
+		Set<String> foo = new LinkedHashSet<>();
 		foo.add("1");
 		foo.add("2");
 		foo.add("3");
@@ -672,7 +692,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void collection() {
-		List<String> strings = new ArrayList<String>();
+		List<String> strings = new ArrayList<>();
 		strings.add("3");
 		strings.add("9");
 		@SuppressWarnings("unchecked")
@@ -684,7 +704,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertMapToMap() throws Exception {
-		Map<String, String> foo = new HashMap<String, String>();
+		Map<String, String> foo = new HashMap<>();
 		foo.put("1", "BAR");
 		foo.put("2", "BAZ");
 		@SuppressWarnings("unchecked")
@@ -697,7 +717,7 @@ public class DefaultConversionServiceTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void convertHashMapValuesToList() {
-		Map<String, Integer> hashMap = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> hashMap = new LinkedHashMap<>();
 		hashMap.put("1", 1);
 		hashMap.put("2", 2);
 		List converted = conversionService.convert(hashMap.values(), List.class);
@@ -706,7 +726,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void map() {
-		Map<String, String> strings = new HashMap<String, String>();
+		Map<String, String> strings = new HashMap<>();
 		strings.put("3", "9");
 		strings.put("6", "31");
 		@SuppressWarnings("unchecked")
@@ -921,11 +941,11 @@ public class DefaultConversionServiceTests {
 
 	// test fields and helpers
 
-	public List<Integer> genericList = new ArrayList<Integer>();
+	public List<Integer> genericList = new ArrayList<>();
 
 	public Stream<Integer> genericStream;
 
-	public Map<Integer, FooEnum> genericMap = new HashMap<Integer, FooEnum>();
+	public Map<Integer, FooEnum> genericMap = new HashMap<>();
 
 	public EnumSet<Foo> enumSet;
 

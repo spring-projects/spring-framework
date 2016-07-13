@@ -34,7 +34,8 @@ is another view technology, supported by Spring. This template engine is a templ
 aimed at generating XML-like markup (XML, XHTML, HTML5, ...​), but that can be used to generate any
 text based content.
 
-This requires Groovy 2.3.1+ on the the classpath.
+This requires Groovy 2.3.1+ on the classpath.
+
 
 [[view-groovymarkup-configuration]]
 === Configuration
@@ -76,6 +77,7 @@ The XML counterpart using the MVC namespace is:
 	<mvc:groovy-configurer resource-loader-path="/WEB-INF/"/>
 ----
 
+
 [[view-groovymarkup-example]]
 === Example
 
@@ -98,56 +100,26 @@ Here is a sample template for an HTML page:
 ----
 
 
-[[view-velocity]]
-== Velocity & FreeMarker
-http://velocity.apache.org[Velocity] and http://www.freemarker.org[FreeMarker] are two
-templating languages that can be used as view technologies within Spring MVC
-applications. The languages are quite similar and serve similar needs and so are
-considered together in this section. For semantic and syntactic differences between the
-two languages, see the http://www.freemarker.org[FreeMarker] web site.
+[[view-freemarker]]
+== FreeMarker
+http://www.freemarker.org[FreeMarker] is a  templating language that can be used as a
+view technology within Spring MVC applications. For details on the template language,
+see the http://www.freemarker.org[FreeMarker] web site.
 
 
-
-[[view-velocity-dependencies]]
+[[view-freemarker-dependencies]]
 === Dependencies
-Your web application will need to include `velocity-1.x.x.jar` or `freemarker-2.x.jar`
-in order to work with Velocity or FreeMarker respectively and `commons-collections.jar`
-is required for Velocity. Typically they are included in the `WEB-INF/lib` folder where
-they are guaranteed to be found by a Java EE server and added to the classpath for your
+Your web application will need to include `freemarker-2.x.jar` in order to work with
+FreeMarker. Typically this is included in the `WEB-INF/lib` folder where the jars are
+guaranteed to be found by a Java EE server and added to the classpath for your
 application. It is of course assumed that you already have the `spring-webmvc.jar` in
-your `'WEB-INF/lib'` directory too! If you make use of Spring's 'dateToolAttribute' or
-'numberToolAttribute' in your Velocity views, you will also need to include the
-`velocity-tools-generic-1.x.jar`
+your `'WEB-INF/lib'` directory too!
 
 
-
-[[view-velocity-contextconfig]]
+[[view-freemarker-contextconfig]]
 === Context configuration
 A suitable configuration is initialized by adding the relevant configurer bean
 definition to your `'{asterisk}-servlet.xml'` as shown below:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<!--
-	This bean sets up the Velocity environment for us based on a root path for templates.
-	Optionally, a properties file can be specified for more control over the Velocity
-	environment, but the defaults are pretty sane for file based template loading.
-	-->
-	<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-		<property name="resourceLoaderPath" value="/WEB-INF/velocity/"/>
-	</bean>
-
-	<!--
-	View resolvers can also be configured with ResourceBundles or XML files. If you need
-	different view resolving based on Locale, you have to use the resource bundle resolver.
-	-->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
-		<property name="cache" value="true"/>
-		<property name="prefix" value=""/>
-		<property name="suffix" value=".vm"/>
-	</bean>
-----
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -170,76 +142,22 @@ definition to your `'{asterisk}-servlet.xml'` as shown below:
 
 [NOTE]
 ====
-For non web-apps add a `VelocityConfigurationFactoryBean` or a
-`FreeMarkerConfigurationFactoryBean` to your application context definition file.
+For non web-apps add a `FreeMarkerConfigurationFactoryBean` to your application context
+definition file.
 ====
 
 
-
-[[view-velocity-createtemplates]]
+[[view-freemarker-createtemplates]]
 === Creating templates
-Your templates need to be stored in the directory specified by the `{asterisk}Configurer` bean
-shown above. This document does not cover details of creating templates for the two
-languages - please see their relevant websites for information. If you use the view
-resolvers highlighted, then the logical view names relate to the template file names in
-similar fashion to `InternalResourceViewResolver` for JSP's. So if your controller
-returns a ModelAndView object containing a view name of "welcome" then the resolvers
-will look for the `/WEB-INF/freemarker/welcome.ftl` or `/WEB-INF/velocity/welcome.vm`
-template as appropriate.
-
-
-
-[[view-velocity-advancedconfig]]
-=== Advanced configuration
-The basic configurations highlighted above will be suitable for most application
-requirements, however additional configuration options are available for when unusual or
-advanced requirements dictate.
-
-
-[[view-velocity-example-velocityproperties]]
-==== velocity.properties
-This file is completely optional, but if specified, contains the values that are passed
-to the Velocity runtime in order to configure velocity itself. Only required for
-advanced configurations, if you need this file, specify its location on the
-`VelocityConfigurer` bean definition above.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-		<property name="configLocation" value="/WEB-INF/velocity.properties"/>
-	</bean>
-----
-
-Alternatively, you can specify velocity properties directly in the bean definition for
-the Velocity config bean by replacing the "configLocation" property with the following
-inline properties.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
-		<property name="velocityProperties">
-			<props>
-				<prop key="resource.loader">file</prop>
-				<prop key="file.resource.loader.class">
-					org.apache.velocity.runtime.resource.loader.FileResourceLoader
-				</prop>
-				<prop key="file.resource.loader.path">${webapp.root}/WEB-INF/velocity</prop>
-				<prop key="file.resource.loader.cache">false</prop>
-			</props>
-		</property>
-	</bean>
-----
-
-Refer to the
-{api-spring-framework}/ui/velocity/VelocityEngineFactory.html[API
-documentation] for Spring configuration of Velocity, or the Velocity documentation for
-examples and definitions of the `'velocity.properties'` file itself.
+Your templates need to be stored in the directory specified by the `FreeMarkerConfigurer`
+shown above. If you use the view resolvers highlighted, then the logical view names
+relate to the template file names in similar fashion to `InternalResourceViewResolver`
+for JSP's. So if your controller returns a ModelAndView object containing a view name of
+"welcome" then the resolver will look for the `/WEB-INF/freemarker/welcome.ftl` template.
 
 
 [[views-freemarker]]
-==== FreeMarker
+=== Advanced FreeMarker configuration
 FreeMarker 'Settings' and 'SharedVariables' can be passed directly to the FreeMarker
 `Configuration` object managed by Spring by setting the appropriate bean properties on
 the `FreeMarkerConfigurer` bean. The `freemarkerSettings` property requires a
@@ -266,14 +184,13 @@ the `Configuration` object.
 
 
 
-[[view-velocity-forms]]
+[[view-freemarker-forms]]
 === Bind support and form handling
 Spring provides a tag library for use in JSP's that contains (amongst other things) a
 `<spring:bind/>` tag. This tag primarily enables forms to display values from form
 backing objects and to show the results of failed validations from a `Validator` in the
-web or business tier. From version 1.1, Spring now has support for the same
-functionality in both Velocity and FreeMarker, with additional convenience macros for
-generating form input elements themselves.
+web or business tier. Spring also has support for the same functionality in FreeMarker,
+with additional convenience macros for generating form input elements themselves.
 
 
 [[view-bind-macros]]
@@ -285,41 +202,16 @@ Some of the macros defined in the Spring libraries are considered internal (priv
 no such scoping exists in the macro definitions making all macros visible to calling
 code and user templates. The following sections concentrate only on the macros you need
 to be directly calling from within your templates. If you wish to view the macro code
-directly, the files are called spring.vm / spring.ftl and are in the packages
-`org.springframework.web.servlet.view.velocity` or
-`org.springframework.web.servlet.view.freemarker` respectively.
+directly, the file is called `spring.ftl` in the package
+`org.springframework.web.servlet.view.freemarker`.
 
 
 [[view-simple-binding]]
 ==== Simple binding
-In your html forms (vm / ftl templates) that act as the 'formView' for a Spring form
+In your HTML forms (vm / ftl templates) which act as a form view for a Spring MVC
 controller, you can use code similar to the following to bind to field values and
 display error messages for each input field in similar fashion to the JSP equivalent.
-Note that the name of the command object is "command" by default, but can be overridden
-in your MVC configuration by setting the 'commandName' bean property on your form
-controller. Example code is shown below for the `personFormV` and `personFormF` views
-configured earlier;
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<!-- velocity macros are automatically available -->
-	<html>
-		...
-		<form action="" method="POST">
-			Name:
-			#springBind( "command.name" )
-			<input type="text"
-				name="${status.expression}"
-				value="$!status.value"/><br>
-			#foreach($error in $status.errorMessages) <b>$error</b> <br> #end
-			<br>
-			...
-			<input type="submit" value="submit"/>
-		</form>
-		...
-	</html>
-----
+Example code is shown below for the `personForm` view configured earlier:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -331,10 +223,10 @@ configured earlier;
 		...
 		<form action="" method="POST">
 			Name:
-			<@spring.bind "command.name"/>
+			<@spring.bind "myModelObject.name"/>
 			<input type="text"
 				name="${spring.status.expression}"
-				value="${spring.status.value?default("")}"/><br>
+				value="${spring.status.value?html}"/><br>
 			<#list spring.status.errorMessages as error> <b>${error}</b> <br> </#list>
 			<br>
 			...
@@ -344,18 +236,18 @@ configured earlier;
 	</html>
 ----
 
-`#springBind` / `<@spring.bind>` requires a 'path' argument which consists of the name
-of your command object (it will be 'command' unless you changed it in your
-FormController properties) followed by a period and the name of the field on the command
-object you wish to bind to. Nested fields can be used too such as
-"command.address.street". The `bind` macro assumes the default HTML escaping behavior
-specified by the ServletContext parameter `defaultHtmlEscape` in web.xml
+`<@spring.bind>` requires a 'path' argument which consists of the name of your command
+object (it will be 'command' unless you changed it in your FormController properties)
+followed by a period and the name of the field on the command object you wish to bind to.
+Nested fields can be used too such as "command.address.street". The `bind` macro assumes
+the default HTML escaping behavior specified by the ServletContext parameter
+`defaultHtmlEscape` in `web.xml`.
 
-The optional form of the macro called `#springBindEscaped` / `<@spring.bindEscaped>`
-takes a second argument and explicitly specifies whether HTML escaping should be used in
-the status error messages or values. Set to true or false as required. Additional form
-handling macros simplify the use of HTML escaping and these macros should be used
-wherever possible. They are explained in the next section.
+The optional form of the macro called `<@spring.bindEscaped>` takes a second argument
+and explicitly specifies whether HTML escaping should be used in the status error
+messages or values. Set to true or false as required. Additional form handling macros
+simplify the use of HTML escaping and these macros should be used wherever possible.
+They are explained in the next section.
 
 
 [[views-form-macros]]
@@ -372,62 +264,49 @@ parameter list that each takes.
 .Table of macro definitions
 [cols="3,1,1"]
 |===
-| macro| VTL definition| FTL definition
+| macro| FTL definition
 
 | **message** (output a string from a resource bundle based on the code parameter)
-| #springMessage($code)
 | <@spring.message code/>
 
 | **messageText** (output a string from a resource bundle based on the code parameter,
   falling back to the value of the default parameter)
-| #springMessageText($code $text)
 | <@spring.messageText code, text/>
 
 | **url** (prefix a relative URL with the application's context root)
-| #springUrl($relativeUrl)
 | <@spring.url relativeUrl/>
 
 | **formInput** (standard input field for gathering user input)
-| #springFormInput($path $attributes)
 | <@spring.formInput path, attributes, fieldType/>
 
 | **formHiddenInput *** (hidden input field for submitting non-user input)
-| #springFormHiddenInput($path $attributes)
 | <@spring.formHiddenInput path, attributes/>
 
 | **formPasswordInput** * (standard input field for gathering passwords. Note that no
   value will ever be populated in fields of this type)
-| #springFormPasswordInput($path $attributes)
 | <@spring.formPasswordInput path, attributes/>
 
 | **formTextarea** (large text field for gathering long, freeform text input)
-| #springFormTextarea($path $attributes)
 | <@spring.formTextarea path, attributes/>
 
 | **formSingleSelect** (drop down box of options allowing a single required value to be
   selected)
-| #springFormSingleSelect( $path $options $attributes)
 | <@spring.formSingleSelect path, options, attributes/>
 
 | **formMultiSelect** (a list box of options allowing the user to select 0 or more values)
-| #springFormMultiSelect($path $options $attributes)
 | <@spring.formMultiSelect path, options, attributes/>
 
 | **formRadioButtons** (a set of radio buttons allowing a single selection to be made
   from the available choices)
-| #springFormRadioButtons($path $options $separator $attributes)
 | <@spring.formRadioButtons path, options separator, attributes/>
 
 | **formCheckboxes** (a set of checkboxes allowing 0 or more values to be selected)
-| #springFormCheckboxes($path $options $separator $attributes)
 | <@spring.formCheckboxes path, options, separator, attributes/>
 
 | **formCheckbox** (a single checkbox)
-| #springFormCheckbox($path $attributes)
 | <@spring.formCheckbox path, attributes/>
 
 | **showErrors** (simplify display of validation errors for the bound field)
-| #springShowErrors($separator $classOrStyle)
 | <@spring.showErrors separator, classOrStyle/>
 |===
 
@@ -463,16 +342,6 @@ differences exist between the two languages, they are explained in the notes.
 
 [[views-form-macros-input]]
 ===== Input Fields
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<!-- the Name field example from above using form macros in VTL -->
-	...
-	Name:
-	#springFormInput("command.name" "")<br>
-	#springShowErrors("<br>" "")<br>
-----
-
 The formInput macro takes the path parameter (command.name) and an additional attributes
 parameter which is empty in the example above. The macro, along with all other form
 generation macros, performs an implicit spring bind on the path parameter. The binding
@@ -482,8 +351,7 @@ path parameter again - it simply operates on whichever field a bind was last cre
 The showErrors macro takes a separator parameter (the characters that will be used to
 separate multiple errors on a given field) and also accepts a second parameter, this
 time a class name or style attribute. Note that FreeMarker is able to specify default
-values for the attributes parameter, unlike Velocity, and the two macro calls above
-could be expressed as follows in FTL:
+values for the attributes parameter.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -562,15 +430,15 @@ codes would be created with suitable keys like the example below.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	protected Map referenceData(HttpServletRequest request) throws Exception {
-		Map cityMap = new LinkedHashMap();
+	protected Map<String, String> referenceData(HttpServletRequest request) throws Exception {
+		Map<String, String> cityMap = new LinkedHashMap<>();
 		cityMap.put("LDN", "London");
 		cityMap.put("PRS", "Paris");
 		cityMap.put("NYC", "New York");
 
-		Map m = new HashMap();
-		m.put("cityMap", cityMap);
-		return m;
+		Map<String, String> model = new HashMap<>();
+		model.put("cityMap", cityMap);
+		return model;
 	}
 ----
 
@@ -603,9 +471,6 @@ model/context variable named xhtmlCompliant:
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
-	## for Velocity..
-	#set($springXhtmlCompliant = true)
-
 	<#-- for FreeMarker -->
 	<#assign xhtmlCompliant = true in spring>
 ----
@@ -818,7 +683,7 @@ The preceding JSP assumes that the variable name of the form backing object is
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<form:form commandName="user">
+	<form:form modelAttribute="user">
 		<table>
 			<tr>
 				<td>First Name:</td>
@@ -2168,358 +2033,6 @@ The PDF version of the word list is even simpler. This time, the class extends
 Once again, amend the controller to return the `pdf` view with `return new
 ModelAndView("pdf", map);`, and reload the URL in your application. This time a PDF
 document should appear listing each of the words in the model map.
-
-
-
-
-[[view-jasper-reports]]
-== JasperReports
-JasperReports ( http://jasperreports.sourceforge.net[]) is a powerful open-source
-reporting engine that supports the creation of report designs using an easily understood
-XML file format. JasperReports is capable of rendering reports in four different
-formats: CSV, Excel, HTML and PDF.
-
-
-
-[[view-jasper-reports-dependencies]]
-=== Dependencies
-Your application will need to include the latest release of JasperReports, which at the
-time of writing was 0.6.1. JasperReports itself depends on the following projects:
-
-* BeanShell
-* Commons BeanUtils
-* Commons Collections
-* Commons Digester
-* Commons Logging
-* iText
-* POI
-
-JasperReports also requires a JAXP compliant XML parser.
-
-
-
-[[view-jasper-reports-configuration]]
-=== Configuration
-To configure JasperReports views in your Spring container configuration you need to
-define a `ViewResolver` to map view names to the appropriate view class depending on
-which format you want your report rendered in.
-
-
-[[view-jasper-reports-configuration-resolver]]
-==== Configuring the ViewResolver
-
-Typically, you will use the `ResourceBundleViewResolver` to map view names to view
-classes and files in a properties file.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.ResourceBundleViewResolver">
-		<property name="basename" value="views"/>
-	</bean>
-----
-
-Here we've configured an instance of the `ResourceBundleViewResolver` class that will
-look for view mappings in the resource bundle with base name `views`. (The content of
-this file is described in the next section.)
-
-
-[[view-jasper-reports-configuration-views]]
-==== Configuring the Views
-
-The Spring Framework contains five different `View` implementations for JasperReports,
-four of which correspond to one of the four output formats supported by JasperReports,
-and one that allows for the format to be determined at runtime:
-
-[[view-jasper-reports-configuration-views-classes]]
-.JasperReports View classes
-|===
-| Class Name| Render Format
-
-| `JasperReportsCsvView`
-| CSV
-
-| `JasperReportsHtmlView`
-| HTML
-
-| `JasperReportsPdfView`
-| PDF
-
-| `JasperReportsXlsView`
-| Microsoft Excel
-
-| `JasperReportsMultiFormatView`
-| The view is <<view-jasper-reports-configuration-multiformat-view,decided upon at
-  runtime>>
-|===
-
-Mapping one of these classes to a view name and a report file is a matter of adding the
-appropriate entries in the resource bundle configured in the previous section as shown
-here:
-
-[literal]
-[subs="verbatim,quotes"]
-----
-simpleReport.(class)=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
-simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
-----
-
-Here you can see that the view with name `simpleReport` is mapped to the
-`JasperReportsPdfView` class, causing the output of this report to be rendered in PDF
-format. The `url` property of the view is set to the location of the underlying report
-file.
-
-
-[[view-jasper-reports-configuration-report-files]]
-==== About Report Files
-JasperReports has two distinct types of report file: the design file, which has a
-`.jrxml` extension, and the compiled report file, which has a `.jasper` extension.
-Typically, you use the JasperReports Ant task to compile your `.jrxml` design file into
-a `.jasper` file before deploying it into your application. With the Spring Framework
-you can map either of these files to your report file and the framework will take care
-of compiling the `.jrxml` file on the fly for you. You should note that after a `.jrxml`
-file is compiled by the Spring Framework, the compiled report is cached for the lifetime
-of the application. Thus, to make changes to the file you will need to restart your
-application.
-
-
-[[view-jasper-reports-configuration-multiformat-view]]
-==== Using JasperReportsMultiFormatView
-
-The `JasperReportsMultiFormatView` allows for the report format to be specified at
-runtime. The actual rendering of the report is delegated to one of the other
-JasperReports view classes - the `JasperReportsMultiFormatView` class simply adds a
-wrapper layer that allows for the exact implementation to be specified at runtime.
-
-The `JasperReportsMultiFormatView` class introduces two concepts: the format key and the
-discriminator key. The `JasperReportsMultiFormatView` class uses the mapping key to look
-up the actual view implementation class, and it uses the format key to lookup up the
-mapping key. From a coding perspective you add an entry to your model with the format
-key as the key and the mapping key as the value, for example:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public ModelAndView handleSimpleReportMulti(HttpServletRequest request,
-	HttpServletResponse response) throws Exception {
-
-		String uri = request.getRequestURI();
-		String format = uri.substring(uri.lastIndexOf(".") + 1);
-
-		Map model = getModel();
-		model.put("format", format);
-
-		return new ModelAndView("simpleReportMulti", model);
-
-	}
-----
-
-In this example, the mapping key is determined from the extension of the request URI and
-is added to the model under the default format key: `format`. If you wish to use a
-different format key then you can configure this using the `formatKey` property of the
-`JasperReportsMultiFormatView` class.
-
-By default the following mapping key mappings are configured in
-`JasperReportsMultiFormatView`:
-
-[[view-jasper-reports-configuration-multiformat-view-mappings]]
-.JasperReportsMultiFormatView Default Mapping Key Mappings
-|===
-| Mapping Key| View Class
-
-| csv
-| `JasperReportsCsvView`
-
-| html
-| `JasperReportsHtmlView`
-
-| pdf
-| `JasperReportsPdfView`
-
-| xls
-| `JasperReportsXlsView`
-|===
-
-So in the example above a request to URI /foo/myReport.pdf would be mapped to the
-`JasperReportsPdfView` class. You can override the mapping key to view class mappings
-using the `formatMappings` property of `JasperReportsMultiFormatView`.
-
-
-
-[[view-jasper-reports-model]]
-=== Populating the ModelAndView
-
-In order to render your report correctly in the format you have chosen, you must supply
-Spring with all of the data needed to populate your report. For JasperReports this means
-you must pass in all report parameters along with the report datasource. Report
-parameters are simple name/value pairs and can be added to the `Map` for your model as
-you would add any name/value pair.
-
-When adding the datasource to the model you have two approaches to choose from. The
-first approach is to add an instance of `JRDataSource` or a `Collection` type to the
-model `Map` under any arbitrary key. Spring will then locate this object in the model
-and treat it as the report datasource. For example, you may populate your model like so:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	private Map getModel() {
-		Map model = new HashMap();
-		Collection beanData = getBeanData();
-		model.put("myBeanData", beanData);
-		return model;
-	}
-----
-
-The second approach is to add the instance of `JRDataSource` or `Collection` under a
-specific key and then configure this key using the `reportDataKey` property of the view
-class. In both cases Spring will wrap instances of `Collection` in a
-`JRBeanCollectionDataSource` instance. For example:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	private Map getModel() {
-		Map model = new HashMap();
-		Collection beanData = getBeanData();
-		Collection someData = getSomeData();
-		model.put("myBeanData", beanData);
-		model.put("someData", someData);
-		return model;
-	}
-----
-
-Here you can see that two `Collection` instances are being added to the model. To ensure
-that the correct one is used, we simply modify our view configuration as appropriate:
-
-[literal]
-[subs="verbatim,quotes"]
-----
-simpleReport.(class)=org.springframework.web.servlet.view.jasperreports.JasperReportsPdfView
-simpleReport.url=/WEB-INF/reports/DataSourceReport.jasper
-simpleReport.reportDataKey=myBeanData
-----
-
-Be aware that when using the first approach, Spring will use the first instance of
-`JRDataSource` or `Collection` that it encounters. If you need to place multiple
-instances of `JRDataSource` or `Collection` into the model you need to use the second
-approach.
-
-
-
-[[view-jasper-reports-subreports]]
-=== Working with Sub-Reports
-JasperReports provides support for embedded sub-reports within your master report files.
-There are a wide variety of mechanisms for including sub-reports in your report files.
-The easiest way is to hard code the report path and the SQL query for the sub report
-into your design files. The drawback of this approach is obvious: the values are
-hard-coded into your report files reducing reusability and making it harder to modify
-and update report designs. To overcome this you can configure sub-reports declaratively,
-and you can include additional data for these sub-reports directly from your controllers.
-
-
-[[view-jasper-reports-subreports-config-reports]]
-==== Configuring Sub-Report Files
-To control which sub-report files are included in a master report using Spring, your
-report file must be configured to accept sub-reports from an external source. To do this
-you declare a parameter in your report file like so:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<parameter name="ProductsSubReport" class="net.sf.jasperreports.engine.JasperReport"/>
-----
-
-Then, you define your sub-report to use this sub-report parameter:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<subreport>
-		<reportElement isPrintRepeatedValues="false" x="5" y="25" width="325"
-			height="20" isRemoveLineWhenBlank="true" backcolor="#ffcc99"/>
-		<subreportParameter name="City">
-			<subreportParameterExpression><![CDATA[$F{city}]]></subreportParameterExpression>
-		</subreportParameter>
-		<dataSourceExpression><![CDATA[$P{SubReportData}]]></dataSourceExpression>
-		<subreportExpression class="net.sf.jasperreports.engine.JasperReport">
-			<![CDATA[$P{ProductsSubReport}]]></subreportExpression>
-	</subreport>
-----
-
-This defines a master report file that expects the sub-report to be passed in as an
-instance of `net.sf.jasperreports.engine.JasperReports` under the parameter
-`ProductsSubReport`. When configuring your Jasper view class, you can instruct Spring to
-load a report file and pass it into the JasperReports engine as a sub-report using the
-`subReportUrls` property:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<property name="subReportUrls">
-		<map>
-			<entry key="ProductsSubReport" value="/WEB-INF/reports/subReportChild.jrxml"/>
-		</map>
-	</property>
-----
-
-Here, the key of the `Map` corresponds to the name of the sub-report parameter in the
-report design file, and the entry is the URL of the report file. Spring will load this
-report file, compiling it if necessary, and pass it into the JasperReports engine under
-the given key.
-
-
-[[view-jasper-reports-subreports-config-datasources]]
-==== Configuring Sub-Report Data Sources
-This step is entirely optional when using Spring to configure your sub-reports. If you
-wish, you can still configure the data source for your sub-reports using static queries.
-However, if you want Spring to convert data returned in your `ModelAndView` into
-instances of `JRDataSource` then you need to specify which of the parameters in your
-`ModelAndView` Spring should convert. To do this, configure the list of parameter names
-using the `subReportDataKeys` property of your chosen view class:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<property name="subReportDataKeys" value="SubReportData"/>
-----
-
-Here, the key you supply __must__ correspond to both the key used in your `ModelAndView`
-and the key used in your report design file.
-
-
-
-[[view-jasper-reports-exporter-parameters]]
-=== Configuring Exporter Parameters
-If you have special requirements for exporter configuration -- perhaps you want a
-specific page size for your PDF report -- you can configure these exporter parameters
-declaratively in your Spring configuration file using the `exporterParameters` property
-of the view class. The `exporterParameters` property is typed as a `Map`. In your
-configuration the key of an entry should be the fully-qualified name of a static field
-that contains the exporter parameter definition, and the value of an entry should be the
-value you want to assign to the parameter. An example of this is shown below:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="htmlReport" class="org.springframework.web.servlet.view.jasperreports.JasperReportsHtmlView">
-		<property name="url" value="/WEB-INF/reports/simpleReport.jrxml"/>
-		<property name="exporterParameters">
-			<map>
-				<entry key="net.sf.jasperreports.engine.export.JRHtmlExporterParameter.HTML_FOOTER">
-					<value>Footer by Spring!
-						&lt;/td&gt;&lt;td width="50%"&gt;&amp;nbsp; &lt;/td&gt;&lt;/tr&gt;
-						&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;
-					</value>
-				</entry>
-			</map>
-		</property>
-	</bean>
-----
-
-Here you can see that the `JasperReportsHtmlView` is configured with an exporter
-parameter for `net.sf.jasperreports.engine.export.JRHtmlExporterParameter.HTML_FOOTER`
-which will output a footer in the resulting HTML.
 
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -400,7 +400,8 @@ public abstract class AbstractAopProxyTests {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				if (!context) {
 					assertNoInvocationContext();
-				} else {
+				}
+				else {
 					assertNotNull("have context", ExposeInvocationInterceptor.currentInvocation());
 				}
 				return s;
@@ -922,7 +923,7 @@ public abstract class AbstractAopProxyTests {
 		pf2.addAdvisor(new DefaultIntroductionAdvisor(new TimestampIntroductionInterceptor()));
 		ITestBean proxy2 = (ITestBean) createProxy(pf2);
 
-		HashMap<ITestBean, Object> h = new HashMap<ITestBean, Object>();
+		HashMap<ITestBean, Object> h = new HashMap<>();
 		Object value1 = "foo";
 		Object value2 = "bar";
 		assertNull(h.get(proxy1));
@@ -1177,7 +1178,7 @@ public abstract class AbstractAopProxyTests {
 		};
 
 		class NameSaver implements MethodInterceptor {
-			private List<Object> names = new LinkedList<Object>();
+			private List<Object> names = new LinkedList<>();
 
 			@Override
 			public Object invoke(MethodInvocation mi) throws Throwable {
@@ -1216,7 +1217,7 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadVoids) {
 			@Override
 			public boolean matches(Method m, Class<?> targetClass) {
-				return m.getName().equals("overload") && m.getParameterTypes().length == 0;
+				return m.getName().equals("overload") && m.getParameterCount() == 0;
 			}
 		});
 
@@ -1224,7 +1225,7 @@ public abstract class AbstractAopProxyTests {
 		pc.addAdvisor(new StaticMethodMatcherPointcutAdvisor(overLoadInts) {
 			@Override
 			public boolean matches(Method m, Class<?> targetClass) {
-				return m.getName().equals("overload") && m.getParameterTypes().length == 1 &&
+				return m.getName().equals("overload") && m.getParameterCount() == 1 &&
 						m.getParameterTypes()[0].equals(int.class);
 			}
 		});
@@ -1313,7 +1314,7 @@ public abstract class AbstractAopProxyTests {
 		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cba) {
 			@Override
 			public boolean matches(Method m, Class<?> targetClass) {
-				return m.getParameterTypes().length == 0;
+				return m.getParameterCount() == 0;
 			}
 		};
 		TestBean target = new TestBean();
@@ -1356,17 +1357,17 @@ public abstract class AbstractAopProxyTests {
 			}
 		};
 		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
-		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<String, String>(), new HashMap<String, String>());
-		Map<String, String> firstValuesToAdd = new HashMap<String, String>();
+		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<>(), new HashMap<String, String>());
+		Map<String, String> firstValuesToAdd = new HashMap<>();
 		firstValuesToAdd.put("test", "");
-		MapAwareMethodInterceptor mami2 = new MapAwareMethodInterceptor(new HashMap<String, String>(), firstValuesToAdd);
-		MapAwareMethodInterceptor mami3 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap<String, String>());
-		MapAwareMethodInterceptor mami4 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap<String, String>());
-		Map<String, String> secondValuesToAdd = new HashMap<String, String>();
+		MapAwareMethodInterceptor mami2 = new MapAwareMethodInterceptor(new HashMap<>(), firstValuesToAdd);
+		MapAwareMethodInterceptor mami3 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap<>());
+		MapAwareMethodInterceptor mami4 = new MapAwareMethodInterceptor(firstValuesToAdd, new HashMap<>());
+		Map<String, String> secondValuesToAdd = new HashMap<>();
 		secondValuesToAdd.put("foo", "bar");
 		secondValuesToAdd.put("cat", "dog");
 		MapAwareMethodInterceptor mami5 = new MapAwareMethodInterceptor(firstValuesToAdd, secondValuesToAdd);
-		Map<String, String> finalExpected = new HashMap<String, String>(firstValuesToAdd);
+		Map<String, String> finalExpected = new HashMap<>(firstValuesToAdd);
 		finalExpected.putAll(secondValuesToAdd);
 		MapAwareMethodInterceptor mami6 = new MapAwareMethodInterceptor(finalExpected, secondValuesToAdd);
 
@@ -1394,7 +1395,7 @@ public abstract class AbstractAopProxyTests {
 		Advisor matchesNoArgs = new StaticMethodMatcherPointcutAdvisor(cca) {
 			@Override
 			public boolean matches(Method m, Class<?> targetClass) {
-				return m.getParameterTypes().length == 0 || "exceptional".equals(m.getName());
+				return m.getParameterCount() == 0 || "exceptional".equals(m.getName());
 			}
 		};
 		TestBean target = new TestBean();
@@ -1693,7 +1694,7 @@ public abstract class AbstractAopProxyTests {
 				@Override
 				public boolean matches(Method m, Class<?> targetClass) {
 					return m.getName().startsWith("set") &&
-						m.getParameterTypes().length == 1 &&
+						m.getParameterCount() == 1 &&
 						m.getParameterTypes()[0].equals(String.class);
 				}
 			});

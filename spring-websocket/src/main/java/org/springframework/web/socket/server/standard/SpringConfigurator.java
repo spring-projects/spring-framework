@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class SpringConfigurator extends Configurator {
 	private static final Log logger = LogFactory.getLog(SpringConfigurator.class);
 
 	private static final Map<String, Map<Class<?>, String>> cache =
-			new ConcurrentHashMap<String, Map<Class<?>, String>>();
+			new ConcurrentHashMap<>();
 
 
 	@SuppressWarnings("unchecked")
@@ -77,9 +77,9 @@ public class SpringConfigurator extends Configurator {
 			return endpoint;
 		}
 
-		Component annot = AnnotationUtils.findAnnotation(endpointClass, Component.class);
-		if ((annot != null) && wac.containsBean(annot.value())) {
-			T endpoint = wac.getBean(annot.value(), endpointClass);
+		Component ann = AnnotationUtils.findAnnotation(endpointClass, Component.class);
+		if (ann != null && wac.containsBean(ann.value())) {
+			T endpoint = wac.getBean(ann.value(), endpointClass);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Using @ServerEndpoint singleton " + endpoint);
 			}
@@ -102,7 +102,7 @@ public class SpringConfigurator extends Configurator {
 
 		Map<Class<?>, String> beanNamesByType = cache.get(wacId);
 		if (beanNamesByType == null) {
-			beanNamesByType = new ConcurrentHashMap<Class<?>, String>();
+			beanNamesByType = new ConcurrentHashMap<>();
 			cache.put(wacId, beanNamesByType);
 		}
 

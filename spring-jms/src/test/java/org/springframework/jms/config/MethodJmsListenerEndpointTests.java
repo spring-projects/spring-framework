@@ -57,14 +57,18 @@ import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
-import org.springframework.messaging.handler.annotation.support.MethodArgumentTypeMismatchException;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * @author Stephane Nicoll
@@ -407,7 +411,7 @@ public class MethodJmsListenerEndpointTests {
 		Session session = mock(Session.class);
 
 		thrown.expect(ListenerExecutionFailedException.class);
-		thrown.expectCause(Matchers.isA(MethodArgumentTypeMismatchException.class));
+		thrown.expectCause(Matchers.isA(MessageConversionException.class));
 		listener.onMessage(createSimpleJmsTextMessage("test"), session);  // Message<String> as Message<Integer>
 	}
 
@@ -478,10 +482,10 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 
-	@SendTo("defaultReply")
+	@SendTo("defaultReply") @SuppressWarnings("unused")
 	static class JmsEndpointSampleBean {
 
-		private final Map<String, Boolean> invocations = new HashMap<String, Boolean>();
+		private final Map<String, Boolean> invocations = new HashMap<>();
 
 		public void resolveMessageAndSession(javax.jms.Message message, Session session) {
 			invocations.put("resolveMessageAndSession", true);

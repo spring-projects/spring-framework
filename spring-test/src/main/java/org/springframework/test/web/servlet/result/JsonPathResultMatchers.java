@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,17 @@
 
 package org.springframework.test.web.servlet.result;
 
+import java.io.UnsupportedEncodingException;
+
 import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.StringStartsWith;
 
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.util.StringUtils;
 
 /**
  * Factory for assertions on the response content using
@@ -33,11 +38,14 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * @author Rossen Stoyanchev
  * @author Craig Andrews
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 3.2
  */
 public class JsonPathResultMatchers {
 
 	private final JsonPathExpectationsHelper jsonPathHelper;
+
+	private String prefix;
 
 
 	/**
@@ -48,8 +56,21 @@ public class JsonPathResultMatchers {
 	 * @param args arguments to parameterize the {@code JsonPath} expression with,
 	 * using formatting specifiers defined in {@link String#format(String, Object...)}
 	 */
-	protected JsonPathResultMatchers(String expression, Object ... args) {
+	protected JsonPathResultMatchers(String expression, Object... args) {
 		this.jsonPathHelper = new JsonPathExpectationsHelper(expression, args);
+	}
+
+	/**
+	 * Configures the current {@code JsonPathResultMatchers} instance
+	 * to verify that the JSON payload is prepended with the given prefix.
+	 * <p>Use this method if the JSON payloads are prefixed to avoid
+	 * Cross Site Script Inclusion (XSSI) attacks.
+	 * @param prefix the string prefix prepended to the actual JSON payload
+	 * @since 4.3
+	 */
+	public JsonPathResultMatchers prefix(String prefix) {
+		this.prefix = prefix;
+		return this;
 	}
 
 
@@ -61,7 +82,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.assertValue(content, matcher);
 			}
 		};
@@ -75,7 +96,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				jsonPathHelper.assertValue(result.getResponse().getContentAsString(), expectedValue);
+				jsonPathHelper.assertValue(getContent(result), expectedValue);
 			}
 		};
 	}
@@ -91,7 +112,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.exists(content);
 			}
 		};
@@ -108,7 +129,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.doesNotExist(content);
 			}
 		};
@@ -128,7 +149,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.assertValueIsEmpty(content);
 			}
 		};
@@ -148,7 +169,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.assertValueIsNotEmpty(content);
 			}
 		};
@@ -163,7 +184,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.assertValueIsString(content);
 			}
 		};
@@ -178,7 +199,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.assertValueIsBoolean(content);
 			}
 		};
@@ -193,7 +214,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.assertValueIsNumber(content);
 			}
 		};
@@ -207,7 +228,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.assertValueIsArray(content);
 			}
 		};
@@ -222,10 +243,29 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				String content = result.getResponse().getContentAsString();
+				String content = getContent(result);
 				jsonPathHelper.assertValueIsMap(content);
 			}
 		};
+	}
+
+	private String getContent(MvcResult result) throws UnsupportedEncodingException {
+		String content = result.getResponse().getContentAsString();
+		if (StringUtils.hasLength(this.prefix)) {
+			try {
+				String reason = String.format("Expected a JSON payload prefixed with \"%s\" but found: %s",
+						this.prefix, StringUtils.quote(content.substring(0, this.prefix.length())));
+				MatcherAssert.assertThat(reason, content, StringStartsWith.startsWith(this.prefix));
+				return content.substring(this.prefix.length());
+			}
+			catch (StringIndexOutOfBoundsException oobe) {
+				throw new AssertionError(
+						"JSON prefix \"" + this.prefix + "\" not found, exception: " + oobe.getMessage());
+			}
+		}
+		else {
+			return content;
+		}
 	}
 
 }

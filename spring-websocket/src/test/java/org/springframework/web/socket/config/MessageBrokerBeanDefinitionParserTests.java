@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,8 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.HandlerMapping;
@@ -196,7 +198,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		SimpleBrokerMessageHandler brokerMessageHandler = this.appContext.getBean(SimpleBrokerMessageHandler.class);
 		assertNotNull(brokerMessageHandler);
 		Collection<String> prefixes = brokerMessageHandler.getDestinationPrefixes();
-		assertEquals(Arrays.asList("/topic", "/queue"), new ArrayList<String>(prefixes));
+		assertEquals(Arrays.asList("/topic", "/queue"), new ArrayList<>(prefixes));
 		assertNotNull(brokerMessageHandler.getTaskScheduler());
 		assertArrayEquals(new long[] {15000, 15000}, brokerMessageHandler.getHeartbeatValue());
 
@@ -355,6 +357,14 @@ public class MessageBrokerBeanDefinitionParserTests {
 	@Test
 	public void customChannels() {
 		loadBeanDefinitions("websocket-config-broker-customchannels.xml");
+
+		SimpAnnotationMethodMessageHandler annotationMethodMessageHandler =
+				this.appContext.getBean(SimpAnnotationMethodMessageHandler.class);
+
+		Validator validator = annotationMethodMessageHandler.getValidator();
+		assertNotNull(validator);
+		assertSame(this.appContext.getBean("myValidator"), validator);
+		assertThat(validator, Matchers.instanceOf(TestValidator.class));
 
 		List<Class<? extends MessageHandler>> subscriberTypes =
 				Arrays.<Class<? extends MessageHandler>>asList(SimpAnnotationMethodMessageHandler.class,
@@ -519,4 +529,14 @@ class TestWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
 
 class TestStompErrorHandler extends StompSubProtocolErrorHandler {
+}
+
+class TestValidator implements Validator {
+	@Override
+	public boolean supports(Class<?> clazz) {
+		return false;
+	}
+
+	@Override
+	public void validate(Object target, Errors errors) { }
 }

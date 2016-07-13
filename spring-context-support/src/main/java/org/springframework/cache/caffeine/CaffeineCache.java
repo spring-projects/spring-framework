@@ -22,21 +22,19 @@ import java.util.function.Function;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 
 /**
  * Spring {@link org.springframework.cache.Cache} adapter implementation
  * on top of a Caffeine {@link com.github.benmanes.caffeine.cache.Cache} instance.
  *
- * <p>Requires Caffeine 2.0 or higher.
+ * <p>Requires Caffeine 2.1 or higher.
  *
  * @author Ben Manes
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @since 4.3
  */
-@UsesJava8
 public class CaffeineCache extends AbstractValueAdaptingCache {
 
 	private final String name;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.springframework.format.datetime.standard;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.format.ResolverStyle;
 import java.util.TimeZone;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -43,7 +43,6 @@ import org.springframework.util.StringUtils;
  * @see #setDateTimeStyle
  * @see DateTimeFormatterFactoryBean
  */
-@UsesJava8
 public class DateTimeFormatterFactory {
 
 	private String pattern;
@@ -174,7 +173,11 @@ public class DateTimeFormatterFactory {
 	public DateTimeFormatter createDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
 		DateTimeFormatter dateTimeFormatter = null;
 		if (StringUtils.hasLength(this.pattern)) {
-			dateTimeFormatter = DateTimeFormatter.ofPattern(this.pattern);
+			// Using strict parsing to align with Joda-Time and standard DateFormat behavior:
+			// otherwise, an overflow like e.g. Feb 29 for a non-leap-year wouldn't get rejected.
+			// However, with strict parsing, a year digit needs to be specified as 'u'...
+			String patternToUse = this.pattern.replace("yy", "uu");
+			dateTimeFormatter = DateTimeFormatter.ofPattern(patternToUse).withResolverStyle(ResolverStyle.STRICT);
 		}
 		else if (this.iso != null && this.iso != ISO.NONE) {
 			switch (this.iso) {

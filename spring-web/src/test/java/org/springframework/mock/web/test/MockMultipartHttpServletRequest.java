@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 public class MockMultipartHttpServletRequest extends MockHttpServletRequest implements MultipartHttpServletRequest {
 
 	private final MultiValueMap<String, MultipartFile> multipartFiles =
-			new LinkedMultiValueMap<String, MultipartFile>();
+			new LinkedMultiValueMap<>();
 
 
 	/**
@@ -112,7 +112,7 @@ public class MockMultipartHttpServletRequest extends MockHttpServletRequest impl
 
 	@Override
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
-		return new LinkedMultiValueMap<String, MultipartFile>(this.multipartFiles);
+		return new LinkedMultiValueMap<>(this.multipartFiles);
 	}
 
 	@Override

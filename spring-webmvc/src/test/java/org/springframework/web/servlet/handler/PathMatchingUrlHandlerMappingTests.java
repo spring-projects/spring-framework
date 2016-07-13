@@ -126,7 +126,7 @@ public class PathMatchingUrlHandlerMappingTests {
 		hec = getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 
-		// should match because because exact pattern is there
+		// should match because exact pattern is there
 		req = new MockHttpServletRequest("GET", "/administrator/another/bla.xml");
 		hec = getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);

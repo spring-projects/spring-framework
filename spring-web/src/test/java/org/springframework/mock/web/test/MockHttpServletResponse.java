@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,9 +102,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	// HttpServletResponse properties
 	//---------------------------------------------------------------------
 
-	private final List<Cookie> cookies = new ArrayList<Cookie>();
+	private final List<Cookie> cookies = new ArrayList<>();
 
-	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<HeaderValueHolder>();
+	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<>();
 
 	private int status = HttpServletResponse.SC_OK;
 
@@ -112,7 +112,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private String forwardedUrl;
 
-	private final List<String> includedUrls = new ArrayList<String>();
+	private final List<String> includedUrls = new ArrayList<>();
 
 
 	//---------------------------------------------------------------------
@@ -236,8 +236,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		if (contentType != null) {
 			try {
 				MediaType mediaType = MediaType.parseMediaType(contentType);
-				if (mediaType.getCharSet() != null) {
-					this.characterEncoding = mediaType.getCharSet().name();
+				if (mediaType.getCharset() != null) {
+					this.characterEncoding = mediaType.getCharset().name();
 					this.charset = true;
 				}
 			}

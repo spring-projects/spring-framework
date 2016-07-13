@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 			WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
 		super(id, config, wsHandler, attributes);
-		this.messageCache = new LinkedBlockingQueue<String>(config.getHttpMessageCacheSize());
+		this.messageCache = new LinkedBlockingQueue<>(config.getHttpMessageCacheSize());
 	}
 
 
@@ -171,12 +171,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		return Collections.emptyList();
 	}
 
-	/**
-	 * @deprecated as of 4.2, since this method is no longer used.
-	 */
-	@Deprecated
-	protected abstract boolean isStreaming();
-
 
 	/**
 	 * Handle the first request for receiving messages on a SockJS HTTP transport
@@ -196,8 +190,18 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 		this.uri = request.getURI();
 		this.handshakeHeaders = request.getHeaders();
 		this.principal = request.getPrincipal();
-		this.localAddress = request.getLocalAddress();
-		this.remoteAddress = request.getRemoteAddress();
+		try {
+			this.localAddress = request.getLocalAddress();
+		}
+		catch (Exception ex) {
+			// Ignore
+		}
+		try {
+			this.remoteAddress = request.getRemoteAddress();
+		}
+		catch (Exception ex) {
+			// Ignore
+		}
 
 		synchronized (this.responseLock) {
 			try {
@@ -306,14 +310,6 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	 */
 	protected abstract void flushCache() throws SockJsTransportFailureException;
 
-
-	/**
-	 * @deprecated as of 4.2 this method is deprecated since the prelude is written
-	 * in {@link #handleRequestInternal} of the StreamingSockJsSession subclass.
-	 */
-	@Deprecated
-	protected void writePrelude(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-	}
 
 	@Override
 	protected void disconnect(CloseStatus status) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +39,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
@@ -71,7 +75,7 @@ public class ConfigurationClassProcessingTests {
 	 * When complete, the factory is ready to service requests for any {@link Bean} methods
 	 * declared by <var>configClasses</var>.
 	 */
-	private ListableBeanFactory initBeanFactory(Class<?>... configClasses) {
+	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		for (Class<?> configClass : configClasses) {
 			String configBeanName = configClass.getName();
@@ -111,7 +115,7 @@ public class ConfigurationClassProcessingTests {
 		BeanFactory factory = initBeanFactory(ConfigWithBeanWithAliases.class);
 		assertSame(factory.getBean("name1"), ConfigWithBeanWithAliases.testBean);
 		String[] aliases = factory.getAliases("name1");
-		for(String alias : aliases)
+		for (String alias : aliases)
 			assertSame(factory.getBean(alias), ConfigWithBeanWithAliases.testBean);
 
 		// method name should not be registered
@@ -200,6 +204,21 @@ public class ConfigurationClassProcessingTests {
 
 		assertSame(foo.getSpouse(), bar);
 		assertNotSame(bar.getSpouse(), baz);
+	}
+
+	@Test
+	public void configurationWithAdaptivePrototypes() {
+		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
+		factory.register(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
+		factory.refresh();
+
+		AdaptiveInjectionPoints adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
+		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+
+		adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
+		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
 	}
 
 	@Test
@@ -323,6 +342,31 @@ public class ConfigurationClassProcessingTests {
 		@Bean @Scope("prototype")
 		public TestBean baz() {
 			return new TestBean("baz");
+		}
+
+		@Bean @Scope("prototype")
+		public TestBean adaptive1(InjectionPoint ip) {
+			return new TestBean(ip.getMember().getName());
+		}
+
+		@Bean @Scope("prototype")
+		public TestBean adaptive2(DependencyDescriptor dd) {
+			return new TestBean(dd.getMember().getName());
+		}
+	}
+
+
+	@Scope("prototype")
+	static class AdaptiveInjectionPoints {
+
+		@Autowired @Qualifier("adaptive1")
+		public TestBean adaptiveInjectionPoint1;
+
+		public TestBean adaptiveInjectionPoint2;
+
+		@Autowired @Qualifier("adaptive2")
+		public void setAdaptiveInjectionPoint2(TestBean adaptiveInjectionPoint2) {
+			this.adaptiveInjectionPoint2 = adaptiveInjectionPoint2;
 		}
 	}
 

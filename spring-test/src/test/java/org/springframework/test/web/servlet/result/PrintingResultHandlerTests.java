@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class PrintingResultHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("param", "paramValue");
 
 		assertValue("MockHttpServletRequest", "HTTP Method", this.request.getMethod());
@@ -243,12 +243,12 @@ public class PrintingResultHandlerTests {
 
 			private String printedHeading;
 
-			private Map<String, Map<String, Object>> printedValues = new HashMap<String, Map<String, Object>>();
+			private Map<String, Map<String, Object>> printedValues = new HashMap<>();
 
 			@Override
 			public void printHeading(String heading) {
 				this.printedHeading = heading;
-				this.printedValues.put(heading, new HashMap<String, Object>());
+				this.printedValues.put(heading, new HashMap<>());
 			}
 
 			@Override

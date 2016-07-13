@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -26,12 +25,8 @@ import static org.junit.Assert.*;
  */
 public class LinkedCaseInsensitiveMapTests {
 
-	private LinkedCaseInsensitiveMap<String> map;
+	private final LinkedCaseInsensitiveMap<String> map = new LinkedCaseInsensitiveMap<>();
 
-	@Before
-	public void setUp() {
-		map = new LinkedCaseInsensitiveMap<String>();
-	}
 
 	@Test
 	public void putAndGet() {
@@ -53,6 +48,30 @@ public class LinkedCaseInsensitiveMapTests {
 		assertEquals("value3", map.get("key"));
 		assertEquals("value3", map.get("KEY"));
 		assertEquals("value3", map.get("Key"));
+	}
+
+	@Test
+	public void getOrDefault() {
+		map.put("key", "value1");
+		map.put("KEY", "value2");
+		map.put("Key", "value3");
+		assertEquals("value3", map.getOrDefault("key", "N"));
+		assertEquals("value3", map.getOrDefault("KEY", "N"));
+		assertEquals("value3", map.getOrDefault("Key", "N"));
+		assertEquals("N", map.getOrDefault("keeeey", "N"));
+		assertEquals("N", map.getOrDefault(new Object(), "N"));
+	}
+
+	@Test
+	public void getOrDefaultWithNullValue() {
+		map.put("key", null);
+		map.put("KEY", null);
+		map.put("Key", null);
+		assertNull(map.getOrDefault("key", "N"));
+		assertNull(map.getOrDefault("KEY", "N"));
+		assertNull(map.getOrDefault("Key", "N"));
+		assertEquals("N", map.getOrDefault("keeeey", "N"));
+		assertEquals("N", map.getOrDefault(new Object(), "N"));
 	}
 
 }

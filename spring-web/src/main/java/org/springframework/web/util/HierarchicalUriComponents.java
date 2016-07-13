@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		this.port = port;
 		this.path = path != null ? path : NULL_PATH_COMPONENT;
 		this.queryParams = CollectionUtils.unmodifiableMultiValueMap(
-				queryParams != null ? queryParams : new LinkedMultiValueMap<String, String>(0));
+				queryParams != null ? queryParams : new LinkedMultiValueMap<>(0));
 		this.encoded = encoded;
 		if (verify) {
 			verify();
@@ -200,10 +200,10 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private MultiValueMap<String, String> encodeQueryParams(String encoding) throws UnsupportedEncodingException {
 		int size = this.queryParams.size();
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(size);
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
 		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
 			String name = encodeUriComponent(entry.getKey(), encoding, Type.QUERY_PARAM);
-			List<String> values = new ArrayList<String>(entry.getValue().size());
+			List<String> values = new ArrayList<>(entry.getValue().size());
 			for (String value : entry.getValue()) {
 				values.add(encodeUriComponent(value, encoding, Type.QUERY_PARAM));
 			}
@@ -288,7 +288,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return;
 		}
 		int length = source.length();
-		for (int i=0; i < length; i++) {
+		for (int i = 0; i < length; i++) {
 			char ch = source.charAt(i);
 			if (ch == '%') {
 				if ((i + 2) < length) {
@@ -335,10 +335,11 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private MultiValueMap<String, String> expandQueryParams(UriTemplateVariables variables) {
 		int size = this.queryParams.size();
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(size);
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
+		variables = new QueryUriTemplateVariables(variables);
 		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
 			String name = expandUriComponent(entry.getKey(), variables);
-			List<String> values = new ArrayList<String>(entry.getValue().size());
+			List<String> values = new ArrayList<>(entry.getValue().size());
 			for (String value : entry.getValue()) {
 				values.add(expandUriComponent(value, variables));
 			}
@@ -701,8 +702,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		public int hashCode() {
 			return getPath().hashCode();
 		}
-
 	}
+
 
 	/**
 	 * Represents a path backed by a string list (i.e. path segments).
@@ -713,7 +714,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		public PathSegmentComponent(List<String> pathSegments) {
 			Assert.notNull(pathSegments);
-			this.pathSegments = Collections.unmodifiableList(new ArrayList<String>(pathSegments));
+			this.pathSegments = Collections.unmodifiableList(new ArrayList<>(pathSegments));
 		}
 
 		@Override
@@ -738,7 +739,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
 			List<String> pathSegments = getPathSegments();
-			List<String> encodedPathSegments = new ArrayList<String>(pathSegments.size());
+			List<String> encodedPathSegments = new ArrayList<>(pathSegments.size());
 			for (String pathSegment : pathSegments) {
 				String encodedPathSegment = encodeUriComponent(pathSegment, encoding, Type.PATH_SEGMENT);
 				encodedPathSegments.add(encodedPathSegment);
@@ -756,7 +757,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
 			List<String> pathSegments = getPathSegments();
-			List<String> expandedPathSegments = new ArrayList<String>(pathSegments.size());
+			List<String> expandedPathSegments = new ArrayList<>(pathSegments.size());
 			for (String pathSegment : pathSegments) {
 				String expandedPathSegment = expandUriComponent(pathSegment, uriVariables);
 				expandedPathSegments.add(expandedPathSegment);
@@ -805,7 +806,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			List<String> result = new ArrayList<String>();
+			List<String> result = new ArrayList<>();
 			for (PathComponent pathComponent : this.pathComponents) {
 				result.addAll(pathComponent.getPathSegments());
 			}
@@ -814,7 +815,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
-			List<PathComponent> encodedComponents = new ArrayList<PathComponent>(this.pathComponents.size());
+			List<PathComponent> encodedComponents = new ArrayList<>(this.pathComponents.size());
 			for (PathComponent pathComponent : this.pathComponents) {
 				encodedComponents.add(pathComponent.encode(encoding));
 			}
@@ -830,7 +831,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
-			List<PathComponent> expandedComponents = new ArrayList<PathComponent>(this.pathComponents.size());
+			List<PathComponent> expandedComponents = new ArrayList<>(this.pathComponents.size());
 			for (PathComponent pathComponent : this.pathComponents) {
 				expandedComponents.add(pathComponent.expand(uriVariables));
 			}
@@ -881,5 +882,24 @@ final class HierarchicalUriComponents extends UriComponents {
 			return 42;
 		}
 	};
+
+
+	private static class QueryUriTemplateVariables implements UriTemplateVariables {
+
+		private final UriTemplateVariables delegate;
+
+		public QueryUriTemplateVariables(UriTemplateVariables delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public Object getValue(String name) {
+			Object value = this.delegate.getValue(name);
+			if (ObjectUtils.isArray(value)) {
+				value = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(value));
+			}
+			return value;
+		}
+	}
 
 }

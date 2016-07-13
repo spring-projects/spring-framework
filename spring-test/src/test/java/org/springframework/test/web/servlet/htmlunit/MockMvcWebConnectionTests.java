@@ -1,34 +1,33 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.WebClient;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for {@link MockMvcWebConnection}.
@@ -50,7 +49,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void contextPathNull() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, null));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient));
 
 		Page page = this.webClient.getPage("http://localhost/context/a");
 
@@ -59,7 +58,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void contextPathExplicit() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, "/context"));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, "/context"));
 
 		Page page = this.webClient.getPage("http://localhost/context/a");
 
@@ -68,7 +67,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void contextPathEmpty() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, ""));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 
 		Page page = this.webClient.getPage("http://localhost/context/a");
 
@@ -77,7 +76,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void forward() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, ""));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, this.webClient, ""));
 
 		Page page = this.webClient.getPage("http://localhost/forward");
 
@@ -87,13 +86,13 @@ public class MockMvcWebConnectionTests {
 	@Test(expected = IllegalArgumentException.class)
 	@SuppressWarnings("resource")
 	public void contextPathDoesNotStartWithSlash() throws IOException {
-		new MockMvcWebConnection(this.mockMvc, "context");
+		new MockMvcWebConnection(this.mockMvc, this.webClient, "context");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	@SuppressWarnings("resource")
 	public void contextPathEndsWithSlash() throws IOException {
-		new MockMvcWebConnection(this.mockMvc, "/context/");
+		new MockMvcWebConnection(this.mockMvc, this.webClient, "/context/");
 	}
 
 }

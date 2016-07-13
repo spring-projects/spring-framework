@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class WebRequestDataBinderIntegrationTests {
 		PartsBean bean = new PartsBean();
 		partsServlet.setBean(bean);
 
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		Resource firstPart = new ClassPathResource("/org/springframework/http/converter/logo.jpg");
 		parts.add("firstPart", firstPart);
 		parts.add("secondPart", "secondValue");
@@ -122,7 +122,7 @@ public class WebRequestDataBinderIntegrationTests {
 		PartListBean bean = new PartListBean();
 		partListServlet.setBean(bean);
 
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("partList", "first value");
 		parts.add("partList", "second value");
 		Resource logo = new ClassPathResource("/org/springframework/http/converter/logo.jpg");

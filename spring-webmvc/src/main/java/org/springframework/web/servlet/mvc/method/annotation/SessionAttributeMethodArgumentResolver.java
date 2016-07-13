@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import javax.servlet.ServletException;
@@ -33,17 +34,15 @@ import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumen
  */
 public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(SessionAttribute.class);
 	}
 
-
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		SessionAttribute annot = parameter.getParameterAnnotation(SessionAttribute.class);
-		return new NamedValueInfo(annot.name(), annot.required(), ValueConstants.DEFAULT_NONE);
+		SessionAttribute ann = parameter.getParameterAnnotation(SessionAttribute.class);
+		return new NamedValueInfo(ann.name(), ann.required(), ValueConstants.DEFAULT_NONE);
 	}
 
 	@Override

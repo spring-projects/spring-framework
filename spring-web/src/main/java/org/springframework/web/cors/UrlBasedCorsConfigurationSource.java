@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource {
 
-	private final Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<String, CorsConfiguration>();
+	private final Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -123,7 +123,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	@Override
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		for(Map.Entry<String, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
+		for (Map.Entry<String, CorsConfiguration> entry : this.corsConfigurations.entrySet()) {
 			if (this.pathMatcher.match(entry.getKey(), lookupPath)) {
 				return entry.getValue();
 			}

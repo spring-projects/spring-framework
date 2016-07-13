@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
@@ -68,6 +69,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
@@ -140,6 +142,9 @@ import org.springframework.util.StringUtils;
 public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
+	// Common Annotations 1.1 Resource.lookup() available? Not present on JDK 6...
+	private static final Method lookupAttribute = ClassUtils.getMethodIfAvailable(Resource.class, "lookup");
+
 	private static Class<? extends Annotation> webServiceRefClass = null;
 
 	private static Class<? extends Annotation> ejbRefClass = null;
@@ -166,7 +171,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 
-	private final Set<String> ignoredResourceTypes = new HashSet<String>(1);
+	private final Set<String> ignoredResourceTypes = new HashSet<>(1);
 
 	private boolean fallbackToDefaultTypeMatch = true;
 
@@ -178,8 +183,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private transient BeanFactory beanFactory;
 
+	private transient StringValueResolver embeddedValueResolver;
+
 	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(256);
+			new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -271,11 +278,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
 		this.beanFactory = beanFactory;
 		if (this.resourceFactory == null) {
 			this.resourceFactory = beanFactory;
+		}
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
 		}
 	}
 
@@ -341,12 +351,12 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	}
 
 	private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
 		Class<?> targetClass = clazz;
 
 		do {
 			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<InjectionMetadata.InjectedElement>();
+					new LinkedList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
 				@Override
@@ -386,7 +396,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 							if (Modifier.isStatic(method.getModifiers())) {
 								throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
 							}
-							if (method.getParameterTypes().length != 1) {
+							if (method.getParameterCount() != 1) {
 								throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
 							}
 							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
@@ -396,7 +406,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 							if (Modifier.isStatic(method.getModifiers())) {
 								throw new IllegalStateException("@EJB annotation is not supported on static methods");
 							}
-							if (method.getParameterTypes().length != 1) {
+							if (method.getParameterCount() != 1) {
 								throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
 							}
 							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
@@ -504,7 +514,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		if (this.fallbackToDefaultTypeMatch && element.isDefaultName &&
 				factory instanceof AutowireCapableBeanFactory && !factory.containsBean(name)) {
-			autowiredBeanNames = new LinkedHashSet<String>();
+			autowiredBeanNames = new LinkedHashSet<>();
 			resource = ((AutowireCapableBeanFactory) factory).resolveDependency(
 					element.getDependencyDescriptor(), requestingBeanName, autowiredBeanNames, null);
 		}
@@ -592,8 +602,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
 				}
 			}
-			else if (beanFactory instanceof ConfigurableBeanFactory){
-				resourceName = ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(resourceName);
+			else if (embeddedValueResolver != null) {
+				resourceName = embeddedValueResolver.resolveStringValue(resourceName);
 			}
 			if (resourceType != null && Object.class != resourceType) {
 				checkResourceType(resourceType);
@@ -604,7 +614,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			}
 			this.name = resourceName;
 			this.lookupType = resourceType;
-			this.mappedName = resource.mappedName();
+			String lookupValue = (lookupAttribute != null ?
+					(String) ReflectionUtils.invokeMethod(lookupAttribute, resource) : null);
+			this.mappedName = (StringUtils.hasLength(lookupValue) ? lookupValue : resource.mappedName());
 			Lazy lazy = ae.getAnnotation(Lazy.class);
 			this.lazyLookup = (lazy != null && lazy.value());
 		}

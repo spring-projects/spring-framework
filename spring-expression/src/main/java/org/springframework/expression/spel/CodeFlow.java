@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,8 @@ public class CodeFlow implements Opcodes {
 	private int nextFreeVariableId = 1;
 
 	public CodeFlow(String clazzName, ClassWriter cw) {
-		this.compilationScopes = new Stack<ArrayList<String>>();
-		this.compilationScopes.add(new ArrayList<String>());
+		this.compilationScopes = new Stack<>();
+		this.compilationScopes.add(new ArrayList<>());
 		this.cw = cw;
 		this.clazzName = clazzName;
 	}
@@ -114,7 +114,7 @@ public class CodeFlow implements Opcodes {
 	 * each argument will be evaluated in a new scope.
 	 */
 	public void enterCompilationScope() {
-		this.compilationScopes.push(new ArrayList<String>());
+		this.compilationScopes.push(new ArrayList<>());
 	}
 
 	/**
@@ -146,6 +146,67 @@ public class CodeFlow implements Opcodes {
 			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
 		}
 	}
+
+	/**
+	 * Called after the main expression evaluation method has been generated, this
+	 * method will callback any registered FieldAdders or ClinitAdders to add any
+	 * extra information to the class representing the compiled expression.
+	 */
+	public void finish() {
+		if (this.fieldAdders != null) {
+			for (FieldAdder fieldAdder : this.fieldAdders) {
+				fieldAdder.generateField(cw,this);
+			}
+		}
+		if (this.clinitAdders != null) {
+			MethodVisitor mv = cw.visitMethod(ACC_PUBLIC | ACC_STATIC, "<clinit>", "()V", null, null);
+			mv.visitCode();
+			this.nextFreeVariableId = 0; // To 0 because there is no 'this' in a clinit
+			for (ClinitAdder clinitAdder : this.clinitAdders) {
+				clinitAdder.generateCode(mv, this);
+			}
+			mv.visitInsn(RETURN);
+			mv.visitMaxs(0,0); // not supplied due to COMPUTE_MAXS
+			mv.visitEnd();
+		}
+	}
+
+	/**
+	 * Register a FieldAdder which will add a new field to the generated
+	 * class to support the code produced by an ast nodes primary
+	 * generateCode() method.
+	 */
+	public void registerNewField(FieldAdder fieldAdder) {
+		if (this.fieldAdders == null) {
+			this.fieldAdders = new ArrayList<>();
+		}
+		this.fieldAdders.add(fieldAdder);
+	}
+
+	/**
+	 * Register a ClinitAdder which will add code to the static
+	 * initializer in the generated class to support the code
+	 * produced by an ast nodes primary generateCode() method.
+	 */
+	public void registerNewClinit(ClinitAdder clinitAdder) {
+		if (this.clinitAdders == null) {
+			this.clinitAdders = new ArrayList<>();
+		}
+		this.clinitAdders.add(clinitAdder);
+	}
+
+	public int nextFieldId() {
+		return this.nextFieldId++;
+	}
+
+	public int nextFreeVariableId() {
+		return this.nextFreeVariableId++;
+	}
+
+	public String getClassName() {
+		return this.clazzName;
+	}
+
 
 	/**
 	 * Insert any necessary cast and value call to convert from a boxed type to a
@@ -779,74 +840,6 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * Called after the main expression evaluation method has been generated, this
-	 * method will callback any registered FieldAdders or ClinitAdders to add any
-	 * extra information to the class representing the compiled expression.
-	 */
-	public void finish() {
-		if (fieldAdders != null) {
-			for (FieldAdder fieldAdder: fieldAdders) {
-				fieldAdder.generateField(cw,this);
-			}
-		}
-		if (clinitAdders != null) {
-			MethodVisitor mv = cw.visitMethod(ACC_PUBLIC | ACC_STATIC, "<clinit>", "()V", null, null);
-			mv.visitCode();
-			nextFreeVariableId = 0; // To 0 because there is no 'this' in a clinit
-			for (ClinitAdder clinitAdder: clinitAdders) {
-				clinitAdder.generateCode(mv, this);
-			}
-			mv.visitInsn(RETURN);
-			mv.visitMaxs(0,0); // not supplied due to COMPUTE_MAXS
-			mv.visitEnd();
-		}
-	}
-
-	/**
-	 * Register a FieldAdder which will add a new field to the generated
-	 * class to support the code produced by an ast nodes primary
-	 * generateCode() method.
-	 */
-	public void registerNewField(FieldAdder fieldAdder) {
-		if (fieldAdders == null) {
-			fieldAdders = new ArrayList<FieldAdder>();
-		}
-		fieldAdders.add(fieldAdder);
-	}
-
-	/**
-	 * Register a ClinitAdder which will add code to the static
-	 * initializer in the generated class to support the code
-	 * produced by an ast nodes primary generateCode() method.
-	 */
-	public void registerNewClinit(ClinitAdder clinitAdder) {
-		if (clinitAdders == null) {
-			clinitAdders = new ArrayList<ClinitAdder>();
-		}
-		clinitAdders.add(clinitAdder);
-	}
-
-	public int nextFieldId() {
-		return nextFieldId++;
-	}
-
-	public int nextFreeVariableId() {
-		return nextFreeVariableId++;
-	}
-
-	public String getClassname() {
-		return clazzName;
-	}
-
-	public interface FieldAdder {
-		public void generateField(ClassWriter cw, CodeFlow codeflow);
-	}
-
-	public interface ClinitAdder {
-		public void generateCode(MethodVisitor mv, CodeFlow codeflow);
-	}
-
-	/**
 	 * Create the optimal instruction for loading a number on the stack.
 	 * @param mv where to insert the bytecode
 	 * @param value the value to be loaded
@@ -918,7 +911,7 @@ public class CodeFlow implements Opcodes {
 	 */
 	public static boolean isReferenceTypeArray(String arraytype) {
 		int length = arraytype.length();
-		for (int i=0;i<length;i++) {
+		for (int i = 0; i < length; i++) {
 			char ch = arraytype.charAt(i);
 			if (ch == '[') continue;
 			return ch=='L';
@@ -976,5 +969,18 @@ public class CodeFlow implements Opcodes {
 		}
 	}
 
+
+	@FunctionalInterface
+	public interface FieldAdder {
+
+		void generateField(ClassWriter cw, CodeFlow codeflow);
+	}
+
+
+	@FunctionalInterface
+	public interface ClinitAdder {
+
+		void generateCode(MethodVisitor mv, CodeFlow codeflow);
+	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.support;
 
+import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpRequest;
@@ -133,8 +134,15 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	private static String prependForwardedPrefix(HttpServletRequest request, String path) {
-		String prefix = request.getHeader("X-Forwarded-Prefix");
-		if (StringUtils.hasText(prefix)) {
+		String prefix = null;
+		Enumeration<String> names = request.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			if ("X-Forwarded-Prefix".equalsIgnoreCase(name)) {
+				prefix = request.getHeader(name);
+			}
+		}
+		if (prefix != null) {
 			path = prefix + path;
 		}
 		return path;
@@ -223,7 +231,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	@Override
-	public Object clone() {
+	public ServletUriComponentsBuilder cloneBuilder() {
 		return new ServletUriComponentsBuilder(this);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.aop.framework;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +32,7 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class AopProxyUtilsTests {
+public class AopProxyUtilsTests {
 
 	@Test
 	public void testCompleteProxiedInterfacesWorksWithNull() {
@@ -125,15 +123,10 @@ public final class AopProxyUtilsTests {
 		assertEquals(Comparable.class, userInterfaces[1]);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testProxiedUserInterfacesWithNoInterface() {
 		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[0],
-				new InvocationHandler() {
-					@Override
-					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-						return null;
-					}
-				});
+				(proxy1, method, args) -> null);
 		AopProxyUtils.proxiedUserInterfaces(proxy);
 	}
 

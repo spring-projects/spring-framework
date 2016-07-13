@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
-	private static final ThreadLocal<Method> currentlyInvokedFactoryMethod = new ThreadLocal<Method>();
+	private static final ThreadLocal<Method> currentlyInvokedFactoryMethod = new ThreadLocal<>();
 
 
 	/**
@@ -171,12 +171,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			}
 		}
 		catch (IllegalArgumentException ex) {
-			throw new BeanInstantiationException(factoryMethod.getReturnType(),
+			throw new BeanInstantiationException(factoryMethod,
 					"Illegal arguments to factory method '" + factoryMethod.getName() + "'; " +
 					"args: " + StringUtils.arrayToCommaDelimitedString(args), ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new BeanInstantiationException(factoryMethod.getReturnType(),
+			throw new BeanInstantiationException(factoryMethod,
 					"Cannot access factory method '" + factoryMethod.getName() + "'; is it public?", ex);
 		}
 		catch (InvocationTargetException ex) {
@@ -186,7 +186,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				msg = "Circular reference involving containing bean '" + bd.getFactoryBeanName() + "' - consider " +
 						"declaring the factory method as static for independence from its containing instance. " + msg;
 			}
-			throw new BeanInstantiationException(factoryMethod.getReturnType(), msg, ex.getTargetException());
+			throw new BeanInstantiationException(factoryMethod, msg, ex.getTargetException());
 		}
 	}
 

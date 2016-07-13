@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		Method method = ReflectionUtils.findMethod(SampleEvents.class,
 				"tooManyParameters", String.class, String.class);
 
-		thrown.expect(IllegalStateException.class);
+		this.thrown.expect(IllegalStateException.class);
 		createTestInstance(method);
 	}
 
@@ -157,7 +157,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		Method method = ReflectionUtils.findMethod(SampleEvents.class,
 				"noParameter");
 
-		thrown.expect(IllegalStateException.class);
+		this.thrown.expect(IllegalStateException.class);
 		createTestInstance(method);
 	}
 
@@ -166,7 +166,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		Method method = ReflectionUtils.findMethod(SampleEvents.class,
 				"moreThanOneParameter", String.class, Integer.class);
 
-		thrown.expect(IllegalStateException.class);
+		this.thrown.expect(IllegalStateException.class);
 		createTestInstance(method);
 	}
 
@@ -237,9 +237,9 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 				"generateRuntimeException", GenericTestEvent.class);
 		GenericTestEvent<String> event = createGenericTestEvent("fail");
 
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("Test exception");
-		thrown.expectCause(is(isNull(Throwable.class)));
+		this.thrown.expect(IllegalStateException.class);
+		this.thrown.expectMessage("Test exception");
+		this.thrown.expectCause(is(isNull(Throwable.class)));
 		invokeListener(method, event);
 	}
 
@@ -249,8 +249,8 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 				"generateCheckedException", GenericTestEvent.class);
 		GenericTestEvent<String> event = createGenericTestEvent("fail");
 
-		thrown.expect(UndeclaredThrowableException.class);
-		thrown.expectCause(is(instanceOf(IOException.class)));
+		this.thrown.expect(UndeclaredThrowableException.class);
+		this.thrown.expectCause(is(instanceOf(IOException.class)));
 		invokeListener(method, event);
 	}
 
@@ -265,8 +265,8 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		Method method = ReflectionUtils.findMethod(InvalidProxyTestBean.class, "handleIt2", ApplicationEvent.class);
 		StaticApplicationListenerMethodAdapter listener =
 				new StaticApplicationListenerMethodAdapter(method, bean);
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage("handleIt2");
+		this.thrown.expect(IllegalStateException.class);
+		this.thrown.expectMessage("handleIt2");
 		listener.onApplicationEvent(createGenericTestEvent("test"));
 	}
 
@@ -373,7 +373,7 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 
 		@Override
 		public Object getTargetBean() {
-			return targetBean;
+			return this.targetBean;
 		}
 	}
 

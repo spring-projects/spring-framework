@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Repeatable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
@@ -71,11 +72,11 @@ import org.springframework.util.StringUtils;
  * <em>meta-present</em> on the other annotation.
  *
  * <h3>Meta-annotation Support</h3>
- * <p>Most {@code find*()} methods and some {@code get*()} methods in this
- * class provide support for finding annotations used as meta-annotations.
- * Consult the Javadoc for each method in this class for details. For support
- * for meta-annotations with <em>attribute overrides</em> in
- * <em>composed annotations</em>, use {@link AnnotatedElementUtils} instead.
+ * <p>Most {@code find*()} methods and some {@code get*()} methods in this class
+ * provide support for finding annotations used as meta-annotations. Consult the
+ * javadoc for each method in this class for details. For fine-grained support for
+ * meta-annotations with <em>attribute overrides</em> in <em>composed annotations</em>,
+ * consider using {@link AnnotatedElementUtils}'s more specific methods instead.
  *
  * <h3>Attribute Aliases</h3>
  * <p>All public methods in this class that return annotations, arrays of
@@ -111,27 +112,26 @@ public abstract class AnnotationUtils {
 	 */
 	public static final String VALUE = "value";
 
-
 	private static final Map<AnnotationCacheKey, Annotation> findAnnotationCache =
-			new ConcurrentReferenceHashMap<AnnotationCacheKey, Annotation>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	private static final Map<AnnotationCacheKey, Boolean> metaPresentCache =
-			new ConcurrentReferenceHashMap<AnnotationCacheKey, Boolean>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache =
-			new ConcurrentReferenceHashMap<Class<?>, Boolean>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
-			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	private static final Map<Class<? extends Annotation>, Map<String, List<String>>> attributeAliasesCache =
-			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Map<String, List<String>>>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	private static final Map<Class<? extends Annotation>, List<Method>> attributeMethodsCache =
-			new ConcurrentReferenceHashMap<Class<? extends Annotation>, List<Method>>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	private static final Map<Method, AliasDescriptor> aliasDescriptorCache =
-			new ConcurrentReferenceHashMap<Method, AliasDescriptor>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	private static transient Log logger;
 
@@ -257,36 +257,6 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Delegates to {@link #getRepeatableAnnotations(AnnotatedElement, Class, Class)}.
-	 * @since 4.0
-	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @deprecated As of Spring Framework 4.2, use {@code getRepeatableAnnotations()}
-	 * or {@code getDeclaredRepeatableAnnotations()} instead.
-	 */
-	@Deprecated
-	public static <A extends Annotation> Set<A> getRepeatableAnnotation(Method method,
-			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
-
-		return getRepeatableAnnotations(method, annotationType, containerAnnotationType);
-	}
-
-	/**
-	 * Delegates to {@link #getRepeatableAnnotations(AnnotatedElement, Class, Class)}.
-	 * @since 4.0
-	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @deprecated As of Spring Framework 4.2, use {@code getRepeatableAnnotations()}
-	 * or {@code getDeclaredRepeatableAnnotations()} instead.
-	 */
-	@Deprecated
-	public static <A extends Annotation> Set<A> getRepeatableAnnotation(AnnotatedElement annotatedElement,
-			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
-
-		return getRepeatableAnnotations(annotatedElement, annotationType, containerAnnotationType);
-	}
-
-	/**
 	 * Get the <em>repeatable</em> {@linkplain Annotation annotations} of
 	 * {@code annotationType} from the supplied {@link AnnotatedElement}, where
 	 * such annotations are either <em>present</em>, <em>indirectly present</em>,
@@ -308,6 +278,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
@@ -343,6 +314,7 @@ public abstract class AnnotationUtils {
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
@@ -388,6 +360,7 @@ public abstract class AnnotationUtils {
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
@@ -423,6 +396,7 @@ public abstract class AnnotationUtils {
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class)
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
@@ -463,7 +437,7 @@ public abstract class AnnotationUtils {
 			if (annotatedElement instanceof Method) {
 				annotatedElement = BridgeMethodResolver.findBridgedMethod((Method) annotatedElement);
 			}
-			return new AnnotationCollector<A>(annotationType, containerAnnotationType, declaredMode).getResult(annotatedElement);
+			return new AnnotationCollector<>(annotationType, containerAnnotationType, declaredMode).getResult(annotatedElement);
 		}
 		catch (Exception ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
@@ -495,7 +469,7 @@ public abstract class AnnotationUtils {
 
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
-		A ann = findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>());
+		A ann = findAnnotation(annotatedElement, annotationType, new HashSet<>());
 		return synthesizeAnnotation(ann, annotatedElement);
 	}
 
@@ -680,7 +654,7 @@ public abstract class AnnotationUtils {
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(clazz, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
 		if (result == null) {
-			result = findAnnotation(clazz, annotationType, new HashSet<Annotation>());
+			result = findAnnotation(clazz, annotationType, new HashSet<>());
 			if (result != null && synthesize) {
 				result = synthesizeAnnotation(result, clazz);
 				findAnnotationCache.put(cacheKey, result);
@@ -1169,7 +1143,7 @@ public abstract class AnnotationUtils {
 
 		// Track which attribute values have already been replaced so that we can short
 		// circuit the search algorithms.
-		Set<String> valuesAlreadyReplaced = new HashSet<String>();
+		Set<String> valuesAlreadyReplaced = new HashSet<>();
 
 		// Validate @AliasFor configuration
 		Map<String, List<String>> aliasMap = getAttributeAliasMap(annotationType);
@@ -1534,7 +1508,7 @@ public abstract class AnnotationUtils {
 			return map;
 		}
 
-		map = new LinkedHashMap<String, List<String>>();
+		map = new LinkedHashMap<>();
 		for (Method attribute : getAttributeMethods(annotationType)) {
 			List<String> aliasNames = getAttributeAliasNames(attribute);
 			if (!aliasNames.isEmpty()) {
@@ -1670,7 +1644,7 @@ public abstract class AnnotationUtils {
 			return methods;
 		}
 
-		methods = new ArrayList<Method>();
+		methods = new ArrayList<>();
 		for (Method method : annotationType.getDeclaredMethods()) {
 			if (isAttributeMethod(method)) {
 				ReflectionUtils.makeAccessible(method);
@@ -1707,7 +1681,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	static boolean isAttributeMethod(Method method) {
-		return (method != null && method.getParameterTypes().length == 0 && method.getReturnType() != void.class);
+		return (method != null && method.getParameterCount() == 0 && method.getReturnType() != void.class);
 	}
 
 	/**
@@ -1717,11 +1691,24 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	static boolean isAnnotationTypeMethod(Method method) {
-		return (method != null && method.getName().equals("annotationType") && method.getParameterTypes().length == 0);
+		return (method != null && method.getName().equals("annotationType") && method.getParameterCount() == 0);
 	}
 
 	/**
-	 * <p>If the supplied throwable is an {@link AnnotationConfigurationException},
+	 * Resolve the container type for the supplied repeatable {@code annotationType}.
+	 * <p>Automatically detects a <em>container annotation</em> declared via
+	 * {@link java.lang.annotation.Repeatable}. If the supplied annotation type
+	 * is not annotated with {@code @Repeatable}, this method simply returns
+	 * {@code null}.
+	 * @since 4.2
+	 */
+	static Class<? extends Annotation> resolveContainerAnnotationType(Class<? extends Annotation> annotationType) {
+		Repeatable repeatable = getAnnotation(annotationType, Repeatable.class);
+		return (repeatable != null ? repeatable.value() : null);
+	}
+
+	/**
+	 * If the supplied throwable is an {@link AnnotationConfigurationException},
 	 * it will be cast to an {@code AnnotationConfigurationException} and thrown,
 	 * allowing it to propagate to the caller.
 	 * <p>Otherwise, this method does nothing.
@@ -1774,7 +1761,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Cache key for the AnnotatedElement cache.
 	 */
-	private static class AnnotationCacheKey {
+	private static final class AnnotationCacheKey implements Comparable<AnnotationCacheKey> {
 
 		private final AnnotatedElement element;
 
@@ -1801,12 +1788,24 @@ public abstract class AnnotationUtils {
 		public int hashCode() {
 			return (this.element.hashCode() * 29 + this.annotationType.hashCode());
 		}
+
+		@Override
+		public String toString() {
+			return "@" + this.annotationType + " on " + this.element;
+		}
+
+		@Override
+		public int compareTo(AnnotationCacheKey other) {
+			int result = this.element.toString().compareTo(other.element.toString());
+			if (result == 0) {
+				result = this.annotationType.getName().compareTo(other.annotationType.getName());
+			}
+			return result;
+		}
 	}
 
 
 	private static class AnnotationCollector<A extends Annotation> {
-
-		private static final String REPEATABLE_CLASS_NAME = "java.lang.annotation.Repeatable";
 
 		private final Class<A> annotationType;
 
@@ -1814,30 +1813,15 @@ public abstract class AnnotationUtils {
 
 		private final boolean declaredMode;
 
-		private final Set<AnnotatedElement> visited = new HashSet<AnnotatedElement>();
+		private final Set<AnnotatedElement> visited = new HashSet<>();
 
-		private final Set<A> result = new LinkedHashSet<A>();
+		private final Set<A> result = new LinkedHashSet<>();
 
 		AnnotationCollector(Class<A> annotationType, Class<? extends Annotation> containerAnnotationType, boolean declaredMode) {
 			this.annotationType = annotationType;
 			this.containerAnnotationType = (containerAnnotationType != null ? containerAnnotationType :
 					resolveContainerAnnotationType(annotationType));
 			this.declaredMode = declaredMode;
-		}
-
-		@SuppressWarnings("unchecked")
-		static Class<? extends Annotation> resolveContainerAnnotationType(Class<? extends Annotation> annotationType) {
-			try {
-				Annotation repeatable = getAnnotation(annotationType, REPEATABLE_CLASS_NAME);
-				if (repeatable != null) {
-					Object value = AnnotationUtils.getValue(repeatable);
-					return (Class<? extends Annotation>) value;
-				}
-			}
-			catch (Exception ex) {
-				handleIntrospectionFailure(annotationType, ex);
-			}
-			return null;
 		}
 
 		Set<A> getResult(AnnotatedElement element) {
@@ -1872,7 +1856,7 @@ public abstract class AnnotationUtils {
 		@SuppressWarnings("unchecked")
 		private List<A> getValue(AnnotatedElement element, Annotation annotation) {
 			try {
-				List<A> synthesizedAnnotations = new ArrayList<A>();
+				List<A> synthesizedAnnotations = new ArrayList<>();
 				for (A anno : (A[]) AnnotationUtils.getValue(annotation)) {
 					synthesizedAnnotations.add(synthesizeAnnotation(anno, element));
 				}
@@ -1953,7 +1937,7 @@ public abstract class AnnotationUtils {
 			this.aliasedAttributeName = getAliasedAttributeName(aliasFor, sourceAttribute);
 			if (this.aliasedAnnotationType == this.sourceAnnotationType &&
 					this.aliasedAttributeName.equals(this.sourceAttributeName)) {
-				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] points to " +
+				String msg = String.format("@AliasFor declaration on attribute '%s' in annotation [%s] points to " +
 						"itself. Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
 						sourceAttribute.getName(), declaringClass.getName());
 				throw new AnnotationConfigurationException(msg);
@@ -1963,7 +1947,7 @@ public abstract class AnnotationUtils {
 			}
 			catch (NoSuchMethodException ex) {
 				String msg = String.format(
-						"Attribute [%s] in annotation [%s] is declared as an @AliasFor nonexistent attribute [%s] in annotation [%s].",
+						"Attribute '%s' in annotation [%s] is declared as an @AliasFor nonexistent attribute '%s' in annotation [%s].",
 						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
 						this.aliasedAnnotationType.getName());
 				throw new AnnotationConfigurationException(msg, ex);
@@ -1975,8 +1959,8 @@ public abstract class AnnotationUtils {
 		private void validate() {
 			// Target annotation is not meta-present?
 			if (!this.isAliasPair && !isAnnotationMetaPresent(this.sourceAnnotationType, this.aliasedAnnotationType)) {
-				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares " +
-						"an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",
+				String msg = String.format("@AliasFor declaration on attribute '%s' in annotation [%s] declares " +
+						"an alias for attribute '%s' in meta-annotation [%s] which is not meta-present.",
 						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
 						this.aliasedAnnotationType.getName());
 				throw new AnnotationConfigurationException(msg);
@@ -1985,14 +1969,14 @@ public abstract class AnnotationUtils {
 			if (this.isAliasPair) {
 				AliasFor mirrorAliasFor = this.aliasedAttribute.getAnnotation(AliasFor.class);
 				if (mirrorAliasFor == null) {
-					String msg = String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",
+					String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s].",
 							this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName);
 					throw new AnnotationConfigurationException(msg);
 				}
 
 				String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor, this.aliasedAttribute);
 				if (!this.sourceAttributeName.equals(mirrorAliasedAttributeName)) {
-					String msg = String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
+					String msg = String.format("Attribute '%s' in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
 							this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName,
 							mirrorAliasedAttributeName);
 					throw new AnnotationConfigurationException(msg);
@@ -2001,9 +1985,10 @@ public abstract class AnnotationUtils {
 
 			Class<?> returnType = this.sourceAttribute.getReturnType();
 			Class<?> aliasedReturnType = this.aliasedAttribute.getReturnType();
-			if (returnType != aliasedReturnType) {
-				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] " +
-						"and attribute [%s] in annotation [%s] must declare the same return type.",
+			if (returnType != aliasedReturnType &&
+					(!aliasedReturnType.isArray() || returnType != aliasedReturnType.getComponentType())) {
+				String msg = String.format("Misconfigured aliases: attribute '%s' in annotation [%s] " +
+						"and attribute '%s' in annotation [%s] must declare the same return type.",
 						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
 						this.aliasedAnnotationType.getName());
 				throw new AnnotationConfigurationException(msg);
@@ -2020,16 +2005,16 @@ public abstract class AnnotationUtils {
 			Object aliasedDefaultValue = aliasedAttribute.getDefaultValue();
 
 			if (defaultValue == null || aliasedDefaultValue == null) {
-				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] " +
-						"and attribute [%s] in annotation [%s] must declare default values.",
+				String msg = String.format("Misconfigured aliases: attribute '%s' in annotation [%s] " +
+						"and attribute '%s' in annotation [%s] must declare default values.",
 						this.sourceAttributeName, this.sourceAnnotationType.getName(), aliasedAttribute.getName(),
 						aliasedAttribute.getDeclaringClass().getName());
 				throw new AnnotationConfigurationException(msg);
 			}
 
 			if (!ObjectUtils.nullSafeEquals(defaultValue, aliasedDefaultValue)) {
-				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] " +
-						"and attribute [%s] in annotation [%s] must declare the same default value.",
+				String msg = String.format("Misconfigured aliases: attribute '%s' in annotation [%s] " +
+						"and attribute '%s' in annotation [%s] must declare the same default value.",
 						this.sourceAttributeName, this.sourceAnnotationType.getName(), aliasedAttribute.getName(),
 						aliasedAttribute.getDeclaringClass().getName());
 				throw new AnnotationConfigurationException(msg);
@@ -2084,7 +2069,7 @@ public abstract class AnnotationUtils {
 			}
 
 			// Else: search for implicit aliases
-			List<String> aliases = new ArrayList<String>();
+			List<String> aliases = new ArrayList<>();
 			for (AliasDescriptor otherDescriptor : getOtherDescriptors()) {
 				if (this.isAliasFor(otherDescriptor)) {
 					this.validateAgainst(otherDescriptor);
@@ -2095,7 +2080,7 @@ public abstract class AnnotationUtils {
 		}
 
 		private List<AliasDescriptor> getOtherDescriptors() {
-			List<AliasDescriptor> otherDescriptors = new ArrayList<AliasDescriptor>();
+			List<AliasDescriptor> otherDescriptors = new ArrayList<>();
 			for (Method currentAttribute : getAttributeMethods(this.sourceAnnotationType)) {
 				if (!this.sourceAttribute.equals(currentAttribute)) {
 					AliasDescriptor otherDescriptor = AliasDescriptor.from(currentAttribute);
@@ -2154,7 +2139,7 @@ public abstract class AnnotationUtils {
 
 			// Ensure user did not declare both 'value' and 'attribute' in @AliasFor
 			if (attributeDeclared && valueDeclared) {
-				String msg = String.format("In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' " +
+				String msg = String.format("In @AliasFor declared on attribute '%s' in annotation [%s], attribute 'attribute' " +
 						"and its alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
 						attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value);
 				throw new AnnotationConfigurationException(msg);

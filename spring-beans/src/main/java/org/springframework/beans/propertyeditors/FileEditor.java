@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,16 +59,14 @@ public class FileEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * Create a new FileEditor,
-	 * using the default ResourceEditor underneath.
+	 * Create a new FileEditor, using a default ResourceEditor underneath.
 	 */
 	public FileEditor() {
 		this.resourceEditor = new ResourceEditor();
 	}
 
 	/**
-	 * Create a new FileEditor,
-	 * using the given ResourceEditor underneath.
+	 * Create a new FileEditor, using the given ResourceEditor underneath.
 	 * @param resourceEditor the ResourceEditor to use
 	 */
 	public FileEditor(ResourceEditor resourceEditor) {
@@ -105,7 +103,7 @@ public class FileEditor extends PropertyEditorSupport {
 			}
 			catch (IOException ex) {
 				throw new IllegalArgumentException(
-						"Could not retrieve File for " + resource + ": " + ex.getMessage());
+						"Could not retrieve file for " + resource + ": " + ex.getMessage());
 			}
 		}
 		else {

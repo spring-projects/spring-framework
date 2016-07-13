@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,7 +200,7 @@ public abstract class PropertyMatches {
 		 * @param maxDistance the maximum distance to accept
 		 */
 		private static String[] calculateMatches(String propertyName, PropertyDescriptor[] propertyDescriptors, int maxDistance) {
-			List<String> candidates = new ArrayList<String>();
+			List<String> candidates = new ArrayList<>();
 			for (PropertyDescriptor pd : propertyDescriptors) {
 				if (pd.getWriteMethod() != null) {
 					String possibleAlternative = pd.getName();
@@ -241,7 +241,7 @@ public abstract class PropertyMatches {
 		}
 
 		private static String[] calculateMatches(final String propertyName, Class<?> beanClass, final int maxDistance) {
-			final List<String> candidates = new ArrayList<String>();
+			final List<String> candidates = new ArrayList<>();
 			ReflectionUtils.doWithFields(beanClass, new ReflectionUtils.FieldCallback() {
 				@Override
 				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {

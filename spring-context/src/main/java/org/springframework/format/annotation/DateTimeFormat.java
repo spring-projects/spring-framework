@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * <p>Each attribute is mutually exclusive, so only set one attribute per annotation instance
  * (the one most convenient one for your formatting needs).
  * When the pattern attribute is specified, it takes precedence over both the style and ISO attribute.
- * When the {@link #iso} attribute is specified, if takes precedence over the style attribute.
+ * When the {@link #iso} attribute is specified, it takes precedence over the style attribute.
  * When no annotation attributes are specified, the default format applied is style-based
  * with a style code of 'SS' (short date, short time).
  *
@@ -75,6 +75,12 @@ public @interface DateTimeFormat {
 	 * <p>Defaults to empty String, indicating no custom pattern String has been specified.
 	 * Set this attribute when you wish to format your field in accordance with a custom
 	 * date time pattern not represented by a style or ISO format.
+	 * <p>Note: This pattern follows the original {@link java.text.SimpleDateFormat} style,
+	 * as also supported by Joda-Time, with strict parsing semantics towards overflows
+	 * (e.g. rejecting a Feb 29 value for a non-leap-year). As a consequence, 'yy'
+	 * characters indicate a year in the traditional style, not a "year-of-era" as in the
+	 * {@link java.time.format.DateTimeFormatter} specification (i.e. 'yy' turns into 'uu'
+	 * when going through that {@code DateTimeFormatter} with strict resolution mode).
 	 */
 	String pattern() default "";
 

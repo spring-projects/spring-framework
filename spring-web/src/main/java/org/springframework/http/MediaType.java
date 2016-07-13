@@ -71,7 +71,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/x-www-form-urlencoded}.
-	 *  */
+	 */
 	public final static MediaType APPLICATION_FORM_URLENCODED;
 
 	/**
@@ -103,7 +103,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
-	 *  */
+	 */
 	public final static MediaType APPLICATION_OCTET_STREAM;
 
 	/**
@@ -113,7 +113,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/pdf}.
-	 *  */
+	 */
 	public final static MediaType APPLICATION_PDF;
 
 	/**
@@ -123,7 +123,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/xhtml+xml}.
-	 *  */
+	 */
 	public final static MediaType APPLICATION_XHTML_XML;
 
 	/**
@@ -173,7 +173,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code multipart/form-data}.
-	 *  */
+	 */
 	public final static MediaType MULTIPART_FORM_DATA;
 
 	/**
@@ -183,7 +183,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code text/html}.
-	 *  */
+	 */
 	public final static MediaType TEXT_HTML;
 
 	/**
@@ -192,8 +192,18 @@ public class MediaType extends MimeType implements Serializable {
 	public final static String TEXT_HTML_VALUE = "text/html";
 
 	/**
+	 * Public constant media type for {@code text/markdown}.
+	 */
+	public final static MediaType TEXT_MARKDOWN;
+
+	/**
+	 * A String equivalent of {@link MediaType#TEXT_MARKDOWN}.
+	 */
+	public final static String TEXT_MARKDOWN_VALUE = "text/markdown";
+
+	/**
 	 * Public constant media type for {@code text/plain}.
-	 *  */
+	 */
 	public final static MediaType TEXT_PLAIN;
 
 	/**
@@ -203,7 +213,7 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code text/xml}.
-	 *  */
+	 */
 	public final static MediaType TEXT_XML;
 
 	/**
@@ -230,6 +240,7 @@ public class MediaType extends MimeType implements Serializable {
 		IMAGE_PNG = valueOf(IMAGE_PNG_VALUE);
 		MULTIPART_FORM_DATA = valueOf(MULTIPART_FORM_DATA_VALUE);
 		TEXT_HTML = valueOf(TEXT_HTML_VALUE);
+		TEXT_MARKDOWN = valueOf(TEXT_MARKDOWN_VALUE);
 		TEXT_PLAIN = valueOf(TEXT_PLAIN_VALUE);
 		TEXT_XML = valueOf(TEXT_XML_VALUE);
 	}
@@ -276,6 +287,17 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public MediaType(String type, String subtype, double qualityValue) {
 		this(type, subtype, Collections.singletonMap(PARAM_QUALITY_FACTOR, Double.toString(qualityValue)));
+	}
+
+	/**
+	 * Copy-constructor that copies the type, subtype and parameters of the given
+	 * {@code MediaType}, and allows to set the specified character set.
+	 * @param other the other media type
+	 * @param charset the character set
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 */
+	public MediaType(MediaType other, Charset charset) {
+		super(other, charset);
 	}
 
 	/**
@@ -352,7 +374,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (!mediaType.getParameters().containsKey(PARAM_QUALITY_FACTOR)) {
 			return this;
 		}
-		Map<String, String> params = new LinkedHashMap<String, String>(getParameters());
+		Map<String, String> params = new LinkedHashMap<>(getParameters());
 		params.put(PARAM_QUALITY_FACTOR, mediaType.getParameters().get(PARAM_QUALITY_FACTOR));
 		return new MediaType(this, params);
 	}
@@ -365,7 +387,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (!getParameters().containsKey(PARAM_QUALITY_FACTOR)) {
 			return this;
 		}
-		Map<String, String> params = new LinkedHashMap<String, String>(getParameters());
+		Map<String, String> params = new LinkedHashMap<>(getParameters());
 		params.remove(PARAM_QUALITY_FACTOR);
 		return new MediaType(this, params);
 	}
@@ -416,7 +438,7 @@ public class MediaType extends MimeType implements Serializable {
 			return Collections.emptyList();
 		}
 		String[] tokens = mediaTypes.split(",\\s*");
-		List<MediaType> result = new ArrayList<MediaType>(tokens.length);
+		List<MediaType> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMediaType(token));
 		}
@@ -503,7 +525,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static void sortBySpecificityAndQuality(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
-			Collections.sort(mediaTypes, new CompoundComparator<MediaType>(
+			Collections.sort(mediaTypes, new CompoundComparator<>(
 					MediaType.SPECIFICITY_COMPARATOR, MediaType.QUALITY_VALUE_COMPARATOR));
 		}
 	}

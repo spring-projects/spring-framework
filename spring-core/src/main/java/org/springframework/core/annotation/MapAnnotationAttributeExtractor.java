@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import static org.springframework.core.annotation.AnnotationUtils.*;
@@ -87,7 +89,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	private static Map<String, Object> enrichAndValidateAttributes(
 			Map<String, Object> originalAttributes, Class<? extends Annotation> annotationType) {
 
-		Map<String, Object> attributes = new HashMap<String, Object>(originalAttributes);
+		Map<String, Object> attributes = new LinkedHashMap<>(originalAttributes);
 		Map<String, List<String>> attributeAliasMap = getAttributeAliasMap(annotationType);
 
 		for (Method attributeMethod : getAttributeMethods(annotationType)) {
@@ -119,11 +121,9 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			}
 
 			// if still null
-			if (attributeValue == null) {
-				throw new IllegalArgumentException(String.format(
-						"Attributes map [%s] returned null for required attribute [%s] defined by annotation type [%s].",
-						attributes, attributeName, annotationType.getName()));
-			}
+			Assert.notNull(attributeValue, () -> String.format(
+					"Attributes map %s returned null for required attribute '%s' defined by annotation type [%s].",
+					attributes, attributeName, annotationType.getName()));
 
 			// finally, ensure correct type
 			Class<?> requiredReturnType = attributeMethod.getReturnType();
@@ -132,8 +132,16 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			if (!ClassUtils.isAssignable(requiredReturnType, actualReturnType)) {
 				boolean converted = false;
 
+				// Single element overriding an array of the same type?
+				if (requiredReturnType.isArray() && requiredReturnType.getComponentType() == actualReturnType) {
+					Object array = Array.newInstance(requiredReturnType.getComponentType(), 1);
+					Array.set(array, 0, attributeValue);
+					attributes.put(attributeName, array);
+					converted = true;
+				}
+
 				// Nested map representing a single annotation?
-				if (Annotation.class.isAssignableFrom(requiredReturnType) &&
+				else if (Annotation.class.isAssignableFrom(requiredReturnType) &&
 						Map.class.isAssignableFrom(actualReturnType)) {
 					Class<? extends Annotation> nestedAnnotationType =
 							(Class<? extends Annotation>) requiredReturnType;
@@ -153,13 +161,11 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 					converted = true;
 				}
 
-				if (!converted) {
-					throw new IllegalArgumentException(String.format(
-							"Attributes map [%s] returned a value of type [%s] for attribute [%s], "
-							+ "but a value of type [%s] is required as defined by annotation type [%s].",
-							attributes, actualReturnType.getName(), attributeName, requiredReturnType.getName(),
-							annotationType.getName()));
-				}
+				Assert.isTrue(converted, () -> String.format(
+						"Attributes map %s returned a value of type [%s] for attribute '%s', " +
+						"but a value of type [%s] is required as defined by annotation type [%s].",
+						attributes, actualReturnType.getName(), attributeName, requiredReturnType.getName(),
+						annotationType.getName()));
 			}
 		}
 

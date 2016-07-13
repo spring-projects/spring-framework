@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,8 +150,8 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 		HttpStatus status = HttpStatus.valueOf(response.getStatus());
 		HttpHeaders responseHeaders = toHttpHeaders(response.getHeaders());
 		return (response.getContent() != null ?
-			new ResponseEntity<String>(response.getContentAsString(), responseHeaders, status) :
-			new ResponseEntity<String>(responseHeaders, status));
+				new ResponseEntity<>(response.getContentAsString(), responseHeaders, status) :
+				new ResponseEntity<>(responseHeaders, status));
 	}
 
 	private static void addHttpHeaders(Request request, HttpHeaders headers) {

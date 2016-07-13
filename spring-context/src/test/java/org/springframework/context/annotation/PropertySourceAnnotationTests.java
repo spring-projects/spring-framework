@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,12 @@
 package org.springframework.context.annotation;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Properties;
 import javax.inject.Inject;
 
 import org.junit.Rule;
@@ -27,9 +31,13 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -64,7 +72,7 @@ public class PropertySourceAnnotationTests {
 		do {
 			name = iterator.next().getName();
 		}
-		while(iterator.hasNext());
+		while (iterator.hasNext());
 
 		assertThat(name, is("p1"));
 	}
@@ -109,6 +117,22 @@ public class PropertySourceAnnotationTests {
 			// p1 should 'win' as it was registered last
 			assertThat(ctx.getBean(TestBean.class).getName(), equalTo("p1TestBean"));
 		}
+	}
+
+	@Test
+	public void withCustomFactory() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithImplicitName.class, WithCustomFactory.class);
+		ctx.refresh();
+		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("P2TESTBEAN"));
+	}
+
+	@Test
+	public void withCustomFactoryAsMeta() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ConfigWithImplicitName.class, WithCustomFactoryAsMeta.class);
+		ctx.refresh();
+		assertThat(ctx.getBean(TestBean.class).getName(), equalTo("P2TESTBEAN"));
 	}
 
 	@Test
@@ -351,6 +375,43 @@ public class PropertySourceAnnotationTests {
 	@Configuration
 	@PropertySource("classpath:org/springframework/context/annotation/p2.properties")
 	static class P2Config {
+	}
+
+
+	@Configuration
+	@PropertySource(value = "classpath:org/springframework/context/annotation/p2.properties", factory = MyCustomFactory.class)
+	static class WithCustomFactory {
+	}
+
+
+	@Configuration
+	@MyPropertySource(value = "classpath:org/springframework/context/annotation/p2.properties")
+	static class WithCustomFactoryAsMeta {
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@PropertySource(value = {}, factory = MyCustomFactory.class)
+	public @interface MyPropertySource {
+
+		@AliasFor(annotation = PropertySource.class)
+		String value();
+	}
+
+
+	public static class MyCustomFactory implements PropertySourceFactory {
+
+		@Override
+		public org.springframework.core.env.PropertySource createPropertySource(String name, EncodedResource resource) throws IOException {
+			Properties props = PropertiesLoaderUtils.loadProperties(resource);
+			return new org.springframework.core.env.PropertySource<Properties>("my" + name, props) {
+				@Override
+				public Object getProperty(String name) {
+					String value = props.getProperty(name);
+					return (value != null ? value.toUpperCase() : null);
+				}
+			};
+		}
 	}
 
 

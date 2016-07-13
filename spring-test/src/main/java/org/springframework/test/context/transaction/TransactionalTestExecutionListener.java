@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@ package org.springframework.test.context.transaction;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +31,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -42,8 +44,6 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
-
-import static org.springframework.core.annotation.AnnotationUtils.*;
 
 /**
  * {@code TestExecutionListener} that provides support for executing tests
@@ -83,8 +83,9 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * <h3>Declarative Rollback and Commit Behavior</h3>
  * <p>By default, test transactions will be automatically <em>rolled back</em>
  * after completion of the test; however, transactional commit and rollback
- * behavior can be configured declaratively via the {@link Rollback @Rollback}
- * annotation at the class level and at the method level.
+ * behavior can be configured declaratively via the {@link Commit @Commit}
+ * and {@link Rollback @Rollback} annotations at the class level and at the
+ * method level.
  *
  * <h3>Programmatic Transaction Management</h3>
  * <p>As of Spring Framework 4.1, it is possible to interact with test-managed
@@ -96,9 +97,10 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * <p>When executing transactional tests, it is sometimes useful to be able to
  * execute certain <em>set up</em> or <em>tear down</em> code outside of a
  * transaction. {@code TransactionalTestExecutionListener} provides such
- * support for methods annotated with
- * {@link BeforeTransaction @BeforeTransaction} or
- * {@link AfterTransaction @AfterTransaction}.
+ * support for methods annotated with {@link BeforeTransaction @BeforeTransaction}
+ * or {@link AfterTransaction @AfterTransaction}. As of Spring Framework 4.3,
+ * {@code @BeforeTransaction} and {@code @AfterTransaction} may also be declared
+ * on Java 8 based interface default methods.
  *
  * <h3>Configuring a Transaction Manager</h3>
  * <p>{@code TransactionalTestExecutionListener} expects a
@@ -130,14 +132,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
-	@SuppressWarnings("deprecation")
-	private static final TransactionConfigurationAttributes defaultTxConfigAttributes = new TransactionConfigurationAttributes();
-
-	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
-
-	@SuppressWarnings("deprecation")
-	private TransactionConfigurationAttributes configurationAttributes;
-
+	// Do not require @Transactional test methods to be public.
+	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource(false);
 
 	/**
 	 * Returns {@code 4000}.
@@ -165,9 +161,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
 		TransactionContext txContext = TransactionContextHolder.removeCurrentTransactionContext();
-		if (txContext != null) {
-			throw new IllegalStateException("Cannot start a new transaction without ending the existing transaction.");
-		}
+		Assert.state(txContext == null, "Cannot start a new transaction without ending the existing transaction.");
 
 		PlatformTransactionManager tm = null;
 		TransactionAttribute transactionAttribute = this.attributeSource.getTransactionAttribute(testMethod, testClass);
@@ -177,8 +171,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				transactionAttribute);
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("Explicit transaction definition [" + transactionAttribute + "] found for test context "
-						+ testContext);
+				logger.debug("Explicit transaction definition [" + transactionAttribute + "] found for test context " +
+						testContext);
 			}
 
 			if (transactionAttribute.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NOT_SUPPORTED) {
@@ -186,6 +180,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			}
 
 			tm = getTransactionManager(testContext, transactionAttribute.getQualifier());
+
+			Assert.state(tm != null, () -> String.format(
+					"Failed to retrieve PlatformTransactionManager for @Transactional test for test context %s.",
+					testContext));
 		}
 
 		if (tm != null) {
@@ -240,12 +238,15 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing @BeforeTransaction method [" + method + "] for test context " + testContext);
 				}
+				ReflectionUtils.makeAccessible(method);
 				method.invoke(testContext.getTestInstance());
 			}
 		}
 		catch (InvocationTargetException ex) {
-			logger.error("Exception encountered while executing @BeforeTransaction methods for test context "
-					+ testContext + ".", ex.getTargetException());
+			if (logger.isErrorEnabled()) {
+				logger.error("Exception encountered while executing @BeforeTransaction methods for test context " +
+						testContext + ".", ex.getTargetException());
+			}
 			ReflectionUtils.rethrowException(ex.getTargetException());
 		}
 	}
@@ -267,6 +268,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing @AfterTransaction method [" + method + "] for test context " + testContext);
 				}
+				ReflectionUtils.makeAccessible(method);
 				method.invoke(testContext.getTestInstance());
 			}
 			catch (InvocationTargetException ex) {
@@ -274,15 +276,15 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				if (afterTransactionException == null) {
 					afterTransactionException = targetException;
 				}
-				logger.error("Exception encountered while executing @AfterTransaction method [" + method
-						+ "] for test context " + testContext, targetException);
+				logger.error("Exception encountered while executing @AfterTransaction method [" + method +
+						"] for test context " + testContext, targetException);
 			}
 			catch (Exception ex) {
 				if (afterTransactionException == null) {
 					afterTransactionException = ex;
 				}
-				logger.error("Exception encountered while executing @AfterTransaction method [" + method
-						+ "] for test context " + testContext, ex);
+				logger.error("Exception encountered while executing @AfterTransaction method [" + method +
+						"] for test context " + testContext, ex);
 			}
 		}
 
@@ -305,20 +307,18 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @see #getTransactionManager(TestContext)
 	 */
 	protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
-		// look up by type and qualifier from @Transactional
+		// Look up by type and qualifier from @Transactional
 		if (StringUtils.hasText(qualifier)) {
 			try {
-				// Use autowire-capable factory in order to support extended qualifier
-				// matching (only exposed on the internal BeanFactory, not on the
-				// ApplicationContext).
+				// Use autowire-capable factory in order to support extended qualifier matching
+				// (only exposed on the internal BeanFactory, not on the ApplicationContext).
 				BeanFactory bf = testContext.getApplicationContext().getAutowireCapableBeanFactory();
 
 				return BeanFactoryAnnotationUtils.qualifiedBeanOfType(bf, PlatformTransactionManager.class, qualifier);
 			}
 			catch (RuntimeException ex) {
 				if (logger.isWarnEnabled()) {
-					logger.warn(
-						String.format(
+					logger.warn(String.format(
 							"Caught exception while retrieving transaction manager with qualifier '%s' for test context %s",
 							qualifier, testContext), ex);
 				}
@@ -345,33 +345,23 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	protected PlatformTransactionManager getTransactionManager(TestContext testContext) {
-		@SuppressWarnings("deprecation")
-		String tmName = retrieveConfigurationAttributes(testContext).getTransactionManagerName();
-		return TestContextTransactionUtils.retrieveTransactionManager(testContext, tmName);
+		return TestContextTransactionUtils.retrieveTransactionManager(testContext, null);
 	}
 
 	/**
 	 * Determine whether or not to rollback transactions by default for the
 	 * supplied {@linkplain TestContext test context}.
-	 * <p>Supports {@link Rollback @Rollback} or
-	 * {@link TransactionConfiguration @TransactionConfiguration} at the
+	 * <p>Supports {@link Rollback @Rollback} or {@link Commit @Commit} at the
 	 * class-level.
 	 * @param testContext the test context for which the default rollback flag
 	 * should be retrieved
 	 * @return the <em>default rollback</em> flag for the supplied test context
 	 * @throws Exception if an error occurs while determining the default rollback flag
 	 */
-	@SuppressWarnings("deprecation")
 	protected final boolean isDefaultRollback(TestContext testContext) throws Exception {
 		Class<?> testClass = testContext.getTestClass();
-		Rollback rollback = findAnnotation(testClass, Rollback.class);
+		Rollback rollback = AnnotatedElementUtils.findMergedAnnotation(testClass, Rollback.class);
 		boolean rollbackPresent = (rollback != null);
-		TransactionConfigurationAttributes txConfigAttributes = retrieveConfigurationAttributes(testContext);
-
-		if (rollbackPresent && txConfigAttributes != defaultTxConfigAttributes) {
-			throw new IllegalStateException(String.format("Test class [%s] is annotated with both @Rollback "
-					+ "and @TransactionConfiguration, but only one is permitted.", testClass.getName()));
-		}
 
 		if (rollbackPresent) {
 			boolean defaultRollback = rollback.value();
@@ -383,7 +373,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		}
 
 		// else
-		return txConfigAttributes.isDefaultRollback();
+		return true;
 	}
 
 	/**
@@ -399,149 +389,41 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 */
 	protected final boolean isRollback(TestContext testContext) throws Exception {
 		boolean rollback = isDefaultRollback(testContext);
-		Rollback rollbackAnnotation = findAnnotation(testContext.getTestMethod(), Rollback.class);
+		Rollback rollbackAnnotation =
+				AnnotatedElementUtils.findMergedAnnotation(testContext.getTestMethod(), Rollback.class);
 		if (rollbackAnnotation != null) {
 			boolean rollbackOverride = rollbackAnnotation.value();
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format(
-					"Method-level @Rollback(%s) overrides default rollback [%s] for test context %s.",
-					rollbackOverride, rollback, testContext));
+						"Method-level @Rollback(%s) overrides default rollback [%s] for test context %s.",
+						rollbackOverride, rollback, testContext));
 			}
 			rollback = rollbackOverride;
 		}
 		else {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format(
-					"No method-level @Rollback override: using default rollback [%s] for test context %s.", rollback,
-					testContext));
+						"No method-level @Rollback override: using default rollback [%s] for test context %s.",
+						rollback, testContext));
 			}
 		}
 		return rollback;
 	}
 
 	/**
-	 * Gets all superclasses of the supplied {@link Class class}, including the
-	 * class itself. The ordering of the returned list will begin with the
-	 * supplied class and continue up the class hierarchy, excluding {@link Object}.
-	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#getSuperClasses(Class)} and
-	 * adapted.
-	 * @param clazz the class for which to retrieve the superclasses
-	 * @return all superclasses of the supplied class, excluding {@code Object}
-	 */
-	private List<Class<?>> getSuperClasses(Class<?> clazz) {
-		List<Class<?>> results = new ArrayList<Class<?>>();
-		Class<?> current = clazz;
-		while (current != null && Object.class != current) {
-			results.add(current);
-			current = current.getSuperclass();
-		}
-		return results;
-	}
-
-	/**
-	 * Gets all methods in the supplied {@link Class class} and its superclasses
+	 * Get all methods in the supplied {@link Class class} and its superclasses
 	 * which are annotated with the supplied {@code annotationType} but
 	 * which are not <em>shadowed</em> by methods overridden in subclasses.
-	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#getAnnotatedMethods(Class)}
-	 * and adapted.
+	 * <p>Default methods on interfaces are also detected.
 	 * @param clazz the class for which to retrieve the annotated methods
 	 * @param annotationType the annotation type for which to search
 	 * @return all annotated methods in the supplied class and its superclasses
+	 * as well as annotated interface default methods
 	 */
 	private List<Method> getAnnotatedMethods(Class<?> clazz, Class<? extends Annotation> annotationType) {
-		List<Method> results = new ArrayList<Method>();
-		for (Class<?> current : getSuperClasses(clazz)) {
-			for (Method method : current.getDeclaredMethods()) {
-				Annotation annotation = getAnnotation(method, annotationType);
-				if (annotation != null && !isShadowed(method, results)) {
-					results.add(method);
-				}
-			}
-		}
-		return results;
-	}
-
-	/**
-	 * Determine if the supplied {@link Method method} is <em>shadowed</em> by
-	 * a method in the supplied {@link List list} of previous methods.
-	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, List)}.
-	 * @param method the method to check for shadowing
-	 * @param previousMethods the list of methods which have previously been processed
-	 * @return {@code true} if the supplied method is shadowed by a
-	 * method in the {@code previousMethods} list
-	 */
-	private boolean isShadowed(Method method, List<Method> previousMethods) {
-		for (Method each : previousMethods) {
-			if (isShadowed(method, each)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Determine if the supplied {@linkplain Method current method} is
-	 * <em>shadowed</em> by a {@linkplain Method previous method}.
-	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, Method)}.
-	 * @param current the current method
-	 * @param previous the previous method
-	 * @return {@code true} if the previous method shadows the current one
-	 */
-	private boolean isShadowed(Method current, Method previous) {
-		if (!previous.getName().equals(current.getName())) {
-			return false;
-		}
-		if (previous.getParameterTypes().length != current.getParameterTypes().length) {
-			return false;
-		}
-		for (int i = 0; i < previous.getParameterTypes().length; i++) {
-			if (!previous.getParameterTypes()[i].equals(current.getParameterTypes()[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Retrieve the {@link TransactionConfigurationAttributes} for the
-	 * supplied {@link TestContext} whose {@linkplain Class test class}
-	 * may optionally declare or inherit
-	 * {@link TransactionConfiguration @TransactionConfiguration}.
-	 * <p>If {@code @TransactionConfiguration} is not present for the
-	 * supplied {@code TestContext}, a default instance of
-	 * {@code TransactionConfigurationAttributes} will be used instead.
-	 * @param testContext the test context for which the configuration
-	 * attributes should be retrieved
-	 * @return the TransactionConfigurationAttributes instance for this listener,
-	 * potentially cached
-	 * @see TransactionConfigurationAttributes#TransactionConfigurationAttributes()
-	 */
-	@SuppressWarnings("deprecation")
-	TransactionConfigurationAttributes retrieveConfigurationAttributes(TestContext testContext) {
-		if (this.configurationAttributes == null) {
-			Class<?> clazz = testContext.getTestClass();
-
-			TransactionConfiguration txConfig = AnnotatedElementUtils.findMergedAnnotation(clazz,
-				TransactionConfiguration.class);
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved @TransactionConfiguration [%s] for test class [%s].",
-					txConfig, clazz.getName()));
-			}
-
-			TransactionConfigurationAttributes configAttributes = (txConfig == null ? defaultTxConfigAttributes
-					: new TransactionConfigurationAttributes(txConfig.transactionManager(), txConfig.defaultRollback()));
-
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Using TransactionConfigurationAttributes %s for test class [%s].",
-					configAttributes, clazz.getName()));
-			}
-			this.configurationAttributes = configAttributes;
-		}
-		return this.configurationAttributes;
+		return Arrays.stream(ReflectionUtils.getUniqueDeclaredMethods(clazz))
+				.filter(method -> AnnotatedElementUtils.hasAnnotation(method, annotationType))
+				.collect(Collectors.toList());
 	}
 
 }

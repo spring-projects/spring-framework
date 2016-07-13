@@ -247,7 +247,7 @@ expression using the methods `setVariable()` and `registerFunction()`. The use o
 variables and functions are described in the language reference sections
 <<expressions-ref-variables,Variables>> and <<expressions-ref-functions,Functions>>. The
 `StandardEvaluationContext` is also where you can register custom
-++ConstructorResolver++s, ++MethodResolver++s, and ++PropertyAccessor++s to extend how SpEL
+``ConstructorResolver``s, ``MethodResolver``s, and ``PropertyAccessor``s to extend how SpEL
 evaluates expressions. Please refer to the JavaDoc of these classes for more details.
 
 
@@ -432,7 +432,7 @@ More and more types of expression will be compilable in the future.
 [[expressions-beandef]]
 == Expression support for defining bean definitions
 SpEL expressions can be used with XML or annotation-based configuration metadata for
-defining ++BeanDefinition++s. In both cases the syntax to define the expression is of the
+defining ``BeanDefinition``s. In both cases the syntax to define the expression is of the
 form `#{ <expression string> }`.
 
 
@@ -442,7 +442,7 @@ form `#{ <expression string> }`.
 A property or constructor-arg value can be set using expressions as shown below.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="numberGuess" class="org.spring.samples.NumberGuess">
 		<property name="randomNumber" value="#{ T(java.lang.Math).random() * 100.0 }"/>
@@ -456,7 +456,7 @@ shown below. Note that you do not have to prefix the predefined variable with th
 symbol in this context.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="taxCalculator" class="org.spring.samples.TaxCalculator">
 		<property name="defaultLocale" value="#{ systemProperties['user.region'] }"/>
@@ -468,7 +468,7 @@ symbol in this context.
 You can also refer to other bean properties by name, for example.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="numberGuess" class="org.spring.samples.NumberGuess">
 		<property name="randomNumber" value="#{ T(java.lang.Math).random() * 100.0 }"/>
@@ -785,7 +785,7 @@ expression based `matches` operator.
 ----
 	// evaluates to false
 	boolean falseValue = parser.parseExpression(
-			"'xyz' instanceof T(int)").getValue(Boolean.class);
+			"'xyz' instanceof T(Integer.class)").getValue(Boolean.class);
 
 	// evaluates to true
 	boolean trueValue = parser.parseExpression(
@@ -795,6 +795,13 @@ expression based `matches` operator.
 	boolean falseValue = parser.parseExpression(
 			"'5.0067' matches '\^-?\\d+(\\.\\d{2})?$'").getValue(Boolean.class);
 ----
+
+[NOTE]
+====
+Be careful with primitive types as they are immediately boxed up to the wrapper type,
+so `1 instanceof T(int)` evaluates to `false` while `1 instanceof T(Integer.class)`
+evaluates to `true`, as expected.
+====
 
 Each symbolic operator can also be specified as a purely alphabetic equivalent. This
 avoids problems where the symbols used have special meaning for the document type in

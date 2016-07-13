@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
- * Netty 4 to execute requests.
+ * {@link org.springframework.http.client.ClientHttpRequest} implementation
+ * that uses Netty 4 to execute requests.
  *
  * <p>Created via the {@link Netty4ClientHttpRequestFactory}.
  *
@@ -88,7 +88,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
 		final SettableListenableFuture<ClientHttpResponse> responseFuture =
-				new SettableListenableFuture<ClientHttpResponse>();
+				new SettableListenableFuture<>();
 
 		ChannelFutureListener connectionListener = new ChannelFutureListener() {
 			@Override
@@ -148,8 +148,8 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
 				nettyMethod, this.uri.toString(), this.body.buffer());
 
-		nettyRequest.headers().set(HttpHeaders.HOST, uri.getHost());
-		nettyRequest.headers().set(HttpHeaders.CONNECTION, io.netty.handler.codec.http.HttpHeaders.Values.CLOSE);
+		nettyRequest.headers().set(HttpHeaders.HOST, this.uri.getHost());
+		nettyRequest.headers().set(HttpHeaders.CONNECTION, "close");
 
 		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
 			nettyRequest.headers().add(entry.getKey(), entry.getValue());

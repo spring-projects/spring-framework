@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,9 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", MessageBrokerBeanDefinitionParser.class.getClassLoader());
 
+	private static final boolean javaxValidationPresent =
+			ClassUtils.isPresent("javax.validation.Validator", MessageBrokerBeanDefinitionParser.class.getClassLoader());
+
 
 	@Override
 	public BeanDefinition parse(Element element, ParserContext context) {
@@ -199,7 +202,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			handlerMappingDef.getPropertyValues().add("urlPathHelper", new RuntimeBeanReference(pathHelper));
 		}
 
-		ManagedMap<String, Object> urlMap = new ManagedMap<String, Object>();
+		ManagedMap<String, Object> urlMap = new ManagedMap<>();
 		urlMap.setSource(source);
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
 
@@ -241,7 +244,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			argValues.addIndexedArgumentValue(0, new RuntimeBeanReference(executorName));
 		}
 		RootBeanDefinition channelDef = new RootBeanDefinition(ExecutorSubscribableChannel.class, argValues, null);
-		ManagedList<? super Object> interceptors = new ManagedList<Object>();
+		ManagedList<? super Object> interceptors = new ManagedList<>();
 		if (element != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(element, "interceptors");
 			interceptors.addAll(WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context));
@@ -407,7 +410,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			if (brokerRelayElem.hasAttribute("virtual-host")) {
 				values.add("virtualHost", brokerRelayElem.getAttribute("virtual-host"));
 			}
-			ManagedMap<String, Object> map = new ManagedMap<String, Object>();
+			ManagedMap<String, Object> map = new ManagedMap<>();
 			map.setSource(source);
 			if (brokerRelayElem.hasAttribute("user-destination-broadcast")) {
 				String destination = brokerRelayElem.getAttribute("user-destination-broadcast");
@@ -450,7 +453,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private RuntimeBeanReference registerMessageConverter(Element element, ParserContext context, Object source) {
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
-		ManagedList<? super Object> converters = new ManagedList<Object>();
+		ManagedList<? super Object> converters = new ManagedList<>();
 		if (convertersElement != null) {
 			converters.setSource(source);
 			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, "bean", "ref")) {
@@ -516,6 +519,11 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			beanDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 		}
 
+		RuntimeBeanReference validatorRef = getValidator(messageBrokerElement, source, context);
+		if (validatorRef != null) {
+			beanDef.getPropertyValues().add("validator", validatorRef);
+		}
+
 		Element resolversElement = DomUtils.getChildElementByTagName(messageBrokerElement, "argument-resolvers");
 		if (resolversElement != null) {
 			values.add("customArgumentResolvers", extractBeanSubElements(resolversElement, context));
@@ -529,8 +537,26 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		registerBeanDef(beanDef, context, source);
 	}
 
+	private RuntimeBeanReference getValidator(Element messageBrokerElement, Object source, ParserContext parserContext) {
+		if (messageBrokerElement.hasAttribute("validator")) {
+			return new RuntimeBeanReference(messageBrokerElement.getAttribute("validator"));
+		}
+		else if (javaxValidationPresent) {
+			RootBeanDefinition validatorDef = new RootBeanDefinition(
+					"org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean");
+			validatorDef.setSource(source);
+			validatorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			String validatorName = parserContext.getReaderContext().registerWithGeneratedName(validatorDef);
+			parserContext.registerComponent(new BeanComponentDefinition(validatorDef, validatorName));
+			return new RuntimeBeanReference(validatorName);
+		}
+		else {
+			return null;
+		}
+	}
+
 	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
-		ManagedList<Object> list = new ManagedList<Object>();
+		ManagedList<Object> list = new ManagedList<>();
 		list.setSource(parserContext.extractSource(parentElement));
 		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
 			Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
@@ -546,6 +572,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.getConstructorArgumentValues().addIndexedArgumentValue(0, userRegistry);
 		if (brokerElem.hasAttribute("user-destination-prefix")) {
 			beanDef.getPropertyValues().add("userDestinationPrefix", brokerElem.getAttribute("user-destination-prefix"));
+		}
+		if (brokerElem.hasAttribute("path-matcher")) {
+			String pathMatcherRef = brokerElem.getAttribute("path-matcher");
+			beanDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 		}
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}
@@ -590,10 +620,9 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (context.getRegistry().containsBeanDefinition(name)) {
 			beanDef.getPropertyValues().add("outboundChannelExecutor", context.getRegistry().getBeanDefinition(name));
 		}
-		name = SCHEDULER_BEAN_NAME;
-		if (context.getRegistry().containsBeanDefinition(name)) {
-			beanDef.getPropertyValues().add("sockJsTaskScheduler", context.getRegistry().getBeanDefinition(name));
-		}
+		Object scheduler = WebSocketNamespaceUtils.registerScheduler(SCHEDULER_BEAN_NAME, context, source);
+		beanDef.getPropertyValues().add("sockJsTaskScheduler", scheduler);
+
 		registerBeanDefByName("webSocketMessageBrokerStats", beanDef, context, source);
 	}
 

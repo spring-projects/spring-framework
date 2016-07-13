@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 						HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 
 		if (!CollectionUtils.isEmpty(uriTemplateVars)) {
-			return new LinkedHashMap<String, String>(uriTemplateVars);
+			return new LinkedHashMap<>(uriTemplateVars);
 		}
 		else {
 			return Collections.emptyMap();

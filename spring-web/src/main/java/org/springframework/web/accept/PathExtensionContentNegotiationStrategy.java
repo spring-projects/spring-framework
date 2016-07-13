@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -56,8 +57,7 @@ public class PathExtensionContentNegotiationStrategy
 
 	private static final Log logger = LogFactory.getLog(PathExtensionContentNegotiationStrategy.class);
 
-	private static final boolean JAF_PRESENT = ClassUtils.isPresent(
-			"javax.activation.FileTypeMap",
+	private static final boolean JAF_PRESENT = ClassUtils.isPresent("javax.activation.FileTypeMap",
 			PathExtensionContentNegotiationStrategy.class.getClassLoader());
 
 	private static final UrlPathHelper PATH_HELPER = new UrlPathHelper();
@@ -133,6 +133,32 @@ public class PathExtensionContentNegotiationStrategy
 			return null;
 		}
 		throw new HttpMediaTypeNotAcceptableException(getAllMediaTypes());
+	}
+
+	/**
+	 * A public method exposing the knowledge of the path extension strategy to
+	 * resolve file extensions to a MediaType in this case for a given
+	 * {@link Resource}. The method first looks up any explicitly registered
+	 * file extensions first and then falls back on JAF if available.
+	 * @param resource the resource to look up
+	 * @return the MediaType for the extension or {@code null}.
+	 * @since 4.3
+	 */
+	public MediaType getMediaTypeForResource(Resource resource) {
+		Assert.notNull(resource);
+		MediaType mediaType = null;
+		String filename = resource.getFilename();
+		String extension = StringUtils.getFilenameExtension(filename);
+		if (extension != null) {
+			mediaType = lookupMediaType(extension);
+		}
+		if (mediaType == null && JAF_PRESENT) {
+			mediaType = JafMediaTypeFactory.getMediaType(filename);
+		}
+		if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
+			mediaType = null;
+		}
+		return mediaType;
 	}
 
 

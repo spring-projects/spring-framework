@@ -86,7 +86,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 		}
 		else {
 			boolean found = false;
-			paramValues = new ArrayList<String>();
+			paramValues = new ArrayList<>();
 			for (MultiValueMap<String, String> params : pathParameters.values()) {
 				if (params.containsKey(name)) {
 					if (found) {

@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -226,7 +228,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR5804() throws Exception {
-		Map<String, String> m = new HashMap<String, String>();
+		Map<String, String> m = new HashMap<>();
 		m.put("foo", "bar");
 		StandardEvaluationContext eContext = new StandardEvaluationContext(m); // root is a map instance
 		eContext.addPropertyAccessor(new MapAccessor());
@@ -548,7 +550,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		public String floo = "bar";
 
 		public XX() {
-			m = new HashMap<String, String>();
+			m = new HashMap<>();
 			m.put("$foo", "wibble");
 			m.put("bar", "siddle");
 		}
@@ -577,7 +579,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	static class Holder {
 
-		public Map<String, String> map = new HashMap<String, String>();
+		public Map<String, String> map = new HashMap<>();
 	}
 
 
@@ -781,9 +783,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void mapOfMap_SPR7244() throws Exception {
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("uri", "http:");
-		Map<String, String> nameMap = new LinkedHashMap<String, String>();
+		Map<String, String> nameMap = new LinkedHashMap<>();
 		nameMap.put("givenName", "Arthur");
 		map.put("value", nameMap);
 
@@ -847,11 +849,11 @@ public class SpelReproTests extends AbstractExpressionTests {
 		public Map<String, String> ms;
 
 		C() {
-			ls = new ArrayList<String>();
+			ls = new ArrayList<>();
 			ls.add("abc");
 			ls.add("def");
 			as = new String[] { "abc", "def" };
-			ms = new HashMap<String, String>();
+			ms = new HashMap<>();
 			ms.put("abc", "xyz");
 			ms.put("def", "pqr");
 		}
@@ -875,7 +877,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void greaterThanWithNulls_SPR7840() throws Exception {
-		List<D> list = new ArrayList<D>();
+		List<D> list = new ArrayList<>();
 		list.add(new D("aaa"));
 		list.add(new D("bbb"));
 		list.add(new D(null));
@@ -935,7 +937,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 
-		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> args = new ArrayList<>();
 		args.add(TypeDescriptor.forObject(new Integer(42)));
 
 		ConversionPriority1 target = new ConversionPriority1();
@@ -975,7 +977,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		WideningPrimitiveConversion target = new WideningPrimitiveConversion();
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
 
-		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> args = new ArrayList<>();
 		args.add(TypeDescriptor.forObject(INTEGER_VALUE));
 
 		MethodExecutor me = new ReflectiveMethodResolver(true).resolve(emptyEvalContext, target, "getX", args);
@@ -988,10 +990,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	public void varargsAndPrimitives_SPR8174() throws Exception {
 		EvaluationContext emptyEvalContext = new StandardEvaluationContext();
-		List<TypeDescriptor> args = new ArrayList<TypeDescriptor>();
+		List<TypeDescriptor> args = new ArrayList<>();
 
 		args.add(TypeDescriptor.forObject(34L));
-		ReflectionUtil<Integer> ru = new ReflectionUtil<Integer>();
+		ReflectionUtil<Integer> ru = new ReflectionUtil<>();
 		MethodExecutor me = new ReflectiveMethodResolver().resolve(emptyEvalContext, ru, "methodToCall", args);
 
 		args.set(0, TypeDescriptor.forObject(23));
@@ -1111,7 +1113,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			public int DIV = 1;
 			public int div = 3;
 
-			public Map<String, String> m = new HashMap<String, String>();
+			public Map<String, String> m = new HashMap<>();
 
 			Reserver() {
 				m.put("NE", "xyz");
@@ -1227,10 +1229,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	class ContextObject {
 
-		public Map<String, String> firstContext = new HashMap<String, String>();
-		public Map<String, String> secondContext = new HashMap<String, String>();
-		public Map<String, String> thirdContext = new HashMap<String, String>();
-		public Map<String, String> fourthContext = new HashMap<String, String>();
+		public Map<String, String> firstContext = new HashMap<>();
+		public Map<String, String> secondContext = new HashMap<>();
+		public Map<String, String> thirdContext = new HashMap<>();
+		public Map<String, String> fourthContext = new HashMap<>();
 
 		public ContextObject() {
 			firstContext.put("shouldBeFirst", "first");
@@ -1274,7 +1276,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void customStaticFunctions_SPR9038() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
-		List<MethodResolver> methodResolvers = new ArrayList<MethodResolver>();
+		List<MethodResolver> methodResolvers = new ArrayList<>();
 		methodResolvers.add(new ReflectiveMethodResolver() {
 			@Override
 			protected Method[] getMethods(Class<?> type) {
@@ -1800,7 +1802,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	public void SPR9194() {
 		TestClass2 one = new TestClass2("abc");
 		TestClass2 two = new TestClass2("abc");
-		Map<String, TestClass2> map = new HashMap<String, TestClass2>();
+		Map<String, TestClass2> map = new HashMap<>();
 		map.put("one", one);
 		map.put("two", two);
 
@@ -1811,7 +1813,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 	@Test
 	public void SPR11348() {
-		Collection<String> coll = new LinkedHashSet<String>();
+		Collection<String> coll = new LinkedHashSet<>();
 		coll.add("one");
 		coll.add("two");
 		coll = Collections.unmodifiableCollection(coll);
@@ -1899,16 +1901,16 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
-	public void SPR12803() throws Exception {
+	public void SPR12803() {
 		StandardEvaluationContext sec = new StandardEvaluationContext();
 		sec.setVariable("iterable", Collections.emptyList());
 		SpelExpressionParser parser = new SpelExpressionParser();
-		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.GuavaLists).newArrayList(#iterable)");
+		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.FooLists).newArrayList(#iterable)");
 		assertTrue(expression.getValue(sec) instanceof ArrayList);
 	}
 
 	@Test
-	public void SPR12808() throws Exception {
+	public void SPR12808() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.DistanceEnforcer).from(#no)");
 		StandardEvaluationContext sec = new StandardEvaluationContext();
@@ -1925,10 +1927,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void SPR13055() throws Exception {
-		List<Map<String, Object>> myPayload = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> myPayload = new ArrayList<>();
 
-		Map<String, Object> v1 = new HashMap<String, Object>();
-		Map<String, Object> v2 = new HashMap<String, Object>();
+		Map<String, Object> v1 = new HashMap<>();
+		Map<String, Object> v2 = new HashMap<>();
 
 		v1.put("test11", "test11");
 		v1.put("test12", "test12");
@@ -1953,7 +1955,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		res = parser.parseExpression("#root.![values()]").getValue(context, List.class);
 		assertEquals("[[test12, test11], [test22, test21]]", res.toString());
 	}
-	
+
 	@Test
 	public void AccessingFactoryBean_spr9511() {
 		StandardEvaluationContext context = new StandardEvaluationContext();
@@ -1962,22 +1964,24 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals("custard", expr.getValue(context));
 		expr = new SpelExpressionParser().parseRaw("&foo");
 		assertEquals("foo factory",expr.getValue(context));
-		
+	
 		try {
 			expr = new SpelExpressionParser().parseRaw("&@foo");
 			fail("Illegal syntax, error expected");
-		} catch (SpelParseException spe) {
+		}
+		catch (SpelParseException spe) {
 			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
 			assertEquals(0,spe.getPosition());
 		}
-		
+	
 		try {
 			expr = new SpelExpressionParser().parseRaw("@&foo");
 			fail("Illegal syntax, error expected");
-		} catch (SpelParseException spe) {
+		}
+		catch (SpelParseException spe) {
 			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
 			assertEquals(0,spe.getPosition());
-		}		
+		}	
 	}
 
 	@Test
@@ -2080,6 +2084,17 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals("{X=66}", result.toString());
 	}
 
+	@Test
+	public void SPR13918() {
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("encoding", "UTF-8");
+
+		Expression ex = parser.parseExpression("T(java.nio.charset.Charset).forName(#encoding)");
+		Object result = ex.getValue(context);
+		assertEquals(Charset.forName("UTF-8"), result);
+	}
+
+
 	public static class ListOf {
 
 		private final double value;
@@ -2092,6 +2107,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			return value;
 		}
 	}
+
 
 	public static class BeanClass {
 
@@ -2107,9 +2123,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	private static enum ABC { A, B, C }
+	private enum ABC { A, B, C }
 
-	private static enum XYZ { X, Y, Z }
+	private enum XYZ { X, Y, Z }
 
 
 	public static class BooleanHolder {
@@ -2136,9 +2152,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	private static interface GenericInterface<T extends Number> {
+	private interface GenericInterface<T extends Number> {
 
-		public T getProperty();
+		T getProperty();
 	}
 
 
@@ -2163,9 +2179,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	public static interface StaticFinal {
+	public interface StaticFinal {
 
-		public static final String VALUE = "interfaceValue";
+		String VALUE = "interfaceValue";
 	}
 
 
@@ -2242,7 +2258,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	@SuppressWarnings({ "rawtypes", "serial" })
+	@SuppressWarnings({"rawtypes", "serial"})
 	public static class MapWithConstant extends HashMap {
 
 		public static final int X = 1;
@@ -2253,7 +2269,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		private String name;
 
-		private List<Item> children = new ArrayList<Item>();
+		private List<Item> children = new ArrayList<>();
 
 		public void setName(String name) {
 			this.name = name;
@@ -2392,10 +2408,10 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	public static class GuavaLists {
+	public static class FooLists {
 
 		public static <T> List<T> newArrayList(Iterable<T> iterable) {
-			return new ArrayList<T>();
+			return new ArrayList<>();
 		}
 
 		public static <T> List<T> newArrayList(Object... elements) {

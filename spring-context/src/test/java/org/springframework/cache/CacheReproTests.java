@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package org.springframework.cache;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -39,6 +40,7 @@ import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -83,11 +85,11 @@ public class CacheReproTests {
 
 		String key = "1";
 		Object result = bean.getSimple("1");
-		verify(cache, times(1)).get(key); // first call: cache miss
+		verify(cache, times(1)).get(key);  // first call: cache miss
 
 		Object cachedResult = bean.getSimple("1");
 		assertSame(result, cachedResult);
-		verify(cache, times(2)).get(key); // second call: cache hit
+		verify(cache, times(2)).get(key);  // second call: cache hit
 
 		context.close();
 	}
@@ -100,11 +102,11 @@ public class CacheReproTests {
 
 		String key = "1";
 		Object result = bean.getNeverCache("1");
-		verify(cache, times(0)).get(key); // no cache hit at all, caching disabled
+		verify(cache, times(0)).get(key);  // no cache hit at all, caching disabled
 
 		Object cachedResult = bean.getNeverCache("1");
 		assertNotSame(result, cachedResult);
-		verify(cache, times(0)).get(key); // caching disabled
+		verify(cache, times(0)).get(key);  // caching disabled
 
 		context.close();
 	}
@@ -114,8 +116,9 @@ public class CacheReproTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr13081Config.class);
 		MyCacheResolver cacheResolver = context.getBean(MyCacheResolver.class);
 		Spr13081Service bean = context.getBean(Spr13081Service.class);
+
 		assertNull(cacheResolver.getCache("foo").get("foo"));
-		Object result = bean.getSimple("foo"); // cache name = id
+		Object result = bean.getSimple("foo");  // cache name = id
 		assertEquals(result, cacheResolver.getCache("foo").get("foo").get());
 	}
 
@@ -124,10 +127,26 @@ public class CacheReproTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr13081Config.class);
 		Spr13081Service bean = context.getBean(Spr13081Service.class);
 
-
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage(MyCacheResolver.class.getName());
+		this.thrown.expect(IllegalStateException.class);
+		this.thrown.expectMessage(MyCacheResolver.class.getName());
 		bean.getSimple(null);
+	}
+
+	@Test
+	public void spr14230AdaptsToOptional() {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr14230Config.class);
+		Spr14230Service bean = context.getBean(Spr14230Service.class);
+		Cache cache = context.getBean(CacheManager.class).getCache("itemCache");
+
+		TestBean tb = new TestBean("tb1");
+		bean.insertItem(tb);
+		assertSame(tb, bean.findById("tb1").get());
+		assertSame(tb, cache.get("tb1").get());
+
+		cache.clear();
+		TestBean tb2 = bean.findById("tb1").get();
+		assertNotSame(tb, tb2);
+		assertSame(tb2, cache.get("tb1").get());
 	}
 
 
@@ -215,7 +234,7 @@ public class CacheReproTests {
 		@Bean
 		public CacheManager cacheManager() {
 			SimpleCacheManager cacheManager = new SimpleCacheManager();
-			cacheManager.setCaches(Arrays.asList(cache()));
+			cacheManager.setCaches(Collections.singletonList(cache()));
 			return cacheManager;
 		}
 
@@ -245,6 +264,7 @@ public class CacheReproTests {
 		}
 	}
 
+
 	@Configuration
 	@EnableCaching
 	public static class Spr13081Config extends CachingConfigurerSupport {
@@ -259,8 +279,8 @@ public class CacheReproTests {
 		public Spr13081Service service() {
 			return new Spr13081Service();
 		}
-
 	}
+
 
 	public static class MyCacheResolver extends AbstractCacheResolver {
 
@@ -282,11 +302,42 @@ public class CacheReproTests {
 		}
 	}
 
+
 	public static class Spr13081Service {
 
 		@Cacheable
 		public Object getSimple(String cacheName) {
 			return new Object();
+		}
+	}
+
+
+	public static class Spr14230Service {
+
+		@Cacheable("itemCache")
+		public Optional<TestBean> findById(String id) {
+			return Optional.of(new TestBean(id));
+		}
+
+		@CachePut(cacheNames = "itemCache", key = "#item.name")
+		public TestBean insertItem(TestBean item) {
+			return item;
+		}
+	}
+
+
+	@Configuration
+	@EnableCaching
+	public static class Spr14230Config {
+
+		@Bean
+		public CacheManager cacheManager() {
+			return new ConcurrentMapCacheManager();
+		}
+
+		@Bean
+		public Spr14230Service service() {
+			return new Spr14230Service();
 		}
 	}
 

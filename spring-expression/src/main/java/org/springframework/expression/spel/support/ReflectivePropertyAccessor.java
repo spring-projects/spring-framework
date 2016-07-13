@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.asm.MethodVisitor;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.Property;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.style.ToStringCreator;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
@@ -63,18 +62,21 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	private static final Set<Class<?>> BOOLEAN_TYPES;
 
 	static {
-		Set<Class<?>> booleanTypes = new HashSet<Class<?>>();
+		Set<Class<?>> booleanTypes = new HashSet<>();
 		booleanTypes.add(Boolean.class);
 		booleanTypes.add(Boolean.TYPE);
 		BOOLEAN_TYPES = Collections.unmodifiableSet(booleanTypes);
 	}
 
 
-	private final Map<CacheKey, InvokerPair> readerCache = new ConcurrentHashMap<CacheKey, InvokerPair>(64);
+	private final Map<PropertyCacheKey, InvokerPair> readerCache =
+			new ConcurrentHashMap<>(64);
 
-	private final Map<CacheKey, Member> writerCache = new ConcurrentHashMap<CacheKey, Member>(64);
+	private final Map<PropertyCacheKey, Member> writerCache =
+			new ConcurrentHashMap<>(64);
 
-	private final Map<CacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<CacheKey, TypeDescriptor>(64);
+	private final Map<PropertyCacheKey, TypeDescriptor> typeDescriptorCache =
+			new ConcurrentHashMap<>(64);
 
 	private InvokerPair lastReadInvokerPair;
 
@@ -96,7 +98,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (type.isArray() && name.equals("length")) {
 			return true;
 		}
-		CacheKey cacheKey = new CacheKey(type, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		if (this.readerCache.containsKey(cacheKey)) {
 			return true;
 		}
@@ -140,7 +142,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return new TypedValue(Array.getLength(target));
 		}
 
-		CacheKey cacheKey = new CacheKey(type, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		InvokerPair invoker = this.readerCache.get(cacheKey);
 		lastReadInvokerPair = invoker;
 
@@ -202,7 +204,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return false;
 		}
 		Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
-		CacheKey cacheKey = new CacheKey(type, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		if (this.writerCache.containsKey(cacheKey)) {
 			return true;
 		}
@@ -244,7 +246,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				throw new AccessException("Type conversion failure", evaluationException);
 			}
 		}
-		CacheKey cacheKey = new CacheKey(type, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		Member cachedMember = this.writerCache.get(cacheKey);
 
 		if (cachedMember == null || cachedMember instanceof Method) {
@@ -301,7 +303,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (type.isArray() && name.equals("length")) {
 			return TypeDescriptor.valueOf(Integer.TYPE);
 		}
-		CacheKey cacheKey = new CacheKey(type, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		TypeDescriptor typeDescriptor = this.typeDescriptorCache.get(cacheKey);
 		if (typeDescriptor == null) {
 			// attempt to populate the cache entry
@@ -372,7 +374,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		for (String methodSuffix : methodSuffixes) {
 			for (Method method : methods) {
 				if (method.getName().equals(prefix + methodSuffix) &&
-						method.getParameterTypes().length == numberOfParams &&
+						method.getParameterCount() == numberOfParams &&
 						(!mustBeStatic || Modifier.isStatic(method.getModifiers())) &&
 						(requiredReturnTypes.isEmpty() || requiredReturnTypes.contains(method.getReturnType()))) {
 					return method;
@@ -466,7 +468,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return this;
 		}
 
-		CacheKey cacheKey = new CacheKey(type, name, target instanceof Class);
+		PropertyCacheKey cacheKey = new PropertyCacheKey(type, name, target instanceof Class);
 		InvokerPair invocationTarget = this.readerCache.get(cacheKey);
 
 		if (invocationTarget == null || invocationTarget.member instanceof Method) {
@@ -520,17 +522,17 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 
-	private static class CacheKey {
+	private static final class PropertyCacheKey implements Comparable<PropertyCacheKey> {
 
 		private final Class<?> clazz;
 
-		private final String name;
+		private final String property;
 
 		private boolean targetIsClass;
 
-		public CacheKey(Class<?> clazz, String name, boolean targetIsClass) {
+		public PropertyCacheKey(Class<?> clazz, String name, boolean targetIsClass) {
 			this.clazz = clazz;
-			this.name = name;
+			this.property = name;
 			this.targetIsClass = targetIsClass;
 		}
 
@@ -539,23 +541,32 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (this == other) {
 				return true;
 			}
-			if (!(other instanceof CacheKey)) {
+			if (!(other instanceof PropertyCacheKey)) {
 				return false;
 			}
-			CacheKey otherKey = (CacheKey) other;
-			return (this.clazz.equals(otherKey.clazz) && this.name.equals(otherKey.name) &&
+			PropertyCacheKey otherKey = (PropertyCacheKey) other;
+			return (this.clazz == otherKey.clazz && this.property.equals(otherKey.property) &&
 					this.targetIsClass == otherKey.targetIsClass);
 		}
 
 		@Override
 		public int hashCode() {
-			return (this.clazz.hashCode() * 29 + this.name.hashCode());
+			return (this.clazz.hashCode() * 29 + this.property.hashCode());
 		}
 
 		@Override
 		public String toString() {
-			return new ToStringCreator(this).append("clazz", this.clazz).append("name",
-					this.name).append("targetIsClass", this.targetIsClass).toString();
+			return "CacheKey [clazz=" + this.clazz.getName() + ", property=" + this.property + ", " +
+					this.property + ", targetIsClass=" + this.targetIsClass + "]";
+		}
+
+		@Override
+		public int compareTo(PropertyCacheKey other) {
+			int result = this.clazz.getName().compareTo(other.clazz.getName());
+			if (result == 0) {
+				result = this.property.compareTo(other.property);
+			}
+			return result;
 		}
 	}
 

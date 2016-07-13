@@ -64,7 +64,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	private final BeanExpressionContext expressionContext;
 
 	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
-			new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
+			new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -87,10 +87,16 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
-		Object arg = resolveArgumentInternal(nestedParameter, message, namedValueInfo.name);
+		Object resolvedName = resolveStringValue(namedValueInfo.name);
+		if (resolvedName == null) {
+			throw new IllegalArgumentException(
+					"Specified name must not resolve to null: [" + namedValueInfo.name + "]");
+		}
+
+		Object arg = resolveArgumentInternal(nestedParameter, message, resolvedName.toString());
 		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
-				arg = resolveDefaultValue(namedValueInfo.defaultValue);
+				arg = resolveStringValue(namedValueInfo.defaultValue);
 			}
 			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
 				handleMissingValue(namedValueInfo.name, nestedParameter, message);
@@ -98,7 +104,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
 		}
 		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
-			arg = resolveDefaultValue(namedValueInfo.defaultValue);
+			arg = resolveStringValue(namedValueInfo.defaultValue);
 		}
 
 		if (!ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
@@ -149,6 +155,22 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	}
 
 	/**
+	 * Resolve the given annotation-specified value,
+	 * potentially containing placeholders and expressions.
+	 */
+	private Object resolveStringValue(String value) {
+		if (this.configurableBeanFactory == null) {
+			return value;
+		}
+		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
+		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
+		if (exprResolver == null) {
+			return value;
+		}
+		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
+	}
+
+	/**
 	 * Resolves the given parameter type and value name into an argument value.
 	 * @param parameter the method parameter to resolve to an argument value
 	 * @param message the current request
@@ -158,21 +180,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	protected abstract Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
 			throws Exception;
-
-	/**
-	 * Resolves the given default value into an argument value.
-	 */
-	private Object resolveDefaultValue(String defaultValue) {
-		if (this.configurableBeanFactory == null) {
-			return defaultValue;
-		}
-		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(defaultValue);
-		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
-		if (exprResolver == null) {
-			return defaultValue;
-		}
-		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
-	}
 
 	/**
 	 * Invoked when a named value is required, but

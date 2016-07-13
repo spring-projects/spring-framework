@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.PathMatcher;
@@ -85,7 +86,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	private static final String MVC_VALIDATOR_NAME = "mvcValidator";
 
-	private static final boolean jackson2Present= ClassUtils.isPresent(
+	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
 
@@ -244,11 +245,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		handler.setMessageConverter(brokerMessageConverter());
 		handler.setValidator(simpValidator());
 
-		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 		addArgumentResolvers(argumentResolvers);
 		handler.setCustomArgumentResolvers(argumentResolvers);
 
-		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
 		addReturnValueHandlers(returnValueHandlers);
 		handler.setCustomReturnValueHandlers(returnValueHandlers);
 
@@ -288,7 +289,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (handler == null) {
 			return new NoOpBrokerMessageHandler();
 		}
-		Map<String, MessageHandler> subscriptions = new HashMap<String, MessageHandler>(1);
+		Map<String, MessageHandler> subscriptions = new HashMap<>(1);
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
 		if (destination != null) {
 			subscriptions.put(destination, userDestinationMessageHandler());
@@ -315,8 +316,11 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (getBrokerRegistry().getUserRegistryBroadcast() == null) {
 			return new NoOpMessageHandler();
 		}
-		return new UserRegistryMessageHandler(userRegistry(), brokerMessagingTemplate(),
-				getBrokerRegistry().getUserRegistryBroadcast(), messageBrokerTaskScheduler());
+		SimpUserRegistry userRegistry = userRegistry();
+		Assert.isInstanceOf(MultiServerUserRegistry.class, userRegistry);
+		return new UserRegistryMessageHandler((MultiServerUserRegistry) userRegistry,
+				brokerMessagingTemplate(), getBrokerRegistry().getUserRegistryBroadcast(),
+				messageBrokerTaskScheduler());
 	}
 
 	// Expose alias for 4.1 compatibility
@@ -343,7 +347,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public CompositeMessageConverter brokerMessageConverter() {
-		List<MessageConverter> converters = new ArrayList<MessageConverter>();
+		List<MessageConverter> converters = new ArrayList<>();
 		boolean registerDefaults = configureMessageConverters(converters);
 		if (registerDefaults) {
 			converters.add(new StringMessageConverter());
@@ -380,6 +384,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
 		}
+		resolver.setPathMatcher(getBrokerRegistry().getPathMatcher());
 		return resolver;
 	}
 
@@ -393,18 +398,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	 * Create the user registry that provides access to the local users.
 	 */
 	protected abstract SimpUserRegistry createLocalUserRegistry();
-
-	/**
-	 * As of 4.2, UserSessionRegistry is deprecated in favor of SimpUserRegistry
-	 * exposing information about all connected users. The MultiServerUserRegistry
-	 * implementation in combination with UserRegistryMessageHandler can be used
-	 * to share user registries across multiple servers.
-	 */
-	@Deprecated
-	@SuppressWarnings("deprecation")
-	protected org.springframework.messaging.simp.user.UserSessionRegistry userSessionRegistry() {
-		return null;
-	}
 
 	/**
 	 * Return a {@link org.springframework.validation.Validator}s instance for validating

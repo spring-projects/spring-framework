@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public abstract class MockRestRequestMatchers {
 	/**
 	 * Assert request header values with the given Hamcrest matcher.
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
 		return new RequestMatcher() {
 			@Override
@@ -155,8 +155,8 @@ public abstract class MockRestRequestMatchers {
 	private static void assertHeaderValueCount(final String name, HttpHeaders headers, int expectedCount) {
 		List<String> actualValues = headers.get(name);
 		AssertionErrors.assertTrue("Expected header <" + name + ">", actualValues != null);
-		AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + expectedCount
-				+ "> values but found " + actualValues, expectedCount <= actualValues.size());
+		AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + expectedCount +
+				"> values but found " + actualValues, expectedCount <= actualValues.size());
 	}
 
 	/**

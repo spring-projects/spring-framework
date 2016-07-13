@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,9 +43,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.Formatter;
 import org.springframework.format.support.FormatterPropertyEditorAdapter;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
@@ -92,8 +89,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>This generic data binder can be used in any kind of environment.
  * It is typically used by Spring web MVC controllers, via the web-specific
- * subclasses {@link org.springframework.web.bind.ServletRequestDataBinder}
- * and {@link org.springframework.web.portlet.bind.PortletRequestDataBinder}.
+ * subclass {@link org.springframework.web.bind.ServletRequestDataBinder}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -125,19 +121,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	protected static final Log logger = LogFactory.getLog(DataBinder.class);
 
-	private static Class<?> javaUtilOptionalClass = null;
-
-	static {
-		try {
-			javaUtilOptionalClass =
-					ClassUtils.forName("java.util.Optional", DataBinder.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 not available - Optional references simply not supported then.
-		}
-	}
-
-
 	private final Object target;
 
 	private final String objectName;
@@ -162,7 +145,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private BindingErrorProcessor bindingErrorProcessor = new DefaultBindingErrorProcessor();
 
-	private final List<Validator> validators = new ArrayList<Validator>();
+	private final List<Validator> validators = new ArrayList<>();
 
 	private ConversionService conversionService;
 
@@ -184,12 +167,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @param objectName the name of the target object
 	 */
 	public DataBinder(Object target, String objectName) {
-		if (target != null && target.getClass() == javaUtilOptionalClass) {
-			this.target = OptionalUnwrapper.unwrap(target);
-		}
-		else {
-			this.target = target;
-		}
+		this.target = ObjectUtils.unwrapOptional(target);
 		this.objectName = objectName;
 	}
 
@@ -784,7 +762,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected void checkRequiredFields(MutablePropertyValues mpvs) {
 		String[] requiredFields = getRequiredFields();
 		if (!ObjectUtils.isEmpty(requiredFields)) {
-			Map<String, PropertyValue> propertyValues = new HashMap<String, PropertyValue>();
+			Map<String, PropertyValue> propertyValues = new HashMap<>();
 			PropertyValue[] pvs = mpvs.getPropertyValues();
 			for (PropertyValue pv : pvs) {
 				String canonicalName = PropertyAccessorUtils.canonicalPropertyName(pv.getName());
@@ -883,24 +861,6 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 			throw new BindException(getBindingResult());
 		}
 		return getBindingResult().getModel();
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class OptionalUnwrapper {
-
-		public static Object unwrap(Object optionalObject) {
-			Optional<?> optional = (Optional<?>) optionalObject;
-			if (!optional.isPresent()) {
-				return null;
-			}
-			Object result = optional.get();
-			Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
-			return result;
-		}
 	}
 
 }

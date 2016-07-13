@@ -24,7 +24,7 @@ import org.springframework.http.HttpMethod;
  * @author Luciano Leggieri
  */
 public class OkHttpAsyncClientHttpRequestFactoryTests extends AbstractAsyncHttpRequestFactoryTestCase {
- 
+
     @Override
     protected AsyncClientHttpRequestFactory createRequestFactory() {
         return new OkHttpClientHttpRequestFactory();

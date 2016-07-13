@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,53 +59,6 @@ public abstract class RequestContextUtils {
 	 */
 	public static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
 
-
-	/**
-	 * Look for the WebApplicationContext associated with the DispatcherServlet
-	 * that has initiated request processing.
-	 * @param request current HTTP request
-	 * @return the request-specific web application context
-	 * @throws IllegalStateException if no servlet-specific context has been found
-	 * @see #getWebApplicationContext(ServletRequest, ServletContext)
-	 * @deprecated as of Spring 4.2.1, in favor of
-	 * {@link #findWebApplicationContext(HttpServletRequest)}
-	 */
-	@Deprecated
-	public static WebApplicationContext getWebApplicationContext(ServletRequest request) throws IllegalStateException {
-		return getWebApplicationContext(request, null);
-	}
-
-	/**
-	 * Look for the WebApplicationContext associated with the DispatcherServlet
-	 * that has initiated request processing, and for the global context if none
-	 * was found associated with the current request. This method is useful to
-	 * allow components outside the framework, such as JSP tag handlers,
-	 * to access the most specific application context available.
-	 * @param request current HTTP request
-	 * @param servletContext current servlet context
-	 * @return the request-specific WebApplicationContext, or the global one
-	 * if no request-specific context has been found
-	 * @throws IllegalStateException if neither a servlet-specific nor a
-	 * global context has been found
-	 * @see DispatcherServlet#WEB_APPLICATION_CONTEXT_ATTRIBUTE
-	 * @see WebApplicationContextUtils#getRequiredWebApplicationContext(ServletContext)
-	 * @deprecated as of Spring 4.2.1, in favor of
-	 * {@link #findWebApplicationContext(HttpServletRequest, ServletContext)}
-	 */
-	@Deprecated
-	public static WebApplicationContext getWebApplicationContext(
-			ServletRequest request, ServletContext servletContext) throws IllegalStateException {
-
-		WebApplicationContext webApplicationContext = (WebApplicationContext) request.getAttribute(
-				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
-		if (webApplicationContext == null) {
-			if (servletContext == null) {
-				throw new IllegalStateException("No WebApplicationContext found: not in a DispatcherServlet request?");
-			}
-			webApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
-		}
-		return webApplicationContext;
-	}
 
 	/**
 	 * Look for the WebApplicationContext associated with the DispatcherServlet
@@ -198,7 +151,7 @@ public abstract class RequestContextUtils {
 	 * <p>Consider using {@link org.springframework.context.i18n.LocaleContextHolder#getTimeZone()}
 	 * which will normally be populated with the same TimeZone: That method only
 	 * differs in terms of its fallback to the system time zone if the LocaleResolver
-	 * hasn't provided provided a specific time zone (instead of this method's {@code null}).
+	 * hasn't provided a specific time zone (instead of this method's {@code null}).
 	 * @param request current HTTP request
 	 * @return the current time zone for the given request, either from the
 	 * TimeZoneAwareLocaleResolver or {@code null} if none associated

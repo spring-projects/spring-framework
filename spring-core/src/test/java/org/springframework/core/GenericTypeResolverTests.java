@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class GenericTypeResolverTests {
 
 	@Test
 	public void nullIfNotResolvable() {
-		GenericClass<String> obj = new GenericClass<String>();
+		GenericClass<String> obj = new GenericClass<>();
 		assertNull(resolveTypeArgument(obj.getClass(), GenericClass.class));
 	}
 
@@ -82,13 +82,13 @@ public class GenericTypeResolverTests {
 		Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
 		MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
 		assertEquals(MyInterfaceType.class,
-				resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<TypeVariable, Type>()));
+				resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<>()));
 
 		Method intArrMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerArrayInputMessage",
 				MyInterfaceType[].class);
 		MethodParameter intArrMessageMethodParam = new MethodParameter(intArrMessageMethod, 0);
 		assertEquals(MyInterfaceType[].class,
-				resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<TypeVariable, Type>()));
+				resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<>()));
 
 		Method genericArrMessageMethod = findMethod(MySimpleTypeWithMethods.class, "readGenericArrayInputMessage",
 				Object[].class);
@@ -130,7 +130,7 @@ public class GenericTypeResolverTests {
 		Type t = null;
 		Type x = null;
 		for (Map.Entry<TypeVariable, Type> entry : map.entrySet()) {
-			if(entry.getKey().toString().equals("T")) {
+			if (entry.getKey().toString().equals("T")) {
 				t = entry.getValue();
 			}
 			else {
@@ -158,7 +158,7 @@ public class GenericTypeResolverTests {
 	@Test
 	public void getGenericsOnArrayFromParamCannotBeResolved() throws Exception {
 		// SPR-11044
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(
+		MethodParameter methodParameter = MethodParameter.forExecutable(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
 		Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
 		assertThat(resolved, equalTo((Class<?>) Object[].class));

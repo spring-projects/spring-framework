@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	// ServletRequest properties
 	// ---------------------------------------------------------------------
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private String characterEncoding;
 
@@ -152,7 +152,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String contentType;
 
-	private final Map<String, String[]> parameters = new LinkedHashMap<String, String[]>(16);
+	private final Map<String, String[]> parameters = new LinkedHashMap<>(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -167,7 +167,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String remoteHost = DEFAULT_REMOTE_HOST;
 
 	/** List of locales in descending order */
-	private final List<Locale> locales = new LinkedList<Locale>();
+	private final List<Locale> locales = new LinkedList<>();
 
 	private boolean secure = false;
 
@@ -198,7 +198,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private Cookie[] cookies;
 
-	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<HeaderValueHolder>();
+	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<>();
 
 	private String method;
 
@@ -210,7 +210,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String remoteUser;
 
-	private final Set<String> userRoles = new HashSet<String>();
+	private final Set<String> userRoles = new HashSet<>();
 
 	private Principal userPrincipal;
 
@@ -228,7 +228,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private boolean requestedSessionIdFromURL = false;
 
-	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<String, Part>();
+	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<>();
 
 
 	// ---------------------------------------------------------------------
@@ -328,9 +328,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * throwing an IllegalStateException if not active anymore.
 	 */
 	protected void checkActive() throws IllegalStateException {
-		if (!this.active) {
-			throw new IllegalStateException("Request is not active anymore");
-		}
+		Assert.state(this.active, "Request is not active anymore");
 	}
 
 
@@ -347,7 +345,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
+		return Collections.enumeration(new LinkedHashSet<>(this.attributes.keySet()));
 	}
 
 	@Override
@@ -390,8 +388,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (contentType != null) {
 			try {
 				MediaType mediaType = MediaType.parseMediaType(contentType);
-				if (mediaType.getCharSet() != null) {
-					this.characterEncoding = mediaType.getCharSet().name();
+				if (mediaType.getCharset() != null) {
+					this.characterEncoding = mediaType.getCharset().name();
 				}
 			}
 			catch (Exception ex) {
@@ -807,9 +805,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
-		if (!this.asyncSupported) {
-			throw new IllegalStateException("Async not supported");
-		}
+		Assert.state(this.asyncSupported, "Async not supported");
 		this.asyncStarted = true;
 		this.asyncContext = new MockAsyncContext(request, response);
 		return this.asyncContext;
@@ -973,7 +969,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public Enumeration<String> getHeaders(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<String>());
+		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<>());
 	}
 
 	@Override
@@ -1213,7 +1209,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
-		List<Part> result = new LinkedList<Part>();
+		List<Part> result = new LinkedList<>();
 		for (List<Part> list : this.parts.values()) {
 			result.addAll(list);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 import java.util.ArrayList;
 import java.util.List;
 /**
- * An abstract base class class for configuring STOMP over WebSocket/SockJS endpoints.
+ * An abstract base class for configuring STOMP over WebSocket/SockJS endpoints.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -51,9 +51,9 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 
 	private HandshakeHandler handshakeHandler;
 
-	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
-	private final List<String> allowedOrigins = new ArrayList<String>();
+	private final List<String> allowedOrigins = new ArrayList<>();
 
 	private StompSockJsServiceRegistration registration;
 
@@ -111,14 +111,14 @@ public class WebMvcStompWebSocketEndpointRegistration implements StompWebSocketE
 	}
 
 	protected HandshakeInterceptor[] getInterceptors() {
-		List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+		List<HandshakeInterceptor> interceptors = new ArrayList<>();
 		interceptors.addAll(this.interceptors);
 		interceptors.add(new OriginHandshakeInterceptor(this.allowedOrigins));
 		return interceptors.toArray(new HandshakeInterceptor[interceptors.size()]);
 	}
 
 	public final MultiValueMap<HttpRequestHandler, String> getMappings() {
-		MultiValueMap<HttpRequestHandler, String> mappings = new LinkedMultiValueMap<HttpRequestHandler, String>();
+		MultiValueMap<HttpRequestHandler, String> mappings = new LinkedMultiValueMap<>();
 		if (this.registration != null) {
 			SockJsService sockJsService = this.registration.getSockJsService();
 			for (String path : this.paths) {

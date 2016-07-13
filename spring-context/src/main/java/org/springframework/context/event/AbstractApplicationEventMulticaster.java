@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public abstract class AbstractApplicationEventMulticaster
 	private final ListenerRetriever defaultRetriever = new ListenerRetriever(false);
 
 	final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
-			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>(64);
+			new ConcurrentHashMap<>(64);
 
 	private ClassLoader beanClassLoader;
 
@@ -203,12 +203,12 @@ public abstract class AbstractApplicationEventMulticaster
 	private Collection<ApplicationListener<?>> retrieveApplicationListeners(
 			ResolvableType eventType, Class<?> sourceType, ListenerRetriever retriever) {
 
-		LinkedList<ApplicationListener<?>> allListeners = new LinkedList<ApplicationListener<?>>();
+		LinkedList<ApplicationListener<?>> allListeners = new LinkedList<>();
 		Set<ApplicationListener<?>> listeners;
 		Set<String> listenerBeans;
 		synchronized (this.retrievalMutex) {
-			listeners = new LinkedHashSet<ApplicationListener<?>>(this.defaultRetriever.applicationListeners);
-			listenerBeans = new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
+			listeners = new LinkedHashSet<>(this.defaultRetriever.applicationListeners);
+			listenerBeans = new LinkedHashSet<>(this.defaultRetriever.applicationListenerBeans);
 		}
 		for (ApplicationListener<?> listener : listeners) {
 			if (supportsEvent(listener, eventType, sourceType)) {
@@ -286,7 +286,7 @@ public abstract class AbstractApplicationEventMulticaster
 	/**
 	 * Cache key for ListenerRetrievers, based on event type and source type.
 	 */
-	private static class ListenerCacheKey {
+	private static final class ListenerCacheKey implements Comparable<ListenerCacheKey> {
 
 		private final ResolvableType eventType;
 
@@ -311,6 +311,23 @@ public abstract class AbstractApplicationEventMulticaster
 		public int hashCode() {
 			return (ObjectUtils.nullSafeHashCode(this.eventType) * 29 + ObjectUtils.nullSafeHashCode(this.sourceType));
 		}
+
+		@Override
+		public String toString() {
+			return "ListenerCacheKey [eventType = " + this.eventType + ", sourceType = " + this.sourceType.getName() + "]";
+		}
+
+		@Override
+		public int compareTo(ListenerCacheKey other) {
+			int result = 0;
+			if (this.eventType != null) {
+				result = this.eventType.toString().compareTo(other.eventType.toString());
+			}
+			if (result == 0 && this.sourceType != null) {
+				result = this.sourceType.getName().compareTo(other.sourceType.getName());
+			}
+			return result;
+		}
 	}
 
 
@@ -328,13 +345,13 @@ public abstract class AbstractApplicationEventMulticaster
 		private final boolean preFiltered;
 
 		public ListenerRetriever(boolean preFiltered) {
-			this.applicationListeners = new LinkedHashSet<ApplicationListener<?>>();
-			this.applicationListenerBeans = new LinkedHashSet<String>();
+			this.applicationListeners = new LinkedHashSet<>();
+			this.applicationListenerBeans = new LinkedHashSet<>();
 			this.preFiltered = preFiltered;
 		}
 
 		public Collection<ApplicationListener<?>> getApplicationListeners() {
-			LinkedList<ApplicationListener<?>> allListeners = new LinkedList<ApplicationListener<?>>();
+			LinkedList<ApplicationListener<?>> allListeners = new LinkedList<>();
 			for (ApplicationListener<?> listener : this.applicationListeners) {
 				allListeners.add(listener);
 			}

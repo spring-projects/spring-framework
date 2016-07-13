@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -208,7 +208,7 @@ public class JmsMessagingTemplateTests {
 	@Test
 	public void convertAndSendPayloadAndHeaders() throws JMSException {
 		Destination destination = new Destination() {};
-		Map<String, Object> headers = new HashMap<String, Object>();
+		Map<String, Object> headers = new HashMap<>();
 		headers.put("foo", "bar");
 
 		messagingTemplate.convertAndSend(destination, "Hello", headers);
@@ -218,7 +218,7 @@ public class JmsMessagingTemplateTests {
 
 	@Test
 	public void convertAndSendPayloadAndHeadersName() throws JMSException {
-		Map<String, Object> headers = new HashMap<String, Object>();
+		Map<String, Object> headers = new HashMap<>();
 		headers.put("foo", "bar");
 
 		messagingTemplate.convertAndSend("myQueue", "Hello", headers);

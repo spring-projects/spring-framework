@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,22 +59,22 @@ public class CorsRegistration {
 	}
 
 	public CorsRegistration allowedOrigins(String... origins) {
-		this.config.setAllowedOrigins(new ArrayList<String>(Arrays.asList(origins)));
+		this.config.setAllowedOrigins(new ArrayList<>(Arrays.asList(origins)));
 		return this;
 	}
 
 	public CorsRegistration allowedMethods(String... methods) {
-		this.config.setAllowedMethods(new ArrayList<String>(Arrays.asList(methods)));
+		this.config.setAllowedMethods(new ArrayList<>(Arrays.asList(methods)));
 		return this;
 	}
 
 	public CorsRegistration allowedHeaders(String... headers) {
-		this.config.setAllowedHeaders(new ArrayList<String>(Arrays.asList(headers)));
+		this.config.setAllowedHeaders(new ArrayList<>(Arrays.asList(headers)));
 		return this;
 	}
 
 	public CorsRegistration exposedHeaders(String... headers) {
-		this.config.setExposedHeaders(new ArrayList<String>(Arrays.asList(headers)));
+		this.config.setExposedHeaders(new ArrayList<>(Arrays.asList(headers)));
 		return this;
 	}
 

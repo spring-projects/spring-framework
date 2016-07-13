@@ -29,7 +29,7 @@
 	</lang:bsh>
 
 	<lang:bsh id="messengerByType" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"
-			autowire="byType" dependency-check="objects" init-method="init" destroy-method="destroy">
+			autowire="byType" init-method="init" destroy-method="destroy">
 	</lang:bsh>
 
 	<lang:bsh id="messengerByName" script-source="classpath:org/springframework/scripting/bsh/MessengerImpl.bsh"

@@ -125,7 +125,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * {@link Session} to send a message.
 	 * <p>Default is {@link Session#AUTO_ACKNOWLEDGE}.
 	 * <p>Vendor-specific extensions to the acknowledgment mode can be set here as well.
-	 * <p>Note that that inside an EJB, the parameters to the
+	 * <p>Note that inside an EJB, the parameters to the
 	 * {@code create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)} method
 	 * are not taken into account. Depending on the transaction context in the EJB,
 	 * the container makes its own decisions on these values. See section 17.3.5

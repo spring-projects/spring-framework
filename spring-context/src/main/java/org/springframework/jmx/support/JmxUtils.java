@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -299,17 +299,6 @@ public abstract class JmxUtils {
 			}
 		}
 		return getMXBeanInterface(clazz.getSuperclass());
-	}
-
-	/**
-	 * Check whether MXBean support is available, i.e. whether we're running
-	 * on Java 6 or above.
-	 * @return {@code true} if available; {@code false} otherwise
-	 * @deprecated as of Spring 4.0, since Java 6 is required anyway now
-	 */
-	@Deprecated
-	public static boolean isMXBeanSupportAvailable() {
-		return true;
 	}
 
 }

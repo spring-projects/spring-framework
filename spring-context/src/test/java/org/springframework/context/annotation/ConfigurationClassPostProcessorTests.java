@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -592,15 +592,21 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
-	public void testPrototypeArgumentsThroughBeanMethodCall() {
+	public void testPrototypeArgumentThroughBeanMethodCall() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithPrototype.class);
 		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
 	}
 
 	@Test
-	public void testSingletonArgumentsThroughBeanMethodCall() {
+	public void testSingletonArgumentThroughBeanMethodCall() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithSingleton.class);
 		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
+	}
+
+	@Test
+	public void testNullArgumentThroughBeanMethodCall() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithNull.class);
+		ctx.getBean("aFoo");
 	}
 
 
@@ -850,7 +856,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<Object> genericRepo() {
-			return new GenericRepository<Object>();
+			return new GenericRepository<>();
 		}
 	}
 
@@ -912,12 +918,12 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<? extends String> stringRepo() {
-			return new Repository<String>();
+			return new Repository<>();
 		}
 
 		@Bean
 		public Repository<? extends Number> numberRepo() {
-			return new Repository<Number>();
+			return new Repository<>();
 		}
 
 		@Bean
@@ -936,7 +942,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<? extends Number> numberRepo() {
-			return new Repository<Number>();
+			return new Repository<>();
 		}
 
 		@Bean
@@ -1057,17 +1063,27 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
-	public interface DefaultMethodsConfig {
+	public interface BaseInterface {
 
-		@Bean
-		default ServiceBean serviceBean() {
-			return provider().getServiceBean();
-		}
+		ServiceBean serviceBean();
+	}
+
+	public interface BaseDefaultMethods extends BaseInterface {
 
 		@Bean
 		default ServiceBeanProvider provider() {
 			return new ServiceBeanProvider();
 		}
+
+		@Bean
+		@Override
+		default ServiceBean serviceBean() {
+			return provider().getServiceBean();
+		}
+	}
+
+	public interface DefaultMethodsConfig extends BaseDefaultMethods {
+
 	}
 
 	@Configuration
@@ -1137,7 +1153,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		@Scope("prototype")
-		public DependingFoo foo(final BarArgument bar) {
+		public DependingFoo foo(BarArgument bar) {
 			return new DependingFoo(bar);
 		}
 
@@ -1145,7 +1161,7 @@ public class ConfigurationClassPostProcessorTests {
 		public FooFactory fooFactory() {
 			return new FooFactory() {
 				@Override
-				public DependingFoo createFoo(final BarArgument bar) {
+				public DependingFoo createFoo(BarArgument bar) {
 					return foo(bar);
 				}
 			};
@@ -1156,7 +1172,7 @@ public class ConfigurationClassPostProcessorTests {
 	static class BeanArgumentConfigWithSingleton {
 
 		@Bean @Lazy
-		public DependingFoo foo(final BarArgument bar) {
+		public DependingFoo foo(BarArgument bar) {
 			return new DependingFoo(bar);
 		}
 
@@ -1164,10 +1180,29 @@ public class ConfigurationClassPostProcessorTests {
 		public FooFactory fooFactory() {
 			return new FooFactory() {
 				@Override
-				public DependingFoo createFoo(final BarArgument bar) {
+				public DependingFoo createFoo(BarArgument bar) {
 					return foo(bar);
 				}
 			};
+		}
+	}
+
+	@Configuration
+	static class BeanArgumentConfigWithNull {
+
+		@Bean
+		public DependingFoo aFoo() {
+			return foo(null);
+		}
+
+		@Bean @Lazy
+		public DependingFoo foo(BarArgument bar) {
+			return new DependingFoo(bar);
+		}
+
+		@Bean
+		public BarArgument bar() {
+			return new BarArgument();
 		}
 	}
 
@@ -1177,6 +1212,7 @@ public class ConfigurationClassPostProcessorTests {
 	static class DependingFoo {
 
 		DependingFoo(BarArgument bar) {
+			Assert.notNull(bar);
 		}
 	}
 

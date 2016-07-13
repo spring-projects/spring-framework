@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.context.transaction;
 
 import java.util.Map;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -73,7 +74,8 @@ public abstract class TestContextTransactionUtils {
 	 * <li>Look up the {@code DataSource} by type and name, if the supplied
 	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
 	 * {@code DataSource} does not exist.
-	 * <li>Attempt to look up a single {@code DataSource} by type.
+	 * <li>Attempt to look up the single {@code DataSource} by type.
+	 * <li>Attempt to look up the <em>primary</em> {@code DataSource} by type.
 	 * <li>Attempt to look up the {@code DataSource} by type and the
 	 * {@linkplain #DEFAULT_DATA_SOURCE_NAME default data source name}.
 	 * @param testContext the test context for which the {@code DataSource}
@@ -110,15 +112,21 @@ public abstract class TestContextTransactionUtils {
 				if (dataSources.size() == 1) {
 					return dataSources.values().iterator().next();
 				}
+
+				try {
+					// look up single bean by type, with support for 'primary' beans
+					return bf.getBean(DataSource.class);
+				}
+				catch (BeansException ex) {
+					logBeansException(testContext, ex, PlatformTransactionManager.class);
+				}
 			}
 
 			// look up by type and default name
 			return bf.getBean(DEFAULT_DATA_SOURCE_NAME, DataSource.class);
 		}
 		catch (BeansException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Caught exception while retrieving DataSource for test context " + testContext, ex);
-			}
+			logBeansException(testContext, ex, DataSource.class);
 			return null;
 		}
 	}
@@ -133,7 +141,8 @@ public abstract class TestContextTransactionUtils {
 	 * <li>Look up the transaction manager by type and explicit name, if the supplied
 	 * {@code name} is non-empty, throwing a {@link BeansException} if the named
 	 * transaction manager does not exist.
-	 * <li>Attempt to look up the transaction manager by type.
+	 * <li>Attempt to look up the single transaction manager by type.
+	 * <li>Attempt to look up the <em>primary</em> transaction manager by type.
 	 * <li>Attempt to look up the transaction manager via a
 	 * {@link TransactionManagementConfigurer}, if present.
 	 * <li>Attempt to look up the transaction manager by type and the
@@ -176,13 +185,19 @@ public abstract class TestContextTransactionUtils {
 					return txMgrs.values().iterator().next();
 				}
 
+				try {
+					// look up single bean by type, with support for 'primary' beans
+					return bf.getBean(PlatformTransactionManager.class);
+				}
+				catch (BeansException ex) {
+					logBeansException(testContext, ex, PlatformTransactionManager.class);
+				}
+
 				// look up single TransactionManagementConfigurer
 				Map<String, TransactionManagementConfigurer> configurers = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					lbf, TransactionManagementConfigurer.class);
-				if (configurers.size() > 1) {
-					throw new IllegalStateException(
+				Assert.state(configurers.size() <= 1,
 						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
-				}
 				if (configurers.size() == 1) {
 					return configurers.values().iterator().next().annotationDrivenTransactionManager();
 				}
@@ -192,11 +207,15 @@ public abstract class TestContextTransactionUtils {
 			return bf.getBean(DEFAULT_TRANSACTION_MANAGER_NAME, PlatformTransactionManager.class);
 		}
 		catch (BeansException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Caught exception while retrieving transaction manager for test context " + testContext,
-					ex);
-			}
+			logBeansException(testContext, ex, PlatformTransactionManager.class);
 			return null;
+		}
+	}
+
+	private static void logBeansException(TestContext testContext, BeansException ex, Class<?> beanType) {
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Caught exception while retrieving %s for test context %s",
+				beanType.getSimpleName(), testContext), ex);
 		}
 	}
 

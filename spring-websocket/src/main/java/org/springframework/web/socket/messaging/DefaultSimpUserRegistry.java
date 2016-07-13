@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,50 +37,34 @@ import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Default, mutable, thread-safe implementation of {@link SimpUserRegistry} that
- * listens ApplicationContext events of type {@link AbstractSubProtocolEvent} to
- * keep track of user presence and subscription information.
+ * A default implementation of {@link SimpUserRegistry} that relies on
+ * {@link AbstractSubProtocolEvent} application context events to keep track of
+ * connected users and their subscriptions.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
  */
 public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicationListener {
 
-	private final Map<String, DefaultSimpUser> users = new ConcurrentHashMap<String, DefaultSimpUser>();
+	/* Primary lookup that holds all users and their sessions */
+	private final Map<String, LocalSimpUser> users = new ConcurrentHashMap<>();
 
-	private final Map<String, DefaultSimpSession> sessions = new ConcurrentHashMap<String, DefaultSimpSession>();
+	/* Secondary lookup across all sessions by id */
+	private final Map<String, LocalSimpSession> sessions = new ConcurrentHashMap<>();
+
+	private final Object sessionLock = new Object();
 
 
 	@Override
-	public SimpUser getUser(String userName) {
-		return this.users.get(userName);
+	public int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 
-	@Override
-	public Set<SimpUser> getUsers() {
-		return new HashSet<SimpUser>(this.users.values());
-	}
-
-	public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) {
-		Set<SimpSubscription> result = new HashSet<SimpSubscription>();
-		for (DefaultSimpSession session : this.sessions.values()) {
-			for (SimpSubscription subscription : session.subscriptions.values()) {
-				if (matcher.match(subscription)) {
-					result.add(subscription);
-				}
-			}
-		}
-		return result;
-	}
+	// SmartApplicationListener methods
 
 	@Override
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
 		return AbstractSubProtocolEvent.class.isAssignableFrom(eventType);
-	}
-
-	@Override
-	public boolean supportsSourceType(Class<?> sourceType) {
-		return true;
 	}
 
 	@Override
@@ -92,7 +76,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		String sessionId = accessor.getSessionId();
 
 		if (event instanceof SessionSubscribeEvent) {
-			DefaultSimpSession session = this.sessions.get(sessionId);
+			LocalSimpSession session = this.sessions.get(sessionId);
 			if (session != null) {
 				String id = accessor.getSubscriptionId();
 				String destination = accessor.getDestination();
@@ -108,23 +92,22 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			if (user instanceof DestinationUserNameProvider) {
 				name = ((DestinationUserNameProvider) user).getDestinationUserName();
 			}
-			synchronized (this) {
-				DefaultSimpUser simpUser = this.users.get(name);
+			synchronized (this.sessionLock) {
+				LocalSimpUser simpUser = this.users.get(name);
 				if (simpUser == null) {
-					simpUser = new DefaultSimpUser(name, sessionId);
+					simpUser = new LocalSimpUser(name);
 					this.users.put(name, simpUser);
 				}
-				else {
-					simpUser.addSession(sessionId);
-				}
-				this.sessions.put(sessionId, (DefaultSimpSession) simpUser.getSession(sessionId));
+				LocalSimpSession session = new LocalSimpSession(sessionId, simpUser);
+				simpUser.addSession(session);
+				this.sessions.put(sessionId, session);
 			}
 		}
 		else if (event instanceof SessionDisconnectEvent) {
-			synchronized (this) {
-				DefaultSimpSession session = this.sessions.remove(sessionId);
+			synchronized (this.sessionLock) {
+				LocalSimpSession session = this.sessions.remove(sessionId);
 				if (session != null) {
-					DefaultSimpUser user = session.getUser();
+					LocalSimpUser user = session.getUser();
 					user.removeSession(sessionId);
 					if (!user.hasSessions()) {
 						this.users.remove(user.getName());
@@ -133,7 +116,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 			}
 		}
 		else if (event instanceof SessionUnsubscribeEvent) {
-			DefaultSimpSession session = this.sessions.get(sessionId);
+			LocalSimpSession session = this.sessions.get(sessionId);
 			if (session != null) {
 				String subscriptionId = accessor.getSubscriptionId();
 				session.removeSubscription(subscriptionId);
@@ -142,28 +125,52 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 	}
 
 	@Override
-	public int getOrder() {
-		return Ordered.LOWEST_PRECEDENCE;
+	public boolean supportsSourceType(Class<?> sourceType) {
+		return true;
 	}
+
+	// SimpUserRegistry methods
+
+	@Override
+	public SimpUser getUser(String userName) {
+		return this.users.get(userName);
+	}
+
+	@Override
+	public Set<SimpUser> getUsers() {
+		return new HashSet<>(this.users.values());
+	}
+
+	public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) {
+		Set<SimpSubscription> result = new HashSet<>();
+		for (LocalSimpSession session : this.sessions.values()) {
+			for (SimpSubscription subscription : session.subscriptions.values()) {
+				if (matcher.match(subscription)) {
+					result.add(subscription);
+				}
+			}
+		}
+		return result;
+	}
+
 
 	@Override
 	public String toString() {
 		return "users=" + this.users;
 	}
 
-	private static class DefaultSimpUser implements SimpUser {
+
+	private static class LocalSimpUser implements SimpUser {
 
 		private final String name;
 
-		private final Map<String, SimpSession> sessions =
-				new ConcurrentHashMap<String, SimpSession>(1);
+		private final Map<String, SimpSession> userSessions =
+				new ConcurrentHashMap<>(1);
 
 
-		public DefaultSimpUser(String userName, String sessionId) {
+		public LocalSimpUser(String userName) {
 			Assert.notNull(userName);
-			Assert.notNull(sessionId);
 			this.name = userName;
-			this.sessions.put(sessionId, new DefaultSimpSession(sessionId, this));
 		}
 
 		@Override
@@ -173,26 +180,25 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean hasSessions() {
-			return !this.sessions.isEmpty();
+			return !this.userSessions.isEmpty();
 		}
 
 		@Override
 		public SimpSession getSession(String sessionId) {
-			return (sessionId != null ? this.sessions.get(sessionId) : null);
+			return (sessionId != null ? this.userSessions.get(sessionId) : null);
 		}
 
 		@Override
 		public Set<SimpSession> getSessions() {
-			return new HashSet<SimpSession>(this.sessions.values());
+			return new HashSet<>(this.userSessions.values());
 		}
 
-		void addSession(String sessionId) {
-			DefaultSimpSession session = new DefaultSimpSession(sessionId, this);
-			this.sessions.put(sessionId, session);
+		void addSession(SimpSession session) {
+			this.userSessions.put(session.getId(), session);
 		}
 
 		void removeSession(String sessionId) {
-			this.sessions.remove(sessionId);
+			this.userSessions.remove(sessionId);
 		}
 
 		@Override
@@ -213,20 +219,20 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public String toString() {
-			return "name=" + this.name + ", sessions=" + this.sessions;
+			return "name=" + this.name + ", sessions=" + this.userSessions;
 		}
 	}
 
-	private static class DefaultSimpSession implements SimpSession {
+	private static class LocalSimpSession implements SimpSession {
 
 		private final String id;
 
-		private final DefaultSimpUser user;
+		private final LocalSimpUser user;
 
-		private final Map<String, SimpSubscription> subscriptions = new ConcurrentHashMap<String, SimpSubscription>(4);
+		private final Map<String, SimpSubscription> subscriptions = new ConcurrentHashMap<>(4);
 
 
-		public DefaultSimpSession(String id, DefaultSimpUser user) {
+		public LocalSimpSession(String id, LocalSimpUser user) {
 			Assert.notNull(id);
 			Assert.notNull(user);
 			this.id = id;
@@ -239,17 +245,17 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public DefaultSimpUser getUser() {
+		public LocalSimpUser getUser() {
 			return this.user;
 		}
 
 		@Override
 		public Set<SimpSubscription> getSubscriptions() {
-			return new HashSet<SimpSubscription>(this.subscriptions.values());
+			return new HashSet<>(this.subscriptions.values());
 		}
 
 		void addSubscription(String id, String destination) {
-			this.subscriptions.put(id, new DefaultSimpSubscription(id, destination, this));
+			this.subscriptions.put(id, new LocalSimpSubscription(id, destination, this));
 		}
 
 		void removeSubscription(String id) {
@@ -278,16 +284,16 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 	}
 
-	private static class DefaultSimpSubscription implements SimpSubscription {
+	private static class LocalSimpSubscription implements SimpSubscription {
 
 		private final String id;
 
-		private final DefaultSimpSession session;
+		private final LocalSimpSession session;
 
 		private final String destination;
 
 
-		public DefaultSimpSubscription(String id, String destination, DefaultSimpSession session) {
+		public LocalSimpSubscription(String id, String destination, LocalSimpSession session) {
 			Assert.notNull(id);
 			Assert.hasText(destination);
 			Assert.notNull(session);
@@ -302,7 +308,7 @@ public class DefaultSimpUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public DefaultSimpSession getSession() {
+		public LocalSimpSession getSession() {
 			return this.session;
 		}
 

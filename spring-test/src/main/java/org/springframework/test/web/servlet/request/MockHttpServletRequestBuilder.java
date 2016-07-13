@@ -82,15 +82,15 @@ public class MockHttpServletRequestBuilder
 
 	private final URI url;
 
-	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<String, Object>();
+	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
 
 	private String contentType;
 
 	private byte[] content;
 
-	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
+	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
-	private final List<Cookie> cookies = new ArrayList<Cookie>();
+	private final List<Cookie> cookies = new ArrayList<>();
 
 	private Locale locale;
 
@@ -100,13 +100,13 @@ public class MockHttpServletRequestBuilder
 
 	private Principal principal;
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private MockHttpSession session;
 
-	private final Map<String, Object> sessionAttributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> sessionAttributes = new LinkedHashMap<>();
 
-	private final Map<String, Object> flashAttributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> flashAttributes = new LinkedHashMap<>();
 
 	private String contextPath = "";
 
@@ -114,7 +114,7 @@ public class MockHttpServletRequestBuilder
 
 	private String pathInfo = ValueConstants.DEFAULT_NONE;
 
-	private final List<RequestPostProcessor> postProcessors = new ArrayList<RequestPostProcessor>();
+	private final List<RequestPostProcessor> postProcessors = new ArrayList<>();
 
 
 	/**
@@ -149,8 +149,8 @@ public class MockHttpServletRequestBuilder
 	 * @since 4.3
 	 */
 	MockHttpServletRequestBuilder(String httpMethod, URI url) {
-		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(url, "url is required");
+		Assert.notNull(httpMethod, "'httpMethod' is required");
+		Assert.notNull(url, "'url' is required");
 		this.method = httpMethod;
 		this.url = url;
 	}
@@ -250,7 +250,7 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
-		List<MediaType> result = new ArrayList<MediaType>(mediaTypes.length);
+		List<MediaType> result = new ArrayList<>(mediaTypes.length);
 		for (String mediaType : mediaTypes) {
 			result.add(MediaType.parseMediaType(mediaType));
 		}
@@ -335,7 +335,7 @@ public class MockHttpServletRequestBuilder
 	 * @param sessionAttributes the session attributes
 	 */
 	public MockHttpServletRequestBuilder sessionAttrs(Map<String, Object> sessionAttributes) {
-		Assert.notEmpty(sessionAttributes, "'sessionAttrs' must not be empty");
+		Assert.notEmpty(sessionAttributes, "'sessionAttributes' must not be empty");
 		for (String name : sessionAttributes.keySet()) {
 			sessionAttr(name, sessionAttributes.get(name));
 		}
@@ -357,7 +357,7 @@ public class MockHttpServletRequestBuilder
 	 * @param flashAttributes the flash attributes
 	 */
 	public MockHttpServletRequestBuilder flashAttrs(Map<String, Object> flashAttributes) {
-		Assert.notEmpty(flashAttributes, "'flashAttrs' must not be empty");
+		Assert.notEmpty(flashAttributes, "'flashAttributes' must not be empty");
 		for (String name : flashAttributes.keySet()) {
 			flashAttr(name, flashAttributes.get(name));
 		}
@@ -708,7 +708,8 @@ public class MockHttpServletRequestBuilder
 	}
 
 	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {
-		MultiValueMap<String, String> map;HttpInputMessage message = new HttpInputMessage() {
+		MultiValueMap<String, String> map;
+		HttpInputMessage message = new HttpInputMessage() {
 			@Override
 			public InputStream getBody() throws IOException {
 				return new ByteArrayInputStream(content);
@@ -725,7 +726,7 @@ public class MockHttpServletRequestBuilder
 			map = new FormHttpMessageConverter().read(null, message);
 		}
 		catch (IOException ex) {
-			throw new IllegalStateException("Failed to parse form data in request body: ", ex);
+			throw new IllegalStateException("Failed to parse form data in request body", ex);
 		}
 		return map;
 	}
@@ -750,10 +751,8 @@ public class MockHttpServletRequestBuilder
 	public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
 		for (RequestPostProcessor postProcessor : this.postProcessors) {
 			request = postProcessor.postProcessRequest(request);
-			if (request == null) {
-				throw new IllegalStateException(
-						"Post-processor [" + postProcessor.getClass().getName() + "] returned null");
-			}
+			Assert.state(request != null,
+					() -> "Post-processor [" + postProcessor.getClass().getName() + "] returned null");
 		}
 		return request;
 	}

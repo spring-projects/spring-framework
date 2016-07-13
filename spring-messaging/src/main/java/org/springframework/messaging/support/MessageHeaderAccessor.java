@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -282,7 +282,7 @@ public class MessageHeaderAccessor {
 	 * where each new call returns a fresh copy of the current header values.
 	 */
 	public Map<String, Object> toMap() {
-		return new HashMap<String, Object>(this.headers);
+		return new HashMap<>(this.headers);
 	}
 
 
@@ -354,7 +354,7 @@ public class MessageHeaderAccessor {
 	 * names. Supported pattern styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
 	 */
 	public void removeHeaders(String... headerPatterns) {
-		List<String> headersToRemove = new ArrayList<String>();
+		List<String> headersToRemove = new ArrayList<>();
 		for (String pattern : headerPatterns) {
 			if (StringUtils.hasLength(pattern)){
 				if (pattern.contains("*")){
@@ -371,7 +371,7 @@ public class MessageHeaderAccessor {
 	}
 
 	private List<String> getMatchingHeaderNames(String pattern, Map<String, Object> headers) {
-		List<String> matchingHeaderNames = new ArrayList<String>();
+		List<String> matchingHeaderNames = new ArrayList<>();
 		if (headers != null) {
 			for (String key : headers.keySet()) {
 				if (PatternMatchUtils.simpleMatch(pattern, key)) {
@@ -501,7 +501,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return (bytes.length < 80) ?
 						" payload=" + new String(bytes, charset) :
@@ -526,7 +526,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return " payload=" + new String(bytes, charset);
 			}

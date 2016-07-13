@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class BufferingStompDecoder {
 
 	private final int bufferSizeLimit;
 
-	private final Queue<ByteBuffer> chunks = new LinkedBlockingQueue<ByteBuffer>();
+	private final Queue<ByteBuffer> chunks = new LinkedBlockingQueue<>();
 
 	private volatile Integer expectedContentLength;
 
@@ -129,7 +129,7 @@ public class BufferingStompDecoder {
 
 		ByteBuffer bufferToDecode = assembleChunksAndReset();
 
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
 		List<Message<byte[]>> messages = this.stompDecoder.decode(bufferToDecode, headers);
 
 		if (bufferToDecode.hasRemaining()) {

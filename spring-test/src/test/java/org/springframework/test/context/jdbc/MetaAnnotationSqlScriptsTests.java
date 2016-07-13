@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 
 /**
  * Integration tests that verify support for using {@link Sql @Sql} and
- * {@link SqlGroup @SqlGroup} as a meta-annotations.
+ * {@link SqlGroup @SqlGroup} as meta-annotations.
  *
  * @author Sam Brannen
  * @since 4.1

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.samples;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -29,6 +29,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import static org.junit.Assert.*;
+import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
@@ -39,20 +40,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * code.
  *
  * @author Rossen Stoyanchev
+ * @since 4.1
  */
 public class SampleAsyncTests {
 
-	private MockRestServiceServer mockServer;
+	private final AsyncRestTemplate restTemplate = new AsyncRestTemplate();
 
-	private AsyncRestTemplate restTemplate;
+	private final MockRestServiceServer mockServer = MockRestServiceServer.createServer(this.restTemplate);
 
-
-	@Before
-	public void setup() {
-		this.restTemplate = new AsyncRestTemplate();
-		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
-
-	}
 
 	@Test
 	public void performGet() throws Exception {
@@ -63,7 +58,8 @@ public class SampleAsyncTests {
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		@SuppressWarnings("unused")
-		ListenableFuture<ResponseEntity<Person>> ludwig = restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+		ListenableFuture<ResponseEntity<Person>> ludwig =
+				this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
 
 		// We are only validating the request. The response is mocked out.
 		// person.getName().equals("Ludwig van Beethoven")
@@ -73,18 +69,25 @@ public class SampleAsyncTests {
 	}
 
 	@Test
-	public void performGetAsync() throws Exception {
+	public void performGetManyTimes() throws Exception {
 
 		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
-		this.mockServer.expect(requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+		this.mockServer.expect(manyTimes(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
 				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		@SuppressWarnings("unused")
-		ListenableFuture<ResponseEntity<Person>> ludwig = restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+		ListenableFuture<ResponseEntity<Person>> ludwig =
+				this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
 
+		// We are only validating the request. The response is mocked out.
 		// person.getName().equals("Ludwig van Beethoven")
 		// person.getDouble().equals(1.6035)
+
+		this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
 
 		this.mockServer.verify();
 	}
@@ -98,7 +101,8 @@ public class SampleAsyncTests {
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		@SuppressWarnings("unused")
-		ListenableFuture<ResponseEntity<Person>> ludwig = restTemplate.getForEntity("/composers/{id}", Person.class, 42);
+		ListenableFuture<ResponseEntity<Person>> ludwig =
+				this.restTemplate.getForEntity("/composers/{id}", Person.class, 42);
 
 		// hotel.getId() == 42
 		// hotel.getName().equals("Holiday Inn")
@@ -132,7 +136,8 @@ public class SampleAsyncTests {
 			this.mockServer.verify();
 		}
 		catch (AssertionError error) {
-			assertTrue(error.getMessage(), error.getMessage().contains("2 out of 4 were executed"));
+			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
 		}
 	}
+
 }

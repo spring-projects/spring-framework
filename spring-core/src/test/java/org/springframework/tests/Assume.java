@@ -16,14 +16,10 @@
 
 package org.springframework.tests;
 
-import java.awt.GraphicsEnvironment;
-import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.junit.AssumptionViolatedException;
-
-import org.springframework.util.ClassUtils;
 
 import static org.junit.Assume.*;
 
@@ -87,26 +83,6 @@ public abstract class Assume {
 	public static void notLogging(Log log) {
 		assumeFalse(log.isTraceEnabled());
 		assumeFalse(log.isDebugEnabled());
-	}
-
-	/**
-	 * Assume that we can load fonts.
-	 * <p>See <a href="https://java.net/jira/browse/MACOSX_PORT-355">MACOSX_PORT-355</a>
-	 * issue.
-	 * @throws AssumptionViolatedException if the assumption fails
-	 */
-	public static void canLoadNativeDirFonts() {
-		try {
-			GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-			Class<?> parserClass = ClassUtils.forName(
-					"net.sf.jasperreports.engine.util.JRStyledTextParser", Assume.class.getClassLoader());
-			Method method = parserClass.getMethod("getInstance");
-			method.setAccessible(true);
-			method.invoke(null);
-		}
-		catch (Throwable ex) {
-			throw new AssumptionViolatedException("Requires GraphicsEnvironment that can load fonts", ex);
-		}
 	}
 
 

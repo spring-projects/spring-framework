@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,8 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	private void parseRequest(HttpServletRequest request) {
 		try {
 			Collection<Part> parts = request.getParts();
-			this.multipartParameterNames = new LinkedHashSet<String>(parts.size());
-			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<String, MultipartFile>(parts.size());
+			this.multipartParameterNames = new LinkedHashSet<>(parts.size());
+			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<>(parts.size());
 			for (Part part : parts) {
 				String disposition = part.getHeader(CONTENT_DISPOSITION);
 				String filename = extractFilename(disposition);
@@ -184,7 +184,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 
 		// Servlet 3.0 getParameterNames() not guaranteed to include multipart form items
 		// (e.g. on WebLogic 12) -> need to merge them here to be on the safe side
-		Set<String> paramNames = new LinkedHashSet<String>();
+		Set<String> paramNames = new LinkedHashSet<>();
 		Enumeration<String> paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
 			paramNames.add(paramEnum.nextElement());
@@ -204,7 +204,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 
 		// Servlet 3.0 getParameterMap() not guaranteed to include multipart form items
 		// (e.g. on WebLogic 12) -> need to merge them here to be on the safe side
-		Map<String, String[]> paramMap = new LinkedHashMap<String, String[]>();
+		Map<String, String[]> paramMap = new LinkedHashMap<>();
 		paramMap.putAll(super.getParameterMap());
 		for (String paramName : this.multipartParameterNames) {
 			if (!paramMap.containsKey(paramName)) {
@@ -232,7 +232,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			if (part != null) {
 				HttpHeaders headers = new HttpHeaders();
 				for (String headerName : part.getHeaderNames()) {
-					headers.put(headerName, new ArrayList<String>(part.getHeaders(headerName)));
+					headers.put(headerName, new ArrayList<>(part.getHeaders(headerName)));
 				}
 				return headers;
 			}

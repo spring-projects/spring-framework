@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -105,7 +106,7 @@ public class UriComponentsBuilder implements Cloneable {
 
 	private CompositePathComponentBuilder pathBuilder;
 
-	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
 	private String fragment;
 
@@ -130,7 +131,7 @@ public class UriComponentsBuilder implements Cloneable {
 		this.userInfo = other.userInfo;
 		this.host = other.host;
 		this.port = other.port;
-		this.pathBuilder = (CompositePathComponentBuilder) other.pathBuilder.clone();
+		this.pathBuilder = other.pathBuilder.cloneBuilder();
 		this.queryParams.putAll(other.queryParams);
 		this.fragment = other.fragment;
 	}
@@ -271,71 +272,16 @@ public class UriComponentsBuilder implements Cloneable {
 	/**
 	 * Create a new {@code UriComponents} object from the URI associated with
 	 * the given HttpRequest while also overlaying with values from the headers
-	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>, or
-	 * "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if "Forwarded" is
-	 * not found.
+	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>,
+	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
+	 * "Forwarded" is not found.
 	 * @param request the source request
 	 * @return the URI components of the URI
 	 * @since 4.1.5
 	 */
 	public static UriComponentsBuilder fromHttpRequest(HttpRequest request) {
-		URI uri = request.getURI();
-		UriComponentsBuilder builder = UriComponentsBuilder.fromUri(uri);
-
-		String scheme = uri.getScheme();
-		String host = uri.getHost();
-		int port = uri.getPort();
-
-		String forwardedHeader = request.getHeaders().getFirst("Forwarded");
-		if (StringUtils.hasText(forwardedHeader)) {
-			String forwardedToUse = StringUtils.commaDelimitedListToStringArray(forwardedHeader)[0];
-			Matcher m = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
-			if (m.find()) {
-				host = m.group(1).trim();
-			}
-			m = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
-			if (m.find()) {
-				scheme = m.group(1).trim();
-			}
-		}
-		else {
-			String hostHeader = request.getHeaders().getFirst("X-Forwarded-Host");
-			if (StringUtils.hasText(hostHeader)) {
-				String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
-				String hostToUse = hosts[0];
-				if (hostToUse.contains(":")) {
-					String[] hostAndPort = StringUtils.split(hostToUse, ":");
-					host = hostAndPort[0];
-					port = Integer.parseInt(hostAndPort[1]);
-				}
-				else {
-					host = hostToUse;
-					port = -1;
-				}
-			}
-
-			String portHeader = request.getHeaders().getFirst("X-Forwarded-Port");
-			if (StringUtils.hasText(portHeader)) {
-				String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
-				port = Integer.parseInt(ports[0]);
-			}
-
-			String protocolHeader = request.getHeaders().getFirst("X-Forwarded-Proto");
-			if (StringUtils.hasText(protocolHeader)) {
-				String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
-				scheme = protocols[0];
-			}
-		}
-
-		builder.scheme(scheme);
-		builder.host(host);
-		builder.port(null);
-		if (scheme.equals("http") && port != 80 || scheme.equals("https") && port != 443) {
-			builder.port(port);
-		}
-		return builder;
+		return fromUri(request.getURI()).adaptFromForwardedHeaders(request.getHeaders());
 	}
-
 
 	/**
 	 * Create an instance by parsing the "Origin" header of an HTTP request.
@@ -461,18 +407,6 @@ public class UriComponentsBuilder implements Cloneable {
 			this.fragment = uri.getRawFragment();
 		}
 		return this;
-	}
-
-	private void resetHierarchicalComponents() {
-		this.userInfo = null;
-		this.host = null;
-		this.port = null;
-		this.pathBuilder = new CompositePathComponentBuilder();
-		this.queryParams.clear();
-	}
-
-	private void resetSchemeSpecificPart() {
-		this.ssp = null;
 	}
 
 	/**
@@ -724,23 +658,109 @@ public class UriComponentsBuilder implements Cloneable {
 		return this;
 	}
 
+	/**
+	 * Adapt this builder's scheme+host+port from the given headers, specifically
+	 * "Forwarded" (<a href="http://tools.ietf.org/html/rfc7239">RFC 7239</a>,
+	 * or "X-Forwarded-Host", "X-Forwarded-Port", and "X-Forwarded-Proto" if
+	 * "Forwarded" is not found.
+	 * @param headers the HTTP headers to consider
+	 * @return this UriComponentsBuilder
+	 * @since 4.2.7
+	 */
+	UriComponentsBuilder adaptFromForwardedHeaders(HttpHeaders headers) {
+		String forwardedHeader = headers.getFirst("Forwarded");
+		if (StringUtils.hasText(forwardedHeader)) {
+			String forwardedToUse = StringUtils.commaDelimitedListToStringArray(forwardedHeader)[0];
+			Matcher matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
+			if (matcher.find()) {
+				host(matcher.group(1).trim());
+			}
+			matcher = FORWARDED_PROTO_PATTERN.matcher(forwardedToUse);
+			if (matcher.find()) {
+				scheme(matcher.group(1).trim());
+			}
+		}
+		else {
+			String hostHeader = headers.getFirst("X-Forwarded-Host");
+			if (StringUtils.hasText(hostHeader)) {
+				String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
+				String hostToUse = hosts[0];
+				if (hostToUse.contains(":")) {
+					String[] hostAndPort = StringUtils.split(hostToUse, ":");
+					host(hostAndPort[0]);
+					port(Integer.parseInt(hostAndPort[1]));
+				}
+				else {
+					host(hostToUse);
+					port(null);
+				}
+			}
+
+			String portHeader = headers.getFirst("X-Forwarded-Port");
+			if (StringUtils.hasText(portHeader)) {
+				String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
+				port(Integer.parseInt(ports[0]));
+			}
+
+			String protocolHeader = headers.getFirst("X-Forwarded-Proto");
+			if (StringUtils.hasText(protocolHeader)) {
+				String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
+				scheme(protocols[0]);
+			}
+		}
+
+		if ((this.scheme.equals("http") && "80".equals(this.port)) ||
+				(this.scheme.equals("https") && "443".equals(this.port))) {
+			this.port = null;
+		}
+
+		return this;
+	}
+
+	private void resetHierarchicalComponents() {
+		this.userInfo = null;
+		this.host = null;
+		this.port = null;
+		this.pathBuilder = new CompositePathComponentBuilder();
+		this.queryParams.clear();
+	}
+
+	private void resetSchemeSpecificPart() {
+		this.ssp = null;
+	}
+
+
+	/**
+	 * Public declaration of Object's {@code clone()} method.
+	 * Delegates to {@link #cloneBuilder()}.
+	 * @see Object#clone()
+	 */
 	@Override
 	public Object clone() {
+		return cloneBuilder();
+	}
+
+	/**
+	 * Clone this {@code UriComponentsBuilder}.
+	 * @return the cloned {@code UriComponentsBuilder} object
+	 * @since 4.2.7
+	 */
+	public UriComponentsBuilder cloneBuilder() {
 		return new UriComponentsBuilder(this);
 	}
 
 
-	private interface PathComponentBuilder extends Cloneable {
+	private interface PathComponentBuilder {
 
 		PathComponent build();
 
-		Object clone();
+		PathComponentBuilder cloneBuilder();
 	}
 
 
 	private static class CompositePathComponentBuilder implements PathComponentBuilder {
 
-		private final LinkedList<PathComponentBuilder> builders = new LinkedList<PathComponentBuilder>();
+		private final LinkedList<PathComponentBuilder> builders = new LinkedList<>();
 
 		public CompositePathComponentBuilder() {
 		}
@@ -793,7 +813,7 @@ public class UriComponentsBuilder implements Cloneable {
 		@Override
 		public PathComponent build() {
 			int size = this.builders.size();
-			List<PathComponent> components = new ArrayList<PathComponent>(size);
+			List<PathComponent> components = new ArrayList<>(size);
 			for (PathComponentBuilder componentBuilder : this.builders) {
 				PathComponent pathComponent = componentBuilder.build();
 				if (pathComponent != null) {
@@ -810,10 +830,10 @@ public class UriComponentsBuilder implements Cloneable {
 		}
 
 		@Override
-		public Object clone() {
+		public CompositePathComponentBuilder cloneBuilder() {
 			CompositePathComponentBuilder compositeBuilder = new CompositePathComponentBuilder();
 			for (PathComponentBuilder builder : this.builders) {
-				compositeBuilder.builders.add((PathComponentBuilder) builder.clone());
+				compositeBuilder.builders.add(builder.cloneBuilder());
 			}
 			return compositeBuilder;
 		}
@@ -852,7 +872,7 @@ public class UriComponentsBuilder implements Cloneable {
 		}
 
 		@Override
-		public Object clone() {
+		public FullPathComponentBuilder cloneBuilder() {
 			FullPathComponentBuilder builder = new FullPathComponentBuilder();
 			builder.append(this.path.toString());
 			return builder;
@@ -862,7 +882,7 @@ public class UriComponentsBuilder implements Cloneable {
 
 	private static class PathSegmentComponentBuilder implements PathComponentBuilder {
 
-		private final List<String> pathSegments = new LinkedList<String>();
+		private final List<String> pathSegments = new LinkedList<>();
 
 		public void append(String... pathSegments) {
 			for (String pathSegment : pathSegments) {
@@ -879,7 +899,7 @@ public class UriComponentsBuilder implements Cloneable {
 		}
 
 		@Override
-		public Object clone() {
+		public PathSegmentComponentBuilder cloneBuilder() {
 			PathSegmentComponentBuilder builder = new PathSegmentComponentBuilder();
 			builder.pathSegments.addAll(this.pathSegments);
 			return builder;

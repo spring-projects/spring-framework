@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,29 @@ import org.springframework.core.io.Resource;
  */
 public class WebJarsResourceResolver extends AbstractResourceResolver {
 
-	private final static String WEBJARS_LOCATION = "META-INF/resources/webjars";
+	private final static String WEBJARS_LOCATION = "META-INF/resources/webjars/";
 
 	private final static int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
 
-	private final WebJarAssetLocator webJarAssetLocator = new WebJarAssetLocator();
+
+	private final WebJarAssetLocator webJarAssetLocator;
+
+
+	/**
+	 * Create a {@code WebJarsResourceResolver} with a default {@code WebJarAssetLocator} instance.
+	 */
+	public WebJarsResourceResolver() {
+		this(new WebJarAssetLocator());
+	}
+
+	/**
+	 * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarAssetLocator} instance,
+	 * e.g. with a custom index.
+	 * @since 4.3
+	 */
+	public WebJarsResourceResolver(WebJarAssetLocator webJarAssetLocator) {
+		this.webJarAssetLocator = webJarAssetLocator;
+	}
 
 
 	@Override

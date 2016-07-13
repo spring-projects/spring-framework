@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,35 @@
 
 package org.springframework.http.client;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses
- * <a href="http://square.github.io/okhttp/">OkHttp</a> to create requests.
+ * <a href="http://square.github.io/okhttp/">OkHttp</a> 2.x to create requests.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
  * @since 4.2
+ * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
+ * @deprecated as of Spring 5.0, in favor of OkHttp 3.x
  */
+@Deprecated
 public class OkHttpClientHttpRequestFactory
 		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory, DisposableBean {
 
@@ -54,7 +66,7 @@ public class OkHttpClientHttpRequestFactory
 	 * @param client the client to use
 	 */
 	public OkHttpClientHttpRequestFactory(OkHttpClient client) {
-		Assert.notNull(client, "'client' must not be null");
+		Assert.notNull(client, "OkHttpClient must not be null");
 		this.client = client;
 		this.defaultClient = false;
 	}
@@ -90,20 +102,17 @@ public class OkHttpClientHttpRequestFactory
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
-		return createRequestInternal(uri, httpMethod);
-	}
-
-	@Override
-	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
-		return createRequestInternal(uri, httpMethod);
-	}
-
-	private OkHttpClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
 		return new OkHttpClientHttpRequest(this.client, uri, httpMethod);
 	}
 
 	@Override
-	public void destroy() throws Exception {
+	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
+		return new OkHttpAsyncClientHttpRequest(this.client, uri, httpMethod);
+	}
+
+
+	@Override
+	public void destroy() throws IOException {
 		if (this.defaultClient) {
 			// Clean up the client if we created it in the constructor
 			if (this.client.getCache() != null) {
@@ -111,6 +120,33 @@ public class OkHttpClientHttpRequestFactory
 			}
 			this.client.getDispatcher().getExecutorService().shutdown();
 		}
+	}
+
+
+	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri,
+			HttpMethod method) throws MalformedURLException {
+
+		com.squareup.okhttp.MediaType contentType = getContentType(headers);
+		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
+
+		URL url = uri.toURL();
+		String methodName = method.name();
+		Request.Builder builder = new Request.Builder().url(url).method(methodName, body);
+
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			for (String headerValue : entry.getValue()) {
+				builder.addHeader(headerName, headerValue);
+			}
+		}
+
+		return builder.build();
+	}
+
+	private static com.squareup.okhttp.MediaType getContentType(HttpHeaders headers) {
+		String rawContentType = headers.getFirst(HttpHeaders.CONTENT_TYPE);
+		return (StringUtils.hasText(rawContentType) ?
+				com.squareup.okhttp.MediaType.parse(rawContentType) : null);
 	}
 
 }

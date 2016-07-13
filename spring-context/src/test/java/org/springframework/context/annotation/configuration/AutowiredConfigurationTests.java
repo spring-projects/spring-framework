@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.inject.Provider;
 import org.junit.Test;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -52,6 +53,7 @@ import static org.junit.Assert.*;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class AutowiredConfigurationTests {
 
@@ -101,6 +103,18 @@ public class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
 		assertSame(ctx.getBean(AutowiredConstructorConfig.class).colour, ctx.getBean(Colour.class));
+	}
+
+	@Test
+	public void testObjectFactoryConstructorWithTypeVariable() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
+				new ClassPathResource("annotation-config.xml", ObjectFactoryConstructorConfig.class));
+		GenericApplicationContext ctx = new GenericApplicationContext(factory);
+		ctx.registerBeanDefinition("config1", new RootBeanDefinition(ObjectFactoryConstructorConfig.class));
+		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
+		ctx.refresh();
+		assertSame(ctx.getBean(ObjectFactoryConstructorConfig.class).colour, ctx.getBean(Colour.class));
 	}
 
 	@Test
@@ -190,20 +204,23 @@ public class AutowiredConfigurationTests {
 
 		TestBean testBean = context.getBean("testBean", TestBean.class);
 		assertThat(testBean.getName(), equalTo("localhost"));
-		assertThat(testBean.getAge(), equalTo((int) new ClassPathResource("log4j.properties").contentLength()));
+		assertThat(testBean.getAge(), equalTo(contentLength()));
 	}
 
 	@Test
 	public void testCustomPropertiesWithGenericContext() throws IOException {
 		GenericApplicationContext context = new GenericApplicationContext();
-		// context.setResourceLoader(new FileSystemResourceLoader());
 		new XmlBeanDefinitionReader(context).loadBeanDefinitions(
 				new ClassPathResource("AutowiredConfigurationTests-custom.xml", AutowiredConfigurationTests.class));
 		context.refresh();
 
 		TestBean testBean = context.getBean("testBean", TestBean.class);
 		assertThat(testBean.getName(), equalTo("localhost"));
-		assertThat(testBean.getAge(), equalTo((int) new ClassPathResource("log4j.properties").contentLength()));
+		assertThat(testBean.getAge(), equalTo(contentLength()));
+	}
+
+	private int contentLength() throws IOException {
+		return (int) new ClassPathResource("do_not_delete_me.txt").contentLength();
 	}
 
 
@@ -253,6 +270,18 @@ public class AutowiredConfigurationTests {
 		// @Autowired
 		AutowiredConstructorConfig(Colour colour) {
 			this.colour = colour;
+		}
+	}
+
+
+	@Configuration
+	static class ObjectFactoryConstructorConfig {
+
+		Colour colour;
+
+		// @Autowired
+		ObjectFactoryConstructorConfig(ObjectFactory<Colour> colourFactory) {
+			this.colour = colourFactory.getObject();
 		}
 	}
 
@@ -452,7 +481,7 @@ public class AutowiredConfigurationTests {
 			this.hostname = hostname;
 		}
 
-		@Value("log4j.properties")
+		@Value("do_not_delete_me.txt")
 		public void setResource(Resource resource) {
 			this.resource = resource;
 		}

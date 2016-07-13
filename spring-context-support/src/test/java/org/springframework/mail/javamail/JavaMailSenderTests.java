@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ public class JavaMailSenderTests {
 		sender.setUsername("username");
 		sender.setPassword("password");
 
-		final List<Message> messages = new ArrayList<Message>();
+		final List<Message> messages = new ArrayList<>();
 
 		MimeMessagePreparator preparator = new MimeMessagePreparator() {
 			@Override
@@ -206,7 +206,7 @@ public class JavaMailSenderTests {
 		sender.setUsername("username");
 		sender.setPassword("password");
 
-		final List<Message> messages = new ArrayList<Message>();
+		final List<Message> messages = new ArrayList<>();
 
 		MimeMessagePreparator preparator1 = new MimeMessagePreparator() {
 			@Override
@@ -533,7 +533,7 @@ public class JavaMailSenderTests {
 		private String connectedUsername = null;
 		private String connectedPassword = null;
 		private boolean closeCalled = false;
-		private List<Message> sentMessages = new ArrayList<Message>();
+		private List<Message> sentMessages = new ArrayList<>();
 
 		private MockTransport(Session session, URLName urlName) {
 			super(session, urlName);

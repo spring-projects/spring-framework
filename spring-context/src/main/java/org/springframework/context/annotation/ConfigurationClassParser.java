@@ -66,7 +66,9 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.DefaultPropertySourceFactory;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
@@ -103,6 +105,8 @@ import org.springframework.util.StringUtils;
  */
 class ConfigurationClassParser {
 
+	private static final PropertySourceFactory DEFAULT_PROPERTY_SOURCE_FACTORY = new DefaultPropertySourceFactory();
+
 	private static final Comparator<DeferredImportSelectorHolder> DEFERRED_IMPORT_COMPARATOR =
 			new Comparator<ConfigurationClassParser.DeferredImportSelectorHolder>() {
 				@Override
@@ -129,11 +133,11 @@ class ConfigurationClassParser {
 	private final ConditionEvaluator conditionEvaluator;
 
 	private final Map<ConfigurationClass, ConfigurationClass> configurationClasses =
-			new LinkedHashMap<ConfigurationClass, ConfigurationClass>();
+			new LinkedHashMap<>();
 
-	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<String, ConfigurationClass>();
+	private final Map<String, ConfigurationClass> knownSuperclasses = new HashMap<>();
 
-	private final List<String> propertySourceNames = new ArrayList<String>();
+	private final List<String> propertySourceNames = new ArrayList<>();
 
 	private final ImportStack importStack = new ImportStack();
 
@@ -160,7 +164,7 @@ class ConfigurationClassParser {
 
 
 	public void parse(Set<BeanDefinitionHolder> configCandidates) {
-		this.deferredImportSelectors = new LinkedList<DeferredImportSelectorHolder>();
+		this.deferredImportSelectors = new LinkedList<>();
 
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
@@ -299,15 +303,7 @@ class ConfigurationClassParser {
 		}
 
 		// Process default methods on interfaces
-		for (SourceClass ifc : sourceClass.getInterfaces()) {
-			beanMethods = ifc.getMetadata().getAnnotatedMethods(Bean.class.getName());
-			for (MethodMetadata methodMetadata : beanMethods) {
-				if (!methodMetadata.isAbstract()) {
-					// A default method or other concrete method on a Java 8+ interface...
-					configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
-				}
-			}
-		}
+		processInterfaces(configClass, sourceClass);
 
 		// Process superclass, if any
 		if (sourceClass.getMetadata().hasSuperClass()) {
@@ -325,8 +321,6 @@ class ConfigurationClassParser {
 
 	/**
 	 * Register member (nested) classes that happen to be configuration classes themselves.
-	 * @param sourceClass the source class to process
-	 * @throws IOException if there is any problem reading metadata from a member class
 	 */
 	private void processMemberClasses(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
 		for (SourceClass memberClass : sourceClass.getMemberClasses()) {
@@ -349,21 +343,48 @@ class ConfigurationClassParser {
 	}
 
 	/**
+	 * Register default methods on interfaces implemented by the configuration class.
+	 */
+	private void processInterfaces(ConfigurationClass configClass, SourceClass sourceClass) throws IOException {
+		for (SourceClass ifc : sourceClass.getInterfaces()) {
+			Set<MethodMetadata> beanMethods = ifc.getMetadata().getAnnotatedMethods(Bean.class.getName());
+			for (MethodMetadata methodMetadata : beanMethods) {
+				if (!methodMetadata.isAbstract()) {
+					// A default method or other concrete method on a Java 8+ interface...
+					configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
+				}
+			}
+			processInterfaces(configClass, ifc);
+		}
+	}
+
+	/**
 	 * Process the given <code>@PropertySource</code> annotation metadata.
 	 * @param propertySource metadata for the <code>@PropertySource</code> annotation found
 	 * @throws IOException if loading a property source failed
 	 */
 	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
 		String name = propertySource.getString("name");
+		if (!StringUtils.hasLength(name)) {
+			name = null;
+		}
 		String encoding = propertySource.getString("encoding");
+		if (!StringUtils.hasLength(encoding)) {
+			encoding = null;
+		}
 		String[] locations = propertySource.getStringArray("value");
-		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 		Assert.isTrue(locations.length > 0, "At least one @PropertySource(value) location is required");
+		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
+
+		Class<? extends PropertySourceFactory> factoryClass = propertySource.getClass("factory");
+		PropertySourceFactory factory = (factoryClass == PropertySourceFactory.class ?
+				DEFAULT_PROPERTY_SOURCE_FACTORY : BeanUtils.instantiate(factoryClass));
+
 		for (String location : locations) {
 			try {
 				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
-				addPropertySource(createPropertySource(name, encoding, resource));
+				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
 			catch (IllegalArgumentException ex) {
 				// from resolveRequiredPlaceholders
@@ -380,34 +401,23 @@ class ConfigurationClassParser {
 		}
 	}
 
-	private ResourcePropertySource createPropertySource(String name, String encoding, Resource resource) throws IOException {
-		if (StringUtils.hasText(name)) {
-			return (StringUtils.hasText(encoding) ?
-					new ResourcePropertySource(name, new EncodedResource(resource, encoding)) :
-					new ResourcePropertySource(name, resource));
-		}
-		else {
-			return (StringUtils.hasText(encoding) ?
-					new ResourcePropertySource(new EncodedResource(resource, encoding)) :
-					new ResourcePropertySource(resource));
-		}
-	}
-
-	private void addPropertySource(ResourcePropertySource propertySource) {
+	private void addPropertySource(PropertySource<?> propertySource) {
 		String name = propertySource.getName();
 		MutablePropertySources propertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
 		if (propertySources.contains(name) && this.propertySourceNames.contains(name)) {
 			// We've already added a version, we need to extend it
 			PropertySource<?> existing = propertySources.get(name);
+			PropertySource<?> newSource = (propertySource instanceof ResourcePropertySource ?
+					((ResourcePropertySource) propertySource).withResourceName() : propertySource);
 			if (existing instanceof CompositePropertySource) {
-				((CompositePropertySource) existing).addFirstPropertySource(propertySource.withResourceName());
+				((CompositePropertySource) existing).addFirstPropertySource(newSource);
 			}
 			else {
 				if (existing instanceof ResourcePropertySource) {
 					existing = ((ResourcePropertySource) existing).withResourceName();
 				}
 				CompositePropertySource composite = new CompositePropertySource(name);
-				composite.addPropertySource(propertySource.withResourceName());
+				composite.addPropertySource(newSource);
 				composite.addPropertySource(existing);
 				propertySources.replace(name, composite);
 			}
@@ -428,8 +438,8 @@ class ConfigurationClassParser {
 	 * Returns {@code @Import} class, considering all meta-annotations.
 	 */
 	private Set<SourceClass> getImports(SourceClass sourceClass) throws IOException {
-		Set<SourceClass> imports = new LinkedHashSet<SourceClass>();
-		Set<SourceClass> visited = new LinkedHashSet<SourceClass>();
+		Set<SourceClass> imports = new LinkedHashSet<>();
+		Set<SourceClass> visited = new LinkedHashSet<>();
 		collectImports(sourceClass, imports, visited);
 		return imports;
 	}
@@ -614,7 +624,7 @@ class ConfigurationClassParser {
 	 * Factory method to obtain {@link SourceClass}s from class names.
 	 */
 	public Collection<SourceClass> asSourceClasses(String[] classNames) throws IOException {
-		List<SourceClass> annotatedClasses = new ArrayList<SourceClass>();
+		List<SourceClass> annotatedClasses = new ArrayList<>();
 		for (String className : classNames) {
 			annotatedClasses.add(asSourceClass(className));
 		}
@@ -641,7 +651,7 @@ class ConfigurationClassParser {
 	@SuppressWarnings("serial")
 	private static class ImportStack extends ArrayDeque<ConfigurationClass> implements ImportRegistry {
 
-		private final MultiValueMap<String, AnnotationMetadata> imports = new LinkedMultiValueMap<String, AnnotationMetadata>();
+		private final MultiValueMap<String, AnnotationMetadata> imports = new LinkedMultiValueMap<>();
 
 		public void registerImport(AnnotationMetadata importingClass, String importedClass) {
 			this.imports.add(importedClass, importingClass);
@@ -761,7 +771,7 @@ class ConfigurationClassParser {
 				Class<?> sourceClass = (Class<?>) sourceToProcess;
 				try {
 					Class<?>[] declaredClasses = sourceClass.getDeclaredClasses();
-					List<SourceClass> members = new ArrayList<SourceClass>(declaredClasses.length);
+					List<SourceClass> members = new ArrayList<>(declaredClasses.length);
 					for (Class<?> declaredClass : declaredClasses) {
 						members.add(asSourceClass(declaredClass));
 					}
@@ -777,7 +787,7 @@ class ConfigurationClassParser {
 			// ASM-based resolution - safe for non-resolvable classes as well
 			MetadataReader sourceReader = (MetadataReader) sourceToProcess;
 			String[] memberClassNames = sourceReader.getClassMetadata().getMemberClassNames();
-			List<SourceClass> members = new ArrayList<SourceClass>(memberClassNames.length);
+			List<SourceClass> members = new ArrayList<>(memberClassNames.length);
 			for (String memberClassName : memberClassNames) {
 				try {
 					members.add(asSourceClass(memberClassName));
@@ -801,7 +811,7 @@ class ConfigurationClassParser {
 		}
 
 		public Set<SourceClass> getInterfaces() throws IOException {
-			Set<SourceClass> result = new LinkedHashSet<SourceClass>();
+			Set<SourceClass> result = new LinkedHashSet<>();
 			if (this.source instanceof Class<?>) {
 				Class<?> sourceClass = (Class<?>) this.source;
 				for (Class<?> ifcClass : sourceClass.getInterfaces()) {
@@ -817,7 +827,7 @@ class ConfigurationClassParser {
 		}
 
 		public Set<SourceClass> getAnnotations() throws IOException {
-			Set<SourceClass> result = new LinkedHashSet<SourceClass>();
+			Set<SourceClass> result = new LinkedHashSet<>();
 			for (String className : this.metadata.getAnnotationTypes()) {
 				try {
 					result.add(getRelated(className));
@@ -836,7 +846,7 @@ class ConfigurationClassParser {
 				return Collections.emptySet();
 			}
 			String[] classNames = (String[]) annotationAttributes.get(attribute);
-			Set<SourceClass> result = new LinkedHashSet<SourceClass>();
+			Set<SourceClass> result = new LinkedHashSet<>();
 			for (String className : classNames) {
 				result.add(getRelated(className));
 			}

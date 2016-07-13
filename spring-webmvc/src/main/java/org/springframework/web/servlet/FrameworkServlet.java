@@ -43,11 +43,9 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ContextLoader;
@@ -164,11 +162,6 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
 
 
-	/** Checking for Servlet 3.0+ HttpServletResponse.getStatus() */
-	private static final boolean responseGetStatusAvailable =
-			ClassUtils.hasMethod(HttpServletResponse.class, "getStatus");
-
-
 	/** ServletContext attribute to find the WebApplicationContext in */
 	private String contextAttribute;
 
@@ -186,7 +179,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
 	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
-			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+			new ArrayList<>();
 
 	/** Comma-delimited ApplicationContextInitializer class names set through init param */
 	private String contextInitializerClasses;
@@ -740,17 +733,17 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			Class<?> initializerClass = ClassUtils.forName(className, wac.getClassLoader());
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
-			if (initializerContextClass != null) {
-				Assert.isAssignable(initializerContextClass, wac.getClass(), String.format(
-						"Could not add context initializer [%s] since its generic parameter [%s] " +
+			if (initializerContextClass != null && !initializerContextClass.isInstance(wac)) {
+				throw new ApplicationContextException(String.format(
+						"Could not apply context initializer [%s] since its generic parameter [%s] " +
 						"is not assignable from the type of application context used by this " +
-						"framework servlet [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+						"framework servlet: [%s]", initializerClass.getName(), initializerContextClass.getName(),
 						wac.getClass().getName()));
 			}
 			return BeanUtils.instantiateClass(initializerClass, ApplicationContextInitializer.class);
 		}
-		catch (Exception ex) {
-			throw new IllegalArgumentException(String.format("Could not instantiate class [%s] specified " +
+		catch (ClassNotFoundException ex) {
+			throw new ApplicationContextException(String.format("Could not load class [%s] specified " +
 					"via 'contextInitializerClasses' init-param", className), ex);
 		}
 	}
@@ -914,13 +907,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			}
 		}
 
-		// Use response wrapper for Servlet 2.5 compatibility where
-		// the getHeader() method does not exist
+		// Use response wrapper in order to always add PATCH to the allowed methods
 		super.doOptions(request, new HttpServletResponseWrapper(response) {
 			@Override
 			public void setHeader(String name, String value) {
 				if ("Allow".equals(name)) {
-					value = (StringUtils.hasLength(value) ? value + ", " : "") + RequestMethod.PATCH.name();
+					value = (StringUtils.hasLength(value) ? value + ", " : "") + HttpMethod.PATCH.name();
 				}
 				super.setHeader(name, value);
 			}
@@ -1071,13 +1063,12 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (this.publishEvents) {
 			// Whether or not we succeeded, publish an event.
 			long processingTime = System.currentTimeMillis() - startTime;
-			int statusCode = (responseGetStatusAvailable ? response.getStatus() : -1);
 			this.webApplicationContext.publishEvent(
 					new ServletRequestHandledEvent(this,
 							request.getRequestURI(), request.getRemoteAddr(),
 							request.getMethod(), getServletConfig().getServletName(),
 							WebUtils.getSessionId(request), getUsernameForRequest(request),
-							processingTime, failureCause, statusCode));
+							processingTime, failureCause, response.getStatus()));
 		}
 	}
 

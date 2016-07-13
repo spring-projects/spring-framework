@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ public class DateTimeFormattingTests {
 	@Test
 	public void testBindLocalDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDate", new String[]{"10/31/09"});
+		propertyValues.add("localDate", new String[] {"10/31/09"});
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 	}
@@ -293,6 +293,14 @@ public class DateTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindDateTimeOverflow() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateTimeAnnotatedPattern", "02/29/09 12:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getErrorCount());
+	}
+
+	@Test
 	public void testBindISODate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDate", "2009-10-31");
@@ -413,7 +421,7 @@ public class DateTimeFormattingTests {
 
 		private MonthDay monthDay;
 
-		private final List<DateTimeBean> children = new ArrayList<DateTimeBean>();
+		private final List<DateTimeBean> children = new ArrayList<>();
 
 		public LocalDate getLocalDate() {
 			return localDate;

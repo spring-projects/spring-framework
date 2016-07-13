@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,9 +143,9 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 	 */
 	private final XmlBeanDefinitionReader groovyDslXmlBeanDefinitionReader;
 
-	private final Map<String, String> namespaces = new HashMap<String, String>();
+	private final Map<String, String> namespaces = new HashMap<>();
 
-	private final Map<String, DeferredProperty> deferredProperties = new HashMap<String, DeferredProperty>();
+	private final Map<String, DeferredProperty> deferredProperties = new HashMap<>();
 
 	private MetaClass metaClass = GroovySystem.getMetaClassRegistry().getMetaClass(getClass());
 
@@ -568,7 +568,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 		}
 		if (containsRuntimeRefs) {
-			Map<Object, Object> managedMap = new ManagedMap<Object, Object>();
+			Map<Object, Object> managedMap = new ManagedMap<>();
 			managedMap.putAll(map);
 			return managedMap;
 		}
@@ -590,7 +590,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 		}
 		if (containsRuntimeRefs) {
-			List<Object> managedList = new ManagedList<Object>();
+			List<Object> managedList = new ManagedList<>();
 			managedList.addAll(list);
 			return managedList;
 		}

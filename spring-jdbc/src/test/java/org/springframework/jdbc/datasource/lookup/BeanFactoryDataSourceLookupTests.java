@@ -63,10 +63,11 @@ public class BeanFactoryDataSourceLookupTests {
 				BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup(beanFactory);
 				lookup.getDataSource(DATASOURCE_BEAN_NAME);
 				fail("should have thrown DataSourceLookupFailureException");
-		} catch (DataSourceLookupFailureException ex) { /* expected */ }
+		}
+		catch (DataSourceLookupFailureException ex) { /* expected */ }
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testLookupWhereBeanFactoryHasNotBeenSupplied() throws Exception {
 		BeanFactoryDataSourceLookup lookup = new BeanFactoryDataSourceLookup();
 		lookup.getDataSource(DATASOURCE_BEAN_NAME);

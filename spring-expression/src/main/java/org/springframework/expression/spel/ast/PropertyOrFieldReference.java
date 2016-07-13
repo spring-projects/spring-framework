@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,8 +306,8 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	private List<PropertyAccessor> getPropertyAccessorsToTry(Object contextObject, List<PropertyAccessor> propertyAccessors) {
 		Class<?> targetType = (contextObject != null ? contextObject.getClass() : null);
 
-		List<PropertyAccessor> specificAccessors = new ArrayList<PropertyAccessor>();
-		List<PropertyAccessor> generalAccessors = new ArrayList<PropertyAccessor>();
+		List<PropertyAccessor> specificAccessors = new ArrayList<>();
+		List<PropertyAccessor> generalAccessors = new ArrayList<>();
 		for (PropertyAccessor resolver : propertyAccessors) {
 			Class<?>[] targets = resolver.getSpecificTargetClasses();
 			if (targets == null) {
@@ -326,7 +326,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				}
 			}
 		}
-		List<PropertyAccessor> resolvers = new ArrayList<PropertyAccessor>();
+		List<PropertyAccessor> resolvers = new ArrayList<>();
 		resolvers.addAll(specificAccessors);
 		generalAccessors.removeAll(specificAccessors);
 		resolvers.addAll(generalAccessors);

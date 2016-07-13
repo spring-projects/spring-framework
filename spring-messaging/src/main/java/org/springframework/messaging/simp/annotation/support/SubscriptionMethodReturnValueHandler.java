@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,15 +34,22 @@ import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 
 /**
- * A {@link HandlerMethodReturnValueHandler} for replying directly to a subscription.
- * It is supported on methods annotated with
- * {@link org.springframework.messaging.simp.annotation.SubscribeMapping}
- * unless they're also annotated with {@link SendTo} or {@link SendToUser} in
- * which case a message is sent to the broker instead.
+ * {@code HandlerMethodReturnValueHandler} for replying directly to a
+ * subscription. It is supported on methods annotated with
+ * {@link org.springframework.messaging.simp.annotation.SubscribeMapping
+ * SubscribeMapping} such that the return value is treated as a response to be
+ * sent directly back on the session. This allows a client to implement
+ * a request-response pattern and use it for example to obtain some data upon
+ * initialization.
  *
- * <p>The value returned from the method is converted, and turned to a {@link Message}
- * and then enriched with the sessionId, subscriptionId, and destination of the
- * input message. The message is then sent directly back to the connected client.
+ * <p>The value returned from the method is converted and turned into a
+ * {@link Message} that is then enriched with the sessionId, subscriptionId, and
+ * destination of the input message.
+ *
+ * <p><strong>Note:</strong> this default behavior for interpreting the return
+ * value from an {@code @SubscribeMapping} method can be overridden through use
+ * of the {@link SendTo} or {@link SendToUser} annotations in which case a
+ * message is prepared and sent to the broker instead.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -60,12 +67,12 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 	/**
 	 * Construct a new SubscriptionMethodReturnValueHandler.
-	 * @param messagingTemplate a messaging template to send messages to,
+	 * @param template a messaging template to send messages to,
 	 * most likely the "clientOutboundChannel" (must not be {@code null})
 	 */
-	public SubscriptionMethodReturnValueHandler(MessageSendingOperations<String> messagingTemplate) {
-		Assert.notNull(messagingTemplate, "messagingTemplate must not be null");
-		this.messagingTemplate = messagingTemplate;
+	public SubscriptionMethodReturnValueHandler(MessageSendingOperations<String> template) {
+		Assert.notNull(template, "messagingTemplate must not be null");
+		this.messagingTemplate = template;
 	}
 
 
@@ -88,13 +95,15 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return (returnType.getMethodAnnotation(SubscribeMapping.class) != null &&
-				returnType.getMethodAnnotation(SendTo.class) == null &&
-				returnType.getMethodAnnotation(SendToUser.class) == null);
+		return (returnType.hasMethodAnnotation(SubscribeMapping.class) &&
+				!returnType.hasMethodAnnotation(SendTo.class) &&
+				!returnType.hasMethodAnnotation(SendToUser.class));
 	}
 
 	@Override
-	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message) throws Exception {
+	public void handleReturnValue(Object returnValue, MethodParameter returnType, Message<?> message)
+			throws Exception {
+
 		if (returnValue == null) {
 			return;
 		}
@@ -105,27 +114,27 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 
 		if (subscriptionId == null) {
-			throw new IllegalStateException(
-					"No subscriptionId in " + message + " returned by: " + returnType.getMethod());
+			throw new IllegalStateException("No subscriptionId in " + message +
+					" returned by: " + returnType.getMethod());
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Reply to @SubscribeMapping: " + returnValue);
 		}
-		this.messagingTemplate.convertAndSend(
-				destination, returnValue, createHeaders(sessionId, subscriptionId, returnType));
+		MessageHeaders headersToSend = createHeaders(sessionId, subscriptionId, returnType);
+		this.messagingTemplate.convertAndSend(destination, returnValue, headersToSend);
 	}
 
 	private MessageHeaders createHeaders(String sessionId, String subscriptionId, MethodParameter returnType) {
-		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
-			getHeaderInitializer().initHeaders(headerAccessor);
+			getHeaderInitializer().initHeaders(accessor);
 		}
-		headerAccessor.setSessionId(sessionId);
-		headerAccessor.setSubscriptionId(subscriptionId);
-		headerAccessor.setHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER, returnType);
-		headerAccessor.setLeaveMutable(true);
-		return headerAccessor.getMessageHeaders();
+		accessor.setSessionId(sessionId);
+		accessor.setSubscriptionId(subscriptionId);
+		accessor.setHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER, returnType);
+		accessor.setLeaveMutable(true);
+		return accessor.getMessageHeaders();
 	}
 
 }

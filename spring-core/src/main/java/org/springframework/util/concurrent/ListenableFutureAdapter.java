@@ -65,21 +65,11 @@ public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S> 
 					onFailure(ex);
 					return;
 				}
-				try {
-					successCallback.onSuccess(adapted);
-				}
-				catch (Throwable e) {
-					// Ignore
-				}
+				successCallback.onSuccess(adapted);
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				try {
-					failureCallback.onFailure(ex);
-				}
-				catch (Throwable t) {
-					// Ignore
-				}
+				failureCallback.onFailure(ex);
 			}
 		});
 	}

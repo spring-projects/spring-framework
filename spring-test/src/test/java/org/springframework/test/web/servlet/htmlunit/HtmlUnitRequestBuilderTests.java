@@ -238,6 +238,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void buildRequestInputStream() throws Exception {
 		String content = "some content that has length";
 		webRequest.setHttpMethod(HttpMethod.POST);
@@ -409,6 +410,27 @@ public class HtmlUnitRequestBuilderTests {
 
 		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
 		assertThat(actualRequest.getParameter("name"), equalTo("value"));
+	}
+
+	// SPR-14177
+	@Test
+	public void buildRequestParameterMapDecodesParameterName() throws Exception {
+		webRequest.setUrl(new URL("http://example.com/example/?row%5B0%5D=value"));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
+		assertThat(actualRequest.getParameter("row[0]"), equalTo("value"));
+	}
+
+	@Test
+	public void buildRequestParameterMapDecodesParameterValue() throws Exception {
+		webRequest.setUrl(new URL("http://example.com/example/?name=row%5B0%5D"));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
+		assertThat(actualRequest.getParameter("name"), equalTo("row[0]"));
 	}
 
 	@Test

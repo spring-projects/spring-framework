@@ -1290,9 +1290,9 @@ a better feel for its functionality
 
 Concrete implementations for the main media (mime) types are provided in the framework
 and are registered by default with the `RestTemplate` on the client-side and with
-`AnnotationMethodHandlerAdapter` on the server-side.
+`RequestMethodHandlerAdapter` on the server-side.
 
-The implementations of ++HttpMessageConverter++s are described in the following sections.
+The implementations of ``HttpMessageConverter``s are described in the following sections.
 For all converters a default media type is used but can be overridden by setting the
 `supportedMediaTypes` bean property
 
@@ -3508,6 +3508,9 @@ be marked with the `ManagedAttribute` annotation. When marking properties you ca
 either the annotation of the getter or the setter to create a write-only or read-only
 attribute respectively.
 
+NOTE: A `ManagedResource` annotated bean must be public as well as the methods exposing
+an operation or an attribute.
+
 The example below shows the annotated version of the `JmxTestBean` class that you saw
 earlier:
 
@@ -3891,7 +3894,7 @@ lists of method names.
 === Controlling the ObjectNames for your beans
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
-`ObjectNamingStrategy` to obtain ++ObjectName++s for each of the beans it is registering.
+`ObjectNamingStrategy` to obtain ``ObjectName``s for each of the beans it is registering.
 The default implementation, `KeyNamingStrategy`, will, by default, use the key of the
 `beans` `Map` as the `ObjectName`. In addition, the `KeyNamingStrategy` can map the key
 of the `beans` `Map` to an entry in a `Properties` file (or files) to resolve the
@@ -3906,7 +3909,7 @@ uses source level metadata to obtain the `ObjectName`.
 ==== Reading ObjectNames from Properties
 
 You can configure your own `KeyNamingStrategy` instance and configure it to read
-++ObjectName++s from a `Properties` instance rather than use bean key. The
+``ObjectName``s from a `Properties` instance rather than use bean key. The
 `KeyNamingStrategy` will attempt to locate an entry in the `Properties` with a key
 corresponding to the bean key. If no entry is found or if the `Properties` instance is
 `null` then the bean key itself is used.
@@ -6004,7 +6007,7 @@ along with an inline image.
 	helper.setTo("test@host.com");
 
 	// use the true flag to indicate the text included is HTML
-	helper.setText("<html><body><img src=''cid:identifier1234''></body></html>", true);
+	helper.setText("<html><body><img src='cid:identifier1234'></body></html>", true);
 
 	// let's include the infamous windows Sample file (this time copied to c:/)
 	FileSystemResource res = new FileSystemResource(new File("c:/Sample.jpg"));
@@ -6040,124 +6043,11 @@ of your emails using the above approach for a number of reasons.
   recompiling, redeploying...
 
 Typically the approach taken to address these issues is to use a template library such
-as FreeMarker or Velocity to define the display structure of email content. This leaves
-your code tasked only with creating the data that is to be rendered in the email
-template and sending the email. It is definitely a best practice for when the content of
-your emails becomes even moderately complex, and with the Spring Framework's support
-classes for FreeMarker and Velocity becomes quite easy to do. Find below an example of
-using the Velocity template library to create email content.
-
-
-[[mail-templates-example]]
-===== A Velocity-based example
-To use http://velocity.apache.org[Velocity] to create your email template(s), you will
-need to have the Velocity libraries available on your classpath. You will also need to
-create one or more Velocity templates for the email content that your application needs.
-Find below the Velocity template that this example will be using. As you can see it is
-HTML-based, and since it is plain text it can be created using your favorite HTML or
-text editor.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	# in the com/foo/package
-	<html>
-		<body>
-			<h3>Hi ${user.userName}, welcome to the Chipping Sodbury On-the-Hill message boards!</h3>
-
-			<div>
-				Your email address is <a href="mailto:${user.emailAddress}">${user.emailAddress}</a>.
-			</div>
-		</body>
-	</html>
-----
-
-Find below some simple code and Spring XML configuration that makes use of the above
-Velocity template to create email content and send email(s).
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	package com.foo;
-
-	import org.apache.velocity.app.VelocityEngine;
-	import org.springframework.mail.javamail.JavaMailSender;
-	import org.springframework.mail.javamail.MimeMessageHelper;
-	import org.springframework.mail.javamail.MimeMessagePreparator;
-	import org.springframework.ui.velocity.VelocityEngineUtils;
-
-	import javax.mail.internet.MimeMessage;
-	import java.util.HashMap;
-	import java.util.Map;
-
-	public class SimpleRegistrationService implements RegistrationService {
-
-		private JavaMailSender mailSender;
-		private VelocityEngine velocityEngine;
-
-		public void setMailSender(JavaMailSender mailSender) {
-			this.mailSender = mailSender;
-		}
-
-		public void setVelocityEngine(VelocityEngine velocityEngine) {
-			this.velocityEngine = velocityEngine;
-		}
-
-		public void register(User user) {
-
-			// Do the registration logic...
-
-			sendConfirmationEmail(user);
-		}
-
-		private void sendConfirmationEmail(final User user) {
-			MimeMessagePreparator preparator = new MimeMessagePreparator() {
-				public void prepare(MimeMessage mimeMessage) throws Exception {
-					MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-					message.setTo(user.getEmailAddress());
-					message.setFrom("webmaster@csonth.gov.uk"); // could be parameterized...
-					Map model = new HashMap();
-					model.put("user", user);
-					String text = VelocityEngineUtils.mergeTemplateIntoString(
-							velocityEngine, "com/dns/registration-confirmation.vm", model);
-					message.setText(text, true);
-				}
-			};
-			this.mailSender.send(preparator);
-		}
-
-	}
-----
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-		<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-			<property name="host" value="mail.csonth.gov.uk"/>
-		</bean>
-
-		<bean id="registrationService" class="com.foo.SimpleRegistrationService">
-			<property name="mailSender" ref="mailSender"/>
-			<property name="velocityEngine" ref="velocityEngine"/>
-		</bean>
-
-		<bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
-			<property name="velocityProperties">
-				<value>
-					resource.loader=class
-					class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
-				</value>
-			</property>
-		</bean>
-
-	</beans>
-----
+as FreeMarker to define the display structure of email content. This leaves your code
+tasked only with creating the data that is to be rendered in the email template and
+sending the email. It is definitely a best practice for when the content of your emails
+becomes even moderately complex, and with the Spring Framework's support classes for
+FreeMarker becomes quite easy to do.
 
 
 
@@ -6495,7 +6385,7 @@ reference is provided for managing those methods annotated with `@Scheduled`.
 
 [[scheduling-annotation-support-scheduled]]
 ==== The @Scheduled Annotation
-The @Scheduled annotation can be added to a method along with trigger metadata. For
+The `@Scheduled` annotation can be added to a method along with trigger metadata. For
 example, the following method would be invoked every 5 seconds with a fixed delay,
 meaning that the period will be measured from the completion time of each preceding
 invocation.
@@ -6559,13 +6449,15 @@ Context, then those would typically have been provided through dependency inject
 
 [NOTE]
 ====
-Make sure that you are not initializing multiple instances of the same @Scheduled
+As of Spring Framework 4.3, `@Scheduled` methods are supported on beans of any scope.
+
+Make sure that you are not initializing multiple instances of the same `@Scheduled`
 annotation class at runtime, unless you do want to schedule callbacks to each such
-instance. Related to this, make sure that you do not use @Configurable on bean classes
-which are annotated with @Scheduled and registered as regular Spring beans with the
-container: You would get double initialization otherwise, once through the container and
-once through the @Configurable aspect, with the consequence of each @Scheduled method
-being invoked twice.
+instance. Related to this, make sure that you do not use `@Configurable` on bean
+classes which are annotated with `@Scheduled` and registered as regular Spring beans
+with the container: You would get double initialization otherwise, once through the
+container and once through the `@Configurable` aspect, with the consequence of each
+`@Scheduled` method being invoked twice.
 ====
 
 
@@ -6616,8 +6508,8 @@ asynchronous execution so that the caller can perform other tasks prior to calli
 ----
 
 `@Async` can not be used in conjunction with lifecycle callbacks such as
-`@PostConstruct`. To asynchronously initialize Spring beans you currently have to use a
-separate initializing Spring bean that invokes the `@Async` annotated method on the
+`@PostConstruct`. To asynchronously initialize Spring beans you currently have to use
+a separate initializing Spring bean that invokes the `@Async` annotated method on the
 target then.
 
 [source,java,indent=0]
@@ -6632,7 +6524,7 @@ target then.
 
 	}
 
-	public class SampleBeanInititalizer {
+	public class SampleBeanInitializer {
 
 		private final SampleBean bean;
 
@@ -6647,6 +6539,14 @@ target then.
 
 	}
 ----
+
+[NOTE]
+====
+There is no direct XML equivalent for `@Async` since such methods should be designed
+for asynchronous execution in the first place, not externally re-declared to be async.
+However, you may manually set up Spring's `AsyncExecutionInterceptor` with Spring AOP,
+in combination with a custom pointcut.
+====
 
 
 
@@ -7363,7 +7263,7 @@ message is surrounded by quotes. Below are the changes that I (the author) make 
 
 		public String getMessage() {
 			// change the implementation to surround the message in quotes
-			return "''" + this.message + "''"
+			return "'" + this.message + "'"
 		}
 
 		public void setMessage(String message) {
@@ -7770,7 +7670,7 @@ will want to do with this callback, and you can see an example of doing that bel
 			DelegatingMetaClass metaClass = new DelegatingMetaClass(goo.getMetaClass()) {
 
 				public Object invokeMethod(Object object, String methodName, Object[] arguments) {
-					System.out.println("Invoking ''" + methodName + "''.");
+					System.out.println("Invoking '" + methodName + "'.");
 					return super.invokeMethod(object, methodName, arguments);
 				}
 			};
@@ -8163,10 +8063,9 @@ materialized by the `org.springframework.cache.Cache` and
 There are <<cache-store-configuration,a few implementations>> of that abstraction
 available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
 http://ehcache.org/[EhCache], Gemfire cache,
-https://github.com/ben-manes/caffeine/wiki[Caffeine],
-https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
-JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
-other cache stores/providers.
+https://github.com/ben-manes/caffeine/wiki[Caffeine] and JSR-107 compliant
+caches. See <<cache-plug>> for more information on plugging in other cache
+stores/providers.
 
 [IMPORTANT]
 ====
@@ -8390,15 +8289,42 @@ result in an exception as a custom `CacheManager` will be ignored by the
 `CacheResolver` implementation. This is probably not what you expect.
 ====
 
+[[cache-annotations-cacheable-synchronized]]
+===== Synchronized caching
+In a multi-threaded environment, certain operations might be concurrently invoked for
+the same argument (typically on startup). By default, the cache abstraction does not
+lock anything and the same value may be computed several times, defeating the purpose
+of caching.
+
+For those particular cases, the `sync` attribute can be used to instruct the underlying
+cache provider to _lock_ the cache entry while the value is being computed. As a result,
+only one thread will be busy computing the value while the others are blocked until the
+entry is updated in the cache.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(cacheNames="foos", **sync="true"**)
+	public Foo executeExpensiveOperation(String id) {...}
+----
+
+[NOTE]
+====
+This is an optional feature and your favorite cache library may not support it. All
+`CacheManager` implementations provided by the core framework support it. Check the
+documentation of your cache provider for more details.
+====
+
+
 [[cache-annotations-cacheable-condition]]
 ===== Conditional caching
 Sometimes, a method might not be suitable for caching all the time (for example, it
 might depend on the given arguments). The cache annotations support such functionality
 through the `condition` parameter which takes a `SpEL` expression that is evaluated to
 either `true` or `false`. If `true`, the method is cached - if not, it behaves as if the
-method is not cached, that is executed every since time no matter what values are in the
-cache or what arguments are used. A quick example - the following method will be cached
-only if the argument `name` has a length shorter than 32:
+method is not cached, that is executed every time no matter what values are in the cache
+or what arguments are used. A quick example - the following method will be cached only
+if the argument `name` has a length shorter than 32:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -8557,10 +8483,8 @@ and thus requires a result.
 
 There are cases when multiple annotations of the same type, such as `@CacheEvict` or
 `@CachePut` need to be specified, for example because the condition or the key
-expression is different between different caches. Unfortunately Java does not support
-such declarations however there is a workaround - using an __enclosing__ annotation, in
-this case, `@Caching`. `@Caching` allows multiple nested `@Cacheable`, `@CachePut` and
-`@CacheEvict` to be used on the same method:
+expression is different between different caches. `@Caching` allows multiple nested
+`@Cacheable`, `@CachePut` and `@CacheEvict` to be used on the same method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -9002,7 +8926,7 @@ we did in the example above by defining the target cache through the `cache:defi
 === Configuring the cache storage
 Out of the box, the cache abstraction provides several storage integration. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
-controls and manages ++Cache++s and can be used to retrieve these for storage.
+controls and manages ``Cache``s and can be used to retrieve these for storage.
 
 
 [[cache-store-configuration-jdk]]
@@ -9094,41 +9018,6 @@ The Caffeine `CacheManager` also supports customs `Caffeine` and `CacheLoader`. 
 the https://github.com/ben-manes/caffeine/wiki[Caffeine documentation] for more
 information about those.
 
-[[cache-store-configuration-guava]]
-==== Guava Cache
-
-The Guava implementation is located under `org.springframework.cache.guava` package and
-provides access to several features of Guava.
-
-Configuring a `CacheManager` that creates the cache on demand is straightforward:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="cacheManager"
-	      class="org.springframework.cache.guava.GuavaCacheManager"/>
-----
-
-It is also possible to provide the caches to use explicitly. In that case, only those
-will be made available by the manager:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="cacheManager" class="org.springframework.cache.guava.GuavaCacheManager">
-		<property name="caches">
-			<set>
-				<value>default</value>
-				<value>books</value>
-			</set>
-		</property>
-	</bean>
-----
-
-The Guava `CacheManager` also supports customs `CacheBuilder` and `CacheLoader`. See
-the https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava documentation]
-for more information about those.
-
 [[cache-store-configuration-gemfire]]
 ==== GemFire-based Cache
 
@@ -9181,7 +9070,7 @@ performs no caching - that is, forces the cached methods to be executed every ti
 	</bean>
 ----
 
-The `CompositeCacheManager` above chains multiple ++CacheManager++s and additionally,
+The `CompositeCacheManager` above chains multiple ``CacheManager``s and additionally,
 through the `fallbackToNoOpCache` flag, adds a __no op__ cache that for all the
 definitions not handled by the configured cache managers. That is, every cache
 definition not found in either `jdkCache` or `gemfireCache` (configured above) will be

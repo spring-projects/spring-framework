@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		Assume.group(TestGroup.PERFORMANCE);
 	}
 
+
 	@Test
 	public void failsWhenJdkProxyAndScheduledMethodNotPresentOnInterface() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -102,27 +103,35 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 	@Configuration
 	@EnableTransactionManagement
-	static class JdkProxyTxConfig { }
+	static class JdkProxyTxConfig {
+	}
+
 
 	@Configuration
 	@EnableTransactionManagement(proxyTargetClass=true)
-	static class SubclassProxyTxConfig { }
+	static class SubclassProxyTxConfig {
+	}
+
 
 	@Configuration
 	static class RepoConfigA {
+
 		@Bean
 		public MyRepository repository() {
 			return new MyRepositoryImpl();
 		}
 	}
 
+
 	@Configuration
 	static class RepoConfigB {
+
 		@Bean
 		public MyRepositoryWithScheduledMethod repository() {
 			return new MyRepositoryWithScheduledMethodImpl();
 		}
 	}
+
 
 	@Configuration
 	@EnableScheduling
@@ -140,14 +149,16 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		@Bean
 		public PersistenceExceptionTranslator peTranslator() {
-			PersistenceExceptionTranslator txlator = mock(PersistenceExceptionTranslator.class);
-			return txlator;
+			return mock(PersistenceExceptionTranslator.class);
 		}
 	}
 
+
 	public interface MyRepository {
+
 		int getInvocationCount();
 	}
+
 
 	@Repository
 	static class MyRepositoryImpl implements MyRepository {
@@ -166,10 +177,14 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 		}
 	}
 
+
 	public interface MyRepositoryWithScheduledMethod {
+
 		int getInvocationCount();
-		public void scheduled();
+
+		void scheduled();
 	}
+
 
 	@Repository
 	static class MyRepositoryWithScheduledMethodImpl implements MyRepositoryWithScheduledMethod {

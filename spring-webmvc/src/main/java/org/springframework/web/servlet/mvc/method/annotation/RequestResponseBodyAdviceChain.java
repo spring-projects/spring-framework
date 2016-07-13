@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ import org.springframework.web.method.ControllerAdviceBean;
  */
 class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyAdvice<Object> {
 
-	private final List<Object> requestBodyAdvice = new ArrayList<Object>(4);
+	private final List<Object> requestBodyAdvice = new ArrayList<>(4);
 
-	private final List<Object> responseBodyAdvice = new ArrayList<Object>(4);
+	private final List<Object> responseBodyAdvice = new ArrayList<>(4);
 
 
 	/**
@@ -158,7 +158,7 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 		if (CollectionUtils.isEmpty(availableAdvice)) {
 			return Collections.emptyList();
 		}
-		List<A> result = new ArrayList<A>(availableAdvice.size());
+		List<A> result = new ArrayList<>(availableAdvice.size());
 		for (Object advice : availableAdvice) {
 			if (advice instanceof ControllerAdviceBean) {
 				ControllerAdviceBean adviceBean = (ControllerAdviceBean) advice;

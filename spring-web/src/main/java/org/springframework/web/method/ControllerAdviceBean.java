@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,8 @@ public class ControllerAdviceBean implements Ordered {
 			this.order = initOrderFromBean(bean);
 		}
 
-		ControllerAdvice annotation = AnnotatedElementUtils.findMergedAnnotation(
-				beanType, ControllerAdvice.class);
+		ControllerAdvice annotation =
+				AnnotatedElementUtils.findMergedAnnotation(beanType, ControllerAdvice.class);
 
 		if (annotation != null) {
 			this.basePackages = initBasePackages(annotation);
@@ -211,7 +211,7 @@ public class ControllerAdviceBean implements Ordered {
 	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.
 	 */
 	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext applicationContext) {
-		List<ControllerAdviceBean> beans = new ArrayList<ControllerAdviceBean>();
+		List<ControllerAdviceBean> beans = new ArrayList<>();
 		for (String name : BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, Object.class)) {
 			if (applicationContext.findAnnotationOnBean(name, ControllerAdvice.class) != null) {
 				beans.add(new ControllerAdviceBean(name, applicationContext));
@@ -229,7 +229,7 @@ public class ControllerAdviceBean implements Ordered {
 	}
 
 	private static Set<String> initBasePackages(ControllerAdvice annotation) {
-		Set<String> basePackages = new LinkedHashSet<String>();
+		Set<String> basePackages = new LinkedHashSet<>();
 		for (String basePackage : annotation.basePackages()) {
 			if (StringUtils.hasText(basePackage)) {
 				basePackages.add(adaptBasePackage(basePackage));

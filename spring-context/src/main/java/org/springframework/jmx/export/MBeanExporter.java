@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	private boolean exposeManagedResourceClassLoader = true;
 
 	/** A set of bean names that should be excluded from autodetection */
-	private Set<String> excludedBeans = new HashSet<String>();
+	private Set<String> excludedBeans = new HashSet<>();
 
 	/** The MBeanExporterListeners registered with this exporter. */
 	private MBeanExporterListener[] listeners;
@@ -171,7 +171,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 
 	/** Map of actually registered NotificationListeners */
 	private final Map<NotificationListenerBean, ObjectName[]> registeredNotificationListeners =
-			new LinkedHashMap<NotificationListenerBean, ObjectName[]>();
+			new LinkedHashMap<>();
 
 	/** Stores the ClassLoader to use for generating lazy-init proxies */
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
@@ -366,7 +366,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	public void setNotificationListenerMappings(Map<?, ? extends NotificationListener> listeners) {
 		Assert.notNull(listeners, "'listeners' must not be null");
 		List<NotificationListenerBean> notificationListeners =
-				new ArrayList<NotificationListenerBean>(listeners.size());
+				new ArrayList<>(listeners.size());
 
 		for (Map.Entry<?, ? extends NotificationListener> entry : listeners.entrySet()) {
 			// Get the listener from the map value.
@@ -520,7 +520,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	protected void registerBeans() {
 		// The beans property may be null, for example if we are relying solely on autodetection.
 		if (this.beans == null) {
-			this.beans = new HashMap<String, Object>();
+			this.beans = new HashMap<>();
 			// Use AUTODETECT_ALL as default in no beans specified explicitly.
 			if (this.autodetectMode == null) {
 				this.autodetectMode = AUTODETECT_ALL;
@@ -570,7 +570,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * should be exposed to the {@code MBeanServer}. Specifically, if the
 	 * supplied {@code mapValue} is the name of a bean that is configured
 	 * for lazy initialization, then a proxy to the resource is registered with
-	 * the {@code MBeanServer} so that the the lazy load behavior is
+	 * the {@code MBeanServer} so that the lazy load behavior is
 	 * honored. If the bean is already an MBean then it will be registered
 	 * directly with the {@code MBeanServer} without any intervention. For
 	 * all other beans or bean names, the resource itself is registered with
@@ -891,7 +891,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * whether to include a bean or not
 	 */
 	private void autodetect(AutodetectCallback callback) {
-		Set<String> beanNames = new LinkedHashSet<String>(this.beanFactory.getBeanDefinitionCount());
+		Set<String> beanNames = new LinkedHashSet<>(this.beanFactory.getBeanDefinitionCount());
 		beanNames.addAll(Arrays.asList(this.beanFactory.getBeanDefinitionNames()));
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			beanNames.addAll(Arrays.asList(((ConfigurableBeanFactory) this.beanFactory).getSingletonNames()));
@@ -1077,7 +1077,8 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	/**
 	 * Internal callback interface for the autodetection process.
 	 */
-	private static interface AutodetectCallback {
+	@FunctionalInterface
+	private interface AutodetectCallback {
 
 		/**
 		 * Called during the autodetection process to decide whether

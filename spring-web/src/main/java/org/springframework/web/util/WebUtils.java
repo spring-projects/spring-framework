@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpRequest;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -178,23 +179,6 @@ public abstract class WebUtils {
 		String param = servletContext.getInitParameter(WEB_APP_ROOT_KEY_PARAM);
 		String key = (param != null ? param : DEFAULT_WEB_APP_ROOT_KEY);
 		System.getProperties().remove(key);
-	}
-
-	/**
-	 * Return whether default HTML escaping is enabled for the web application,
-	 * i.e. the value of the "defaultHtmlEscape" context-param in {@code web.xml}
-	 * (if any). Falls back to {@code false} in case of no explicit default given.
-	 * @param servletContext the servlet context of the web application
-	 * @return whether default HTML escaping is enabled (default is {@code false})
-	 * @deprecated as of Spring 4.1, in favor of {@link #getDefaultHtmlEscape}
-	 */
-	@Deprecated
-	public static boolean isDefaultHtmlEscape(ServletContext servletContext) {
-		if (servletContext == null) {
-			return false;
-		}
-		String param = servletContext.getInitParameter(HTML_ESCAPE_CONTEXT_PARAM);
-		return Boolean.valueOf(param);
 	}
 
 	/**
@@ -657,7 +641,7 @@ public abstract class WebUtils {
 	public static Map<String, Object> getParametersStartingWith(ServletRequest request, String prefix) {
 		Assert.notNull(request, "Request must not be null");
 		Enumeration<String> paramNames = request.getParameterNames();
-		Map<String, Object> params = new TreeMap<String, Object>();
+		Map<String, Object> params = new TreeMap<>();
 		if (prefix == null) {
 			prefix = "";
 		}
@@ -753,7 +737,7 @@ public abstract class WebUtils {
 	 * @since 3.2
 	 */
 	public static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
 		if (!StringUtils.hasText(matrixVariables)) {
 			return result;
 		}
@@ -811,18 +795,31 @@ public abstract class WebUtils {
 		if (origin == null) {
 			return true;
 		}
-		UriComponents actualUrl = UriComponentsBuilder.fromHttpRequest(request).build();
+		UriComponentsBuilder urlBuilder;
+		if (request instanceof ServletServerHttpRequest) {
+			// Build more efficiently if we can: we only need scheme, host, port for origin comparison
+			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+			urlBuilder = new UriComponentsBuilder().
+					scheme(servletRequest.getScheme()).
+					host(servletRequest.getServerName()).
+					port(servletRequest.getServerPort()).
+					adaptFromForwardedHeaders(request.getHeaders());
+		}
+		else {
+			urlBuilder = UriComponentsBuilder.fromHttpRequest(request);
+		}
+		UriComponents actualUrl = urlBuilder.build();
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
 		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
 	}
 
-	private static int getPort(UriComponents component) {
-		int port = component.getPort();
+	private static int getPort(UriComponents uri) {
+		int port = uri.getPort();
 		if (port == -1) {
-			if ("http".equals(component.getScheme()) || "ws".equals(component.getScheme())) {
+			if ("http".equals(uri.getScheme()) || "ws".equals(uri.getScheme())) {
 				port = 80;
 			}
-			else if ("https".equals(component.getScheme()) || "wss".equals(component.getScheme())) {
+			else if ("https".equals(uri.getScheme()) || "wss".equals(uri.getScheme())) {
 				port = 443;
 			}
 		}

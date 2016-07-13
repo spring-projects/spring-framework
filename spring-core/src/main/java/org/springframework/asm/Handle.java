@@ -64,6 +64,12 @@ public final class Handle {
      */
     final String desc;
 
+
+    /**
+     * Indicate if the owner is an interface or not.
+     */
+    final boolean itf;
+
     /**
      * Constructs a new field or method handle.
      * 
@@ -84,12 +90,44 @@ public final class Handle {
      * @param desc
      *            the descriptor of the field or method designated by this
      *            handle.
+     *
+     * @deprecated this constructor has been superseded
+     *             by {@link #Handle(int, String, String, String, boolean)}.
      */
+    @Deprecated
     public Handle(int tag, String owner, String name, String desc) {
+        this(tag, owner, name, desc, tag == Opcodes.H_INVOKEINTERFACE);
+    }
+
+    /**
+     * Constructs a new field or method handle.
+     *
+     * @param tag
+     *            the kind of field or method designated by this Handle. Must be
+     *            {@link Opcodes#H_GETFIELD}, {@link Opcodes#H_GETSTATIC},
+     *            {@link Opcodes#H_PUTFIELD}, {@link Opcodes#H_PUTSTATIC},
+     *            {@link Opcodes#H_INVOKEVIRTUAL},
+     *            {@link Opcodes#H_INVOKESTATIC},
+     *            {@link Opcodes#H_INVOKESPECIAL},
+     *            {@link Opcodes#H_NEWINVOKESPECIAL} or
+     *            {@link Opcodes#H_INVOKEINTERFACE}.
+     * @param owner
+     *            the internal name of the class that owns the field or method
+     *            designated by this handle.
+     * @param name
+     *            the name of the field or method designated by this handle.
+     * @param desc
+     *            the descriptor of the field or method designated by this
+     *            handle.
+     * @param itf
+     *            true if the owner is an interface.
+     */
+    public Handle(int tag, String owner, String name, String desc, boolean itf) {
         this.tag = tag;
         this.owner = owner;
         this.name = name;
         this.desc = desc;
+        this.itf = itf;
     }
 
     /**
@@ -135,6 +173,17 @@ public final class Handle {
         return desc;
     }
 
+    /**
+     * Returns true if the owner of the field or method designated
+     * by this handle is an interface.
+     *
+     * @return true if the owner of the field or method designated
+     *         by this handle is an interface.
+     */
+    public boolean isInterface() {
+        return itf;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -144,13 +193,13 @@ public final class Handle {
             return false;
         }
         Handle h = (Handle) obj;
-        return tag == h.tag && owner.equals(h.owner) && name.equals(h.name)
-                && desc.equals(h.desc);
+        return tag == h.tag && itf == h.itf && owner.equals(h.owner)
+                && name.equals(h.name) && desc.equals(h.desc);
     }
 
     @Override
     public int hashCode() {
-        return tag + owner.hashCode() * name.hashCode() * desc.hashCode();
+        return tag + (itf? 64: 0) + owner.hashCode() * name.hashCode() * desc.hashCode();
     }
 
     /**
@@ -158,13 +207,16 @@ public final class Handle {
      * representation is:
      * 
      * <pre>
+     * for a reference to a class:
      * owner '.' name desc ' ' '(' tag ')'
+     * for a reference to an interface:
+     * owner '.' name desc ' ' '(' tag ' ' itf ')'
      * </pre>
      * 
      * . As this format is unambiguous, it can be parsed if necessary.
      */
     @Override
     public String toString() {
-        return owner + '.' + name + desc + " (" + tag + ')';
+        return owner + '.' + name + desc + " (" + tag + (itf? " itf": "") + ')';
     }
 }

@@ -10,37 +10,38 @@
 		Matches all Advisors in the factory: we don't use a prefix
 	</description>
 
-	<bean id="aapc"
-		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
-	
-		<!-- This common interceptor will be applied always,
-		before custom lockable advisor -->
+	<bean id="aapc" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
+		<!-- This common interceptor will be applied always, before custom lockable advisor -->
 		<property name="interceptorNames">
 			<value>nopInterceptor</value>
 		</property>
 	</bean>
 
-	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor" />
+	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
 
-	<!--
-		Stateful mixin. Will apply to all objects
-		Note that singleton property is false.
-	-->
-	<bean id="lockableAdvisor"
-		class="test.mixin.LockMixinAdvisor"
-		scope="prototype"
-	/>
-
-	<bean id="test1"
-		class="org.springframework.tests.sample.beans.TestBean">
-		<property name="age"><value>4</value></property>
+	<bean id="pointcutAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+		<property name="pointcut">
+			<bean class="org.springframework.aop.support.NameMatchMethodPointcut">
+				<property name="mappedName" value="doSomething"/>
+			</bean>
+		</property>
+		<property name="advice">
+			<bean class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
+		</property>
 	</bean>
 
-	<bean id="test2"
-		class="org.springframework.tests.sample.beans.TestBean">
-		<property name="age"><value>4</value></property>
+	<!-- Stateful mixin. Will apply to all objects. Note that singleton property is false. -->
+	<bean id="lockableAdvisor" class="test.mixin.LockMixinAdvisor" scope="prototype"/>
+
+	<bean id="test1" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="age" value="4"/>
 	</bean>
 
+	<bean id="test2" class="org.springframework.tests.sample.beans.TestBean">
+		<property name="age" value="4"/>
+	</bean>
 
-</beans>	
+	<bean id="packageVisibleMethod" class="org.springframework.aop.framework.autoproxy.PackageVisibleMethod"/>
+
+</beans>
 

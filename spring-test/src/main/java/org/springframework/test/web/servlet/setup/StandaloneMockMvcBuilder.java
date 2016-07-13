@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,13 +89,13 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private List<Object> controllerAdvice;
 
-	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+	private List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
-	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers = new ArrayList<>();
 
-	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers = new ArrayList<>();
 
-	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
+	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<>();
 
 	private Validator validator = null;
 
@@ -119,7 +119,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 
 	private Boolean removeSemicolonContent;
 
-	private Map<String, String> placeHolderValues = new HashMap<String, String>();
+	private Map<String, String> placeHolderValues = new HashMap<>();
 
 
 	/**

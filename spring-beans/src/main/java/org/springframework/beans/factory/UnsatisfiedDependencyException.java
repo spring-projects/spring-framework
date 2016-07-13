@@ -31,6 +31,9 @@ import org.springframework.util.ClassUtils;
 @SuppressWarnings("serial")
 public class UnsatisfiedDependencyException extends BeanCreationException {
 
+	private InjectionPoint injectionPoint;
+
+
 	/**
 	 * Create a new UnsatisfiedDependencyException.
 	 * @param resourceDescription description of the resource that the bean definition came from
@@ -64,32 +67,39 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 	 * Create a new UnsatisfiedDependencyException.
 	 * @param resourceDescription description of the resource that the bean definition came from
 	 * @param beanName the name of the bean requested
-	 * @param ctorArgIndex the index of the constructor argument that couldn't be satisfied
-	 * @param ctorArgType the type of the constructor argument that couldn't be satisfied
+	 * @param injectionPoint the injection point (field or method/constructor parameter)
 	 * @param msg the detail message
+	 * @since 4.3
 	 */
 	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, int ctorArgIndex, Class<?> ctorArgType, String msg) {
+			String resourceDescription, String beanName, InjectionPoint injectionPoint, String msg) {
 
-		super(resourceDescription, beanName,
-				"Unsatisfied dependency expressed through constructor argument with index " +
-				ctorArgIndex + " of type [" + ClassUtils.getQualifiedName(ctorArgType) + "]" +
-				(msg != null ? ": " + msg : ""));
+		super(resourceDescription, beanName, "Unsatisfied dependency expressed through " + injectionPoint + ": " + msg);
+		this.injectionPoint = injectionPoint;
 	}
 
 	/**
 	 * Create a new UnsatisfiedDependencyException.
 	 * @param resourceDescription description of the resource that the bean definition came from
 	 * @param beanName the name of the bean requested
-	 * @param ctorArgIndex the index of the constructor argument that couldn't be satisfied
-	 * @param ctorArgType the type of the constructor argument that couldn't be satisfied
+	 * @param injectionPoint the injection point (field or method/constructor parameter)
 	 * @param ex the bean creation exception that indicated the unsatisfied dependency
+	 * @since 4.3
 	 */
 	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, int ctorArgIndex, Class<?> ctorArgType, BeansException ex) {
+			String resourceDescription, String beanName, InjectionPoint injectionPoint, BeansException ex) {
 
-		this(resourceDescription, beanName, ctorArgIndex, ctorArgType, (ex != null ? ex.getMessage() : ""));
+		this(resourceDescription, beanName, injectionPoint, (ex != null ? ex.getMessage() : ""));
 		initCause(ex);
+	}
+
+
+	/**
+	 * Return the injection point (field or method/constructor parameter), if known.
+	 * @since 4.3
+	 */
+	public InjectionPoint getInjectionPoint() {
+		return this.injectionPoint;
 	}
 
 }

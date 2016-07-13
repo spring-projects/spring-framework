@@ -55,7 +55,6 @@ import org.springframework.web.util.WebUtils;
  * @since 29.09.2003
  * @see #CommonsMultipartResolver(ServletContext)
  * @see #setResolveLazily
- * @see org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver
  * @see org.apache.commons.fileupload.servlet.ServletFileUpload
  * @see org.apache.commons.fileupload.disk.DiskFileItemFactory
  */

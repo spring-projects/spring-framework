@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,10 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 
 	private ExpressionParser expressionParser;
 
-	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<String, Expression>(256);
+	private final Map<String, Expression> expressionCache = new ConcurrentHashMap<>(256);
 
 	private final Map<BeanExpressionContext, StandardEvaluationContext> evaluationCache =
-			new ConcurrentHashMap<BeanExpressionContext, StandardEvaluationContext>(8);
+			new ConcurrentHashMap<>(8);
 
 	private final ParserContext beanExpressionParserContext = new ParserContext() {
 		@Override

@@ -699,9 +699,9 @@ public class RestTemplateTests {
 		given(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).willReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
 		given(this.request.getHeaders()).willReturn(requestHeaders);
-		given(converter.canWrite(String.class, null)).willReturn(true);
+		given(converter.canWrite(String.class, String.class, null)).willReturn(true);
 		String requestBody = "Hello World";
-		converter.write(requestBody, null, this.request);
+		converter.write(requestBody, String.class, null, this.request);
 		given(this.request.execute()).willReturn(response);
 		given(errorHandler.hasError(response)).willReturn(false);
 		List<Integer> expected = Collections.singletonList(42);

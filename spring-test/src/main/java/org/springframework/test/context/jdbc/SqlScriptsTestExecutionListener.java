@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -40,11 +40,10 @@ import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -129,10 +128,10 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
 		boolean classLevel = false;
 
-		Set<Sql> sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestMethod(), Sql.class,
+		Set<Sql> sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(testContext.getTestMethod(), Sql.class,
 			SqlGroup.class);
 		if (sqlAnnotations.isEmpty()) {
-			sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestClass(), Sql.class,
+			sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(testContext.getTestClass(), Sql.class,
 				SqlGroup.class);
 			if (!sqlAnnotations.isEmpty()) {
 				classLevel = true;
@@ -157,7 +156,6 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the
 	 * class level
 	 */
-	@SuppressWarnings("serial")
 	private void executeSqlScripts(Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel)
 			throws Exception {
 		if (executionPhase != sql.executionPhase()) {
@@ -204,16 +202,12 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		final boolean newTxRequired = mergedSqlConfig.getTransactionMode() == TransactionMode.ISOLATED;
 
 		if (transactionManager == null) {
-			if (newTxRequired) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "cannot execute SQL scripts using Transaction Mode "
-						+ "[%s] without a PlatformTransactionManager.", testContext, TransactionMode.ISOLATED));
-			}
+			Assert.state(!newTxRequired, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+					"cannot execute SQL scripts using Transaction Mode " +
+					"[%s] without a PlatformTransactionManager.", testContext, TransactionMode.ISOLATED));
 
-			if (dataSource == null) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "supply at least a DataSource or PlatformTransactionManager.", testContext));
-			}
+			Assert.state(dataSource != null, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+					"supply at least a DataSource or PlatformTransactionManager.", testContext));
 
 			// Execute scripts directly against the DataSource
 			populator.execute(dataSource);
@@ -231,11 +225,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 			if (dataSource == null) {
 				dataSource = dataSourceFromTxMgr;
-				if (dataSource == null) {
-					throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-							+ "could not obtain DataSource from transaction manager [%s] (named '%s').", testContext,
+				Assert.state(dataSource != null, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+						"could not obtain DataSource from transaction manager [%s] (named '%s').", testContext,
 						transactionManager.getClass().getName(), tmName));
-				}
 			}
 
 			final DataSource finalDataSource = dataSource;
@@ -245,12 +237,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
 				testContext, new DefaultTransactionAttribute(propagation));
 
-			new TransactionTemplate(transactionManager, transactionAttribute).execute(new TransactionCallbackWithoutResult() {
-
-				@Override
-				public void doInTransactionWithoutResult(TransactionStatus status) {
-					populator.execute(finalDataSource);
-				}
+			new TransactionTemplate(transactionManager, transactionAttribute).execute(status -> {
+				populator.execute(finalDataSource);
+				return null;
 			});
 		}
 	}

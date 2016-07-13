@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,7 +285,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		public void expectMessages(MessageExchange... messageExchanges) throws InterruptedException {
 
 			List<MessageExchange> expectedMessages =
-					new ArrayList<MessageExchange>(Arrays.<MessageExchange>asList(messageExchanges));
+					new ArrayList<>(Arrays.<MessageExchange>asList(messageExchanges));
 
 			while (expectedMessages.size() > 0) {
 				Message<?> message = this.queue.poll(10000, TimeUnit.MILLISECONDS);
@@ -326,7 +326,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public boolean matchMessage(Message<?> message) {
-			for (int i=0 ; i < this.expected.length; i++) {
+			for (int i = 0 ; i < this.expected.length; i++) {
 				if (this.expected[i].match(message)) {
 					this.actual[i] = message;
 					return true;

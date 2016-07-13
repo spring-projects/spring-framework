@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,34 +40,34 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <table>
  * <tr>
- *     <th>Property Setter</th>
- *     <th>Underlying Strategy</th>
- *     <th>Default Setting</th>
+ * <th>Property Setter</th>
+ * <th>Underlying Strategy</th>
+ * <th>Default Setting</th>
  * </tr>
  * <tr>
- *     <td>{@link #setFavorPathExtension}</td>
- *     <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
- *     <td>On</td>
+ * <td>{@link #setFavorPathExtension}</td>
+ * <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
+ * <td>On</td>
  * </tr>
  * <tr>
- *     <td>{@link #setFavorParameter favorParameter}</td>
- *     <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
- *     <td>Off</td>
+ * <td>{@link #setFavorParameter favorParameter}</td>
+ * <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
+ * <td>Off</td>
  * </tr>
  * <tr>
- *     <td>{@link #setIgnoreAcceptHeader ignoreAcceptHeader}</td>
- *     <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
- *     <td>On</td>
+ * <td>{@link #setIgnoreAcceptHeader ignoreAcceptHeader}</td>
+ * <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
+ * <td>On</td>
  * </tr>
  * <tr>
- *     <td>{@link #setDefaultContentType defaultContentType}</td>
- *     <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
- *     <td>Not set</td>
+ * <td>{@link #setDefaultContentType defaultContentType}</td>
+ * <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
+ * <td>Not set</td>
  * </tr>
  * <tr>
- *     <td>{@link #setDefaultContentTypeStrategy defaultContentTypeStrategy}</td>
- *     <td>{@link ContentNegotiationStrategy}</td>
- *     <td>Not set</td>
+ * <td>{@link #setDefaultContentTypeStrategy defaultContentTypeStrategy}</td>
+ * <td>{@link ContentNegotiationStrategy}</td>
+ * <td>Not set</td>
  * </tr>
  * </table>
  *
@@ -96,7 +96,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean ignoreAcceptHeader = false;
 
-	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+	private Map<String, MediaType> mediaTypes = new HashMap<>();
 
 	private boolean ignoreUnknownPathExtensions = true;
 
@@ -250,7 +250,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	@Override
 	public void afterPropertiesSet() {
-		List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
+		List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;

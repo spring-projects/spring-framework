@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	@Test
 	public void testCustomFormatter() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
-		Set<Object> formatters = new HashSet<Object>();
+		Set<Object> formatters = new HashSet<>();
 		formatters.add(new TestBeanFormatter());
 		formatters.add(new SpecialIntAnnotationFormatterFactory());
 		factory.setFormatters(formatters);
@@ -105,7 +105,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	@Test
 	public void testFormatterRegistrar() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
-		Set<FormatterRegistrar> registrars = new HashSet<FormatterRegistrar>();
+		Set<FormatterRegistrar> registrars = new HashSet<>();
 		registrars.add(new TestFormatterRegistrar());
 		factory.setFormatterRegistrars(registrars);
 		factory.afterPropertiesSet();
@@ -119,7 +119,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 	@Test
 	public void testInvalidFormatter() throws Exception {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
-		Set<Object> formatters = new HashSet<Object>();
+		Set<Object> formatters = new HashSet<>();
 		formatters.add(new Object());
 		factory.setFormatters(formatters);
 		try {
@@ -174,7 +174,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 	private static class SpecialIntAnnotationFormatterFactory implements AnnotationFormatterFactory<SpecialInt> {
 
-		private final Set<Class<?>> fieldTypes = new HashSet<Class<?>>(1);
+		private final Set<Class<?>> fieldTypes = new HashSet<>(1);
 
 		public SpecialIntAnnotationFormatterFactory() {
 			fieldTypes.add(Integer.class);

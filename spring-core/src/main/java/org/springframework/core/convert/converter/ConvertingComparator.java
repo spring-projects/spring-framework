@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	public ConvertingComparator(
 			Comparator<T> comparator, ConversionService conversionService, Class<? extends T> targetType) {
 
-		this(comparator, new ConversionServiceConverter<S, T>(conversionService, targetType));
+		this(comparator, new ConversionServiceConverter<>(conversionService, targetType));
 	}
 
 
@@ -88,7 +88,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	 * @return a new {@link ConvertingComparator} instance
 	 */
 	public static <K, V> ConvertingComparator<Map.Entry<K, V>, K> mapEntryKeys(Comparator<K> comparator) {
-		return new ConvertingComparator<Map.Entry<K,V>, K>(comparator, new Converter<Map.Entry<K, V>, K>() {
+		return new ConvertingComparator<>(comparator, new Converter<Map.Entry<K, V>, K>() {
 			@Override
 			public K convert(Map.Entry<K, V> source) {
 				return source.getKey();
@@ -103,7 +103,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	 * @return a new {@link ConvertingComparator} instance
 	 */
 	public static <K, V> ConvertingComparator<Map.Entry<K, V>, V> mapEntryValues(Comparator<V> comparator) {
-		return new ConvertingComparator<Map.Entry<K,V>, V>(comparator, new Converter<Map.Entry<K, V>, V>() {
+		return new ConvertingComparator<>(comparator, new Converter<Map.Entry<K, V>, V>() {
 			@Override
 			public V convert(Map.Entry<K, V> source) {
 				return source.getValue();

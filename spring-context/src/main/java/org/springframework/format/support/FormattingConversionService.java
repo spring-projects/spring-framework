@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,10 @@ public class FormattingConversionService extends GenericConversionService
 	private StringValueResolver embeddedValueResolver;
 
 	private final Map<AnnotationConverterKey, GenericConverter> cachedPrinters =
-			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>(64);
+			new ConcurrentHashMap<>(64);
 
 	private final Map<AnnotationConverterKey, GenericConverter> cachedParsers =
-			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>(64);
+			new ConcurrentHashMap<>(64);
 
 
 	@Override
@@ -194,7 +194,7 @@ public class FormattingConversionService extends GenericConversionService
 				result = this.parser.parse(text, LocaleContextHolder.getLocale());
 			}
 			catch (ParseException ex) {
-				throw new IllegalArgumentException("Unable to parse '" + text + "'", ex);
+				throw new IllegalArgumentException("Parse attempt failed for value [" + text + "]", ex);
 			}
 			if (result == null) {
 				throw new IllegalStateException("Parsers are not allowed to return null");

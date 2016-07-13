@@ -44,7 +44,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
-import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.AbstractUriTemplateHandler;
 import org.springframework.web.util.UriTemplateHandler;
 
 /**
@@ -152,8 +152,28 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	}
 
 	/**
-	 * Set a custom {@link UriTemplateHandler} for expanding URI templates.
-	 * <p>By default, RestTemplate uses {@link DefaultUriTemplateHandler}.
+	 * Configure default URI variable values. This is a shortcut for:
+	 * <pre class="code">
+	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
+	 * handler.setDefaultUriVariables(...);
+	 *
+	 * AsyncRestTemplate restTemplate = new AsyncRestTemplate();
+	 * restTemplate.setUriTemplateHandler(handler);
+	 * </pre>
+	 * @param defaultUriVariables the default URI variable values
+	 * @since 4.3
+	 */
+	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+		UriTemplateHandler handler = this.syncTemplate.getUriTemplateHandler();
+		Assert.isInstanceOf(AbstractUriTemplateHandler.class, handler,
+				"Can only use this property in conjunction with a DefaultUriTemplateHandler");
+		((AbstractUriTemplateHandler) handler).setDefaultUriVariables(defaultUriVariables);
+	}
+
+	/**
+	 * This property has the same purpose as the corresponding property on the
+	 * {@code RestTemplate}. For more details see
+	 * {@link RestTemplate#setUriTemplateHandler}.
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {
@@ -483,7 +503,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 				requestCallback.doWithRequest(request);
 			}
 			ListenableFuture<ClientHttpResponse> responseFuture = request.executeAsync();
-			return new ResponseExtractorFuture<T>(method, url, responseFuture, responseExtractor);
+			return new ResponseExtractorFuture<>(method, url, responseFuture, responseExtractor);
 		}
 		catch (IOException ex) {
 			throw new ResourceAccessException("I/O error on " + method.name() +

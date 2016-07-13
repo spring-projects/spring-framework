@@ -1,17 +1,17 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.test.web.servlet.htmlunit;
@@ -19,13 +19,17 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+
+import javax.servlet.http.Cookie;
 
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.util.Assert;
@@ -34,11 +38,13 @@ import org.springframework.util.StringUtils;
 /**
  * @author Rob Winch
  * @author Sam Brannen
+ * @author Rossen Stoyanchev
  * @since 4.2
  */
 final class MockWebResponseBuilder {
 
 	private static final String DEFAULT_STATUS_MESSAGE = "N/A";
+
 
 	private final long startTime;
 
@@ -54,6 +60,7 @@ final class MockWebResponseBuilder {
 		this.webRequest = webRequest;
 		this.response = response;
 	}
+
 
 	public WebResponse build() throws IOException {
 		WebResponseData webResponseData = webResponseData();
@@ -87,7 +94,7 @@ final class MockWebResponseBuilder {
 
 	private List<NameValuePair> responseHeaders() {
 		Collection<String> headerNames = this.response.getHeaderNames();
-		List<NameValuePair> responseHeaders = new ArrayList<NameValuePair>(headerNames.size());
+		List<NameValuePair> responseHeaders = new ArrayList<>(headerNames.size());
 		for (String headerName : headerNames) {
 			List<Object> headerValues = this.response.getHeaderValues(headerName);
 			for (Object value : headerValues) {
@@ -98,7 +105,30 @@ final class MockWebResponseBuilder {
 		if (location != null) {
 			responseHeaders.add(new NameValuePair("Location", location));
 		}
+		for (Cookie cookie : this.response.getCookies()) {
+			responseHeaders.add(new NameValuePair("Set-Cookie", valueOfCookie(cookie)));
+		}
 		return responseHeaders;
 	}
 
+	private String valueOfCookie(Cookie cookie) {
+		return createCookie(cookie).toString();
+	}
+
+	static com.gargoylesoftware.htmlunit.util.Cookie createCookie(Cookie cookie) {
+		Date expires = null;
+		if (cookie.getMaxAge() > -1) {
+			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);
+		}
+		BasicClientCookie result = new BasicClientCookie(cookie.getName(), cookie.getValue());
+		result.setDomain(cookie.getDomain());
+		result.setComment(cookie.getComment());
+		result.setExpiryDate(expires);
+		result.setPath(cookie.getPath());
+		result.setSecure(cookie.getSecure());
+		if(cookie.isHttpOnly()) {
+			result.setAttribute("httponly", "true");
+		}
+		return new com.gargoylesoftware.htmlunit.util.Cookie(result);
+	}
 }

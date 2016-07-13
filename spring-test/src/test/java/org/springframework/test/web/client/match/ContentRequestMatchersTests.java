@@ -27,7 +27,6 @@ import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 
-
 /**
  * Unit tests for {@link ContentRequestMatchers}.
  *
@@ -52,14 +51,14 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testContentTypeNoMatch1() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
 		MockRestRequestMatchers.content().contentType("application/xml").match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testContentTypeNoMatch2() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
@@ -73,7 +72,7 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().string("test").match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testStringNoMatch() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
@@ -88,7 +87,7 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().bytes(content).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testBytesNoMatch() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
@@ -119,7 +118,7 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().xml(content).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testXmlNoMatch() throws Exception {
 		this.request.getBody().write("<foo>11</foo>".getBytes());
 
@@ -134,7 +133,7 @@ public class ContentRequestMatchersTests {
 		MockRestRequestMatchers.content().node(hasXPath("/foo/bar")).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void testNodeMatcherNoMatch() throws Exception {
 		String content = "<foo><bar>baz</bar></foo>";
 		this.request.getBody().write(content.getBytes());

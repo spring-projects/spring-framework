@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.util.Assert;
@@ -162,7 +161,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (declaredEventType == null) {
 			return null;
 		}
-		if (this.method.getParameterTypes().length == 0) {
+		if (this.method.getParameterCount() == 0) {
 			return new Object[0];
 		}
 		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass())
@@ -214,7 +213,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	protected <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
-		return AnnotationUtils.findAnnotation(this.method, annotationType);
+		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}
 
 	/**
@@ -348,14 +347,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	private List<ResolvableType> resolveDeclaredEventTypes() {
-		int count = this.method.getParameterTypes().length;
+		int count = this.method.getParameterCount();
 		if (count > 1) {
 			throw new IllegalStateException(
 					"Maximum one parameter is allowed for event listener method: " + this.method);
 		}
 		EventListener ann = getEventListener();
 		if (ann != null && ann.classes().length > 0) {
-			List<ResolvableType> types = new ArrayList<ResolvableType>();
+			List<ResolvableType> types = new ArrayList<>();
 			for (Class<?> eventType : ann.classes()) {
 				types.add(ResolvableType.forClass(eventType));
 			}

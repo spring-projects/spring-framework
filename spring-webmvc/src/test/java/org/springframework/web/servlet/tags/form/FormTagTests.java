@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setName(name);
 		this.tag.setCssClass(cssClass);
 		this.tag.setCssStyle(cssStyle);
-		this.tag.setCommandName(commandName);
+		this.tag.setModelAttribute(commandName);
 		this.tag.setAction(action);
 		this.tag.setMethod(method);
 		this.tag.setTarget(target);
@@ -138,7 +138,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String onsubmit = "onsubmit";
 		String onreset = "onreset";
 
-		this.tag.setCommandName(commandName);
+		this.tag.setModelAttribute(commandName);
 		this.tag.setMethod(method);
 		this.tag.setEnctype(enctype);
 		this.tag.setOnsubmit(onsubmit);
@@ -182,7 +182,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String onsubmit = "onsubmit";
 		String onreset = "onreset";
 
-		this.tag.setCommandName(commandName);
+		this.tag.setModelAttribute(commandName);
 		this.tag.setServletRelativeAction(action);
 		this.tag.setMethod(method);
 		this.tag.setEnctype(enctype);
@@ -216,7 +216,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	@Test
 	public void withNullResolvedCommand() throws Exception {
 		try {
-			tag.setCommandName(null);
+			tag.setModelAttribute(null);
 			tag.doStartTag();
 			fail("Must not be able to have a command name that resolves to null");
 		}

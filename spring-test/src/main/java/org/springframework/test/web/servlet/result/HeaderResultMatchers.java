@@ -89,7 +89,7 @@ public class HeaderResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertEquals("Response header " + name, result.getResponse().getHeader(name), value);
+				assertEquals("Response header " + name, value, result.getResponse().getHeader(name));
 			}
 		};
 	}

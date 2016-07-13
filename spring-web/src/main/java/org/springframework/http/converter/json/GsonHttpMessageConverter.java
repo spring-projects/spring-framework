@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
-import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
@@ -48,15 +47,14 @@ import org.springframework.util.Assert;
  * By default, it supports {@code application/json} and {@code application/*+json} with
  * {@code UTF-8} character set.
  *
- * <p>Tested against Gson 2.3; compatible with Gson 2.0 and higher.
+ * <p>Tested against Gson 2.6; compatible with Gson 2.0 and higher.
  *
  * @author Roy Clarkson
  * @since 4.1
  * @see #setGson
  * @see #setSupportedMediaTypes
  */
-public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object>
-		implements GenericHttpMessageConverter<Object> {
+public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -70,7 +68,8 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 	 * Construct a new {@code GsonHttpMessageConverter}.
 	 */
 	public GsonHttpMessageConverter() {
-		super(MediaType.APPLICATION_JSON_UTF8, new MediaType("application", "*+json", DEFAULT_CHARSET));
+		super(MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 
@@ -179,10 +178,10 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 	}
 
 	private Charset getCharset(HttpHeaders headers) {
-		if (headers == null || headers.getContentType() == null || headers.getContentType().getCharSet() == null) {
+		if (headers == null || headers.getContentType() == null || headers.getContentType().getCharset() == null) {
 			return DEFAULT_CHARSET;
 		}
-		return headers.getContentType().getCharSet();
+		return headers.getContentType().getCharset();
 	}
 
 	@Override

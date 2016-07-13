@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,14 @@ public class DateFormattingTests {
 	}
 
 	@Test
+	public void testBindDateTimeOverflow() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateAnnotatedPattern", "02/29/09 12:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getErrorCount());
+	}
+
+	@Test
 	public void testBindISODate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDate", "2009-10-31");
@@ -252,7 +260,7 @@ public class DateFormattingTests {
 		@DateTimeFormat(iso=ISO.DATE_TIME)
 		private Date isoDateTime;
 
-		private final List<SimpleDateBean> children = new ArrayList<SimpleDateBean>();
+		private final List<SimpleDateBean> children = new ArrayList<>();
 
 		public Long getMillis() {
 			return millis;

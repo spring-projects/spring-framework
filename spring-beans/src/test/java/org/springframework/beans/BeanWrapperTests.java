@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,14 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		accessor.setExtractOldValueForEditor(true); // This will call the getter
 		accessor.setPropertyValue("name", "tom");
 		assertTrue("Set name to tom", target.getName().equals("tom"));
+	}
+
+	@Test
+	public void aliasedSetterThroughDefaultMethod() {
+		GetterBean target = new GetterBean();
+		BeanWrapper accessor = createAccessor(target);
+		accessor.setPropertyValue("aliasedName", "tom");
+		assertTrue("Set name to tom", target.getAliasedName().equals("tom"));
 	}
 
 	@Test
@@ -194,9 +202,39 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		assertEquals("x", accessor.getPropertyValue("object.name"));
 	}
 
+	@Test
+	public void incompletelyQuotedKeyLeadsToPropertyException() {
+		TestBean target = new TestBean();
+		try {
+			BeanWrapper accessor = createAccessor(target);
+			accessor.setPropertyValue("[']", "foobar");
+			fail("Should throw exception on invalid property");
+		}
+		catch (NotWritablePropertyException ex) {
+			assertNull(ex.getPossibleMatches());
+		}
+	}
+
 
 	@SuppressWarnings("unused")
-	private static class GetterBean {
+	private interface AliasedProperty {
+
+		default void setAliasedName(String name) {
+			setName(name);
+		}
+
+		default String getAliasedName() {
+			return getName();
+		}
+
+		void setName(String name);
+
+		String getName();
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class GetterBean implements AliasedProperty {
 
 		private String name;
 
@@ -211,6 +249,7 @@ public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 			return name;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class IntelliBean {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public final class CustomEditorConfigurerTests {
 	public void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<Class<?>, Class<? extends PropertyEditor>>();
+		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<>();
 		editors.put(Date.class, MyDateEditor.class);
 		cec.setCustomEditors(editors);
 		cec.postProcessBeanFactory(bf);
@@ -99,7 +99,7 @@ public final class CustomEditorConfigurerTests {
 	public void testCustomEditorConfigurerWithRequiredTypeArray() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
-		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<Class<?>, Class<? extends PropertyEditor>>();
+		Map<Class<?>, Class<? extends PropertyEditor>> editors = new HashMap<>();
 		editors.put(String[].class, MyTestEditor.class);
 		cec.setCustomEditors(editors);
 		cec.postProcessBeanFactory(bf);

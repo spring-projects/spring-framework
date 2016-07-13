@@ -18,17 +18,14 @@ package org.springframework.test.web.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.AsyncClientHttpRequest;
 import org.springframework.http.client.AsyncClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
-import org.springframework.test.web.client.response.MockRestResponseCreators;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -36,59 +33,33 @@ import org.springframework.web.client.support.RestGatewaySupport;
 
 /**
  * <strong>Main entry point for client-side REST testing</strong>. Used for tests
- * that involve direct or indirect (through client code) use of the
- * {@link RestTemplate}. Provides a way to set up fine-grained expectations
- * on the requests that will be performed through the {@code RestTemplate} and
- * a way to define the responses to send back removing the need for an
- * actual running server.
+ * that involve direct or indirect use of the {@link RestTemplate}. Provides a
+ * way to set up expected requests that will be performed through the
+ * {@code RestTemplate} as well as mock responses to send back thus removing the
+ * need for an actual server.
  *
- * <p>Below is an example:
+ * <p>Below is an example that assumes static imports from
+ * {@code MockRestRequestMatchers}, {@code MockRestResponseCreators},
+ * and {@code ExpectedCount}:
+ *
  * <pre class="code">
- * import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
- * import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
- * import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
- *
- * ...
- *
  * RestTemplate restTemplate = new RestTemplate()
- * MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
+ * MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
  *
- * mockServer.expect(requestTo("/hotels/42")).andExpect(method(HttpMethod.GET))
+ * server.expect(manyTimes(), requestTo("/hotels/42")).andExpect(method(HttpMethod.GET))
  *     .andRespond(withSuccess("{ \"id\" : \"42\", \"name\" : \"Holiday Inn\"}", MediaType.APPLICATION_JSON));
  *
  * Hotel hotel = restTemplate.getForObject("/hotels/{id}", Hotel.class, 42);
  * &#47;&#47; Use the hotel instance...
  *
- * mockServer.verify();
+ * // Verify all expectations met
+ * server.verify();
  * </pre>
  *
- * <p>To create an instance of this class, use {@link #createServer(RestTemplate)}
- * and provide the {@code RestTemplate} to set up for the mock testing.
- *
- * <p>After that use {@link #expect(RequestMatcher)} and fluent API methods
- * {@link ResponseActions#andExpect(RequestMatcher) andExpect(RequestMatcher)} and
- * {@link ResponseActions#andRespond(ResponseCreator) andRespond(ResponseCreator)}
- * to set up request expectations and responses, most likely relying on the default
- * {@code RequestMatcher} implementations provided in {@link MockRestRequestMatchers}
- * and the {@code ResponseCreator} implementations provided in
- * {@link MockRestResponseCreators} both of which can be statically imported.
- *
- * <p>At the end of the test use {@link #verify()} to ensure all expected
- * requests were actually performed.
- *
- * <p>Note that because of the fluent API offered by this class (and related
- * classes), you can typically use the Code Completion features (i.e.
- * ctrl-space) in your IDE to set up the mocks.
- *
- * <p>An alternative to the above is to use
- * {@link MockMvcClientHttpRequestFactory} which allows executing requests
- * against a {@link org.springframework.test.web.servlet.MockMvc MockMvc}
- * instance. That allows you to process requests using your server-side code
- * but without running a server.
- *
- * <p><strong>Credits:</strong> The client-side REST testing support was
- * inspired by and initially based on similar code in the Spring WS project for
- * client-side tests involving the {@code WebServiceTemplate}.
+ * <p>Note that as an alternative to the above you can also set the
+ * {@link MockMvcClientHttpRequestFactory} on a {@code RestTemplate} which
+ * allows executing requests against an instance of
+ * {@link org.springframework.test.web.servlet.MockMvc MockMvc}.
  *
  * @author Craig Walls
  * @author Rossen Stoyanchev
@@ -96,75 +67,45 @@ import org.springframework.web.client.support.RestGatewaySupport;
  */
 public class MockRestServiceServer {
 
-	private final List<RequestMatcherClientHttpRequest> expectedRequests =
-			new LinkedList<RequestMatcherClientHttpRequest>();
-
-	private final List<RequestMatcherClientHttpRequest> actualRequests =
-			new LinkedList<RequestMatcherClientHttpRequest>();
+	private final RequestExpectationManager expectationManager;
 
 
 	/**
-	 * Private constructor.
-	 * @see #createServer(RestTemplate)
-	 * @see #createServer(RestGatewaySupport)
+	 * Private constructor with {@code RequestExpectationManager}.
+	 * See static builder methods and {@code createServer} shortcut methods.
 	 */
-	private MockRestServiceServer() {
+	private MockRestServiceServer(RequestExpectationManager expectationManager) {
+		this.expectationManager = expectationManager;
 	}
 
 
 	/**
-	 * Create a {@code MockRestServiceServer} and set up the given
-	 * {@code RestTemplate} with a mock {@link ClientHttpRequestFactory}.
-	 * @param restTemplate the RestTemplate to set up for mock testing
-	 * @return the created mock server
+	 * Set up an expectation for a single HTTP request. The returned
+	 * {@link ResponseActions} can be used to set up further expectations as
+	 * well as to define the response.
+	 * <p>This method may be invoked any number times before starting to make
+	 * request through the underlying {@code RestTemplate} in order to set up
+	 * all expected requests.
+	 * @param matcher request matcher
+	 * @return a representation of the expectation
 	 */
-	public static MockRestServiceServer createServer(RestTemplate restTemplate) {
-		Assert.notNull(restTemplate, "'restTemplate' must not be null");
-		MockRestServiceServer mockServer = new MockRestServiceServer();
-		RequestMatcherClientHttpRequestFactory factory = mockServer.new RequestMatcherClientHttpRequestFactory();
-		restTemplate.setRequestFactory(factory);
-		return mockServer;
+	public ResponseActions expect(RequestMatcher matcher) {
+		return expect(ExpectedCount.once(), matcher);
 	}
 
 	/**
-	 * Create a {@code MockRestServiceServer} and set up the given
-	 * {@code AsyRestTemplate} with a mock {@link AsyncClientHttpRequestFactory}.
-	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
-	 * @return the created mock server
+	 * An alternative to {@link #expect(RequestMatcher)} with an indication how
+	 * many times the request is expected to be executed.
+	 * <p>When request expectations have an expected count greater than one, only
+	 * the first execution is expected to match the order of declaration. Subsequent
+	 * request executions may be inserted anywhere thereafter.
+	 * @param count the expected count
+	 * @param matcher request matcher
+	 * @return a representation of the expectation
+	 * @since 4.3
 	 */
-	public static MockRestServiceServer createServer(AsyncRestTemplate asyncRestTemplate) {
-		Assert.notNull(asyncRestTemplate, "'asyncRestTemplate' must not be null");
-		MockRestServiceServer mockServer = new MockRestServiceServer();
-		RequestMatcherClientHttpRequestFactory factory = mockServer.new RequestMatcherClientHttpRequestFactory();
-		asyncRestTemplate.setAsyncRequestFactory(factory);
-		return mockServer;
-	}
-
-	/**
-	 * Create a {@code MockRestServiceServer} and set up the given
-	 * {@code RestGatewaySupport} with a mock {@link ClientHttpRequestFactory}.
-	 * @param restGateway the REST gateway to set up for mock testing
-	 * @return the created mock server
-	 */
-	public static MockRestServiceServer createServer(RestGatewaySupport restGateway) {
-		Assert.notNull(restGateway, "'gatewaySupport' must not be null");
-		return createServer(restGateway.getRestTemplate());
-	}
-
-
-	/**
-	 * Set up a new HTTP request expectation. The returned {@link ResponseActions}
-	 * is used to set up further expectations and to define the response.
-	 * <p>This method may be invoked multiple times before starting the test, i.e. before
-	 * using the {@code RestTemplate}, to set up expectations for multiple requests.
-	 * @param requestMatcher a request expectation, see {@link MockRestRequestMatchers}
-	 * @return used to set up further expectations or to define a response
-	 */
-	public ResponseActions expect(RequestMatcher requestMatcher) {
-		Assert.state(this.actualRequests.isEmpty(), "Can't add more expected requests with test already underway");
-		RequestMatcherClientHttpRequest request = new RequestMatcherClientHttpRequest(requestMatcher);
-		this.expectedRequests.add(request);
-		return request;
+	public ResponseActions expect(ExpectedCount count, RequestMatcher matcher) {
+		return this.expectationManager.expectRequest(count, matcher);
 	}
 
 	/**
@@ -173,66 +114,183 @@ public class MockRestServiceServer {
 	 * @throws AssertionError when some expectations were not met
 	 */
 	public void verify() {
-		if (this.expectedRequests.isEmpty() || this.expectedRequests.equals(this.actualRequests)) {
-			return;
-		}
-		throw new AssertionError(getVerifyMessage());
+		this.expectationManager.verify();
 	}
 
-	private String getVerifyMessage() {
-		StringBuilder sb = new StringBuilder("Further request(s) expected\n");
-		if (this.actualRequests.size() > 0) {
-			sb.append("The following ");
-		}
-		sb.append(this.actualRequests.size()).append(" out of ");
-		sb.append(this.expectedRequests.size()).append(" were executed");
+	/**
+	 * Reset the internal state removing all expectations and recorded requests.
+	 */
+	public void reset() {
+		this.expectationManager.reset();
+	}
 
-		if (this.actualRequests.size() > 0) {
-			sb.append(":\n");
-			for (RequestMatcherClientHttpRequest request : this.actualRequests) {
-				sb.append(request.toString()).append("\n");
+
+	/**
+	 * Return a builder for a {@code MockRestServiceServer} that should be used
+	 * to reply to the given {@code RestTemplate}.
+	 * @since 4.3
+	 */
+	public static MockRestServiceServerBuilder bindTo(RestTemplate restTemplate) {
+		return new DefaultBuilder(restTemplate);
+	}
+
+	/**
+	 * Return a builder for a {@code MockRestServiceServer} that should be used
+	 * to reply to the given {@code AsyncRestTemplate}.
+	 * @since 4.3
+	 */
+	public static MockRestServiceServerBuilder bindTo(AsyncRestTemplate asyncRestTemplate) {
+		return new DefaultBuilder(asyncRestTemplate);
+	}
+
+	/**
+	 * Return a builder for a {@code MockRestServiceServer} that should be used
+	 * to reply to the given {@code RestGatewaySupport}.
+	 * @since 4.3
+	 */
+	public static MockRestServiceServerBuilder bindTo(RestGatewaySupport restGateway) {
+		Assert.notNull(restGateway, "'gatewaySupport' must not be null");
+		return new DefaultBuilder(restGateway.getRestTemplate());
+	}
+
+
+	/**
+	 * A shortcut for {@code bindTo(restTemplate).build()}.
+	 * @param restTemplate the RestTemplate to set up for mock testing
+	 * @return the mock server
+	 */
+	public static MockRestServiceServer createServer(RestTemplate restTemplate) {
+		return bindTo(restTemplate).build();
+	}
+
+	/**
+	 * A shortcut for {@code bindTo(asyncRestTemplate).build()}.
+	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
+	 * @return the created mock server
+	 */
+	public static MockRestServiceServer createServer(AsyncRestTemplate asyncRestTemplate) {
+		return bindTo(asyncRestTemplate).build();
+	}
+
+	/**
+	 * A shortcut for {@code bindTo(restGateway).build()}.
+	 * @param restGateway the REST gateway to set up for mock testing
+	 * @return the created mock server
+	 */
+	public static MockRestServiceServer createServer(RestGatewaySupport restGateway) {
+		return bindTo(restGateway).build();
+	}
+
+
+	/**
+	 * Builder to create a {@code MockRestServiceServer}.
+	 */
+	public interface MockRestServiceServerBuilder {
+
+		/**
+		 * Whether to allow expected requests to be executed in any order not
+		 * necessarily matching the order of declaration.
+		 * <p>When set to "true" this is effectively a shortcut for:<br>
+		 * {@code builder.build(new UnorderedRequestExpectationManager)}.
+		 * @param ignoreExpectOrder whether to ignore the order of expectations
+		 */
+		MockRestServiceServerBuilder ignoreExpectOrder(boolean ignoreExpectOrder);
+
+		/**
+		 * Build the {@code MockRestServiceServer} and set up the underlying
+		 * {@code RestTemplate} or {@code AsyncRestTemplate} with a
+		 * {@link ClientHttpRequestFactory} that creates mock requests.
+		 */
+		MockRestServiceServer build();
+
+		/**
+		 * An overloaded build alternative that accepts a custom
+		 * {@link RequestExpectationManager}.
+		 */
+		MockRestServiceServer build(RequestExpectationManager manager);
+	}
+
+
+	private static class DefaultBuilder implements MockRestServiceServerBuilder {
+
+		private final RestTemplate restTemplate;
+
+		private final AsyncRestTemplate asyncRestTemplate;
+
+		private boolean ignoreExpectOrder;
+
+		public DefaultBuilder(RestTemplate restTemplate) {
+			Assert.notNull(restTemplate, "RestTemplate must not be null");
+			this.restTemplate = restTemplate;
+			this.asyncRestTemplate = null;
+		}
+
+		public DefaultBuilder(AsyncRestTemplate asyncRestTemplate) {
+			Assert.notNull(asyncRestTemplate, "AsyncRestTemplate must not be null");
+			this.restTemplate = null;
+			this.asyncRestTemplate = asyncRestTemplate;
+		}
+
+		@Override
+		public MockRestServiceServerBuilder ignoreExpectOrder(boolean ignoreExpectOrder) {
+			this.ignoreExpectOrder = ignoreExpectOrder;
+			return this;
+		}
+
+		@Override
+		public MockRestServiceServer build() {
+			if (this.ignoreExpectOrder) {
+				return build(new UnorderedRequestExpectationManager());
+			}
+			else {
+				return build(new SimpleRequestExpectationManager());
 			}
 		}
-		return sb.toString();
+
+		@Override
+		public MockRestServiceServer build(RequestExpectationManager manager) {
+			MockRestServiceServer server = new MockRestServiceServer(manager);
+			MockClientHttpRequestFactory factory = server.new MockClientHttpRequestFactory();
+			if (this.restTemplate != null) {
+				this.restTemplate.setRequestFactory(factory);
+			}
+			if (this.asyncRestTemplate != null) {
+				this.asyncRestTemplate.setAsyncRequestFactory(factory);
+			}
+			return server;
+		}
 	}
 
 
 	/**
 	 * Mock ClientHttpRequestFactory that creates requests by iterating
-	 * over the list of expected {@link RequestMatcherClientHttpRequest}'s.
+	 * over the list of expected {@link DefaultRequestExpectation}'s.
 	 */
-	private class RequestMatcherClientHttpRequestFactory
-			implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
-
-		private Iterator<RequestMatcherClientHttpRequest> requestIterator;
+	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
 
 		@Override
-		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
 			return createRequestInternal(uri, httpMethod);
 		}
 
 		@Override
-		public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
+		public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
 			return createRequestInternal(uri, httpMethod);
 		}
 
-		private RequestMatcherClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
+		private MockAsyncClientHttpRequest createRequestInternal(URI uri, HttpMethod method) {
 			Assert.notNull(uri, "'uri' must not be null");
-			Assert.notNull(httpMethod, "'httpMethod' must not be null");
+			Assert.notNull(method, "'httpMethod' must not be null");
 
-			if (this.requestIterator == null) {
-				this.requestIterator = MockRestServiceServer.this.expectedRequests.iterator();
-			}
-			if (!this.requestIterator.hasNext()) {
-				throw new AssertionError("No further requests expected: HTTP " + httpMethod + " " + uri);
-			}
+			return new MockAsyncClientHttpRequest(method, uri) {
 
-			RequestMatcherClientHttpRequest request = this.requestIterator.next();
-			request.setURI(uri);
-			request.setMethod(httpMethod);
-
-			MockRestServiceServer.this.actualRequests.add(request);
-			return request;
+				@Override
+				protected ClientHttpResponse executeInternal() throws IOException {
+					ClientHttpResponse response = expectationManager.validateRequest(this);
+					setResponse(response);
+					return response;
+				}
+			};
 		}
 	}
 
