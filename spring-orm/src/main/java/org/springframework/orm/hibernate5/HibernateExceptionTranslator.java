@@ -16,14 +16,18 @@
 
 package org.springframework.orm.hibernate5;
 
+import javax.persistence.PersistenceException;
+
 import org.hibernate.HibernateException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
+import org.springframework.orm.jpa.EntityManagerFactoryUtils;
 
 /**
  * {@link PersistenceExceptionTranslator} capable of translating {@link HibernateException}
- * instances to Spring's {@link DataAccessException} hierarchy.
+ * instances to Spring's {@link DataAccessException} hierarchy. As of Spring 4.3.2 and
+ * Hibernate 5.2, it also converts standard JPA {@link PersistenceException} instances.
  *
  * <p>Extended by {@link LocalSessionFactoryBean}, so there is no need to declare this
  * translator in addition to a {@code LocalSessionFactoryBean}.
@@ -35,6 +39,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  * @since 4.2
  * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
  * @see SessionFactoryUtils#convertHibernateAccessException(HibernateException)
+ * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible(RuntimeException)
  */
 public class HibernateExceptionTranslator implements PersistenceExceptionTranslator {
 
@@ -43,7 +48,10 @@ public class HibernateExceptionTranslator implements PersistenceExceptionTransla
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);
 		}
-		return null;
+		if (ex instanceof PersistenceException && ex.getCause() instanceof HibernateException) {
+			return convertHibernateAccessException((HibernateException) ex.getCause());
+		}
+		return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
 	}
 
 	/**
