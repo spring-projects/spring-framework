@@ -17,8 +17,6 @@
 package org.springframework.test.web.servlet.samples.standalone;
 
 import java.io.StringWriter;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -200,14 +198,11 @@ public class AsyncTests {
 
 	@RestController
 	@RequestMapping(path = "/{id}", produces = "application/json")
-	@SuppressWarnings("unused")
 	private static class AsyncController {
 
-		private final Collection<DeferredResult<Person>> deferredResults =
-				new CopyOnWriteArrayList<>();
+		private final Collection<DeferredResult<Person>> deferredResults = new CopyOnWriteArrayList<>();
 
-		private final Collection<ListenableFutureTask<Person>> futureTasks =
-				new CopyOnWriteArrayList<>();
+		private final Collection<ListenableFutureTask<Person>> futureTasks = new CopyOnWriteArrayList<>();
 
 
 		@RequestMapping(params = "callable")
