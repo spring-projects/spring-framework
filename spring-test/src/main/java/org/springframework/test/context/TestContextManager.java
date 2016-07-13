@@ -368,6 +368,9 @@ public class TestContextManager {
 				if (afterTestExecutionException == null) {
 					afterTestExecutionException = ex;
 				}
+				else {
+					afterTestExecutionException.addSuppressed(ex);
+				}
 			}
 		}
 		if (afterTestExecutionException != null) {
@@ -423,6 +426,9 @@ public class TestContextManager {
 				if (afterTestMethodException == null) {
 					afterTestMethodException = ex;
 				}
+				else {
+					afterTestMethodException.addSuppressed(ex);
+				}
 			}
 		}
 		if (afterTestMethodException != null) {
@@ -463,6 +469,9 @@ public class TestContextManager {
 				logException(ex, "afterTestClass", testExecutionListener, testClass);
 				if (afterTestClassException == null) {
 					afterTestClassException = ex;
+				}
+				else {
+					afterTestClassException.addSuppressed(ex);
 				}
 			}
 		}
