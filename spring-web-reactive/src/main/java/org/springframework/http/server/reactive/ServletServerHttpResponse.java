@@ -42,17 +42,23 @@ import org.springframework.util.Assert;
  */
 public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 
+	private final Object bodyProcessorMonitor = new Object();
+
+	private volatile ResponseBodyProcessor bodyProcessor;
+
 	private final HttpServletResponse response;
 
-	private ResponseBodyProcessor bodyProcessor;
+	private final int bufferSize;
 
 	public ServletServerHttpResponse(HttpServletResponse response,
 			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
 		super(dataBufferFactory);
 		Assert.notNull(response, "'response' must not be null");
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		Assert.isTrue(bufferSize > 0);
+
 		this.response = response;
-		this.bodyProcessor =
-				new ResponseBodyProcessor(response.getOutputStream(), bufferSize);
+		this.bufferSize = bufferSize;
 	}
 
 	public HttpServletResponse getServletResponse() {
@@ -69,10 +75,34 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		return Mono.from(subscriber -> {
-			publisher.subscribe(this.bodyProcessor);
-			this.bodyProcessor.subscribe(subscriber);
-		});
+		Assert.state(this.bodyProcessor == null,
+				"Response body publisher is already provided");
+		try {
+			synchronized (this.bodyProcessorMonitor) {
+				if (this.bodyProcessor == null) {
+					this.bodyProcessor = createBodyProcessor();
+				}
+				else {
+					throw new IllegalStateException(
+							"Response body publisher is already provided");
+				}
+			}
+			return Mono.from(subscriber -> {
+				publisher.subscribe(this.bodyProcessor);
+				this.bodyProcessor.subscribe(subscriber);
+			});
+		}
+		catch (IOException ex) {
+			return Mono.error(ex);
+		}
+	}
+
+	private ResponseBodyProcessor createBodyProcessor() throws IOException {
+		ResponseBodyProcessor bodyProcessor =
+				new ResponseBodyProcessor(this.response.getOutputStream(),
+						this.bufferSize);
+		bodyProcessor.registerListener();
+		return bodyProcessor;
 	}
 
 	@Override
@@ -108,10 +138,6 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 				this.response.addCookie(cookie);
 			}
 		}
-	}
-
-	public void registerListener() throws IOException {
-		this.bodyProcessor.registerListener();
 	}
 
 	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor {

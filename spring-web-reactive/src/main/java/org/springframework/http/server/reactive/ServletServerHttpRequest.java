@@ -47,18 +47,25 @@ import org.springframework.util.StringUtils;
  */
 public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
+	private final Object bodyPublisherMonitor = new Object();
+
+	private volatile RequestBodyPublisher bodyPublisher;
+
 	private final HttpServletRequest request;
 
-	private final RequestBodyPublisher bodyPublisher;
+	private final DataBufferFactory dataBufferFactory;
+
+	private final int bufferSize;
 
 	public ServletServerHttpRequest(HttpServletRequest request,
-			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
+			DataBufferFactory dataBufferFactory, int bufferSize) {
 		Assert.notNull(request, "'request' must not be null.");
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		Assert.isTrue(bufferSize > 0);
+
 		this.request = request;
-		this.bodyPublisher =
-				new RequestBodyPublisher(request.getInputStream(), dataBufferFactory,
-						bufferSize);
+		this.dataBufferFactory = dataBufferFactory;
+		this.bufferSize = bufferSize;
 	}
 
 	public HttpServletRequest getServletRequest() {
@@ -136,11 +143,29 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return Flux.from(this.bodyPublisher);
+		try {
+			RequestBodyPublisher bodyPublisher = this.bodyPublisher;
+			if (bodyPublisher == null) {
+				synchronized (this.bodyPublisherMonitor) {
+					bodyPublisher = this.bodyPublisher;
+					if (bodyPublisher == null) {
+						this.bodyPublisher = bodyPublisher = createBodyPublisher();
+					}
+				}
+			}
+			return Flux.from(bodyPublisher);
+		}
+		catch (IOException ex) {
+			return Flux.error(ex);
+		}
 	}
 
-	public void registerListener() throws IOException {
-		this.bodyPublisher.registerListener();
+	private RequestBodyPublisher createBodyPublisher() throws IOException {
+		RequestBodyPublisher bodyPublisher =
+				new RequestBodyPublisher(request.getInputStream(), this.dataBufferFactory,
+						this.bufferSize);
+		bodyPublisher.registerListener();
+		return bodyPublisher;
 	}
 
 	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {

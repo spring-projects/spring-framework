@@ -42,7 +42,6 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link ServerHttpResponse} to the Undertow {@link HttpServerExchange}.
- *
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -50,8 +49,11 @@ import org.springframework.util.Assert;
 public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		implements ZeroCopyHttpOutputMessage {
 
-	private final HttpServerExchange exchange;
+	private final Object bodyProcessorMonitor = new Object();
 
+	private volatile ResponseBodyProcessor bodyProcessor;
+
+	private final HttpServerExchange exchange;
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
 			DataBufferFactory dataBufferFactory) {
@@ -60,11 +62,9 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		this.exchange = exchange;
 	}
 
-
 	public HttpServerExchange getUndertowExchange() {
 		return this.exchange;
 	}
-
 
 	@Override
 	protected void writeStatusCode() {
@@ -74,19 +74,36 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		}
 	}
 
-
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		// lazily create Subscriber, since calling
-		// {@link HttpServerExchange#getResponseChannel} as done in the
-		// ResponseBodyProcessor constructor commits the response status and headers
-		return Mono.from(subscriber -> {
-			ResponseBodyProcessor processor = new ResponseBodyProcessor(this.exchange);
-			processor.registerListener();
-			publisher.subscribe(processor);
-			processor.subscribe(subscriber);
-		});
+		Assert.state(this.bodyProcessor == null,
+				"Response body publisher is already provided");
+		try {
+			synchronized (this.bodyProcessorMonitor) {
+				if (this.bodyProcessor == null) {
+					this.bodyProcessor = createBodyProcessor();
+				}
+				else {
+					throw new IllegalStateException(
+							"Response body publisher is already provided");
+				}
+			}
+			return Mono.from(subscriber -> {
+				publisher.subscribe(this.bodyProcessor);
+				this.bodyProcessor.subscribe(subscriber);
+			});
+		}
+		catch (IOException ex) {
+			return Mono.error(ex);
+		}
 	}
+
+	private ResponseBodyProcessor createBodyProcessor() throws IOException {
+		ResponseBodyProcessor bodyProcessor = new ResponseBodyProcessor(this.exchange);
+		bodyProcessor.registerListener();
+		return bodyProcessor;
+	}
+
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
@@ -99,8 +116,8 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 			FileChannel in = new FileInputStream(file).getChannel();
 			long result = responseChannel.transferFrom(in, position, count);
 			if (result < count) {
-				return Mono.error(new IOException("Could only write " + result +
-						" out of " + count + " bytes"));
+				return Mono.error(new IOException(
+						"Could only write " + result + " out of " + count + " bytes"));
 			}
 			else {
 				return Mono.empty();

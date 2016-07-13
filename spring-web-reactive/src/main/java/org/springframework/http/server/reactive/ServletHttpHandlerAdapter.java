@@ -76,12 +76,10 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		ServletServerHttpRequest request =
 				new ServletServerHttpRequest(servletRequest, this.dataBufferFactory,
 						this.bufferSize);
-		request.registerListener();
 
 		ServletServerHttpResponse response =
 				new ServletServerHttpResponse(servletResponse, this.dataBufferFactory,
 						this.bufferSize);
-		response.registerListener();
 
 		HandlerResultSubscriber resultSubscriber =
 				new HandlerResultSubscriber(asyncContext);
