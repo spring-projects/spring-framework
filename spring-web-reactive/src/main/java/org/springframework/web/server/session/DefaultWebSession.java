@@ -34,6 +34,9 @@ import org.springframework.util.Assert;
  */
 public class DefaultWebSession implements ConfigurableWebSession, Serializable {
 
+	private static final long serialVersionUID = -3567697426432961630L;
+
+
 	private final String id;
 
 	private final Map<String, Object> attributes;

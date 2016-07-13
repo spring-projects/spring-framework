@@ -84,6 +84,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 		Flux<DataBuffer> flux = Flux.from(inputStream);
@@ -96,10 +97,8 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 					flatMap(dataBuffer -> {
 						try {
 							InputStream is = dataBuffer.asInputStream();
-							XMLEventReader eventReader =
-									inputFactory.createXMLEventReader(is);
-							return Flux
-									.fromIterable((Iterable<XMLEvent>) () -> eventReader);
+							XMLEventReader eventReader = inputFactory.createXMLEventReader(is);
+							return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader);
 						}
 						catch (XMLStreamException ex) {
 							return Mono.error(ex);

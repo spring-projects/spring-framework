@@ -130,8 +130,9 @@ public abstract class ContentNegotiatingResultHandlerSupport implements Ordered 
 		return (mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes);
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<MediaType> getProducibleTypes(ServerWebExchange exchange, List<MediaType> mediaTypes) {
-		Optional<?> optional = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
+		Optional<Object> optional = exchange.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (optional.isPresent()) {
 			Set<MediaType> set = (Set<MediaType>) optional.get();
 			return new ArrayList<>(set);

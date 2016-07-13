@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("serial")
 public class ResponseStatusException extends NestedRuntimeException {
 
 	private final HttpStatus status;

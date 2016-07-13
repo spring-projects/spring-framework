@@ -25,9 +25,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
-import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.FlushingDataBuffer;
@@ -96,20 +96,7 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 					sb.append(((String)data).replaceAll("\\n", "\ndata:")).append("\n");
 				}
 				else {
-					Optional<Encoder<?>> encoder = dataEncoders
-						.stream()
-						.filter(e -> e.canEncode(ResolvableType.forClass(data.getClass()), mediaType))
-						.findFirst();
-
-					if (encoder.isPresent()) {
-						dataBuffer = ((Encoder<Object>)encoder.get())
-								.encode(Mono.just(data), bufferFactory,
-										ResolvableType.forClass(data.getClass()), mediaType)
-								.concatWith(encodeString("\n", bufferFactory));
-					}
-					else {
-						throw new CodecException("No suitable encoder found!");
-					}
+					dataBuffer = applyEncoder(data, mediaType, bufferFactory);
 				}
 			}
 
@@ -124,6 +111,21 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 			);
 		});
 
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> Flux<DataBuffer> applyEncoder(Object data, MediaType mediaType, DataBufferFactory bufferFactory) {
+		ResolvableType elementType = ResolvableType.forClass(data.getClass());
+		Optional<Encoder<?>> encoder = dataEncoders
+			.stream()
+			.filter(e -> e.canEncode(elementType, mediaType))
+			.findFirst();
+		if (!encoder.isPresent()) {
+			return Flux.error(new CodecException("No suitable encoder found!"));
+		}
+		return ((Encoder<T>) encoder.get())
+				.encode(Mono.just((T) data), bufferFactory, elementType, mediaType)
+				.concatWith(encodeString("\n", bufferFactory));
 	}
 
 	private Mono<DataBuffer> encodeString(String str, DataBufferFactory bufferFactory) {

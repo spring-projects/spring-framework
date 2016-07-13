@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("serial")
 public class MediaTypeNotSupportedStatusException extends ResponseStatusException {
 
 	private final List<MediaType> supportedMediaTypes;

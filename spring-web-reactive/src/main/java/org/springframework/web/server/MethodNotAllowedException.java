@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("serial")
 public class MethodNotAllowedException extends ResponseStatusException {
 
 	private String method;

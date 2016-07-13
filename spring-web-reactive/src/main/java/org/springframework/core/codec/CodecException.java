@@ -23,6 +23,7 @@ import org.springframework.core.NestedRuntimeException;
  *
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("serial")
 public class CodecException extends NestedRuntimeException {
 
 	public CodecException(String msg, Throwable cause) {

@@ -249,12 +249,12 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		return StringUtils.stripFilenameExtension(path);
 	}
 
+	@SuppressWarnings("unchecked")
 	private Object updateModel(Object value, HandlerResult result) {
 		if (value instanceof Model) {
 			result.getModel().addAllAttributes(((Model) value).asMap());
 		}
 		else if (value instanceof Map) {
-			//noinspection unchecked
 			result.getModel().addAllAttributes((Map<String, ?>) value);
 		}
 		else {

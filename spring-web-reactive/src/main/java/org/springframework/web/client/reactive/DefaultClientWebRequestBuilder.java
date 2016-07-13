@@ -59,7 +59,7 @@ public class DefaultClientWebRequestBuilder implements ClientWebRequestBuilder {
 
 	private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
-	private Publisher body;
+	private Publisher<?> body;
 
 	private ResolvableType elementType;
 

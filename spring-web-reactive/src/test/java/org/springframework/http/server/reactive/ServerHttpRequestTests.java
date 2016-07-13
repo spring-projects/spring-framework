@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.junit.Test;
 
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.assertEquals;

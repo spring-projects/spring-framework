@@ -204,6 +204,7 @@ public final class WebClient {
 			}
 		}
 
+		@SuppressWarnings("unchecked")
 		protected Mono<Void> writeRequestBody(Publisher<?> content,
 				ResolvableType requestType, ClientHttpRequest request,
 				List<HttpMessageConverter<?>> messageConverters) {
@@ -215,7 +216,6 @@ public final class WebClient {
 						"Could not encode request body of type '" + contentType
 								+ "' with target type '" + requestType.toString() + "'"));
 			}
-			// noinspection unchecked
 			return converter.get().write((Publisher) content, requestType, contentType, request);
 		}
 

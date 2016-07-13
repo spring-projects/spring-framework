@@ -43,8 +43,8 @@ public class ResponseExtractors {
 	 * Extract the response body and decode it, returning it as a {@code Mono<T>}
 	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Mono<T>> body(ResolvableType bodyType) {
-		// noinspection unchecked
 		return (clientResponse, messageConverters) -> (Mono<T>) clientResponse
 				.flatMap(resp -> decodeResponseBody(resp, bodyType,
 						messageConverters))
@@ -81,6 +81,7 @@ public class ResponseExtractors {
 	 * a single type {@code T}
 	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Mono<ResponseEntity<T>>> response(
 			ResolvableType bodyType) {
 		return (clientResponse, messageConverters) -> clientResponse.then(response -> {
@@ -92,7 +93,6 @@ public class ResponseExtractors {
 					Mono.just(response.getStatusCode()));
 		}).map(tuple -> {
 			Object body = (tuple.getT1() != EMPTY_BODY ? tuple.getT1() : null);
-			// noinspection unchecked
 			return new ResponseEntity<>((T) body, tuple.getT2(), tuple.getT3());
 		});
 	}
@@ -138,6 +138,7 @@ public class ResponseExtractors {
 		return (clientResponse, messageConverters) -> clientResponse.map(resp -> resp.getHeaders());
 	}
 
+	@SuppressWarnings("unchecked")
 	protected static <T> Flux<T> decodeResponseBody(ClientHttpResponse response,
 			ResolvableType responseType,
 			List<HttpMessageConverter<?>> messageConverters) {
@@ -150,7 +151,6 @@ public class ResponseExtractors {
 					"Could not decode response body of type '" + contentType
 							+ "' with target type '" + responseType.toString() + "'"));
 		}
-		// noinspection unchecked
 		return (Flux<T>) converter.get().read(responseType, response);
 	}
 

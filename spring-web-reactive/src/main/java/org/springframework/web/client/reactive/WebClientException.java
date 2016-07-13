@@ -24,6 +24,7 @@ import org.springframework.core.NestedRuntimeException;
  *
  * @author Brian Clozel
  */
+@SuppressWarnings("serial")
 public class WebClientException extends NestedRuntimeException {
 
 	public WebClientException(String msg) {

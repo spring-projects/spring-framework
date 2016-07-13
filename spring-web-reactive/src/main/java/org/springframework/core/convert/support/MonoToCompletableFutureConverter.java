@@ -32,8 +32,8 @@ import org.springframework.core.convert.converter.GenericConverter;
 public class MonoToCompletableFutureConverter implements GenericConverter {
 
 	@Override
-	public Set<ConvertiblePair> getConvertibleTypes() {
-		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>();
+	public Set<GenericConverter.ConvertiblePair> getConvertibleTypes() {
+		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>(2);
 		pairs.add(new GenericConverter.ConvertiblePair(Mono.class, CompletableFuture.class));
 		pairs.add(new GenericConverter.ConvertiblePair(CompletableFuture.class, Mono.class));
 		return pairs;
@@ -45,10 +45,10 @@ public class MonoToCompletableFutureConverter implements GenericConverter {
 			return null;
 		}
 		else if (CompletableFuture.class.isAssignableFrom(sourceType.getType())) {
-			return Mono.fromFuture((CompletableFuture) source);
+			return Mono.fromFuture((CompletableFuture<?>) source);
 		}
 		else if (CompletableFuture.class.isAssignableFrom(targetType.getType())) {
-			return Mono.from((Publisher) source).toFuture();
+			return Mono.from((Publisher<?>) source).toFuture();
 		}
 		return null;
 	}

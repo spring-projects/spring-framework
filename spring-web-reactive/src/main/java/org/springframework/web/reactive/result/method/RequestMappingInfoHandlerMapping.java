@@ -313,7 +313,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		public Set<String> getAllowedMethods() {
 			return this.partialMatches.stream().
 					flatMap(m -> m.getInfo().getMethodsCondition().getMethods().stream()).
-					map(Enum::name).
+					map(requestMethod -> requestMethod.name()).
 					collect(Collectors.toCollection(LinkedHashSet::new));
 		}
 

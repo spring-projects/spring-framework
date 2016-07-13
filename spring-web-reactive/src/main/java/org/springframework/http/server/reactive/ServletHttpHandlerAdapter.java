@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  */
 @WebServlet(asyncSupported = true)
+@SuppressWarnings("serial")
 public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;

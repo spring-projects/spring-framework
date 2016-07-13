@@ -274,5 +274,11 @@ public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 			return false;
 		}
 
+		@Override
+		public int hashCode() {
+			int result = this.foo.hashCode();
+			result = 31 * result + this.bar.hashCode();
+			return result;
+		}
 	}
 }

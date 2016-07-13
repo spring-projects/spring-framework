@@ -34,7 +34,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Brian Clozel
  */
-public class ClientWebRequest {
+public class 	ClientWebRequest {
 
 	protected final HttpMethod httpMethod;
 
@@ -44,7 +44,7 @@ public class ClientWebRequest {
 
 	private MultiValueMap<String, HttpCookie> cookies;
 
-	protected Publisher body;
+	protected Publisher<?> body;
 
 	protected ResolvableType elementType;
 
@@ -78,11 +78,11 @@ public class ClientWebRequest {
 		this.cookies = cookies;
 	}
 
-	public Publisher getBody() {
+	public Publisher<?> getBody() {
 		return body;
 	}
 
-	public void setBody(Publisher body) {
+	public void setBody(Publisher<?> body) {
 		this.body = body;
 	}
 

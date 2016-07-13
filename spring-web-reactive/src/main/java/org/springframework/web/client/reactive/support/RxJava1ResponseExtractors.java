@@ -40,15 +40,15 @@ import rx.Single;
  *
  * @author Brian Clozel
  */
-public class RxJava1ResponseExtractors {
+public class 	RxJava1ResponseExtractors {
 
 	/**
 	 * Extract the response body and decode it, returning it as a {@code Single<T>}
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Single<T>> body(Class<T> sourceClass) {
 
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		//noinspection unchecked
 		return (clientResponse, messageConverters) -> (Single<T>) RxJava1SingleConverter
 				.fromPublisher(clientResponse
 						.flatMap(resp -> decodeResponseBody(resp, resolvableType, messageConverters)).next());
@@ -69,20 +69,19 @@ public class RxJava1ResponseExtractors {
 	 * Extract the full response body as a {@code ResponseEntity}
 	 * with its body decoded as a single type {@code T}
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Single<ResponseEntity<T>>> response(Class<T> sourceClass) {
 
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) -> (Single<ResponseEntity<T>>)
+		return (clientResponse, messageConverters) ->
 				RxJava1SingleConverter.fromPublisher(clientResponse
 						.then(response ->
 								Mono.when(
 										decodeResponseBody(response, resolvableType, messageConverters).next(),
 										Mono.just(response.getHeaders()),
 										Mono.just(response.getStatusCode())))
-						.map(tuple -> {
-							//noinspection unchecked
-							return new ResponseEntity<>((T) tuple.getT1(), tuple.getT2(), tuple.getT3());
-						}));
+						.map(tuple ->
+								new ResponseEntity<>((T) tuple.getT1(), tuple.getT2(), tuple.getT3())));
 	}
 
 	/**
@@ -107,6 +106,7 @@ public class RxJava1ResponseExtractors {
 				.fromPublisher(clientResponse.map(resp -> resp.getHeaders()));
 	}
 
+	@SuppressWarnings("unchecked")
 	protected static <T> Flux<T> decodeResponseBody(ClientHttpResponse response, ResolvableType responseType,
 			List<HttpMessageConverter<?>> messageConverters) {
 
@@ -116,7 +116,6 @@ public class RxJava1ResponseExtractors {
 			return Flux.error(new IllegalStateException("Could not decode response body of type '" + contentType +
 					"' with target type '" + responseType.toString() + "'"));
 		}
-		//noinspection unchecked
 		return (Flux<T>) converter.get().read(responseType, response);
 	}
 
