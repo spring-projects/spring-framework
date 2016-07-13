@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -170,8 +169,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 		// Remove possible duplicates if we loaded default listeners.
 		if (usingDefaults) {
-			Set<Class<? extends TestExecutionListener>> classesSet = new HashSet<>();
-			classesSet.addAll(classesList);
+			Set<Class<? extends TestExecutionListener>> classesSet = new LinkedHashSet<>(classesList);
 			classesList.clear();
 			classesList.addAll(classesSet);
 		}
