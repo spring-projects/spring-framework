@@ -51,20 +51,14 @@ import org.springframework.web.util.WebUtils;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class PathExtensionContentNegotiationStrategy
-		extends AbstractMappingContentNegotiationStrategy {
-
-	private static final Log logger = LogFactory.getLog(PathExtensionContentNegotiationStrategy.class);
+public class PathExtensionContentNegotiationStrategy extends AbstractMappingContentNegotiationStrategy {
 
 	private static final boolean JAF_PRESENT = ClassUtils.isPresent("javax.activation.FileTypeMap",
 			PathExtensionContentNegotiationStrategy.class.getClassLoader());
 
-	private static final UrlPathHelper PATH_HELPER = new UrlPathHelper();
+	private static final Log logger = LogFactory.getLog(PathExtensionContentNegotiationStrategy.class);
 
-	static {
-		PATH_HELPER.setUrlDecode(false);
-	}
-
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private boolean useJaf = true;
 
@@ -72,20 +66,30 @@ public class PathExtensionContentNegotiationStrategy
 
 
 	/**
-	 * Create an instance with the given map of file extensions and media types.
-	 */
-	public PathExtensionContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
-		super(mediaTypes);
-	}
-
-	/**
 	 * Create an instance without any mappings to start with. Mappings may be added
 	 * later on if any extensions are resolved through the Java Activation framework.
 	 */
 	public PathExtensionContentNegotiationStrategy() {
-		super(null);
+		this(null);
 	}
 
+	/**
+	 * Create an instance with the given map of file extensions and media types.
+	 */
+	public PathExtensionContentNegotiationStrategy(Map<String, MediaType> mediaTypes) {
+		super(mediaTypes);
+		this.urlPathHelper.setUrlDecode(false);
+	}
+
+
+	/**
+	 * Configure a {@code UrlPathHelper} to use in {@link #getMediaTypeKey}
+	 * in order to derive the lookup path for a target request URL path.
+	 * @since 4.2.8
+	 */
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
+	}
 
 	/**
 	 * Whether to use the Java Activation Framework to look up file extensions.
@@ -112,7 +116,7 @@ public class PathExtensionContentNegotiationStrategy
 			logger.warn("An HttpServletRequest is required to determine the media type key");
 			return null;
 		}
-		String path = PATH_HELPER.getLookupPathForRequest(request);
+		String path = this.urlPathHelper.getLookupPathForRequest(request);
 		String filename = WebUtils.extractFullFilenameFromUrlPath(path);
 		String extension = StringUtils.getFilenameExtension(filename);
 		return (StringUtils.hasText(extension)) ? extension.toLowerCase(Locale.ENGLISH) : null;

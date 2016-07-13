@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private UrlPathHelper pathHelper = new UrlPathHelper();
+	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -65,15 +65,24 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * {@link #getForRequestUrl(javax.servlet.http.HttpServletRequest, String)}
 	 * in order to derive the lookup path for a target request URL path.
 	 */
-	public void setUrlPathHelper(UrlPathHelper pathHelper) {
-		this.pathHelper = pathHelper;
+	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+		this.urlPathHelper = urlPathHelper;
 	}
 
 	/**
 	 * Return the configured {@code UrlPathHelper}.
+	 * @since 4.2.8
 	 */
+	public UrlPathHelper getUrlPathHelper() {
+		return this.urlPathHelper;
+	}
+
+	/**
+	 * @deprecated as of Spring 4.2.8, in favor of {@link #getUrlPathHelper}
+	 */
+	@Deprecated
 	public UrlPathHelper getPathHelper() {
-		return this.pathHelper;
+		return this.urlPathHelper;
 	}
 
 	/**
@@ -135,6 +144,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		}
 	}
 
+
 	protected void detectResourceHandlers(ApplicationContext appContext) {
 		logger.debug("Looking for resource handler mappings");
 
@@ -158,7 +168,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		}
 	}
 
-
 	/**
 	 * A variation on {@link #getForLookupPath(String)} that accepts a full request
 	 * URL path (i.e. including context and servlet path) and returns the full request
@@ -181,8 +190,9 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	}
 
 	private int getLookupPathIndex(HttpServletRequest request) {
-		String requestUri = getPathHelper().getRequestUri(request);
-		String lookupPath = getPathHelper().getLookupPathForRequest(request);
+		UrlPathHelper pathHelper = getUrlPathHelper();
+		String requestUri = pathHelper.getRequestUri(request);
+		String lookupPath = pathHelper.getLookupPathForRequest(request);
 		return requestUri.indexOf(lookupPath);
 	}
 
