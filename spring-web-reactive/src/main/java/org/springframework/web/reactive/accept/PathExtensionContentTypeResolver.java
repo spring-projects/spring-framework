@@ -22,10 +22,9 @@ import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
-import org.springframework.http.support.MediaTypeUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils2;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -94,8 +93,8 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 	@Override
 	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
 		if (this.useJaf) {
-			Optional<MimeType> mimeType = MimeTypeUtils2.getMimeType("file." + key);
-			MediaType mediaType = mimeType.map(MediaTypeUtils::toMediaType).orElse(null);
+			Optional<MimeType> mimeType = MimeTypeUtils.getMimeType("file." + key);
+			MediaType mediaType = mimeType.map(MediaType::toMediaType).orElse(null);
 			if (mediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 				return mediaType;
 			}
@@ -122,9 +121,7 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 			mediaType = getMediaType(extension);
 		}
 		if (mediaType == null) {
-			mediaType =
-					MimeTypeUtils2.getMimeType(filename).map(MediaTypeUtils::toMediaType)
-							.orElse(null);
+			mediaType = MimeTypeUtils.getMimeType(filename).map(MediaType::toMediaType).orElse(null);
 		}
 		if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 			mediaType = null;

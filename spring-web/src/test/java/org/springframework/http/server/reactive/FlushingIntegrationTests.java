@@ -28,6 +28,8 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.client.reactive.ClientWebRequestBuilders;
+import org.springframework.web.client.reactive.ResponseExtractors;
 import org.springframework.web.client.reactive.WebClient;
 
 /**
@@ -46,8 +48,8 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 	@Test
 	public void testFlushing() throws Exception {
 		Mono<String> result = this.webClient
-				.perform(get("http://localhost:" + port))
-				.extract(bodyStream(String.class))
+				.perform(ClientWebRequestBuilders.get("http://localhost:" + port))
+				.extract(ResponseExtractors.bodyStream(String.class))
 				.takeUntil(s -> {
 					return s.endsWith("data1");
 				})

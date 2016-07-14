@@ -18,6 +18,7 @@ package org.springframework.mock.web.test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
 import org.springframework.util.Assert;
@@ -65,4 +66,18 @@ public class DelegatingServletInputStream extends ServletInputStream {
 		this.sourceStream.close();
 	}
 
+	@Override
+	public boolean isFinished() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean isReady() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setReadListener(ReadListener readListener) {
+		throw new UnsupportedOperationException();
+	}
 }

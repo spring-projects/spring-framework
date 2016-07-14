@@ -30,7 +30,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.util.MimeType;
-import org.springframework.web.reactive.sse.SseEvent;
 
 /**
  * @author Sebastien Deleuze

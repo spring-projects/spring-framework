@@ -33,8 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
-import org.springframework.http.support.MediaTypeUtils;
-import org.springframework.util.MimeTypeUtils2;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -73,8 +72,8 @@ public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Reso
 			if (contentType == null ||
 					!contentType.isConcrete() ||
 					MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
-				contentType = MimeTypeUtils2.getMimeType(resource.getFilename()).
-						map(MediaTypeUtils::toMediaType).
+				contentType = MimeTypeUtils.getMimeType(resource.getFilename()).
+						map(MediaType::toMediaType).
 						orElse(MediaType.APPLICATION_OCTET_STREAM);
 			}
 			headers.setContentType(contentType);

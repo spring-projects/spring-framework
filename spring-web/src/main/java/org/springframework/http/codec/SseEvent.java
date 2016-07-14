@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.sse;
+package org.springframework.http.codec;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.SseEventEncoder;

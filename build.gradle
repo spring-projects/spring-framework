@@ -673,7 +673,7 @@ project("spring-web") {
 		compile(project(":spring-beans"))  // for MultipartFilter
 		compile(project(":spring-context"))
 		compile(project(":spring-core"))
-		provided("javax.servlet:javax.servlet-api:3.0.1")
+		provided "javax.servlet:javax.servlet-api:3.1.0"
 		optional(project(":spring-oxm"))  // for MarshallingHttpMessageConverter
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.el:javax.el-api:2.2.5")
@@ -682,6 +682,16 @@ project("spring-web") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
+		optional("org.reactivestreams:reactive-streams:1.0.0")
+		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
+		optional("io.projectreactor:reactor-netty:${reactorNettyVersion}")
+		optional("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+			exclude group: 'io.reactivex', module: 'rxjava'
+		}
+		optional("io.reactivex:rxjava:${rxJavaVersion}")
+		optional("io.undertow:undertow-core:1.3.20.Final")
+		optional("io.netty:netty-buffer:${nettyVersion}") // Temporarily for JsonObjectDecoder
+		optional("com.fasterxml:aalto-xml:1.0.0")
 		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}")
 		optional("io.netty:netty-all:${nettyVersion}")
@@ -710,6 +720,11 @@ project("spring-web") {
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
+		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
+		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
+		testCompile("com.squareup.okhttp3:mockwebserver:3.0.1")
 	}
 }
 
@@ -817,25 +832,23 @@ project("spring-web-reactive") {
 		compile(project(":spring-web"))
 		compile "org.reactivestreams:reactive-streams:1.0.0"
 		compile "io.projectreactor:reactor-core:${reactorCoreVersion}"
-		compile "io.netty:netty-buffer:${nettyVersion}" // Temporarily for JsonObjectDecoder
 		optional(project(":spring-context-support"))  // for FreeMarker support
 		provided "javax.servlet:javax.servlet-api:3.1.0"
-		optional "org.apache.tomcat:tomcat-util:${tomcatVersion}"
-		optional "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
-		optional "org.eclipse.jetty:jetty-server:${jettyVersion}"
-		optional "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
-		optional 'io.undertow:undertow-core:1.3.20.Final'
-		optional "io.projectreactor:reactor-netty:${reactorNettyVersion}"
-		optional "io.reactivex:rxjava:${rxJavaVersion}"
-		optional("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
-			exclude group: 'io.reactivex', module: 'rxjava'
-		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		optional("com.fasterxml:aalto-xml:1.0.0")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional "org.apache.httpcomponents:httpclient:4.5.1" // Needed to run Javadoc without error
+		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
+		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
+		testCompile("io.projectreactor:reactor-netty:${reactorNettyVersion}")
+		testCompile("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+			exclude group: 'io.reactivex', module: 'rxjava'
+		}
+		testCompile("io.undertow:undertow-core:1.3.20.Final")
+		testCompile("io.reactivex:rxjava:${rxJavaVersion}")
+		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testCompile "com.squareup.okhttp3:mockwebserver:3.0.1"
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("xmlunit:xmlunit:1.6")
 	}

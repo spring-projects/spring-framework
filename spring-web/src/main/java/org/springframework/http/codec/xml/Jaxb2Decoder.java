@@ -35,13 +35,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.AbstractDecoder;
+import org.springframework.core.codec.CodecException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.xml.StaxUtils2;
+import org.springframework.util.xml.StaxUtils;
 
 /**
  * Decode from a bytes stream of XML elements to a stream of {@code Object} (POJO).
@@ -198,7 +198,7 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 	private Object unmarshal(List<XMLEvent> events, Class<?> outputClass) {
 		try {
 			Unmarshaller unmarshaller = this.jaxbContexts.createUnmarshaller(outputClass);
-			XMLEventReader eventReader = StaxUtils2.createXMLEventReader(events);
+			XMLEventReader eventReader = StaxUtils.createXMLEventReader(events);
 			if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
 				return unmarshaller.unmarshal(eventReader);
 			}

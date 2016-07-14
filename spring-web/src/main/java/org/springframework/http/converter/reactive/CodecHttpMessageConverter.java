@@ -32,7 +32,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ReactiveHttpOutputMessage;
-import org.springframework.http.support.MediaTypeUtils;
 
 /**
  * Implementation of the {@link HttpMessageConverter} interface that delegates to
@@ -84,10 +83,10 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		this.decoder = decoder;
 
 		this.readableMediaTypes = decoder != null ?
-				MediaTypeUtils.toMediaTypes(decoder.getDecodableMimeTypes()) :
+				MediaType.toMediaTypes(decoder.getDecodableMimeTypes()) :
 				Collections.emptyList();
 		this.writableMediaTypes = encoder != null ?
-				MediaTypeUtils.toMediaTypes(encoder.getEncodableMimeTypes()) :
+				MediaType.toMediaTypes(encoder.getEncodableMimeTypes()) :
 				Collections.emptyList();
 	}
 

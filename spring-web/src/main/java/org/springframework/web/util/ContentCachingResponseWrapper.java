@@ -21,8 +21,8 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
@@ -43,7 +43,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	private final FastByteArrayOutputStream content = new FastByteArrayOutputStream(1024);
 
-	private final ServletOutputStream outputStream = new ResponseServletOutputStream();
+	private ServletOutputStream outputStream;
 
 	private PrintWriter writer;
 
@@ -109,6 +109,9 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public ServletOutputStream getOutputStream() throws IOException {
+		if (this.outputStream == null) {
+			this.outputStream = new ResponseServletOutputStream(getResponse().getOutputStream());
+		}
 		return this.outputStream;
 	}
 
@@ -225,8 +228,15 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		}
 	}
 
+	// TODO: this is no longer usable in Servlet 3.0 environment
 
 	private class ResponseServletOutputStream extends ServletOutputStream {
+
+		private final ServletOutputStream os;
+
+		public ResponseServletOutputStream(ServletOutputStream os) {
+			this.os = os;
+		}
 
 		@Override
 		public void write(int b) throws IOException {
@@ -236,6 +246,16 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		@Override
 		public void write(byte[] b, int off, int len) throws IOException {
 			content.write(b, off, len);
+		}
+
+		@Override
+		public boolean isReady() {
+			return this.os.isReady();
+		}
+
+		@Override
+		public void setWriteListener(WriteListener writeListener) {
+			this.os.setWriteListener(writeListener);
 		}
 	}
 

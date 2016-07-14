@@ -51,6 +51,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import org.springframework.http.MediaType;
@@ -1218,6 +1219,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			result.addAll(list);
 		}
 		return result;
+	}
+
+	@Override
+	public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+		throw new UnsupportedOperationException();
 	}
 
 }

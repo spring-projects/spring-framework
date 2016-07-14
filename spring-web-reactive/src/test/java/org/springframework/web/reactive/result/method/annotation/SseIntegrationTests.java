@@ -52,7 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.WebClient;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
-import org.springframework.web.reactive.sse.SseEvent;
+import org.springframework.http.codec.SseEvent;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**

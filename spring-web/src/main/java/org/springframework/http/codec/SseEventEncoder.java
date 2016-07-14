@@ -34,7 +34,6 @@ import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-import org.springframework.web.reactive.sse.SseEvent;
 
 /**
  * An encoder for {@link SseEvent}s that also supports any other kind of {@link Object}
