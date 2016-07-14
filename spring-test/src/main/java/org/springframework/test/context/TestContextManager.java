@@ -335,9 +335,11 @@ public class TestContextManager {
 	 * {@code testInstance}, {@code testMethod}, and {@code exception}.
 	 * <p>Each registered {@link TestExecutionListener} will be given a chance
 	 * to perform its post-processing. If a listener throws an exception, the
-	 * remaining registered listeners will still be called, but the first
-	 * exception thrown will be tracked and rethrown after all listeners have
-	 * executed. Note that registered listeners will be executed in the opposite
+	 * remaining registered listeners will still be called. After all listeners
+	 * have executed, the first caught exception will be rethrown with any
+	 * subsequent exceptions {@linkplain Throwable#addSuppressed suppressed} in
+	 * the first exception.
+	 * <p>Note that registered listeners will be executed in the opposite
 	 * order in which they were registered.
 	 * @param testInstance the current test instance (never {@code null})
 	 * @param testMethod the test method which has just been executed on the
@@ -351,6 +353,7 @@ public class TestContextManager {
 	 * @see #afterTestMethod
 	 * @see #beforeTestExecution
 	 * @see #getTestExecutionListeners()
+	 * @see Throwable#addSuppressed(Throwable)
 	 */
 	public void afterTestExecution(Object testInstance, Method testMethod, Throwable exception) throws Exception {
 		String callbackName = "afterTestExecution";
@@ -394,10 +397,11 @@ public class TestContextManager {
 	 * {@code testInstance}, {@code testMethod}, and {@code exception}.
 	 * <p>Each registered {@link TestExecutionListener} will be given a chance
 	 * to perform its post-processing. If a listener throws an exception, the
-	 * remaining registered listeners will still be called, but the first
-	 * exception thrown will be tracked and rethrown after all listeners have
-	 * executed. Note that registered listeners will be executed in the opposite
-	 * order in which they were registered.
+	 * remaining registered listeners will still be called. After all listeners
+	 * have executed, the first caught exception will be rethrown with any
+	 * subsequent exceptions {@linkplain Throwable#addSuppressed suppressed} in
+	 * the first exception.
+	 * <p>Note that registered listeners will be executed in the opposite
 	 * @param testInstance the current test instance (never {@code null})
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
@@ -409,6 +413,7 @@ public class TestContextManager {
 	 * @see #beforeTestExecution
 	 * @see #afterTestExecution
 	 * @see #getTestExecutionListeners()
+	 * @see Throwable#addSuppressed(Throwable)
 	 */
 	public void afterTestMethod(Object testInstance, Method testMethod, Throwable exception) throws Exception {
 		String callbackName = "afterTestMethod";
@@ -441,15 +446,17 @@ public class TestContextManager {
 	 * tests within the class. Should be called after any framework-specific
 	 * <em>after class methods</em> (e.g., methods annotated with JUnit 4's
 	 * {@link org.junit.AfterClass @AfterClass}).
-	 * <p>Each registered {@link TestExecutionListener} will be given a chance to
-	 * post-process the test class. If a listener throws an exception, the
-	 * remaining registered listeners will still be called, but the first
-	 * exception thrown will be tracked and rethrown after all listeners have
-	 * executed. Note that registered listeners will be executed in the opposite
-	 * order in which they were registered.
+	 * <p>Each registered {@link TestExecutionListener} will be given a chance
+	 * to perform its post-processing. If a listener throws an exception, the
+	 * remaining registered listeners will still be called. After all listeners
+	 * have executed, the first caught exception will be rethrown with any
+	 * subsequent exceptions {@linkplain Throwable#addSuppressed suppressed} in
+	 * the first exception.
+	 * <p>Note that registered listeners will be executed in the opposite
 	 * @throws Exception if a registered TestExecutionListener throws an exception
 	 * @since 3.0
 	 * @see #getTestExecutionListeners()
+	 * @see Throwable#addSuppressed(Throwable)
 	 */
 	public void afterTestClass() throws Exception {
 		Class<?> testClass = getTestContext().getTestClass();
