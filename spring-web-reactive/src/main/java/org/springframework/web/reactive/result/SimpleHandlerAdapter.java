@@ -33,6 +33,7 @@ import org.springframework.web.server.WebHandler;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 public class SimpleHandlerAdapter implements HandlerAdapter {
 

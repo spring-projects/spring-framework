@@ -25,6 +25,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Handle {@link ResponseStatusException} by setting the response status.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 

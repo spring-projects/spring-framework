@@ -74,6 +74,7 @@ import reactor.core.publisher.Mono;
  * </ul>
  *
  * @author Brian Clozel
+ * @since 5.0
  * @see ClientWebRequestBuilders
  * @see ResponseExtractors
  */

@@ -42,6 +42,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 

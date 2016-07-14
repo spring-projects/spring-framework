@@ -27,6 +27,7 @@ import org.springframework.web.server.WebSession;
  * for example by implementations of {@link WebSessionManager}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface ConfigurableWebSession extends WebSession {
 

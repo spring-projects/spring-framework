@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
+ * @since 5.0
  */
 public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 

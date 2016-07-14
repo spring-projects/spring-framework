@@ -49,9 +49,11 @@ import org.springframework.web.server.ServerWebExchange;
  * <p>For each registered handler method, a unique mapping is maintained with
  * subclasses defining the details of the mapping type {@code <T>}.
  *
- * @author Rossen Stoyanchev
  * @param <T> The mapping for a {@link HandlerMethod} containing the conditions
  * needed to match the handler method to incoming request.
+ *
+ * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMapping implements InitializingBean {
 

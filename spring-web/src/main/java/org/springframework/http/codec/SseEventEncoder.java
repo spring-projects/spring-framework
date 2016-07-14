@@ -39,6 +39,7 @@ import org.springframework.util.MimeType;
  * An encoder for {@link SseEvent}s that also supports any other kind of {@link Object}
  * (in that case, the object will be the data of the {@link SseEvent}).
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 public class SseEventEncoder extends AbstractEncoder<Object> {
 

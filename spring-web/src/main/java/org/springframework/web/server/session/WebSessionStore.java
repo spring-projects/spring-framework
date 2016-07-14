@@ -23,7 +23,7 @@ import org.springframework.web.server.WebSession;
  * Strategy for {@link WebSession} persistence.
  *
  * @author Rossen Stoyanchev
- * @since 4.3
+ * @since 5.0
  */
 public interface WebSessionStore {
 

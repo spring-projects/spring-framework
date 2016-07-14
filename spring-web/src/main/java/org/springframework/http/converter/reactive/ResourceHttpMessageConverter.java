@@ -41,6 +41,7 @@ import org.springframework.util.ResourceUtils;
  * {@link Resource Resources} and supports byte range requests.
  **
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Resource> {
 

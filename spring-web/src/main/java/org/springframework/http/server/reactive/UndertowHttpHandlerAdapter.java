@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandler {
 

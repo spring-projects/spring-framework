@@ -34,6 +34,7 @@ import org.springframework.web.server.ServerWebExchange;
  * against a set of {@link RequestMethod}s.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public final class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
 

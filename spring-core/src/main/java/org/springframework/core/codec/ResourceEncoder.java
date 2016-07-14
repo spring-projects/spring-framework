@@ -34,6 +34,7 @@ import org.springframework.util.StreamUtils;
 /**
  * An encoder for {@link Resource}s.
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 

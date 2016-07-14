@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
  * keys (e.g. file extension, query parameter) and media types.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface MappingContentTypeResolver extends RequestedContentTypeResolver {
 

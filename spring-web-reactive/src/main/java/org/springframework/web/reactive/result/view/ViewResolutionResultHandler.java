@@ -71,6 +71,7 @@ import org.springframework.web.util.HttpRequestPathHelper;
  * based on annotations (e.g. for {@code @ResponseBody}).
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ViewResolutionResultHandler extends ContentNegotiatingResultHandlerSupport
 		implements HandlerResultHandler, Ordered {

@@ -29,6 +29,7 @@ import org.springframework.web.server.ServerWebExchange;
  * a set parameter expressions with syntax defined in {@link RequestMapping#params()}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public final class ParamsRequestCondition extends AbstractRequestCondition<ParamsRequestCondition> {
 

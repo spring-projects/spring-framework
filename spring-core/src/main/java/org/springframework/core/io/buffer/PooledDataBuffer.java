@@ -21,6 +21,7 @@ package org.springframework.core.io.buffer;
  * Introduces methods for reference counting.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public interface PooledDataBuffer extends DataBuffer {
 

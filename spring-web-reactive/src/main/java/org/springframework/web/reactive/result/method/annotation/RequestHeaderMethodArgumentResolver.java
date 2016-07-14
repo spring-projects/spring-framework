@@ -41,6 +41,7 @@ import org.springframework.web.server.ServerWebInputException;
  * request header values that don't yet match the method parameter type.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  * @see RequestHeaderMapMethodArgumentResolver
  */
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {

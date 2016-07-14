@@ -31,6 +31,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
  * Strategy interface that specifies a converter that can convert from and to HTTP
  * requests and responses.
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public interface HttpMessageConverter<T> {
 

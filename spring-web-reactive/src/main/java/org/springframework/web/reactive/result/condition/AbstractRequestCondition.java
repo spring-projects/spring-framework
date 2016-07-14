@@ -24,6 +24,7 @@ import java.util.Iterator;
  * {@link #equals(Object)}, {@link #hashCode()}, and {@link #toString()}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>>
 		implements RequestCondition<T> {

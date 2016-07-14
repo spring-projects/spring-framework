@@ -26,6 +26,7 @@ import org.springframework.web.server.ServerWebExchange;
  * A {@link RequestedContentTypeResolver} that resolves to a fixed list of media types.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class FixedContentTypeResolver implements RequestedContentTypeResolver {
 

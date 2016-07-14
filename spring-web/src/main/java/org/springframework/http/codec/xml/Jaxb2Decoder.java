@@ -48,6 +48,7 @@ import org.springframework.util.xml.StaxUtils;
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @since 5.0
  * @see Jaxb2Encoder
  */
 public class Jaxb2Decoder extends AbstractDecoder<Object> {

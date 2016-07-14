@@ -44,6 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
  * path pattern that matches the current request path.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 

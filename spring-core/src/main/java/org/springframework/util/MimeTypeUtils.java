@@ -327,6 +327,7 @@ public abstract class MimeTypeUtils {
 	 * Framework.
 	 * @param filename the filename whose mime type is to be found
 	 * @return the mime type, if any
+	 * @since 5.0
 	 */
 	public static Optional<MimeType> getMimeType(String filename) {
 		if (filename != null) {

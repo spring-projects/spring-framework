@@ -22,6 +22,7 @@ import org.springframework.web.util.HttpRequestPathHelper;
  * Assist with configuring {@code HandlerMapping}'s with path matching options.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class PathMatchConfigurer {
 

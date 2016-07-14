@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * Base class for {@code ViewResolver} implementations with shared properties.
  *
  * @author Rossen Stoyanchev
- * @since 4.3
+ * @since 5.0
  */
 public abstract class ViewResolverSupport implements ApplicationContextAware, Ordered {
 

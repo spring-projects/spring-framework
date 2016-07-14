@@ -53,6 +53,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Supports the invocation of {@code @RequestMapping} methods.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactoryAware, InitializingBean {
 

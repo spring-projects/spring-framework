@@ -26,6 +26,7 @@ import org.springframework.web.server.ServerWebExchange;
  * client through the response.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  * @see CookieWebSessionIdResolver
  */
 public interface WebSessionIdResolver {

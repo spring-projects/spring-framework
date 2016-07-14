@@ -36,6 +36,7 @@ import org.springframework.web.server.ServerWebExchange;
  * HandlerResultHandler} implementations that perform content negotiation.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class ContentNegotiatingResultHandlerSupport implements Ordered {
 

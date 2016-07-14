@@ -37,6 +37,7 @@ import org.springframework.web.server.session.WebSessionManager;
  * then invokes the target {@code WebHandler}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
 

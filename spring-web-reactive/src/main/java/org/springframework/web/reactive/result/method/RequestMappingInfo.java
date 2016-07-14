@@ -47,6 +47,7 @@ import org.springframework.web.util.HttpRequestPathHelper;
  * </ol>
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public final class RequestMappingInfo implements RequestCondition<RequestMappingInfo> {
 

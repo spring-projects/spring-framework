@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
  * {@link Mono} API.
  *
  * @author Brian Clozel
+ * @since 5.0
  */
 public class ResponseExtractors {
 

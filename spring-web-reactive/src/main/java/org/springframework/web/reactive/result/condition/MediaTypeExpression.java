@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
  * "produces" conditions.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface MediaTypeExpression {
 

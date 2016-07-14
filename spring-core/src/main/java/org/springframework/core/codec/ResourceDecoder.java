@@ -35,6 +35,7 @@ import org.springframework.util.MimeTypeUtils;
  * A decoder for {@link Resource}s.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class ResourceDecoder extends AbstractDecoder<Resource> {
 

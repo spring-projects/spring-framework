@@ -40,6 +40,7 @@ import org.springframework.web.util.WebUtils;
  * the {@link #setUseJaf(boolean)} property may be set to false.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class PathExtensionContentTypeResolver extends AbstractMappingContentTypeResolver {
 

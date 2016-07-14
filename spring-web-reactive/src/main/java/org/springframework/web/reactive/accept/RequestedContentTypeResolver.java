@@ -25,6 +25,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Strategy for resolving the requested media types for a {@code ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface RequestedContentTypeResolver {
 

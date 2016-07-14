@@ -32,6 +32,7 @@ import org.springframework.web.server.session.WebSessionManager;
  * Default implementation of {@link ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class DefaultServerWebExchange implements ServerWebExchange {
 

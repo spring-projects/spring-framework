@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 
 /**
  * @author Arjen Poutsma
+ * @since 5.0
  */
 final class JaxbContextContainer {
 

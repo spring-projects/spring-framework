@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
  * Exception for errors that fit response status 416 (unsupported media type).
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 @SuppressWarnings("serial")
 public class UnsupportedMediaTypeStatusException extends ResponseStatusException {

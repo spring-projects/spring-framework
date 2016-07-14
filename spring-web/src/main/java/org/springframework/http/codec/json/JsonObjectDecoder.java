@@ -45,6 +45,7 @@ import org.springframework.util.MimeType;
  * Based on  <a href="https://github.com/netty/netty/blob/master/codec/src/main/java/io/netty/handler/codec/json/JsonObjectDecoder.java">Netty JsonObjectDecoder</a>
  *
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 

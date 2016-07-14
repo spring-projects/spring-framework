@@ -25,6 +25,7 @@ import org.springframework.web.server.ServerWebExchange;
  * {@link WebHandler} that decorates and delegates to another.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class WebHandlerDecorator implements WebHandler {
 

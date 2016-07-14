@@ -41,6 +41,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Regardless of which syntax is used, the semantics are the same.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 

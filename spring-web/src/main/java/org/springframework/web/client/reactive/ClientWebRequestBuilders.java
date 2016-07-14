@@ -23,6 +23,7 @@ import org.springframework.http.HttpMethod;
  * Static factory methods for {@link DefaultClientWebRequestBuilder ClientWebRequestBuilders}
  *
  * @author Brian Clozel
+ * @since 5.0
  */
 public abstract class ClientWebRequestBuilders {
 

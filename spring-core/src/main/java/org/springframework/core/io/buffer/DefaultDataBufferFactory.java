@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  * heap-based or direct buffers are to be preferred.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class DefaultDataBufferFactory implements DataBufferFactory {
 

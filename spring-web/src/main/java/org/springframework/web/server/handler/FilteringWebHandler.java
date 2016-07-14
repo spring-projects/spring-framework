@@ -31,6 +31,7 @@ import org.springframework.web.server.ServerWebExchange;
  * to the target {@link WebHandler}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class FilteringWebHandler extends WebHandlerDecorator {
 

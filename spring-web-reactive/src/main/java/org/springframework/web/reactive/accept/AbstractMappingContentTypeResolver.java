@@ -39,6 +39,7 @@ import org.springframework.web.server.ServerWebExchange;
  * extension, query parameter, etc) for a given exchange.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractMappingContentTypeResolver implements MappingContentTypeResolver {
 

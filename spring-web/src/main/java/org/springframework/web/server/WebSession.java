@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
  * A session may also be created explicitly via {@link #start()}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface WebSession {
 

@@ -40,6 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  * A {@link View} that delegates to an {@link HttpMessageConverter}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class HttpMessageConverterView implements View {
 

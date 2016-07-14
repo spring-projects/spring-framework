@@ -35,6 +35,7 @@ import org.springframework.web.server.ServerWebExchange;
  * {@code MappingContentTypeResolver}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class CompositeContentTypeResolver implements MappingContentTypeResolver {
 

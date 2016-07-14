@@ -48,6 +48,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Stephane Maldini
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class ResponseBodyResultHandler extends AbstractMessageConverterResultHandler
 		implements HandlerResultHandler {

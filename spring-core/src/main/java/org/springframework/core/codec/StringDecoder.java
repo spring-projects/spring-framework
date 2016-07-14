@@ -44,6 +44,7 @@ import org.springframework.util.MimeTypeUtils;
  * @author Brian Clozel
  * @author Arjen Poutsma
  * @author Mark Paluch
+ * @since 5.0
  * @see StringEncoder
  */
 public class StringDecoder extends AbstractDecoder<String> {

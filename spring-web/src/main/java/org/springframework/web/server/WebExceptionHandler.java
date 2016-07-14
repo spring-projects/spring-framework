@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
  * Contract for handling exceptions during web server exchange processing.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface WebExceptionHandler {
 

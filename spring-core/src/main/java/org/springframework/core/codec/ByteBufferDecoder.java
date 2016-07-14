@@ -30,6 +30,7 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 

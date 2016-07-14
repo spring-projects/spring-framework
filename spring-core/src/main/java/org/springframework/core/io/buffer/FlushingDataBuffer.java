@@ -26,6 +26,7 @@ import java.util.function.IntPredicate;
  * previously buffered data should be flushed.
  *
  * @author Sebastien Deleuze
+ * @since 5.0
  * @see FlushingDataBuffer#INSTANCE
  */
 public class FlushingDataBuffer implements DataBuffer {

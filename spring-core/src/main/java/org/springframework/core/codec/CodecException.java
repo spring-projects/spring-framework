@@ -22,6 +22,7 @@ import org.springframework.core.NestedRuntimeException;
  * Codec related exception, usually used as a wrapper for a cause exception.
  *
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 @SuppressWarnings("serial")
 public class CodecException extends NestedRuntimeException {

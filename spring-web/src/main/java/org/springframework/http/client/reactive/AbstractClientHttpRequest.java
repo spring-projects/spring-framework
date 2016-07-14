@@ -35,6 +35,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @since 5.0
  */
 public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 

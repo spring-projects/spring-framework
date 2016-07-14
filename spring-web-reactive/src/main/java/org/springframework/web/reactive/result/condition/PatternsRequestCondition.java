@@ -38,6 +38,7 @@ import org.springframework.web.util.HttpRequestPathHelper;
  * against a set of URL path patterns.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public final class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
 

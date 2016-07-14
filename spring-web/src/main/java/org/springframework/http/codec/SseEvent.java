@@ -26,6 +26,7 @@ import org.springframework.http.codec.SseEventEncoder;
  * {@code SseEmitter} type. It allows to send Server-Sent Events in a reactive way.
  *
  * @author Sebastien Deleuze
+ * @since 5.0
  * @see SseEventEncoder
  * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
  */

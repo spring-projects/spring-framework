@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  * Implementation of {@code XMLEventReader} based on a list of {@link XMLEvent}s.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 class ListBasedXMLEventReader extends AbstractXMLEventReader {
 

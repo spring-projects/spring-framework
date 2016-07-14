@@ -40,6 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  * to the response with {@link HttpMessageConverter}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractMessageConverterResultHandler extends ContentNegotiatingResultHandlerSupport {
 

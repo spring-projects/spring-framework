@@ -41,6 +41,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 

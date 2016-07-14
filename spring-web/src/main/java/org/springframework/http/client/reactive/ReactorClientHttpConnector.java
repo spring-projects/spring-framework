@@ -27,6 +27,7 @@ import reactor.core.publisher.Mono;
  * Reactor-Netty implementation of {@link ClientHttpConnector}
  *
  * @author Brian Clozel
+ * @since 5.0
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
 

@@ -40,6 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
  * request parameters have multiple values.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  * @see RequestParamMethodArgumentResolver
  */
 public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgumentResolver {

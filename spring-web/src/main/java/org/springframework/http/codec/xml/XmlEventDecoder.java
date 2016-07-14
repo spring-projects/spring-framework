@@ -69,6 +69,7 @@ import org.springframework.util.MimeTypeUtils;
  * decoders who are.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 

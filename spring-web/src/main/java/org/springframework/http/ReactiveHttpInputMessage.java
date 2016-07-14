@@ -28,6 +28,7 @@ import org.springframework.core.io.buffer.DataBuffer;
  * on the client-side.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public interface ReactiveHttpInputMessage extends HttpMessage {
 

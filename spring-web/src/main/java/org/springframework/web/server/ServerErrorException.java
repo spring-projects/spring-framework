@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
  * an optional {@link MethodParameter} if related to the error).
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 @SuppressWarnings("serial")
 public class ServerErrorException extends ResponseStatusException {

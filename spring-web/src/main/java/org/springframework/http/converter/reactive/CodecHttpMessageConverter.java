@@ -40,6 +40,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 

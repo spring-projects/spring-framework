@@ -71,6 +71,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
  * <p>Import directly or extend and override protected methods to customize.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 @Configuration @SuppressWarnings("unused")
 public class WebReactiveConfiguration implements ApplicationContextAware {

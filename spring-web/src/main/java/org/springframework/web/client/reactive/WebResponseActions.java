@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
  * {@link WebClient} request.
  *
  * @author Brian Clozel
+ * @since 5.0
  */
 public interface WebResponseActions {
 

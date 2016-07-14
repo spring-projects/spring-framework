@@ -42,6 +42,7 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @since 5.0
  * @see JacksonJsonDecoder
  */
 public class JacksonJsonEncoder extends AbstractEncoder<Object> {

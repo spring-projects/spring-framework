@@ -27,6 +27,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Resolver for the {@link Model} controller method argument.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ModelArgumentResolver implements HandlerMethodArgumentResolver {
 

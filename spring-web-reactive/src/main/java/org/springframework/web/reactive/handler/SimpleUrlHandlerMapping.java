@@ -49,6 +49,7 @@ import org.springframework.util.CollectionUtils;
  * {@link org.springframework.util.AntPathMatcher AntPathMatcher} javadoc.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 

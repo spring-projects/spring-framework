@@ -21,6 +21,7 @@ package org.springframework.web.reactive.result.condition;
  * parameters and request header conditions in {@code @RequestMapping}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface NameValueExpression<T> {
 

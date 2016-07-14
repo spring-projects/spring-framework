@@ -31,6 +31,7 @@ import org.springframework.http.converter.reactive.HttpMessageConverter;
  * <p>See static factory methods in {@link ResponseExtractors}.
  *
  * @author Brian Clozel
+ * @since 5.0
  */
 public interface ResponseExtractor<T> {
 

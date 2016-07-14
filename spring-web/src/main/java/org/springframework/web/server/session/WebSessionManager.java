@@ -30,6 +30,7 @@ import org.springframework.web.server.WebSession;
  * underlying concerns related to the management of web sessions.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  * @see WebSessionIdResolver
  * @see WebSessionStore
  */

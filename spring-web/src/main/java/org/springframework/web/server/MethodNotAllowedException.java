@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  * Exception for errors that fit response status 405 (method not allowed).
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 @SuppressWarnings("serial")
 public class MethodNotAllowedException extends ResponseStatusException {

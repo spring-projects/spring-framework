@@ -41,6 +41,7 @@ import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewRes
  * JSON, XML, etc.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ViewResolverRegistry {
 

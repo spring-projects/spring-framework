@@ -29,8 +29,9 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * A {@link RequestedContentTypeResolver} that extracts the media type lookup key from a
  * known query parameter named "format" by default.
- *s
+ *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ParameterContentTypeResolver extends AbstractMappingContentTypeResolver {
 

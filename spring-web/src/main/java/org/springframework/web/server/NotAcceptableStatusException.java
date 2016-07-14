@@ -25,6 +25,7 @@ import org.springframework.http.MediaType;
  * Exception for errors that fit response status 405 (not acceptable).
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 @SuppressWarnings("serial")
 public class NotAcceptableStatusException extends ResponseStatusException {

@@ -22,6 +22,7 @@ import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
  * Assist with configuring properties of a {@link UrlBasedViewResolver}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class UrlBasedViewResolverRegistration {
 

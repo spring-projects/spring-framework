@@ -36,6 +36,7 @@ import org.springframework.web.server.ServerWebExchange;
  * provide {@code null} conditions or no conditions at all to the constructor.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class CompositeRequestCondition extends AbstractRequestCondition<CompositeRequestCondition> {
 

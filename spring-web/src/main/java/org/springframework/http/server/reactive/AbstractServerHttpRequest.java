@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  * Common base class for {@link ServerHttpRequest} implementations.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 

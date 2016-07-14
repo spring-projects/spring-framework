@@ -28,6 +28,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 
 /**
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 public class MonoToCompletableFutureConverter implements GenericConverter {
 

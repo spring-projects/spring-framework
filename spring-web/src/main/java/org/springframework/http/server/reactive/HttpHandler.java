@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
  * Contract for handling HTTP requests in a non-blocking way.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public interface HttpHandler {
 

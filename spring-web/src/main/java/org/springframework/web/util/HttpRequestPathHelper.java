@@ -27,6 +27,7 @@ import org.springframework.web.server.ServerWebExchange;
  * A helper class to obtain the lookup path for path matching purposes.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class HttpRequestPathHelper {
 

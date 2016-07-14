@@ -33,6 +33,7 @@ import org.springframework.core.io.buffer.FlushingDataBuffer;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 public interface ReactiveHttpOutputMessage extends HttpMessage {
 

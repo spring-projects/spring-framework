@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
  * file transfers.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  * @see <a href="https://en.wikipedia.org/wiki/Zero-copy">Zero-copy</a>
  */
 public interface ZeroCopyHttpOutputMessage extends ReactiveHttpOutputMessage {

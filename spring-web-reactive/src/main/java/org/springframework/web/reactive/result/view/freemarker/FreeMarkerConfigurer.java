@@ -57,6 +57,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactory;
  * Note: Spring's FreeMarker support requires FreeMarker 2.3 or higher.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 		implements FreeMarkerConfig, InitializingBean, ResourceLoaderAware {

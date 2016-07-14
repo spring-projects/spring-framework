@@ -33,6 +33,7 @@ import org.springframework.web.server.ServerWebExchange;
  * exception handling with one or more {@link WebExceptionHandler} instances.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 

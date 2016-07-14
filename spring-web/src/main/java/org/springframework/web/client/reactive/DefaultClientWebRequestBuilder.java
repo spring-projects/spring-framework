@@ -44,6 +44,7 @@ import org.springframework.web.util.UriTemplateHandler;
  * <p>See static factory methods in {@link ClientWebRequestBuilders}
  *
  * @author Brian Clozel
+ * @since 5.0
  * @see ClientWebRequestBuilders
  */
 public class DefaultClientWebRequestBuilder implements ClientWebRequestBuilder {

@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
  * as security, timeouts, and others.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface WebFilter {
 

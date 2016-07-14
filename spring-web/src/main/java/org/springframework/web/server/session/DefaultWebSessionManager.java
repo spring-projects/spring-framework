@@ -33,6 +33,7 @@ import org.springframework.web.server.WebSession;
  * session id resolution strategy and simple in-memory session persistence.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class DefaultWebSessionManager implements WebSessionManager {
 

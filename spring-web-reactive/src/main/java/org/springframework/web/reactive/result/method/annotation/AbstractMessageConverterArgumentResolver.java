@@ -53,6 +53,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * failure results in an {@link ServerWebInputException}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractMessageConverterArgumentResolver {
 

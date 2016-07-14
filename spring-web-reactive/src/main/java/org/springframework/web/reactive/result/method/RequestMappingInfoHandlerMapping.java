@@ -51,6 +51,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * the mapping between a request and a handler method.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMethodMapping<RequestMappingInfo> {
 

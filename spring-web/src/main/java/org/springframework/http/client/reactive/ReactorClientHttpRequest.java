@@ -37,6 +37,7 @@ import org.springframework.http.HttpMethod;
  * {@link ClientHttpRequest} implementation for the Reactor-Netty HTTP client
  *
  * @author Brian Clozel
+ * @since 5.0
  * @see reactor.io.netty.http.HttpClient
  */
 public class ReactorClientHttpRequest extends AbstractClientHttpRequest {

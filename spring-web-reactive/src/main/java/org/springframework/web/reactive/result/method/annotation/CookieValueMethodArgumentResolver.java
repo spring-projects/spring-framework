@@ -34,6 +34,7 @@ import org.springframework.web.server.ServerWebInputException;
  * does not exist.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class CookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 

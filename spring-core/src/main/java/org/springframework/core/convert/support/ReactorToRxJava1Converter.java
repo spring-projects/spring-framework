@@ -35,6 +35,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 /**
  * @author Stephane Maldini
  * @author Sebastien Deleuze
+ * @since 5.0
  */
 public final class ReactorToRxJava1Converter implements GenericConverter {
 

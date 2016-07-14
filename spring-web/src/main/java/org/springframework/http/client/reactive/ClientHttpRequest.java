@@ -28,6 +28,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @since 5.0
  */
 public interface ClientHttpRequest extends ReactiveHttpOutputMessage {
 

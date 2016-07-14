@@ -22,6 +22,7 @@ package org.springframework.web.client.reactive;
  *
  * @author Rob Winch
  * @author Brian Clozel
+ * @since 5.0
  * @see DefaultClientWebRequestBuilder#apply(ClientWebRequestPostProcessor)
  */
 public interface ClientWebRequestPostProcessor {

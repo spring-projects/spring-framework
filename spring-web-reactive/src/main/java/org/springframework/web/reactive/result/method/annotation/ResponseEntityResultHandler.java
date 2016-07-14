@@ -42,6 +42,7 @@ import org.springframework.web.server.ServerWebExchange;
  * safe to place it early in the order as it looks for a concrete return type.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ResponseEntityResultHandler extends AbstractMessageConverterResultHandler
 		implements HandlerResultHandler {

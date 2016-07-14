@@ -39,6 +39,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * used, the semantics are the same.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 

@@ -48,6 +48,7 @@ import org.springframework.web.server.ServerWebInputException;
  * to provide access to all request parameters in the form of a map.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  * @see RequestParamMapMethodArgumentResolver
  */
 public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {

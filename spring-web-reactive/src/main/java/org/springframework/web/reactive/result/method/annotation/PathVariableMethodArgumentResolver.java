@@ -48,6 +48,7 @@ import org.springframework.web.server.ServerWebExchange;
  * {@link Converter}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  * @see PathVariableMapMethodArgumentResolver
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {

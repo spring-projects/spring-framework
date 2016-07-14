@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 /**
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 @WebServlet(asyncSupported = true)
 @SuppressWarnings("serial")

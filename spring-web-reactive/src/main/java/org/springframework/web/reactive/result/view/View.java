@@ -36,6 +36,7 @@ import org.springframework.web.server.ServerWebExchange;
  * any existing {@code Encoder} to render alternate media types.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface View {
 

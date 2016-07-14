@@ -53,6 +53,7 @@ import org.springframework.web.server.ServerWebInputException;
  * {@link ConfigurableBeanFactory} must be supplied to the class constructor.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
 

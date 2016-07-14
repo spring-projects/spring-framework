@@ -36,6 +36,7 @@ import org.springframework.util.ObjectUtils;
  * Typically constructed using the {@link NettyDataBufferFactory}.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public class NettyDataBuffer implements PooledDataBuffer {
 

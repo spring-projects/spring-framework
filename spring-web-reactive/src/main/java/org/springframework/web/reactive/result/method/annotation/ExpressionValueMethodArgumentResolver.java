@@ -32,6 +32,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Language #{...} expressions.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 

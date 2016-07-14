@@ -29,6 +29,7 @@ import reactor.core.util.BackpressureUtils;
 /**
  * Publisher returned from {@link ServerHttpResponse#writeWith(Publisher)}.
  * @author Arjen Poutsma
+ * @since 5.0
  */
 class ResponseBodyWriteResultPublisher implements Publisher<Void> {
 

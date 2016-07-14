@@ -30,6 +30,7 @@ import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
  * also optionally configuring one or more filters and/or exception handlers.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface WebHandler {
 

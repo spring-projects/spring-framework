@@ -31,6 +31,7 @@ import org.springframework.web.server.ServerWebExchange;
  * Cookie-based {@link WebSessionIdResolver}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 

@@ -31,6 +31,7 @@ import org.springframework.util.MimeType;
  * Encode from a String stream to a bytes stream.
  *
  * @author Sebastien Deleuze
+ * @since 5.0
  * @see StringDecoder
  */
 public class StringEncoder extends AbstractEncoder<String> {

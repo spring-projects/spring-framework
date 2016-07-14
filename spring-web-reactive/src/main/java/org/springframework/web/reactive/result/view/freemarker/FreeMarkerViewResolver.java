@@ -25,7 +25,9 @@ import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
  * via the "viewClass" property. See {@link UrlBasedViewResolver} for details.
  *
  * @author Rossen Stoyanchev
- */public class FreeMarkerViewResolver extends UrlBasedViewResolver {
+ * @since 5.0
+ */
+public class FreeMarkerViewResolver extends UrlBasedViewResolver {
 
 
 	/**

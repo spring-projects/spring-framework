@@ -24,6 +24,7 @@ import org.springframework.beans.factory.InitializingBean;
  * holding the URL that a View wraps, in the form of a "url" bean property.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractUrlBasedView extends AbstractView implements InitializingBean {
 

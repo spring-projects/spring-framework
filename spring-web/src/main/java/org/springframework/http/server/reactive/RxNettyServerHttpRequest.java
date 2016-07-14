@@ -40,6 +40,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
+ * @since 5.0
  */
 public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 

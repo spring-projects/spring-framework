@@ -26,6 +26,7 @@ import org.springframework.web.server.ServerWebExchange;
  * A {@link RequestedContentTypeResolver} that checks the 'Accept' request header.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class HeaderContentTypeResolver implements RequestedContentTypeResolver {
 

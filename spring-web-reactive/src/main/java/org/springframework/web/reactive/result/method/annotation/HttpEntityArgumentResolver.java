@@ -38,6 +38,7 @@ import org.springframework.web.server.ServerWebExchange;
  * {@code HttpMessageConverter}.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class HttpEntityArgumentResolver extends AbstractMessageConverterArgumentResolver
 		implements HandlerMethodArgumentResolver {

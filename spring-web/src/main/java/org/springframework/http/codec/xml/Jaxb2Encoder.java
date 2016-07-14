@@ -38,6 +38,7 @@ import org.springframework.util.MimeTypeUtils;
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
+ * @since 5.0
  * @see Jaxb2Decoder
  */
 public class Jaxb2Encoder extends AbstractSingleValueEncoder<Object> {

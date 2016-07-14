@@ -28,6 +28,7 @@ import org.springframework.web.util.HttpRequestPathHelper;
  * implementations.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		implements HandlerMapping, Ordered {

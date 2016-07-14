@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
  * Base class for exceptions associated with specific HTTP response status codes.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 @SuppressWarnings("serial")
 public class ResponseStatusException extends NestedRuntimeException {

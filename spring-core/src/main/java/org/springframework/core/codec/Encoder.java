@@ -33,6 +33,7 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @param <T> the type of elements in the input stream
+ * @since 5.0
  */
 public interface Encoder<T> {
 

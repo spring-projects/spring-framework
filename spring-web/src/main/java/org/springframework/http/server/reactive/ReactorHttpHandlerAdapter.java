@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
 
 /**
  * @author Stephane Maldini
+ * @since 5.0
  */
 public class ReactorHttpHandlerAdapter
 		implements ChannelHandler<ByteBuf, ByteBuf, HttpChannel> {

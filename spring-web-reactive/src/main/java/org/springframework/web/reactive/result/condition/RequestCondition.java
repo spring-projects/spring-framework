@@ -26,9 +26,11 @@ import org.springframework.web.server.ServerWebExchange;
  * to each other via {@link #compareTo(Object, ServerWebExchange)} to determine
  * which is a closer match for a given request.
  *
- * @author Rossen Stoyanchev
  * @param <T> the type of objects that this RequestCondition can be combined
  * with and compared to
+ *
+ * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public interface RequestCondition<T> {
 

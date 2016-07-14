@@ -28,6 +28,7 @@ import org.springframework.util.MimeType;
  * Abstract base class for {@link org.springframework.core.codec.Encoder} classes that
  * can only deal with a single value.
  * @author Arjen Poutsma
+ * @since 5.0
  */
 public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 

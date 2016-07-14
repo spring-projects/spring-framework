@@ -29,6 +29,7 @@ import org.springframework.http.HttpMethod;
  * to send the actual {@link ClientHttpRequest} and receive the {@link ClientHttpResponse}
  *
  * @author Brian Clozel
+ * @since 5.0
  */
 public interface ClientHttpConnector {
 

@@ -33,6 +33,7 @@ import org.springframework.util.ObjectUtils;
  * using the {@link DefaultDataBufferFactory}.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  * @see DefaultDataBufferFactory
  */
 public class DefaultDataBuffer implements DataBuffer {

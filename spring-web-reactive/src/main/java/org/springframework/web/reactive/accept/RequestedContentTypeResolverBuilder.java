@@ -78,6 +78,7 @@ import org.springframework.util.CollectionUtils;
  * {@link #useJaf suppress} the use of JAF.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class RequestedContentTypeResolverBuilder {
 

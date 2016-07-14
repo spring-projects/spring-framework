@@ -38,6 +38,7 @@ import org.springframework.core.io.buffer.DataBuffer;
  * and Undertow support.
  *
  * @author Arjen Poutsma
+ * @since 5.0
  * @see ServletServerHttpRequest
  * @see UndertowHttpHandlerAdapter
  */
