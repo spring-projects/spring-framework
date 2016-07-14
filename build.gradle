@@ -363,6 +363,10 @@ project("spring-core") {
 		compile("commons-logging:commons-logging:1.2")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("net.sf.jopt-simple:jopt-simple:5.0.2")
+		optional("org.reactivestreams:reactive-streams:1.0.0")
+		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
+		optional "io.reactivex:rxjava:${rxJavaVersion}"
+		optional("io.netty:netty-buffer:${nettyVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("com.fasterxml.woodstox:woodstox-core:5.0.2") {

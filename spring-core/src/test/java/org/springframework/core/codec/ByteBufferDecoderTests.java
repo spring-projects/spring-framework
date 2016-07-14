@@ -26,7 +26,7 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.MediaType;
+import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -40,12 +40,9 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
-				MediaType.TEXT_PLAIN));
-		assertFalse(this.decoder
-				.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
-				MediaType.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.TEXT_PLAIN));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test

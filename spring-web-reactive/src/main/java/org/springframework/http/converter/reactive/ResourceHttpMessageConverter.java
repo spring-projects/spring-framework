@@ -29,13 +29,13 @@ import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.ResourceEncoder;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourceUtils2;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.http.support.MediaTypeUtils;
 import org.springframework.util.MimeTypeUtils2;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write
@@ -116,7 +116,7 @@ public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Reso
 	}
 
 	private static Optional<File> getFile(Resource resource) {
-		if (ResourceUtils2.hasFile(resource)) {
+		if (ResourceUtils.hasFile(resource)) {
 			try {
 				return Optional.of(resource.getFile());
 			}

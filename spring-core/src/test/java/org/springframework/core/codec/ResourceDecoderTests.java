@@ -28,10 +28,12 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.MediaType;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Arjen Poutsma
@@ -42,17 +44,14 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canDecode() throws Exception {
-		assertTrue(
-				this.decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
-				MediaType.TEXT_PLAIN));
-		assertTrue(
-				this.decoder.canDecode(ResolvableType.forClass(ByteArrayResource.class),
-				MediaType.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Resource.class),
-				MediaType.TEXT_PLAIN));
-		assertTrue(
-				this.decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
-				MediaType.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(
+				ResolvableType.forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.decoder.canDecode(
+				ResolvableType.forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.decoder.canDecode(
+				ResolvableType.forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN));
+		assertTrue(this.decoder.canDecode(
+				ResolvableType.forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test

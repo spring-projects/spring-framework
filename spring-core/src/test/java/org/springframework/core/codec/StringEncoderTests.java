@@ -28,7 +28,7 @@ import reactor.core.test.TestSubscriber;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
-import org.springframework.http.MediaType;
+import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -48,12 +48,9 @@ public class StringEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canWrite() {
-		assertTrue(this.encoder
-				.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
-		assertFalse(this.encoder
-				.canEncode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class),
-				MediaType.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class), MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test
