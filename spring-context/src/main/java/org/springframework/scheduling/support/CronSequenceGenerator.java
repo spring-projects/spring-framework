@@ -95,6 +95,7 @@ public class CronSequenceGenerator {
 		parse(expression);
 	}
 
+
 	/**
 	 * Return the cron pattern that this sequence generator has been built for.
 	 */
@@ -378,6 +379,10 @@ public class CronSequenceGenerator {
 			throw new IllegalArgumentException("Range less than minimum (" + min + "): '" +
 					field + "' in expression \"" + this.expression + "\"");
 		}
+		if (result[0] > result[1]) {
+			throw new IllegalArgumentException("Invalid inverted range: '" + field +
+					"' in expression \"" + this.expression + "\"");
+		}
 		return result;
 	}
 
@@ -388,6 +393,7 @@ public class CronSequenceGenerator {
 	 * fields separated by single spaces.
 	 * @param expression the expression to evaluate
 	 * @return {@code true} if the given expression is a valid cron expression
+	 * @since 4.3
 	 */
 	public static boolean isValidExpression(String expression) {
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
