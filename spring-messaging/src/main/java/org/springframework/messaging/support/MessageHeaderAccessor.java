@@ -306,12 +306,17 @@ public class MessageHeaderAccessor {
 			throw new IllegalArgumentException("'" + name + "' header is read-only");
 		}
 		verifyType(name, value);
-		if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
-			this.modified = true;
-			if (value != null) {
+		if (value != null) {
+			// Modify header if necessary
+			if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
+				this.modified = true;
 				this.headers.getRawHeaders().put(name, value);
 			}
-			else {
+		}
+		else {
+			// Remove header if available
+			if (this.headers.containsKey(name)) {
+				this.modified = true;
 				this.headers.getRawHeaders().remove(name);
 			}
 		}
