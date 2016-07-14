@@ -21,6 +21,12 @@ package org.springframework.test.context;
  * test execution events published by the {@link TestContextManager} with which
  * the listener is registered.
  *
+ * <p>Note that not all testing frameworks support all lifecycle callbacks defined
+ * in this API. For example, {@link #beforeTestExecution} and
+ * {@link #afterTestExecution} are not supported in conjunction with JUnit 4 when
+ * using the {@link org.springframework.test.context.junit4.rules.SpringMethodRule
+ * SpringMethodRule}.
+ *
  * <p>This interface provides empty {@code default} implementations for all methods.
  * Concrete implementations can therefore choose to override only those methods
  * suitable for the task at hand.
@@ -65,8 +71,6 @@ public interface TestExecutionListener {
 	 * the class.
 	 * <p>This method should be called immediately before framework-specific
 	 * <em>before class</em> lifecycle callbacks.
-	 * <p>If a given testing framework does not support <em>before class</em>
-	 * lifecycle callbacks, this method will not be called for that framework.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
@@ -186,8 +190,6 @@ public interface TestExecutionListener {
 	 * the class.
 	 * <p>This method should be called immediately after framework-specific
 	 * <em>after class</em> lifecycle callbacks.
-	 * <p>If a given testing framework does not support <em>after class</em>
-	 * lifecycle callbacks, this method will not be called for that framework.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
 	 * @param testContext the test context for the test; never {@code null}
