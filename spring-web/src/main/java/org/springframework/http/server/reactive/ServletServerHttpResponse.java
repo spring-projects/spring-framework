@@ -197,13 +197,9 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 				if (logger.isTraceEnabled()) {
 					logger.trace("flush");
 				}
-				try {
-					this.outputStream.flush();
-					this.flushOnNext = false;
-					return;
-				}
-				catch (IOException ignored) {
-				}
+				this.outputStream.flush();
+				this.flushOnNext = false;
+				return;
 			}
 			this.flushOnNext = true;
 
@@ -234,10 +230,7 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 
 			@Override
 			public void onError(Throwable ex) {
-				// Error on writing to the HTTP stream, so any further writes will probably
-				// fail. Let's log instead of calling {@link #writeError}.
-				ResponseBodyProcessor.this.logger
-						.error("ResponseBodyWriteListener error", ex);
+				ResponseBodyProcessor.this.onError(ex);
 			}
 		}
 	}
