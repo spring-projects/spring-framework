@@ -579,7 +579,7 @@ public class MethodParameter {
 		if (this == other) {
 			return true;
 		}
-		if (other == null || getClass() != other.getClass()) {
+		if (!(other instanceof MethodParameter)) {
 			return false;
 		}
 		MethodParameter otherParam = (MethodParameter) other;

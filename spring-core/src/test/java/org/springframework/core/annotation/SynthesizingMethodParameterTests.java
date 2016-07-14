@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
+ * @since 5.0
  */
 public class SynthesizingMethodParameterTests {
 
@@ -69,8 +70,8 @@ public class SynthesizingMethodParameterTests {
 		assertNotEquals(methodParameter, longParameter);
 
 		methodParameter = new MethodParameter(method, 0);
-		assertNotEquals(stringParameter, methodParameter);
-		assertNotEquals(methodParameter, stringParameter);
+		assertEquals(stringParameter, methodParameter);
+		assertEquals(methodParameter, stringParameter);
 		assertNotEquals(longParameter, methodParameter);
 		assertNotEquals(methodParameter, longParameter);
 	}
