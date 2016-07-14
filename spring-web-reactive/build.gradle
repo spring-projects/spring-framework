@@ -1,0 +1,135 @@
+buildscript {
+	repositories {
+		maven { url 'https://repo.spring.io/plugins-release' }
+	}
+	dependencies {
+		classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'propdeps'
+apply plugin: 'propdeps-idea'
+apply plugin: 'propdeps-maven'
+
+jar {
+	baseName = 'spring-reactive'
+}
+
+group = 'org.springframework.reactive'
+
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven { url 'https://oss.jfrog.org/libs-snapshot' }  // RxNetty 0.5.x snapshots
+  maven { url 'http://repo.spring.io/milestone' }  // Reactor milestone
+  maven { url 'http://repo.spring.io/snapshot' }  // Reactor snapshot
+}
+
+ext {
+	springVersion = '5.0.0.BUILD-SNAPSHOT'
+	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
+	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
+	rxJavaVersion = '1.1.6'
+	tomcatVersion = '8.5.3'
+	jettyVersion = '9.3.10.v20160621'
+	nettyVersion = '4.1.2.Final'
+	jacksonVersion = '2.7.5'
+
+	javadocLinks = [
+		"http://docs.oracle.com/javase/8/docs/api/",
+		"http://projectreactor.io/core/docs/api/",
+		"http://docs.spring.io/spring/docs/${springVersion}/javadoc-api/",
+		"http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/"
+	] as String[]
+}
+
+configurations.all {
+	// check for updates every build
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+	resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+		// consistent netty version to avoid issues with clashes in netty-all vs
+		// netty-common for example
+		if (details.requested.group == 'io.netty') {
+			details.useVersion nettyVersion
+		}
+	}
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			uniqueVersion = false
+		}
+	}
+}
+
+javadoc {
+	description = "Generates project-level javadoc for use in -javadoc jar"
+
+	options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+	options.author = true
+	options.header = project.name
+	options.addStringOption('Xdoclint:none', '-quiet')
+	options.links(project.ext.javadocLinks)
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+artifacts {
+	archives sourcesJar
+	archives javadocJar
+}
+
+dependencies {
+	compile "org.springframework:spring-core:${springVersion}"
+	compile "org.springframework:spring-web:${springVersion}"
+	compile "org.reactivestreams:reactive-streams:1.0.0"
+	compile "io.projectreactor:reactor-core:${reactorVersion}"
+	compile "commons-logging:commons-logging:1.2"
+	compile "io.netty:netty-buffer:${nettyVersion}" // Temporarily for JsonObjectDecoder (GH #116)
+
+	optional "org.springframework:spring-context-support:${springVersion}" // for FreeMarker
+	optional "io.reactivex:rxjava:${rxJavaVersion}"
+	optional ("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+		exclude group: 'io.reactivex', module: 'rxjava'
+	}
+	optional "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+	optional "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+	optional "io.projectreactor:reactor-netty:${reactorNettyVersion}"
+	optional "org.apache.tomcat:tomcat-util:${tomcatVersion}"
+	optional "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+	optional 'io.undertow:undertow-core:1.3.20.Final'
+	optional "org.eclipse.jetty:jetty-server:${jettyVersion}"
+	optional "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
+	optional("org.freemarker:freemarker:2.3.23")
+	optional("com.fasterxml:aalto-xml:1.0.0")
+	optional("javax.validation:validation-api:1.1.0.Final")
+
+	provided "javax.servlet:javax.servlet-api:3.1.0"
+
+	testCompile "junit:junit:4.12"
+	testCompile "org.springframework:spring-test:${springVersion}"
+	testCompile "org.slf4j:slf4j-jcl:1.7.12"
+	testCompile "org.slf4j:jul-to-slf4j:1.7.12"
+	testCompile "log4j:log4j:1.2.16"
+	testCompile("org.mockito:mockito-core:1.10.19") {
+		exclude group: 'org.hamcrest', module: 'hamcrest-core'
+	}
+	testCompile "org.hamcrest:hamcrest-all:1.3"
+	testCompile "com.squareup.okhttp3:mockwebserver:3.0.1"
+	testCompile("xmlunit:xmlunit:1.6")
+
+	// Needed to run Javadoc without error
+	optional "org.apache.httpcomponents:httpclient:4.5.1"
+}
+
+
