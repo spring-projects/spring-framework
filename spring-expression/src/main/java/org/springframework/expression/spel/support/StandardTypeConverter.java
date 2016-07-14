@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  */
 public class StandardTypeConverter implements TypeConverter {
 
-	private static ConversionService defaultConversionService;
+	private static volatile ConversionService defaultConversionService;
 
 	private final ConversionService conversionService;
 
@@ -45,10 +45,8 @@ public class StandardTypeConverter implements TypeConverter {
 	 * Create a StandardTypeConverter for the default ConversionService.
 	 */
 	public StandardTypeConverter() {
-		synchronized (this) {
-			if (defaultConversionService == null) {
-				defaultConversionService = new DefaultConversionService();
-			}
+		if (defaultConversionService == null) {
+			defaultConversionService = new DefaultConversionService();
 		}
 		this.conversionService = defaultConversionService;
 	}
