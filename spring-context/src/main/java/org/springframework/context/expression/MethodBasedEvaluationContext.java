@@ -89,7 +89,7 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 		String[] parameterNames = this.paramDiscoverer.getParameterNames(this.method);
 		// save parameter names (if discovered)
 		if (parameterNames != null) {
-			for (int i = 0; i < parameterNames.length; i++) {
+			for (int i = 0; i < args.length; i++) {
 				setVariable(parameterNames[i], this.args[i]);
 			}
 		}

@@ -62,6 +62,42 @@ public class MethodBasedEvaluationContextTests {
 		assertNull(context.lookupVariable("p0"));
 	}
 
+	@Test
+	public void varArgEmpty() {
+		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
+		MethodBasedEvaluationContext context = createEvaluationContext(method, new Object[] {null});
+
+		assertNull(context.lookupVariable("p0"));
+		assertNull(context.lookupVariable("p1"));
+	}
+
+	@Test
+	public void varArgNull() {
+		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
+		MethodBasedEvaluationContext context = createEvaluationContext(method, new Object[] {null, null});
+
+		assertNull(context.lookupVariable("p0"));
+		assertNull(context.lookupVariable("p1"));
+	}
+
+	@Test
+	public void varArgSingle() {
+		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
+		MethodBasedEvaluationContext context = createEvaluationContext(method, new Object[] {null, "hello"});
+
+		assertNull(context.lookupVariable("p0"));
+		assertEquals("hello", context.lookupVariable("p1"));
+	}
+
+	@Test
+	public void varArgMultiple() {
+		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
+		MethodBasedEvaluationContext context = createEvaluationContext(method, new Object[] {null, new String[]{"hello", "hi"}});
+
+		assertNull(context.lookupVariable("p0"));
+		assertNotNull(context.lookupVariable("p1"));
+	}
+
 	private MethodBasedEvaluationContext createEvaluationContext(Method method, Object[] args) {
 		return new MethodBasedEvaluationContext(this, method, args, this.paramDiscover);
 	}
@@ -73,6 +109,9 @@ public class MethodBasedEvaluationContextTests {
 		private void hello(String foo, Boolean flag) {
 		}
 
+		private void hello(Boolean flag, String ... vararg){
+
+		}
 	}
 
 }
