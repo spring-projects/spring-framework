@@ -30,6 +30,7 @@ import com.fasterxml.aalto.AsyncByteBufferFeeder;
 import com.fasterxml.aalto.AsyncXMLInputFactory;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.evt.EventAllocatorImpl;
+import com.fasterxml.aalto.stax.InputFactoryImpl;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -116,8 +117,7 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 	private static class AaltoDataBufferToXmlEvent
 			implements Function<DataBuffer, Publisher<? extends XMLEvent>> {
 
-		private static final AsyncXMLInputFactory inputFactory =
-				(AsyncXMLInputFactory) XmlEventDecoder.inputFactory;
+		private static final AsyncXMLInputFactory inputFactory = new InputFactoryImpl();
 
 		private final AsyncXMLStreamReader<AsyncByteBufferFeeder> streamReader =
 				inputFactory.createAsyncForByteBuffer();
