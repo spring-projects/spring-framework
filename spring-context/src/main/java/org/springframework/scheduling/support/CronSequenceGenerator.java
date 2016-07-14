@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -378,6 +378,10 @@ public class CronSequenceGenerator {
 		if (result[0] < min || result[1] < min) {
 			throw new IllegalArgumentException("Range less than minimum (" + min + "): '" +
 					field + "' in expression \"" + this.expression + "\"");
+		}
+		if (result[0] > result[1]) {
+			throw new IllegalArgumentException("Invalid inverted range: '" + field +
+					"' in expression \"" + this.expression + "\"");
 		}
 		return result;
 	}
