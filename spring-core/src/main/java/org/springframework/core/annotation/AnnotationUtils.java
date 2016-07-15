@@ -1129,11 +1129,10 @@ public abstract class AnnotationUtils {
 		// Only do defaults scanning for public annotations; we'd run into
 		// IllegalAccessExceptions otherwise, and we don't want to mess with
 		// accessibility in a SecurityManager environment.
-		Class<?> annotationType = attributes.annotationType();
+		Class<? extends Annotation> annotationType = attributes.annotationType();
 		if (annotationType != null && Modifier.isPublic(annotationType.getModifiers())) {
 			// Check declared default values of attributes in the annotation type.
-			Method[] annotationAttributes = annotationType.getMethods();
-			for (Method annotationAttribute : annotationAttributes) {
+			for (Method annotationAttribute : getAttributeMethods(annotationType)) {
 				String attributeName = annotationAttribute.getName();
 				Object defaultValue = annotationAttribute.getDefaultValue();
 				if (defaultValue != null && !attributes.containsKey(attributeName)) {

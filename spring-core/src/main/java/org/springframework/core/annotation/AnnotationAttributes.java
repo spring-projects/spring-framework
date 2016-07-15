@@ -47,7 +47,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	private static final String UNKNOWN = "unknown";
 
-	private Class<? extends Annotation> annotationType;
+	private final Class<? extends Annotation> annotationType;
 
 	private final String displayName;
 
@@ -95,18 +95,23 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * or {@code null} to just store the annotation type name
 	 * @since 4.3.2
 	 */
-	@SuppressWarnings("unchecked")
 	public AnnotationAttributes(String annotationType, ClassLoader classLoader) {
 		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = getAnnotationType(annotationType, classLoader);
+		this.displayName = annotationType;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<? extends Annotation> getAnnotationType(String annotationType, ClassLoader classLoader) {
 		if (classLoader != null) {
 			try {
-				this.annotationType = (Class<? extends Annotation>) classLoader.loadClass(annotationType);
+				return (Class<? extends Annotation>) classLoader.loadClass(annotationType);
 			}
 			catch (ClassNotFoundException ex) {
 				// Annotation Class not resolvable
 			}
 		}
-		this.displayName = annotationType;
+		return null;
 	}
 
 	/**
