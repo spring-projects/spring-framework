@@ -36,14 +36,15 @@ import rx.Single;
 
 /**
  * Static factory methods for {@link ResponseExtractor}
- * based on the {@link Observable} and {@link Single} API.
+ * based on the {@link Observable} and {@link Single} APIs.
  *
  * @author Brian Clozel
+ * @since 5.0
  */
-public class 	RxJava1ResponseExtractors {
+public class RxJava1ResponseExtractors {
 
 	/**
-	 * Extract the response body and decode it, returning it as a {@code Single<T>}
+	 * Extract the response body and decode it, returning it as a {@code Single<T>}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Single<T>> body(Class<T> sourceClass) {
@@ -55,7 +56,7 @@ public class 	RxJava1ResponseExtractors {
 	}
 
 	/**
-	 * Extract the response body and decode it, returning it as an {@code Observable<T>}
+	 * Extract the response body and decode it, returning it as an {@code Observable<T>}.
 	 */
 	public static <T> ResponseExtractor<Observable<T>> bodyStream(Class<T> sourceClass) {
 
@@ -67,7 +68,7 @@ public class 	RxJava1ResponseExtractors {
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity}
-	 * with its body decoded as a single type {@code T}
+	 * with its body decoded as a single type {@code T}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Single<ResponseEntity<T>>> response(Class<T> sourceClass) {
@@ -86,7 +87,7 @@ public class 	RxJava1ResponseExtractors {
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity}
-	 * with its body decoded as an {@code Observable<T>}
+	 * with its body decoded as an {@code Observable<T>}.
 	 */
 	public static <T> ResponseExtractor<Single<ResponseEntity<Observable<T>>>> responseStream(Class<T> sourceClass) {
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
@@ -99,7 +100,7 @@ public class 	RxJava1ResponseExtractors {
 	}
 
 	/**
-	 * Extract the response headers as an {@code HttpHeaders} instance
+	 * Extract the response headers as an {@code HttpHeaders} instance.
 	 */
 	public static ResponseExtractor<Single<HttpHeaders>> headers() {
 		return (clientResponse, messageConverters) -> RxJava1SingleConverter
@@ -124,4 +125,5 @@ public class 	RxJava1ResponseExtractors {
 			ResolvableType type, MediaType mediaType) {
 		return messageConverters.stream().filter(e -> e.canRead(type, mediaType)).findFirst();
 	}
+
 }

@@ -31,7 +31,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Static factory methods for {@link ResponseExtractor} based on the {@link Flux} and
- * {@link Mono} API.
+ * {@link Mono} APIs.
  *
  * @author Brian Clozel
  * @since 5.0
@@ -41,7 +41,7 @@ public class ResponseExtractors {
 	private static final Object EMPTY_BODY = new Object();
 
 	/**
-	 * Extract the response body and decode it, returning it as a {@code Mono<T>}
+	 * Extract the response body and decode it, returning it as a {@code Mono<T>}.
 	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
 	@SuppressWarnings("unchecked")
@@ -53,7 +53,7 @@ public class ResponseExtractors {
 	}
 
 	/**
-	 * Extract the response body and decode it, returning it as a {@code Mono<T>}
+	 * Extract the response body and decode it, returning it as a {@code Mono<T>}.
 	 */
 	public static <T> ResponseExtractor<Mono<T>> body(Class<T> sourceClass) {
 		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
@@ -61,7 +61,7 @@ public class ResponseExtractors {
 	}
 
 	/**
-	 * Extract the response body and decode it, returning it as a {@code Flux<T>}
+	 * Extract the response body and decode it, returning it as a {@code Flux<T>}.
 	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
 	public static <T> ResponseExtractor<Flux<T>> bodyStream(ResolvableType bodyType) {
@@ -70,7 +70,7 @@ public class ResponseExtractors {
 	}
 
 	/**
-	 * Extract the response body and decode it, returning it as a {@code Flux<T>}
+	 * Extract the response body and decode it, returning it as a {@code Flux<T>}.
 	 */
 	public static <T> ResponseExtractor<Flux<T>> bodyStream(Class<T> sourceClass) {
 		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
@@ -79,7 +79,7 @@ public class ResponseExtractors {
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity} with its body decoded as
-	 * a single type {@code T}
+	 * a single type {@code T}.
 	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
 	@SuppressWarnings("unchecked")
@@ -100,7 +100,7 @@ public class ResponseExtractors {
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity} with its body decoded as
-	 * a single type {@code T}
+	 * a single type {@code T}.
 	 */
 	public static <T> ResponseExtractor<Mono<ResponseEntity<T>>> response(
 			Class<T> bodyClass) {
@@ -110,7 +110,7 @@ public class ResponseExtractors {
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity} with its body decoded as
-	 * a {@code Flux<T>}
+	 * a {@code Flux<T>}.
 	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
 	public static <T> ResponseExtractor<Mono<ResponseEntity<Flux<T>>>> responseStream(
@@ -123,7 +123,7 @@ public class ResponseExtractors {
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity} with its body decoded as
-	 * a {@code Flux<T>}
+	 * a {@code Flux<T>}.
 	 */
 	public static <T> ResponseExtractor<Mono<ResponseEntity<Flux<T>>>> responseStream(
 			Class<T> sourceClass) {
@@ -132,7 +132,7 @@ public class ResponseExtractors {
 	}
 
 	/**
-	 * Extract the response headers as an {@code HttpHeaders} instance
+	 * Extract the response headers as an {@code HttpHeaders} instance.
 	 */
 	public static ResponseExtractor<Mono<HttpHeaders>> headers() {
 		return (clientResponse, messageConverters) -> clientResponse.map(resp -> resp.getHeaders());
@@ -160,4 +160,5 @@ public class ResponseExtractors {
 		return messageConverters.stream().filter(e -> e.canRead(type, mediaType))
 				.findFirst();
 	}
+
 }
