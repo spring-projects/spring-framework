@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import static org.junit.Assume.assumeFalse;
 import static org.springframework.web.client.reactive.ClientWebRequestBuilders.*;
 import static org.springframework.web.client.reactive.ResponseExtractors.*;
 
@@ -47,6 +48,7 @@ import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.WebClient;
@@ -67,6 +69,10 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@Before
 	public void setup() throws Exception {
 		super.setup();
+
+		// See https://github.com/eclipse/jetty.project/issues/730
+		assumeFalse(server instanceof JettyHttpServer);
+
 		this.webClient = new WebClient(new ReactorClientHttpConnector());
 		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new CodecHttpMessageConverter<>(new ByteBufferEncoder(), new ByteBufferDecoder()));
