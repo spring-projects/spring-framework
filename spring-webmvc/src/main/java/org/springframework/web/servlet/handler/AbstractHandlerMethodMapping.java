@@ -236,7 +236,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 						}
 						catch (Throwable ex) {
 							throw new IllegalStateException("Invalid mapping on handler class [" +
-									handlerType.getName() + "]: " + method, ex);
+									userType.getName() + "]: " + method, ex);
 						}
 					}
 				});

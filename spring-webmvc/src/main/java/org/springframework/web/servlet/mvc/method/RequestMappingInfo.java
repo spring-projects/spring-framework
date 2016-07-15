@@ -525,8 +525,8 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * <p>By default this is not set.
 		 * @since 4.2.8
 		 */
-		public void setUrlPathHelper(UrlPathHelper pathHelper) {
-			this.urlPathHelper = pathHelper;
+		public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+			this.urlPathHelper = urlPathHelper;
 		}
 
 		/**
