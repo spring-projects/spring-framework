@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 
 	// Redefined with public visibility.
 	@Override
-	public Class getPropertyType(String propertyPath) {
+	public Class<?> getPropertyType(String propertyPath) {
 		return null;
 	}
 
@@ -127,7 +127,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyAccessException if the property was valid but the
-	 * accessor method failed or a type mismatch occured
+	 * accessor method failed or a type mismatch occurred
 	 */
 	public abstract void setPropertyValue(String propertyName, Object value) throws BeansException;
 

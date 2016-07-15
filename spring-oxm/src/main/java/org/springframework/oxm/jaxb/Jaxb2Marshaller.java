@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -628,13 +628,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Compare section 8.5.1 of the JAXB2 spec.
 	 */
 	private boolean isPrimitiveWrapper(Class<?> clazz) {
-		return Boolean.class.equals(clazz) ||
+		return (Boolean.class.equals(clazz) ||
 				Byte.class.equals(clazz) ||
 				Short.class.equals(clazz) ||
 				Integer.class.equals(clazz) ||
 				Long.class.equals(clazz) ||
 				Float.class.equals(clazz) ||
-				Double.class.equals(clazz);
+				Double.class.equals(clazz));
 	}
 
 	/**
@@ -642,7 +642,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Compare section 8.5.2 of the JAXB2 spec.
 	 */
 	private boolean isStandardClass(Class<?> clazz) {
-		return String.class.equals(clazz) ||
+		return (String.class.equals(clazz) ||
 				BigInteger.class.isAssignableFrom(clazz) ||
 				BigDecimal.class.isAssignableFrom(clazz) ||
 				Calendar.class.isAssignableFrom(clazz) ||
@@ -655,7 +655,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				DataHandler.class.equals(clazz) ||
 				// Source and subclasses should be supported according to the JAXB2 spec, but aren't in the RI
 				// Source.class.isAssignableFrom(clazz) ||
-				UUID.class.equals(clazz);
+				UUID.class.equals(clazz));
 
 	}
 
@@ -893,7 +893,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	/**
 	 * Convert the given {@code JAXBException} to an appropriate exception from the
 	 * {@code org.springframework.oxm} hierarchy.
-	 * @param ex {@code JAXBException} that occured
+	 * @param ex {@code JAXBException} that occurred
 	 * @return the corresponding {@code XmlMappingException}
 	 */
 	protected XmlMappingException convertJaxbException(JAXBException ex) {

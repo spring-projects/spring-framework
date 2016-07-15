@@ -78,7 +78,7 @@ public class AutoProxyRegistrar implements ImportBeanDefinitionRegistrar {
 			logger.warn(String.format("%s was imported but no annotations were found " +
 					"having both 'mode' and 'proxyTargetClass' attributes of type " +
 					"AdviceMode and boolean respectively. This means that auto proxy " +
-					"creator registration and configuration may not have occured as " +
+					"creator registration and configuration may not have occurred as " +
 					"intended, and components may not be proxied as expected. Check to " +
 					"ensure that %s has been @Import'ed on the same class where these " +
 					"annotations are declared; otherwise remove the import of %s " +

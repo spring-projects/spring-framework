@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,15 +116,15 @@ public class StopWatch {
 		if (this.running) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
-		this.startTimeMillis = System.currentTimeMillis();
 		this.running = true;
 		this.currentTaskName = taskName;
+		this.startTimeMillis = System.currentTimeMillis();
 	}
 
 	/**
 	 * Stop the current task. The results are undefined if timing
 	 * methods are called without invoking at least one pair
-	 * {@link #start()} / {@link #stop()} methods.
+	 * {@code start()} / {@code stop()} methods.
 	 * @see #start()
 	 */
 	public void stop() throws IllegalStateException {
@@ -302,7 +302,7 @@ public class StopWatch {
 		 * Return the time in seconds this task took.
 		 */
 		public double getTimeSeconds() {
-			return this.timeMillis / 1000.0;
+			return (this.timeMillis / 1000.0);
 		}
 	}
 
