@@ -16,10 +16,6 @@
 
 package org.springframework.core.type.classreading;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 
@@ -30,7 +26,7 @@ import org.springframework.core.annotation.AnnotationUtils;
  */
 class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVisitor {
 
-	private final String annotationType;
+	protected final String annotationType;
 
 
 	public RecursiveAnnotationAttributesVisitor(
@@ -42,49 +38,8 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 
 
 	@Override
-	public final void visitEnd() {
-		try {
-			Class<?> annotationClass = this.classLoader.loadClass(this.annotationType);
-			doVisitEnd(annotationClass);
-		}
-		catch (ClassNotFoundException ex) {
-			logger.debug("Failed to class-load type while reading annotation metadata. " +
-					"This is a non-fatal error, but certain annotation metadata may be unavailable.", ex);
-		}
-	}
-
-	protected void doVisitEnd(Class<?> annotationClass) {
-		registerDefaultValues(annotationClass);
-	}
-
-	private void registerDefaultValues(Class<?> annotationClass) {
-		// Only do defaults scanning for public annotations; we'd run into
-		// IllegalAccessExceptions otherwise, and we don't want to mess with
-		// accessibility in a SecurityManager environment.
-		if (Modifier.isPublic(annotationClass.getModifiers())) {
-			// Check declared default values of attributes in the annotation type.
-			Method[] annotationAttributes = annotationClass.getMethods();
-			for (Method annotationAttribute : annotationAttributes) {
-				String attributeName = annotationAttribute.getName();
-				Object defaultValue = annotationAttribute.getDefaultValue();
-				if (defaultValue != null && !this.attributes.containsKey(attributeName)) {
-					if (defaultValue instanceof Annotation) {
-						defaultValue = AnnotationAttributes.fromMap(AnnotationUtils.getAnnotationAttributes(
-								(Annotation) defaultValue, false, true));
-					}
-					else if (defaultValue instanceof Annotation[]) {
-						Annotation[] realAnnotations = (Annotation[]) defaultValue;
-						AnnotationAttributes[] mappedAnnotations = new AnnotationAttributes[realAnnotations.length];
-						for (int i = 0; i < realAnnotations.length; i++) {
-							mappedAnnotations[i] = AnnotationAttributes.fromMap(
-									AnnotationUtils.getAnnotationAttributes(realAnnotations[i], false, true));
-						}
-						defaultValue = mappedAnnotations;
-					}
-					this.attributes.put(attributeName, defaultValue);
-				}
-			}
-		}
+	public void visitEnd() {
+		AnnotationUtils.registerDefaultValues(this.attributes);
 	}
 
 }

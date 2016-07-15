@@ -69,7 +69,7 @@ class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationVisitor
 	@Override
 	public AnnotationVisitor visitAnnotation(String attributeName, String asmTypeDescriptor) {
 		String annotationType = Type.getType(asmTypeDescriptor).getClassName();
-		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
+		AnnotationAttributes nestedAttributes = new AnnotationAttributes(annotationType, this.classLoader);
 		this.allNestedAttributes.add(nestedAttributes);
 		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes, this.classLoader);
 	}
