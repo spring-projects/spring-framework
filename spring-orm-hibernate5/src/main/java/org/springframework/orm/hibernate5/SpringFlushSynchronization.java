@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.orm.hibernate5;
 
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -40,13 +39,7 @@ public class SpringFlushSynchronization extends TransactionSynchronizationAdapte
 
 	@Override
 	public void flush() {
-		try {
-			SessionFactoryUtils.logger.debug("Flushing Hibernate Session on explicit request");
-			this.session.flush();
-		}
-		catch (HibernateException ex) {
-			throw SessionFactoryUtils.convertHibernateAccessException(ex);
-		}
+		SessionFactoryUtils.flush(this.session, false);
 	}
 
 

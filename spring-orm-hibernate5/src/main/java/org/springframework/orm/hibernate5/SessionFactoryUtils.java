@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -121,6 +122,37 @@ public abstract class SessionFactoryUtils {
 	 */
 	static FlushMode getFlushMode(Session session) {
 		return (FlushMode) ReflectionUtils.invokeMethod(getFlushMode, session);
+	}
+
+	/**
+	 * Trigger a flush on the given Hibernate Session, converting regular
+	 * {@link HibernateException} instances as well as Hibernate 5.2's
+	 * {@link PersistenceException} wrappers accordingly.
+	 * @param session the Hibernate Session to flush
+	 * @param synch whether this flush is triggered by transaction synchronization
+	 * @throws DataAccessException
+	 * @since 4.3.2
+	 */
+	static void flush(Session session, boolean synch) throws DataAccessException {
+		if (synch) {
+			logger.debug("Flushing Hibernate Session on transaction synchronization");
+		}
+		else {
+			logger.debug("Flushing Hibernate Session on explicit request");
+		}
+		try {
+			session.flush();
+		}
+		catch (HibernateException ex) {
+			throw convertHibernateAccessException(ex);
+		}
+		catch (PersistenceException ex) {
+			if (ex.getCause() instanceof HibernateException) {
+				throw convertHibernateAccessException((HibernateException) ex.getCause());
+			}
+			throw ex;
+		}
+
 	}
 
 	/**

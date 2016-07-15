@@ -18,6 +18,7 @@ package org.springframework.orm.hibernate5;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import javax.persistence.PersistenceException;
 import javax.sql.DataSource;
 
 import org.hibernate.ConnectionReleaseMode;
@@ -588,6 +589,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			// assumably failed to flush changes to database
 			throw convertHibernateAccessException(ex);
 		}
+		catch (PersistenceException ex) {
+			if (ex.getCause() instanceof HibernateException) {
+				throw convertHibernateAccessException((HibernateException) ex.getCause());
+			}
+			throw ex;
+		}
 	}
 
 	@Override
@@ -606,6 +613,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		catch (HibernateException ex) {
 			// Shouldn't really happen, as a rollback doesn't cause a flush.
 			throw convertHibernateAccessException(ex);
+		}
+		catch (PersistenceException ex) {
+			if (ex.getCause() instanceof HibernateException) {
+				throw convertHibernateAccessException((HibernateException) ex.getCause());
+			}
+			throw ex;
 		}
 		finally {
 			if (!txObject.isNewSession() && !this.hibernateManagedSession) {
@@ -824,6 +837,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 			catch (HibernateException ex) {
 				throw convertHibernateAccessException(ex);
+			}
+			catch (PersistenceException ex) {
+				if (ex.getCause() instanceof HibernateException) {
+					throw convertHibernateAccessException((HibernateException) ex.getCause());
+				}
+				throw ex;
 			}
 		}
 	}
