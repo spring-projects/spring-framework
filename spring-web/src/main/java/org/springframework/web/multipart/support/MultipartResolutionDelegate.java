@@ -122,18 +122,18 @@ public abstract class MultipartResolutionDelegate {
 				return null;
 			}
 		}
-		else if (servletPartClass == parameter.getNestedParameterType()) {
-			return (isMultipart ? RequestPartResolver.resolvePart(request, name) : null);
+		else if (servletPartClass != null) {
+			if (servletPartClass == parameter.getNestedParameterType()) {
+				return (isMultipart ? RequestPartResolver.resolvePart(request, name) : null);
+			}
+			else if (isPartCollection(parameter)) {
+				return (isMultipart ? RequestPartResolver.resolvePartList(request, name) : null);
+			}
+			else if (isPartArray(parameter)) {
+				return (isMultipart ? RequestPartResolver.resolvePartArray(request, name) : null);
+			}
 		}
-		else if (isPartCollection(parameter)) {
-			return (isMultipart ? RequestPartResolver.resolvePartList(request, name) : null);
-		}
-		else if (isPartArray(parameter)) {
-			return (isMultipart ? RequestPartResolver.resolvePartArray(request, name) : null);
-		}
-		else {
-			return UNRESOLVABLE;
-		}
+		return UNRESOLVABLE;
 	}
 
 	private static boolean isMultipartFileCollection(MethodParameter methodParam) {
