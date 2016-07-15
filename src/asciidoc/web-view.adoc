@@ -106,6 +106,13 @@ applications. The languages are quite similar and serve similar needs and so are
 considered together in this section. For semantic and syntactic differences between the
 two languages, see the http://www.freemarker.org[FreeMarker] web site.
 
+[NOTE]
+====
+As of Spring Framework 4.3, Velocity support has been deprecated due to six years
+without active maintenance of the Apache Velocity project. We recommend Spring's
+FreeMarker support instead, or Thymeleaf which comes with Spring support itself.
+====
+
 
 
 [[view-velocity-dependencies]]
