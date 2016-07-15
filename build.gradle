@@ -56,7 +56,7 @@ configure(allprojects) { project ->
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.log4jVersion         = "1.2.17"
-	ext.nettyVersion         = "4.0.37.Final"
+	ext.nettyVersion         = "4.0.39.Final"
 	ext.okhttpVersion        = "2.7.5"
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.13"
