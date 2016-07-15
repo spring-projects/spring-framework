@@ -24,7 +24,7 @@ package org.springframework.beans.factory;
  *
  * <p>An alternative to implementing DisposableBean is specifying a custom
  * destroy-method, for example in an XML bean definition.
- * For a list of all bean lifecycle methods, see the BeanFactory javadocs.
+ * For a list of all bean lifecycle methods, see the {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Juergen Hoeller
  * @since 12.08.2003
