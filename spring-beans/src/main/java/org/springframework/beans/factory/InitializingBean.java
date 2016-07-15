@@ -23,7 +23,7 @@ package org.springframework.beans.factory;
  *
  * <p>An alternative to implementing InitializingBean is specifying a custom
  * init-method, for example in an XML bean definition.
- * For a list of all bean lifecycle methods, see the BeanFactory javadocs.
+ * For a list of all bean lifecycle methods, see the {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Rod Johnson
  * @see BeanNameAware
