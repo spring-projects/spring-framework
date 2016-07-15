@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,11 +104,11 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * by specificity via {@link MediaType#sortBySpecificity(List)}.
 	 */
 	private static List<MediaType> getAllSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
-		Set<MediaType> allSupportedMediaTypes = new LinkedHashSet<MediaType>();
+		Set<MediaType> allSupportedMediaTypes = new LinkedHashSet<>();
 		for (HttpMessageConverter<?> messageConverter : messageConverters) {
 			allSupportedMediaTypes.addAll(messageConverter.getSupportedMediaTypes());
 		}
-		List<MediaType> result = new ArrayList<MediaType>(allSupportedMediaTypes);
+		List<MediaType> result = new ArrayList<>(allSupportedMediaTypes);
 		MediaType.sortBySpecificity(result);
 		return Collections.unmodifiableList(result);
 	}

@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
  */
 public class LinkedCaseInsensitiveMapTests {
 
-	private final LinkedCaseInsensitiveMap<String> map = new LinkedCaseInsensitiveMap<String>();
+	private final LinkedCaseInsensitiveMap<String> map = new LinkedCaseInsensitiveMap<>();
 
 
 	@Test

@@ -52,7 +52,7 @@ import org.springframework.util.StringUtils;
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
-	private List<Resource> scripts = new ArrayList<Resource>();
+	private List<Resource> scripts = new ArrayList<>();
 
 	private String sqlScriptEncoding;
 
@@ -137,7 +137,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	public void setScripts(Resource... scripts) {
 		assertContentsOfScriptArray(scripts);
 		// Ensure that the list is modifiable
-		this.scripts = new ArrayList<Resource>(Arrays.asList(scripts));
+		this.scripts = new ArrayList<>(Arrays.asList(scripts));
 	}
 
 	/**

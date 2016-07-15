@@ -156,12 +156,19 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 	/**
 	 * Return the type of the request's body.
-	 * @return the request's body type
+	 * @return the request's body type, or {@code null} if not known
 	 * @since 4.3
 	 */
 	public Type getType() {
-		return (this.type == null && this.getBody() != null ? this.getBody().getClass() : this.type );
+		if (this.type == null) {
+			T body = getBody();
+			if (body != null) {
+				return body.getClass();
+			}
+		}
+		return this.type;
 	}
+
 
 	@Override
 	public boolean equals(Object other) {
@@ -172,8 +179,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 			return false;
 		}
 		RequestEntity<?> otherEntity = (RequestEntity<?>) other;
-		return (ObjectUtils.nullSafeEquals(this.method, otherEntity.method) &&
-				ObjectUtils.nullSafeEquals(this.url, otherEntity.url));
+		return (ObjectUtils.nullSafeEquals(getMethod(), otherEntity.getMethod()) &&
+				ObjectUtils.nullSafeEquals(getUrl(), otherEntity.getUrl()));
 	}
 
 	@Override
@@ -187,9 +194,9 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("<");
-		builder.append(this.method);
+		builder.append(getMethod());
 		builder.append(' ');
-		builder.append(this.url);
+		builder.append(getUrl());
 		builder.append(',');
 		T body = getBody();
 		HttpHeaders headers = getHeaders();
@@ -437,17 +444,17 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public RequestEntity<Void> build() {
-			return new RequestEntity<Void>(this.headers, this.method, this.url);
+			return new RequestEntity<>(this.headers, this.method, this.url);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body) {
-			return new RequestEntity<T>(body, this.headers, this.method, this.url);
+			return new RequestEntity<>(body, this.headers, this.method, this.url);
 		}
 
 		@Override
 		public <T> RequestEntity<T> body(T body, Type type) {
-			return new RequestEntity<T>(body, this.headers, this.method, this.url, type);
+			return new RequestEntity<>(body, this.headers, this.method, this.url, type);
 		}
 	}
 

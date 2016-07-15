@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ class HandlersBeanDefinitionParser implements BeanDefinitionParser {
 			strategy = new WebSocketHandlerMappingStrategy(handshakeHandler, interceptors);
 		}
 
-		ManagedMap<String, Object> urlMap = new ManagedMap<String, Object>();
+		ManagedMap<String, Object> urlMap = new ManagedMap<>();
 		urlMap.setSource(source);
 		for (Element mappingElement : DomUtils.getChildElementsByTagName(element, "mapping")) {
 			strategy.addMapping(mappingElement, urlMap, context);

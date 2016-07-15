@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,9 +55,9 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class CollectionFactory {
 
-	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<Class<?>>(11);
+	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<>(11);
 
-	private static final Set<Class<?>> approximableMapTypes = new HashSet<Class<?>>(7);
+	private static final Set<Class<?>> approximableMapTypes = new HashSet<>(7);
 
 
 	static {
@@ -118,10 +118,10 @@ public abstract class CollectionFactory {
 	@SuppressWarnings({ "unchecked", "cast", "rawtypes" })
 	public static <E> Collection<E> createApproximateCollection(Object collection, int capacity) {
 		if (collection instanceof LinkedList) {
-			return new LinkedList<E>();
+			return new LinkedList<>();
 		}
 		else if (collection instanceof List) {
-			return new ArrayList<E>(capacity);
+			return new ArrayList<>(capacity);
 		}
 		else if (collection instanceof EnumSet) {
 			// Cast is necessary for compilation in Eclipse 4.4.1.
@@ -130,10 +130,10 @@ public abstract class CollectionFactory {
 			return enumSet;
 		}
 		else if (collection instanceof SortedSet) {
-			return new TreeSet<E>(((SortedSet<E>) collection).comparator());
+			return new TreeSet<>(((SortedSet<E>) collection).comparator());
 		}
 		else {
-			return new LinkedHashSet<E>(capacity);
+			return new LinkedHashSet<>(capacity);
 		}
 	}
 
@@ -179,13 +179,13 @@ public abstract class CollectionFactory {
 		Assert.notNull(collectionType, "Collection type must not be null");
 		if (collectionType.isInterface()) {
 			if (Set.class == collectionType || Collection.class == collectionType) {
-				return new LinkedHashSet<E>(capacity);
+				return new LinkedHashSet<>(capacity);
 			}
 			else if (List.class == collectionType) {
-				return new ArrayList<E>(capacity);
+				return new ArrayList<>(capacity);
 			}
 			else if (SortedSet.class == collectionType || NavigableSet.class == collectionType) {
-				return new TreeSet<E>();
+				return new TreeSet<>();
 			}
 			else {
 				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
@@ -245,10 +245,10 @@ public abstract class CollectionFactory {
 			return enumMap;
 		}
 		else if (map instanceof SortedMap) {
-			return new TreeMap<K, V>(((SortedMap<K, V>) map).comparator());
+			return new TreeMap<>(((SortedMap<K, V>) map).comparator());
 		}
 		else {
-			return new LinkedHashMap<K, V>(capacity);
+			return new LinkedHashMap<>(capacity);
 		}
 	}
 
@@ -295,10 +295,10 @@ public abstract class CollectionFactory {
 		Assert.notNull(mapType, "Map type must not be null");
 		if (mapType.isInterface()) {
 			if (Map.class == mapType) {
-				return new LinkedHashMap<K, V>(capacity);
+				return new LinkedHashMap<>(capacity);
 			}
 			else if (SortedMap.class == mapType || NavigableMap.class == mapType) {
-				return new TreeMap<K, V>();
+				return new TreeMap<>();
 			}
 			else if (MultiValueMap.class == mapType) {
 				return new LinkedMultiValueMap();

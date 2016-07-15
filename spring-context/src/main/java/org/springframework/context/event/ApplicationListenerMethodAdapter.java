@@ -161,7 +161,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (declaredEventType == null) {
 			return null;
 		}
-		if (this.method.getParameterTypes().length == 0) {
+		if (this.method.getParameterCount() == 0) {
 			return new Object[0];
 		}
 		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass())
@@ -347,14 +347,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	private List<ResolvableType> resolveDeclaredEventTypes() {
-		int count = this.method.getParameterTypes().length;
+		int count = this.method.getParameterCount();
 		if (count > 1) {
 			throw new IllegalStateException(
 					"Maximum one parameter is allowed for event listener method: " + this.method);
 		}
 		EventListener ann = getEventListener();
 		if (ann != null && ann.classes().length > 0) {
-			List<ResolvableType> types = new ArrayList<ResolvableType>();
+			List<ResolvableType> types = new ArrayList<>();
 			for (Class<?> eventType : ann.classes()) {
 				types.add(ResolvableType.forClass(eventType));
 			}

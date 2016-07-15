@@ -26,8 +26,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link org.springframework.instrument.classloading.LoadTimeWeaver} implementation for Tomcat's
- * new {@link org.apache.tomcat.InstrumentableClassLoader InstrumentableClassLoader}.
+ * {@link org.springframework.instrument.classloading.LoadTimeWeaver} implementation
+ * for Tomcat's new {@code org.apache.tomcat.InstrumentableClassLoader}.
  * Also capable of handling Spring's TomcatInstrumentableClassLoader when encountered.
  *
  * @author Juergen Hoeller

@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  */
 public final class MockMvcWebConnection implements WebConnection {
 
-	private final Map<String, MockHttpSession> sessions = new HashMap<String, MockHttpSession>();
+	private final Map<String, MockHttpSession> sessions = new HashMap<>();
 
 	private final MockMvc mockMvc;
 
@@ -97,35 +97,6 @@ public final class MockMvcWebConnection implements WebConnection {
 		this.webClient = webClient;
 		this.mockMvc = mockMvc;
 		this.contextPath = contextPath;
-	}
-
-	/**
-	 * Create a new instance that assumes the context path of the application
-	 * is {@code ""} (i.e., the root context).
-	 * <p>For example, the URL {@code http://localhost/test/this} would use
-	 * {@code ""} as the context path.
-	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
-	 * @deprecated Use {@link #MockMvcWebConnection(MockMvc, WebClient)}
-	 */
-	@Deprecated
-	public MockMvcWebConnection(MockMvc mockMvc) {
-		this(mockMvc, "");
-	}
-
-	/**
-	 * Create a new instance with the specified context path.
-	 * <p>The path may be {@code null} in which case the first path segment
-	 * of the URL is turned into the contextPath. Otherwise it must conform
-	 * to {@link javax.servlet.http.HttpServletRequest#getContextPath()}
-	 * which states that it can be an empty string and otherwise must start
-	 * with a "/" character and not end with a "/" character.
-	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
-	 * @param contextPath the contextPath to use
-	 * @deprecated use {@link #MockMvcWebConnection(MockMvc, WebClient, String)}
-	 */
-	@Deprecated
-	public MockMvcWebConnection(MockMvc mockMvc, String contextPath) {
-		this(mockMvc, new WebClient(), contextPath);
 	}
 
 	/**

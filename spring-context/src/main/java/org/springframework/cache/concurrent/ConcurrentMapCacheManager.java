@@ -48,7 +48,7 @@ import org.springframework.core.serializer.support.SerializationDelegate;
  */
 public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderAware {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
+	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
 	private boolean dynamic = true;
 
@@ -188,7 +188,7 @@ public class ConcurrentMapCacheManager implements CacheManager, BeanClassLoaderA
 	 */
 	protected Cache createConcurrentMapCache(String name) {
 		SerializationDelegate actualSerialization = (isStoreByValue() ? this.serialization : null);
-		return new ConcurrentMapCache(name, new ConcurrentHashMap<Object, Object>(256),
+		return new ConcurrentMapCache(name, new ConcurrentHashMap<>(256),
 				isAllowNullValues(), actualSerialization);
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -354,18 +354,18 @@ public class PropertyResourceConfigurerTests {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("stringArray", new String[] {"${os.name}", "${age}"});
 
-		List<Object> friends = new ManagedList<Object>();
+		List<Object> friends = new ManagedList<>();
 		friends.add("na${age}me");
 		friends.add(new RuntimeBeanReference("${ref}"));
 		pvs.add("friends", friends);
 
-		Set<Object> someSet = new ManagedSet<Object>();
+		Set<Object> someSet = new ManagedSet<>();
 		someSet.add("na${age}me");
 		someSet.add(new RuntimeBeanReference("${ref}"));
 		someSet.add(new TypedStringValue("${age}", Integer.class));
 		pvs.add("someSet", someSet);
 
-		Map<Object, Object> someMap = new ManagedMap<Object, Object>();
+		Map<Object, Object> someMap = new ManagedMap<>();
 		someMap.put(new TypedStringValue("key${age}"), new TypedStringValue("${age}"));
 		someMap.put(new TypedStringValue("key${age}ref"), new RuntimeBeanReference("${ref}"));
 		someMap.put("key1", new RuntimeBeanReference("${ref}"));
@@ -805,9 +805,9 @@ public class PropertyResourceConfigurerTests {
 	 */
 	public static class MockPreferences extends AbstractPreferences {
 
-		private static Map<String, String> values = new HashMap<String, String>();
+		private static Map<String, String> values = new HashMap<>();
 
-		private static Map<String, AbstractPreferences> children = new HashMap<String, AbstractPreferences>();
+		private static Map<String, AbstractPreferences> children = new HashMap<>();
 
 		public MockPreferences() {
 			super(null, "");

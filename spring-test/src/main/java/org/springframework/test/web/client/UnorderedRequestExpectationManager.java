@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import java.io.IOException;
@@ -22,7 +23,7 @@ import org.springframework.http.client.ClientHttpResponse;
 
 /**
  * {@code RequestExpectationManager} that matches requests to expectations
- * regardless of the order of declaration of expectated requests.
+ * regardless of the order of declaration of expected requests.
  *
  * @author Rossen Stoyanchev
  * @since 4.3

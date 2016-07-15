@@ -1290,9 +1290,9 @@ a better feel for its functionality
 
 Concrete implementations for the main media (mime) types are provided in the framework
 and are registered by default with the `RestTemplate` on the client-side and with
-`AnnotationMethodHandlerAdapter` on the server-side.
+`RequestMethodHandlerAdapter` on the server-side.
 
-The implementations of ++HttpMessageConverter++s are described in the following sections.
+The implementations of ``HttpMessageConverter``s are described in the following sections.
 For all converters a default media type is used but can be overridden by setting the
 `supportedMediaTypes` bean property
 
@@ -3894,7 +3894,7 @@ lists of method names.
 === Controlling the ObjectNames for your beans
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
-`ObjectNamingStrategy` to obtain ++ObjectName++s for each of the beans it is registering.
+`ObjectNamingStrategy` to obtain ``ObjectName``s for each of the beans it is registering.
 The default implementation, `KeyNamingStrategy`, will, by default, use the key of the
 `beans` `Map` as the `ObjectName`. In addition, the `KeyNamingStrategy` can map the key
 of the `beans` `Map` to an entry in a `Properties` file (or files) to resolve the
@@ -3909,7 +3909,7 @@ uses source level metadata to obtain the `ObjectName`.
 ==== Reading ObjectNames from Properties
 
 You can configure your own `KeyNamingStrategy` instance and configure it to read
-++ObjectName++s from a `Properties` instance rather than use bean key. The
+``ObjectName``s from a `Properties` instance rather than use bean key. The
 `KeyNamingStrategy` will attempt to locate an entry in the `Properties` with a key
 corresponding to the bean key. If no entry is found or if the `Properties` instance is
 `null` then the bean key itself is used.
@@ -6043,124 +6043,11 @@ of your emails using the above approach for a number of reasons.
   recompiling, redeploying...
 
 Typically the approach taken to address these issues is to use a template library such
-as FreeMarker or Velocity to define the display structure of email content. This leaves
-your code tasked only with creating the data that is to be rendered in the email
-template and sending the email. It is definitely a best practice for when the content of
-your emails becomes even moderately complex, and with the Spring Framework's support
-classes for FreeMarker and Velocity becomes quite easy to do. Find below an example of
-using the Velocity template library to create email content.
-
-
-[[mail-templates-example]]
-===== A Velocity-based example
-To use http://velocity.apache.org[Velocity] to create your email template(s), you will
-need to have the Velocity libraries available on your classpath. You will also need to
-create one or more Velocity templates for the email content that your application needs.
-Find below the Velocity template that this example will be using. As you can see it is
-HTML-based, and since it is plain text it can be created using your favorite HTML or
-text editor.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	# in the com/foo/package
-	<html>
-		<body>
-			<h3>Hi ${user.userName}, welcome to the Chipping Sodbury On-the-Hill message boards!</h3>
-
-			<div>
-				Your email address is <a href="mailto:${user.emailAddress}">${user.emailAddress}</a>.
-			</div>
-		</body>
-	</html>
-----
-
-Find below some simple code and Spring XML configuration that makes use of the above
-Velocity template to create email content and send email(s).
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	package com.foo;
-
-	import org.apache.velocity.app.VelocityEngine;
-	import org.springframework.mail.javamail.JavaMailSender;
-	import org.springframework.mail.javamail.MimeMessageHelper;
-	import org.springframework.mail.javamail.MimeMessagePreparator;
-	import org.springframework.ui.velocity.VelocityEngineUtils;
-
-	import javax.mail.internet.MimeMessage;
-	import java.util.HashMap;
-	import java.util.Map;
-
-	public class SimpleRegistrationService implements RegistrationService {
-
-		private JavaMailSender mailSender;
-		private VelocityEngine velocityEngine;
-
-		public void setMailSender(JavaMailSender mailSender) {
-			this.mailSender = mailSender;
-		}
-
-		public void setVelocityEngine(VelocityEngine velocityEngine) {
-			this.velocityEngine = velocityEngine;
-		}
-
-		public void register(User user) {
-
-			// Do the registration logic...
-
-			sendConfirmationEmail(user);
-		}
-
-		private void sendConfirmationEmail(final User user) {
-			MimeMessagePreparator preparator = new MimeMessagePreparator() {
-				public void prepare(MimeMessage mimeMessage) throws Exception {
-					MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-					message.setTo(user.getEmailAddress());
-					message.setFrom("webmaster@csonth.gov.uk"); // could be parameterized...
-					Map model = new HashMap();
-					model.put("user", user);
-					String text = VelocityEngineUtils.mergeTemplateIntoString(
-							velocityEngine, "com/dns/registration-confirmation.vm", model);
-					message.setText(text, true);
-				}
-			};
-			this.mailSender.send(preparator);
-		}
-
-	}
-----
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-		<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-			<property name="host" value="mail.csonth.gov.uk"/>
-		</bean>
-
-		<bean id="registrationService" class="com.foo.SimpleRegistrationService">
-			<property name="mailSender" ref="mailSender"/>
-			<property name="velocityEngine" ref="velocityEngine"/>
-		</bean>
-
-		<bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
-			<property name="velocityProperties">
-				<value>
-					resource.loader=class
-					class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
-				</value>
-			</property>
-		</bean>
-
-	</beans>
-----
+as FreeMarker to define the display structure of email content. This leaves your code
+tasked only with creating the data that is to be rendered in the email template and
+sending the email. It is definitely a best practice for when the content of your emails
+becomes even moderately complex, and with the Spring Framework's support classes for
+FreeMarker becomes quite easy to do.
 
 
 
@@ -8403,15 +8290,42 @@ result in an exception as a custom `CacheManager` will be ignored by the
 `CacheResolver` implementation. This is probably not what you expect.
 ====
 
+[[cache-annotations-cacheable-synchronized]]
+===== Synchronized caching
+In a multi-threaded environment, certain operations might be concurrently invoked for
+the same argument (typically on startup). By default, the cache abstraction does not
+lock anything and the same value may be computed several times, defeating the purpose
+of caching.
+
+For those particular cases, the `sync` attribute can be used to instruct the underlying
+cache provider to _lock_ the cache entry while the value is being computed. As a result,
+only one thread will be busy computing the value while the others are blocked until the
+entry is updated in the cache.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(cacheNames="foos", **sync="true"**)
+	public Foo executeExpensiveOperation(String id) {...}
+----
+
+[NOTE]
+====
+This is an optional feature and your favorite cache library may not support it. All
+`CacheManager` implementations provided by the core framework support it. Check the
+documentation of your cache provider for more details.
+====
+
+
 [[cache-annotations-cacheable-condition]]
 ===== Conditional caching
 Sometimes, a method might not be suitable for caching all the time (for example, it
 might depend on the given arguments). The cache annotations support such functionality
 through the `condition` parameter which takes a `SpEL` expression that is evaluated to
 either `true` or `false`. If `true`, the method is cached - if not, it behaves as if the
-method is not cached, that is executed every since time no matter what values are in the
-cache or what arguments are used. A quick example - the following method will be cached
-only if the argument `name` has a length shorter than 32:
+method is not cached, that is executed every time no matter what values are in the cache
+or what arguments are used. A quick example - the following method will be cached only
+if the argument `name` has a length shorter than 32:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -9013,7 +8927,7 @@ we did in the example above by defining the target cache through the `cache:defi
 === Configuring the cache storage
 Out of the box, the cache abstraction provides several storage integration. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
-controls and manages ++Cache++s and can be used to retrieve these for storage.
+controls and manages ``Cache``s and can be used to retrieve these for storage.
 
 
 [[cache-store-configuration-jdk]]
@@ -9192,7 +9106,7 @@ performs no caching - that is, forces the cached methods to be executed every ti
 	</bean>
 ----
 
-The `CompositeCacheManager` above chains multiple ++CacheManager++s and additionally,
+The `CompositeCacheManager` above chains multiple ``CacheManager``s and additionally,
 through the `fallbackToNoOpCache` flag, adds a __no op__ cache that for all the
 definitions not handled by the configured cache managers. That is, every cache
 definition not found in either `jdkCache` or `gemfireCache` (configured above) will be

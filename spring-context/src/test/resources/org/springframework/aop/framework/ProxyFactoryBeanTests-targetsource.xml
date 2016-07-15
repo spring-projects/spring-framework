@@ -25,7 +25,7 @@
 		in a BeanFactory. If for some strange reason you want to, use Type 3 IoC.
 	-->
 	<bean id="targetSource" class="org.springframework.aop.target.SingletonTargetSource">
-		<constructor-arg><ref local="target"/></constructor-arg>
+		<constructor-arg><ref bean="target"/></constructor-arg>
 	</bean>
 
 	<bean id="directTarget"

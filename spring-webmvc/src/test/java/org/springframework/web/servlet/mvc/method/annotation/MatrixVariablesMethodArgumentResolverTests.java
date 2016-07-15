@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		this.request = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 
-		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<String, MultiValueMap<String, String>>();
+		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<>();
 		this.request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, params);
 	}
 
@@ -142,7 +142,7 @@ public class MatrixVariablesMethodArgumentResolverTests {
 				(Map<String, MultiValueMap<String, String>>) this.request.getAttribute(
 						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		matrixVariables.put(pathVarName, params);
 
 		return params;

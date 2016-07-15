@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package org.springframework.core.env;
  * Interface for resolving properties against any underlying source.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 3.1
  * @see Environment
  * @see PropertySourcesPropertyResolver
@@ -27,14 +28,14 @@ package org.springframework.core.env;
 public interface PropertyResolver {
 
 	/**
-	 * Return whether the given property key is available for resolution, i.e.,
-	 * the value for the given key is not {@code null}.
+	 * Return whether the given property key is available for resolution,
+	 * i.e. if the value for the given key is not {@code null}.
 	 */
 	boolean containsProperty(String key);
 
 	/**
-	 * Return the property value associated with the given key, or {@code null}
-	 * if the key cannot be resolved.
+	 * Return the property value associated with the given key,
+	 * or {@code null} if the key cannot be resolved.
 	 * @param key the property name to resolve
 	 * @see #getProperty(String, String)
 	 * @see #getProperty(String, Class)
@@ -53,8 +54,8 @@ public interface PropertyResolver {
 	String getProperty(String key, String defaultValue);
 
 	/**
-	 * Return the property value associated with the given key, or {@code null}
-	 * if the key cannot be resolved.
+	 * Return the property value associated with the given key,
+	 * or {@code null} if the key cannot be resolved.
 	 * @param key the property name to resolve
 	 * @param targetType the expected type of the property value
 	 * @see #getRequiredProperty(String, Class)
@@ -62,24 +63,14 @@ public interface PropertyResolver {
 	<T> T getProperty(String key, Class<T> targetType);
 
 	/**
-	 * Return the property value associated with the given key, or
-	 * {@code defaultValue} if the key cannot be resolved.
+	 * Return the property value associated with the given key,
+	 * or {@code defaultValue} if the key cannot be resolved.
 	 * @param key the property name to resolve
 	 * @param targetType the expected type of the property value
 	 * @param defaultValue the default value to return if no value is found
 	 * @see #getRequiredProperty(String, Class)
 	 */
 	<T> T getProperty(String key, Class<T> targetType, T defaultValue);
-
-	/**
-	 * Convert the property value associated with the given key to a {@code Class}
-	 * of type {@code T} or {@code null} if the key cannot be resolved.
-	 * @throws org.springframework.core.convert.ConversionException if class specified
-	 * by property value cannot be found  or loaded or if targetType is not assignable
-	 * from class specified by property value
-	 * @see #getProperty(String, Class)
-	 */
-	<T> Class<T> getPropertyAsClass(String key, Class<T> targetType);
 
 	/**
 	 * Return the property value associated with the given key (never {@code null}).

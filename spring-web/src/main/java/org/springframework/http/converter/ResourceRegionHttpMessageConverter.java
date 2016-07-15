@@ -65,7 +65,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
-	protected ResourceRegion readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage)
+	protected ResourceRegion readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		return null;
@@ -119,10 +119,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		}
 	}
 
-	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage)
-			throws IOException {
-
-		Assert.notNull(region, "ResourceRegion should not be null");
+	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage) throws IOException {
+		Assert.notNull(region, "ResourceRegion must not be null");
 		HttpHeaders responseHeaders = outputMessage.getHeaders();
 		long start = region.getPosition();
 		long end = start + region.getCount() - 1;
@@ -177,6 +175,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		println(out);
 		print(out, "--" + boundaryString + "--");
 	}
+
 
 
 	private static void println(OutputStream os) throws IOException {

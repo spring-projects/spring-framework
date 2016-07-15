@@ -182,7 +182,7 @@ public class PersistenceXmlParsingTests {
 
 		String resource = "/org/springframework/orm/jpa/persistence-complex.xml";
 		MapDataSourceLookup dataSourceLookup = new MapDataSourceLookup();
-		Map<String, DataSource> dataSources = new HashMap<String, DataSource>();
+		Map<String, DataSource> dataSources = new HashMap<>();
 		dataSources.put("jdbc/MyPartDB", ds);
 		dataSources.put("jdbc/MyDB", ds);
 		dataSourceLookup.setDataSources(dataSources);

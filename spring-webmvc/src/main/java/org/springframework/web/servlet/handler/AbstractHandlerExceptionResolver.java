@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.handler;
 
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -128,13 +129,15 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
-			// Log exception, both at debug log level and at warn level, if desired.
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
 			}
-			logException(ex, request);
 			prepareResponse(ex, response);
-			return doResolveException(request, response, handler, ex);
+			ModelAndView result = doResolveException(request, response, handler, ex);
+			if (result != null) {
+				logException(ex, request);
+			}
+			return result;
 		}
 		else {
 			return null;
@@ -194,7 +197,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return the log message to use
 	 */
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
-		return "Handler execution resulted in exception: " + ex;
+		return "Resolved exception caused by Handler execution: " + ex;
 	}
 
 	/**

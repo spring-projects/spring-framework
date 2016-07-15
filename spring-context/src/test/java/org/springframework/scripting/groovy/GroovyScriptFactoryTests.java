@@ -466,7 +466,7 @@ public class GroovyScriptFactoryTests {
 	@Test  // SPR-6268
 	public void testProxyTargetClassNotAllowedIfNotGroovy() throws Exception {
 		try {
-			new ClassPathXmlApplicationContext("jruby-with-xsd-proxy-target-class.xml", getClass());
+			new ClassPathXmlApplicationContext("groovy-with-xsd-proxy-target-class.xml", getClass());
 		}
 		catch (BeanCreationException ex) {
 			assertTrue(ex.getMessage().contains("Cannot use proxyTargetClass=true"));
@@ -541,15 +541,6 @@ public class GroovyScriptFactoryTests {
 		ContextScriptBean bean2 = (ContextScriptBean) ctx.getBean("bean2");
 		assertEquals(tb, bean2.getTestBean());
 		assertEquals(ctx, bean2.getApplicationContext());
-
-		try {
-			ctx.getBean("bean3");
-			fail("Should have thrown BeanCreationException");
-		}
-		catch (BeanCreationException ex) {
-			// expected
-			assertTrue(ex.contains(UnsatisfiedDependencyException.class));
-		}
 	}
 
 	@Test

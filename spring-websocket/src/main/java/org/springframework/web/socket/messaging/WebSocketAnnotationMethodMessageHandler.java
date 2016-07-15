@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 		}
 
 		public static List<MessagingAdviceBean> createFromList(List<ControllerAdviceBean> beans) {
-			List<MessagingAdviceBean> result = new ArrayList<MessagingAdviceBean>(beans.size());
+			List<MessagingAdviceBean> result = new ArrayList<>(beans.size());
 			for (ControllerAdviceBean bean : beans) {
 				result.add(new MessagingControllerAdviceBean(bean));
 			}

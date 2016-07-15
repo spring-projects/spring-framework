@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 
 	@Test
 	public void basic() throws Exception {
-		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
+		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 		interceptors.add(new NoOpInterceptor());
 		interceptors.add(new NoOpInterceptor());
 		interceptors.add(new NoOpInterceptor());
@@ -77,7 +77,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 
 	@Test
 	public void noExecution() throws Exception {
-		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
+		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 		interceptors.add(new ClientHttpRequestInterceptor() {
 			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class PropertyComparatorTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCompoundComparator() {
-		CompoundComparator<Dog> c = new CompoundComparator<Dog>();
+		CompoundComparator<Dog> c = new CompoundComparator<>();
 		c.addComparator(new PropertyComparator("lastName", false, true));
 
 		Dog dog1 = new Dog();
@@ -80,7 +80,7 @@ public class PropertyComparatorTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCompoundComparatorInvert() {
-		CompoundComparator<Dog> c = new CompoundComparator<Dog>();
+		CompoundComparator<Dog> c = new CompoundComparator<>();
 		c.addComparator(new PropertyComparator("lastName", false, true));
 		c.addComparator(new PropertyComparator("firstName", false, true));
 		Dog dog1 = new Dog();

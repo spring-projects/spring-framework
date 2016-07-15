@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class TilesViewTests {
 
 	@Test
 	public void render() throws Exception {
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("modelAttribute", "modelValue");
 		view.render(model, request, response);
 		assertEquals("modelValue", request.getAttribute("modelAttribute"));
@@ -84,14 +84,14 @@ public class TilesViewTests {
 
 	@Test
 	public void alwaysIncludeDefaults() throws Exception {
-		view.render(new HashMap<String, Object>(), request, response);
+		view.render(new HashMap<>(), request, response);
 		assertNull(request.getAttribute(AbstractRequest.FORCE_INCLUDE_ATTRIBUTE_NAME));
 	}
 
 	@Test
 	public void alwaysIncludeEnabled() throws Exception {
 		view.setAlwaysInclude(true);
-		view.render(new HashMap<String, Object>(), request, response);
+		view.render(new HashMap<>(), request, response);
 		assertTrue((Boolean)request.getAttribute(AbstractRequest.FORCE_INCLUDE_ATTRIBUTE_NAME));
 	}
 

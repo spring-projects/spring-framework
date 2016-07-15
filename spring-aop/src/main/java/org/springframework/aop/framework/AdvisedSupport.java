@@ -87,13 +87,13 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Interfaces to be implemented by the proxy. Held in List to keep the order
 	 * of registration, to create JDK proxy with specified order of interfaces.
 	 */
-	private List<Class<?>> interfaces = new ArrayList<Class<?>>();
+	private List<Class<?>> interfaces = new ArrayList<>();
 
 	/**
 	 * List of Advisors. If an Advice is added, it will be wrapped
 	 * in an Advisor before being added to this List.
 	 */
-	private List<Advisor> advisors = new LinkedList<Advisor>();
+	private List<Advisor> advisors = new LinkedList<>();
 
 	/**
 	 * Array updated on changes to the advisors list, which is easier
@@ -122,7 +122,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Initialize the method cache.
 	 */
 	private void initMethodCache() {
-		this.methodCache = new ConcurrentHashMap<MethodCacheKey, List<Object>>(32);
+		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
 
@@ -506,7 +506,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @param other the AdvisedSupport object to copy configuration from
 	 */
 	protected void copyConfigurationFrom(AdvisedSupport other) {
-		copyConfigurationFrom(other, other.targetSource, new ArrayList<Advisor>(other.advisors));
+		copyConfigurationFrom(other, other.targetSource, new ArrayList<>(other.advisors));
 	}
 
 	/**
@@ -520,7 +520,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 		copyFrom(other);
 		this.targetSource = targetSource;
 		this.advisorChainFactory = other.advisorChainFactory;
-		this.interfaces = new ArrayList<Class<?>>(other.interfaces);
+		this.interfaces = new ArrayList<>(other.interfaces);
 		for (Advisor advisor : advisors) {
 			if (advisor instanceof IntroductionAdvisor) {
 				validateIntroductionAdvisor((IntroductionAdvisor) advisor);

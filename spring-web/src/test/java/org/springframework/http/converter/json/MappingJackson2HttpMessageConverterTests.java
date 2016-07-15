@@ -99,7 +99,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertEquals("Foo", result.get("string"));
 		assertEquals(42, result.get("number"));
 		assertEquals(42D, (Double) result.get("fraction"), 0D);
-		List<String> array = new ArrayList<String>();
+		List<String> array = new ArrayList<>();
 		array.add("Foo");
 		array.add("Bar");
 		assertEquals(array, result.get("array"));
@@ -329,7 +329,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	@Test  // SPR-13318
 	public void writeSubTypeList() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		List<MyBean> beans = new ArrayList<MyBean>();
+		List<MyBean> beans = new ArrayList<>();
 		MyBean foo = new MyBean();
 		foo.setString("Foo");
 		foo.setNumber(42);

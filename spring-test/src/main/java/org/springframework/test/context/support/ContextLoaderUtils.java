@@ -97,7 +97,7 @@ abstract class ContextLoaderUtils {
 
 		Class<ContextConfiguration> contextConfigType = ContextConfiguration.class;
 		Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
-		List<List<ContextConfigurationAttributes>> hierarchyAttributes = new ArrayList<List<ContextConfigurationAttributes>>();
+		List<List<ContextConfigurationAttributes>> hierarchyAttributes = new ArrayList<>();
 
 		UntypedAnnotationDescriptor desc =
 				findAnnotationDescriptorForTypes(testClass, contextConfigType, contextHierarchyType);
@@ -122,7 +122,7 @@ abstract class ContextLoaderUtils {
 				throw new IllegalStateException(msg);
 			}
 
-			List<ContextConfigurationAttributes> configAttributesList = new ArrayList<ContextConfigurationAttributes>();
+			List<ContextConfigurationAttributes> configAttributesList = new ArrayList<>();
 
 			if (contextConfigDeclaredLocally) {
 				ContextConfiguration contextConfiguration = AnnotationUtils.synthesizeAnnotation(
@@ -178,7 +178,7 @@ abstract class ContextLoaderUtils {
 	 * @see #resolveContextHierarchyAttributes(Class)
 	 */
 	static Map<String, List<ContextConfigurationAttributes>> buildContextHierarchyMap(Class<?> testClass) {
-		final Map<String, List<ContextConfigurationAttributes>> map = new LinkedHashMap<String, List<ContextConfigurationAttributes>>();
+		final Map<String, List<ContextConfigurationAttributes>> map = new LinkedHashMap<>();
 		int hierarchyLevel = 1;
 
 		for (List<ContextConfigurationAttributes> configAttributesList : resolveContextHierarchyAttributes(testClass)) {
@@ -193,7 +193,7 @@ abstract class ContextLoaderUtils {
 				// Encountered a new context hierarchy level?
 				if (!map.containsKey(name)) {
 					hierarchyLevel++;
-					map.put(name, new ArrayList<ContextConfigurationAttributes>());
+					map.put(name, new ArrayList<>());
 				}
 
 				map.get(name).add(configAttributes);
@@ -201,7 +201,7 @@ abstract class ContextLoaderUtils {
 		}
 
 		// Check for uniqueness
-		Set<List<ContextConfigurationAttributes>> set = new HashSet<List<ContextConfigurationAttributes>>(map.values());
+		Set<List<ContextConfigurationAttributes>> set = new HashSet<>(map.values());
 		if (set.size() != map.size()) {
 			String msg = String.format("The @ContextConfiguration elements configured via @ContextHierarchy in " +
 					"test class [%s] and its superclasses must define unique contexts per hierarchy level.",
@@ -233,7 +233,7 @@ abstract class ContextLoaderUtils {
 	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 
-		List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
+		List<ContextConfigurationAttributes> attributesList = new ArrayList<>();
 		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
 
 		AnnotationDescriptor<ContextConfiguration> descriptor = findAnnotationDescriptor(testClass, annotationType);

@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  */
 public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
-	private static final ThreadLocal<Method> currentlyInvokedFactoryMethod = new ThreadLocal<Method>();
+	private static final ThreadLocal<Method> currentlyInvokedFactoryMethod = new ThreadLocal<>();
 
 
 	/**

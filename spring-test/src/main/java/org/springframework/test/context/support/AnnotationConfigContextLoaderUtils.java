@@ -60,7 +60,7 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	public static Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
 		Assert.notNull(declaringClass, "Declaring class must not be null");
 
-		List<Class<?>> configClasses = new ArrayList<Class<?>>();
+		List<Class<?>> configClasses = new ArrayList<>();
 
 		for (Class<?> candidate : declaringClass.getDeclaredClasses()) {
 			if (isDefaultConfigurationClassCandidate(candidate)) {

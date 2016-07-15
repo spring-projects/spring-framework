@@ -468,17 +468,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	class MappingRegistry {
 
-		private final Map<T, MappingRegistration<T>> registry = new HashMap<T, MappingRegistration<T>>();
+		private final Map<T, MappingRegistration<T>> registry = new HashMap<>();
 
-		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<T, HandlerMethod>();
+		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<>();
 
-		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<String, T>();
+		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
 
 		private final Map<String, List<HandlerMethod>> nameLookup =
-				new ConcurrentHashMap<String, List<HandlerMethod>>();
+				new ConcurrentHashMap<>();
 
 		private final Map<HandlerMethod, CorsConfiguration> corsLookup =
-				new ConcurrentHashMap<HandlerMethod, CorsConfiguration>();
+				new ConcurrentHashMap<>();
 
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -554,7 +554,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					this.corsLookup.put(handlerMethod, corsConfig);
 				}
 
-				this.registry.put(mapping, new MappingRegistration<T>(mapping, handlerMethod, directUrls, name));
+				this.registry.put(mapping, new MappingRegistration<>(mapping, handlerMethod, directUrls, name));
 			}
 			finally {
 				this.readWriteLock.writeLock().unlock();
@@ -572,7 +572,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		private List<String> getDirectUrls(T mapping) {
-			List<String> urls = new ArrayList<String>(1);
+			List<String> urls = new ArrayList<>(1);
 			for (String path : getMappingPathPatterns(mapping)) {
 				if (!getPathMatcher().isPattern(path)) {
 					urls.add(path);
@@ -597,7 +597,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Mapping name '" + name + "'");
 			}
 
-			List<HandlerMethod> newList = new ArrayList<HandlerMethod>(oldList.size() + 1);
+			List<HandlerMethod> newList = new ArrayList<>(oldList.size() + 1);
 			newList.addAll(oldList);
 			newList.add(handlerMethod);
 			this.nameLookup.put(name, newList);
@@ -653,7 +653,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				this.nameLookup.remove(name);
 				return;
 			}
-			List<HandlerMethod> newList = new ArrayList<HandlerMethod>(oldList.size() - 1);
+			List<HandlerMethod> newList = new ArrayList<>(oldList.size() - 1);
 			for (HandlerMethod current : oldList) {
 				if (!current.equals(handlerMethod)) {
 					newList.add(current);

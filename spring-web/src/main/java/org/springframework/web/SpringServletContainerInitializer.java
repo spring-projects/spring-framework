@@ -140,7 +140,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	public void onStartup(Set<Class<?>> webAppInitializerClasses, ServletContext servletContext)
 			throws ServletException {
 
-		List<WebApplicationInitializer> initializers = new LinkedList<WebApplicationInitializer>();
+		List<WebApplicationInitializer> initializers = new LinkedList<>();
 
 		if (webAppInitializerClasses != null) {
 			for (Class<?> waiClass : webAppInitializerClasses) {

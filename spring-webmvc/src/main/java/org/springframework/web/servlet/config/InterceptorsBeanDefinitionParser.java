@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 
 	private ManagedList<String> getIncludePatterns(Element interceptor, String elementName) {
 		List<Element> paths = DomUtils.getChildElementsByTagName(interceptor, elementName);
-		ManagedList<String> patterns = new ManagedList<String>(paths.size());
+		ManagedList<String> patterns = new ManagedList<>(paths.size());
 		for (Element path : paths) {
 			patterns.add(path.getAttribute("path"));
 		}

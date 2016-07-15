@@ -220,7 +220,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private List<DestructionAwareBeanPostProcessor> filterPostProcessors(List<BeanPostProcessor> processors, Object bean) {
 		List<DestructionAwareBeanPostProcessor> filteredPostProcessors = null;
 		if (!CollectionUtils.isEmpty(processors)) {
-			filteredPostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>(processors.size());
+			filteredPostProcessors = new ArrayList<>(processors.size());
 			for (BeanPostProcessor processor : processors) {
 				if (processor instanceof DestructionAwareBeanPostProcessor) {
 					DestructionAwareBeanPostProcessor dabpp = (DestructionAwareBeanPostProcessor) processor;
@@ -388,7 +388,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	protected Object writeReplace() {
 		List<DestructionAwareBeanPostProcessor> serializablePostProcessors = null;
 		if (this.beanPostProcessors != null) {
-			serializablePostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>();
+			serializablePostProcessors = new ArrayList<>();
 			for (DestructionAwareBeanPostProcessor postProcessor : this.beanPostProcessors) {
 				if (postProcessor instanceof Serializable) {
 					serializablePostProcessors.add(postProcessor);

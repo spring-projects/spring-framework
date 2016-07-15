@@ -34,9 +34,9 @@ import org.springframework.util.Assert;
  */
 public class ListenableFutureCallbackRegistry<T> {
 
-	private final Queue<SuccessCallback<? super T>> successCallbacks = new LinkedList<SuccessCallback<? super T>>();
+	private final Queue<SuccessCallback<? super T>> successCallbacks = new LinkedList<>();
 
-	private final Queue<FailureCallback> failureCallbacks = new LinkedList<FailureCallback>();
+	private final Queue<FailureCallback> failureCallbacks = new LinkedList<>();
 
 	private State state = State.NEW;
 

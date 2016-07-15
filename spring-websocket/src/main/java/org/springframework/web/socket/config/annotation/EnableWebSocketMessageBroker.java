@@ -45,12 +45,12 @@ import org.springframework.context.annotation.Import;
  * &#064;EnableWebSocketMessageBroker
  * public class MyConfiguration extends AbstractWebSocketMessageBrokerConfigurer {
  *
- * 	   &#064;Override
+ *     &#064;Override
  *     public void registerStompEndpoints(StompEndpointRegistry registry) {
  *         registry.addEndpoint("/portfolio").withSockJS();
  *     }
  *
- * 	   &#064;Bean
+ *     &#064;Bean
  *     public void configureMessageBroker(MessageBrokerRegistry registry) {
  *         registry.enableStompBrokerRelay("/queue/", "/topic/");
  *         registry.setApplicationDestinationPrefixes("/app/");

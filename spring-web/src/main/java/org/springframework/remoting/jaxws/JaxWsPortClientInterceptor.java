@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,21 +35,18 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.remoting.RemoteConnectFailureException;
 import org.springframework.remoting.RemoteLookupFailureException;
 import org.springframework.remoting.RemoteProxyFailureException;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} for accessing a
- * specific port of a JAX-WS service. Compatible with JAX-WS 2.1 and 2.2,
- * as included in JDK 6 update 4+ and Java 7/8.
+ * specific port of a JAX-WS service.
  *
  * <p>Uses either {@link LocalJaxWsServiceFactory}'s facilities underneath,
  * or takes an explicit reference to an existing JAX-WS Service instance
@@ -85,8 +82,6 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	private Map<String, Object> customProperties;
 
 	private WebServiceFeature[] portFeatures;
-
-	private Object[] webServiceFeatures;
 
 	private Class<?> serviceInterface;
 
@@ -245,7 +240,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	public Map<String, Object> getCustomProperties() {
 		if (this.customProperties == null) {
-			this.customProperties = new HashMap<String, Object>();
+			this.customProperties = new HashMap<>();
 		}
 		return this.customProperties;
 	}
@@ -269,22 +264,6 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 */
 	public void setPortFeatures(WebServiceFeature... features) {
 		this.portFeatures = features;
-	}
-
-	/**
-	 * Specify WebServiceFeature specifications for the JAX-WS port stub:
-	 * in the form of actual {@link javax.xml.ws.WebServiceFeature} objects,
-	 * WebServiceFeature Class references, or WebServiceFeature class names.
-	 * <p>As of Spring 4.0, this is effectively just an alternative way of
-	 * specifying {@link #setPortFeatures "portFeatures"}. Do not specify
-	 * both properties at the same time; prefer "portFeatures" moving forward.
-	 * @deprecated as of Spring 4.0, in favor of the differentiated
-	 * {@link #setServiceFeatures "serviceFeatures"} and
-	 * {@link #setPortFeatures "portFeatures"} properties
-	 */
-	@Deprecated
-	public void setWebServiceFeatures(Object[] webServiceFeatures) {
-		this.webServiceFeatures = webServiceFeatures;
 	}
 
 	/**
@@ -315,10 +294,8 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	}
 
 	/**
-	 * Set the bean ClassLoader to use for this interceptor:
-	 * for resolving WebServiceFeature class names as specified through
-	 * {@link #setWebServiceFeatures}, and also for building a client
-	 * proxy in the {@link JaxWsPortProxyFactoryBean} subclass.
+	 * Set the bean ClassLoader to use for this interceptor: primarily for
+	 * building a client proxy in the {@link JaxWsPortProxyFactoryBean} subclass.
 	 */
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
@@ -429,48 +406,13 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * {@code Service.getPort(...)}
 	 */
 	protected Object getPortStub(Service service, QName portQName) {
-		if (this.portFeatures != null || this.webServiceFeatures != null) {
-			WebServiceFeature[] portFeaturesToUse = this.portFeatures;
-			if (portFeaturesToUse == null) {
-				portFeaturesToUse = new WebServiceFeature[this.webServiceFeatures.length];
-				for (int i = 0; i < this.webServiceFeatures.length; i++) {
-					portFeaturesToUse[i] = convertWebServiceFeature(this.webServiceFeatures[i]);
-				}
-			}
-			return (portQName != null ? service.getPort(portQName, getServiceInterface(), portFeaturesToUse) :
-					service.getPort(getServiceInterface(), portFeaturesToUse));
+		if (this.portFeatures != null) {
+			return (portQName != null ? service.getPort(portQName, getServiceInterface(), this.portFeatures) :
+					service.getPort(getServiceInterface(), this.portFeatures));
 		}
 		else {
 			return (portQName != null ? service.getPort(portQName, getServiceInterface()) :
 					service.getPort(getServiceInterface()));
-		}
-	}
-
-	/**
-	 * Convert the given feature specification object to a WebServiceFeature instance
-	 * @param feature the feature specification object, as passed into the
-	 * {@link #setWebServiceFeatures "webServiceFeatures"} bean property
-	 * @return the WebServiceFeature instance (never {@code null})
-	 */
-	private WebServiceFeature convertWebServiceFeature(Object feature) {
-		Assert.notNull(feature, "WebServiceFeature specification object must not be null");
-		if (feature instanceof WebServiceFeature) {
-			return (WebServiceFeature) feature;
-		}
-		else if (feature instanceof Class) {
-			return (WebServiceFeature) BeanUtils.instantiate((Class<?>) feature);
-		}
-		else if (feature instanceof String) {
-			try {
-				Class<?> featureClass = getBeanClassLoader().loadClass((String) feature);
-				return (WebServiceFeature) BeanUtils.instantiate(featureClass);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalArgumentException("Could not load WebServiceFeature class [" + feature + "]");
-			}
-		}
-		else {
-			throw new IllegalArgumentException("Unknown WebServiceFeature specification type: " + feature.getClass());
 		}
 	}
 
@@ -485,7 +427,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @see #setCustomProperties
 	 */
 	protected void preparePortStub(Object stub) {
-		Map<String, Object> stubProperties = new HashMap<String, Object>();
+		Map<String, Object> stubProperties = new HashMap<>();
 		String username = getUsername();
 		if (username != null) {
 			stubProperties.put(BindingProvider.USERNAME_PROPERTY, username);

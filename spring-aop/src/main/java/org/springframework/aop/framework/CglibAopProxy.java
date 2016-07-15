@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 	protected static final Log logger = LogFactory.getLog(CglibAopProxy.class);
 
 	/** Keeps track of the Classes that we have validated for final methods */
-	private static final Map<Class<?>, Boolean> validatedClasses = new WeakHashMap<Class<?>, Boolean>();
+	private static final Map<Class<?>, Boolean> validatedClasses = new WeakHashMap<>();
 
 
 	/** The configuration used to configure this proxy */
@@ -322,7 +322,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 		if (isStatic && isFrozen) {
 			Method[] methods = rootClass.getMethods();
 			Callback[] fixedCallbacks = new Callback[methods.length];
-			this.fixedInterceptorMap = new HashMap<String, Integer>(methods.length);
+			this.fixedInterceptorMap = new HashMap<>(methods.length);
 
 			// TODO: small memory optimisation here (can skip creation for methods with no advice)
 			for (int x = 0; x < methods.length; x++) {

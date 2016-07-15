@@ -38,8 +38,8 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -381,17 +381,6 @@ public class MvcUriComponentsBuilder {
 				(controllerType != null ? controllerType : method.getDeclaringClass()), method, args);
 	}
 
-	/**
-	 * @see #fromMethod(Class, Method, Object...)
-	 * @see #fromMethod(UriComponentsBuilder, Class, Method, Object...)
-	 * @deprecated as of 4.2, this is deprecated in favor of the overloaded
-	 * method that also accepts a controllerType argument
-	 */
-	@Deprecated
-	public static UriComponentsBuilder fromMethod(Method method, Object... args) {
-		return fromMethodInternal(null, method.getDeclaringClass(), method, args);
-	}
-
 	private static UriComponentsBuilder fromMethodInternal(UriComponentsBuilder baseUrl,
 			Class<?> controllerType, Method method, Object... args) {
 
@@ -450,7 +439,7 @@ public class MvcUriComponentsBuilder {
 			@Override
 			public boolean matches(Method method) {
 				String name = method.getName();
-				int argLength = method.getParameterTypes().length;
+				int argLength = method.getParameterCount();
 				return (name.equals(methodName) && argLength == args.length);
 			}
 		};
@@ -476,14 +465,14 @@ public class MvcUriComponentsBuilder {
 			contributor = defaultUriComponentsContributor;
 		}
 
-		int paramCount = method.getParameterTypes().length;
+		int paramCount = method.getParameterCount();
 		int argCount = args.length;
 		if (paramCount != argCount) {
 			throw new IllegalArgumentException("Number of method parameters " + paramCount +
 					" does not match number of argument values " + argCount);
 		}
 
-		final Map<String, Object> uriVars = new HashMap<String, Object>();
+		final Map<String, Object> uriVars = new HashMap<>();
 		for (int i = 0; i < paramCount; i++) {
 			MethodParameter param = new SynthesizingMethodParameter(method, i);
 			param.initParameterNameDiscovery(parameterNameDiscoverer);
@@ -771,20 +760,10 @@ public class MvcUriComponentsBuilder {
 			this.baseUrl = (baseUrl != null ? baseUrl : initBaseUrl());
 			this.controllerType = controllerType;
 			this.method = method;
-			this.argumentValues = new Object[method.getParameterTypes().length];
+			this.argumentValues = new Object[method.getParameterCount()];
 			for (int i = 0; i < this.argumentValues.length; i++) {
 				this.argumentValues[i] = null;
 			}
-		}
-
-		/**
-		 * @see #MethodArgumentBuilder(Class, Method)
-		 * @deprecated as of 4.2, this is deprecated in favor of alternative constructors
-		 * that accept a controllerType argument
-		 */
-		@Deprecated
-		public MethodArgumentBuilder(Method method) {
-			this(method.getDeclaringClass(), method);
 		}
 
 		private static UriComponentsBuilder initBaseUrl() {

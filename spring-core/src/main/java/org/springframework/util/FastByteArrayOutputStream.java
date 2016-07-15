@@ -48,7 +48,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 
 
 	// The buffers used to store the content bytes
-	private final LinkedList<byte[]> buffers = new LinkedList<byte[]>();
+	private final LinkedList<byte[]> buffers = new LinkedList<>();
 
 	// The size, in bytes, to use when allocating the first byte[]
 	private final int initialBlockSize;

@@ -144,10 +144,8 @@ loading, and the transparent creation of contexts by, for example, a Servlet con
 The Context module also supports Java EE features such as EJB, JMX, and basic remoting.
 The `ApplicationContext` interface is the focal point of the Context module.
 `spring-context-support` provides support for integrating common third-party libraries
-into a Spring application context for caching (EhCache, Guava, JCache), mailing
-(JavaMail), scheduling (CommonJ, Quartz) and template engines (FreeMarker, JasperReports,
-Velocity).
-
+into a Spring application context, in particular for caching (EhCache, JCache) and
+scheduling (CommonJ, Quartz).
 
 The `spring-expression` module provides a powerful <<expressions,__Expression
 Language__>> for querying and manipulating an object graph at runtime. It is an extension
@@ -198,14 +196,13 @@ management for classes that implement special interfaces and for __all your POJO
 Old Java Objects)__.
 
 The `spring-orm` module provides integration layers for popular
-<<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>>,
-<<orm-jdo,JDO>>, and <<orm-hibernate,Hibernate>>. Using the `spring-orm` module you can
-use all of these O/R-mapping frameworks in combination with all of the other features
-Spring offers, such as the simple declarative transaction management feature mentioned
-previously.
+<<orm-introduction,object-relational mapping>> APIs, including <<orm-jpa,JPA>> and
+<<orm-hibernate,Hibernate>>. Using the `spring-orm` module you can use these
+O/R-mapping frameworks in combination with all of the other features Spring offers,
+such as the simple declarative transaction management feature mentioned previously.
 
 The `spring-oxm` module provides an abstraction layer that supports <<oxm,Object/XML
-mapping>> implementations such as JAXB, Castor, XMLBeans, JiBX and XStream.
+mapping>> implementations such as JAXB, Castor, JiBX and XStream.
 
 The `spring-jms` module (<<jms,Java Messaging Service>>) contains features for producing and
 consuming messages. Since Spring Framework 4.1, it provides integration with the
@@ -214,8 +211,8 @@ consuming messages. Since Spring Framework 4.1, it provides integration with the
 
 [[overview-web]]
 ==== Web
-The __Web__ layer consists of the `spring-web`, `spring-webmvc`, `spring-websocket`, and
-`spring-webmvc-portlet` modules.
+The __Web__ layer consists of the `spring-web`, `spring-webmvc` and `spring-websocket`
+modules.
 
 The `spring-web` module provides basic web-oriented integration features such as
 multipart file upload functionality and the initialization of the IoC container using
@@ -228,17 +225,13 @@ for web applications. Spring's MVC framework provides a clean separation between
 model code and web forms and integrates with all of the other features of the Spring
 Framework.
 
-The `spring-webmvc-portlet` module (also known as the __Web-Portlet__ module) provides
-the MVC implementation to be used in a Portlet environment and mirrors the functionality
-of the `spring-webmvc` module.
-
 
 [[overview-testing]]
 ==== Test
 The `spring-test` module supports the <<unit-testing,unit testing>> and
 <<integration-testing,integration testing>> of Spring components with JUnit or TestNG. It
 provides consistent <<testcontext-ctx-management,loading>> of Spring
-++ApplicationContext++s and <<testcontext-ctx-management-caching,caching>> of those
+``ApplicationContext``s and <<testcontext-ctx-management-caching,caching>> of those
 contexts. It also provides <<mock-objects,mock objects>> that you can use to test your
 code in isolation.
 
@@ -259,11 +252,11 @@ the web application fully transactional, just as it would be if you used EJB
 container-managed transactions. All your custom business logic can be implemented with
 simple POJOs and managed by Spring's IoC container. Additional services include support
 for sending email and validation that is independent of the web layer, which lets you
-choose where to execute validation rules. Spring's ORM support is integrated with JPA,
-Hibernate and JDO; for example, when using Hibernate, you can continue to use
-your existing mapping files and standard Hibernate `SessionFactory` configuration. Form
-controllers seamlessly integrate the web-layer with the domain model, removing the need
-for `ActionForms` or other classes that transform HTTP parameters to values for your
+choose where to execute validation rules. Spring's ORM support is integrated with JPA
+and Hibernate; for example, when using Hibernate, you can continue to use your existing
+mapping files and standard Hibernate `SessionFactory` configuration. Form controllers
+seamlessly integrate the web-layer with the domain model, removing the need for
+`ActionForms` or other classes that transform HTTP parameters to values for your
 domain model.
 
 .Spring middle-tier using a third-party web framework
@@ -415,10 +408,6 @@ modules, see <<overview-modules>>.
 |org.springframework
 |spring-webmvc
 |REST Web Services and model-view-controller implementation for web applications
-
-|org.springframework
-|spring-webmvc-portlet
-|MVC implementation to be used in a Portlet environment
 
 |org.springframework
 |spring-websocket

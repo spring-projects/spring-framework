@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,10 +83,10 @@ public class LocalConnectionFactoryBean implements FactoryBean<Object>, Initiali
 	 * <p>The ManagerConnectionFactory will usually be set up as separate bean
 	 * (potentially as inner bean), populated with JavaBean properties:
 	 * a ManagerConnectionFactory is encouraged to follow the JavaBean pattern
-	 * by the JCA specification, analogous to a JDBC DataSource and a JDO
-	 * PersistenceManagerFactory.
+	 * by the JCA specification, analogous to a JDBC DataSource and a JPA
+	 * EntityManagerFactory.
 	 * <p>Note that the ManagerConnectionFactory implementation might expect
-	 * a reference to its JCA 1.5 ResourceAdapter, expressed through the
+	 * a reference to its JCA 1.7 ResourceAdapter, expressed through the
 	 * {@link javax.resource.spi.ResourceAdapterAssociation} interface.
 	 * Simply inject the corresponding ResourceAdapter instance into its
 	 * "resourceAdapter" bean property in this case, before passing the

@@ -65,7 +65,7 @@ import org.springframework.util.StringValueResolver;
  *
  * <p>This post-processor is automatically registered by Spring's
  * {@code <task:annotation-driven>} XML element, and also by the
- * @{@link EnableScheduling} annotation.
+ * {@link EnableScheduling @EnableScheduling} annotation.
  *
  * <p>Autodetects any {@link SchedulingConfigurer} instances in the container,
  * allowing for customization of the scheduler to be used or for fine-grained
@@ -113,7 +113,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks =
-			new ConcurrentHashMap<Object, Set<ScheduledTask>>(16);
+			new ConcurrentHashMap<>(16);
 
 
 	@Override
@@ -293,7 +293,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		try {
-			Assert.isTrue(method.getParameterTypes().length == 0,
+			Assert.isTrue(method.getParameterCount() == 0,
 					"Only no-arg methods may be annotated with @Scheduled");
 
 			Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
@@ -304,7 +304,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 			Set<ScheduledTask> tasks = this.scheduledTasks.get(bean);
 			if (tasks == null) {
-				tasks = new LinkedHashSet<ScheduledTask>(4);
+				tasks = new LinkedHashSet<>(4);
 				this.scheduledTasks.put(bean, tasks);
 			}
 

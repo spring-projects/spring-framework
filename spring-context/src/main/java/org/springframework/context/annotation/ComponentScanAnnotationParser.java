@@ -121,7 +121,7 @@ class ComponentScanAnnotationParser {
 			scanner.getBeanDefinitionDefaults().setLazyInit(true);
 		}
 
-		Set<String> basePackages = new LinkedHashSet<String>();
+		Set<String> basePackages = new LinkedHashSet<>();
 		String[] basePackagesArray = componentScan.getAliasedStringArray("basePackages", ComponentScan.class, declaringClass);
 		for (String pkg : basePackagesArray) {
 			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
@@ -145,7 +145,7 @@ class ComponentScanAnnotationParser {
 	}
 
 	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) {
-		List<TypeFilter> typeFilters = new ArrayList<TypeFilter>();
+		List<TypeFilter> typeFilters = new ArrayList<>();
 		FilterType filterType = filterAttributes.getEnum("type");
 
 		for (Class<?> filterClass : filterAttributes.getAliasedClassArray("classes", ComponentScan.Filter.class, null)) {

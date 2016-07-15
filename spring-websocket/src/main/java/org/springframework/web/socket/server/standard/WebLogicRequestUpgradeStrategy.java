@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,32 +46,21 @@ import org.springframework.web.socket.server.HandshakeFailureException;
  * Supports 12.1.3 as well as 12.2.1, as of Spring Framework 4.2.3.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeStrategy {
-
-	private static final boolean WLS_12_1_3 = isWebLogic1213();
-
-	private static final TyrusEndpointHelper endpointHelper =
-			(WLS_12_1_3 ? new Tyrus135EndpointHelper() : new Tyrus17EndpointHelper());
 
 	private static final TyrusMuxableWebSocketHelper webSocketHelper = new TyrusMuxableWebSocketHelper();
 
 	private static final WebLogicServletWriterHelper servletWriterHelper = new WebLogicServletWriterHelper();
 
 	private static final Connection.CloseListener noOpCloseListener = new Connection.CloseListener() {
-
 		@Override
 		public void close(CloseReason reason) {
 		}
 	};
 
-
-
-	@Override
-	protected TyrusEndpointHelper getEndpointHelper() {
-		return endpointHelper;
-	}
 
 	@Override
 	protected void handleSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -94,27 +83,13 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 		response.flushBuffer();
 
 		boolean isProtected = request.getUserPrincipal() != null;
-		Writer servletWriter = servletWriterHelper.newInstance(response, webSocket, isProtected);
+		Writer servletWriter = servletWriterHelper.newInstance(webSocket, isProtected);
 		Connection connection = upgradeInfo.createConnection(servletWriter, noOpCloseListener);
 		new BeanWrapperImpl(webSocket).setPropertyValue("connection", connection);
 		new BeanWrapperImpl(servletWriter).setPropertyValue("connection", connection);
 		webSocketHelper.registerForReadEvent(webSocket);
 	}
 
-
-	private static boolean isWebLogic1213() {
-		try {
-			type("weblogic.websocket.tyrus.TyrusMuxableWebSocket").getDeclaredConstructor(
-					type("weblogic.servlet.internal.MuxableSocketHTTP"));
-			return true;
-		}
-		catch (NoSuchMethodException ex) {
-			return false;
-		}
-		catch (ClassNotFoundException ex) {
-			throw new IllegalStateException("No compatible WebSocket version found", ex);
-		}
-	}
 
 	private static Class<?> type(String className) throws ClassNotFoundException {
 		return WebLogicRequestUpgradeStrategy.class.getClassLoader().loadClass(className);
@@ -153,17 +128,11 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 			try {
 				type = type("weblogic.websocket.tyrus.TyrusMuxableWebSocket");
 
-				if (WLS_12_1_3) {
-					constructor = type.getDeclaredConstructor(type("weblogic.servlet.internal.MuxableSocketHTTP"));
-					subjectHelper = null;
-				}
-				else {
-					constructor = type.getDeclaredConstructor(
-							type("weblogic.servlet.internal.MuxableSocketHTTP"),
-							type("weblogic.websocket.tyrus.CoherenceServletFilterService"),
-							type("weblogic.servlet.spi.SubjectHandle"));
-					subjectHelper = new SubjectHelper();
-				}
+				constructor = type.getDeclaredConstructor(
+						type("weblogic.servlet.internal.MuxableSocketHTTP"),
+						type("weblogic.websocket.tyrus.CoherenceServletFilterService"),
+						type("weblogic.servlet.spi.SubjectHandle"));
+				subjectHelper = new SubjectHelper();
 
 				upgradeMethod = type.getMethod("upgrade", type("weblogic.socket.MuxableSocket"), ServletContext.class);
 				readEventMethod = type.getMethod("registerForReadEvent");
@@ -175,8 +144,7 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 
 		private Object newInstance(HttpServletRequest request, Object httpSocket) {
 			try {
-				Object[] args = (WLS_12_1_3 ? new Object[] {httpSocket} :
-						new Object[] {httpSocket, null, subjectHelper.getSubject(request)});
+				Object[] args = new Object[] {httpSocket, null, subjectHelper.getSubject(request)};
 				return constructor.newInstance(args);
 			}
 			catch (Exception ex) {
@@ -263,13 +231,7 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 				Class<?> writerType = type("weblogic.websocket.tyrus.TyrusServletWriter");
 				Class<?> listenerType = type("weblogic.websocket.tyrus.TyrusServletWriter$CloseListener");
 				Class<?> webSocketType = TyrusMuxableWebSocketHelper.type;
-				Class<HttpServletResponse> responseType = HttpServletResponse.class;
-
-				Class<?>[] argTypes = (WLS_12_1_3 ?
-						new Class<?>[] {webSocketType, responseType, listenerType, boolean.class} :
-						new Class<?>[] {webSocketType, listenerType, boolean.class});
-
-				constructor = writerType.getDeclaredConstructor(argTypes);
+				constructor = writerType.getDeclaredConstructor(webSocketType, listenerType, boolean.class);
 				ReflectionUtils.makeAccessible(constructor);
 			}
 			catch (Exception ex) {
@@ -277,13 +239,9 @@ public class WebLogicRequestUpgradeStrategy extends AbstractTyrusRequestUpgradeS
 			}
 		}
 
-		private Writer newInstance(HttpServletResponse response, Object webSocket, boolean isProtected) {
+		private Writer newInstance(Object webSocket, boolean isProtected) {
 			try {
-				Object[] args = (WLS_12_1_3 ?
-						new Object[] {webSocket, response, null, isProtected} :
-						new Object[] {webSocket, null, isProtected});
-
-				return (Writer) constructor.newInstance(args);
+				return (Writer) constructor.newInstance(webSocket, null, isProtected);
 			}
 			catch (Exception ex) {
 				throw new HandshakeFailureException("Failed to create TyrusServletWriter", ex);

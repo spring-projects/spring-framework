@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -305,7 +305,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 		if (args == null) {
 			return new Object[0];
 		}
-		List<Object> resolvedArgs = new ArrayList<Object>(args.length);
+		List<Object> resolvedArgs = new ArrayList<>(args.length);
 		for (Object arg : args) {
 			if (arg instanceof MessageSourceResolvable) {
 				resolvedArgs.add(getMessage((MessageSourceResolvable) arg, locale));

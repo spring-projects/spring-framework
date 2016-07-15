@@ -120,7 +120,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	public final List<TestExecutionListener> getTestExecutionListeners() {
 		Class<?> clazz = getBootstrapContext().getTestClass();
 		Class<TestExecutionListeners> annotationType = TestExecutionListeners.class;
-		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<Class<? extends TestExecutionListener>>();
+		List<Class<? extends TestExecutionListener>> classesList = new ArrayList<>();
 		boolean usingDefaults = false;
 
 		AnnotationDescriptor<TestExecutionListeners> descriptor =
@@ -170,7 +170,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 
 		// Remove possible duplicates if we loaded default listeners.
 		if (usingDefaults) {
-			Set<Class<? extends TestExecutionListener>> classesSet = new HashSet<Class<? extends TestExecutionListener>>();
+			Set<Class<? extends TestExecutionListener>> classesSet = new HashSet<>();
 			classesSet.addAll(classesList);
 			classesList.clear();
 			classesList.addAll(classesSet);
@@ -190,7 +190,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	}
 
 	private List<TestExecutionListener> instantiateListeners(List<Class<? extends TestExecutionListener>> classesList) {
-		List<TestExecutionListener> listeners = new ArrayList<TestExecutionListener>(classesList.size());
+		List<TestExecutionListener> listeners = new ArrayList<>(classesList.size());
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
 			NoClassDefFoundError ncdfe = null;
 			try {
@@ -226,7 +226,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	@SuppressWarnings("unchecked")
 	protected Set<Class<? extends TestExecutionListener>> getDefaultTestExecutionListenerClasses() {
-		Set<Class<? extends TestExecutionListener>> defaultListenerClasses = new LinkedHashSet<Class<? extends TestExecutionListener>>();
+		Set<Class<? extends TestExecutionListener>> defaultListenerClasses = new LinkedHashSet<>();
 		ClassLoader cl = getClass().getClassLoader();
 		for (String className : getDefaultTestExecutionListenerClassNames()) {
 			try {
@@ -284,7 +284,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			MergedContextConfiguration mergedConfig = null;
 
 			for (List<ContextConfigurationAttributes> list : hierarchyMap.values()) {
-				List<ContextConfigurationAttributes> reversedList = new ArrayList<ContextConfigurationAttributes>(list);
+				List<ContextConfigurationAttributes> reversedList = new ArrayList<>(list);
 				Collections.reverse(reversedList);
 
 				// Don't use the supplied testClass; instead ensure that we are
@@ -308,23 +308,20 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		}
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private MergedContextConfiguration buildDefaultMergedContextConfiguration(Class<?> testClass,
 			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
-		List<ContextConfigurationAttributes> defaultConfigAttributesList
-			= Collections.singletonList(new ContextConfigurationAttributes(testClass));
+		List<ContextConfigurationAttributes> defaultConfigAttributesList =
+				Collections.singletonList(new ContextConfigurationAttributes(testClass));
 
 		ContextLoader contextLoader = resolveContextLoader(testClass, defaultConfigAttributesList);
 		if (logger.isInfoEnabled()) {
 			logger.info(String.format(
-				"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s], using %s",
-				testClass.getName(), contextLoader.getClass().getSimpleName()));
+					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s], using %s",
+					testClass.getName(), contextLoader.getClass().getSimpleName()));
 		}
 		return buildMergedContextConfiguration(testClass, defaultConfigAttributesList, null,
-			cacheAwareContextLoaderDelegate, false);
+				cacheAwareContextLoaderDelegate, false);
 	}
 
 	/**
@@ -360,14 +357,14 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be null or empty");
 
 		ContextLoader contextLoader = resolveContextLoader(testClass, configAttributesList);
-		List<String> locations = new ArrayList<String>();
-		List<Class<?>> classes = new ArrayList<Class<?>>();
-		List<Class<?>> initializers = new ArrayList<Class<?>>();
+		List<String> locations = new ArrayList<>();
+		List<Class<?>> classes = new ArrayList<>();
+		List<Class<?>> initializers = new ArrayList<>();
 
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
-					configAttributes));
+						configAttributes));
 			}
 			if (contextLoader instanceof SmartContextLoader) {
 				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
@@ -412,14 +409,11 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return processMergedContextConfiguration(mergedConfig);
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private Set<ContextCustomizer> getContextCustomizers(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
 		List<ContextCustomizerFactory> factories = getContextCustomizerFactories();
-		Set<ContextCustomizer> customizers = new LinkedHashSet<ContextCustomizer>(factories.size());
+		Set<ContextCustomizer> customizers = new LinkedHashSet<>(factories.size());
 		for (ContextCustomizerFactory factory : factories) {
 			ContextCustomizer customizer = factory.createContextCustomizer(testClass, configAttributes);
 			if (customizer != null) {
@@ -439,18 +433,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
 		return SpringFactoriesLoader.loadFactories(ContextCustomizerFactory.class, getClass().getClassLoader());
-	}
-
-	/**
-	 * @since 4.3
-	 */
-	private boolean areAllEmpty(Collection<?>... collections) {
-		for (Collection<?> collection : collections) {
-			if (!collection.isEmpty()) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -573,6 +555,16 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
 		return mergedConfig;
+	}
+
+
+	private static boolean areAllEmpty(Collection<?>... collections) {
+		for (Collection<?> collection : collections) {
+			if (!collection.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

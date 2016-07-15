@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class StopWatch {
 
 	private boolean keepTaskList = true;
 
-	private final List<TaskInfo> taskList = new LinkedList<TaskInfo>();
+	private final List<TaskInfo> taskList = new LinkedList<>();
 
 	/** Start time of the current task */
 	private long startTimeMillis;

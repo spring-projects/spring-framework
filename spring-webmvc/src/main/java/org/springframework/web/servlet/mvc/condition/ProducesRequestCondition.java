@@ -89,7 +89,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * @param manager used to determine requested media types
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers, ContentNegotiationManager manager) {
-		this.expressions = new ArrayList<ProduceMediaTypeExpression>(parseExpressions(produces, headers));
+		this.expressions = new ArrayList<>(parseExpressions(produces, headers));
 		Collections.sort(this.expressions);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 	}
@@ -98,14 +98,14 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * Private constructor with already parsed media type expressions.
 	 */
 	private ProducesRequestCondition(Collection<ProduceMediaTypeExpression> expressions, ContentNegotiationManager manager) {
-		this.expressions = new ArrayList<ProduceMediaTypeExpression>(expressions);
+		this.expressions = new ArrayList<>(expressions);
 		Collections.sort(this.expressions);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 	}
 
 
 	private Set<ProduceMediaTypeExpression> parseExpressions(String[] produces, String[] headers) {
-		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<ProduceMediaTypeExpression>();
+		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>();
 		if (headers != null) {
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);
@@ -128,14 +128,14 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * Return the contained "produces" expressions.
 	 */
 	public Set<MediaTypeExpression> getExpressions() {
-		return new LinkedHashSet<MediaTypeExpression>(this.expressions);
+		return new LinkedHashSet<>(this.expressions);
 	}
 
 	/**
 	 * Return the contained producible media types excluding negated expressions.
 	 */
 	public Set<MediaType> getProducibleMediaTypes() {
-		Set<MediaType> result = new LinkedHashSet<MediaType>();
+		Set<MediaType> result = new LinkedHashSet<>();
 		for (ProduceMediaTypeExpression expression : this.expressions) {
 			if (!expression.isNegated()) {
 				result.add(expression.getMediaType());
@@ -196,7 +196,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		catch (HttpMediaTypeException ex) {
 			return null;
 		}
-		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<ProduceMediaTypeExpression>(expressions);
+		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(expressions);
 		for (Iterator<ProduceMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
 			ProduceMediaTypeExpression expression = iterator.next();
 			if (!expression.match(acceptedMediaTypes)) {

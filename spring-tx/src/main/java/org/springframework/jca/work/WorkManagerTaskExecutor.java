@@ -43,17 +43,17 @@ import org.springframework.util.concurrent.ListenableFutureTask;
 
 /**
  * {@link org.springframework.core.task.TaskExecutor} implementation
- * that delegates to a JCA 1.5 WorkManager, implementing the
+ * that delegates to a JCA 1.7 WorkManager, implementing the
  * {@link javax.resource.spi.work.WorkManager} interface.
  *
  * <p>This is mainly intended for use within a JCA ResourceAdapter implementation,
  * but may also be used in a standalone environment, delegating to a locally
  * embedded WorkManager implementation (such as Geronimo's).
  *
- * <p>Also implements the JCA 1.5 WorkManager interface itself, delegating all
+ * <p>Also implements the JCA 1.7 WorkManager interface itself, delegating all
  * calls to the target WorkManager. Hence, a caller can choose whether it wants
  * to talk to this executor through the Spring TaskExecutor interface or the
- * JCA 1.5 WorkManager interface.
+ * WorkManager interface.
  *
  * <p>This adapter is also capable of obtaining a JCA WorkManager from JNDI.
  * This is for example appropriate on the Geronimo application server, where
@@ -159,7 +159,7 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	}
 
 	/**
-	 * Specify a JCA 1.5 WorkListener to apply, if any.
+	 * Specify a JCA WorkListener to apply, if any.
 	 * <p>This shared WorkListener instance will be passed on to the
 	 * WorkManager by all {@link #execute} calls on this TaskExecutor.
 	 */
@@ -258,28 +258,28 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 
 	@Override
 	public Future<?> submit(Runnable task) {
-		FutureTask<Object> future = new FutureTask<Object>(task, null);
+		FutureTask<Object> future = new FutureTask<>(task, null);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}
 
 	@Override
 	public <T> Future<T> submit(Callable<T> task) {
-		FutureTask<T> future = new FutureTask<T>(task);
+		FutureTask<T> future = new FutureTask<>(task);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}
 
 	@Override
 	public ListenableFuture<?> submitListenable(Runnable task) {
-		ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+		ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}
 
 	@Override
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
-		ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+		ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}

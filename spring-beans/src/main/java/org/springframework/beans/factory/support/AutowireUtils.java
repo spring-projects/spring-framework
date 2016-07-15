@@ -65,8 +65,8 @@ abstract class AutowireUtils {
 				if (p1 != p2) {
 					return (p1 ? -1 : 1);
 				}
-				int c1pl = c1.getParameterTypes().length;
-				int c2pl = c2.getParameterTypes().length;
+				int c1pl = c1.getParameterCount();
+				int c2pl = c2.getParameterCount();
 				return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
 			}
 		});
@@ -88,8 +88,8 @@ abstract class AutowireUtils {
 				if (p1 != p2) {
 					return (p1 ? -1 : 1);
 				}
-				int c1pl = fm1.getParameterTypes().length;
-				int c2pl = fm2.getParameterTypes().length;
+				int c1pl = fm1.getParameterCount();
+				int c2pl = fm2.getParameterCount();
 				return (c1pl < c2pl ? 1 : (c1pl > c2pl ? -1 : 0));
 			}
 		});

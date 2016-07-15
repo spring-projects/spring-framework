@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import org.springframework.cache.CacheManager;
  */
 public class NoOpCacheManager implements CacheManager {
 
-	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>(16);
+	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<>(16);
 
-	private final Set<String> cacheNames = new LinkedHashSet<String>(16);
+	private final Set<String> cacheNames = new LinkedHashSet<>(16);
 
 
 	/**

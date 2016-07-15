@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testRegisterNullNotificationListenerType() throws Exception {
-		Map<String, NotificationListener> listeners = new HashMap<String, NotificationListener>();
+		Map<String, NotificationListener> listeners = new HashMap<>();
 		// put null in as a value...
 		listeners.put("*", null);
 		MBeanExporter exporter = new MBeanExporter();
@@ -90,7 +90,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testRegisterNotificationListenerForNonExistentMBean() throws Exception {
-		Map<String, NotificationListener> listeners = new HashMap<String, NotificationListener>();
+		Map<String, NotificationListener> listeners = new HashMap<>();
 		NotificationListener dummyListener = new NotificationListener() {
 			@Override
 			public void handleNotification(Notification notification, Object handback) {
@@ -130,7 +130,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	@Test
 	public void testUserCreatedMBeanRegWithDynamicMBean() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("spring:name=dynBean", new TestDynamicMBean());
 
 		InvokeDetectAssembler asm = new InvokeDetectAssembler();
@@ -249,7 +249,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		IJmxTestBean proxy = (IJmxTestBean) factory.getProxy();
 		String name = "bean:mmm=whatever";
 
-		Map<String, Object> beans = new HashMap<String, Object>();
+		Map<String, Object> beans = new HashMap<>();
 		beans.put(name, proxy);
 
 		MBeanExporter exporter = new MBeanExporter();
@@ -268,7 +268,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		SelfNamingTestBean testBean = new SelfNamingTestBean();
 		testBean.setObjectName(objectName);
 
-		Map<String, Object> beans = new HashMap<String, Object>();
+		Map<String, Object> beans = new HashMap<>();
 		beans.put("foo", testBean);
 
 		MBeanExporter exporter = new MBeanExporter();
@@ -295,14 +295,14 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		String objectName2 = "spring:test=equalBean";
 
-		Map<String, Object> beans = new HashMap<String, Object>();
+		Map<String, Object> beans = new HashMap<>();
 		beans.put(objectName.toString(), springRegistered);
 		beans.put(objectName2, springRegistered);
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.setRegistrationBehavior(MBeanExporter.REGISTRATION_IGNORE_EXISTING);
+		exporter.setRegistrationPolicy(RegistrationPolicy.IGNORE_EXISTING);
 
 		start(exporter);
 
@@ -327,7 +327,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		Person springRegistered = new Person();
 		springRegistered.setName("Sally Greenwood");
 
-		Map<String, Object> beans = new HashMap<String, Object>();
+		Map<String, Object> beans = new HashMap<>();
 		beans.put(objectName.toString(), springRegistered);
 
 		MBeanExporter exporter = new MBeanExporter();
@@ -353,7 +353,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		bean.setName(name);
 		ObjectName objectName = ObjectNameManager.getInstance("spring:type=Test");
 
-		Map<String, Object> beans = new HashMap<String, Object>();
+		Map<String, Object> beans = new HashMap<>();
 		beans.put(objectName.toString(), bean);
 
 		MBeanExporter exporter = new MBeanExporter();
@@ -383,7 +383,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		factory.registerSingleton(exportedBeanName, new TestBean());
 
 		MBeanExporter exporter = new MBeanExporter();
-		Map<String, Object> beansToExport = new HashMap<String, Object>();
+		Map<String, Object> beansToExport = new HashMap<>();
 		beansToExport.put(OBJECT_NAME, exportedBeanName);
 		exporter.setBeans(beansToExport);
 		exporter.setServer(getServer());
@@ -470,7 +470,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
-		Map<String, Object> beansToExport = new HashMap<String, Object>();
+		Map<String, Object> beansToExport = new HashMap<>();
 		beansToExport.put(OBJECT_NAME, OBJECT_NAME);
 		exporter.setBeans(beansToExport);
 		exporter.setAssembler(new NamedBeanAutodetectCapableMBeanInfoAssemblerStub(OBJECT_NAME));
@@ -526,7 +526,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	@Test
 	public void testNotRunningInBeanFactoryAndPassedBeanNameToExport() throws Exception {
 		MBeanExporter exporter = new MBeanExporter();
-		Map<String, Object> beans = new HashMap<String, Object>();
+		Map<String, Object> beans = new HashMap<>();
 		beans.put(OBJECT_NAME, "beanName");
 		exporter.setBeans(beans);
 		thrown.expect(MBeanExportException.class);
@@ -576,7 +576,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
-		Map<String, Object> beansToExport = new HashMap<String, Object>();
+		Map<String, Object> beansToExport = new HashMap<>();
 		beansToExport.put("test:what=ever", testBeanInstance);
 		exporter.setBeans(beansToExport);
 		exporter.setBeanFactory(factory);
@@ -598,7 +598,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
-		Map<String, Object> beansToExport = new HashMap<String, Object>();
+		Map<String, Object> beansToExport = new HashMap<>();
 		beansToExport.put("test:what=ever", testBeanInstance);
 		exporter.setBeans(beansToExport);
 		exporter.setBeanFactory(factory);
@@ -626,7 +626,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
-		Map<String, Object> beansToExport = new HashMap<String, Object>();
+		Map<String, Object> beansToExport = new HashMap<>();
 		beansToExport.put(objectName1, objectName1);
 		beansToExport.put(objectName2, objectName2);
 		exporter.setBeans(beansToExport);
@@ -672,7 +672,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	private Map<String, Object> getBeanMap() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put(OBJECT_NAME, new JmxTestBean());
 		return map;
 	}
@@ -700,9 +700,9 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	private static class MockMBeanExporterListener implements MBeanExporterListener {
 
-		private List<ObjectName> registered = new ArrayList<ObjectName>();
+		private List<ObjectName> registered = new ArrayList<>();
 
-		private List<ObjectName> unregistered = new ArrayList<ObjectName>();
+		private List<ObjectName> unregistered = new ArrayList<>();
 
 		@Override
 		public void mbeanRegistered(ObjectName objectName) {
@@ -762,7 +762,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	public static final class StubNotificationListener implements NotificationListener {
 
-		private List<Notification> notifications = new ArrayList<Notification>();
+		private List<Notification> notifications = new ArrayList<>();
 
 		@Override
 		public void handleNotification(Notification notification, Object handback) {

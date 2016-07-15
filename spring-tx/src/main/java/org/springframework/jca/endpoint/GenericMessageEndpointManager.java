@@ -26,7 +26,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.SmartLifecycle;
 
 /**
- * Generic bean that manages JCA 1.5 message endpoints within a Spring
+ * Generic bean that manages JCA 1.7 message endpoints within a Spring
  * application context, activating and deactivating the endpoint as part
  * of the application context's lifecycle.
  *
@@ -214,7 +214,7 @@ public class GenericMessageEndpointManager implements SmartLifecycle, Initializi
 	 * Set whether to auto-start the endpoint activation after this endpoint
 	 * manager has been initialized and the context has been refreshed.
 	 * <p>Default is "true". Turn this flag off to defer the endpoint
-	 * activation until an explicit {#start()} call.
+	 * activation until an explicit {@link #start()} call.
 	 */
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;

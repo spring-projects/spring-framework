@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -275,7 +275,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	protected static final Log logger = LogFactory.getLog(SingletonBeanFactoryLocator.class);
 
 	/** The keyed BeanFactory instances */
-	private static final Map<String, BeanFactoryLocator> instances = new HashMap<String, BeanFactoryLocator>();
+	private static final Map<String, BeanFactoryLocator> instances = new HashMap<>();
 
 
 	/**
@@ -333,9 +333,9 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 
 	// We map BeanFactoryGroup objects by String keys, and by the definition object.
-	private final Map<String, BeanFactoryGroup> bfgInstancesByKey = new HashMap<String, BeanFactoryGroup>();
+	private final Map<String, BeanFactoryGroup> bfgInstancesByKey = new HashMap<>();
 
-	private final Map<BeanFactory, BeanFactoryGroup> bfgInstancesByObj = new HashMap<BeanFactory, BeanFactoryGroup>();
+	private final Map<BeanFactory, BeanFactoryGroup> bfgInstancesByObj = new HashMap<>();
 
 	private final String resourceLocation;
 

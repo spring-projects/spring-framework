@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class CustomScopeConfigurer implements BeanFactoryPostProcessor, BeanClas
 	 */
 	public void addScope(String scopeName, Scope scope) {
 		if (this.scopes == null) {
-			this.scopes = new LinkedHashMap<String, Object>(1);
+			this.scopes = new LinkedHashMap<>(1);
 		}
 		this.scopes.put(scopeName, scope);
 	}

@@ -35,7 +35,7 @@ import org.springframework.test.context.TestPropertySource;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.context.support.TestPropertySourceUtils.*;
 
@@ -48,8 +48,11 @@ import static org.springframework.test.context.support.TestPropertySourceUtils.*
 public class TestPropertySourceUtilsTests {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
-	private static final String[] KEY_VALUE_PAIR = new String[] { "key = value" };
-	private static final String[] FOO_LOCATIONS = new String[] { "classpath:/foo.properties" };
+
+	private static final String[] KEY_VALUE_PAIR = new String[] {"key = value"};
+
+	private static final String[] FOO_LOCATIONS = new String[] {"classpath:/foo.properties"};
+
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
@@ -74,7 +77,7 @@ public class TestPropertySourceUtilsTests {
 	@Test
 	public void value() {
 		assertMergedTestPropertySources(ValuePropertySources.class, asArray("classpath:/value.xml"),
-			EMPTY_STRING_ARRAY);
+				EMPTY_STRING_ARRAY);
 	}
 
 	@Test
@@ -86,67 +89,66 @@ public class TestPropertySourceUtilsTests {
 	@Test
 	public void locationsAndProperties() {
 		assertMergedTestPropertySources(LocationsAndPropertiesPropertySources.class,
-			asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
 	}
 
 	@Test
 	public void inheritedLocationsAndProperties() {
 		assertMergedTestPropertySources(InheritedPropertySources.class,
-			asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
 	}
 
 	@Test
 	public void extendedLocationsAndProperties() {
 		assertMergedTestPropertySources(ExtendedPropertySources.class,
-			asArray("classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/bar1.xml", "classpath:/bar2.xml"),
-			asArray("k1a=v1a", "k1b: v1b", "k2a v2a", "k2b: v2b"));
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/bar1.xml", "classpath:/bar2.xml"),
+				asArray("k1a=v1a", "k1b: v1b", "k2a v2a", "k2b: v2b"));
 	}
 
 	@Test
 	public void overriddenLocations() {
 		assertMergedTestPropertySources(OverriddenLocationsPropertySources.class,
-			asArray("classpath:/baz.properties"), asArray("k1a=v1a", "k1b: v1b", "key = value"));
+				asArray("classpath:/baz.properties"), asArray("k1a=v1a", "k1b: v1b", "key = value"));
 	}
 
 	@Test
 	public void overriddenProperties() {
 		assertMergedTestPropertySources(OverriddenPropertiesPropertySources.class,
-			asArray("classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/baz.properties"), KEY_VALUE_PAIR);
+				asArray("classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/baz.properties"), KEY_VALUE_PAIR);
 	}
 
 	@Test
 	public void overriddenLocationsAndProperties() {
 		assertMergedTestPropertySources(OverriddenLocationsAndPropertiesPropertySources.class,
-			asArray("classpath:/baz.properties"), KEY_VALUE_PAIR);
+				asArray("classpath:/baz.properties"), KEY_VALUE_PAIR);
 	}
 
-	// -------------------------------------------------------------------------
 
 	@Test
 	public void addPropertiesFilesToEnvironmentWithNullContext() {
 		expectedException.expect(IllegalArgumentException.class);
-		expectedException.expectMessage("context must not be null");
+		expectedException.expectMessage("must not be null");
 		addPropertiesFilesToEnvironment((ConfigurableApplicationContext) null, FOO_LOCATIONS);
 	}
 
 	@Test
 	public void addPropertiesFilesToEnvironmentWithContextAndNullLocations() {
 		expectedException.expect(IllegalArgumentException.class);
-		expectedException.expectMessage("locations must not be null");
+		expectedException.expectMessage("must not be null");
 		addPropertiesFilesToEnvironment(mock(ConfigurableApplicationContext.class), (String[]) null);
 	}
 
 	@Test
 	public void addPropertiesFilesToEnvironmentWithNullEnvironment() {
 		expectedException.expect(IllegalArgumentException.class);
-		expectedException.expectMessage("environment must not be null");
+		expectedException.expectMessage("must not be null");
 		addPropertiesFilesToEnvironment((ConfigurableEnvironment) null, mock(ResourceLoader.class), FOO_LOCATIONS);
 	}
 
 	@Test
 	public void addPropertiesFilesToEnvironmentWithEnvironmentAndNullLocations() {
 		expectedException.expect(IllegalArgumentException.class);
-		expectedException.expectMessage("locations must not be null");
+		expectedException.expectMessage("must not be null");
 		addPropertiesFilesToEnvironment(new MockEnvironment(), mock(ResourceLoader.class), (String[]) null);
 	}
 
@@ -167,8 +169,6 @@ public class TestPropertySourceUtilsTests {
 		assertEquals(1, propertySources.size());
 		assertEquals("value", environment.getProperty("key"));
 	}
-
-	// -------------------------------------------------------------------------
 
 	@Test
 	public void addInlinedPropertiesToEnvironmentWithNullContext() {
@@ -231,15 +231,16 @@ public class TestPropertySourceUtilsTests {
 		convertInlinedPropertiesToMap((String[]) null);
 	}
 
-	// -------------------------------------------------------------------
 
 	private static void assertMergedTestPropertySources(Class<?> testClass, String[] expectedLocations,
 			String[] expectedProperties) {
+
 		MergedTestPropertySources mergedPropertySources = buildMergedTestPropertySources(testClass);
 		assertNotNull(mergedPropertySources);
 		assertArrayEquals(expectedLocations, mergedPropertySources.getLocations());
 		assertArrayEquals(expectedProperties, mergedPropertySources.getProperties());
 	}
+
 
 	@SafeVarargs
 	private static <T> T[] asArray(T... arr) {

@@ -88,7 +88,7 @@ public abstract class SpringFactoriesLoader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Loaded [" + factoryClass.getName() + "] names: " + factoryNames);
 		}
-		List<T> result = new ArrayList<T>(factoryNames.size());
+		List<T> result = new ArrayList<>(factoryNames.size());
 		for (String factoryName : factoryNames) {
 			result.add(instantiateFactory(factoryName, factoryClass, classLoaderToUse));
 		}
@@ -111,7 +111,7 @@ public abstract class SpringFactoriesLoader {
 		try {
 			Enumeration<URL> urls = (classLoader != null ? classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
 					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
-			List<String> result = new ArrayList<String>();
+			List<String> result = new ArrayList<>();
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));

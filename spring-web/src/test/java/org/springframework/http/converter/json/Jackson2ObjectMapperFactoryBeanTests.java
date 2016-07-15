@@ -283,7 +283,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	public void setMixIns() {
 		Class<?> target = String.class;
 		Class<?> mixinSource = Object.class;
-		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
+		Map<Class<?>, Class<?>> mixIns = new HashMap<>();
 		mixIns.put(target, mixinSource);
 
 		this.factory.setModules(Collections.emptyList());
@@ -316,7 +316,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertTrue(this.factory.isSingleton());
 		assertEquals(ObjectMapper.class, this.factory.getObjectType());
 
-		Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<Class<?>, JsonDeserializer<?>>();
+		Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<>();
 		deserializers.put(Date.class, new DateDeserializer());
 
 		JsonSerializer<Class<?>> serializer1 = new ClassSerializer();

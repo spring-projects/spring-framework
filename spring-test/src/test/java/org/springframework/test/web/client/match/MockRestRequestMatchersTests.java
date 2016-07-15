@@ -91,7 +91,6 @@ public class MockRestRequestMatchersTests {
 		MockRestRequestMatchers.header("foo", "bad").match(this.request);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void headerContains() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
@@ -99,13 +98,11 @@ public class MockRestRequestMatchersTests {
 		MockRestRequestMatchers.header("foo", containsString("ba")).match(this.request);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test(expected = AssertionError.class)
 	public void headerContainsWithMissingHeader() throws Exception {
 		MockRestRequestMatchers.header("foo", containsString("baz")).match(this.request);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test(expected = AssertionError.class)
 	public void headerContainsWithMissingValue() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));

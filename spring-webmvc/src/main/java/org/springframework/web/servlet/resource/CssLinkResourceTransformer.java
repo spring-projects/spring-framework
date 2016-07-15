@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,12 +49,11 @@ import org.springframework.util.StringUtils;
  */
 public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
-	private static final Log logger = LogFactory.getLog(CssLinkResourceTransformer.class);
-
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
+	private static final Log logger = LogFactory.getLog(CssLinkResourceTransformer.class);
 
-	private final List<CssLinkParser> linkParsers = new ArrayList<CssLinkParser>();
+	private final List<CssLinkParser> linkParsers = new ArrayList<>(2);
 
 
 	public CssLinkResourceTransformer() {
@@ -81,7 +80,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
 		String content = new String(bytes, DEFAULT_CHARSET);
 
-		Set<CssLinkInfo> infos = new HashSet<CssLinkInfo>(5);
+		Set<CssLinkInfo> infos = new HashSet<>(8);
 		for (CssLinkParser parser : this.linkParsers) {
 			parser.parseLink(content, infos);
 		}
@@ -93,7 +92,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			return resource;
 		}
 
-		List<CssLinkInfo> sortedInfos = new ArrayList<CssLinkInfo>(infos);
+		List<CssLinkInfo> sortedInfos = new ArrayList<>(infos);
 		Collections.sort(sortedInfos);
 
 		int index = 0;
@@ -123,16 +122,16 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 	private boolean hasScheme(String link) {
 		int schemeIndex = link.indexOf(":");
-		return (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/"))
-				|| link.indexOf("//") == 0;
+		return (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")) || link.indexOf("//") == 0;
 	}
 
 
-	protected static interface CssLinkParser {
+	@FunctionalInterface
+	protected interface CssLinkParser {
 
 		void parseLink(String content, Set<CssLinkInfo> linkInfos);
-
 	}
+
 
 	protected static abstract class AbstractCssLinkParser implements CssLinkParser {
 
@@ -189,6 +188,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 	}
 
+
 	private static class ImportStatementCssLinkParser extends AbstractCssLinkParser {
 
 		@Override
@@ -207,6 +207,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			return index;
 		}
 	}
+
 
 	private static class UrlFunctionCssLinkParser extends AbstractCssLinkParser {
 
@@ -229,8 +230,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
 		private final int end;
 
-
-		private CssLinkInfo(int start, int end) {
+		public CssLinkInfo(int start, int end) {
 			this.start = start;
 			this.end = end;
 		}

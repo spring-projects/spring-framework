@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -287,11 +287,12 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 
-		given(task.isDone()).willReturn(false);
+		given(task.isCancelled()).willReturn(false);
+		given(task.cancel(false)).willReturn(true);
 
 		this.session.cancelHeartbeat();
 
-		verify(task).isDone();
+		verify(task).isCancelled();
 		verify(task).cancel(false);
 		verifyNoMoreInteractions(task);
 	}

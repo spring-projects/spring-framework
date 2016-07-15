@@ -2216,7 +2216,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testPrototypeWithArrayConversionForConstructor() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		List<String> list = new ManagedList<String>();
+		List<String> list = new ManagedList<>();
 		list.add("myName");
 		list.add("myBeanName");
 		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);
@@ -2235,7 +2235,7 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	public void testPrototypeWithArrayConversionForFactoryMethod() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		List<String> list = new ManagedList<String>();
+		List<String> list = new ManagedList<>();
 		list.add("myName");
 		list.add("myBeanName");
 		RootBeanDefinition bd = new RootBeanDefinition(DerivedTestBean.class);

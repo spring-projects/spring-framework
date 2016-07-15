@@ -58,7 +58,7 @@ public class ModelAndViewContainer {
 	private boolean redirectModelScenario = false;
 
 	/* Names of attributes with binding disabled */
-	private final Set<String> bindingDisabledAttributes = new HashSet<String>(4);
+	private final Set<String> bindingDisabledAttributes = new HashSet<>(4);
 
 	private HttpStatus status;
 

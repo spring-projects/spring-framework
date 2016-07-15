@@ -74,30 +74,6 @@ public class MessagingMessageConverterTests {
 		assertEquals(1224L, msg.getPayload());
 	}
 
-	@Test
-	public void payloadConversionLazilyInvoked() throws JMSException {
-		TextMessage jmsMsg = new StubTextMessage("1224");
-		TestMessageConverter converter = new TestMessageConverter();
-		this.converter.setPayloadConverter(converter);
-		Message<?> msg = (Message<?>) this.converter.fromMessage(jmsMsg);
-		assertEquals("Converter should not have been called yet", false, converter.called);
-		assertEquals(1224L, msg.getPayload());
-		assertEquals("Converter should have been called", true, converter.called);
-	}
-
-	@Test
-	public void headerConversionLazilyInvoked() throws JMSException {
-		javax.jms.Message jmsMsg = mock(javax.jms.Message.class);
-		when(jmsMsg.getPropertyNames()).thenThrow(new IllegalArgumentException("Header failure"));
-
-		Message<?> msg = (Message<?>) this.converter.fromMessage(jmsMsg);
-
-		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Header failure");
-		msg.getHeaders(); // Triggers headers resolution
-	}
-
-
 	static class TestMessageConverter extends SimpleMessageConverter {
 
 		private boolean called;

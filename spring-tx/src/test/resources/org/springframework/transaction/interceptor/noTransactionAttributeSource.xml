@@ -15,8 +15,8 @@
 		Invalid: we need a transaction attribute source
 	-->
 	<bean id="noTransactionAttributeSource" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="mockMan"/></property>
-		<property name="target"><ref local="target"/></property>
+		<property name="transactionManager"><ref bean="mockMan"/></property>
+		<property name="target"><ref bean="target"/></property>
 	</bean>
 
 </beans>

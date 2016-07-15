@@ -54,6 +54,28 @@ public class MockRestServiceServerTests {
 		server.verify();
 	}
 
+	@Test(expected = AssertionError.class)
+	public void exactExpectOrder() throws Exception {
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
+				.ignoreExpectOrder(false).build();
+
+		server.expect(requestTo("/foo")).andRespond(withSuccess());
+		server.expect(requestTo("/bar")).andRespond(withSuccess());
+		this.restTemplate.getForObject("/bar", Void.class);
+	}
+
+	@Test
+	public void ignoreExpectOrder() throws Exception {
+		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate)
+				.ignoreExpectOrder(true).build();
+
+		server.expect(requestTo("/foo")).andRespond(withSuccess());
+		server.expect(requestTo("/bar")).andRespond(withSuccess());
+		this.restTemplate.getForObject("/bar", Void.class);
+		this.restTemplate.getForObject("/foo", Void.class);
+		server.verify();
+	}
+
 	@Test
 	public void resetAndReuseServer() throws Exception {
 		MockRestServiceServer server = MockRestServiceServer.bindTo(this.restTemplate).build();

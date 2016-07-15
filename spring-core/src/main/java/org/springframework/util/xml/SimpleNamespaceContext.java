@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import org.springframework.util.Assert;
  */
 public class SimpleNamespaceContext implements NamespaceContext {
 
-	private final Map<String, String> prefixToNamespaceUri = new HashMap<String, String>();
+	private final Map<String, String> prefixToNamespaceUri = new HashMap<>();
 
-	private final Map<String, Set<String>> namespaceUriToPrefixes = new HashMap<String, Set<String>>();
+	private final Map<String, Set<String>> namespaceUriToPrefixes = new HashMap<>();
 
 	private String defaultNamespaceUri = "";
 
@@ -125,7 +125,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 			this.prefixToNamespaceUri.put(prefix, namespaceUri);
 			Set<String> prefixes = this.namespaceUriToPrefixes.get(namespaceUri);
 			if (prefixes == null) {
-				prefixes = new LinkedHashSet<String>();
+				prefixes = new LinkedHashSet<>();
 				this.namespaceUriToPrefixes.put(namespaceUri, prefixes);
 			}
 			prefixes.add(prefix);

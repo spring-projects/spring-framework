@@ -132,7 +132,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
-	private List<Object> requestResponseBodyAdvice = new ArrayList<Object>();
+	private List<Object> requestResponseBodyAdvice = new ArrayList<>();
 
 	private WebBindingInitializer webBindingInitializer;
 
@@ -158,27 +158,27 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache =
-			new ConcurrentHashMap<Class<?>, SessionAttributesHandler>(64);
+			new ConcurrentHashMap<>(64);
 
-	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<Class<?>, Set<Method>>(64);
+	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<>(64);
 
 	private final Map<ControllerAdviceBean, Set<Method>> initBinderAdviceCache =
-			new LinkedHashMap<ControllerAdviceBean, Set<Method>>();
+			new LinkedHashMap<>();
 
-	private final Map<Class<?>, Set<Method>> modelAttributeCache = new ConcurrentHashMap<Class<?>, Set<Method>>(64);
+	private final Map<Class<?>, Set<Method>> modelAttributeCache = new ConcurrentHashMap<>(64);
 
 	private final Map<ControllerAdviceBean, Set<Method>> modelAttributeAdviceCache =
-			new LinkedHashMap<ControllerAdviceBean, Set<Method>>();
+			new LinkedHashMap<>();
 
 
 	public RequestMappingHandlerAdapter() {
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
 
-		this.messageConverters = new ArrayList<HttpMessageConverter<?>>(4);
+		this.messageConverters = new ArrayList<>(4);
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(stringHttpMessageConverter);
-		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
+		this.messageConverters.add(new SourceHttpMessageConverter<>());
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
@@ -537,7 +537,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		List<ControllerAdviceBean> beans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
 		AnnotationAwareOrderComparator.sort(beans);
 
-		List<Object> requestResponseBodyAdviceBeans = new ArrayList<Object>();
+		List<Object> requestResponseBodyAdviceBeans = new ArrayList<>();
 
 		for (ControllerAdviceBean bean : beans) {
 			Set<Method> attrMethods = MethodIntrospector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
@@ -578,7 +578,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * and custom resolvers provided via {@link #setCustomArgumentResolvers}.
 	 */
 	private List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
 		// Annotation-based argument resolution
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
@@ -625,7 +625,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * methods including built-in and custom resolvers.
 	 */
 	private List<HandlerMethodArgumentResolver> getDefaultInitBinderArgumentResolvers() {
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
 		// Annotation-based argument resolution
 		resolvers.add(new RequestParamMethodArgumentResolver(getBeanFactory(), false));
@@ -658,7 +658,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * custom handlers provided via {@link #setReturnValueHandlers}.
 	 */
 	private List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
-		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
@@ -854,7 +854,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			methods = MethodIntrospector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS);
 			this.modelAttributeCache.put(handlerType, methods);
 		}
-		List<InvocableHandlerMethod> attrMethods = new ArrayList<InvocableHandlerMethod>();
+		List<InvocableHandlerMethod> attrMethods = new ArrayList<>();
 		// Global methods first
 		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.modelAttributeAdviceCache.entrySet()) {
 			if (entry.getKey().isApplicableToBeanType(handlerType)) {
@@ -886,7 +886,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			methods = MethodIntrospector.selectMethods(handlerType, INIT_BINDER_METHODS);
 			this.initBinderCache.put(handlerType, methods);
 		}
-		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<InvocableHandlerMethod>();
+		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<>();
 		// Global methods first
 		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.initBinderAdviceCache.entrySet()) {
 			if (entry.getKey().isApplicableToBeanType(handlerType)) {

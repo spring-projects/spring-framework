@@ -88,7 +88,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	private static Map<String, Object> enrichAndValidateAttributes(
 			Map<String, Object> originalAttributes, Class<? extends Annotation> annotationType) {
 
-		Map<String, Object> attributes = new LinkedHashMap<String, Object>(originalAttributes);
+		Map<String, Object> attributes = new LinkedHashMap<>(originalAttributes);
 		Map<String, List<String>> attributeAliasMap = getAttributeAliasMap(annotationType);
 
 		for (Method attributeMethod : getAttributeMethods(annotationType)) {

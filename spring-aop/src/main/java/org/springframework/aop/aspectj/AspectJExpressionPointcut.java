@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ import org.springframework.util.StringUtils;
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
-	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<PointcutPrimitive>();
+	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<>();
 
 	static {
 		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.EXECUTION);
@@ -112,7 +112,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	private transient PointcutExpression pointcutExpression;
 
-	private transient Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<Method, ShadowMatch>(32);
+	private transient Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<>(32);
 
 
 	/**
@@ -628,7 +628,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 		// Initialize transient fields.
 		// pointcutExpression will be initialized lazily by checkReadyToMatch()
-		this.shadowMatchCache = new ConcurrentHashMap<Method, ShadowMatch>(32);
+		this.shadowMatchCache = new ConcurrentHashMap<>(32);
 	}
 
 

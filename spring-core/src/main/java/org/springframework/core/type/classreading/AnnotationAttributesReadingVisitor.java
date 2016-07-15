@@ -72,7 +72,7 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 		else {
 			attributes.add(0, this.attributes);
 		}
-		Set<Annotation> visited = new LinkedHashSet<Annotation>();
+		Set<Annotation> visited = new LinkedHashSet<>();
 		Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
 		if (!ObjectUtils.isEmpty(metaAnnotations)) {
 			for (Annotation metaAnnotation : metaAnnotations) {
@@ -82,7 +82,7 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 			}
 		}
 		if (this.metaAnnotationMap != null) {
-			Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>(visited.size());
+			Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
 			for (Annotation ann : visited) {
 				metaAnnotationTypeNames.add(ann.annotationType().getName());
 			}

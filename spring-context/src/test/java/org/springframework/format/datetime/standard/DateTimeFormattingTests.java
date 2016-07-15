@@ -124,7 +124,7 @@ public class DateTimeFormattingTests {
 	@Test
 	public void testBindLocalDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDate", new String[]{"10/31/09"});
+		propertyValues.add("localDate", new String[] {"10/31/09"});
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 	}
@@ -421,7 +421,7 @@ public class DateTimeFormattingTests {
 
 		private MonthDay monthDay;
 
-		private final List<DateTimeBean> children = new ArrayList<DateTimeBean>();
+		private final List<DateTimeBean> children = new ArrayList<>();
 
 		public LocalDate getLocalDate() {
 			return localDate;

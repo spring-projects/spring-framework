@@ -60,7 +60,7 @@ public class AnnotatedEndpointConnectionManager extends ConnectionManagerSupport
 
 	public AnnotatedEndpointConnectionManager(Class<?> endpointClass, String uriTemplate, Object... uriVariables) {
 		super(uriTemplate, uriVariables);
-		this.endpointProvider = new BeanCreatingHandlerProvider<Object>(endpointClass);
+		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 		this.endpoint = null;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.TypeMismatchException;
@@ -48,6 +49,11 @@ public class ResponseStatusExceptionResolverTests {
 	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
+
+	@Before
+	public void setup() {
+		exceptionResolver.setWarnLogCategory(exceptionResolver.getClass().getName());
+	}
 
 	@Test
 	public void statusCode() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class HeadersMethodArgumentResolverTests {
 		this.paramMessageHeaderAccessor = new MethodParameter(method, 3);
 		this.paramMessageHeaderAccessorSubclass = new MethodParameter(method, 4);
 
-		Map<String, Object> headers = new HashMap<String, Object>();
+		Map<String, Object> headers = new HashMap<>();
 		headers.put("foo", "bar");
 		this.message = MessageBuilder.withPayload(new byte[0]).copyHeaders(headers).build();
 	}

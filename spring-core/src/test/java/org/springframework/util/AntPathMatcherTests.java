@@ -331,7 +331,7 @@ public class AntPathMatcherTests {
 		assertEquals(Collections.singletonMap("hotel", "1"), result);
 
 		result = pathMatcher.extractUriTemplateVariables("/hotels/{hotel}/bookings/{booking}", "/hotels/1/bookings/2");
-		Map<String, String> expected = new LinkedHashMap<String, String>();
+		Map<String, String> expected = new LinkedHashMap<>();
 		expected.put("hotel", "1");
 		expected.put("booking", "2");
 		assertEquals(expected, result);
@@ -349,7 +349,7 @@ public class AntPathMatcherTests {
 		assertEquals(Collections.singletonMap("B", "b"), result);
 
 		result = pathMatcher.extractUriTemplateVariables("/{name}.{extension}", "/test.html");
-		expected = new LinkedHashMap<String, String>();
+		expected = new LinkedHashMap<>();
 		expected.put("name", "test");
 		expected.put("extension", "html");
 		assertEquals(expected, result);
@@ -499,7 +499,7 @@ public class AntPathMatcherTests {
 	@Test
 	public void patternComparatorSort() {
 		Comparator<String> comparator = pathMatcher.getPatternComparator("/hotels/new");
-		List<String> paths = new ArrayList<String>(3);
+		List<String> paths = new ArrayList<>(3);
 
 		paths.add(null);
 		paths.add("/hotels/new");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		// Use the standard evaluation context
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.setVariable("favouriteColour","blue");
-		List<Integer> primes = new ArrayList<Integer>();
+		List<Integer> primes = new ArrayList<>();
 		primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
 		ctx.setVariable("primes",primes);
 
@@ -251,7 +251,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 */
 	private static class FruitColourAccessor implements PropertyAccessor {
 
-		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
+		private static Map<String,Color> propertyMap = new HashMap<>();
 
 		static {
 			propertyMap.put("banana",Color.yellow);
@@ -296,7 +296,7 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 	 */
 	private static class VegetableColourAccessor implements PropertyAccessor {
 
-		private static Map<String,Color> propertyMap = new HashMap<String,Color>();
+		private static Map<String,Color> propertyMap = new HashMap<>();
 
 		static {
 			propertyMap.put("carrot",Color.orange);

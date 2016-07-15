@@ -38,9 +38,6 @@ import org.springframework.core.annotation.AliasFor;
  * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
  * {@code RequestMappingHandlerMapping}-{@code RequestMappingHandlerAdapter} pair
  * which are the default in the MVC Java config and the MVC namespace.
- * In particular {@code @RestControllerAdvice} is not supported with the
- * {@code DefaultAnnotationHandlerMapping}-{@code AnnotationMethodHandlerAdapter}
- * pair both of which are also deprecated.
  *
  * @author Rossen Stoyanchev
  * @since 4.3

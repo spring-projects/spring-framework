@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class FreeMarkerViewTests {
 		FreeMarkerView fv = new FreeMarkerView();
 
 		WebApplicationContext wac = mock(WebApplicationContext.class);
-		given(wac.getBeansOfType(FreeMarkerConfig.class, true, false)).willReturn(new HashMap<String, FreeMarkerConfig>());
+		given(wac.getBeansOfType(FreeMarkerConfig.class, true, false)).willReturn(new HashMap<>());
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		fv.setUrl("anythingButNull");
@@ -92,7 +92,7 @@ public class FreeMarkerViewTests {
 		WebApplicationContext wac = mock(WebApplicationContext.class);
 		MockServletContext sc = new MockServletContext();
 
-		Map<String, FreeMarkerConfig> configs = new HashMap<String, FreeMarkerConfig>();
+		Map<String, FreeMarkerConfig> configs = new HashMap<>();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
 		configs.put("configurer", configurer);
@@ -108,7 +108,7 @@ public class FreeMarkerViewTests {
 		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
 		HttpServletResponse response = new MockHttpServletResponse();
 
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("myattr", "myvalue");
 		fv.render(model, request, response);
 
@@ -122,7 +122,7 @@ public class FreeMarkerViewTests {
 		WebApplicationContext wac = mock(WebApplicationContext.class);
 		MockServletContext sc = new MockServletContext();
 
-		Map<String, FreeMarkerConfig> configs = new HashMap<String, FreeMarkerConfig>();
+		Map<String, FreeMarkerConfig> configs = new HashMap<>();
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
 		configs.put("configurer", configurer);
@@ -139,7 +139,7 @@ public class FreeMarkerViewTests {
 		HttpServletResponse response = new MockHttpServletResponse();
 		response.setContentType("myContentType");
 
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("myattr", "myvalue");
 		fv.render(model, request, response);
 

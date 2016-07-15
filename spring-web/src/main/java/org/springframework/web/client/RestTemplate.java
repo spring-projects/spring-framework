@@ -138,7 +138,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			ClassUtils.isPresent("com.google.gson.Gson", RestTemplate.class.getClassLoader());
 
 
-	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 
 	private ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
@@ -155,7 +155,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter());
-		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
+		this.messageConverters.add(new SourceHttpMessageConverter<>());
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
 		if (romePresent) {
@@ -240,7 +240,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	/**
 	 * Configure default URI variable values. This is a shortcut for:
 	 * <pre class="code">
-	 *
 	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
 	 * handler.setDefaultUriVariables(...);
 	 *
@@ -252,7 +251,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
 		Assert.isInstanceOf(AbstractUriTemplateHandler.class, this.uriTemplateHandler,
-				"Can only use this property in conjunction with an AbstractUriTemplateHandler.");
+				"Can only use this property in conjunction with an AbstractUriTemplateHandler");
 		((AbstractUriTemplateHandler) this.uriTemplateHandler).setDefaultUriVariables(defaultUriVariables);
 	}
 
@@ -284,7 +283,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T getForObject(String url, Class<T> responseType, Object... urlVariables) throws RestClientException {
 		RequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, urlVariables);
 	}
 
@@ -292,7 +291,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T getForObject(String url, Class<T> responseType, Map<String, ?> urlVariables) throws RestClientException {
 		RequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor, urlVariables);
 	}
 
@@ -300,7 +299,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T getForObject(URI url, Class<T> responseType) throws RestClientException {
 		RequestCallback requestCallback = acceptHeaderRequestCallback(responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.GET, requestCallback, responseExtractor);
 	}
 
@@ -377,7 +376,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
@@ -387,7 +386,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters(), logger);
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor, uriVariables);
 	}
 
@@ -395,7 +394,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public <T> T postForObject(URI url, Object request, Class<T> responseType) throws RestClientException {
 		RequestCallback requestCallback = httpEntityCallback(request, responseType);
 		HttpMessageConverterExtractor<T> responseExtractor =
-				new HttpMessageConverterExtractor<T>(responseType, getMessageConverters());
+				new HttpMessageConverterExtractor<>(responseType, getMessageConverters());
 		return execute(url, HttpMethod.POST, requestCallback, responseExtractor);
 	}
 
@@ -698,7 +697,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * Returns a response extractor for {@link ResponseEntity}.
 	 */
 	protected <T> ResponseExtractor<ResponseEntity<T>> responseEntityExtractor(Type responseType) {
-		return new ResponseEntityResponseExtractor<T>(responseType);
+		return new ResponseEntityResponseExtractor<>(responseType);
 	}
 
 	/**
@@ -727,7 +726,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				if (this.responseType instanceof Class) {
 					responseClass = (Class<?>) this.responseType;
 				}
-				List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
+				List<MediaType> allSupportedMediaTypes = new ArrayList<>();
 				for (HttpMessageConverter<?> converter : getMessageConverters()) {
 					if (responseClass != null) {
 						if (converter.canRead(responseClass, null)) {
@@ -753,7 +752,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		private List<MediaType> getSupportedMediaTypes(HttpMessageConverter<?> messageConverter) {
 			List<MediaType> supportedMediaTypes = messageConverter.getSupportedMediaTypes();
-			List<MediaType> result = new ArrayList<MediaType>(supportedMediaTypes.size());
+			List<MediaType> result = new ArrayList<>(supportedMediaTypes.size());
 			for (MediaType supportedMediaType : supportedMediaTypes) {
 				if (supportedMediaType.getCharset() != null) {
 					supportedMediaType =
@@ -783,7 +782,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				this.requestEntity = (HttpEntity<?>) requestBody;
 			}
 			else if (requestBody != null) {
-				this.requestEntity = new HttpEntity<Object>(requestBody);
+				this.requestEntity = new HttpEntity<>(requestBody);
 			}
 			else {
 				this.requestEntity = HttpEntity.EMPTY;
@@ -872,7 +871,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		public ResponseEntityResponseExtractor(Type responseType) {
 			if (responseType != null && Void.class != responseType) {
-				this.delegate = new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
+				this.delegate = new HttpMessageConverterExtractor<>(responseType, getMessageConverters(), logger);
 			}
 			else {
 				this.delegate = null;
@@ -883,10 +882,10 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		public ResponseEntity<T> extractData(ClientHttpResponse response) throws IOException {
 			if (this.delegate != null) {
 				T body = this.delegate.extractData(response);
-				return new ResponseEntity<T>(body, response.getHeaders(), response.getStatusCode());
+				return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
 			}
 			else {
-				return new ResponseEntity<T>(response.getHeaders(), response.getStatusCode());
+				return new ResponseEntity<>(response.getHeaders(), response.getStatusCode());
 			}
 		}
 	}

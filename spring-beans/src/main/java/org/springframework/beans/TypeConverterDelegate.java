@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,20 +54,6 @@ import org.springframework.util.StringUtils;
 class TypeConverterDelegate {
 
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
-
-	/** Java 8's java.util.Optional.empty() instance */
-	private static Object javaUtilOptionalEmpty = null;
-
-	static {
-		try {
-			Class<?> clazz = ClassUtils.forName("java.util.Optional", TypeConverterDelegate.class.getClassLoader());
-			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
-		}
-		catch (Exception ex) {
-			// Java 8 not available - conversion to Optional not supported then.
-		}
-	}
-
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -183,10 +170,14 @@ class TypeConverterDelegate {
 
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
-			if (requiredType != null && Collection.class.isAssignableFrom(requiredType) && convertedValue instanceof String) {
-				TypeDescriptor elementType = typeDescriptor.getElementTypeDescriptor();
-				if (elementType != null && Enum.class.isAssignableFrom(elementType.getType())) {
-					convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
+			if (typeDescriptor != null && requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
+					convertedValue instanceof String) {
+				TypeDescriptor elementTypeDesc = typeDescriptor.getElementTypeDescriptor();
+				if (elementTypeDesc != null) {
+					Class<?> elementType = elementTypeDesc.getType();
+					if (Class.class == elementType || Enum.class.isAssignableFrom(elementType)) {
+						convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
+					}
 				}
 			}
 			if (editor == null) {
@@ -265,8 +256,8 @@ class TypeConverterDelegate {
 			}
 			else {
 				// convertedValue == null
-				if (javaUtilOptionalEmpty != null && requiredType.equals(javaUtilOptionalEmpty.getClass())) {
-					convertedValue = javaUtilOptionalEmpty;
+				if (requiredType == Optional.class) {
+					convertedValue = Optional.empty();
 				}
 			}
 

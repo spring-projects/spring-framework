@@ -74,7 +74,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 
 	private static final ThreadLocal<Map<Object, ScriptEngine>> enginesHolder =
-			new NamedThreadLocal<Map<Object, ScriptEngine>>("ScriptTemplateView engines");
+			new NamedThreadLocal<>("ScriptTemplateView engines");
 
 
 	private ScriptEngine engine;
@@ -254,7 +254,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			Map<Object, ScriptEngine> engines = enginesHolder.get();
 			if (engines == null) {
-				engines = new HashMap<Object, ScriptEngine>(4);
+				engines = new HashMap<>(4);
 				enginesHolder.set(engines);
 			}
 			Object engineKey = (!ObjectUtils.isEmpty(this.scripts) ?

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import org.springframework.lang.UsesJava8;
-
 /**
  * {@link ParameterNameDiscoverer} implementation which uses JDK 8's reflection facilities
  * for introspecting parameter names (based on the "-parameters" compiler flag).
@@ -30,7 +28,6 @@ import org.springframework.lang.UsesJava8;
  * @since 4.0
  * @see java.lang.reflect.Parameter#getName()
  */
-@UsesJava8
 public class StandardReflectionParameterNameDiscoverer implements ParameterNameDiscoverer {
 
 	@Override

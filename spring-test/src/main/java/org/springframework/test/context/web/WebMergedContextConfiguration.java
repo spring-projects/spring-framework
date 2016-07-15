@@ -60,36 +60,6 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 
 
 	/**
-	 * Create a new {@code WebMergedContextConfiguration} instance for the
-	 * supplied parameters.
-	 * <p>Delegates to
-	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String[], String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}.
-	 * @param testClass the test class for which the configuration was merged
-	 * @param locations the merged resource locations
-	 * @param classes the merged annotated classes
-	 * @param contextInitializerClasses the merged context initializer classes
-	 * @param activeProfiles the merged active bean definition profiles
-	 * @param resourceBasePath the resource path to the root directory of the web application
-	 * @param contextLoader the resolved {@code ContextLoader}
-	 * @param cacheAwareContextLoaderDelegate a cache-aware context loader
-	 * delegate with which to retrieve the parent context
-	 * @param parent the parent configuration or {@code null} if there is no parent
-	 * @since 3.2.2
-	 * @deprecated as of Spring 4.1, use
-	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String[], String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)}
-	 * instead.
-	 */
-	@Deprecated
-	public WebMergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
-			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
-			String[] activeProfiles, String resourceBasePath, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
-
-		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, null, null, resourceBasePath,
-			contextLoader, cacheAwareContextLoaderDelegate, parent);
-	}
-
-	/**
 	 * Create a new {@code WebMergedContextConfiguration} instance by copying
 	 * all properties from the supplied {@code MergedContextConfiguration}.
 	 * <p>If an <em>empty</em> value is supplied for the {@code resourceBasePath}

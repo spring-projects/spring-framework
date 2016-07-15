@@ -300,7 +300,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		@Override
 		protected List<ApplicationResource> getSources(ApplicationContext applicationContext) {
 			if (definitions != null) {
-				List<ApplicationResource> result = new LinkedList<ApplicationResource>();
+				List<ApplicationResource> result = new LinkedList<>();
 				for (String definition : definitions) {
 					Collection<ApplicationResource> resources = applicationContext.getResources(definition);
 					if (resources != null) {

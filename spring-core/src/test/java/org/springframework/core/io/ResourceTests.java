@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class ResourceTests {
 		assertEquals(resource, resource3);
 
 		// Check whether equal/hashCode works in a HashSet.
-		HashSet<Resource> resources = new HashSet<Resource>();
+		HashSet<Resource> resources = new HashSet<>();
 		resources.add(resource);
 		resources.add(resource2);
 		assertEquals(1, resources.size());

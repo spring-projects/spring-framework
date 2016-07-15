@@ -7,3 +7,8 @@ org.springframework.test.context.TestExecutionListener = \
 	org.springframework.test.context.support.DirtiesContextTestExecutionListener,\
 	org.springframework.test.context.transaction.TransactionalTestExecutionListener,\
 	org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
+
+# Default ContextCustomizerFactory implementations for the Spring TestContext Framework
+#
+org.springframework.test.context.ContextCustomizerFactory = \
+	org.springframework.test.context.web.socket.MockServerContainerContextCustomizerFactory

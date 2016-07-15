@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,14 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 * than non-null objects.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static final NullSafeComparator NULLS_LOW = new NullSafeComparator<Object>(true);
+	public static final NullSafeComparator NULLS_LOW = new NullSafeComparator<>(true);
 
 	/**
 	 * A shared default instance of this comparator, treating nulls higher
 	 * than non-null objects.
 	 */
 	@SuppressWarnings("rawtypes")
-	public static final NullSafeComparator NULLS_HIGH = new NullSafeComparator<Object>(false);
+	public static final NullSafeComparator NULLS_HIGH = new NullSafeComparator<>(false);
 
 	private final Comparator<T> nonNullComparator;
 

@@ -244,7 +244,7 @@ public abstract class MimeTypeUtils {
 
 		Map<String, String> parameters = null;
 		if (parts.length > 1) {
-			parameters = new LinkedHashMap<String, String>(parts.length - 1);
+			parameters = new LinkedHashMap<>(parts.length - 1);
 			for (int i = 1; i < parts.length; i++) {
 				String parameter = parts[i];
 				int eqIndex = parameter.indexOf('=');
@@ -278,7 +278,7 @@ public abstract class MimeTypeUtils {
 			return Collections.emptyList();
 		}
 		String[] tokens = mimeTypes.split(",\\s*");
-		List<MimeType> result = new ArrayList<MimeType>(tokens.length);
+		List<MimeType> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMimeType(token));
 		}
@@ -358,6 +358,6 @@ public abstract class MimeTypeUtils {
 	/**
 	 * Comparator used by {@link #sortBySpecificity(List)}.
 	 */
-	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new SpecificityComparator<MimeType>();
+	public static final Comparator<MimeType> SPECIFICITY_COMPARATOR = new SpecificityComparator<>();
 
 }

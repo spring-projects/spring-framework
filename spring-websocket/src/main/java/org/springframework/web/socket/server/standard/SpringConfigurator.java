@@ -55,7 +55,7 @@ public class SpringConfigurator extends Configurator {
 	private static final Log logger = LogFactory.getLog(SpringConfigurator.class);
 
 	private static final Map<String, Map<Class<?>, String>> cache =
-			new ConcurrentHashMap<String, Map<Class<?>, String>>();
+			new ConcurrentHashMap<>();
 
 
 	@SuppressWarnings("unchecked")
@@ -102,7 +102,7 @@ public class SpringConfigurator extends Configurator {
 
 		Map<Class<?>, String> beanNamesByType = cache.get(wacId);
 		if (beanNamesByType == null) {
-			beanNamesByType = new ConcurrentHashMap<Class<?>, String>();
+			beanNamesByType = new ConcurrentHashMap<>();
 			cache.put(wacId, beanNamesByType);
 		}
 

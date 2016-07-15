@@ -129,7 +129,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					String requestEncoding = this.servletRequest.getCharacterEncoding();
 					if (StringUtils.hasLength(requestEncoding)) {
 						Charset charSet = Charset.forName(requestEncoding);
-						Map<String, String> params = new LinkedCaseInsensitiveMap<String>();
+						Map<String, String> params = new LinkedCaseInsensitiveMap<>();
 						params.putAll(contentType.getParameters());
 						params.put("charset", charSet.toString());
 						MediaType newContentType = new MediaType(contentType.getType(), contentType.getSubtype(), params);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,9 +72,9 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	private static final Comparator<Method> METHOD_COMPARATOR;
 
 	static {
-		CompoundComparator<Method> comparator = new CompoundComparator<Method>();
-		comparator.addComparator(new ConvertingComparator<Method, Annotation>(
-				new InstanceComparator<Annotation>(
+		CompoundComparator<Method> comparator = new CompoundComparator<>();
+		comparator.addComparator(new ConvertingComparator<>(
+				new InstanceComparator<>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
 				new Converter<Method, Annotation>() {
 					@Override
@@ -84,7 +84,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 						return (annotation != null ? annotation.getAnnotation() : null);
 					}
 				}));
-		comparator.addComparator(new ConvertingComparator<Method, String>(
+		comparator.addComparator(new ConvertingComparator<>(
 				new Converter<Method, String>() {
 					@Override
 					public String convert(Method method) {
@@ -106,7 +106,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		MetadataAwareAspectInstanceFactory lazySingletonAspectInstanceFactory =
 				new LazySingletonAspectInstanceFactoryDecorator(aspectInstanceFactory);
 
-		List<Advisor> advisors = new LinkedList<Advisor>();
+		List<Advisor> advisors = new LinkedList<>();
 		for (Method method : getAdvisorMethods(aspectClass)) {
 			Advisor advisor = getAdvisor(method, lazySingletonAspectInstanceFactory, advisors.size(), aspectName);
 			if (advisor != null) {
@@ -132,7 +132,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
-		final List<Method> methods = new LinkedList<Method>();
+		final List<Method> methods = new LinkedList<>();
 		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
 			@Override
 			public void doWith(Method method) throws IllegalArgumentException {

@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class CompositeDatabasePopulator implements DatabasePopulator {
 
-	private final List<DatabasePopulator> populators = new ArrayList<DatabasePopulator>(4);
+	private final List<DatabasePopulator> populators = new ArrayList<>(4);
 
 
 	/**

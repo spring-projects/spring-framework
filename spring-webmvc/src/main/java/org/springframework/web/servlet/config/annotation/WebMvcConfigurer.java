@@ -136,7 +136,7 @@ public interface WebMvcConfigurer {
 	 * be useful for example to allow default resolvers to be registered and then
 	 * insert a custom one through this method.
 	 * @param exceptionResolvers the list of configured resolvers to extend.
-	 * @since 4.3.1
+	 * @since 4.3
 	 */
 	void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 

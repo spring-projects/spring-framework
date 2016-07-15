@@ -19,7 +19,6 @@ package org.springframework.web.filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -29,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
@@ -61,28 +59,29 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 	private static final String STREAMING_ATTRIBUTE = ShallowEtagHeaderFilter.class.getName() + ".STREAMING";
 
-	/** Checking for Servlet 3.0+ HttpServletResponse.getHeader(String) */
-	private static final boolean servlet3Present =
-			ClassUtils.hasMethod(HttpServletResponse.class, "getHeader", String.class);
 
 	private boolean writeWeakETag = false;
 
-	/**
-	 * Set whether the ETag value written to the response should be weak, as per rfc7232.
-	 * <p>Should be configured using an {@code <init-param>} for parameter name
-	 * "writeWeakETag" in the filter definition in {@code web.xml}.
-	 * @see  <a href="https://tools.ietf.org/html/rfc7232#section-2.3">rfc7232 section-2.3</a>
-	 */
-	public boolean isWriteWeakETag() {
-		return writeWeakETag;
-	}
 
 	/**
-	 * Return whether the ETag value written to the response should be weak, as per rfc7232.
+	 * Set whether the ETag value written to the response should be weak, as per RFC 7232.
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
+	 * "writeWeakETag" in the filter definition in {@code web.xml}.
+	 * @see  <a href="https://tools.ietf.org/html/rfc7232#section-2.3">RFC 7232 section 2.3</a>
+	 * @since 4.3
 	 */
 	public void setWriteWeakETag(boolean writeWeakETag) {
 		this.writeWeakETag = writeWeakETag;
 	}
+
+	/**
+	 * Return whether the ETag value written to the response should be weak, as per RFC 7232.
+	 * @since 4.3
+	 */
+	public boolean isWriteWeakETag() {
+		return this.writeWeakETag;
+	}
+
 
 	/**
 	 * The default value is "false" so that the filter may delay the generation of
@@ -169,10 +168,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		if (responseStatusCode >= 200 && responseStatusCode < 300 &&
 				(HttpMethod.GET.matches(method) || HttpMethod.HEAD.matches(method))) {
 
-			String cacheControl = null;
-			if (servlet3Present) {
-				cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
-			}
+			String cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
 			if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
 				return true;
 			}

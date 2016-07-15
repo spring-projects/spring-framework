@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class ModelFactoryOrderingTests {
 
 		Class<?> type = controller.getClass();
 		Set<Method> methods = MethodIntrospector.selectMethods(type, METHOD_FILTER);
-		List<InvocableHandlerMethod> modelMethods = new ArrayList<InvocableHandlerMethod>();
+		List<InvocableHandlerMethod> modelMethods = new ArrayList<>();
 		for (Method method : methods) {
 			InvocableHandlerMethod modelMethod = new InvocableHandlerMethod(controller, method);
 			modelMethod.setHandlerMethodArgumentResolvers(resolvers);

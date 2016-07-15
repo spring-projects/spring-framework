@@ -129,13 +129,13 @@ abstract class AnnotationReadingVisitorUtils {
 		// method.
 		AnnotationAttributes results = new AnnotationAttributes(attributesList.get(0));
 
-		Set<String> overridableAttributeNames = new HashSet<String>(results.keySet());
+		Set<String> overridableAttributeNames = new HashSet<>(results.keySet());
 		overridableAttributeNames.remove(AnnotationUtils.VALUE);
 
 		// Since the map is a LinkedMultiValueMap, we depend on the ordering of
 		// elements in the map and reverse the order of the keys in order to traverse
 		// "down" the annotation hierarchy.
-		List<String> annotationTypes = new ArrayList<String>(attributesMap.keySet());
+		List<String> annotationTypes = new ArrayList<>(attributesMap.keySet());
 		Collections.reverse(annotationTypes);
 
 		// No need to revisit the target annotation type:

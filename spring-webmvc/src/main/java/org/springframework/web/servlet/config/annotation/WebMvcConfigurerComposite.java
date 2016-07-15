@@ -35,7 +35,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  */
 class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
-	private final List<WebMvcConfigurer> delegates = new ArrayList<WebMvcConfigurer>();
+	private final List<WebMvcConfigurer> delegates = new ArrayList<>();
 
 	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {
 		if (configurers != null) {
@@ -150,7 +150,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
 	@Override
 	public Validator getValidator() {
-		List<Validator> candidates = new ArrayList<Validator>();
+		List<Validator> candidates = new ArrayList<>();
 		for (WebMvcConfigurer configurer : this.delegates) {
 			Validator validator = configurer.getValidator();
 			if (validator != null) {
@@ -182,7 +182,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
 	@Override
 	public MessageCodesResolver getMessageCodesResolver() {
-		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
+		List<MessageCodesResolver> candidates = new ArrayList<>();
 		for (WebMvcConfigurer configurer : this.delegates) {
 			MessageCodesResolver messageCodesResolver = configurer.getMessageCodesResolver();
 			if (messageCodesResolver != null) {

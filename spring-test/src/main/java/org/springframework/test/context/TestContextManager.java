@@ -86,7 +86,7 @@ public class TestContextManager {
 
 	private final TestContext testContext;
 
-	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<TestExecutionListener>();
+	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<>();
 
 
 	/**
@@ -165,7 +165,7 @@ public class TestContextManager {
 	 * registered for this {@code TestContextManager} in reverse order.
 	 */
 	private List<TestExecutionListener> getReversedTestExecutionListeners() {
-		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(getTestExecutionListeners());
+		List<TestExecutionListener> listenersReversed = new ArrayList<>(getTestExecutionListeners());
 		Collections.reverse(listenersReversed);
 		return listenersReversed;
 	}

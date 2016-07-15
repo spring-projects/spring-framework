@@ -145,7 +145,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (!logger.isWarnEnabled()) {
 			return this.objectMapper.canDeserialize(javaType);
 		}
-		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
+		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
 		}
@@ -161,7 +161,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (!logger.isWarnEnabled()) {
 			return this.objectMapper.canSerialize(clazz);
 		}
-		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
+		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canSerialize(clazz, causeRef)) {
 			return true;
 		}

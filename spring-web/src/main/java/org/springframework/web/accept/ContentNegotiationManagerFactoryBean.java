@@ -96,7 +96,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean ignoreAcceptHeader = false;
 
-	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+	private Map<String, MediaType> mediaTypes = new HashMap<>();
 
 	private boolean ignoreUnknownPathExtensions = true;
 
@@ -250,7 +250,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	@Override
 	public void afterPropertiesSet() {
-		List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
+		List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;

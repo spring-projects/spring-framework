@@ -88,7 +88,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(final HttpHeaders headers) throws IOException {
 		final SettableListenableFuture<ClientHttpResponse> responseFuture =
-				new SettableListenableFuture<ClientHttpResponse>();
+				new SettableListenableFuture<>();
 
 		ChannelFutureListener connectionListener = new ChannelFutureListener() {
 			@Override

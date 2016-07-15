@@ -40,18 +40,9 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultConversionService extends GenericConversionService {
 
-	/** Java 8's java.util.Optional class available? */
-	private static final boolean javaUtilOptionalClassAvailable =
-			ClassUtils.isPresent("java.util.Optional", DefaultConversionService.class.getClassLoader());
-
 	/** Java 8's java.time package available? */
 	private static final boolean jsr310Available =
 			ClassUtils.isPresent("java.time.ZoneId", DefaultConversionService.class.getClassLoader());
-
-	/** Java 8's java.util.stream.Stream class available? */
-	private static final boolean streamAvailable = ClassUtils.isPresent(
-			"java.util.stream.Stream", DefaultConversionService.class.getClassLoader());
-
 
 
 	/**
@@ -83,9 +74,7 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new ObjectToObjectConverter());
 		converterRegistry.addConverter(new IdToEntityConverter((ConversionService) converterRegistry));
 		converterRegistry.addConverter(new FallbackObjectToStringConverter());
-		if (javaUtilOptionalClassAvailable) {
-			converterRegistry.addConverter(new ObjectToOptionalConverter((ConversionService) converterRegistry));
-		}
+		converterRegistry.addConverter(new ObjectToOptionalConverter((ConversionService) converterRegistry));
 	}
 
 	/**
@@ -117,9 +106,7 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new CollectionToObjectConverter(conversionService));
 		converterRegistry.addConverter(new ObjectToCollectionConverter(conversionService));
 
-		if (streamAvailable) {
-			converterRegistry.addConverter(new StreamConverter(conversionService));
-		}
+		converterRegistry.addConverter(new StreamConverter(conversionService));
 	}
 
 

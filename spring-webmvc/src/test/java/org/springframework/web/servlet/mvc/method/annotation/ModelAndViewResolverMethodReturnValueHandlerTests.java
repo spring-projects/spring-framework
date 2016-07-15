@@ -53,7 +53,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 
 	@Before
 	public void setUp() {
-		mavResolvers = new ArrayList<ModelAndViewResolver>();
+		mavResolvers = new ArrayList<>();
 		handler = new ModelAndViewResolverMethodReturnValueHandler(mavResolvers);
 		mavContainer = new ModelAndViewContainer();
 		request = new ServletWebRequest(new MockHttpServletRequest());

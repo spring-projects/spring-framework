@@ -105,7 +105,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
 		List<HttpRange> rangeList = HttpRange.parseRanges("bytes=0-5,7-15,17-20,22-38");
-		List<ResourceRegion> regions = new ArrayList<ResourceRegion>();
+		List<ResourceRegion> regions = new ArrayList<>();
 		for(HttpRange range : rangeList) {
 			regions.add(range.toResourceRegion(body));
 		}

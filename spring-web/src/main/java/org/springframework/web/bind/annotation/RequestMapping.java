@@ -27,34 +27,17 @@ import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation for mapping web requests onto specific handler classes and/or
- * handler methods. Provides a consistent style between Servlet and Portlet
- * environments, with the semantics adapting to the concrete environment.
- *
- * <p><b>NOTE:</b> The set of features supported for Servlets is a superset
- * of the set of features supported for Portlets. The places where this applies
- * are marked with the label "Servlet-only" in this source file. For Servlet
- * environments there are some further distinctions depending on whether an
- * application is configured with {@literal "@MVC 3.0"} or
- * {@literal "@MVC 3.1"} support classes. The places where this applies are
- * marked with {@literal "@MVC 3.1-only"} in this source file. For more
- * details see the note on the new support classes added in Spring MVC 3.1
- * further below.
+ * handler methods.
  *
  * <p>Handler methods which are annotated with this annotation are allowed to
  * have very flexible signatures. They may have parameters of the following
  * types, in arbitrary order (except for validation results, which need to
  * follow right after the corresponding command object, if desired):
  * <ul>
- * <li>Request and/or response objects (Servlet API or Portlet API).
+ * <li>Request and/or response objects (typically from the Servlet API).
  * You may choose any specific request/response type, e.g.
- * {@link javax.servlet.ServletRequest} / {@link javax.servlet.http.HttpServletRequest}
- * or {@link javax.portlet.PortletRequest} / {@link javax.portlet.ActionRequest} /
- * {@link javax.portlet.RenderRequest}. Note that in the Portlet case,
- * an explicitly declared action/render argument is also used for mapping
- * specific request types onto a handler method (in case of no other
- * information given that differentiates between action and render requests).
- * <li>Session object (Servlet API or Portlet API): either
- * {@link javax.servlet.http.HttpSession} or {@link javax.portlet.PortletSession}.
+ * {@link javax.servlet.ServletRequest} / {@link javax.servlet.http.HttpServletRequest}.
+ * <li>Session object: typically {@link javax.servlet.http.HttpSession}.
  * An argument of this type will enforce the presence of a corresponding session.
  * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
@@ -65,17 +48,17 @@ import org.springframework.core.annotation.AliasFor;
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
  * Allows for generic request parameter access as well as request/session
- * attribute access, without ties to the native Servlet/Portlet API.
+ * attribute access, without ties to the native Servlet API.
  * <li>{@link java.util.Locale} for the current request locale
  * (determined by the most specific locale resolver available,
  * i.e. the configured {@link org.springframework.web.servlet.LocaleResolver}
- * in a Servlet environment and the portal locale in a Portlet environment).
+ * in a Servlet environment).
  * <li>{@link java.io.InputStream} / {@link java.io.Reader} for access
  * to the request's content. This will be the raw InputStream/Reader as
- * exposed by the Servlet/Portlet API.
+ * exposed by the Servlet API.
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
  * the response's content. This will be the raw OutputStream/Writer as
- * exposed by the Servlet/Portlet API.
+ * exposed by the Servlet API.
  * <li>{@link org.springframework.http.HttpMethod} for the HTTP request method</li>
  * <li>{@link PathVariable @PathVariable} annotated parameters (Servlet-only)
  * for access to URI template values (i.e. /hotels/{hotel}). Variable values will be
@@ -94,13 +77,13 @@ import org.springframework.core.annotation.AliasFor;
  * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
  * matrix variables in the URL or to those in a specific path variable.
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
- * specific Servlet/Portlet request parameters. Parameter values will be
+ * specific Servlet request parameters. Parameter values will be
  * converted to the declared method argument type. Additionally,
  * {@code @RequestParam} can be used on a {@link java.util.Map Map&lt;String, String&gt;} or
  * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}
  * method parameter to gain access to all request parameters.
  * <li>{@link RequestHeader @RequestHeader} annotated parameters for access to
- * specific Servlet/Portlet request HTTP headers. Parameter values will be
+ * specific Servlet request HTTP headers. Parameter values will be
  * converted to the declared method argument type. Additionally,
  * {@code @RequestHeader} can be used on a {@link java.util.Map Map&lt;String, String&gt;},
  * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;}, or
@@ -177,7 +160,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
+ * <li>A {@code ModelAndView} object (from Servlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link org.springframework.ui.Model Model} object, with the view name implicitly
@@ -238,11 +221,9 @@ import org.springframework.core.annotation.AliasFor;
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
- * / {@link javax.portlet.RenderResponse} for that purpose)
- * or if the view name is supposed to be implicitly determined through a
- * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
- * (not declaring a response argument in the handler method signature;
- * only applicable in a Servlet environment).
+ * for that purpose) or if the view name is supposed to be implicitly determined
+ * through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * (not declaring a response argument in the handler method signature).
  * <li>Any other return type will be considered as single model attribute
  * to be exposed to the view, using the attribute name specified through
  * {@link ModelAttribute @ModelAttribute} at the method level (or the default attribute
@@ -253,22 +234,9 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p><b>NOTE:</b> {@code @RequestMapping} will only be processed if an
  * an appropriate {@code HandlerMapping}-{@code HandlerAdapter} pair
- * is configured. This is the case by default in both the
- * {@code DispatcherServlet} and the {@code DispatcherPortlet}.
- * However, if you are defining custom {@code HandlerMappings} or
- * {@code HandlerAdapters}, then you need to add
- * {@code DefaultAnnotationHandlerMapping} and
- * {@code AnnotationMethodHandlerAdapter} to your configuration.</code>.
- *
- * <p><b>NOTE:</b> Spring 3.1 introduced a new set of support classes for
- * {@code @RequestMapping} methods in Servlet environments called
- * {@code RequestMappingHandlerMapping} and
- * {@code RequestMappingHandlerAdapter}. They are recommended for use and
- * even required to take advantage of new features in Spring MVC 3.1 (search
- * {@literal "@MVC 3.1-only"} in this source file) and going forward.
- * The new support classes are enabled by default from the MVC namespace and
- * with use of the MVC Java config ({@code @EnableWebMvc}) but must be
- * configured explicitly if using neither.
+ * is configured. If you are defining custom {@code HandlerMappings} or
+ * {@code HandlerAdapters}, then you need to add {@code RequestMappingHandlerMapping}
+ * and {@code RequestMappingHandlerAdapter} to your configuration.</code>.
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as
@@ -293,8 +261,6 @@ import org.springframework.core.annotation.AliasFor;
  * @see InitBinder
  * @see org.springframework.web.context.request.WebRequest
  * @see org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
- * @see org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping
- * @see org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -314,11 +280,9 @@ public @interface RequestMapping {
 
 	/**
 	 * The primary mapping expressed by this annotation.
-	 * <p>In a Servlet environment this is an alias for {@link #path}.
-	 * For example {@code @RequestMapping("/foo")} is equivalent to
+	 * <p>This is an alias for {@link #path}. For example
+	 * {@code @RequestMapping("/foo")} is equivalent to
 	 * {@code @RequestMapping(path="/foo")}.
-	 * <p>In a Portlet environment this is the mapped portlet modes
-	 * (i.e. "EDIT", "VIEW", "HELP" or any custom modes).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
@@ -348,7 +312,6 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this HTTP method restriction (i.e. the type-level restriction
 	 * gets checked before the handler method is even resolved).
-	 * <p>Supported for Servlet environments as well as Portlet 2.0 environments.
 	 */
 	RequestMethod[] method() default {};
 
@@ -365,14 +328,10 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this parameter restriction (i.e. the type-level restriction
 	 * gets checked before the handler method is even resolved).
-	 * <p>In a Servlet environment, parameter mappings are considered as restrictions
-	 * that are enforced at the type level. The primary path mapping (i.e. the
-	 * specified URI value) still has to uniquely identify the target handler, with
-	 * parameter mappings simply expressing preconditions for invoking the handler.
-	 * <p>In a Portlet environment, parameters are taken into account as mapping
-	 * differentiators, i.e. the primary portlet mode mapping plus the parameter
-	 * conditions uniquely identify the target handler. Different handlers may be
-	 * mapped onto the same portlet mode, as long as their parameter mappings differ.
+	 * <p>Parameter mappings are considered as restrictions that are enforced at
+	 * the type level. The primary path mapping (i.e. the specified URI value)
+	 * still has to uniquely identify the target handler, with parameter mappings
+	 * simply expressing preconditions for invoking the handler.
 	 */
 	String[] params() default {};
 
@@ -395,8 +354,6 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this header restriction (i.e. the type-level restriction
 	 * gets checked before the handler method is even resolved).
-	 * <p>Maps against HttpServletRequest headers in a Servlet environment,
-	 * and against PortletRequest properties in a Portlet 2.0 environment.
 	 * @see org.springframework.http.MediaType
 	 */
 	String[] headers() default {};

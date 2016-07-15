@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 */
 	private Expression[] parseExpressions(String expressionString, ParserContext context)
 			throws ParseException {
-		List<Expression> expressions = new LinkedList<Expression>();
+		List<Expression> expressions = new LinkedList<>();
 		String prefix = context.getExpressionPrefix();
 		String suffix = context.getExpressionSuffix();
 		int startIdx = 0;
@@ -210,7 +210,7 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 		if (nextSuffix == -1) {
 			return -1; // the suffix is missing
 		}
-		Stack<Bracket> stack = new Stack<Bracket>();
+		Stack<Bracket> stack = new Stack<>();
 		while (pos < maxlen) {
 			if (isSuffixHere(expressionString, pos, suffix) && stack.isEmpty()) {
 				break;

@@ -49,7 +49,7 @@ class DefaultMvcResult implements MvcResult {
 
 	private Exception resolvedException;
 
-	private final AtomicReference<Object> asyncResult = new AtomicReference<Object>(RESULT_NONE);
+	private final AtomicReference<Object> asyncResult = new AtomicReference<>(RESULT_NONE);
 
 
 	/**

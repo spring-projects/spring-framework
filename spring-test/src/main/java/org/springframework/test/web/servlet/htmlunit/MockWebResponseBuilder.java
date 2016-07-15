@@ -94,7 +94,7 @@ final class MockWebResponseBuilder {
 
 	private List<NameValuePair> responseHeaders() {
 		Collection<String> headerNames = this.response.getHeaderNames();
-		List<NameValuePair> responseHeaders = new ArrayList<NameValuePair>(headerNames.size());
+		List<NameValuePair> responseHeaders = new ArrayList<>(headerNames.size());
 		for (String headerName : headerNames) {
 			List<Object> headerValues = this.response.getHeaderValues(headerName);
 			for (Object value : headerValues) {

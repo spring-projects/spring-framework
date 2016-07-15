@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ public class GsonHttpMessageConverterTests {
 		assertEquals(42, n.longValue());
 		n = (Number) result.get("fraction");
 		assertEquals(42D, n.doubleValue(), 0D);
-		List<String> array = new ArrayList<String>();
+		List<String> array = new ArrayList<>();
 		array.add("Foo");
 		array.add("Bar");
 		assertEquals(array, result.get("array"));

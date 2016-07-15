@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public class MapAccessorTests {
 	}
 
 	public static class MapGetter {
-		Map<String,Object> map = new HashMap<String,Object>();
+		Map<String,Object> map = new HashMap<>();
 
 		public MapGetter() {
 			map.put("foo", "bar");
@@ -82,15 +82,15 @@ public class MapAccessorTests {
 	}
 
 	public Map<String,Object> getSimpleTestMap() {
-		Map<String,Object> map = new HashMap<String,Object>();
+		Map<String,Object> map = new HashMap<>();
 		map.put("foo","bar");
 		return map;
 	}
 
 	public Map<String,Map<String,Object>> getNestedTestMap() {
-		Map<String,Object> map = new HashMap<String,Object>();
+		Map<String,Object> map = new HashMap<>();
 		map.put("foo","bar");
-		Map<String,Map<String,Object>> map2 = new HashMap<String,Map<String,Object>>();
+		Map<String,Map<String,Object>> map2 = new HashMap<>();
 		map2.put("aaa", map);
 		return map2;
 	}

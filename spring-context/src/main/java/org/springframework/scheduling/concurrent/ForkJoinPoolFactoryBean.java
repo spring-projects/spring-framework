@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,9 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.lang.UsesJava7;
 
 /**
  * A Spring {@link FactoryBean} that builds and exposes a preconfigured {@link ForkJoinPool}.
- * May be used on Java 7 and 8 as well as on Java 6 with {@code jsr166.jar} on the classpath
- * (ideally on the VM bootstrap classpath).
  *
  * <p>For details on the ForkJoinPool API and its use with RecursiveActions, see the
  * <a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ForkJoinPool.html">JDK 7 javadoc</a>.
@@ -38,7 +35,6 @@ import org.springframework.lang.UsesJava7;
  * @author Juergen Hoeller
  * @since 3.1
  */
-@UsesJava7
 public class ForkJoinPoolFactoryBean implements FactoryBean<ForkJoinPool>, InitializingBean, DisposableBean {
 
 	private boolean commonPool = false;

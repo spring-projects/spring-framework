@@ -42,7 +42,7 @@ final class StringToNumberConverterFactory implements ConverterFactory<String, N
 
 	@Override
 	public <T extends Number> Converter<String, T> getConverter(Class<T> targetType) {
-		return new StringToNumber<T>(targetType);
+		return new StringToNumber<>(targetType);
 	}
 
 

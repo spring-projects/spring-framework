@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -318,7 +318,7 @@ public abstract class CollectionUtils {
 	 * returned will be a different instance than the array given.
 	 */
 	public static <A, E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
-		ArrayList<A> elements = new ArrayList<A>();
+		ArrayList<A> elements = new ArrayList<>();
 		while (enumeration.hasMoreElements()) {
 			elements.add(enumeration.nextElement());
 		}
@@ -331,7 +331,7 @@ public abstract class CollectionUtils {
 	 * @return the iterator
 	 */
 	public static <E> Iterator<E> toIterator(Enumeration<E> enumeration) {
-		return new EnumerationIterator<E>(enumeration);
+		return new EnumerationIterator<>(enumeration);
 	}
 
 	/**
@@ -341,7 +341,7 @@ public abstract class CollectionUtils {
 	 * @since 3.1
 	 */
 	public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> map) {
-		return new MultiValueMapAdapter<K, V>(map);
+		return new MultiValueMapAdapter<>(map);
 	}
 
 	/**
@@ -353,7 +353,7 @@ public abstract class CollectionUtils {
 	@SuppressWarnings("unchecked")
 	public static <K, V> MultiValueMap<K, V> unmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> map) {
 		Assert.notNull(map, "'map' must not be null");
-		Map<K, List<V>> result = new LinkedHashMap<K, List<V>>(map.size());
+		Map<K, List<V>> result = new LinkedHashMap<>(map.size());
 		for (Map.Entry<? extends K, ? extends List<? extends V>> entry : map.entrySet()) {
 			List<? extends V> values = Collections.unmodifiableList(entry.getValue());
 			result.put(entry.getKey(), (List<V>) values);
@@ -408,7 +408,7 @@ public abstract class CollectionUtils {
 		public void add(K key, V value) {
 			List<V> values = this.map.get(key);
 			if (values == null) {
-				values = new LinkedList<V>();
+				values = new LinkedList<>();
 				this.map.put(key, values);
 			}
 			values.add(value);
@@ -422,7 +422,7 @@ public abstract class CollectionUtils {
 
 		@Override
 		public void set(K key, V value) {
-			List<V> values = new LinkedList<V>();
+			List<V> values = new LinkedList<>();
 			values.add(value);
 			this.map.put(key, values);
 		}
@@ -436,7 +436,7 @@ public abstract class CollectionUtils {
 
 		@Override
 		public Map<K, V> toSingleValueMap() {
-			LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<K,V>(this.map.size());
+			LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<>(this.map.size());
 			for (Entry<K, List<V>> entry : map.entrySet()) {
 				singleValueMap.put(entry.getKey(), entry.getValue().get(0));
 			}

@@ -27,11 +27,6 @@ import org.springframework.util.StringUtils;
  */
 public abstract class ContextCacheUtils {
 
-	private ContextCacheUtils() {
-		/* no-op */
-	}
-
-
 	/**
 	 * Retrieve the maximum size of the {@link ContextCache}.
 	 * <p>Uses {@link SpringProperties} to retrieve a system property or Spring
@@ -49,7 +44,7 @@ public abstract class ContextCacheUtils {
 			}
 		}
 		catch (Exception ex) {
-			/* ignore */
+			// ignore
 		}
 
 		// Fallback

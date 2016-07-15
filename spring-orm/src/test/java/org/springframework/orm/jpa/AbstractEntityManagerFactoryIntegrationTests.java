@@ -36,20 +36,11 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends org.s
 			"/org/springframework/orm/jpa/hibernate/hibernate-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
 			"/org/springframework/orm/jpa/inject.xml"};
 
-	protected static final String[] OPENJPA_CONFIG_LOCATIONS = new String[] {
-			"/org/springframework/orm/jpa/openjpa/openjpa-manager.xml", "/org/springframework/orm/jpa/memdb.xml",
-			"/org/springframework/orm/jpa/inject.xml"};
-
 
 	private static Provider getProvider() {
 		String provider = System.getProperty("org.springframework.orm.jpa.provider");
-		if (provider != null) {
-			if (provider.toLowerCase().contains("hibernate")) {
-				return Provider.HIBERNATE;
-			}
-			if (provider.toLowerCase().contains("openjpa")) {
-				return Provider.OPENJPA;
-			}
+		if (provider != null && provider.toLowerCase().contains("hibernate")) {
+			return Provider.HIBERNATE;
 		}
 		return Provider.ECLIPSELINK;
 	}
@@ -69,8 +60,6 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends org.s
 				return ECLIPSELINK_CONFIG_LOCATIONS;
 			case HIBERNATE:
 				return HIBERNATE_CONFIG_LOCATIONS;
-			case OPENJPA:
-				return OPENJPA_CONFIG_LOCATIONS;
 			default:
 				throw new IllegalStateException("Unknown provider: " + provider);
 		}
@@ -92,7 +81,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends org.s
 
 	static enum Provider {
 
-		ECLIPSELINK, HIBERNATE, OPENJPA
+		ECLIPSELINK, HIBERNATE
 	}
 
 }

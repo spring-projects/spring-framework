@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 
-		Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<String, CorsConfiguration>();
+		Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<>();
 		List<Element> mappings = DomUtils.getChildElementsByTagName(element, "mapping");
 
 		if (mappings.isEmpty()) {

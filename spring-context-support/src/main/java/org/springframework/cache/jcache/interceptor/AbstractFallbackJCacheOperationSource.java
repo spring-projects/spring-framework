@@ -51,7 +51,7 @@ public abstract class AbstractFallbackJCacheOperationSource implements JCacheOpe
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<MethodClassKey, Object> cache = new ConcurrentHashMap<MethodClassKey, Object>(1024);
+	private final Map<MethodClassKey, Object> cache = new ConcurrentHashMap<>(1024);
 
 
 	@Override

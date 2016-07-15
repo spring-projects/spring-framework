@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class DeferredResultTests {
 	public void setResult() {
 		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
-		DeferredResult<String> result = new DeferredResult<String>();
+		DeferredResult<String> result = new DeferredResult<>();
 		result.setResultHandler(handler);
 
 		assertTrue(result.setResult("hello"));
@@ -45,7 +45,7 @@ public class DeferredResultTests {
 	public void setResultTwice() {
 		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
-		DeferredResult<String> result = new DeferredResult<String>();
+		DeferredResult<String> result = new DeferredResult<>();
 		result.setResultHandler(handler);
 
 		assertTrue(result.setResult("hello"));
@@ -58,7 +58,7 @@ public class DeferredResultTests {
 	public void isSetOrExpired() {
 		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
-		DeferredResult<String> result = new DeferredResult<String>();
+		DeferredResult<String> result = new DeferredResult<>();
 		result.setResultHandler(handler);
 
 		assertFalse(result.isSetOrExpired());
@@ -74,7 +74,7 @@ public class DeferredResultTests {
 	public void hasResult() {
 		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
-		DeferredResult<String> result = new DeferredResult<String>();
+		DeferredResult<String> result = new DeferredResult<>();
 		result.setResultHandler(handler);
 
 		assertFalse(result.hasResult());
@@ -89,7 +89,7 @@ public class DeferredResultTests {
 	public void onCompletion() throws Exception {
 		final StringBuilder sb = new StringBuilder();
 
-		DeferredResult<String> result = new DeferredResult<String>();
+		DeferredResult<String> result = new DeferredResult<>();
 		result.onCompletion(new Runnable() {
 			@Override
 			public void run() {
@@ -109,7 +109,7 @@ public class DeferredResultTests {
 
 		DeferredResultHandler handler = mock(DeferredResultHandler.class);
 
-		DeferredResult<String> result = new DeferredResult<String>(null, "timeout result");
+		DeferredResult<String> result = new DeferredResult<>(null, "timeout result");
 		result.setResultHandler(handler);
 		result.onTimeout(new Runnable() {
 			@Override

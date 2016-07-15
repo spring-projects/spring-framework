@@ -67,7 +67,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		target.setName("Rob Harrop");
 
 		MBeanExporter adapter = new MBeanExporter();
-		Map<String, Object> beans = new HashMap<String, Object>();
+		Map<String, Object> beans = new HashMap<>();
 		beans.put(OBJECT_NAME, target);
 		adapter.setServer(getServer());
 		adapter.setBeans(beans);

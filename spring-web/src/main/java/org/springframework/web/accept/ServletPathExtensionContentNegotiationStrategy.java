@@ -92,15 +92,18 @@ public class ServletPathExtensionContentNegotiationStrategy extends PathExtensio
 	 * @since 4.3
 	 */
 	public MediaType getMediaTypeForResource(Resource resource) {
-		MediaType mediaType = super.getMediaTypeForResource(resource);
-		if (mediaType == null) {
+		MediaType mediaType = null;
+		if (this.servletContext != null) {
 			String mimeType = this.servletContext.getMimeType(resource.getFilename());
 			if (StringUtils.hasText(mimeType)) {
 				mediaType = MediaType.parseMediaType(mimeType);
 			}
 		}
-		if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
-			mediaType = null;
+		if (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
+			MediaType superMediaType = super.getMediaTypeForResource(resource);
+			if (superMediaType != null) {
+				mediaType = superMediaType;
+			}
 		}
 		return mediaType;
 	}

@@ -368,9 +368,9 @@ method has been added.
 * Test property sources which automatically override system and application property
   sources can be configured via the new `@TestPropertySource` annotation.
 ** See <<testcontext-ctx-management-property-sources>> for details.
-* Default ++TestExecutionListener++s can now be automatically discovered.
+* Default ``TestExecutionListener``s can now be automatically discovered.
 ** See <<testcontext-tel-config-automatic-discovery>> for details.
-* Custom ++TestExecutionListener++s can now be automatically merged with the default
+* Custom ``TestExecutionListener``s can now be automatically merged with the default
   listeners.
 ** See <<testcontext-tel-config-merging>> for details.
 * The documentation for transactional testing support in the TestContext framework has
@@ -597,13 +597,13 @@ public @interface MyTestConfig {
    subsequent release.
 * `@Sql` now supports execution of _inlined SQL statements_ via a new
   `statements` attribute.
-* The `ContextCache` that is used for caching ++ApplicationContext++s
+* The `ContextCache` that is used for caching ``ApplicationContext``s
   between tests is now a public API with a default implementation that
   can be replaced for custom caching needs.
 * `DefaultTestContext`, `DefaultBootstrapContext`, and
   `DefaultCacheAwareContextLoaderDelegate` are now public classes in the
   `support` subpackage, allowing for custom extensions.
-* ++TestContextBootstrapper++s are now responsible for building the
+* ``TestContextBootstrapper``s are now responsible for building the
   `TestContext`.
 * In the Spring MVC Test framework, `MvcResult` details can now be logged
   at `DEBUG` level or written to a custom `OutputStream` or `Writer`. See
@@ -616,7 +616,7 @@ public @interface MyTestConfig {
   definition profiles.
 * Embedded databases can now be automatically assigned a unique name,
   allowing common test database configuration to be reused in different
-  ++ApplicationContext++s within a test suite.
+  ``ApplicationContext``s within a test suite.
 ** See <<jdbc-embedded-database-unique-names>> for details.
 * `MockHttpServletRequest` and `MockHttpServletResponse` now provide better
   support for date header formatting via the `getDateHeader` and `setDateHeader`
@@ -629,6 +629,8 @@ public @interface MyTestConfig {
 
 === Core Container Improvements
 
+* Core container exceptions provide richer metadata to evaluate programmatically.
+* Java 8 default methods get detected as bean property getters/setters.
 * It is no longer necessary to specify the `@Autowired` annotation if the target
   bean only defines one constructor.
 * `@Configuration` classes support constructor injection.
@@ -640,6 +642,7 @@ public @interface MyTestConfig {
   `String path` in a composed annotation.
 * `@Scheduled` and `@Schedules` may now be used as _meta-annotations_ to create
   custom _composed annotations_ with attribute overrides.
+* `@Scheduled` is properly supported on beans of any scope.
 
 === Data Access Improvements
 
@@ -674,12 +677,19 @@ Spring 4.3 also improves the caching abstraction as follows:
 * Built-in support for <<mvc-ann-requestmapping-head-options,HTTP HEAD and HTTP OPTIONS>>.
 * New `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping`
   _composed annotations_ for `@RequestMapping`.
-* New `@RequestScope`, `@SessionScope`, and `@ApplicationScope` _composed annotations_ for web scopes.
+** See <<mvc-ann-requestmapping-composed,Composed @RequestMapping Variants>> for details.
+* New `@RequestScope`, `@SessionScope`, and `@ApplicationScope` _composed annotations_
+  for web scopes.
+** See <<beans-factory-scopes-request,Request scope>>,
+  <<beans-factory-scopes-session,Session scope>>, and
+  <<beans-factory-scopes-application,Application scope>> for details.
 * New `@RestControllerAdvice` annotation with combined `@ControllerAdvice` with `@ResponseBody` semantics.
 * `@ResponseStatus` is now supported at the class level and inherited by all methods.
 * New `@SessionAttribute` annotation for access to session attributes (see <<mvc-ann-sessionattrib-global, example>>).
 * New `@RequestAttribute` annotation for access to request attributes (see <<mvc-ann-requestattrib, example>>).
 * `@ModelAttribute` allows preventing data binding via `binding=false` attribute (see <<mvc-ann-modelattrib-method-args, reference>>).
+* Consistent exposure of Errors and custom Throwables to MVC exception handlers.
+* Consistent charset handling in HTTP message converters, including a UTF-8 default for multipart text content.
 * Static resource handling uses the configured `ContentNegotiationManager` for media type determination.
 * `RestTemplate` and `AsyncRestTemplate` support strict URI variable encoding via `DefaultUriTemplateHandler`.
 * `AsyncRestTemplate` supports request interception.
@@ -692,6 +702,8 @@ Spring 4.3 also improves the caching abstraction as follows:
 
 * The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.
 * New `SpringRunner` _alias_ for the `SpringJUnit4ClassRunner`.
+* Test related annotations may now be declared on interfaces -- for example, for use with
+  _test interfaces_ that make use of Java 8 based interface default methods.
 * An empty declaration of `@ContextConfiguration` can now be completely omitted if default
   XML files, Groovy scripts, or `@Configuration` classes are detected.
 * `@Transactional` test methods are no longer required to be `public` (e.g., in TestNG and JUnit 5).
@@ -707,8 +719,22 @@ Spring 4.3 also improves the caching abstraction as follows:
   custom `ContextLoader`.
 * `@Sql` and `@SqlGroup` may now be used as _meta-annotations_ to create custom _composed
   annotations_ with attribute overrides.
+* `ReflectionTestUtils` now automatically unwraps proxies when setting or getting a field.
 * Server-side Spring MVC Test supports expectations on response headers with multiple values.
 * Server-side Spring MVC Test parses form data request content and populates request parameters.
+* Server-side Spring MVC Test supports mock-like assertions for invoked handler methods.
 * Client-side REST test support allows indicating how many times a request is expected and
   whether the order of declaration for expectations should be ignored (see <<spring-mvc-test-client>>).
 * Client-side REST Test supports expectations for form data in the request body.
+
+=== Support for new library and server generations
+
+* Hibernate ORM 5.2 (still supporting 4.2/4.3 and 5.0/5.1 as well, with 3.6 deprecated now)
+* Jackson 2.8 (minimum raised to Jackson 2.6+ as of Spring 4.3)
+* OkHttp 3.x (still supporting OkHttp 2.x side by side)
+* Netty 4.1
+* Undertow 1.4
+* Tomcat 8.5.2 as well as 9.0 M6
+
+Furthermore, Spring Framework 4.3 embeds the updated ASM 5.1 and Objenesis 2.4 in
+`spring-core.jar`.

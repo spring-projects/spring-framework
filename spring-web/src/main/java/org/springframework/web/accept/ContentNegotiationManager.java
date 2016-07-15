@@ -46,9 +46,9 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	private static final List<MediaType> MEDIA_TYPE_ALL = Collections.<MediaType>singletonList(MediaType.ALL);
 
 
-	private final List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
+	private final List<ContentNegotiationStrategy> strategies = new ArrayList<>();
 
-	private final Set<MediaTypeFileExtensionResolver> resolvers = new LinkedHashSet<MediaTypeFileExtensionResolver>();
+	private final Set<MediaTypeFileExtensionResolver> resolvers = new LinkedHashSet<>();
 
 
 	/**
@@ -133,11 +133,11 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 
 	@Override
 	public List<String> resolveFileExtensions(MediaType mediaType) {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		for (MediaTypeFileExtensionResolver resolver : this.resolvers) {
 			result.addAll(resolver.resolveFileExtensions(mediaType));
 		}
-		return new ArrayList<String>(result);
+		return new ArrayList<>(result);
 	}
 
 	/**
@@ -152,11 +152,11 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 */
 	@Override
 	public List<String> getAllFileExtensions() {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		for (MediaTypeFileExtensionResolver resolver : this.resolvers) {
 			result.addAll(resolver.getAllFileExtensions());
 		}
-		return new ArrayList<String>(result);
+		return new ArrayList<>(result);
 	}
 
 }

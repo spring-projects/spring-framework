@@ -247,7 +247,7 @@ expression using the methods `setVariable()` and `registerFunction()`. The use o
 variables and functions are described in the language reference sections
 <<expressions-ref-variables,Variables>> and <<expressions-ref-functions,Functions>>. The
 `StandardEvaluationContext` is also where you can register custom
-++ConstructorResolver++s, ++MethodResolver++s, and ++PropertyAccessor++s to extend how SpEL
+``ConstructorResolver``s, ``MethodResolver``s, and ``PropertyAccessor``s to extend how SpEL
 evaluates expressions. Please refer to the JavaDoc of these classes for more details.
 
 
@@ -432,7 +432,7 @@ More and more types of expression will be compilable in the future.
 [[expressions-beandef]]
 == Expression support for defining bean definitions
 SpEL expressions can be used with XML or annotation-based configuration metadata for
-defining ++BeanDefinition++s. In both cases the syntax to define the expression is of the
+defining ``BeanDefinition``s. In both cases the syntax to define the expression is of the
 form `#{ <expression string> }`.
 
 

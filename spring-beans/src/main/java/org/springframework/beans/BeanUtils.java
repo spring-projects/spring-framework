@@ -269,12 +269,12 @@ public abstract class BeanUtils {
 		int numMethodsFoundWithCurrentMinimumArgs = 0;
 		for (Method method : methods) {
 			if (method.getName().equals(methodName)) {
-				int numParams = method.getParameterTypes().length;
-				if (targetMethod == null || numParams < targetMethod.getParameterTypes().length) {
+				int numParams = method.getParameterCount();
+				if (targetMethod == null || numParams < targetMethod.getParameterCount()) {
 					targetMethod = method;
 					numMethodsFoundWithCurrentMinimumArgs = 1;
 				}
-				else if (!method.isBridge() && targetMethod.getParameterTypes().length == numParams) {
+				else if (!method.isBridge() && targetMethod.getParameterCount() == numParams) {
 					if (targetMethod.isBridge()) {
 						// Prefer regular method over bridge...
 						targetMethod = method;

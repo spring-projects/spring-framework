@@ -149,7 +149,7 @@ public class CronSequenceGenerator {
 	}
 
 	private void doNext(Calendar calendar, int dot) {
-		List<Integer> resets = new ArrayList<Integer>();
+		List<Integer> resets = new ArrayList<>();
 
 		int second = calendar.get(Calendar.SECOND);
 		List<Integer> emptyList = Collections.emptyList();

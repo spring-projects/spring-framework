@@ -80,13 +80,13 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * Private constructor accepting parsed media type expressions.
 	 */
 	private ConsumesRequestCondition(Collection<ConsumeMediaTypeExpression> expressions) {
-		this.expressions = new ArrayList<ConsumeMediaTypeExpression>(expressions);
+		this.expressions = new ArrayList<>(expressions);
 		Collections.sort(this.expressions);
 	}
 
 
 	private static Set<ConsumeMediaTypeExpression> parseExpressions(String[] consumes, String[] headers) {
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<ConsumeMediaTypeExpression>();
+		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>();
 		if (headers != null) {
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);
@@ -110,14 +110,14 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 * Return the contained MediaType expressions.
 	 */
 	public Set<MediaTypeExpression> getExpressions() {
-		return new LinkedHashSet<MediaTypeExpression>(this.expressions);
+		return new LinkedHashSet<>(this.expressions);
 	}
 
 	/**
 	 * Returns the media types for this condition excluding negated expressions.
 	 */
 	public Set<MediaType> getConsumableMediaTypes() {
-		Set<MediaType> result = new LinkedHashSet<MediaType>();
+		Set<MediaType> result = new LinkedHashSet<>();
 		for (ConsumeMediaTypeExpression expression : this.expressions) {
 			if (!expression.isNegated()) {
 				result.add(expression.getMediaType());
@@ -180,7 +180,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 		catch (InvalidMediaTypeException ex) {
 			return null;
 		}
-		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<ConsumeMediaTypeExpression>(this.expressions);
+		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(this.expressions);
 		for (Iterator<ConsumeMediaTypeExpression> iterator = result.iterator(); iterator.hasNext();) {
 			ConsumeMediaTypeExpression expression = iterator.next();
 			if (!expression.match(contentType)) {

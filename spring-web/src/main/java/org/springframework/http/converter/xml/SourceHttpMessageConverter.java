@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ import org.springframework.util.StreamUtils;
  */
 public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMessageConverter<T> {
 
-	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<Class<?>>(5);
+	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<>(5);
 
 	static {
 		SUPPORTED_CLASSES.add(DOMSource.class);

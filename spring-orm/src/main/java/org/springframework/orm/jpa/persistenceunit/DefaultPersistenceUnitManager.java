@@ -17,7 +17,6 @@
 package org.springframework.orm.jpa.persistenceunit;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.Converter;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -73,8 +73,7 @@ import org.springframework.util.ResourceUtils;
  * DataSource names are by default interpreted as JNDI names, and no load time weaving
  * is available (which requires weaving to be turned off in the persistence provider).
  *
- * <p><b>NOTE: Spring's JPA support requires JPA 2.0 or higher, as of Spring 4.0.</b>
- * Spring's persistence unit bootstrapping automatically detects JPA 2.1 at runtime.
+ * <p><b>NOTE: Spring's JPA support requires JPA 2.1 or higher, as of Spring 5.0.</b>
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -112,19 +111,11 @@ public class DefaultPersistenceUnitManager
 	private static final Set<TypeFilter> entityTypeFilters;
 
 	static {
-		entityTypeFilters = new LinkedHashSet<TypeFilter>(4);
+		entityTypeFilters = new LinkedHashSet<>(4);
 		entityTypeFilters.add(new AnnotationTypeFilter(Entity.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(Embeddable.class, false));
 		entityTypeFilters.add(new AnnotationTypeFilter(MappedSuperclass.class, false));
-		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends Annotation> converterAnnotation = (Class<? extends Annotation>)
-					ClassUtils.forName("javax.persistence.Converter", DefaultPersistenceUnitManager.class.getClassLoader());
-			entityTypeFilters.add(new AnnotationTypeFilter(converterAnnotation, false));
-		}
-		catch (ClassNotFoundException ex) {
-			// JPA 2.1 API not available
-		}
+		entityTypeFilters.add(new AnnotationTypeFilter(Converter.class, false));
 	}
 
 
@@ -156,9 +147,9 @@ public class DefaultPersistenceUnitManager
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
-	private final Set<String> persistenceUnitInfoNames = new HashSet<String>();
+	private final Set<String> persistenceUnitInfoNames = new HashSet<>();
 
-	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<String, PersistenceUnitInfo>();
+	private final Map<String, PersistenceUnitInfo> persistenceUnitInfos = new HashMap<>();
 
 
 	/**
@@ -478,7 +469,7 @@ public class DefaultPersistenceUnitManager
 	 * as defined in the JPA specification.
 	 */
 	private List<SpringPersistenceUnitInfo> readPersistenceUnitInfos() {
-		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
+		List<SpringPersistenceUnitInfo> infos = new LinkedList<>();
 		String defaultName = this.defaultPersistenceUnitName;
 		boolean buildDefaultUnit = (this.packagesToScan != null || this.mappingResources != null);
 		boolean foundDefaultUnit = false;

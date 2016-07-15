@@ -129,7 +129,7 @@ public class BeanCreationException extends FatalBeanException {
 	 */
 	public void addRelatedCause(Throwable ex) {
 		if (this.relatedCauses == null) {
-			this.relatedCauses = new LinkedList<Throwable>();
+			this.relatedCauses = new LinkedList<>();
 		}
 		this.relatedCauses.add(ex);
 	}

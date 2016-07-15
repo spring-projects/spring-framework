@@ -41,7 +41,7 @@ import org.springframework.core.io.Resource;
  * and cares for proper shutdown of the CacheManager. EhCacheManagerFactoryBean is
  * also necessary for loading EhCache configuration from a non-default config location.
  *
- * <p>Note: As of Spring 4.1, Spring's EhCache support requires EhCache 2.5 or higher.
+ * <p>Note: As of Spring 5.0, Spring's EhCache support requires EhCache 2.10 or higher.
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko

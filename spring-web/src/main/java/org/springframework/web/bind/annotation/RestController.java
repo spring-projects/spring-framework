@@ -36,9 +36,6 @@ import org.springframework.stereotype.Controller;
  * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
  * {@code RequestMappingHandlerMapping}-{@code RequestMappingHandlerAdapter}
  * pair which are the default in the MVC Java config and the MVC namespace.
- * In particular {@code @RestController} is not supported with the
- * {@code DefaultAnnotationHandlerMapping}-{@code AnnotationMethodHandlerAdapter}
- * pair both of which are also deprecated.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen

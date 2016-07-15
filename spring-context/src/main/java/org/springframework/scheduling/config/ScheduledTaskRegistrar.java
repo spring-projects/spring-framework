@@ -67,9 +67,9 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 
 	private List<IntervalTask> fixedDelayTasks;
 
-	private final Map<Task, ScheduledTask> unresolvedTasks = new HashMap<Task, ScheduledTask>(16);
+	private final Map<Task, ScheduledTask> unresolvedTasks = new HashMap<>(16);
 
-	private final Set<ScheduledTask> scheduledTasks = new LinkedHashSet<ScheduledTask>(16);
+	private final Set<ScheduledTask> scheduledTasks = new LinkedHashSet<>(16);
 
 
 	/**
@@ -111,7 +111,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * (typically custom implementations of the {@link Trigger} interface).
 	 */
 	public void setTriggerTasks(Map<Runnable, Trigger> triggerTasks) {
-		this.triggerTasks = new ArrayList<TriggerTask>();
+		this.triggerTasks = new ArrayList<>();
 		for (Map.Entry<Runnable, Trigger> task : triggerTasks.entrySet()) {
 			addTriggerTask(new TriggerTask(task.getKey(), task.getValue()));
 		}
@@ -142,7 +142,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * @see CronTrigger
 	 */
 	public void setCronTasks(Map<Runnable, String> cronTasks) {
-		this.cronTasks = new ArrayList<CronTask>();
+		this.cronTasks = new ArrayList<>();
 		for (Map.Entry<Runnable, String> task : cronTasks.entrySet()) {
 			addCronTask(task.getKey(), task.getValue());
 		}
@@ -173,7 +173,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * @see TaskScheduler#scheduleAtFixedRate(Runnable, long)
 	 */
 	public void setFixedRateTasks(Map<Runnable, Long> fixedRateTasks) {
-		this.fixedRateTasks = new ArrayList<IntervalTask>();
+		this.fixedRateTasks = new ArrayList<>();
 		for (Map.Entry<Runnable, Long> task : fixedRateTasks.entrySet()) {
 			addFixedRateTask(task.getKey(), task.getValue());
 		}
@@ -204,7 +204,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * @see TaskScheduler#scheduleWithFixedDelay(Runnable, long)
 	 */
 	public void setFixedDelayTasks(Map<Runnable, Long> fixedDelayTasks) {
-		this.fixedDelayTasks = new ArrayList<IntervalTask>();
+		this.fixedDelayTasks = new ArrayList<>();
 		for (Map.Entry<Runnable, Long> task : fixedDelayTasks.entrySet()) {
 			addFixedDelayTask(task.getKey(), task.getValue());
 		}
@@ -246,7 +246,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void addTriggerTask(TriggerTask task) {
 		if (this.triggerTasks == null) {
-			this.triggerTasks = new ArrayList<TriggerTask>();
+			this.triggerTasks = new ArrayList<>();
 		}
 		this.triggerTasks.add(task);
 	}
@@ -264,7 +264,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void addCronTask(CronTask task) {
 		if (this.cronTasks == null) {
-			this.cronTasks = new ArrayList<CronTask>();
+			this.cronTasks = new ArrayList<>();
 		}
 		this.cronTasks.add(task);
 	}
@@ -284,7 +284,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void addFixedRateTask(IntervalTask task) {
 		if (this.fixedRateTasks == null) {
-			this.fixedRateTasks = new ArrayList<IntervalTask>();
+			this.fixedRateTasks = new ArrayList<>();
 		}
 		this.fixedRateTasks.add(task);
 	}
@@ -304,7 +304,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public void addFixedDelayTask(IntervalTask task) {
 		if (this.fixedDelayTasks == null) {
-			this.fixedDelayTasks = new ArrayList<IntervalTask>();
+			this.fixedDelayTasks = new ArrayList<>();
 		}
 		this.fixedDelayTasks.add(task);
 	}

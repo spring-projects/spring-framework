@@ -71,7 +71,7 @@ public class EndpointConnectionManager extends ConnectionManagerSupport implemen
 	public EndpointConnectionManager(Class<? extends Endpoint> endpointClass, String uriTemplate, Object... uriVars) {
 		super(uriTemplate, uriVars);
 		Assert.notNull(endpointClass, "endpointClass must not be null");
-		this.endpointProvider = new BeanCreatingHandlerProvider<Endpoint>(endpointClass);
+		this.endpointProvider = new BeanCreatingHandlerProvider<>(endpointClass);
 		this.endpoint = null;
 	}
 

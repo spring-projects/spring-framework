@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ public class FormHttpMessageConverterTests {
 
 	@Test
 	public void writeForm() throws IOException {
-		MultiValueMap<String, String> body = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 		body.set("name 1", "value 1");
 		body.add("name 2", "value 2+1");
 		body.add("name 2", "value 2+2");
@@ -130,7 +130,7 @@ public class FormHttpMessageConverterTests {
 
 	@Test
 	public void writeMultipart() throws Exception {
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("name 1", "value 1");
 		parts.add("name 2", "value 2+1");
 		parts.add("name 2", "value 2+2");
@@ -151,7 +151,7 @@ public class FormHttpMessageConverterTests {
 		Source xml = new StreamSource(new StringReader("<root><child/></root>"));
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(MediaType.TEXT_XML);
-		HttpEntity<Source> entity = new HttpEntity<Source>(xml, entityHeaders);
+		HttpEntity<Source> entity = new HttpEntity<>(xml, entityHeaders);
 		parts.add("xml", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
@@ -209,12 +209,12 @@ public class FormHttpMessageConverterTests {
 		MyBean myBean = new MyBean();
 		myBean.setString("foo");
 
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
 		parts.add("part1", myBean);
 
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(MediaType.TEXT_XML);
-		HttpEntity<MyBean> entity = new HttpEntity<MyBean>(myBean, entityHeaders);
+		HttpEntity<MyBean> entity = new HttpEntity<>(myBean, entityHeaders);
 		parts.add("part2", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();

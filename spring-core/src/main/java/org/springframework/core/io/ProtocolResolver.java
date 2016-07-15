@@ -27,6 +27,7 @@ package org.springframework.core.io;
  * @since 4.3
  * @see DefaultResourceLoader#addProtocolResolver
  */
+@FunctionalInterface
 public interface ProtocolResolver {
 
 	/**
