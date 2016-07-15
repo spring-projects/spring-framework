@@ -102,7 +102,6 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * <p>Only relevant for the "cacheMappings" setting.
 	 * @see #setCacheMappings
 	 * @see org.springframework.web.servlet.handler.AbstractUrlHandlerMapping#setUrlPathHelper
-	 * @see org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver#setUrlPathHelper
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");

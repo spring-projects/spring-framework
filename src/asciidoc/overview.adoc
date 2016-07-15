@@ -274,7 +274,7 @@ layer.
 image::images/overview-remoting.png[width=400]
 
 When you need to access existing code through web services, you can use Spring's
-`Hessian-`, `Burlap-`, `Rmi-` or `JaxRpcProxyFactory` classes. Enabling remote access to
+`Hessian-`, `Rmi-` or `HttpInvokerProxyFactoryBean` classes. Enabling remote access to
 existing applications is not difficult.
 
 .EJBs - Wrapping existing POJOs

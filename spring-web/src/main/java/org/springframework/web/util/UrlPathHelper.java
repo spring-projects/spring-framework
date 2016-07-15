@@ -35,8 +35,7 @@ import org.springframework.util.StringUtils;
  * Helper class for URL path matching. Provides support for URL paths in
  * RequestDispatcher includes and support for consistent URL decoding.
  *
- * <p>Used by {@link org.springframework.web.servlet.handler.AbstractUrlHandlerMapping},
- * {@link org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver}
+ * <p>Used by {@link org.springframework.web.servlet.handler.AbstractUrlHandlerMapping}
  * and {@link org.springframework.web.servlet.support.RequestContext} for path matching
  * and/or URI determination.
  *
@@ -179,8 +178,8 @@ public class UrlPathHelper {
 		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
 		String path;
 
-		// if the app container sanitized the servletPath, check against the sanitized version
-		if (servletPath.indexOf(sanitizedPathWithinApp) != -1) {
+		// If the app container sanitized the servletPath, check against the sanitized version
+		if (servletPath.contains(sanitizedPathWithinApp)) {
 			path = getRemainingPath(sanitizedPathWithinApp, servletPath, false);
 		}
 		else {

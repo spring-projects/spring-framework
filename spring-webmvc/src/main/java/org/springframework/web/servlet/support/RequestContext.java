@@ -468,7 +468,7 @@ public class RequestContext {
 	/**
 	 * (De)activate default HTML escaping for messages and errors, for the scope of this RequestContext.
 	 * <p>The default is the application-wide setting (the "defaultHtmlEscape" context-param in web.xml).
-	 * @see org.springframework.web.util.WebUtils#isDefaultHtmlEscape
+	 * @see org.springframework.web.util.WebUtils#getDefaultHtmlEscape
 	 */
 	public void setDefaultHtmlEscape(boolean defaultHtmlEscape) {
 		this.defaultHtmlEscape = defaultHtmlEscape;

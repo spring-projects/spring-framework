@@ -222,7 +222,7 @@
 						x="15.55" dy="1.2em" class="st8">Email</tspan></text>		</g>
 		<g id="shape17-74" v:mID="17" v:groupContext="shape" transform="translate(309.84,-107.999)">
 			<title>Box.17</title>
-			<desc>Remote access via Hession, Burlap, SOAP</desc>
+			<desc>Remote access via Hession or SOAP</desc>
 			<v:userDefs>
 				<v:ud v:nameU="visVersion" v:val="VT0(11):26"/>
 			</v:userDefs>
@@ -234,8 +234,7 @@
 			</g>
 			<rect x="0" y="204.479" width="46.08" height="54.72" class="st6"/>
 			<text x="12.55" y="222.84" class="st7" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Remote <tspan
-						x="9.04" dy="1.2em" class="st8">access via<v:newlineChar/></tspan><tspan x="11.38" dy="1.2em" class="st8">Hession</tspan>, <tspan
-						x="4.38" dy="1.2em" class="st8">Burlap</tspan>, SOAP</text>		</g>
+						x="9.04" dy="1.2em" class="st8">access via<v:newlineChar/></tspan><tspan x="11.38" dy="1.2em" class="st8">Hession</tspan>, SOAP</text>		</g>
 		<g id="shape18-82" v:mID="18" v:groupContext="shape" transform="translate(114,-172.799)">
 			<title>Box.18</title>
 			<desc>WebApplicationContext providing e.g. messaging</desc>

@@ -118,7 +118,7 @@ public class MvcUriComponentsBuilder {
 	 * @see #fromMethodName(Class, String, Object...)
 	 * @see #fromMethodCall(Object)
 	 * @see #fromMappingName(String)
-	 * @see #fromMethod(java.lang.reflect.Method, Object...)
+	 * @see #fromMethod(Class, Method, Object...)
 	 */
 	protected MvcUriComponentsBuilder(UriComponentsBuilder baseUrl) {
 		Assert.notNull(baseUrl, "'baseUrl' is required");
@@ -168,7 +168,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller
 	 * method and an array of method argument values. This method delegates
-	 * to {@link #fromMethod(java.lang.reflect.Method, Object...)}.
+	 * to {@link #fromMethod(Class, Method, Object...)}.
 	 * @param controllerType the controller
 	 * @param methodName the method name
 	 * @param args the argument values
@@ -207,7 +207,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * Create a {@link UriComponentsBuilder} by invoking a "mock" controller method.
 	 * The controller method and the supplied argument values are then used to
-	 * delegate to {@link #fromMethod(java.lang.reflect.Method, Object...)}.
+	 * delegate to {@link #fromMethod(Class, Method, Object...)}.
 	 * <p>For example, given this controller:
 	 * <pre class="code">
 	 * &#064;RequestMapping("/people/{id}/addresses")
@@ -361,7 +361,7 @@ public class MvcUriComponentsBuilder {
 	}
 
 	/**
-	 * An alternative to {@link #fromMethod(java.lang.reflect.Method, Object...)}
+	 * An alternative to {@link #fromMethod(Class, Method, Object...)}
 	 * that accepts a {@code UriComponentsBuilder} representing the base URL.
 	 * This is useful when using MvcUriComponentsBuilder outside the context of
 	 * processing a request or to apply a custom baseUrl not matching the
@@ -546,8 +546,7 @@ public class MvcUriComponentsBuilder {
 	 * on the controller is invoked, the supplied argument values are remembered
 	 * and the result can then be used to create a {@code UriComponentsBuilder}
 	 * via {@link #fromMethodCall(Object)}.
-	 * <p>
-	 * Note that this is a shorthand version of {@link #controller(Class)} intended
+	 * <p>Note that this is a shorthand version of {@link #controller(Class)} intended
 	 * for inline use (with a static import), for example:
 	 * <pre class="code">
 	 * MvcUriComponentsBuilder.fromMethodCall(on(FooController.class).getFoo(1)).build();
@@ -563,8 +562,7 @@ public class MvcUriComponentsBuilder {
 	 * on the controller is invoked, the supplied argument values are remembered
 	 * and the result can then be used to create {@code UriComponentsBuilder} via
 	 * {@link #fromMethodCall(Object)}.
-	 * <p>
-	 * This is a longer version of {@link #on(Class)}. It is needed with controller
+	 * <p>This is a longer version of {@link #on(Class)}. It is needed with controller
 	 * methods returning void as well for repeated invocations.
 	 * <pre class="code">
 	 * FooController fooController = controller(FooController.class);

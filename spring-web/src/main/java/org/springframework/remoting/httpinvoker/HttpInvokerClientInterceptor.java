@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.remoting.support.RemoteInvocationResult;
  *
  * <p>Serializes remote invocation objects and deserializes remote invocation
  * result objects. Uses Java serialization just like RMI, but provides the
- * same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
+ * same ease of setup as Caucho's HTTP-based Hessian protocol.
  *
  * <P>HTTP invoker is a very extensible and customizable protocol.
  * It supports the RemoteInvocationFactory mechanism, like RMI invoker,

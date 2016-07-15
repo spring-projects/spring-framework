@@ -30,6 +30,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 /**
  * Strategy interface that specifies a converter that can convert from and to HTTP
  * requests and responses.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
@@ -53,9 +54,8 @@ public interface HttpMessageConverter<T> {
 	/**
 	 * Read a {@link Flux} of the given type form the given input message, and returns it.
 	 * @param type the type of object to return. This type must have previously been
-	 * passed to the
-	 * {@link #canRead canRead} method of this interface, which must have returned {@code
-	 * true}.
+	 * passed to the {@link #canRead canRead} method of this interface, which must have
+	 * returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
 	 * @return the converted {@link Flux} of elements
 	 */
@@ -64,9 +64,8 @@ public interface HttpMessageConverter<T> {
 	/**
 	 * Read a {@link Mono} of the given type form the given input message, and returns it.
 	 * @param type the type of object to return. This type must have previously been
-	 * passed to the
-	 * {@link #canRead canRead} method of this interface, which must have returned {@code
-	 * true}.
+	 * passed to the {@link #canRead canRead} method of this interface, which must have
+	 * returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
 	 * @return the converted {@link Mono} of object
 	 */
@@ -82,8 +81,7 @@ public interface HttpMessageConverter<T> {
 	boolean canWrite(ResolvableType type, MediaType mediaType);
 
 	/**
-	 * Return the list of {@link MediaType} objects that can be written by this
-	 * converter.
+	 * Return the list of {@link MediaType} objects that can be written by this converter.
 	 * @return the list of supported readable media types
 	 */
 	List<MediaType> getWritableMediaTypes();
@@ -95,10 +93,9 @@ public interface HttpMessageConverter<T> {
 	 * @param contentType the content type to use when writing. May be {@code null} to
 	 * indicate that the default content type of the converter must be used.
 	 * @param outputMessage the message to write to
-	 * @return
+	 * @return the converted {@link Mono} of object
 	 */
-	Mono<Void> write(Publisher<? extends T> inputStream,
-			ResolvableType type, MediaType contentType,
-			ReactiveHttpOutputMessage outputMessage);
+	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage);
 
 }

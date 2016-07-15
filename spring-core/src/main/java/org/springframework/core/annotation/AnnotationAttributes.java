@@ -74,47 +74,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Create a new, empty {@link AnnotationAttributes} instance for the
-	 * specified {@code annotationType}.
-	 * @param annotationType the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @since 4.2
-	 */
-	public AnnotationAttributes(Class<? extends Annotation> annotationType) {
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-		this.annotationType = annotationType;
-		this.displayName = annotationType.getName();
-	}
-
-	/**
-	 * Create a new, empty {@link AnnotationAttributes} instance for the
-	 * specified {@code annotationType}.
-	 * @param annotationType the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance; never {@code null}
-	 * @param classLoader the ClassLoader to try to load the annotation type on,
-	 * or {@code null} to just store the annotation type name
-	 * @since 4.3.2
-	 */
-	public AnnotationAttributes(String annotationType, ClassLoader classLoader) {
-		Assert.notNull(annotationType, "'annotationType' must not be null");
-		this.annotationType = getAnnotationType(annotationType, classLoader);
-		this.displayName = annotationType;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Class<? extends Annotation> getAnnotationType(String annotationType, ClassLoader classLoader) {
-		if (classLoader != null) {
-			try {
-				return (Class<? extends Annotation>) classLoader.loadClass(annotationType);
-			}
-			catch (ClassNotFoundException ex) {
-				// Annotation Class not resolvable
-			}
-		}
-		return null;
-	}
-
-	/**
 	 * Create a new {@link AnnotationAttributes} instance, wrapping the provided
 	 * map and all its <em>key-value</em> pairs.
 	 * @param map original source of annotation attribute <em>key-value</em> pairs
@@ -137,6 +96,47 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		this.annotationType = other.annotationType;
 		this.displayName = other.displayName;
 		this.validated = other.validated;
+	}
+
+	/**
+	 * Create a new, empty {@link AnnotationAttributes} instance for the
+	 * specified {@code annotationType}.
+	 * @param annotationType the type of annotation represented by this
+	 * {@code AnnotationAttributes} instance; never {@code null}
+	 * @since 4.2
+	 */
+	public AnnotationAttributes(Class<? extends Annotation> annotationType) {
+		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = annotationType;
+		this.displayName = annotationType.getName();
+	}
+
+	/**
+	 * Create a new, empty {@link AnnotationAttributes} instance for the
+	 * specified {@code annotationType}.
+	 * @param annotationType the annotation type name represented by this
+	 * {@code AnnotationAttributes} instance; never {@code null}
+	 * @param classLoader the ClassLoader to try to load the annotation type on,
+	 * or {@code null} to just store the annotation type name
+	 * @since 4.3.2
+	 */
+	public AnnotationAttributes(String annotationType, ClassLoader classLoader) {
+		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = getAnnotationType(annotationType, classLoader);
+		this.displayName = annotationType;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<? extends Annotation> getAnnotationType(String annotationType, ClassLoader classLoader) {
+		if (classLoader != null) {
+			try {
+				return (Class<? extends Annotation>) classLoader.loadClass(annotationType);
+			}
+			catch (ClassNotFoundException ex) {
+				// Annotation Class not resolvable
+			}
+		}
+		return null;
 	}
 
 

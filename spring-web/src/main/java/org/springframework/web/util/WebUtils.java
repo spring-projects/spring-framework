@@ -146,7 +146,6 @@ public abstract class WebUtils {
 	 * @see #WEB_APP_ROOT_KEY_PARAM
 	 * @see #DEFAULT_WEB_APP_ROOT_KEY
 	 * @see WebAppRootListener
-	 * @see Log4jWebConfigurer
 	 */
 	public static void setWebAppRootSystemProperty(ServletContext servletContext) throws IllegalStateException {
 		Assert.notNull(servletContext, "ServletContext must not be null");

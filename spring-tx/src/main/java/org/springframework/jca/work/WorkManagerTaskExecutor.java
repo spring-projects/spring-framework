@@ -61,12 +61,6 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  * can be linked into the J2EE environment through "gbean-ref" entries
  * in the {@code geronimo-web.xml} deployment descriptor.
  *
- * <p><b>On JBoss and GlassFish, obtaining the default JCA WorkManager
- * requires special lookup steps.</b> See the
- * {@link org.springframework.jca.work.jboss.JBossWorkManagerTaskExecutor}
- * {@link org.springframework.jca.work.glassfish.GlassFishWorkManagerTaskExecutor}
- * classes which are the direct equivalent of this generic JCA adapter class.
- *
  * @author Juergen Hoeller
  * @since 2.0.3
  * @see #setWorkManager

@@ -39,8 +39,6 @@ usual (Spring) POJOs. Currently, Spring supports the following remoting technolo
 * __Hessian__. By using Spring's `HessianProxyFactoryBean` and the
   `HessianServiceExporter` you can transparently expose your services using the
   lightweight binary HTTP-based protocol provided by Caucho.
-* __Burlap__. Burlap is Caucho's XML-based alternative to Hessian. Spring provides
-  support classes such as `BurlapProxyFactoryBean` and `BurlapServiceExporter`.
 * __JAX-WS__. Spring provides remoting support for web services via JAX-WS (the
   successor of JAX-RPC, as introduced in Java EE 5 and Java 6).
 * __JMS__. Remoting using JMS as the underlying protocol is supported via the
@@ -207,7 +205,7 @@ will transparently create an invoker and remotely enable the account service thr
 
 
 [[remoting-caucho-protocols]]
-=== Using Hessian or Burlap to remotely call services via HTTP
+=== Using Hessian to remotely call services via HTTP
 Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho and more
 information about Hessian itself can be found at http://www.caucho.com[].
 
@@ -329,22 +327,13 @@ the `AccountService` to manage accounts:
 
 
 
-[[remoting-caucho-protocols-burlap]]
-==== Using Burlap
-We won't discuss Burlap, the XML-based equivalent of Hessian, in detail here, since it
-is configured and set up in exactly the same way as the Hessian variant explained above.
-Just replace the word `Hessian` with `Burlap` and you're all set to go.
-
-
-
 [[remoting-caucho-protocols-security]]
-==== Applying HTTP basic authentication to a service exposed through Hessian or Burlap
-One of the advantages of Hessian and Burlap is that we can easily apply HTTP basic
-authentication, because both protocols are HTTP-based. Your normal HTTP server security
-mechanism can easily be applied through using the `web.xml` security features, for
-example. Usually, you don't use per-user security credentials here, but rather shared
-credentials defined at the `Hessian/BurlapProxyFactoryBean` level (similar to a JDBC
-`DataSource`).
+==== Applying HTTP basic authentication to a service exposed through Hessian
+One of the advantages of Hessian is that we can easily apply HTTP basic authentication,
+because both protocols are HTTP-based. Your normal HTTP server security mechanism can
+easily be applied through using the `web.xml` security features, for example. Usually,
+you don't use per-user security credentials here, but rather shared credentials defined
+at the `HessianProxyFactoryBean` level (similar to a JDBC `DataSource`).
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -375,12 +364,12 @@ at http://projects.spring.io/spring-security/[].
 
 [[remoting-httpinvoker]]
 === Exposing services using HTTP invokers
-As opposed to Burlap and Hessian, which are both lightweight protocols using their own
-slim serialization mechanisms, Spring HTTP invokers use the standard Java serialization
+As opposed to Hessian, which are both lightweight protocols using their own slim
+serialization mechanisms, Spring HTTP invokers use the standard Java serialization
 mechanism to expose services through HTTP. This has a huge advantage if your arguments
 and return types are complex types that cannot be serialized using the serialization
-mechanisms Hessian and Burlap use (refer to the next section for more considerations
-when choosing a remoting technology).
+mechanisms Hessian uses (refer to the next section for more considerations when
+choosing a remoting technology).
 
 Under the hood, Spring uses either the standard facilities provided by the JDK or
 Apache `HttpComponents` to perform HTTP calls. Use the latter if you need more
@@ -393,7 +382,7 @@ for more information.
 [[remoting-httpinvoker-server]]
 ==== Exposing the service object
 Setting up the HTTP invoker infrastructure for a service object resembles closely the
-way you would do the same using Hessian or Burlap. Just as Hessian support provides the
+way you would do the same using Hessian. Just as Hessian support provides the
 `HessianServiceExporter`, Spring's HttpInvoker support provides the
 `org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter`.
 
@@ -472,8 +461,8 @@ shown in this example:
 [[remoting-httpinvoker-client]]
 ==== Linking in the service at the client
 Again, linking in the service from the client much resembles the way you would do it
-when using Hessian or Burlap. Using a proxy, Spring will be able to translate your calls
-to HTTP POST requests to the URL pointing to the exported service.
+when using Hessian. Using a proxy, Spring will be able to translate your calls to
+HTTP POST requests to the URL pointing to the exported service.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -924,11 +913,11 @@ HTTP as transport. Note that HTTP invokers are not only limited to Java-to-Java 
 but also to Spring on both the client and server side. (The latter also applies to
 Spring's RMI invoker for non-RMI interfaces.)
 
-Hessian and/or Burlap might provide significant value when operating in a heterogeneous
-environment, because they explicitly allow for non-Java clients. However, non-Java
-support is still limited. Known issues include the serialization of Hibernate objects in
-combination with lazily-initialized collections. If you have such a data model, consider
-using RMI or HTTP invokers instead of Hessian.
+Hessian might provide significant value when operating in a heterogeneous environment,
+because they explicitly allow for non-Java clients. However, non-Java support is still
+limited. Known issues include the serialization of Hibernate objects in combination with
+lazily-initialized collections. If you have such a data model, consider using RMI or
+HTTP invokers instead of Hessian.
 
 JMS can be useful for providing clusters of services and allowing the JMS broker to take
 care of load balancing, discovery and auto-failover. By default: Java serialization is
@@ -4170,13 +4159,12 @@ To create an `MBeanServerConnection` to a remote JSR-160 enabled `MBeanServer` u
 
 
 [[jmx-jsr160-protocols]]
-==== JMX over Burlap/Hessian/SOAP
+==== JMX over Hessian or SOAP
 JSR-160 permits extensions to the way in which communication is done between the client
 and the server. The examples above are using the mandatory RMI-based implementation
 required by the JSR-160 specification (IIOP and JRMP) and the (optional) JMXMP. By using
 other providers or JMX implementations (such as http://mx4j.sourceforge.net[MX4J]) you
-can take advantage of protocols like SOAP, Hessian, Burlap over simple HTTP or SSL and
-others:
+can take advantage of protocols like SOAP or Hessian over simple HTTP or SSL and others:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
