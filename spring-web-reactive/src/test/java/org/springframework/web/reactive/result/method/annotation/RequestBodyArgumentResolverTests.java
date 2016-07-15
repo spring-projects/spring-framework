@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
@@ -65,7 +66,7 @@ import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
- * Unit tests for {@link RequestBodyArgumentResolver}.When adding a test also
+ * Unit tests for {@link RequestBodyArgumentResolver}. When adding a test also
  * consider whether the logic under test is in a parent class, then see:
  * {@link MessageConverterArgumentResolverTests}.
  *
@@ -208,6 +209,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
 		this.request.writeWith(Flux.just(dataBuffer(body)));
 		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
@@ -217,10 +219,11 @@ public class RequestBodyArgumentResolverTests {
 		assertTrue("Unexpected return value type: " + value,
 				param.getParameterType().isAssignableFrom(value.getClass()));
 
-		//noinspection unchecked
+		//no inspection unchecked
 		return (T) value;
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> T resolveValueWithEmptyBody(ResolvableType bodyType, boolean isRequired) {
 		this.request.writeWith(Flux.empty());
 		MethodParameter param = this.testMethod.resolveParam(bodyType, requestBody(isRequired));
@@ -232,7 +235,7 @@ public class RequestBodyArgumentResolverTests {
 					param.getParameterType().isAssignableFrom(value.getClass()));
 		}
 
-		//noinspection unchecked
+		//no inspection unchecked
 		return (T) value;
 	}
 
@@ -250,7 +253,6 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	void handle(
 			@RequestBody String string,
 			@RequestBody Mono<String> mono,
