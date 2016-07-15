@@ -33,8 +33,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Provides 'pseudo-reification' to avoid noisy Map generics in the calling
  * code as well as convenience methods for looking up annotation attributes
- * in a type-safe fashion, including support for attribute aliases configured
- * via {@link AliasFor @AliasFor}.
+ * in a type-safe fashion.
  *
  * @author Chris Beams
  * @author Sam Brannen
@@ -42,7 +41,6 @@ import org.springframework.util.StringUtils;
  * @since 3.1.1
  * @see AnnotationUtils#getAnnotationAttributes
  * @see AnnotatedElementUtils
- * @see AliasFor
  */
 @SuppressWarnings("serial")
 public class AnnotationAttributes extends LinkedHashMap<String, Object> {
