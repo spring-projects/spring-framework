@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Provides 'pseudo-reification' to avoid noisy Map generics in the calling
  * code as well as convenience methods for looking up annotation attributes
- * in a type-safe fashion, including support for attribute aliases configured
- * via {@link AliasFor @AliasFor}.
+ * in a type-safe fashion.
  *
  * @author Chris Beams
  * @author Sam Brannen
@@ -45,14 +44,13 @@ import org.springframework.util.StringUtils;
  * @since 3.1.1
  * @see AnnotationUtils#getAnnotationAttributes
  * @see AnnotatedElementUtils
- * @see AliasFor
  */
 @SuppressWarnings("serial")
 public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	private static final String UNKNOWN = "unknown";
 
-	private Class<? extends Annotation> annotationType;
+	private final Class<? extends Annotation> annotationType;
 
 	private final String displayName;
 
@@ -100,18 +98,23 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * or {@code null} to just store the annotation type name
 	 * @since 4.3.2
 	 */
-	@SuppressWarnings("unchecked")
 	public AnnotationAttributes(String annotationType, ClassLoader classLoader) {
 		Assert.notNull(annotationType, "'annotationType' must not be null");
+		this.annotationType = getAnnotationType(annotationType, classLoader);
+		this.displayName = annotationType;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Class<? extends Annotation> getAnnotationType(String annotationType, ClassLoader classLoader) {
 		if (classLoader != null) {
 			try {
-				this.annotationType = (Class<? extends Annotation>) classLoader.loadClass(annotationType);
+				return (Class<? extends Annotation>) classLoader.loadClass(annotationType);
 			}
 			catch (ClassNotFoundException ex) {
 				// Annotation Class not resolvable
 			}
 		}
-		this.displayName = annotationType;
+		return null;
 	}
 
 	/**
