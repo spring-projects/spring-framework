@@ -90,10 +90,10 @@ public class 	RxJava1ResponseExtractors {
 	 */
 	public static <T> ResponseExtractor<Single<ResponseEntity<Observable<T>>>> responseStream(Class<T> sourceClass) {
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) -> RxJava1SingleConverter.fromPublisher(clientResponse
-				.map(response -> new ResponseEntity<>(
-						RxJava1ObservableConverter
-								.fromPublisher(decodeResponseBody(response, resolvableType, messageConverters)),
+		return (clientResponse, messageConverters) -> RxJava1SingleConverter.fromPublisher(
+				clientResponse.map(response -> new ResponseEntity<>(
+						RxJava1ObservableConverter.fromPublisher(
+								RxJava1ResponseExtractors.<T> decodeResponseBody(response, resolvableType, messageConverters)),
 						response.getHeaders(),
 						response.getStatusCode())));
 	}

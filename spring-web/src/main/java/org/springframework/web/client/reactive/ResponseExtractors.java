@@ -117,8 +117,7 @@ public class ResponseExtractors {
 			ResolvableType type) {
 		return (clientResponse, messageConverters) -> clientResponse
 				.map(response -> new ResponseEntity<>(
-						decodeResponseBody(response, type,
-								messageConverters),
+						ResponseExtractors.<T> decodeResponseBody(response, type, messageConverters),
 						response.getHeaders(), response.getStatusCode()));
 	}
 
