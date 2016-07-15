@@ -53,9 +53,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
-import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
@@ -372,8 +370,8 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 			configurer.setDefaultTimeout(2500).setTaskExecutor(new ConcurrentTaskExecutor())
-				.registerCallableInterceptors(new CallableProcessingInterceptorAdapter() { })
-				.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptorAdapter() {});
+				.registerCallableInterceptors(new CallableProcessingInterceptor() { })
+				.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptor() {});
 		}
 
 		@Override

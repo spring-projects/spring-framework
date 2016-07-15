@@ -216,7 +216,7 @@ public class DeferredResult<T> {
 
 
 	final DeferredResultProcessingInterceptor getInterceptor() {
-		return new DeferredResultProcessingInterceptorAdapter() {
+		return new DeferredResultProcessingInterceptor() {
 			@Override
 			public <S> boolean handleTimeout(NativeWebRequest request, DeferredResult<S> deferredResult) {
 				if (timeoutCallback != null) {

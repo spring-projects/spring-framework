@@ -29,7 +29,6 @@ package org.springframework.messaging.simp.stomp;
  *
  * @author Rossen Stoyanchev
  * @since 4.2
- * @see StompSessionHandlerAdapter
  */
 public interface StompSessionHandler extends StompFrameHandler {
 

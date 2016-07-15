@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -83,7 +83,7 @@ public class EncodedUriTests {
 
 	@Configuration
 	@EnableWebMvc
-	static class WebConfig extends WebMvcConfigurerAdapter {
+	static class WebConfig implements WebMvcConfigurer {
 
 		@Bean
 		public MyController myController() {

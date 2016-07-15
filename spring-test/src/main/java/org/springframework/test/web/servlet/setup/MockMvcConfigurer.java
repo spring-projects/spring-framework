@@ -34,7 +34,6 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
- * @see org.springframework.test.web.servlet.setup.MockMvcConfigurerAdapter
  */
 public interface MockMvcConfigurer {
 

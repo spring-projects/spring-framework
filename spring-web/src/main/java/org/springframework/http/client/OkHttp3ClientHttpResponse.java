@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @author Roy Clarkson
  * @since 4.3
  */
-class OkHttp3ClientHttpResponse extends AbstractClientHttpResponse {
+class OkHttp3ClientHttpResponse implements ClientHttpResponse {
 
 	private final Response response;
 

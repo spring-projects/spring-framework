@@ -25,9 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -67,13 +67,13 @@ final class TestDispatcherServlet extends DispatcherServlet {
 
 	private void registerAsyncResultInterceptors(final HttpServletRequest request) {
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		asyncManager.registerCallableInterceptor(KEY, new CallableProcessingInterceptorAdapter() {
+		asyncManager.registerCallableInterceptor(KEY, new CallableProcessingInterceptor() {
 			@Override
 			public <T> void postProcess(NativeWebRequest r, Callable<T> task, Object value) throws Exception {
 				getMvcResult(request).setAsyncResult(value);
 			}
 		});
-		asyncManager.registerDeferredResultInterceptor(KEY, new DeferredResultProcessingInterceptorAdapter() {
+		asyncManager.registerDeferredResultInterceptor(KEY, new DeferredResultProcessingInterceptor() {
 			@Override
 			public <T> void postProcess(NativeWebRequest r, DeferredResult<T> result, Object value) throws Exception {
 				getMvcResult(request).setAsyncResult(value);

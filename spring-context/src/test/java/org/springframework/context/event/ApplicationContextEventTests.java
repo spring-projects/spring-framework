@@ -432,12 +432,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	public interface MyOrderedListenerIfc<E extends ApplicationEvent> extends ApplicationListener<E>, Ordered {
 	}
 
-
-	public static abstract class MyOrderedListenerBase implements MyOrderedListenerIfc<MyEvent> {
-	}
-
-
-	public static class MyOrderedListener2 extends MyOrderedListenerBase {
+	public static class MyOrderedListener2 implements MyOrderedListenerIfc<MyEvent> {
 
 		private final MyOrderedListener1 otherListener;
 

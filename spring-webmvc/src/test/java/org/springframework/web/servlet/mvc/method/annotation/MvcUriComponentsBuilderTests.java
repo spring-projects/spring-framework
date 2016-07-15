@@ -54,7 +54,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -490,7 +490,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@EnableWebMvc
-	static class WebConfig extends WebMvcConfigurerAdapter {
+	static class WebConfig implements WebMvcConfigurer {
 
 		@Bean
 		public PersonsAddressesController controller() {

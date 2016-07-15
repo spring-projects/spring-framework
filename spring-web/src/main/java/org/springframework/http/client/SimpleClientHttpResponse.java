@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
  * @author Brian Clozel
  * @since 3.0
  */
-final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
+final class SimpleClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpURLConnection connection;
 

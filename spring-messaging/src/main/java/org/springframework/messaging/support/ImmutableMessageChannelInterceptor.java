@@ -30,7 +30,7 @@ import org.springframework.messaging.MessageChannel;
  * @author Rossen Stoyanchev
  * @since 4.1.2
  */
-public class ImmutableMessageChannelInterceptor extends ChannelInterceptorAdapter {
+public class ImmutableMessageChannelInterceptor implements ChannelInterceptor {
 
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {

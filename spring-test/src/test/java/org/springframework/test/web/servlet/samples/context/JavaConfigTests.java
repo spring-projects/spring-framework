@@ -44,7 +44,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 
 import static org.junit.Assert.*;
@@ -142,7 +142,7 @@ public class JavaConfigTests {
 
 	@Configuration
 	@EnableWebMvc
-	static class WebConfig extends WebMvcConfigurerAdapter {
+	static class WebConfig implements WebMvcConfigurer {
 
 		@Autowired
 		private RootConfig rootConfig;

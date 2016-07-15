@@ -45,7 +45,7 @@ import org.springframework.context.annotation.Import;
  * &#064;Configuration
  * &#064;EnableWebMvc
  * &#064;ComponentScan(basePackageClasses = { MyConfiguration.class })
- * public class MyConfiguration extends WebMvcConfigurerAdapter {
+ * public class MyConfiguration implements WebMvcConfigurer {
  *
  * 	   &#064;Override
  * 	   public void addFormatters(FormatterRegistry formatterRegistry) {

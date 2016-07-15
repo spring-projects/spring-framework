@@ -362,7 +362,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@EnableWebMvc
 	@Configuration
-	static class CustomViewResolverOrderConfig extends WebMvcConfigurerAdapter {
+	static class CustomViewResolverOrderConfig implements WebMvcConfigurer {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -373,7 +373,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@EnableWebMvc
 	@Configuration
-	static class CustomArgumentResolverConfig extends WebMvcConfigurerAdapter {
+	static class CustomArgumentResolverConfig implements WebMvcConfigurer {
 
 		@Override
 		public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

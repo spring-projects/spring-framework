@@ -27,7 +27,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcConfigurerAdapter;
+import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -109,7 +109,7 @@ public class FrameworkExtensionTests {
 	/**
 	 * Test {@code MockMvcConfigurer}.
 	 */
-	private static class TestMockMvcConfigurer extends MockMvcConfigurerAdapter {
+	private static class TestMockMvcConfigurer implements MockMvcConfigurer {
 
 		@Override
 		public void afterConfigurerAdded(ConfigurableMockMvcBuilder<?> builder) {

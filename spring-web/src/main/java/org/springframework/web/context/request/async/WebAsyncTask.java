@@ -157,7 +157,7 @@ public class WebAsyncTask<V> implements BeanFactoryAware {
 	}
 
 	CallableProcessingInterceptor getInterceptor() {
-		return new CallableProcessingInterceptorAdapter() {
+		return new CallableProcessingInterceptor() {
 			@Override
 			public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
 				return (timeoutCallback != null ? timeoutCallback.call() : CallableProcessingInterceptor.RESULT_NONE);

@@ -219,7 +219,7 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Configuration
-	static class TestConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
+	static class TestConfigurer implements WebSocketMessageBrokerConfigurer {
 
 		@Bean
 		public TestController subscriptionController() {

@@ -37,7 +37,7 @@ import org.springframework.util.StreamUtils;
  * @since 4.0
  * @see HttpComponentsAsyncClientHttpRequest#executeAsync()
  */
-final class HttpComponentsAsyncClientHttpResponse extends AbstractClientHttpResponse {
+final class HttpComponentsAsyncClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpResponse httpResponse;
 
