@@ -197,7 +197,6 @@ public class SpringHandlerInstantiatorTests {
 		}
 
 		// Only needed when compiling against Jackson 2.7; gone in 2.8
-		@SuppressWarnings("deprecation")
 		public JavaType typeFromId(String s) {
 			return TypeFactory.defaultInstance().constructFromCanonical(s);
 		}

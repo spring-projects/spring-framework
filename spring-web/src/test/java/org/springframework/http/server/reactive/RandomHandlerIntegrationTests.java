@@ -89,15 +89,9 @@ public class RandomHandlerIntegrationTests extends AbstractHttpHandlerIntegratio
 						assertEquals(REQUEST_SIZE, (long) size);
 					});
 
-
-
 			response.getHeaders().setContentLength(RESPONSE_SIZE);
 
 			return requestSizeMono.then(response.writeWith(multipleChunks()));
-		}
-
-		private Publisher<DataBuffer> singleChunk() {
-			return Mono.just(randomBuffer(RESPONSE_SIZE));
 		}
 
 		private Publisher<DataBuffer> multipleChunks() {

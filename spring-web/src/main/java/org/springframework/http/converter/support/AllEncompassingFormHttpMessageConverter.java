@@ -16,8 +16,6 @@
 
 package org.springframework.http.converter.support;
 
-import javax.xml.transform.Source;
-
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;

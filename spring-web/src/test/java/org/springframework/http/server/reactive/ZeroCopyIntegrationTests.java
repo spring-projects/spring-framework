@@ -56,7 +56,7 @@ public class ZeroCopyIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 		RestTemplate restTemplate = new RestTemplate();
 
-		RequestEntity request =
+		RequestEntity<?> request =
 				RequestEntity.get(new URI("http://localhost:" + port)).build();
 
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);

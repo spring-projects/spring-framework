@@ -205,7 +205,7 @@ public final class WebClient {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		protected Mono<Void> writeRequestBody(Publisher<?> content,
 				ResolvableType requestType, ClientHttpRequest request,
 				List<HttpMessageConverter<?>> messageConverters) {

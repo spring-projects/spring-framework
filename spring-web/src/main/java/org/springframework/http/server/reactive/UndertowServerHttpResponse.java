@@ -114,6 +114,7 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		try {
 			StreamSinkChannel responseChannel =
 					getUndertowExchange().getResponseChannel();
+			@SuppressWarnings("resource")
 			FileChannel in = new FileInputStream(file).getChannel();
 			long result = responseChannel.transferFrom(in, position, count);
 			if (result < count) {

@@ -84,9 +84,7 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 				assertValues(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
 	}
 
-	@SuppressWarnings("unused")
 	void handle(List<Pojo> list) {
 	}
-
 
 }

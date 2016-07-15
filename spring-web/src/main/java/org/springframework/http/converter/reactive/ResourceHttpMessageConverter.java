@@ -39,7 +39,7 @@ import org.springframework.util.ResourceUtils;
 /**
  * Implementation of {@link HttpMessageConverter} that can read and write
  * {@link Resource Resources} and supports byte range requests.
- **
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
@@ -52,6 +52,7 @@ public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Reso
 	public ResourceHttpMessageConverter(int bufferSize) {
 		super(new ResourceEncoder(bufferSize), new ResourceDecoder());
 	}
+
 
 	@Override
 	public Mono<Void> write(Publisher<? extends Resource> inputStream,
@@ -92,8 +93,7 @@ public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Reso
 				ZeroCopyHttpOutputMessage zeroCopyResponse =
 						(ZeroCopyHttpOutputMessage) outputMessage;
 
-				return zeroCopyResponse
-						.writeWith(file.get(), (long) 0, file.get().length());
+				return zeroCopyResponse.writeWith(file.get(), 0, file.get().length());
 			}
 		}
 
@@ -126,6 +126,5 @@ public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Reso
 		}
 		return Optional.empty();
 	}
-
 
 }

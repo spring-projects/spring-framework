@@ -34,9 +34,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.custommonkey.xmlunit.XMLAssert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Sebastien Deleuze

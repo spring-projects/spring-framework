@@ -35,9 +35,8 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.assertThat;
 
 /**
- * Temporarily does not extend AbstractHttpHandlerIntegrationTests.
- *
  * @author Stephane Maldini
+ * @since 5.0
  */
 public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
@@ -50,12 +49,11 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		return new AsyncHandler();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void basicTest() throws Exception {
 		URI url = new URI("http://localhost:" + port);
-		ResponseEntity<String> response = new RestTemplate().exchange(RequestEntity.get(url)
-		                                                                           .build(), String.class);
+		ResponseEntity<String> response = new RestTemplate().exchange(
+				RequestEntity.get(url).build(), String.class);
 
 		assertThat(response.getBody(), Matchers.equalTo("hello"));
 	}
@@ -65,8 +63,8 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.writeWith(Flux.just("h", "e", "l", "l", "o")
-			                            .delay(Duration.ofMillis(100))
-			                            .publishOn(asyncGroup)
+										.delay(Duration.ofMillis(100))
+										.publishOn(asyncGroup)
 					.collect(dataBufferFactory::allocateBuffer, (buffer, str) -> buffer.write(str.getBytes())));
 		}
 	}

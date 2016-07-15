@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.session;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -133,7 +133,6 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertNotNull(headerValues);
 		assertEquals(1, headerValues.size());
 
-		List<String> data = new ArrayList<>();
 		for (String s : headerValues.get(0).split(";")){
 			if (s.startsWith("SESSION=")) {
 				return s.substring("SESSION=".length());

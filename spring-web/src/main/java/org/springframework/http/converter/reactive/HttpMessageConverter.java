@@ -100,4 +100,5 @@ public interface HttpMessageConverter<T> {
 	Mono<Void> write(Publisher<? extends T> inputStream,
 			ResolvableType type, MediaType contentType,
 			ReactiveHttpOutputMessage outputMessage);
+
 }

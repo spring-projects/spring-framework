@@ -19,8 +19,6 @@ package org.springframework.http.server.reactive;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
-import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
@@ -87,4 +85,5 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 			return response.writeWith(responseBody);
 		}
 	}
+
 }

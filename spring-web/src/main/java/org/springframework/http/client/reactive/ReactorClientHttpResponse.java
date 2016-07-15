@@ -17,14 +17,11 @@
 package org.springframework.http.client.reactive;
 
 import java.util.Collection;
-import java.util.function.Function;
 
-import io.netty.buffer.ByteBuf;
 import reactor.core.publisher.Flux;
 import reactor.io.netty.http.HttpClientResponse;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -96,4 +93,5 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 				"status=" + getStatusCode() +
 				'}';
 	}
+
 }

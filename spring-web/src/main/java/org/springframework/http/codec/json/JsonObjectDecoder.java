@@ -38,11 +38,11 @@ import org.springframework.util.MimeType;
  * Decode an arbitrary split byte stream representing JSON objects to a byte
  * stream where each chunk is a well-formed JSON object.
  *
- * This class does not do any real parsing or validation. A sequence of byte
+ * <p>This class does not do any real parsing or validation. A sequence of bytes
  * is considered a JSON object/array if it contains a matching number of opening
  * and closing braces/brackets.
  *
- * Based on  <a href="https://github.com/netty/netty/blob/master/codec/src/main/java/io/netty/handler/codec/json/JsonObjectDecoder.java">Netty JsonObjectDecoder</a>
+ * <p>Based on <a href="https://github.com/netty/netty/blob/master/codec/src/main/java/io/netty/handler/codec/json/JsonObjectDecoder.java">Netty JsonObjectDecoder</a>
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -220,7 +220,6 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 			 * Override this method if you want to filter the json objects/arrays that
 			 * get passed through the pipeline.
 			 */
-			@SuppressWarnings("UnusedParameters")
 			protected ByteBuf extractObject(ByteBuf buffer, int index, int length) {
 				return buffer.slice(index, length).retain();
 			}
