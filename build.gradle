@@ -76,7 +76,7 @@ configure(allprojects) { project ->
 	ext.snifferVersion       = "1.15"
 	ext.testngVersion        = "6.9.10"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.5.3"
+	ext.tomcatVersion        = "8.5.4"
 	ext.tyrusVersion         = "1.13"
 	ext.undertowVersion      = "1.4.0.CR3"
 	ext.websocketVersion     = "1.1"
