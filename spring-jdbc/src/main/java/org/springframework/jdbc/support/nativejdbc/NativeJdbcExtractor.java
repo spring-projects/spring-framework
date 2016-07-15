@@ -64,7 +64,9 @@ import java.sql.Statement;
  * @see CommonsDbcpNativeJdbcExtractor
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
  * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
+ * @deprecated as of Spring 4.4, in favor of java.sql.Connection.unwrap()
  */
+@Deprecated
 public interface NativeJdbcExtractor {
 
 	/**
