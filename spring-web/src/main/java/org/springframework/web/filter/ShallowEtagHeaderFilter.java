@@ -42,6 +42,9 @@ import org.springframework.web.util.WebUtils;
  * (e.g. a {@link org.springframework.web.servlet.View}) is still rendered.
  * As such, this filter only saves bandwidth, not server performance.
  *
+ * <p><b>NOTE:</b> As of Spring Framework 5.0, this filter uses request/response
+ * decorators built on the Servlet 3.1 API.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller

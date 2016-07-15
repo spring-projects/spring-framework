@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ public class DelegatingServletInputStream extends ServletInputStream {
 
 	private final InputStream sourceStream;
 
+	private boolean finished = false;
+
 
 	/**
 	 * Create a DelegatingServletInputStream for the given source stream.
@@ -57,7 +59,11 @@ public class DelegatingServletInputStream extends ServletInputStream {
 
 	@Override
 	public int read() throws IOException {
-		return this.sourceStream.read();
+		int data = this.sourceStream.read();
+		if (data == -1) {
+			this.finished = true;
+		}
+		return data;
 	}
 
 	@Override
@@ -68,16 +74,17 @@ public class DelegatingServletInputStream extends ServletInputStream {
 
 	@Override
 	public boolean isFinished() {
-		throw new UnsupportedOperationException();
+		return this.finished;
 	}
 
 	@Override
 	public boolean isReady() {
-		throw new UnsupportedOperationException();
+		return true;
 	}
 
 	@Override
 	public void setReadListener(ReadListener readListener) {
 		throw new UnsupportedOperationException();
 	}
+
 }

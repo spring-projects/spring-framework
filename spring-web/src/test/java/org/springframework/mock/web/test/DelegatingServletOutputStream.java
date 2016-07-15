@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,11 +74,12 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 
 	@Override
 	public boolean isReady() {
-		throw new UnsupportedOperationException();
+		return true;
 	}
 
 	@Override
 	public void setWriteListener(WriteListener writeListener) {
 		throw new UnsupportedOperationException();
 	}
+
 }

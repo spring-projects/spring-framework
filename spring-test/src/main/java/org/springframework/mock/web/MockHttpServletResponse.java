@@ -45,9 +45,7 @@ import org.springframework.web.util.WebUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletResponse} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
- * Beyond that, {@code MockHttpServletResponse} is also compatible with Servlet
- * 3.1's {@code setContentLengthLong()} method.
+ * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 3.1 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson

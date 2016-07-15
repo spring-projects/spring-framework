@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.FastByteArrayOutputStream;
  * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
  *
  * <p>Used e.g. by {@link org.springframework.web.filter.ShallowEtagHeaderFilter}.
+ * Note: As of Spring Framework 5.0, this wrapper is built on the Servlet 3.1 API.
  *
  * @author Juergen Hoeller
  * @since 4.1.3
@@ -228,7 +229,6 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		}
 	}
 
-	// TODO: this is no longer usable in Servlet 3.0 environment
 
 	private class ResponseServletOutputStream extends ServletOutputStream {
 

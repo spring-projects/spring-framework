@@ -55,6 +55,7 @@ configure(allprojects) { project ->
 	ext.jettyVersion         = "9.3.10.v20160621"
 	ext.jodaVersion          = "2.9.4"
 	ext.jpaVersion           = "2.1.1"
+	ext.jspVersion           = "2.3.2-b02"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.junitJupiterVersion  = '5.0.0-M1'
@@ -69,6 +70,7 @@ configure(allprojects) { project ->
 	ext.reactorNettyVersion  = '2.5.0.BUILD-SNAPSHOT'
 	ext.rxJavaVersion        = '1.1.6'
 	ext.romeVersion          = "1.6.0"
+	ext.servletVersion       = "3.1.0"
 	ext.slf4jVersion         = "1.7.21"
 	ext.snakeyamlVersion     = "1.17"
 	ext.snifferVersion       = "1.15"
@@ -77,6 +79,7 @@ configure(allprojects) { project ->
 	ext.tomcatVersion        = "8.5.3"
 	ext.tyrusVersion         = "1.13"
 	ext.undertowVersion      = "1.4.0.CR3"
+	ext.websocketVersion     = "1.1"
 	ext.woodstoxVersion      = "5.0.2"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.9"
@@ -516,7 +519,7 @@ project("spring-messaging") {
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("javax.inject:javax.inject-tck:1")
-		testCompile("javax.servlet:javax.servlet-api:3.1.0")
+		testCompile("javax.servlet:javax.servlet-api:${servletVersion}")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("org.apache.activemq:activemq-broker:5.8.0")
@@ -674,9 +677,9 @@ project("spring-web") {
 		compile(project(":spring-beans"))  // for MultipartFilter
 		compile(project(":spring-context"))
 		compile(project(":spring-core"))
-		provided "javax.servlet:javax.servlet-api:3.1.0"
+		provided "javax.servlet:javax.servlet-api:${servletVersion}"
 		optional(project(":spring-oxm"))  // for MarshallingHttpMessageConverter
-		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
+		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("javax.faces:javax.faces-api:2.2")
 		optional("javax.validation:validation-api:${beanvalVersion}")
@@ -750,7 +753,7 @@ project("spring-orm") {
 			exclude group: 'org.eclipse.persistence', module: 'javax.persistence'
 		}
 		optional("org.hibernate:hibernate-core:${hibernate5Version}")
-		optional("javax.servlet:javax.servlet-api:3.0.1")
+		optional("javax.servlet:javax.servlet-api:${servletVersion}")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -768,10 +771,10 @@ project("spring-webmvc") {
 		compile(files(project(":spring-core").objenesisRepackJar))
 		compile(project(":spring-expression"))
 		compile(project(":spring-web"))
-		provided("javax.servlet:javax.servlet-api:3.1.0")
+		provided("javax.servlet:javax.servlet-api:${servletVersion}")
 		optional(project(":spring-context-support"))  // for FreeMarker support
 		optional(project(":spring-oxm"))  // for MarshallingView
-		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
+		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("org.apache.poi:poi:${poiVersion}")
 		optional("org.apache.poi:poi-ooxml:${poiVersion}")
@@ -838,7 +841,7 @@ project("spring-web-reactive") {
 		compile "org.reactivestreams:reactive-streams:1.0.0"
 		compile "io.projectreactor:reactor-core:${reactorCoreVersion}"
 		optional(project(":spring-context-support"))  // for FreeMarker support
-		provided "javax.servlet:javax.servlet-api:3.1.0"
+		provided "javax.servlet:javax.servlet-api:${servletVersion}"
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional "org.apache.httpcomponents:httpclient:4.5.1" // Needed to run Javadoc without error
@@ -868,8 +871,8 @@ project("spring-websocket") {
 		compile(project(":spring-web"))
 		optional(project(":spring-messaging"))
 		optional(project(":spring-webmvc"))
-		optional("javax.servlet:javax.servlet-api:3.1.0")
-		optional("javax.websocket:javax.websocket-api:1.0")
+		optional("javax.servlet:javax.servlet-api:${servletVersion}")
+		optional("javax.websocket:javax.websocket-api:${websocketVersion}")
 		optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
 			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
 			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
@@ -926,14 +929,14 @@ project("spring-test") {
 		optional("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
 		optional("org.testng:testng:${testngVersion}")
 		optional("javax.inject:javax.inject:1")
-		optional("javax.servlet:javax.servlet-api:3.0.1")
-		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
+		optional("javax.servlet:javax.servlet-api:${servletVersion}")
+		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		optional("javax.el:javax.el-api:2.2.5")
-		optional("javax.websocket:javax.websocket-api:1.0")
+		optional("javax.websocket:javax.websocket-api:${websocketVersion}")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
@@ -1131,7 +1134,7 @@ configure(rootProject) {
 		testCompile(project(":spring-test"))
 		testCompile(project(":spring-tx"))
 		testCompile(project(":spring-web"))
-		testCompile("javax.servlet:javax.servlet-api:3.0.1")
+		testCompile("javax.servlet:javax.servlet-api:${servletVersion}")
 		testCompile("javax.inject:javax.inject:1")
 		testCompile("javax.resource:javax.resource-api:${jcaVersion}")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")

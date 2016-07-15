@@ -355,9 +355,8 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		if (!path.startsWith("/")) {
-			throw new IllegalArgumentException("RequestDispatcher path at ServletContext level must start with '/'");
-		}
+		Assert.isTrue(path.startsWith("/"),
+				() -> "RequestDispatcher path [" + path + "] at ServletContext level must start with '/'");
 		return new MockRequestDispatcher(path);
 	}
 
@@ -545,11 +544,6 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
-	@Override
-	public String getVirtualServerName() {
-		throw new UnsupportedOperationException();
-	}
-
 	public Set<String> getDeclaredRoles() {
 		return Collections.unmodifiableSet(this.declaredRoles);
 	}
@@ -679,6 +673,11 @@ public class MockServletContext implements ServletContext {
 
 	@Override
 	public <T extends EventListener> T createListener(Class<T> c) throws ServletException {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getVirtualServerName() {
 		throw new UnsupportedOperationException();
 	}
 
