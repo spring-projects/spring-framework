@@ -836,7 +836,7 @@ class ConfigurationClassParser {
 		private SourceClass getRelated(String className) throws IOException {
 			if (this.source instanceof Class<?>) {
 				try {
-					Class<?> clazz = resourceLoader.getClassLoader().loadClass(className);
+					Class<?> clazz = ((Class<?>) this.source).getClassLoader().loadClass(className);
 					return asSourceClass(clazz);
 				}
 				catch (ClassNotFoundException ex) {
