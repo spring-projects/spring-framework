@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,23 +37,24 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Resolves method arguments annotated with {@code @ModelAttribute} and handles
- * return values from methods annotated with {@code @ModelAttribute}.
+ * Resolve {@code @ModelAttribute} annotated method arguments and handle
+ * return values from {@code @ModelAttribute} annotated methods.
  *
- * <p>Model attributes are obtained from the model or if not found possibly
- * created with a default constructor if it is available. Once created, the
- * attributed is populated with request data via data binding and also
- * validation may be applied if the argument is annotated with
- * {@code @javax.validation.Valid}.
+ * <p>Model attributes are obtained from the model or created with a default
+ * constructor (and then added to the model). Once created the attribute is
+ * populated via data binding to Servlet request parameters. Validation may be
+ * applied if the argument is annotated with {@code @javax.validation.Valid}.
+ * or Spring's own {@code @org.springframework.validation.annotation.Validated}.
  *
- * <p>When this handler is created with {@code annotationNotRequired=true},
+ * <p>When this handler is created with {@code annotationNotRequired=true}
  * any non-simple type argument and return value is regarded as a model
  * attribute with or without the presence of an {@code @ModelAttribute}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
+public class ModelAttributeMethodProcessor
+		implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -61,6 +62,7 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 
 	/**
+	 * Class constructor.
 	 * @param annotationNotRequired if "true", non-simple method arguments and
 	 * return values are considered model attributes with or without a
 	 * {@code @ModelAttribute} annotation.
@@ -71,8 +73,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 
 	/**
-	 * Returns {@code true} if the parameter is annotated with {@link ModelAttribute}
-	 * or in default resolution mode, and also if it is not a simple type.
+	 * Returns {@code true} if the parameter is annotated with
+	 * {@link ModelAttribute} or, if in default resolution mode, for any
+	 * method parameter that is not a simple type.
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -100,8 +103,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		String name = ModelFactory.getNameForParameter(parameter);
-		Object attribute = (mavContainer.containsAttribute(name) ?
-				mavContainer.getModel().get(name) : createAttribute(name, parameter, binderFactory, webRequest));
+		Object attribute = (mavContainer.containsAttribute(name) ? mavContainer.getModel().get(name) :
+				createAttribute(name, parameter, binderFactory, webRequest));
 
 		WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
 		if (binder.getTarget() != null) {
@@ -178,7 +181,8 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 
 	/**
 	 * Return {@code true} if there is a method-level {@code @ModelAttribute}
-	 * or if it is a non-simple type when {@code annotationNotRequired=true}.
+	 * or, in default resolution mode, for any return value type that is not
+	 * a simple type.
 	 */
 	public boolean supportsReturnType(MethodParameter returnType) {
 		if (returnType.getMethodAnnotation(ModelAttribute.class) != null) {
