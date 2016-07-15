@@ -19,6 +19,12 @@ package org.springframework.web.client.reactive.support;
 import java.util.List;
 import java.util.Optional;
 
+import reactor.adapter.RxJava1Adapter;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import rx.Observable;
+import rx.Single;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,13 +32,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.web.client.reactive.ResponseExtractor;
-
-import reactor.core.converter.RxJava1ObservableConverter;
-import reactor.core.converter.RxJava1SingleConverter;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import rx.Observable;
-import rx.Single;
 
 /**
  * Static factory methods for {@link ResponseExtractor}
@@ -50,8 +49,8 @@ public class RxJava1ResponseExtractors {
 	public static <T> ResponseExtractor<Single<T>> body(Class<T> sourceClass) {
 
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) -> (Single<T>) RxJava1SingleConverter
-				.fromPublisher(clientResponse
+		return (clientResponse, messageConverters) -> (Single<T>) RxJava1Adapter
+				.publisherToSingle(clientResponse
 						.flatMap(resp -> decodeResponseBody(resp, resolvableType, messageConverters)).next());
 	}
 
@@ -61,8 +60,8 @@ public class RxJava1ResponseExtractors {
 	public static <T> ResponseExtractor<Observable<T>> bodyStream(Class<T> sourceClass) {
 
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) -> RxJava1ObservableConverter
-				.fromPublisher(clientResponse
+		return (clientResponse, messageConverters) -> RxJava1Adapter
+				.publisherToObservable(clientResponse
 						.flatMap(resp -> decodeResponseBody(resp, resolvableType, messageConverters)));
 	}
 
@@ -75,7 +74,7 @@ public class RxJava1ResponseExtractors {
 
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
 		return (clientResponse, messageConverters) ->
-				RxJava1SingleConverter.fromPublisher(clientResponse
+				RxJava1Adapter.publisherToSingle(clientResponse
 						.then(response ->
 								Mono.when(
 										decodeResponseBody(response, resolvableType, messageConverters).next(),
@@ -91,9 +90,9 @@ public class RxJava1ResponseExtractors {
 	 */
 	public static <T> ResponseExtractor<Single<ResponseEntity<Observable<T>>>> responseStream(Class<T> sourceClass) {
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) -> RxJava1SingleConverter.fromPublisher(
+		return (clientResponse, messageConverters) -> RxJava1Adapter.publisherToSingle(
 				clientResponse.map(response -> new ResponseEntity<>(
-						RxJava1ObservableConverter.fromPublisher(
+						RxJava1Adapter.publisherToObservable(
 								RxJava1ResponseExtractors.<T> decodeResponseBody(response, resolvableType, messageConverters)),
 						response.getHeaders(),
 						response.getStatusCode())));
@@ -103,8 +102,8 @@ public class RxJava1ResponseExtractors {
 	 * Extract the response headers as an {@code HttpHeaders} instance.
 	 */
 	public static ResponseExtractor<Single<HttpHeaders>> headers() {
-		return (clientResponse, messageConverters) -> RxJava1SingleConverter
-				.fromPublisher(clientResponse.map(resp -> resp.getHeaders()));
+		return (clientResponse, messageConverters) -> RxJava1Adapter
+				.publisherToSingle(clientResponse.map(resp -> resp.getHeaders()));
 	}
 
 	@SuppressWarnings("unchecked")

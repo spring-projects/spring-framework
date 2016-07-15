@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.subscriber.SignalEmitter;
+import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -149,7 +149,7 @@ public abstract class DataBufferUtils {
 	}
 
 	private static class ReadableByteChannelGenerator
-			implements BiFunction<ReadableByteChannel, SignalEmitter<DataBuffer>,
+			implements BiFunction<ReadableByteChannel, SynchronousSink<DataBuffer>,
 						ReadableByteChannel> {
 
 		private final DataBufferFactory dataBufferFactory;
@@ -164,7 +164,7 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public ReadableByteChannel apply(ReadableByteChannel
-				channel, SignalEmitter<DataBuffer>	sub) {
+				channel, SynchronousSink<DataBuffer>	sub) {
 			try {
 				ByteBuffer byteBuffer = ByteBuffer.allocate(chunkSize);
 				int read;

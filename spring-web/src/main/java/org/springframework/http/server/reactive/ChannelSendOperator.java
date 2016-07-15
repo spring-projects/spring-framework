@@ -21,8 +21,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.MonoSource;
-import reactor.core.subscriber.SubscriberBarrier;
-import reactor.core.util.EmptySubscription;
+import reactor.core.publisher.OperatorAdapter;
+import reactor.core.publisher.Operators;
 
 import org.springframework.util.Assert;
 
@@ -54,7 +54,7 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 		source.subscribe(new WriteWithBarrier(s));
 	}
 
-	private class WriteWithBarrier extends SubscriberBarrier<T, Void> implements Publisher<T> {
+	private class WriteWithBarrier extends OperatorAdapter<T, Void> implements Publisher<T> {
 
 		/**
 		 * We've at at least one emission, we've called the write function, the write
@@ -161,7 +161,7 @@ public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 				this.writeSubscriber = writeSubscriber;
 
 				if (this.error != null || this.completed) {
-					this.writeSubscriber.onSubscribe(EmptySubscription.INSTANCE);
+					this.writeSubscriber.onSubscribe(Operators.emptySubscription());
 					emitCachedSignals();
 				}
 				else {

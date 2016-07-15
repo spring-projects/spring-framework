@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.core.test.TestSubscriber;
+import reactor.test.TestSubscriber;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;

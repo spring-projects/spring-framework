@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import reactor.core.converter.Converters;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
@@ -82,8 +80,9 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
 
-	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+	private static final boolean jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+
+	private static final boolean rxJava1Present = ClassUtils.isPresent("rx.Observable", classLoader);
 
 
 	private PathMatchConfigurer pathMatchConfigurer;
@@ -289,7 +288,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(new MonoToCompletableFutureConverter());
-		if (Converters.hasRxJava1()) {
+		if (rxJava1Present) {
 			registry.addConverter(new ReactorToRxJava1Converter());
 		}
 	}

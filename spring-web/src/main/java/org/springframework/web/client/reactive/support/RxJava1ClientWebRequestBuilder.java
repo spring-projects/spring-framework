@@ -18,8 +18,7 @@ package org.springframework.web.client.reactive.support;
 
 import java.net.URI;
 
-import reactor.core.converter.RxJava1ObservableConverter;
-import reactor.core.converter.RxJava1SingleConverter;
+import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 import rx.Single;
@@ -149,7 +148,7 @@ public class RxJava1ClientWebRequestBuilder implements ClientWebRequestBuilder {
 	 * as type information for the element published by this reactive stream
 	 */
 	public RxJava1ClientWebRequestBuilder body(Single<?> content, ResolvableType elementType) {
-		this.delegate.body(RxJava1SingleConverter.toPublisher(content), elementType);
+		this.delegate.body(RxJava1Adapter.singleToMono(content), elementType);
 		return this;
 	}
 
@@ -158,7 +157,7 @@ public class RxJava1ClientWebRequestBuilder implements ClientWebRequestBuilder {
 	 * as type information for the elements published by this reactive stream
 	 */
 	public RxJava1ClientWebRequestBuilder body(Observable<?> content, ResolvableType elementType) {
-		this.delegate.body(RxJava1ObservableConverter.toPublisher(content), elementType);
+		this.delegate.body(RxJava1Adapter.observableToFlux(content), elementType);
 		return this;
 	}
 

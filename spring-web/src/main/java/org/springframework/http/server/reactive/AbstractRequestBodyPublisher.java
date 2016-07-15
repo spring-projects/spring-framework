@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.util.BackpressureUtils;
+import reactor.core.publisher.Operators;
 
 import org.springframework.core.io.buffer.DataBuffer;
 
@@ -106,7 +106,7 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 		while (hasDemand()) {
 			DataBuffer dataBuffer = read();
 			if (dataBuffer != null) {
-				BackpressureUtils.getAndSub(this.demand, 1L);
+				Operators.getAndSub(this.demand, 1L);
 				this.subscriber.onNext(dataBuffer);
 			}
 			else {
@@ -214,8 +214,8 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 		NO_DEMAND {
 			@Override
 			void request(AbstractRequestBodyPublisher publisher, long n) {
-				if (BackpressureUtils.checkRequest(n, publisher.subscriber)) {
-					BackpressureUtils.addAndGet(publisher.demand, n);
+				if (Operators.checkRequest(n, publisher.subscriber)) {
+					Operators.addAndGet(publisher.demand, n);
 					if (publisher.changeState(this, DEMAND)) {
 						publisher.checkOnDataAvailable();
 					}
@@ -249,8 +249,8 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 		READING {
 			@Override
 			void request(AbstractRequestBodyPublisher publisher, long n) {
-				if (BackpressureUtils.checkRequest(n, publisher.subscriber)) {
-					BackpressureUtils.addAndGet(publisher.demand, n);
+				if (Operators.checkRequest(n, publisher.subscriber)) {
+					Operators.addAndGet(publisher.demand, n);
 				}
 			}
 		},

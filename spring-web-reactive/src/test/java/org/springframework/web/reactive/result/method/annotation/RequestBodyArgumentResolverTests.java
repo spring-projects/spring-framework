@@ -27,11 +27,10 @@ import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.converter.RxJava1ObservableConverter;
-import reactor.core.converter.RxJava1SingleConverter;
+import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.test.TestSubscriber;
+import reactor.test.TestSubscriber;
 import rx.Observable;
 import rx.Single;
 
@@ -166,12 +165,12 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Single.class, String.class);
 
 		Single<String> single = resolveValueWithEmptyBody(type, true);
-		TestSubscriber.subscribe(RxJava1SingleConverter.toPublisher(single))
+		TestSubscriber.subscribe(RxJava1Adapter.singleToMono(single))
 				.assertNoValues()
 				.assertError(ServerWebInputException.class);
 
 		single = resolveValueWithEmptyBody(type, false);
-		TestSubscriber.subscribe(RxJava1SingleConverter.toPublisher(single))
+		TestSubscriber.subscribe(RxJava1Adapter.singleToMono(single))
 				.assertNoValues()
 				.assertError(ServerWebInputException.class);
 	}
@@ -181,12 +180,12 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Observable.class, String.class);
 
 		Observable<String> observable = resolveValueWithEmptyBody(type, true);
-		TestSubscriber.subscribe(RxJava1ObservableConverter.toPublisher(observable))
+		TestSubscriber.subscribe(RxJava1Adapter.observableToFlux(observable))
 				.assertNoValues()
 				.assertError(ServerWebInputException.class);
 
 		observable = resolveValueWithEmptyBody(type, false);
-		TestSubscriber.subscribe(RxJava1ObservableConverter.toPublisher(observable))
+		TestSubscriber.subscribe(RxJava1Adapter.observableToFlux(observable))
 				.assertNoValues()
 				.assertComplete();
 	}

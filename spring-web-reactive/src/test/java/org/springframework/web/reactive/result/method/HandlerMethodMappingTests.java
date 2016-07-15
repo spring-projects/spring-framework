@@ -27,7 +27,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.core.test.TestSubscriber;
+import reactor.test.TestSubscriber;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.MockServerHttpRequest;

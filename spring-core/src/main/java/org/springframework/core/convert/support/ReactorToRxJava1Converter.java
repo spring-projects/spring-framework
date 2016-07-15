@@ -20,9 +20,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.reactivestreams.Publisher;
-import reactor.core.converter.RxJava1CompletableConverter;
-import reactor.core.converter.RxJava1ObservableConverter;
-import reactor.core.converter.RxJava1SingleConverter;
+import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Completable;
@@ -57,22 +55,22 @@ public final class ReactorToRxJava1Converter implements GenericConverter {
 			return null;
 		}
 		if (Observable.class.isAssignableFrom(sourceType.getType())) {
-			return RxJava1ObservableConverter.toPublisher((Observable<?>) source);
+			return RxJava1Adapter.observableToFlux((Observable<?>) source);
 		}
 		else if (Observable.class.isAssignableFrom(targetType.getType())) {
-			return RxJava1ObservableConverter.fromPublisher((Publisher<?>) source);
+			return RxJava1Adapter.publisherToObservable((Publisher<?>) source);
 		}
 		else if (Single.class.isAssignableFrom(sourceType.getType())) {
-			return RxJava1SingleConverter.toPublisher((Single<?>) source);
+			return RxJava1Adapter.singleToMono((Single<?>) source);
 		}
 		else if (Single.class.isAssignableFrom(targetType.getType())) {
-			return RxJava1SingleConverter.fromPublisher((Publisher<?>) source);
+			return RxJava1Adapter.publisherToSingle((Publisher<?>) source);
 		}
 		else if (Completable.class.isAssignableFrom(sourceType.getType())) {
-			return RxJava1CompletableConverter.toPublisher((Completable) source);
+			return RxJava1Adapter.completableToMono((Completable) source);
 		}
 		else if (Completable.class.isAssignableFrom(targetType.getType())) {
-			return RxJava1CompletableConverter.fromPublisher((Publisher<?>) source);
+			return RxJava1Adapter.publisherToCompletable((Publisher<?>) source);
 		}
 		return null;
 	}

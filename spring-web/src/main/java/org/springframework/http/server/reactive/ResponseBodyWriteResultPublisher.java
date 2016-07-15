@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.util.BackpressureUtils;
+import reactor.core.publisher.Operators;
 
 /**
  * Publisher returned from {@link ServerHttpResponse#writeWith(Publisher)}.
@@ -145,7 +145,7 @@ class ResponseBodyWriteResultPublisher implements Publisher<Void> {
 		SUBSCRIBED {
 			@Override
 			void request(ResponseBodyWriteResultPublisher publisher, long n) {
-				BackpressureUtils.checkRequest(n, publisher.subscriber);
+				Operators.checkRequest(n, publisher.subscriber);
 			}
 
 			@Override

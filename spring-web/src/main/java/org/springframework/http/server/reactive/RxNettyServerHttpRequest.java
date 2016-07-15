@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
-import reactor.core.converter.RxJava1ObservableConverter;
+import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
 import rx.Observable;
 
@@ -95,7 +95,7 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	@Override
 	public Flux<DataBuffer> getBody() {
 		Observable<DataBuffer> content = this.request.getContent().map(dataBufferFactory::wrap);
-		return RxJava1ObservableConverter.toPublisher(content);
+		return RxJava1Adapter.observableToFlux(content);
 	}
 
 }

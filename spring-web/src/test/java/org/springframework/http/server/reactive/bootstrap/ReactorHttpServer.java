@@ -16,8 +16,7 @@
 
 package org.springframework.http.server.reactive.bootstrap;
 
-import reactor.core.flow.Loopback;
-import reactor.core.state.Completable;
+import reactor.core.Loopback;
 
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.util.Assert;
@@ -25,14 +24,14 @@ import org.springframework.util.Assert;
 /**
  * @author Stephane Maldini
  */
-public class ReactorHttpServer extends HttpServerSupport
-		implements HttpServer, Loopback, Completable {
+public class ReactorHttpServer extends HttpServerSupport implements HttpServer, Loopback {
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
 	private reactor.io.netty.http.HttpServer reactorServer;
 
 	private boolean running;
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -41,6 +40,7 @@ public class ReactorHttpServer extends HttpServerSupport
 		this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
 		this.reactorServer = reactor.io.netty.http.HttpServer.create(getHost(), getPort());
 	}
+
 
 	@Override
 	public boolean isRunning() {
@@ -55,16 +55,6 @@ public class ReactorHttpServer extends HttpServerSupport
 	@Override
 	public Object connectedOutput() {
 		return reactorServer;
-	}
-
-	@Override
-	public boolean isStarted() {
-		return running;
-	}
-
-	@Override
-	public boolean isTerminated() {
-		return !running;
 	}
 
 	@Override

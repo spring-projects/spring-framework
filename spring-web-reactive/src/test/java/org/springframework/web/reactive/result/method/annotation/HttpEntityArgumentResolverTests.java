@@ -25,11 +25,10 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.converter.RxJava1ObservableConverter;
-import reactor.core.converter.RxJava1SingleConverter;
+import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.test.TestSubscriber;
+import reactor.test.TestSubscriber;
 import rx.Observable;
 import rx.Single;
 
@@ -156,7 +155,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Single.class, String.class));
 		HttpEntity<Single<String>> entity = resolveValueWithEmptyBody(type);
 
-		TestSubscriber.subscribe(RxJava1SingleConverter.toPublisher(entity.getBody()))
+		TestSubscriber.subscribe(RxJava1Adapter.singleToMono(entity.getBody()))
 				.assertNoValues()
 				.assertError(ServerWebInputException.class);
 	}
@@ -166,7 +165,7 @@ public class HttpEntityArgumentResolverTests {
 		ResolvableType type = httpEntityType(forClassWithGenerics(Observable.class, String.class));
 		HttpEntity<Observable<String>> entity = resolveValueWithEmptyBody(type);
 
-		TestSubscriber.subscribe(RxJava1ObservableConverter.toPublisher(entity.getBody()))
+		TestSubscriber.subscribe(RxJava1Adapter.observableToFlux(entity.getBody()))
 				.assertNoError()
 				.assertComplete()
 				.assertNoValues();

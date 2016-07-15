@@ -29,10 +29,13 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.OperatorAdapter;
 import reactor.core.publisher.Signal;
-import reactor.core.subscriber.SubscriberBarrier;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rossen Stoyanchev
@@ -145,7 +148,7 @@ public class ChannelSendOperatorTests {
 			};
 		}
 
-		private class WriteSubscriber extends SubscriberBarrier<String, Void> {
+		private class WriteSubscriber extends OperatorAdapter<String, Void> {
 
 			public WriteSubscriber(Subscriber<? super Void> subscriber) {
 				super(subscriber);

@@ -23,8 +23,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
+import io.reactivex.netty.protocol.http.server.ResponseContentWriter;
 import org.reactivestreams.Publisher;
-import reactor.core.converter.RxJava1ObservableConverter;
+import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 
@@ -72,12 +73,15 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
-		Observable<ByteBuf> content = RxJava1ObservableConverter.fromPublisher(body).map(this::toByteBuf);
-		return RxJava1ObservableConverter.toPublisher(this.response.write(content, bb -> bb instanceof FlushingByteBuf)).then();
+		Observable<ByteBuf> content = RxJava1Adapter.publisherToObservable(body).map(this::toByteBuf);
+		ResponseContentWriter<ByteBuf> writer = this.response.write(content, bb -> bb instanceof FlushingByteBuf);
+		return RxJava1Adapter.observableToFlux(writer).then();
 	}
 
 	private ByteBuf toByteBuf(DataBuffer buffer) {
-		ByteBuf byteBuf = (buffer instanceof NettyDataBuffer ? ((NettyDataBuffer) buffer).getNativeBuffer() :  Unpooled.wrappedBuffer(buffer.asByteBuffer()));
+		ByteBuf byteBuf = (buffer instanceof NettyDataBuffer ?
+				((NettyDataBuffer) buffer).getNativeBuffer() :
+				Unpooled.wrappedBuffer(buffer.asByteBuffer()));
 		return (buffer instanceof FlushingDataBuffer ? new FlushingByteBuf(byteBuf) : byteBuf);
 	}
 

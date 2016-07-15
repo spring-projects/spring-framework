@@ -29,7 +29,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.test.TestSubscriber;
+import reactor.test.TestSubscriber;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.codec.StringEncoder;
