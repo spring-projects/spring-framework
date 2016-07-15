@@ -39,7 +39,7 @@ public abstract class HandlerMethodSelector {
 	 * @param handlerType the handler type to search handler methods on
 	 * @param handlerMethodFilter a {@link MethodFilter} to help recognize handler methods of interest
 	 * @return the selected methods, or an empty set
-	 * @see MethodIntrospector#selectMethods(Class, MethodFilter)
+	 * @see MethodIntrospector#selectMethods
 	 */
 	public static Set<Method> selectMethods(Class<?> handlerType, MethodFilter handlerMethodFilter) {
 		return MethodIntrospector.selectMethods(handlerType, handlerMethodFilter);
