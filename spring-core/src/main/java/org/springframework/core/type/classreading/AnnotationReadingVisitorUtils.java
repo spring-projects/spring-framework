@@ -41,25 +41,29 @@ import org.springframework.util.ObjectUtils;
  */
 abstract class AnnotationReadingVisitorUtils {
 
-	public static AnnotationAttributes convertClassValues(ClassLoader classLoader, AnnotationAttributes original,
-			boolean classValuesAsString) {
+	public static AnnotationAttributes convertClassValues(Object annotatedElement,
+			ClassLoader classLoader, AnnotationAttributes original, boolean classValuesAsString) {
 
 		if (original == null) {
 			return null;
 		}
 
-		AnnotationAttributes result = new AnnotationAttributes(original.size());
-		for (Map.Entry<String, Object> entry : original.entrySet()) {
+		AnnotationAttributes result = new AnnotationAttributes(original);
+		AnnotationUtils.postProcessAnnotationAttributes(annotatedElement, result, classValuesAsString);
+
+		for (Map.Entry<String, Object> entry : result.entrySet()) {
 			try {
 				Object value = entry.getValue();
 				if (value instanceof AnnotationAttributes) {
-					value = convertClassValues(classLoader, (AnnotationAttributes) value, classValuesAsString);
+					value = convertClassValues(
+							annotatedElement, classLoader, (AnnotationAttributes) value, classValuesAsString);
 				}
 				else if (value instanceof AnnotationAttributes[]) {
 					AnnotationAttributes[] values = (AnnotationAttributes[]) value;
 					for (int i = 0; i < values.length; i++) {
-						values[i] = convertClassValues(classLoader, values[i], classValuesAsString);
+						values[i] = convertClassValues(annotatedElement, classLoader, values[i], classValuesAsString);
 					}
+					value = values;
 				}
 				else if (value instanceof Type) {
 					value = (classValuesAsString ? ((Type) value).getClassName() :
@@ -67,7 +71,8 @@ abstract class AnnotationReadingVisitorUtils {
 				}
 				else if (value instanceof Type[]) {
 					Type[] array = (Type[]) value;
-					Object[] convArray = (classValuesAsString ? new String[array.length] : new Class<?>[array.length]);
+					Object[] convArray =
+							(classValuesAsString ? new String[array.length] : new Class<?>[array.length]);
 					for (int i = 0; i < array.length; i++) {
 						convArray[i] = (classValuesAsString ? array[i].getClassName() :
 								classLoader.loadClass(array[i].getClassName()));
@@ -75,11 +80,11 @@ abstract class AnnotationReadingVisitorUtils {
 					value = convArray;
 				}
 				else if (classValuesAsString) {
-					if (value instanceof Class) {
+					if (value instanceof Class<?>) {
 						value = ((Class<?>) value).getName();
 					}
-					else if (value instanceof Class[]) {
-						Class<?>[] clazzArray = (Class[]) value;
+					else if (value instanceof Class<?>[]) {
+						Class<?>[] clazzArray = (Class<?>[]) value;
 						String[] newValue = new String[clazzArray.length];
 						for (int i = 0; i < clazzArray.length; i++) {
 							newValue[i] = clazzArray[i].getName();
@@ -87,13 +92,14 @@ abstract class AnnotationReadingVisitorUtils {
 						value = newValue;
 					}
 				}
-				result.put(entry.getKey(), value);
+				entry.setValue(value);
 			}
 			catch (Exception ex) {
 				// Class not found - can't resolve class reference in annotation attribute.
 				result.put(entry.getKey(), ex);
 			}
 		}
+
 		return result;
 	}
 
@@ -123,13 +129,12 @@ abstract class AnnotationReadingVisitorUtils {
 			return null;
 		}
 
-		// To start with, we populate the results with a copy of all attribute
-		// values from the target annotation. A copy is necessary so that we do
-		// not inadvertently mutate the state of the metadata passed to this
-		// method.
-		AnnotationAttributes results = new AnnotationAttributes(attributesList.get(0));
+		// To start with, we populate the result with a copy of all attribute values
+		// from the target annotation. A copy is necessary so that we do not
+		// inadvertently mutate the state of the metadata passed to this method.
+		AnnotationAttributes result = new AnnotationAttributes(attributesList.get(0));
 
-		Set<String> overridableAttributeNames = new HashSet<>(results.keySet());
+		Set<String> overridableAttributeNames = new HashSet<>(result.keySet());
 		overridableAttributeNames.remove(AnnotationUtils.VALUE);
 
 		// Since the map is a LinkedMultiValueMap, we depend on the ordering of
@@ -152,14 +157,14 @@ abstract class AnnotationReadingVisitorUtils {
 						if (value != null) {
 							// Store the value, potentially overriding a value from an attribute
 							// of the same name found higher in the annotation hierarchy.
-							results.put(overridableAttributeName, value);
+							result.put(overridableAttributeName, value);
 						}
 					}
 				}
 			}
 		}
 
-		return results;
+		return result;
 	}
 
 }

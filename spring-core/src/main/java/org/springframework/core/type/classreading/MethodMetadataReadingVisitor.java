@@ -122,7 +122,8 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
 				this.attributesMap, this.metaAnnotationMap, annotationName);
-		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
+		return AnnotationReadingVisitorUtils.convertClassValues(
+				"method '" + getMethodName() + "'", this.classLoader, raw, classValuesAsString);
 	}
 
 	@Override
@@ -137,8 +138,9 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 		}
 		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<>();
 		for (AnnotationAttributes annotationAttributes : this.attributesMap.get(annotationName)) {
-			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
-					this.classLoader, annotationAttributes, classValuesAsString).entrySet()) {
+			AnnotationAttributes convertedAttributes = AnnotationReadingVisitorUtils.convertClassValues(
+					"method '" + getMethodName() + "'", this.classLoader, annotationAttributes, classValuesAsString);
+			for (Map.Entry<String, Object> entry : convertedAttributes.entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());
 			}
 		}

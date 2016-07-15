@@ -17,7 +17,6 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
 import org.springframework.util.ReflectionUtils;
@@ -32,7 +31,7 @@ import org.springframework.util.ReflectionUtils;
  * @see AliasFor
  * @see AbstractAliasAwareAnnotationAttributeExtractor
  * @see MapAnnotationAttributeExtractor
- * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
+ * @see AnnotationUtils#synthesizeAnnotation
  */
 class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttributeExtractor<Annotation> {
 
@@ -42,7 +41,7 @@ class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAt
 	 * @param annotatedElement the element that is annotated with the supplied
 	 * annotation; may be {@code null} if unknown
 	 */
-	DefaultAnnotationAttributeExtractor(Annotation annotation, AnnotatedElement annotatedElement) {
+	DefaultAnnotationAttributeExtractor(Annotation annotation, Object annotatedElement) {
 		super(annotation.annotationType(), annotatedElement, annotation);
 	}
 

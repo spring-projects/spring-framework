@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,13 +35,13 @@ import org.springframework.util.ObjectUtils;
  * @param <S> the type of source supported by this extractor
  * @see Annotation
  * @see AliasFor
- * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
+ * @see AnnotationUtils#synthesizeAnnotation(Annotation, Object)
  */
 abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements AnnotationAttributeExtractor<S> {
 
 	private final Class<? extends Annotation> annotationType;
 
-	private final AnnotatedElement annotatedElement;
+	private final Object annotatedElement;
 
 	private final S source;
 
@@ -56,7 +56,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	 * @param source the underlying source of annotation attributes; never {@code null}
 	 */
 	AbstractAliasAwareAnnotationAttributeExtractor(
-			Class<? extends Annotation> annotationType, AnnotatedElement annotatedElement, S source) {
+			Class<? extends Annotation> annotationType, Object annotatedElement, S source) {
 
 		Assert.notNull(annotationType, "annotationType must not be null");
 		Assert.notNull(source, "source must not be null");
@@ -73,7 +73,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 	}
 
 	@Override
-	public final AnnotatedElement getAnnotatedElement() {
+	public final Object getAnnotatedElement() {
 		return this.annotatedElement;
 	}
 
@@ -89,18 +89,18 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 
 		List<String> aliasNames = this.attributeAliasMap.get(attributeName);
 		if (aliasNames != null) {
-			Object defaultValue = AnnotationUtils.getDefaultValue(getAnnotationType(), attributeName);
+			Object defaultValue = AnnotationUtils.getDefaultValue(this.annotationType, attributeName);
 			for (String aliasName : aliasNames) {
 				Object aliasValue = getRawAttributeValue(aliasName);
 
 				if (!ObjectUtils.nullSafeEquals(attributeValue, aliasValue) &&
 						!ObjectUtils.nullSafeEquals(attributeValue, defaultValue) &&
 						!ObjectUtils.nullSafeEquals(aliasValue, defaultValue)) {
-					String elementName = (getAnnotatedElement() != null ? getAnnotatedElement().toString() : "unknown element");
+					String elementName = (this.annotatedElement != null ? this.annotatedElement.toString() : "unknown element");
 					throw new AnnotationConfigurationException(String.format(
 							"In annotation [%s] declared on %s and synthesized from [%s], attribute '%s' and its " +
 							"alias '%s' are present with values of [%s] and [%s], but only one is permitted.",
-							getAnnotationType().getName(), elementName, getSource(), attributeName, aliasName,
+							this.annotationType.getName(), elementName, this.source, attributeName, aliasName,
 							ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue)));
 				}
 

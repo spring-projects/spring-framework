@@ -131,7 +131,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
 				this.attributesMap, this.metaAnnotationMap, annotationName);
-		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
+		return AnnotationReadingVisitorUtils.convertClassValues(
+				"class '" + getClassName() + "'", this.classLoader, raw, classValuesAsString);
 	}
 
 	@Override
@@ -148,7 +149,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		}
 		for (AnnotationAttributes raw : attributes) {
 			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
-					this.classLoader, raw, classValuesAsString).entrySet()) {
+					"class '" + getClassName() + "'", this.classLoader, raw, classValuesAsString).entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());
 			}
 		}
