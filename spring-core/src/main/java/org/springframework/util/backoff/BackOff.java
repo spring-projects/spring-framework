@@ -26,7 +26,7 @@ package org.springframework.util.backoff;
  * BackOffExecution exec = backOff.start();
  *
  * // In the operation recovery/retry loop:
- * long waitInterval = exec.nextBackOffMillis();
+ * long waitInterval = exec.nextBackOff();
  * if (waitInterval == BackOffExecution.STOP) {
  *     // do not retry operation
  * }
