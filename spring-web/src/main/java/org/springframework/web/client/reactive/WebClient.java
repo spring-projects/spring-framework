@@ -92,7 +92,7 @@ public final class WebClient {
 
 	private ClientHttpConnector clientHttpConnector;
 
-	private List<HttpMessageConverter<?>> messageConverters;
+	private final DefaultWebClientConfig webClientConfig;
 
 	/**
 	 * Create a {@code WebClient} instance, using the {@link ClientHttpConnector}
@@ -111,8 +111,11 @@ public final class WebClient {
 	 */
 	public WebClient(ClientHttpConnector clientHttpConnector) {
 		this.clientHttpConnector = clientHttpConnector;
-		this.messageConverters = new ArrayList<>();
-		addDefaultHttpMessageConverters(this.messageConverters);
+		this.webClientConfig = new DefaultWebClientConfig();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		addDefaultHttpMessageConverters(converters);
+		this.webClientConfig.setMessageConverters(converters);
+		this.webClientConfig.setResponseErrorHandler(new DefaultResponseErrorHandler());
 	}
 
 	/**
@@ -141,7 +144,14 @@ public final class WebClient {
 	 * messages
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		this.messageConverters = messageConverters;
+		this.webClientConfig.setMessageConverters(messageConverters);
+	}
+
+	/**
+	 * Set the {@link ResponseErrorHandler} to use for handling HTTP response errors
+	 */
+	public void setResponseErrorHandler(ResponseErrorHandler responseErrorHandler) {
+		this.webClientConfig.setResponseErrorHandler(responseErrorHandler);
 	}
 
 	/**
@@ -167,15 +177,39 @@ public final class WebClient {
 		return new WebResponseActions() {
 			@Override
 			public void doWithStatus(Consumer<HttpStatus> consumer) {
-				clientResponse.doOnNext(clientHttpResponse ->
-						consumer.accept(clientHttpResponse.getStatusCode()));
+				clientResponse.doOnNext(clientHttpResponse -> consumer.accept(clientHttpResponse.getStatusCode()));
 			}
 
 			@Override
 			public <T> T extract(ResponseExtractor<T> extractor) {
-				return extractor.extract(clientResponse, messageConverters);
+				return extractor.extract(clientResponse, webClientConfig);
 			}
 		};
+	}
+
+	protected class DefaultWebClientConfig implements WebClientConfig {
+
+		private List<HttpMessageConverter<?>> messageConverters;
+
+		private ResponseErrorHandler responseErrorHandler;
+
+		@Override
+		public List<HttpMessageConverter<?>> getMessageConverters() {
+			return messageConverters;
+		}
+
+		public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
+			this.messageConverters = messageConverters;
+		}
+
+		@Override
+		public ResponseErrorHandler getResponseErrorHandler() {
+			return responseErrorHandler;
+		}
+
+		public void setResponseErrorHandler(ResponseErrorHandler responseErrorHandler) {
+			this.responseErrorHandler = responseErrorHandler;
+		}
 	}
 
 	protected class DefaultRequestCallback implements Function<ClientHttpRequest, Mono<Void>> {
@@ -198,7 +232,8 @@ public final class WebClient {
 					.forEach(cookie -> clientHttpRequest.getCookies().add(cookie.getName(), cookie));
 			if (this.clientWebRequest.getBody() != null) {
 				return writeRequestBody(this.clientWebRequest.getBody(),
-						this.clientWebRequest.getElementType(), clientHttpRequest, messageConverters);
+						this.clientWebRequest.getElementType(),
+						clientHttpRequest, webClientConfig.getMessageConverters());
 			}
 			else {
 				return clientHttpRequest.setComplete();

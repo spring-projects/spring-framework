@@ -16,35 +16,26 @@
 
 package org.springframework.web.client.reactive;
 
-import java.util.function.Consumer;
+import java.util.List;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
 
 /**
- * Allows applying actions, such as extractors, on the result of an executed
- * {@link WebClient} request.
+ * Interface that makes the {@link WebClient} configuration information
+ * available to downstream infrastructure such as {@link ResponseErrorHandler}s.
  *
  * @author Brian Clozel
  * @since 5.0
  */
-public interface WebResponseActions {
+public interface WebClientConfig {
 
 	/**
-	 * Apply synchronous operations once the HTTP response status
-	 * has been received.
+	 * Return the message converters that can help encoding/decoding the HTTP message body
 	 */
-	void doWithStatus(Consumer<HttpStatus> consumer);
+	List<HttpMessageConverter<?>> getMessageConverters();
 
 	/**
-	 * Perform an extraction of the response body into a higher level representation.
-	 *
-	 * <pre class="code">
-	 * static imports: ClientWebRequestBuilder.*, ResponseExtractors.*
-	 *
-	 * webClient
-	 *   .perform(get(url).accept(MediaType.TEXT_PLAIN))
-	 *   .extract(body(String.class));
-	 * </pre>
+	 * Return the configured {@link ResponseErrorHandler}
 	 */
-	<T> T extract(ResponseExtractor<T> extractor);
+	ResponseErrorHandler getResponseErrorHandler();
 }

@@ -17,7 +17,6 @@
 package org.springframework.web.client.reactive.support;
 
 import java.util.List;
-import java.util.Optional;
 
 import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
@@ -31,10 +30,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.web.client.reactive.BodyExtractor;
 import org.springframework.web.client.reactive.ResponseExtractor;
+import org.springframework.web.client.reactive.WebClientException;
 
 /**
- * Static factory methods for {@link ResponseExtractor}
+ * Static factory methods for {@link ResponseExtractor} and {@link BodyExtractor},
  * based on the {@link Observable} and {@link Single} APIs.
  *
  * @author Brian Clozel
@@ -44,14 +45,58 @@ public class RxJava1ResponseExtractors {
 
 	/**
 	 * Extract the response body and decode it, returning it as a {@code Single<T>}.
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> ResponseExtractor<Single<T>> body(ResolvableType bodyType) {
+
+		return (clientResponse, webClientConfig) -> (Single<T>) RxJava1Adapter
+				.publisherToSingle(clientResponse
+						.doOnNext(response -> webClientConfig.getResponseErrorHandler()
+								.handleError(response, webClientConfig.getMessageConverters()))
+						.flatMap(resp -> decodeResponseBodyAsMono(resp, bodyType, webClientConfig.getMessageConverters())));
+	}
+
+	/**
+	 * Extract the response body and decode it, returning it as a {@code Single<T>}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Single<T>> body(Class<T> sourceClass) {
 
-		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) -> (Single<T>) RxJava1Adapter
-				.publisherToSingle(clientResponse
-						.flatMap(resp -> decodeResponseBody(resp, resolvableType, messageConverters)).next());
+		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
+		return body(bodyType);
+	}
+
+	/**
+	 * Extract the response body and decode it, returning it as a {@code Single<T>}.
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> BodyExtractor<Single<T>> as(ResolvableType bodyType) {
+		return (clientResponse, messageConverters) ->
+				(Single<T>) RxJava1Adapter.publisherToSingle(
+						decodeResponseBodyAsMono(clientResponse, bodyType, messageConverters));
+	}
+
+	/**
+	 * Extract the response body and decode it, returning it as a {@code Single<T>}
+	 */
+	public static <T> BodyExtractor<Single<T>> as(Class<T> sourceClass) {
+		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
+		return as(bodyType);
+	}
+
+	/**
+	 * Extract the response body and decode it, returning it as an {@code Observable<T>}
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+	 */
+	public static <T> ResponseExtractor<Observable<T>> bodyStream(ResolvableType bodyType) {
+
+		return (clientResponse, webClientConfig) -> RxJava1Adapter
+				.publisherToObservable(clientResponse
+						.doOnNext(response -> webClientConfig.getResponseErrorHandler()
+								.handleError(response, webClientConfig.getMessageConverters()))
+						.flatMap(resp -> decodeResponseBody(resp, bodyType, webClientConfig.getMessageConverters())));
 	}
 
 	/**
@@ -59,29 +104,56 @@ public class RxJava1ResponseExtractors {
 	 */
 	public static <T> ResponseExtractor<Observable<T>> bodyStream(Class<T> sourceClass) {
 
-		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) -> RxJava1Adapter
-				.publisherToObservable(clientResponse
-						.flatMap(resp -> decodeResponseBody(resp, resolvableType, messageConverters)));
+		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
+		return bodyStream(bodyType);
+	}
+
+	/**
+	 * Extract the response body and decode it, returning it as a {@code Observable<T>}.
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> BodyExtractor<Observable<T>> asStream(ResolvableType bodyType) {
+		return (clientResponse, messageConverters) ->
+				(Observable<T>) RxJava1Adapter
+						.publisherToObservable(decodeResponseBody(clientResponse, bodyType, messageConverters));
+	}
+
+	/**
+	 * Extract the response body and decode it, returning it as a {@code Observable<T>}.
+	 */
+	public static <T> BodyExtractor<Observable<T>> asStream(Class<T> sourceClass) {
+		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
+		return asStream(bodyType);
+	}
+
+	/**
+	 * Extract the full response body as a {@code ResponseEntity}
+	 * with its body decoded as a single type {@code T}.
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> ResponseExtractor<Single<ResponseEntity<T>>> response(ResolvableType bodyType) {
+
+		return (clientResponse, webClientConfig) ->
+				RxJava1Adapter.publisherToSingle(clientResponse
+						.then(response ->
+								Mono.when(
+										decodeResponseBody(response, bodyType, webClientConfig.getMessageConverters()).next(),
+										Mono.just(response.getHeaders()),
+										Mono.just(response.getStatusCode())))
+						.map(tuple ->
+							new ResponseEntity<>((T) tuple.getT1(), tuple.getT2(), tuple.getT3())));
 	}
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity}
 	 * with its body decoded as a single type {@code T}.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Single<ResponseEntity<T>>> response(Class<T> sourceClass) {
 
-		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) ->
-				RxJava1Adapter.publisherToSingle(clientResponse
-						.then(response ->
-								Mono.when(
-										decodeResponseBody(response, resolvableType, messageConverters).next(),
-										Mono.just(response.getHeaders()),
-										Mono.just(response.getStatusCode())))
-						.map(tuple ->
-								new ResponseEntity<>((T) tuple.getT1(), tuple.getT2(), tuple.getT3())));
+		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
+		return response(bodyType);
 	}
 
 	/**
@@ -90,10 +162,19 @@ public class RxJava1ResponseExtractors {
 	 */
 	public static <T> ResponseExtractor<Single<ResponseEntity<Observable<T>>>> responseStream(Class<T> sourceClass) {
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return (clientResponse, messageConverters) -> RxJava1Adapter.publisherToSingle(
-				clientResponse.map(response -> new ResponseEntity<>(
-						RxJava1Adapter.publisherToObservable(
-								RxJava1ResponseExtractors.<T> decodeResponseBody(response, resolvableType, messageConverters)),
+		return responseStream(resolvableType);
+	}
+
+	/**
+	 * Extract the full response body as a {@code ResponseEntity}
+	 * with its body decoded as an {@code Observable<T>}
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+	 */
+	public static <T> ResponseExtractor<Single<ResponseEntity<Observable<T>>>> responseStream(ResolvableType bodyType) {
+		return (clientResponse, webClientConfig) -> RxJava1Adapter.publisherToSingle(clientResponse
+				.map(response -> new ResponseEntity<>(
+								RxJava1Adapter
+								.publisherToObservable(decodeResponseBody(response, bodyType, webClientConfig.getMessageConverters())),
 						response.getHeaders(),
 						response.getStatusCode())));
 	}
@@ -107,22 +188,33 @@ public class RxJava1ResponseExtractors {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected static <T> Flux<T> decodeResponseBody(ClientHttpResponse response, ResolvableType responseType,
-			List<HttpMessageConverter<?>> messageConverters) {
+	protected static <T> Flux<T> decodeResponseBody(ClientHttpResponse response,
+			ResolvableType responseType, List<HttpMessageConverter<?>> messageConverters) {
 
 		MediaType contentType = response.getHeaders().getContentType();
-		Optional<HttpMessageConverter<?>> converter = resolveConverter(messageConverters, responseType, contentType);
-		if (!converter.isPresent()) {
-			return Flux.error(new IllegalStateException("Could not decode response body of type '" + contentType +
-					"' with target type '" + responseType.toString() + "'"));
-		}
-		return (Flux<T>) converter.get().read(responseType, response);
+		HttpMessageConverter<?> converter = resolveConverter(messageConverters, responseType, contentType);
+		return (Flux<T>) converter.read(responseType, response);
 	}
 
+	@SuppressWarnings("unchecked")
+	protected static <T> Mono<T> decodeResponseBodyAsMono(ClientHttpResponse response,
+			ResolvableType responseType, List<HttpMessageConverter<?>> messageConverters) {
 
-	protected static Optional<HttpMessageConverter<?>> resolveConverter(List<HttpMessageConverter<?>> messageConverters,
-			ResolvableType type, MediaType mediaType) {
-		return messageConverters.stream().filter(e -> e.canRead(type, mediaType)).findFirst();
+		MediaType contentType = response.getHeaders().getContentType();
+		HttpMessageConverter<?> converter = resolveConverter(messageConverters, responseType, contentType);
+		return (Mono<T>) converter.readMono(responseType, response);
+	}
+
+	protected static HttpMessageConverter<?> resolveConverter(
+			List<HttpMessageConverter<?>> messageConverters, ResolvableType responseType, MediaType contentType) {
+
+		return messageConverters.stream()
+				.filter(e -> e.canRead(responseType, contentType))
+				.findFirst()
+				.orElseThrow(() ->
+						new WebClientException(
+								"Could not decode response body of type '" + contentType
+										+ "' with target type '" + responseType.toString() + "'"));
 	}
 
 }

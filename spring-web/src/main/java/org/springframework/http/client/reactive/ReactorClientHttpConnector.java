@@ -22,11 +22,14 @@ import java.util.function.Function;
 import org.springframework.http.HttpMethod;
 
 import reactor.core.publisher.Mono;
+import reactor.io.netty.http.HttpException;
+import reactor.io.netty.http.HttpInbound;
 
 /**
  * Reactor-Netty implementation of {@link ClientHttpConnector}
  *
  * @author Brian Clozel
+ * @see reactor.io.netty.http.HttpClient
  * @since 5.0
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
@@ -38,7 +41,10 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 		return reactor.io.netty.http.HttpClient.create(uri.getHost(), uri.getPort())
 				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()),
 						uri.toString(),
-						httpOutbound -> requestCallback.apply(new ReactorClientHttpRequest(method, uri, httpOutbound)))
+						httpClientRequest -> requestCallback
+								.apply(new ReactorClientHttpRequest(method, uri, httpClientRequest)))
+				.cast(HttpInbound.class)
+				.otherwise(HttpException.class, exc -> Mono.just(exc.getChannel()))
 				.map(httpInbound -> new ReactorClientHttpResponse(httpInbound));
 	}
 }

@@ -19,7 +19,7 @@ package org.springframework.http.client.reactive;
 import java.util.Collection;
 
 import reactor.core.publisher.Flux;
-import reactor.io.netty.http.HttpClientResponse;
+import reactor.io.netty.http.HttpInbound;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -34,16 +34,16 @@ import org.springframework.util.MultiValueMap;
  * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client
  *
  * @author Brian Clozel
- * @since 5.0
  * @see reactor.io.netty.http.HttpClient
+ * @since 5.0
  */
 public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final NettyDataBufferFactory dataBufferFactory;
 
-	private final HttpClientResponse response;
+	private final HttpInbound response;
 
-	public ReactorClientHttpResponse(HttpClientResponse response) {
+	public ReactorClientHttpResponse(HttpInbound response) {
 		this.response = response;
 		this.dataBufferFactory = new NettyDataBufferFactory(response.delegate().alloc());
 	}

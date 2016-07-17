@@ -20,7 +20,7 @@ import org.springframework.core.NestedRuntimeException;
 
 /**
  * Base class for exceptions thrown by {@link WebClient} whenever
- * it encounters client-side errors.
+ * it encounters errors.
  *
  * @author Brian Clozel
  * @since 5.0

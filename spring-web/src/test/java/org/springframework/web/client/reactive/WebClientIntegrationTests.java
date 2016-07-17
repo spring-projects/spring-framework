@@ -28,18 +28,17 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.hamcrest.Matchers;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.TestSubscriber;
 
-import org.springframework.http.codec.Pojo;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.Pojo;
 
 /**
  * {@link WebClient} integration tests with the {@code Flux} and {@code Mono} API.
@@ -71,16 +70,16 @@ public class WebClientIntegrationTests {
 		TestSubscriber
 				.subscribe(result)
 				.awaitAndAssertNextValuesWith(
-					httpHeaders -> {
-						assertEquals(MediaType.TEXT_PLAIN, httpHeaders.getContentType());
-						assertEquals(13L, httpHeaders.getContentLength());
-					})
+						httpHeaders -> {
+							assertEquals(MediaType.TEXT_PLAIN, httpHeaders.getContentType());
+							assertEquals(13L, httpHeaders.getContentLength());
+						})
 				.assertComplete();
 
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-		Assert.assertEquals("/greeting?name=Spring", request.getPath());
+		assertEquals(1, server.getRequestCount());
+		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/greeting?name=Spring", request.getPath());
 	}
 
 	@Test
@@ -101,10 +100,10 @@ public class WebClientIntegrationTests {
 				.assertComplete();
 
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("testvalue", request.getHeader("X-Test-Header"));
-		Assert.assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-		Assert.assertEquals("/greeting?name=Spring", request.getPath());
+		assertEquals(1, server.getRequestCount());
+		assertEquals("testvalue", request.getHeader("X-Test-Header"));
+		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/greeting?name=Spring", request.getPath());
 	}
 
 	@Test
@@ -124,11 +123,11 @@ public class WebClientIntegrationTests {
 					assertEquals(200, response.getStatusCode().value());
 					assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
 					assertEquals("Hello Spring!", response.getBody());
-		});
+				});
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("/greeting?name=Spring", request.getPath());
-		Assert.assertEquals("text/plain", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/greeting?name=Spring", request.getPath());
+		assertEquals("text/plain", request.getHeader(HttpHeaders.ACCEPT));
 	}
 
 	@Test
@@ -149,9 +148,9 @@ public class WebClientIntegrationTests {
 				.awaitAndAssertNextValues(content)
 				.assertComplete();
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("/json", request.getPath());
-		Assert.assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/json", request.getPath());
+		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
 	}
 
 	@Test
@@ -171,9 +170,9 @@ public class WebClientIntegrationTests {
 				.awaitAndAssertNextValuesWith(p -> assertEquals("barbar", p.getBar()))
 				.assertComplete();
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("/pojo", request.getPath());
-		Assert.assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/pojo", request.getPath());
+		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
 	}
 
 	@Test
@@ -191,14 +190,14 @@ public class WebClientIntegrationTests {
 		TestSubscriber
 				.subscribe(result)
 				.awaitAndAssertNextValuesWith(
-					p -> assertThat(p.getBar(), Matchers.is("bar1")),
-					p -> assertThat(p.getBar(), Matchers.is("bar2")))
+						p -> assertThat(p.getBar(), Matchers.is("bar1")),
+						p -> assertThat(p.getBar(), Matchers.is("bar2")))
 				.assertValueCount(2)
 				.assertComplete();
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("/pojos", request.getPath());
-		Assert.assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/pojos", request.getPath());
+		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
 	}
 
 	@Test
@@ -216,15 +215,15 @@ public class WebClientIntegrationTests {
 		TestSubscriber
 				.subscribe(result)
 				.awaitAndAssertNextValuesWith(
-					response -> {
-						assertEquals(200, response.getStatusCode().value());
-						assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
-					})
+						response -> {
+							assertEquals(200, response.getStatusCode().value());
+							assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
+						})
 				.assertComplete();
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("/pojos", request.getPath());
-		Assert.assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/pojos", request.getPath());
+		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
 	}
 
 	@Test
@@ -249,12 +248,12 @@ public class WebClientIntegrationTests {
 				.assertComplete();
 
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("/pojo/capitalize", request.getPath());
-		Assert.assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", request.getBody().readUtf8());
-		Assert.assertEquals("chunked", request.getHeader(HttpHeaders.TRANSFER_ENCODING));
-		Assert.assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
-		Assert.assertEquals("application/json", request.getHeader(HttpHeaders.CONTENT_TYPE));
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/pojo/capitalize", request.getPath());
+		assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", request.getBody().readUtf8());
+		assertEquals("chunked", request.getHeader(HttpHeaders.TRANSFER_ENCODING));
+		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("application/json", request.getHeader(HttpHeaders.CONTENT_TYPE));
 	}
 
 	@Test
@@ -274,16 +273,17 @@ public class WebClientIntegrationTests {
 				.assertComplete();
 
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("/test", request.getPath());
-		Assert.assertEquals("testkey=testvalue", request.getHeader(HttpHeaders.COOKIE));
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/test", request.getPath());
+		assertEquals("testkey=testvalue", request.getHeader(HttpHeaders.COOKIE));
 	}
 
 	@Test
 	public void shouldGetErrorWhen404() throws Exception {
 
 		HttpUrl baseUrl = server.url("/greeting?name=Spring");
-		this.server.enqueue(new MockResponse().setResponseCode(404));
+		this.server.enqueue(new MockResponse().setResponseCode(404)
+				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
 		Mono<String> result = this.webClient
 				.perform(get(baseUrl.toString()))
@@ -292,12 +292,50 @@ public class WebClientIntegrationTests {
 		TestSubscriber
 				.subscribe(result)
 				.await()
-				.assertError();
+				.assertErrorWith(t -> {
+					assertThat(t, Matchers.instanceOf(WebClientErrorException.class));
+					WebClientErrorException exc = (WebClientErrorException) t;
+					assertEquals(404, exc.getStatus().value());
+					assertEquals(MediaType.TEXT_PLAIN, exc.getResponseHeaders().getContentType());
+
+					Mono<String> body = exc.getResponseBody(as(String.class));
+
+					TestSubscriber.subscribe(body)
+							.awaitAndAssertNextValues("Not Found")
+							.assertComplete();
+				});
 
 		RecordedRequest request = server.takeRequest();
-		Assert.assertEquals(1, server.getRequestCount());
-		Assert.assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-		Assert.assertEquals("/greeting?name=Spring", request.getPath());
+		assertEquals(1, server.getRequestCount());
+		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/greeting?name=Spring", request.getPath());
+	}
+
+	@Test
+	public void shouldGetErrorWhen500() throws Exception {
+
+		HttpUrl baseUrl = server.url("/greeting?name=Spring");
+		this.server.enqueue(new MockResponse().setResponseCode(500)
+				.setHeader("Content-Type", "text/plain").setBody("Server Error"));
+
+		Mono<String> result = this.webClient
+				.perform(get(baseUrl.toString()))
+				.extract(body(String.class));
+
+		TestSubscriber
+				.subscribe(result)
+				.await()
+				.assertErrorWith(t -> {
+					assertThat(t, Matchers.instanceOf(WebServerErrorException.class));
+					WebServerErrorException exc = (WebServerErrorException) t;
+					assertEquals(500, exc.getStatus().value());
+					assertEquals(MediaType.TEXT_PLAIN, exc.getResponseHeaders().getContentType());
+				});
+
+		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
+		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/greeting?name=Spring", request.getPath());
 	}
 
 	@After

@@ -16,28 +16,28 @@
 
 package org.springframework.web.client.reactive;
 
-import reactor.core.publisher.Mono;
+import java.util.List;
 
 import org.springframework.http.client.reactive.ClientHttpResponse;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
 
 /**
- * A {@code ResponseExtractor} extracts the relevant part of a
- * raw {@link org.springframework.http.client.reactive.ClientHttpResponse},
- * optionally decoding the response body and using a target composition API.
+ * A {@code BodyExtractor} extracts the content of a raw {@link ClientHttpResponse},
+ * decoding the response body and using a target composition API.
  *
- * <p>See static factory methods in {@link ResponseExtractors} and
- * {@link org.springframework.web.client.reactive.support.RxJava1ResponseExtractors}.
+ * <p>See static factory methods in {@link ResponseExtractors}
+ * and {@link org.springframework.web.client.reactive.support.RxJava1ResponseExtractors}.
  *
  * @author Brian Clozel
  * @since 5.0
  */
-public interface ResponseExtractor<T> {
+public interface BodyExtractor<T> {
 
 	/**
-	 * Extract content from the response
+	 * Extract content from the response body
 	 * @param clientResponse the raw HTTP response
-	 * @param webClientConfig the {@link WebClient} configuration information
-	 * @return the relevant part of the response
+	 * @param messageConverters the message converters that decode the response body
+	 * @return the relevant content
 	 */
-	T extract(Mono<ClientHttpResponse> clientResponse, WebClientConfig webClientConfig);
+	T extract(ClientHttpResponse clientResponse, List<HttpMessageConverter<?>> messageConverters);
 }
