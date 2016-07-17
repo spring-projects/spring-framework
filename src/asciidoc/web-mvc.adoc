@@ -25,7 +25,7 @@ For an explanation of this principle, refer to __Expert Spring Web MVC and Web F
 Seth Ladd and others; specifically see the section "A Look At Design," on page 117 of
 the first edition. Alternatively, see
 
-* http://www.objectmentor.com/resources/articles/ocp.pdf[Bob Martin, The Open-Closed
+* https://www.cs.duke.edu/courses/fall07/cps108/papers/ocp.pdf[Bob Martin, The Open-Closed
   Principle (PDF)]
 
 You cannot add advice to final methods when you use Spring MVC. For example, you cannot
