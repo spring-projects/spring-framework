@@ -31,8 +31,10 @@ import org.springframework.util.Assert;
  */
 final class JaxbContextContainer {
 
+
 	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts =
 			new ConcurrentHashMap<>(64);
+
 
 	public Marshaller createMarshaller(Class<?> clazz) throws JAXBException {
 		JAXBContext jaxbContext = getJaxbContext(clazz);

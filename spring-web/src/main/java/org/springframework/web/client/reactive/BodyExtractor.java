@@ -22,11 +22,11 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 
 /**
- * A {@code BodyExtractor} extracts the content of a raw {@link ClientHttpResponse},
- * decoding the response body and using a target composition API.
+ * Contract to extract the content of a raw {@link ClientHttpResponse} decoding
+ * the response body and using a target composition API.
  *
- * <p>See static factory methods in {@link ResponseExtractors}
- * and {@link org.springframework.web.client.reactive.support.RxJava1ResponseExtractors}.
+ * <p>See static factory methods in {@link ResponseExtractors} and
+ * {@link org.springframework.web.client.reactive.support.RxJava1ResponseExtractors}.
  *
  * @author Brian Clozel
  * @since 5.0
@@ -40,4 +40,5 @@ public interface BodyExtractor<T> {
 	 * @return the relevant content
 	 */
 	T extract(ClientHttpResponse clientResponse, List<HttpMessageConverter<?>> messageConverters);
+
 }

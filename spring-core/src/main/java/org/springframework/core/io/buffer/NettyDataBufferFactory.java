@@ -37,6 +37,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 
 	private final ByteBufAllocator byteBufAllocator;
 
+
 	/**
 	 * Creates a new {@code NettyDataBufferFactory} based on the given factory.
 	 * @param byteBufAllocator the factory to use
@@ -48,6 +49,7 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 
 		this.byteBufAllocator = byteBufAllocator;
 	}
+
 
 	@Override
 	public NettyDataBuffer allocateBuffer() {

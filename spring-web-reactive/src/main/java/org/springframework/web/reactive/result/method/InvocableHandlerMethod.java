@@ -40,6 +40,9 @@ import org.springframework.web.server.ServerWebExchange;
 
 
 /**
+ * Extension of HandlerMethod that can invoke the target method after resolving
+ * its method arguments.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */

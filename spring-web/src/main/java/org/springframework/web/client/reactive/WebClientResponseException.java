@@ -24,7 +24,8 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 
 /**
- * Base class for exceptions associated with specific HTTP client response status codes.
+ * Base class for exceptions associated with specific HTTP client response
+ * status codes.
  *
  * @author Brian Clozel
  * @since 5.0
@@ -35,6 +36,7 @@ public class WebClientResponseException extends WebClientException {
 	private final ClientHttpResponse clientResponse;
 
 	private final List<HttpMessageConverter<?>> messageConverters;
+
 
 	/**
 	 * Construct a new instance of {@code WebClientResponseException} with the given response data
@@ -48,6 +50,7 @@ public class WebClientResponseException extends WebClientException {
 		this.clientResponse = clientResponse;
 		this.messageConverters = messageConverters;
 	}
+
 
 	/**
 	 * Return the HTTP status

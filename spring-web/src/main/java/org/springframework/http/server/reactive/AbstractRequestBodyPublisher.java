@@ -34,8 +34,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 
 /**
  * Abstract base class for {@code Publisher} implementations that bridge between
- * event-listener APIs and Reactive Streams. Specifically, base class for the Servlet 3.1
- * and Undertow support.
+ * event-listener APIs and Reactive Streams. Specifically, base class for the
+ * Servlet 3.1 and Undertow support.
  *
  * @author Arjen Poutsma
  * @since 5.0

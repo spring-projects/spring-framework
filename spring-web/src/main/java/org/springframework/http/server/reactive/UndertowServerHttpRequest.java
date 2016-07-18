@@ -39,7 +39,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Adapt {@link ServerHttpRequest} to the Underow {@link HttpServerExchange}.
+ * Adapt {@link ServerHttpRequest} to the Undertow {@link HttpServerExchange}.
  *
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev

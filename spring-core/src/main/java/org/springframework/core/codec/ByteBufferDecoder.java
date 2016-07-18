@@ -28,6 +28,8 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
+ * Decoder for {@link ByteBuffer}s.
+ *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
@@ -49,6 +51,7 @@ public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 	@Override
 	public Flux<ByteBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
+
 		return Flux.from(inputStream).map((dataBuffer) -> {
 			ByteBuffer copy = ByteBuffer.allocate(dataBuffer.readableByteCount());
 			copy.put(dataBuffer.asByteBuffer());

@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link ServerHttpResponse} to the Servlet {@link HttpServletResponse}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */

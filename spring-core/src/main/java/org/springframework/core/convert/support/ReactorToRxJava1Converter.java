@@ -31,6 +31,9 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
+ * Converter to adapt RxJava1 {@link Observable}, {@link Single}, and
+ * {@link Completable} to Reactive Streams and Reactor types.
+ *
  * @author Stephane Maldini
  * @author Sebastien Deleuze
  * @since 5.0

@@ -31,7 +31,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client
+ * {@link ClientHttpResponse} implementation for the Reactor-Netty HTTP client.
  *
  * @author Brian Clozel
  * @see reactor.io.netty.http.HttpClient
@@ -43,10 +43,12 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpInbound response;
 
+
 	public ReactorClientHttpResponse(HttpInbound response) {
 		this.response = response;
 		this.dataBufferFactory = new NettyDataBufferFactory(response.delegate().alloc());
 	}
+
 
 	@Override
 	public Flux<DataBuffer> getBody() {

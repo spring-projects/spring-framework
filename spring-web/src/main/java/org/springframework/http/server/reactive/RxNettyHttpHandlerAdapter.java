@@ -28,6 +28,8 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
+ * Adapt {@link HttpHandler} to the RxNetty {@link RequestHandler}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
@@ -35,20 +37,18 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 
 	private final HttpHandler httpHandler;
 
+
 	public RxNettyHttpHandlerAdapter(HttpHandler httpHandler) {
 		Assert.notNull(httpHandler, "'httpHandler' is required");
 		this.httpHandler = httpHandler;
 	}
 
+
 	@Override
 	public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-		NettyDataBufferFactory dataBufferFactory =
-				new NettyDataBufferFactory(response.unsafeNettyChannel().alloc());
-
-		RxNettyServerHttpRequest adaptedRequest =
-				new RxNettyServerHttpRequest(request, dataBufferFactory);
-		RxNettyServerHttpResponse adaptedResponse =
-				new RxNettyServerHttpResponse(response, dataBufferFactory);
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.unsafeNettyChannel().alloc());
+		RxNettyServerHttpRequest adaptedRequest = new RxNettyServerHttpRequest(request, bufferFactory);
+		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response, bufferFactory);
 		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
 		return RxJava1Adapter.publisherToObservable(result);
 	}

@@ -36,8 +36,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * An encoder for {@link SseEvent}s that also supports any other kind of {@link Object}
- * (in that case, the object will be the data of the {@link SseEvent}).
+ * Encoder that supports a stream of {@link SseEvent}s and also plain
+ * {@link Object}s which is the same as an {@link SseEvent} with data
+ * only.
+ *
  * @author Sebastien Deleuze
  * @since 5.0
  */

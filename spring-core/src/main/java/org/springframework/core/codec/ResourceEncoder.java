@@ -32,7 +32,8 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * An encoder for {@link Resource}s.
+ * Encoder for {@link Resource}s.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
@@ -40,7 +41,9 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 	public static final int DEFAULT_BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
 
+
 	private final int bufferSize;
+
 
 	public ResourceEncoder() {
 		this(DEFAULT_BUFFER_SIZE);
@@ -52,17 +55,17 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 		this.bufferSize = bufferSize;
 	}
 
+
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
 		Class<?> clazz = elementType.getRawClass();
-		return (super.canEncode(elementType, mimeType, hints) &&
-				Resource.class.isAssignableFrom(clazz));
+		return (super.canEncode(elementType, mimeType, hints) && Resource.class.isAssignableFrom(clazz));
 	}
 
 	@Override
-	protected Flux<DataBuffer> encode(Resource resource,
-			DataBufferFactory dataBufferFactory,
+	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
 			ResolvableType type, MimeType mimeType, Object... hints) throws IOException {
+
 		InputStream is = resource.getInputStream();
 		return DataBufferUtils.read(is, dataBufferFactory, bufferSize);
 	}

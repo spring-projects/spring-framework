@@ -41,7 +41,7 @@ import org.springframework.web.util.UriTemplateHandler;
  * Builds a {@link ClientHttpRequest} using a {@link Publisher}
  * as request body.
  *
- * <p>See static factory methods in {@link ClientWebRequestBuilders}
+ * <p>See static factory methods in {@link ClientWebRequestBuilders}.
  *
  * @author Brian Clozel
  * @since 5.0

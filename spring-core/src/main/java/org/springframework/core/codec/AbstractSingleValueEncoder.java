@@ -25,21 +25,25 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
 
 /**
- * Abstract base class for {@link org.springframework.core.codec.Encoder} classes that
- * can only deal with a single value.
+ * Abstract base class for {@link org.springframework.core.codec.Encoder}
+ * classes that can only deal with a single value.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
 public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
+
 	public AbstractSingleValueEncoder(MimeType... supportedMimeTypes) {
 		super(supportedMimeTypes);
 	}
+
 
 	@Override
 	public final Flux<DataBuffer> encode(Publisher<? extends T> inputStream,
 			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
 			Object... hints) {
+
 		return Flux.from(inputStream).
 				take(1).
 				concatMap(t -> {
@@ -53,7 +57,7 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 	}
 
 	/**
-	 * Encodes {@code T} to an output {@link DataBuffer} stream.
+	 * Encode {@code T} to an output {@link DataBuffer} stream.
 	 * @param t the value to process
 	 * @param dataBufferFactory a buffer factory used to create the output
 	 * @param type the stream element type to process
@@ -64,6 +68,5 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 	 */
 	protected abstract Flux<DataBuffer> encode(T t, DataBufferFactory dataBufferFactory,
 			ResolvableType type, MimeType mimeType, Object... hints) throws Exception;
-
 
 }

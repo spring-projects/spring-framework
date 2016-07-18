@@ -21,8 +21,8 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 
 /**
- * An extension of {@link RequestedContentTypeResolver} that maintains a mapping between
- * keys (e.g. file extension, query parameter) and media types.
+ * An extension of {@link RequestedContentTypeResolver} that maintains a mapping
+ * between keys (e.g. file extension, query parameter) and media types.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

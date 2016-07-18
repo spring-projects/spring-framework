@@ -26,6 +26,8 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
+ * Adapt {@link HttpHandler} to the Undertow {@link io.undertow.server.HttpHandler}.
+ *
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -40,13 +42,14 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	private final DataBufferFactory dataBufferFactory;
 
-	public UndertowHttpHandlerAdapter(HttpHandler delegate,
-			DataBufferFactory dataBufferFactory) {
+
+	public UndertowHttpHandlerAdapter(HttpHandler delegate, DataBufferFactory dataBufferFactory) {
 		Assert.notNull(delegate, "'delegate' is required");
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		this.delegate = delegate;
 		this.dataBufferFactory = dataBufferFactory;
 	}
+
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {

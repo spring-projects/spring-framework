@@ -22,8 +22,8 @@ import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 
 /**
- * Strategy interface used by the {@link WebClient} to handle
- * errors in {@link ClientHttpResponse}s if needed.
+ * Strategy interface used by the {@link WebClient} to handle errors in
+ * {@link ClientHttpResponse}s if needed.
  *
  * @author Brian Clozel
  * @see DefaultResponseErrorHandler
@@ -33,8 +33,9 @@ public interface ResponseErrorHandler {
 
 	/**
 	 * Handle the error in the given response.
-	 * Implementations will typically inspect the {@link ClientHttpResponse#getStatusCode() HttpStatus}
-	 * of the response and throw {@link WebClientException}s in case of errors.
+	 * Implementations will typically inspect the
+	 * {@link ClientHttpResponse#getStatusCode() HttpStatus} of the response and
+	 * throw {@link WebClientException}s in case of errors.
 	 */
 	void handleError(ClientHttpResponse response, List<HttpMessageConverter<?>> messageConverters);
 

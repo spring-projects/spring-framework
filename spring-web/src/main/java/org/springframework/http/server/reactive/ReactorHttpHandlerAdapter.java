@@ -25,28 +25,27 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
+ * Adapt {@link HttpHandler} to the Reactor Netty {@link ChannelHandler}.
+ *
  * @author Stephane Maldini
  * @since 5.0
  */
-public class ReactorHttpHandlerAdapter
-		implements ChannelHandler<ByteBuf, ByteBuf, HttpChannel> {
+public class ReactorHttpHandlerAdapter implements ChannelHandler<ByteBuf, ByteBuf, HttpChannel> {
 
 	private final HttpHandler httpHandler;
+
 
 	public ReactorHttpHandlerAdapter(HttpHandler httpHandler) {
 		Assert.notNull(httpHandler, "'httpHandler' is required.");
 		this.httpHandler = httpHandler;
 	}
 
+
 	@Override
 	public Mono<Void> apply(HttpChannel channel) {
-		NettyDataBufferFactory dataBufferFactory =
-				new NettyDataBufferFactory(channel.delegate().alloc());
-
-		ReactorServerHttpRequest adaptedRequest =
-				new ReactorServerHttpRequest(channel, dataBufferFactory);
-		ReactorServerHttpResponse adaptedResponse =
-				new ReactorServerHttpResponse(channel, dataBufferFactory);
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.delegate().alloc());
+		ReactorServerHttpRequest adaptedRequest = new ReactorServerHttpRequest(channel, bufferFactory);
+		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel, bufferFactory);
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse);
 	}
 

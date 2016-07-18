@@ -30,6 +30,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.util.Assert;
 
 /**
+ * Default implementation of {@link org.springframework.web.server.WebSession}.
+ *
  * @author Rossen Stoyanchev
  * @since 5.0
  */

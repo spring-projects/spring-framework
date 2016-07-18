@@ -34,7 +34,7 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Encode from an {@code Object} stream to a byte stream of XML elements.
+ * Encode from {@code Object} stream to a byte stream containing XML elements.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma

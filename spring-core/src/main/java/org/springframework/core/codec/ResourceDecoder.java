@@ -32,16 +32,18 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * A decoder for {@link Resource}s.
+ * Decoder for {@link Resource}s.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
 public class ResourceDecoder extends AbstractDecoder<Resource> {
 
+
 	public ResourceDecoder() {
 		super(MimeTypeUtils.ALL);
 	}
+
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
@@ -54,6 +56,7 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 	@Override
 	public Flux<Resource> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
+
 		Class<?> clazz = elementType.getRawClass();
 
 		Mono<byte[]> byteArray = Flux.from(inputStream).
@@ -67,17 +70,13 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 
 
 		if (InputStreamResource.class.equals(clazz)) {
-			return Flux.from(byteArray.
-					map(ByteArrayInputStream::new).
-					map(InputStreamResource::new));
+			return Flux.from(byteArray.map(ByteArrayInputStream::new).map(InputStreamResource::new));
 		}
 		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
-			return Flux.from(byteArray.
-					map(ByteArrayResource::new));
+			return Flux.from(byteArray.map(ByteArrayResource::new));
 		}
 		else {
-			return Flux.error(new IllegalStateException(
-					"Unsupported resource class: " + clazz));
+			return Flux.error(new IllegalStateException("Unsupported resource class: " + clazz));
 		}
 	}
 }

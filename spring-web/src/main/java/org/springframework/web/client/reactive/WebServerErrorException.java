@@ -32,13 +32,18 @@ import org.springframework.http.converter.reactive.HttpMessageConverter;
 public class WebServerErrorException extends WebClientResponseException {
 
 	/**
-	 * Construct a new instance of {@code HttpServerErrorException} based on a {@link ClientHttpResponse}
-	 * and {@link HttpMessageConverter}s to optionally help decoding the response body
-	 * @param clientResponse the HTTP response
-	 * @param messageConverters the message converters that may decode the HTTP response body
+	 * Construct a new instance of {@code HttpServerErrorException} based on a
+	 * {@link ClientHttpResponse} and {@link HttpMessageConverter}s to optionally
+	 * help decoding the response body
+	 * @param response the HTTP response
+	 * @param converters the message converters that may decode the HTTP response body
 	 */
-	public WebServerErrorException(ClientHttpResponse clientResponse, List<HttpMessageConverter<?>> messageConverters) {
-		super(clientResponse.getStatusCode().value() + " " + clientResponse.getStatusCode().getReasonPhrase(),
-				clientResponse, messageConverters);
+	public WebServerErrorException(ClientHttpResponse response, List<HttpMessageConverter<?>> converters) {
+		super(initMessage(response), response, converters);
 	}
+
+	private static String initMessage(ClientHttpResponse response) {
+		return response.getStatusCode().value() + " " + response.getStatusCode().getReasonPhrase();
+	}
+
 }

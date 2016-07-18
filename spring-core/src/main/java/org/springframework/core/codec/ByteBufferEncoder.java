@@ -28,10 +28,13 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
+ * Encoder for {@link ByteBuffer}s.
+ *
  * @author Sebastien Deleuze
  * @since 5.0
  */
 public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
+
 
 	public ByteBufferEncoder() {
 		super(MimeTypeUtils.ALL);

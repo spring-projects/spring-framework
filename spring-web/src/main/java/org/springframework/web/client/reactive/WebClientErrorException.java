@@ -18,7 +18,6 @@ package org.springframework.web.client.reactive;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.converter.reactive.HttpMessageConverter;
 
@@ -31,15 +30,21 @@ import org.springframework.http.converter.reactive.HttpMessageConverter;
 @SuppressWarnings("serial")
 public class WebClientErrorException extends WebClientResponseException {
 
+
 	/**
-	 * Construct a new instance of {@code HttpClientErrorException} based on a {@link ClientHttpResponse}
-	 * and {@link HttpMessageConverter}s to optionally help decoding the response body
-	 * @param clientResponse the HTTP response
-	 * @param messageConverters the message converters that may decode the HTTP response body
+	 * Construct a new instance of {@code HttpClientErrorException} based on a
+	 * {@link ClientHttpResponse} and {@link HttpMessageConverter}s to optionally
+	 * help decoding the response body
+	 *
+	 * @param response the HTTP response
+	 * @param converters the message converters that may decode the HTTP response body
 	 */
-	public WebClientErrorException(ClientHttpResponse clientResponse,
-			List<HttpMessageConverter<?>> messageConverters) {
-		super(clientResponse.getStatusCode().value() + " " + clientResponse.getStatusCode().getReasonPhrase(),
-				clientResponse, messageConverters);
+	public WebClientErrorException(ClientHttpResponse response, List<HttpMessageConverter<?>> converters) {
+		super(initMessage(response), response, converters);
 	}
+
+	private static String initMessage(ClientHttpResponse response) {
+		return response.getStatusCode().value() + " " + response.getStatusCode().getReasonPhrase();
+	}
+
 }

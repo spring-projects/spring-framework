@@ -24,6 +24,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;
 
 /**
+ * Abstract base class for {@link Decoder} implementations.
+ *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
@@ -31,6 +33,7 @@ import org.springframework.util.MimeType;
 public abstract class AbstractEncoder<T> implements Encoder<T> {
 
 	private List<MimeType> encodableMimeTypes = Collections.emptyList();
+
 
 	protected AbstractEncoder(MimeType... supportedMimeTypes) {
 		this.encodableMimeTypes = Arrays.asList(supportedMimeTypes);
@@ -47,8 +50,7 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 		if (mimeType == null) {
 			return true;
 		}
-		return this.encodableMimeTypes.stream().
-				anyMatch(mt -> mt.isCompatibleWith(mimeType));
+		return this.encodableMimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
 	}
 
 }

@@ -47,4 +47,5 @@ public interface WebResponseActions {
 	 * </pre>
 	 */
 	<T> T extract(ResponseExtractor<T> extractor);
+
 }

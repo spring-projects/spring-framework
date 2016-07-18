@@ -28,6 +28,8 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
 
 /**
+ * Abstract base class for {@link Decoder} implementations.
+ *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
@@ -35,6 +37,7 @@ import org.springframework.util.MimeType;
 public abstract class AbstractDecoder<T> implements Decoder<T> {
 
 	private List<MimeType> decodableMimeTypes = Collections.emptyList();
+
 
 	protected AbstractDecoder(MimeType... supportedMimeTypes) {
 		this.decodableMimeTypes = Arrays.asList(supportedMimeTypes);
@@ -51,12 +54,14 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 		if (mimeType == null) {
 			return true;
 		}
-		return this.decodableMimeTypes.stream().
-				anyMatch(mt -> mt.isCompatibleWith(mimeType));
+		return this.decodableMimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
 	}
 
 	@Override
-	public Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public Mono<T> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
+			MimeType mimeType, Object... hints) {
+
 		throw new UnsupportedOperationException();
 	}
+
 }

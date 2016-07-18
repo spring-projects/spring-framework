@@ -55,21 +55,23 @@ import reactor.core.publisher.Mono;
  * <p>Here is a simple example of a GET request:
  *
  * <pre class="code">
+ * static imports: ClientWebRequestBuilder.*, ResponseExtractors.*
+ *
  * // should be shared between HTTP calls
  * WebClient client = new WebClient(new ReactorHttpClient());
  *
  * Mono&lt;String&gt; result = client
- * 		.perform(ClientWebRequestBuilders.get("http://example.org/resource")
- * 				.accept(MediaType.TEXT_PLAIN))
- * 		.extract(ResponseExtractors.body(String.class));
+ * 		.perform(get("http://example.org/resource").accept(MediaType.TEXT_PLAIN))
+ * 		.extract(body(String.class));
  * </pre>
  *
- * <p>This Web client relies on
+ * <p>This Web client relies on the following:
  * <ul>
- * <li>an {@link ClientHttpConnector} implementation that drives the underlying library (e.g. Reactor-Netty)</li>
- * <li>a {@link ClientWebRequestBuilder} which creates a Web request with a builder API (see
- * {@link ClientWebRequestBuilders})</li>
- * <li>an {@link ResponseExtractor} which extracts the relevant part of the server
+ * <li>{@link ClientHttpConnector} implementation to drive the underlying
+ * library (e.g. Reactor-Netty)</li>
+ * <li>{@link ClientWebRequestBuilder} to create a Web request with a builder
+ * API (see {@link ClientWebRequestBuilders})</li>
+ * <li>{@link ResponseExtractor} to extract the relevant part of the server
  * response with the composition API of choice (see {@link ResponseExtractors}</li>
  * </ul>
  *

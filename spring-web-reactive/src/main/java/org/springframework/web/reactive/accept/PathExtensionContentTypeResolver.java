@@ -31,8 +31,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.WebUtils;
 
 /**
- * A {@link RequestedContentTypeResolver} that extracts the file extension from the
- * request path and uses that as the media type lookup key.
+ * A {@link RequestedContentTypeResolver} that extracts the file extension from
+ * the request path and uses that as the media type lookup key.
  *
  * <p>If the file extension is not found in the explicit registrations provided
  * to the constructor, the Java Activation Framework (JAF) is used as a fallback

@@ -17,8 +17,9 @@
 package org.springframework.web.client.reactive;
 
 /**
- * Allow post processing and/or wrapping the {@link ClientWebRequest} before
- * it's sent to the origin server.
+ * Contract to post-process the {@link ClientWebRequest} after it is created
+ * an initialized in order to mofidy or even wrap it. This may be used for
+ * example to pre-package specific modifications to the request.
  *
  * @author Rob Winch
  * @author Brian Clozel
@@ -28,10 +29,10 @@ package org.springframework.web.client.reactive;
 public interface ClientWebRequestPostProcessor {
 
 	/**
-	 * Implementations can modify and/or wrap the {@link ClientWebRequest} passed in
-	 * and return it
-	 *
+	 * Implementations can modify and/or wrap the {@link ClientWebRequest}
+	 * passed in and return it
 	 * @param request the {@link ClientWebRequest} to be modified and/or wrapped.
 	 */
 	ClientWebRequest postProcess(ClientWebRequest request);
+
 }

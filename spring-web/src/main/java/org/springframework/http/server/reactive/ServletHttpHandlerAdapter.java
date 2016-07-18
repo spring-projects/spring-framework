@@ -34,6 +34,9 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
+ * Adapt {@link HttpHandler} to an {@link HttpServlet} using Servlet Async
+ * support and Servlet 3.1 Non-blocking I/O.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -53,6 +56,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
+
 
 	public void setHandler(HttpHandler handler) {
 		Assert.notNull(handler, "'handler' must not be null");

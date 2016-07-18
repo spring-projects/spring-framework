@@ -28,9 +28,9 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Factory to create a {@link CompositeContentTypeResolver} and configure it with
- * one or more {@link RequestedContentTypeResolver} instances with build style methods.
- * The following table shows methods, resulting strategy instances, and if in
- * use by default:
+ * one or more {@link RequestedContentTypeResolver} instances with build style
+ * methods. The following table shows methods, resulting strategy instances, and
+ * if in use by default:
  *
  * <table>
  * <tr>
@@ -65,9 +65,10 @@ import org.springframework.util.CollectionUtils;
  * </tr>
  * </table>
  *
- * <p>The order in which resolvers are configured is fixed. Config methods may only
- * turn individual resolvers on or off. If you need a custom order for any
- * reason simply instantiate {@code {@link CompositeContentTypeResolver}} directly.
+ * <p>The order in which resolvers are configured is fixed. Config methods may
+ * only turn individual resolvers on or off. If you need a custom order for any
+ * reason simply instantiate {@code {@link CompositeContentTypeResolver}}
+ * directly.
  *
  * <p>For the path extension and parameter resolvers you may explicitly add
  * {@link #mediaTypes(Map)}. This will be used to resolve path extensions or a

@@ -33,7 +33,7 @@ import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
 
 /**
- * {@link ClientHttpRequest} implementation for the Reactor-Netty HTTP client
+ * {@link ClientHttpRequest} implementation for the Reactor-Netty HTTP client.
  *
  * @author Brian Clozel
  * @since 5.0
@@ -49,12 +49,14 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final NettyDataBufferFactory bufferFactory;
 
+
 	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri, HttpClientRequest httpRequest) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpRequest = httpRequest;
 		this.bufferFactory = new NettyDataBufferFactory(httpRequest.delegate().alloc());
 	}
+
 
 	@Override
 	public DataBufferFactory bufferFactory() {

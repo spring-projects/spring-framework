@@ -22,7 +22,8 @@ import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Strategy for resolving the requested media types for a {@code ServerWebExchange}.
+ * Strategy for resolving the requested media types for a
+ * {@code ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

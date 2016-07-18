@@ -34,6 +34,7 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
+ * Base class for {@link View} implementations.
  *
  * @author Rossen Stoyanchev
  * @since 5.0

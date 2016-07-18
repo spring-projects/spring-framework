@@ -44,7 +44,8 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Decode from a bytes stream of XML elements to a stream of {@code Object} (POJO).
+ * Decode from a bytes stream containing XML elements to a stream of
+ * {@code Object}s (POJOs).
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
@@ -66,9 +67,11 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 
 	private final JaxbContextContainer jaxbContexts = new JaxbContextContainer();
 
+
 	public Jaxb2Decoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
+
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
@@ -85,6 +88,7 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
+
 		Class<?> outputClass = elementType.getRawClass();
 		Flux<XMLEvent> xmlEventFlux =
 				this.xmlEventDecoder.decode(inputStream, null, mimeType);

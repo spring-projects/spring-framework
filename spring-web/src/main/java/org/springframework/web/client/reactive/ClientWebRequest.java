@@ -27,15 +27,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Holds all the application information required to build an actual HTTP client request.
- * <p>The request body is materialized by a {@code Publisher} of Objects and their type
- * by a {@code ResolvableType} instance; it should be later converted to a
- * {@code Publisher<DataBuffer>} to be written to the actual HTTP client request.
+ * Simple container for application-level information required to perform an
+ * HTTP client request.
+ *
+ * <p>The request body is provided through a {@code Publisher<Object>} where the
+ * type of each Object is indicated through a {@link ResolvableType} which
+ * subsequently is used to correctly serialize into the
+ * {@code Publisher<DataBuffer>} actually written to request body.
  *
  * @author Brian Clozel
  * @since 5.0
  */
-public class 	ClientWebRequest {
+public class ClientWebRequest {
 
 	protected final HttpMethod httpMethod;
 
@@ -54,6 +57,7 @@ public class 	ClientWebRequest {
 		this.httpMethod = httpMethod;
 		this.url = url;
 	}
+
 
 	public HttpMethod getMethod() {
 		return httpMethod;

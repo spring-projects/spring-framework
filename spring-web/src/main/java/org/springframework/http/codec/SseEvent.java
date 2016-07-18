@@ -20,10 +20,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.SseEventEncoder;
 
 /**
- * Represent a Server-Sent Event.
- *
- * <p>{@code Flux<SseEvent>} is Spring Web Reactive equivalent to Spring MVC
- * {@code SseEmitter} type. It allows to send Server-Sent Events in a reactive way.
+ * Representation for a Server-Sent Event for use with Spring's reactive Web
+ * support. {@code Flux<SseEvent>} or {@code Observable<SseEvent>} is the
+ * reactive equivalent to Spring MVC's {@code SseEmitter}.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -43,6 +42,7 @@ public class SseEvent {
 	private Long reconnectTime;
 
 	private String comment;
+
 
 	/**
 	 * Create an empty instance.
@@ -64,6 +64,7 @@ public class SseEvent {
 		this.data = data;
 		this.mediaType = mediaType;
 	}
+
 
 	/**
 	 * Set the {@code id} SSE field

@@ -20,7 +20,8 @@ package org.springframework.web.client.reactive;
 import org.springframework.http.HttpMethod;
 
 /**
- * Static factory methods for {@link DefaultClientWebRequestBuilder ClientWebRequestBuilders}
+ * Static factory methods for {@link DefaultClientWebRequestBuilder
+ * ClientWebRequestBuilders}.
  *
  * @author Brian Clozel
  * @since 5.0
@@ -46,7 +47,6 @@ public abstract class ClientWebRequestBuilders {
 	public static DefaultClientWebRequestBuilder post(String urlTemplate, Object... urlVariables) {
 		return new DefaultClientWebRequestBuilder(HttpMethod.POST, urlTemplate, urlVariables);
 	}
-
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for a PUT request.

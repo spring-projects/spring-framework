@@ -42,6 +42,7 @@ import org.springframework.util.Assert;
 
 /**
  * Adapt {@link ServerHttpResponse} to the Undertow {@link HttpServerExchange}.
+ *
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma

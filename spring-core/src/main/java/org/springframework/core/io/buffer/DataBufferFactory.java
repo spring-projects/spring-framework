@@ -19,8 +19,8 @@ package org.springframework.core.io.buffer;
 import java.nio.ByteBuffer;
 
 /**
- * A factory for {@link DataBuffer}s, allowing for allocation and wrapping of data
- * buffers.
+ * A factory for {@link DataBuffer}s,allowing for allocation and wrapping of
+ * data buffers.
  *
  * @author Arjen Poutsma
  * @see DataBuffer
@@ -29,22 +29,24 @@ import java.nio.ByteBuffer;
 public interface DataBufferFactory {
 
 	/**
-	 * Allocates a data buffer of a default initial capacity. Depending on the underlying
-	 * implementation and its configuration, this will be heap-based or direct buffer.
+	 * Allocate a data buffer of a default initial capacity. Depending on the
+	 * underlying implementation and its configuration, this will be heap-based
+	 * or direct buffer.
 	 * @return the allocated buffer
 	 */
 	DataBuffer allocateBuffer();
 
 	/**
-	 * Allocates a data buffer of the given initial capacity. Depending on the underlying
-	 * implementation and its configuration, this will be heap-based or direct buffer.
-	 * @param initialCapacity the initial capacity of the buffer to allocateBuffer
+	 * Allocate a data buffer of the given initial capacity. Depending on the
+	 * underlying implementation and its configuration, this will be heap-based
+	 * or direct buffer.
+	 * @param initialCapacity the initial capacity of the buffer to allocate
 	 * @return the allocated buffer
 	 */
 	DataBuffer allocateBuffer(int initialCapacity);
 
 	/**
-	 * Wraps the given {@link ByteBuffer} in a {@code DataBuffer}.
+	 * Wrap the given {@link ByteBuffer} in a {@code DataBuffer}.
 	 * @param byteBuffer the NIO byte buffer to wrap
 	 * @return the wrapped buffer
 	 */

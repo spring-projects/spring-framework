@@ -19,8 +19,7 @@ package org.springframework.web.client.reactive;
 import org.springframework.core.NestedRuntimeException;
 
 /**
- * Base class for exceptions thrown by {@link WebClient} whenever
- * it encounters errors.
+ * Base class for exceptions thrown by {@link WebClient}.
  *
  * @author Brian Clozel
  * @since 5.0
@@ -35,4 +34,5 @@ public class WebClientException extends NestedRuntimeException {
 	public WebClientException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+
 }

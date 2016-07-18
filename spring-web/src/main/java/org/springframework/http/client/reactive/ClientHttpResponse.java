@@ -22,7 +22,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Represents a reactive client-side HTTP response.
+ * Represents a client-side reactive HTTP response.
  *
  * @author Arjen Poutsma
  * @since 5.0

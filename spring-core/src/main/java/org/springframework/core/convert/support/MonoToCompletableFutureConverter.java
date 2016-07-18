@@ -27,10 +27,14 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
 /**
+ * Converter to adapt {@link CompletableFuture} to Reactive Streams and
+ * Reactor {@link Mono}.
+ *
  * @author Sebastien Deleuze
  * @since 5.0
  */
 public class MonoToCompletableFutureConverter implements GenericConverter {
+
 
 	@Override
 	public Set<GenericConverter.ConvertiblePair> getConvertibleTypes() {
@@ -39,6 +43,7 @@ public class MonoToCompletableFutureConverter implements GenericConverter {
 		pairs.add(new GenericConverter.ConvertiblePair(CompletableFuture.class, Mono.class));
 		return pairs;
 	}
+
 
 	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

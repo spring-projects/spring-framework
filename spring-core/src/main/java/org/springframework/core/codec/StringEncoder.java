@@ -38,6 +38,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+
 	public StringEncoder() {
 		super(new MimeType("text", "plain", DEFAULT_CHARSET));
 	}
@@ -51,8 +52,9 @@ public class StringEncoder extends AbstractEncoder<String> {
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends String> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
-			Object... hints) {
+			DataBufferFactory bufferFactory, ResolvableType elementType,
+			MimeType mimeType, Object... hints) {
+
 		Charset charset;
 		if (mimeType != null && mimeType.getCharset() != null) {
 			charset = mimeType.getCharset();

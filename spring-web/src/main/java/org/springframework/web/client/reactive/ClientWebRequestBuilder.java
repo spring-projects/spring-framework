@@ -17,7 +17,7 @@
 package org.springframework.web.client.reactive;
 
 /**
- * Build {@link ClientWebRequest}s
+ * Build {@link ClientWebRequest}s.
  *
  * @author Brian Clozel
  * @since 5.0

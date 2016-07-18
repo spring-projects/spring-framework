@@ -47,8 +47,9 @@ public class DefaultDataBuffer implements DataBuffer {
 	private int writePosition;
 
 	/**
-	 * Creates a new {@code DefaultDataBuffer} based on the given {@code ByteBuffer}. Both
-	 * reading and writing position of this buffer are based on the current {@linkplain
+	 * Create a new {@code DefaultDataBuffer} based on the given
+	 * {@code ByteBuffer}. Both reading and writing position of this buffer are
+	 * based on the current {@linkplain
 	 * ByteBuffer#position() position} of the given buffer.
 	 * @param byteBuffer the buffer to base this buffer on
 	 */

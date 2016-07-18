@@ -32,8 +32,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Implementation of the {@code DataBuffer} interface that wraps a Netty {@link ByteBuf}.
- * Typically constructed using the {@link NettyDataBufferFactory}.
+ * Implementation of the {@code DataBuffer} interface that wraps a Netty
+ * {@link ByteBuf}. Typically constructed with {@link NettyDataBufferFactory}.
  *
  * @author Arjen Poutsma
  * @since 5.0

@@ -22,8 +22,8 @@ import java.nio.ByteBuffer;
 import java.util.function.IntPredicate;
 
 /**
- * Empty {@link DataBuffer} that indicates to the file or the socket writing it that
- * previously buffered data should be flushed.
+ * Empty {@link DataBuffer} that indicates to the file or the socket writing it
+ * that previously buffered data should be flushed.
  *
  * @author Sebastien Deleuze
  * @since 5.0

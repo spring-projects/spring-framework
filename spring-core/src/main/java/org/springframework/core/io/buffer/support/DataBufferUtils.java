@@ -89,8 +89,8 @@ public abstract class DataBufferUtils {
 
 	/**
 	 * Relays buffers from the given {@link Publisher} until the total
-	 * {@linkplain DataBuffer#readableByteCount() byte count} reaches the given maximum
-	 * byte count, or until the publisher is complete.
+	 * {@linkplain DataBuffer#readableByteCount() byte count} reaches the given
+	 * maximum byte count, or until the publisher is complete.
 	 * @param publisher the publisher to filter
 	 * @param maxByteCount the maximum byte count
 	 * @return a flux whose maximum byte count is {@code maxByteCount}
