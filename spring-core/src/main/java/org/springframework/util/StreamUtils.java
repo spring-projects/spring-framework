@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
@@ -105,9 +104,15 @@ public abstract class StreamUtils {
 		Assert.notNull(in, "No input String specified");
 		Assert.notNull(charset, "No charset specified");
 		Assert.notNull(out, "No OutputStream specified");
-		Writer writer = new OutputStreamWriter(out, charset);
-		writer.write(in);
-		writer.flush();
+		//we use FastOutputStreamWriter to save memory and improve tps
+		Writer writer = new FastOutputStreamWriter(out, charset);
+		try {
+			writer.write(in);
+			writer.flush();
+		}
+		finally {
+			writer.close();
+		}                     
 	}
 
 	/**
@@ -143,7 +148,7 @@ public abstract class StreamUtils {
 	 * @param end the position to end copying
 	 * @return the number of bytes copied
 	 * @throws IOException in case of I/O errors
-	 * @since 4.3
+	 * @since 4.3.0
 	 */
 	public static long copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
 		long skipped = in.skip(start);
@@ -175,7 +180,7 @@ public abstract class StreamUtils {
 	 * @param in the InputStream to drain
 	 * @return the number of bytes read
 	 * @throws IOException in case of I/O errors
-	 * @since 4.3
+	 * @since 4.3.0
 	 */
 	public static int drain(InputStream in) throws IOException {
 		Assert.notNull(in, "No InputStream specified");
