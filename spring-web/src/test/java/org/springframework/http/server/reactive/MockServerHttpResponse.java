@@ -45,6 +45,8 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private Publisher<DataBuffer> body;
 
+	private Publisher<Publisher<DataBuffer>> bodyWithFlushes;
+
 	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 
 
@@ -72,10 +74,20 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return this.body;
 	}
 
+	public Publisher<Publisher<DataBuffer>> getBodyWithFlush() {
+		return this.bodyWithFlushes;
+	}
+
 	@Override
 	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
 		this.body = body;
 		return Flux.from(this.body).then();
+	}
+
+	@Override
+	public Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body) {
+		this.bodyWithFlushes = body;
+		return Flux.from(this.bodyWithFlushes).then();
 	}
 
 	@Override
@@ -91,5 +103,4 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	public DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
 	}
-
 }

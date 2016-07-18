@@ -41,7 +41,6 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.SseEventEncoder;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Decoder;
@@ -51,6 +50,7 @@ import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
 import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.converter.reactive.HttpMessageWriter;
 import org.springframework.http.converter.reactive.ResourceHttpMessageWriter;
+import org.springframework.http.converter.reactive.SseEventHttpMessageWriter;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -391,7 +391,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			writers.add(new EncoderHttpMessageWriter<>(jacksonEncoder));
 			sseDataEncoders.add(jacksonEncoder);
 		}
-		writers.add(new EncoderHttpMessageWriter<>(new SseEventEncoder(sseDataEncoders)));
+		writers.add(new SseEventHttpMessageWriter(sseDataEncoders));
 	}
 	/**
 	 * Override this to modify the list of message writers after it has been

@@ -17,7 +17,7 @@
 package org.springframework.http.codec;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.SseEventEncoder;
+import org.springframework.http.converter.reactive.SseEventHttpMessageWriter;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web
@@ -26,7 +26,7 @@ import org.springframework.http.codec.SseEventEncoder;
  *
  * @author Sebastien Deleuze
  * @since 5.0
- * @see SseEventEncoder
+ * @see SseEventHttpMessageWriter
  * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
  */
 public class SseEvent {
@@ -96,10 +96,10 @@ public class SseEvent {
 
 	/**
 	 * Set {@code data} SSE field. If a multiline {@code String} is provided, it will be
-	 * turned into multiple {@code data} field lines by  as
-	 * defined in Server-Sent Events W3C recommendation.
+	 * turned into multiple {@code data} field lines as defined in Server-Sent Events
+	 * W3C recommendation.
 	 *
-	 * If no {@code mediaType} is defined, default {@link SseEventEncoder} will:
+	 * If no {@code mediaType} is defined, default {@link SseEventHttpMessageWriter} will:
 	 *  - Turn single line {@code String} to a single {@code data} field
 	 *  - Turn multiline line {@code String} to multiple {@code data} fields
 	 *  - Serialize other {@code Object} as JSON
@@ -119,7 +119,7 @@ public class SseEvent {
 
 	/**
 	 * Set the {@link MediaType} used to serialize the {@code data}.
-	 * {@link SseEventEncoder} should be configured with the relevant encoder to be
+	 * {@link SseEventHttpMessageWriter} should be configured with the relevant encoder to be
 	 * able to serialize it.
 	 */
 	public void setMediaType(MediaType mediaType) {
@@ -149,7 +149,7 @@ public class SseEvent {
 
 	/**
 	 * Set SSE comment. If a multiline comment is provided, it will be turned into multiple
-	 * SSE comment lines by {@link SseEventEncoder} as defined in Server-Sent Events W3C
+	 * SSE comment lines by {@link SseEventHttpMessageWriter} as defined in Server-Sent Events W3C
 	 * recommendation.
 	 */
 	public void setComment(String comment) {

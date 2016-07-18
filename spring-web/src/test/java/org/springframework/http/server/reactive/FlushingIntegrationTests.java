@@ -18,17 +18,19 @@ package org.springframework.http.server.reactive;
 
 import org.junit.Before;
 import org.junit.Test;
-
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.client.reactive.ClientWebRequestBuilders;
 import org.springframework.web.client.reactive.ResponseExtractors;
 import org.springframework.web.client.reactive.WebClient;
+
+import static org.junit.Assume.assumeFalse;
 
 /**
  * @author Sebastien Deleuze
@@ -59,19 +61,16 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 				.assertValues("data0data1");
 	}
 
-
 	@Override
 	protected HttpHandler createHttpHandler() {
 		return new FlushingHandler();
 	}
 
-	// Handler that never completes designed to test if flushing is perform correctly when
-	// a FlushingDataBuffer is written
 	private static class FlushingHandler implements HttpHandler {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			Flux<DataBuffer> responseBody = Flux
+			Flux<Publisher<DataBuffer>> responseBody = Flux
 					.intervalMillis(50)
 					.map(l -> {
 						byte[] data = ("data" + l).getBytes();
@@ -80,9 +79,11 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 						return buffer;
 					})
 					.take(2)
-					.concatWith(Mono.just(FlushingDataBuffer.INSTANCE))
-					.concatWith(Flux.never());
-			return response.writeWith(responseBody);
+					.map(Flux::just);
+
+			responseBody = responseBody.concatWith(Flux.never());
+
+			return response.writeAndFlushWith(responseBody);
 		}
 	}
 
