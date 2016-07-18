@@ -33,24 +33,10 @@ do not find something similar, please create a new JIRA issue before submitting
 a pull request unless the change is truly trivial -- for example: typo fixes,
 removing compiler warnings, etc.
 
-### Sign the Individual Contributor License Agreement (ICLA)
+### Sign the Contributor License Agreement (CLA)
 
-If you have not previously done so, please fill out and submit the
-[Spring ICLA form][]. You'll receive a token when this process is complete.
-Keep track of this; you may be asked for it later!
-
-Note that emailing/postal mailing a signed copy is _not_ necessary. Submission
-of the web form is all that is required.
-
-Once you've completed the web form, simply add the following in a comment on
-your pull request:
-
-    I have signed and agree to the terms of the Spring Individual Contributor
-    License Agreement.
-
-You do not need to include your token/id. Please add the above statement to all
-future pull requests as well, simply so that the Spring Framework team knows
-immediately that this process is complete.
+If you have not previously done so, please sign the [Contributor License Agreement][].
+If you forget to do so, you'll be reminded when you submit a pull request.
 
 ## Create a Branch
 
@@ -311,7 +297,7 @@ need to issue a new pull request when asked to make changes.
 
 [help documentation]: http://help.github.com/send-pull-requests
 [JIRA issue tracker]: https://jira.spring.io/browse/SPR
-[Spring ICLA form]: https://cla.pivotal.io/sign/spring
+[Contributor License Agreement]: https://cla.pivotal.io/sign/spring
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
 [Spring Framework Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style
 [Rewriting History section of Pro Git]: http://git-scm.com/book/en/Git-Tools-Rewriting-History
