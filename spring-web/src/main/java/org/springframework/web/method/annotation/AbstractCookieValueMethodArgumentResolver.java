@@ -50,11 +50,6 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(CookieValue.class);
-	}
-
-	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		CookieValue annotation = parameter.getParameterAnnotation(CookieValue.class);
 		return new CookieValueNamedValueInfo(annotation);

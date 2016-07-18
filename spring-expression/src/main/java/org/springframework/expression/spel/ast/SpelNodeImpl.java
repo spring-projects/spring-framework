@@ -136,18 +136,6 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 		}
 	}
 
-	// by default Ast nodes are not writable
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws EvaluationException {
-		return false;
-	}
-
-	@Override
-	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
-		throw new SpelEvaluationException(getStartPosition(),
-				SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
-	}
-
 	@Override
 	public SpelNode getChild(int index) {
 		return this.children[index];
@@ -156,14 +144,6 @@ public abstract class SpelNodeImpl implements SpelNode, Opcodes {
 	@Override
 	public int getChildCount() {
 		return this.children.length;
-	}
-
-	@Override
-	public Class<?> getObjectClass(Object obj) {
-		if (obj == null) {
-			return null;
-		}
-		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
 	}
 
 	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {

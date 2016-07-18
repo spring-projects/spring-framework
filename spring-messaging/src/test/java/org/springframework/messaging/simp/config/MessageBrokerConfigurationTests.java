@@ -62,7 +62,6 @@ import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserRegistryMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -495,7 +494,7 @@ public class MessageBrokerConfigurationTests {
 	@Configuration
 	static class CustomConfig extends BaseTestMessageBrokerConfig {
 
-		private ChannelInterceptor interceptor = new ChannelInterceptorAdapter() {};
+		private ChannelInterceptor interceptor = new ChannelInterceptor() {};
 
 		@Override
 		protected void configureClientInboundChannel(ChannelRegistration registration) {

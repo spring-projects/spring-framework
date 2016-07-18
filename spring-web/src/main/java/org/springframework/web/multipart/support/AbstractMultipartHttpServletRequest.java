@@ -17,14 +17,12 @@
 package org.springframework.web.multipart.support;
 
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -62,17 +60,6 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 	@Override
 	public HttpMethod getRequestMethod() {
 		return HttpMethod.resolve(getRequest().getMethod());
-	}
-
-	@Override
-	public HttpHeaders getRequestHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		Enumeration<String> headerNames = getHeaderNames();
-		while (headerNames.hasMoreElements()) {
-			String headerName = headerNames.nextElement();
-			headers.put(headerName, Collections.list(getHeaders(headerName)));
-		}
-		return headers;
 	}
 
 	@Override

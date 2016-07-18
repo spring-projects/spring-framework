@@ -128,7 +128,7 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@EnableWebMvc
-	static abstract class AbstractWebConfig extends WebMvcConfigurerAdapter {
+	static abstract class AbstractWebConfig implements WebMvcConfigurer {
 
 		@Bean
 		public SampleController sampleController() {

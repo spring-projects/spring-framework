@@ -66,7 +66,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import static org.junit.Assert.*;
 import static org.springframework.web.bind.annotation.RequestMethod.*;
@@ -199,7 +199,7 @@ public class RequestPartIntegrationTests {
 
 	@Configuration
 	@EnableWebMvc
-	static class RequestPartTestConfig extends WebMvcConfigurerAdapter {
+	static class RequestPartTestConfig implements WebMvcConfigurer {
 
 		@Bean
 		public RequestPartTestController controller() {

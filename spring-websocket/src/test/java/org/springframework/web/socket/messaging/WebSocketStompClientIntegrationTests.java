@@ -37,7 +37,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
-import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.TomcatWebSocketTestServer;
 import org.springframework.web.socket.WebSocketTestServer;
@@ -143,7 +143,7 @@ public class WebSocketStompClientIntegrationTests {
 	}
 
 
-	private static class TestHandler extends StompSessionHandlerAdapter {
+	private static class TestHandler implements StompSessionHandler {
 
 		private final String topic;
 

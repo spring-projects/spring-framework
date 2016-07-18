@@ -29,7 +29,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -288,7 +288,7 @@ class TestHandshakeHandler implements HandshakeHandler {
 }
 
 
-class TestChannelInterceptor extends ChannelInterceptorAdapter {
+class TestChannelInterceptor implements ChannelInterceptor {
 }
 
 

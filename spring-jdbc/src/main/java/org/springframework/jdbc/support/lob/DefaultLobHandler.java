@@ -79,7 +79,7 @@ import org.apache.commons.logging.LogFactory;
  * @see java.sql.PreparedStatement#setAsciiStream
  * @see java.sql.PreparedStatement#setCharacterStream
  */
-public class DefaultLobHandler extends AbstractLobHandler {
+public class DefaultLobHandler implements LobHandler {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 

@@ -118,7 +118,7 @@ public class DelegatingWebMvcConfigurationTests {
 		final HttpMessageConverter customConverter = mock(HttpMessageConverter.class);
 		final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
 		List<WebMvcConfigurer> configurers = new ArrayList<>();
-		configurers.add(new WebMvcConfigurerAdapter() {
+		configurers.add(new WebMvcConfigurer() {
 			@Override
 			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 				converters.add(stringConverter);
@@ -177,7 +177,7 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	public void configureExceptionResolvers() throws Exception {
 		List<WebMvcConfigurer> configurers = new ArrayList<>();
-		configurers.add(new WebMvcConfigurerAdapter() {
+		configurers.add(new WebMvcConfigurer() {
 			@Override
 			public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 				exceptionResolvers.add(new DefaultHandlerExceptionResolver());
@@ -196,7 +196,7 @@ public class DelegatingWebMvcConfigurationTests {
 		final UrlPathHelper pathHelper = mock(UrlPathHelper.class);
 
 		List<WebMvcConfigurer> configurers = new ArrayList<>();
-		configurers.add(new WebMvcConfigurerAdapter() {
+		configurers.add(new WebMvcConfigurer() {
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {
 				configurer.setUseRegisteredSuffixPatternMatch(true)

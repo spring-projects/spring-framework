@@ -43,7 +43,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
+import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
@@ -290,7 +290,7 @@ public class StompSubProtocolHandlerTests {
 	public void handleMessageFromClientWithImmutableMessageInterceptor() {
 		AtomicReference<Boolean> mutable = new AtomicReference<>();
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
-		channel.addInterceptor(new ChannelInterceptorAdapter() {
+		channel.addInterceptor(new ChannelInterceptor() {
 			@Override
 			public Message<?> preSend(Message<?> message, MessageChannel channel) {
 				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());
@@ -312,7 +312,7 @@ public class StompSubProtocolHandlerTests {
 	public void handleMessageFromClientWithoutImmutableMessageInterceptor() {
 		AtomicReference<Boolean> mutable = new AtomicReference<>();
 		ExecutorSubscribableChannel channel = new ExecutorSubscribableChannel();
-		channel.addInterceptor(new ChannelInterceptorAdapter() {
+		channel.addInterceptor(new ChannelInterceptor() {
 			@Override
 			public Message<?> preSend(Message<?> message, MessageChannel channel) {
 				mutable.set(MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class).isMutable());

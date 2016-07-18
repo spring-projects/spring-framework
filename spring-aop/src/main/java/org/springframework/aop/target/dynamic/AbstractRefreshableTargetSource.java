@@ -71,14 +71,6 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 		return this.targetObject.getClass();
 	}
 
-	/**
-	 * Not static.
-	 */
-	@Override
-	public boolean isStatic() {
-		return false;
-	}
-
 	@Override
 	public final synchronized Object getTarget() {
 		if ((refreshCheckDelayElapsed() && requiresRefresh()) || this.targetObject == null) {

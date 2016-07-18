@@ -16,11 +16,9 @@
 
 package org.springframework.orm.jpa.vendor;
 
-import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import org.springframework.orm.jpa.JpaDialect;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 
 /**
@@ -115,21 +113,6 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 
 	@Override
-	public String getPersistenceProviderRootPackage() {
-		return null;
-	}
-
-	@Override
-	public Map<String, ?> getJpaPropertyMap() {
-		return null;
-	}
-
-	@Override
-	public JpaDialect getJpaDialect() {
-		return null;
-	}
-
-	@Override
 	public Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
 		return EntityManagerFactory.class;
 	}
@@ -137,14 +120,6 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return EntityManager.class;
-	}
-
-	/**
-	 * Post-process the EntityManagerFactory after it has been initialized.
-	 * @param emf the EntityManagerFactory to process
-	 */
-	@Override
-	public void postProcessEntityManagerFactory(EntityManagerFactory emf) {
 	}
 
 }

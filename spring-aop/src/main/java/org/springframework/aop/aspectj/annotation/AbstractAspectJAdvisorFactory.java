@@ -20,7 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -34,12 +33,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.AjType;
-import org.aspectj.lang.reflect.AjTypeSystem;
-import org.aspectj.lang.reflect.PerClauseKind;
-
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.aop.framework.AopConfigException;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
@@ -96,29 +90,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public void validate(Class<?> aspectClass) throws AopConfigException {
-		// If the parent has the annotation and isn't abstract it's an error
-		if (aspectClass.getSuperclass().getAnnotation(Aspect.class) != null &&
-				!Modifier.isAbstract(aspectClass.getSuperclass().getModifiers())) {
-			throw new AopConfigException("[" + aspectClass.getName() + "] cannot extend concrete aspect [" +
-					aspectClass.getSuperclass().getName() + "]");
-		}
-
-		AjType<?> ajType = AjTypeSystem.getAjType(aspectClass);
-		if (!ajType.isAspect()) {
-			throw new NotAnAtAspectException(aspectClass);
-		}
-		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOW) {
-			throw new AopConfigException(aspectClass.getName() + " uses percflow instantiation model: " +
-					"This is not supported in Spring AOP.");
-		}
-		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOWBELOW) {
-			throw new AopConfigException(aspectClass.getName() + " uses percflowbelow instantiation model: " +
-					"This is not supported in Spring AOP.");
-		}
 	}
 
 	/**

@@ -66,6 +66,8 @@ public interface Ordered {
 	 * @see #HIGHEST_PRECEDENCE
 	 * @see #LOWEST_PRECEDENCE
 	 */
-	int getOrder();
+	default int getOrder() {
+		return 1;
+	}
 
 }

@@ -49,8 +49,14 @@ public interface BatchPreparedStatementSetter {
 
 	/**
 	 * Return the size of the batch.
+	 * 
+	 * The default implementation returns {@code Integer.MAX_VALUE}.
+	 * Can be overridden in subclasses to lower the maximum batch size.
+	 * 
 	 * @return the number of statements in the batch
 	 */
-	int getBatchSize();
+	default int getBatchSize() {
+		return Integer.MAX_VALUE;
+	}
 
 }

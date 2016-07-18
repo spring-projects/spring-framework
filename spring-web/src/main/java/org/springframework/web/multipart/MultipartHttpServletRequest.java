@@ -16,6 +16,9 @@
 
 package org.springframework.web.multipart;
 
+import java.util.Collections;
+import java.util.Enumeration;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -55,7 +58,15 @@ public interface MultipartHttpServletRequest extends HttpServletRequest, Multipa
 	/**
 	 * Return this request's headers as a convenient HttpHeaders instance.
 	 */
-	HttpHeaders getRequestHeaders();
+	default HttpHeaders getRequestHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		Enumeration<String> headerNames = getHeaderNames();
+		while (headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			headers.put(headerName, Collections.list(getHeaders(headerName)));
+		}
+		return headers;
+	}
 
 	/**
 	 * Return the headers associated with the specified part of the multipart request.

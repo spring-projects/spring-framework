@@ -16,6 +16,9 @@
 
 package org.springframework.beans;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -132,7 +135,9 @@ public interface PropertyAccessor {
 	 * @throws PropertyAccessException if the property was valid but the
 	 * accessor method failed or a type mismatch occurred
 	 */
-	void setPropertyValue(PropertyValue pv) throws BeansException;
+	default void setPropertyValue(PropertyValue pv) throws BeansException {
+		setPropertyValue(pv.getName(), pv.getValue());
+	}
 
 	/**
 	 * Perform a batch update from a Map.
@@ -148,7 +153,9 @@ public interface PropertyAccessor {
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 */
-	void setPropertyValues(Map<?, ?> map) throws BeansException;
+	default void setPropertyValues(Map<?, ?> map) throws BeansException {
+		setPropertyValues(new MutablePropertyValues(map));
+	}
 
 	/**
 	 * The preferred way to perform a batch update.
@@ -169,7 +176,9 @@ public interface PropertyAccessor {
 	 * successfully updated.
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
 	 */
-	void setPropertyValues(PropertyValues pvs) throws BeansException;
+	default void setPropertyValues(PropertyValues pvs) throws BeansException {
+		setPropertyValues(pvs, false, false);
+	}
 
 	/**
 	 * Perform a batch update with more control over behavior.
@@ -190,8 +199,10 @@ public interface PropertyAccessor {
 	 * successfully updated.
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
 	 */
-	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
-			throws BeansException;
+	default void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
+			throws BeansException {
+		setPropertyValues(pvs, ignoreUnknown, false);
+	}
 
 	/**
 	 * Perform a batch update with full control over behavior.
@@ -212,7 +223,45 @@ public interface PropertyAccessor {
 	 * all individual PropertyAccessExceptions. All other properties will have been
 	 * successfully updated.
 	 */
-	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
-			throws BeansException;
+	default void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
+			throws BeansException {
+	
+		List<PropertyAccessException> propertyAccessExceptions = null;
+		List<PropertyValue> propertyValues = (pvs instanceof MutablePropertyValues ?
+				((MutablePropertyValues) pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
+		for (PropertyValue pv : propertyValues) {
+			try {
+				// This method may throw any BeansException, which won't be caught
+				// here, if there is a critical failure such as no matching field.
+				// We can attempt to deal only with less serious exceptions.
+				setPropertyValue(pv);
+			}
+			catch (NotWritablePropertyException ex) {
+				if (!ignoreUnknown) {
+					throw ex;
+				}
+				// Otherwise, just ignore it and continue...
+			}
+			catch (NullValueInNestedPathException ex) {
+				if (!ignoreInvalid) {
+					throw ex;
+				}
+				// Otherwise, just ignore it and continue...
+			}
+			catch (PropertyAccessException ex) {
+				if (propertyAccessExceptions == null) {
+					propertyAccessExceptions = new LinkedList<>();
+				}
+				propertyAccessExceptions.add(ex);
+			}
+		}
+	
+		// If we encountered individual exceptions, throw the composite exception.
+		if (propertyAccessExceptions != null) {
+			PropertyAccessException[] paeArray =
+					propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
+			throw new PropertyBatchUpdateException(paeArray);
+		}
+	}
 
 }

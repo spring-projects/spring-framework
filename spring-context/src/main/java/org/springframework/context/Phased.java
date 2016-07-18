@@ -29,6 +29,8 @@ public interface Phased {
 	/**
 	 * Return the phase value of this object.
 	 */
-	int getPhase();
+	default int getPhase() {
+		return Integer.MAX_VALUE;
+	}
 
 }

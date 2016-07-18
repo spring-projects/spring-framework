@@ -34,7 +34,6 @@ import org.springframework.web.context.WebApplicationContext;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
- * @see org.springframework.test.web.servlet.setup.MockMvcConfigurerAdapter
  */
 public interface MockMvcConfigurer {
 
@@ -42,13 +41,16 @@ public interface MockMvcConfigurer {
 	 * Invoked immediately after a {@code MockMvcConfigurer} is added via
 	 * {@link ConfigurableMockMvcBuilder#apply}.
 	 */
-	void afterConfigurerAdded(ConfigurableMockMvcBuilder<?> builder);
+	default void afterConfigurerAdded(ConfigurableMockMvcBuilder<?> builder) {
+	}
 
 	/**
 	 * Invoked just before the MockMvc instance is created. Implementations may
 	 * return a RequestPostProcessor to be applied to every request performed
 	 * through the created {@code MockMvc} instance.
 	 */
-	RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder, WebApplicationContext context);
+	default RequestPostProcessor beforeMockMvcCreated(ConfigurableMockMvcBuilder<?> builder, WebApplicationContext cxt) {
+		return null;
+	}
 
 }

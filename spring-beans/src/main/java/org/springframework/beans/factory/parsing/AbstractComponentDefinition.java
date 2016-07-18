@@ -16,9 +16,6 @@
 
 package org.springframework.beans.factory.parsing;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanReference;
-
 /**
  * Base implementation of {@link ComponentDefinition} that provides a basic implementation of
  * {@link #getDescription} which delegates to {@link #getName}. Also provides a base implementation
@@ -31,38 +28,6 @@ import org.springframework.beans.factory.config.BeanReference;
  * @since 2.0
  */
 public abstract class AbstractComponentDefinition implements ComponentDefinition {
-
-	/**
-	 * Delegates to {@link #getName}.
-	 */
-	@Override
-	public String getDescription() {
-		return getName();
-	}
-
-	/**
-	 * Returns an empty array.
-	 */
-	@Override
-	public BeanDefinition[] getBeanDefinitions() {
-		return new BeanDefinition[0];
-	}
-
-	/**
-	 * Returns an empty array.
-	 */
-	@Override
-	public BeanDefinition[] getInnerBeanDefinitions() {
-		return new BeanDefinition[0];
-	}
-
-	/**
-	 * Returns an empty array.
-	 */
-	@Override
-	public BeanReference[] getBeanReferences() {
-		return new BeanReference[0];
-	}
 
 	/**
 	 * Delegates to {@link #getDescription}.

@@ -212,7 +212,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 
-		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
+		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptor() {
 			@Override
 			public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
 				result.setErrorResult(23);
@@ -237,7 +237,7 @@ public class WebAsyncManagerTimeoutTests {
 		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		final Exception exception = new Exception();
 
-		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
+		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptor() {
 			@Override
 			public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
 				throw exception;

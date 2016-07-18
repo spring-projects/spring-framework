@@ -129,7 +129,7 @@ public class Reactor2TcpStompClientTests {
 	}
 
 
-	private static class LoggingSessionHandler extends StompSessionHandlerAdapter {
+	private static class LoggingSessionHandler implements StompSessionHandler {
 
 		@Override
 		public void handleException(StompSession session, StompCommand command,

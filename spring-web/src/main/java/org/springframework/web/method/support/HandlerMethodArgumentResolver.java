@@ -18,6 +18,7 @@ package org.springframework.web.method.support;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -38,7 +39,9 @@ public interface HandlerMethodArgumentResolver {
 	 * @return {@code true} if this resolver supports the supplied parameter;
 	 * {@code false} otherwise
 	 */
-	boolean supportsParameter(MethodParameter parameter);
+	default boolean supportsParameter(MethodParameter parameter) {
+		return parameter.hasParameterAnnotation(CookieValue.class);
+	}
 
 	/**
 	 * Resolves a method parameter into an argument value from a given request.

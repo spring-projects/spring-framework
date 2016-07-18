@@ -41,7 +41,7 @@ import org.springframework.util.StreamUtils;
  * @since 3.1
  * @see HttpComponentsClientHttpRequest#execute()
  */
-final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
+final class HttpComponentsClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpResponse httpResponse;
 

@@ -44,7 +44,9 @@ public interface JpaVendorAdapter {
 	 * excluding provider classes from temporary class overriding.
 	 * @since 2.5.2
 	 */
-	String getPersistenceProviderRootPackage();
+	default String getPersistenceProviderRootPackage() {
+		return null;
+	}
 
 	/**
 	 * Return a Map of vendor-specific JPA properties,
@@ -58,13 +60,17 @@ public interface JpaVendorAdapter {
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
 	 */
-	Map<String, ?> getJpaPropertyMap();
+	default Map<String, ?> getJpaPropertyMap() {
+		return null;
+	}
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this
 	 * provider, or {@code null} if there is none.
 	 */
-	JpaDialect getJpaDialect();
+	default JpaDialect getJpaDialect() {
+		return null;
+	}
 
 	/**
 	 * Return the vendor-specific EntityManagerFactory interface
@@ -92,6 +98,7 @@ public interface JpaVendorAdapter {
 	 * While this is not expected to be used for most providers, it is included
 	 * here as a general extension hook.
 	 */
-	void postProcessEntityManagerFactory(EntityManagerFactory emf);
+	default void postProcessEntityManagerFactory(EntityManagerFactory emf) {
+	}
 
 }

@@ -46,11 +46,15 @@ public interface DeferredResultProcessingInterceptor {
 	 * Invoked immediately before the start of concurrent handling, in the same
 	 * thread that started it. This method may be used to capture state just prior
 	 * to the start of concurrent processing with the given {@code DeferredResult}.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
 	 * @throws Exception in case of errors
 	 */
-	<T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
+	default <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+	}
 
 	/**
 	 * Invoked immediately after the start of concurrent handling, in the same
@@ -58,11 +62,15 @@ public interface DeferredResultProcessingInterceptor {
 	 * concurrent processing with the given {@code DeferredResult}.
 	 * <p>The {@code DeferredResult} may have already been set, for example at
 	 * the time of its creation or by another thread.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
 	 * @throws Exception in case of errors
 	 */
-	<T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
+	default <T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+	}
 
 	/**
 	 * Invoked after a {@code DeferredResult} has been set, via
@@ -72,18 +80,26 @@ public interface DeferredResultProcessingInterceptor {
 	 * <p>This method may also be invoked after a timeout when the
 	 * {@code DeferredResult} was created with a constructor accepting a default
 	 * timeout result.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
 	 * @param concurrentResult the result to which the {@code DeferredResult}
 	 * @throws Exception in case of errors
 	 */
-	<T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult, Object concurrentResult) throws Exception;
+	default <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult, Object concurrentResult) throws Exception {
+	}
 
 	/**
 	 * Invoked from a container thread when an async request times out before
 	 * the {@code DeferredResult} has been set. Implementations may invoke
 	 * {@link DeferredResult#setResult(Object) setResult} or
 	 * {@link DeferredResult#setErrorResult(Object) setErrorResult} to resume processing.
+	 * 
+	 * The default implementation returns {@code true} allowing other interceptors
+	 * to be given a chance to handle the timeout.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request; if the
 	 * {@code DeferredResult} is set, then concurrent processing is resumed and
@@ -92,16 +108,22 @@ public interface DeferredResultProcessingInterceptor {
 	 * other interceptors should not be invoked
 	 * @throws Exception in case of errors
 	 */
-	<T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
+	default <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+		return true;
+	}
 
 	/**
 	 * Invoked from a container thread when an async request completed for any
 	 * reason including timeout and network error. This method is useful for
 	 * detecting that a {@code DeferredResult} instance is no longer usable.
+	 * 
+	 * The default implementation is empty.
+	 * 
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request
 	 * @throws Exception in case of errors
 	 */
-	<T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
+	default <T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+	}
 
 }

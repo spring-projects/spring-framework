@@ -50,7 +50,9 @@ public interface MessageSendingOperations<D> {
 	 * wrap it as a message and send it to a default destination.
 	 * @param payload the Object to use as payload
 	 */
-	void convertAndSend(Object payload) throws MessagingException;
+	default void convertAndSend(Object payload) throws MessagingException {
+		convertAndSend(payload, null);
+	}
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
@@ -59,7 +61,9 @@ public interface MessageSendingOperations<D> {
 	 * @param destination the target destination
 	 * @param payload the Object to use as payload
 	 */
-	void convertAndSend(D destination, Object payload) throws MessagingException;
+	default void convertAndSend(D destination, Object payload) throws MessagingException {
+		convertAndSend(destination, payload, (Map<String, Object>) null);
+	}
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
@@ -70,7 +74,9 @@ public interface MessageSendingOperations<D> {
 	 * @param payload the Object to use as payload
 	 * @param headers headers for the message to send
 	 */
-	void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException;
+	default void convertAndSend(D destination, Object payload, Map<String, Object> headers) throws MessagingException {
+		convertAndSend(destination, payload, headers, null);
+	}
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a
@@ -91,7 +97,10 @@ public interface MessageSendingOperations<D> {
 	 * @param payload the Object to use as payload
 	 * @param postProcessor the post processor to apply to the message
 	 */
-	void convertAndSend(D destination, Object payload, MessagePostProcessor postProcessor) throws MessagingException;
+	default void convertAndSend(D destination, Object payload, MessagePostProcessor postProcessor) throws MessagingException {
+	
+		convertAndSend(destination, payload, null, postProcessor);
+	}
 
 	/**
 	 * Convert the given Object to serialized form, possibly using a

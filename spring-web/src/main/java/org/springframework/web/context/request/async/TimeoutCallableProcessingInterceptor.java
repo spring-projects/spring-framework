@@ -35,7 +35,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class TimeoutCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
+public class TimeoutCallableProcessingInterceptor implements CallableProcessingInterceptor {
 
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {

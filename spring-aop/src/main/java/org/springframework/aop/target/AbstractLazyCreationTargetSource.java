@@ -69,11 +69,6 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 		return (this.lazyTarget != null ? this.lazyTarget.getClass() : null);
 	}
 
-	@Override
-	public boolean isStatic() {
-		return false;
-	}
-
 	/**
 	 * Returns the lazy-initialized target object,
 	 * creating it on-the-fly if it doesn't exist already.
@@ -87,12 +82,6 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 		}
 		return this.lazyTarget;
 	}
-
-	@Override
-	public void releaseTarget(Object target) throws Exception {
-		// nothing to do
-	}
-
 
 	/**
 	 * Subclasses should implement this method to return the lazy initialized object.

@@ -83,9 +83,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
-import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
-import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
@@ -1015,10 +1013,10 @@ public class MvcNamespaceTests {
 		}
 	}
 
-	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
+	public static class TestCallableProcessingInterceptor implements CallableProcessingInterceptor {
 	}
 
-	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter {
+	public static class TestDeferredResultProcessingInterceptor implements DeferredResultProcessingInterceptor {
 	}
 
 	public static class TestPathMatcher implements PathMatcher {

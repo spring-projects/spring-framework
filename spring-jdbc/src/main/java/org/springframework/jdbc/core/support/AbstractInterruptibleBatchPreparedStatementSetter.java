@@ -54,16 +54,6 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	}
 
 	/**
-	 * This implementation returns {@code Integer.MAX_VALUE}.
-	 * Can be overridden in subclasses to lower the maximum batch size.
-	 */
-	@Override
-	public int getBatchSize() {
-		return Integer.MAX_VALUE;
-	}
-
-
-	/**
 	 * Check for available values and set them on the given PreparedStatement.
 	 * If no values are available anymore, return {@code false}.
 	 * @param ps PreparedStatement we'll invoke setter methods on

@@ -313,12 +313,6 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 	}
 
-	@Override
-	public void stop(Runnable callback) {
-		stop();
-		callback.run();
-	}
-
 	/**
 	 * Notify all invoker tasks and stop the shared Connection, if any.
 	 * @throws JMSException if thrown by JMS API methods

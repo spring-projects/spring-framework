@@ -50,7 +50,9 @@ public interface TargetSource extends TargetClassAware {
 	 * @return {@code true} if the target is immutable
 	 * @see #getTarget
 	 */
-	boolean isStatic();
+	default boolean isStatic() {
+		return false;
+	}
 
 	/**
 	 * Return a target instance. Invoked immediately before the
@@ -66,6 +68,8 @@ public interface TargetSource extends TargetClassAware {
 	 * @param target object obtained from a call to {@link #getTarget()}
 	 * @throws Exception if the object can't be released
 	 */
-	void releaseTarget(Object target) throws Exception;
+	default void releaseTarget(Object target) throws Exception {
+		// nothing to do
+	}
 
 }

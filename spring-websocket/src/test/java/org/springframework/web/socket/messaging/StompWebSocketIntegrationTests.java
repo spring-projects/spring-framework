@@ -51,9 +51,9 @@ import org.springframework.web.socket.UndertowTestServer;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.config.annotation.AbstractWebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.DelegatingWebSocketMessageBrokerConfiguration;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.HandshakeHandler;
 
@@ -320,7 +320,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 			basePackageClasses=StompWebSocketIntegrationTests.class,
 			useDefaultFilters=false,
 			includeFilters=@ComponentScan.Filter(IntegrationTestController.class))
-	static class TestMessageBrokerConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
+	static class TestMessageBrokerConfigurer implements WebSocketMessageBrokerConfigurer {
 
 		@Autowired
 		private HandshakeHandler handshakeHandler;  // can't rely on classpath for server detection

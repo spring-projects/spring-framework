@@ -49,8 +49,11 @@ public interface WebMvcConfigurer {
 	/**
 	 * Add {@link Converter}s and {@link Formatter}s in addition to the ones
 	 * registered by default.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
-	void addFormatters(FormatterRegistry registry);
+	default void addFormatters(FormatterRegistry registry) {
+	}
 
 	/**
 	 * Configure the {@link HttpMessageConverter}s to use for reading or writing
@@ -60,36 +63,54 @@ public interface WebMvcConfigurer {
 	 * default converter registration. To simply add a converter without impacting
 	 * default registration, consider using the method
 	 * {@link #extendMessageConverters(java.util.List)} instead.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param converters initially an empty list of converters
 	 */
-	void configureMessageConverters(List<HttpMessageConverter<?>> converters);
+	default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	}
 
 	/**
 	 * A hook for extending or modifying the list of converters after it has been
 	 * configured. This may be useful for example to allow default converters to
 	 * be registered and then insert a custom converter through this method.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param converters the list of configured converters to extend.
 	 * @since 4.1.3
 	 */
-	void extendMessageConverters(List<HttpMessageConverter<?>> converters);
+	default void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+	}
 
 	/**
 	 * Provide a custom {@link Validator} instead of the one created by default.
 	 * The default implementation, assuming JSR-303 is on the classpath, is:
 	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
 	 * Leave the return value as {@code null} to keep the default.
+	 * 
+	 * <p>The default implementation returns {@code null}.
 	 */
-	Validator getValidator();
+	default Validator getValidator() {
+		return null;
+	}
 
 	/**
 	 * Configure content negotiation options.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
-	void configureContentNegotiation(ContentNegotiationConfigurer configurer);
+	default void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+	}
 
 	/**
 	 * Configure asynchronous request handling options.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
-	void configureAsyncSupport(AsyncSupportConfigurer configurer);
+	default void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
 
 	/**
 	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
@@ -100,45 +121,64 @@ public interface WebMvcConfigurer {
 	 * <li>ViewControllerMappings</li>
 	 * <li>ResourcesMappings</li>
 	 * </ul>
+	 * 
+	 * <p>The default implementation is empty.
 	 * @since 4.0.3
 	 */
-	void configurePathMatch(PathMatchConfigurer configurer);
+	default void configurePathMatch(PathMatchConfigurer configurer) {
+	}
 
 	/**
 	 * Add resolvers to support custom controller method argument types.
 	 * <p>This does not override the built-in support for resolving handler
 	 * method arguments. To customize the built-in support for argument
 	 * resolution, configure {@link RequestMappingHandlerAdapter} directly.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param argumentResolvers initially an empty list
 	 */
-	void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
+	default void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
 
 	/**
 	 * Add handlers to support custom controller method return value types.
 	 * <p>Using this option does not override the built-in support for handling
 	 * return values. To customize the built-in support for handling return
 	 * values, configure RequestMappingHandlerAdapter directly.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param returnValueHandlers initially an empty list
 	 */
-	void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
+	default void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+	}
 
 	/**
 	 * Configure the {@link HandlerExceptionResolver}s to handle unresolved
 	 * controller exceptions. If no resolvers are added to the list, default
 	 * exception resolvers are added instead.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param exceptionResolvers initially an empty list
 	 */
-	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
+	default void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	}
 
 	/**
 	 * A hook for extending or modifying the list of
 	 * {@link HandlerExceptionResolver}s after it has been configured. This may
 	 * be useful for example to allow default resolvers to be registered and then
 	 * insert a custom one through this method.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @param exceptionResolvers the list of configured resolvers to extend.
 	 * @since 4.3
 	 */
-	void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
+	default void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	}
 
 	/**
 	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of
@@ -151,15 +191,22 @@ public interface WebMvcConfigurer {
 	 * bean or switch to advanced configuration mode by extending
 	 * {@link org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
 	 * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
-	void addInterceptors(InterceptorRegistry registry);
+	default void addInterceptors(InterceptorRegistry registry) {
+	}
 
 	/**
 	 * Provide a custom {@link MessageCodesResolver} for building message codes
 	 * from data binding and validation error codes. Leave the return value as
 	 * {@code null} to keep the default.
+	 * 
+	 * <p>The default implementation returns {@code null}.
 	 */
-	MessageCodesResolver getMessageCodesResolver();
+	default MessageCodesResolver getMessageCodesResolver() {
+		return null;
+	}
 
 	/**
 	 * Configure simple automated controllers pre-configured with the response
@@ -167,35 +214,51 @@ public interface WebMvcConfigurer {
 	 * cases where there is no need for custom controller logic -- e.g. render a
 	 * home page, perform simple site URL redirects, return a 404 status with
 	 * HTML content, a 204 with no content, and more.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
-	void addViewControllers(ViewControllerRegistry registry);
+	default void addViewControllers(ViewControllerRegistry registry) {
+	}
 
 	/**
 	 * Configure view resolvers to translate String-based view names returned from
 	 * controllers into concrete {@link org.springframework.web.servlet.View}
 	 * implementations to perform rendering with.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
-	void configureViewResolvers(ViewResolverRegistry registry);
+	default void configureViewResolvers(ViewResolverRegistry registry) {
+	}
 
 	/**
 	 * Add handlers to serve static resources such as images, js, and, css
 	 * files from specific locations under web application root, the classpath,
 	 * and others.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
-	void addResourceHandlers(ResourceHandlerRegistry registry);
+	default void addResourceHandlers(ResourceHandlerRegistry registry) {
+	}
 
 	/**
 	 * Configure a handler to delegate unhandled requests by forwarding to the
 	 * Servlet container's "default" servlet. A common use case for this is when
 	 * the {@link DispatcherServlet} is mapped to "/" thus overriding the
 	 * Servlet container's default handling of static resources.
+	 * 
+	 * <p>The default implementation is empty.
 	 */
-	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
+	default void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+	}
 
 	/**
 	 * Configure cross origin requests processing.
+	 * 
+	 * <p>The default implementation is empty.
+	 * 
 	 * @since 4.2
 	 */
-	void addCorsMappings(CorsRegistry registry);
+	default void addCorsMappings(CorsRegistry registry) {
+	}
 
 }

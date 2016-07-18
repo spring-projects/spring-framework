@@ -246,11 +246,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.id;
 	}
 
-	@Override
-	public String getApplicationName() {
-		return "";
-	}
-
 	/**
 	 * Set a friendly name for this context.
 	 * Typically done during initialization of concrete context implementations.

@@ -16,11 +16,6 @@
 
 package org.springframework.beans;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Abstract implementation of the {@link PropertyAccessor} interface.
  * Provides base implementations of all convenience methods, with the
@@ -57,69 +52,6 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	@Override
 	public boolean isAutoGrowNestedPaths() {
 		return this.autoGrowNestedPaths;
-	}
-
-
-	@Override
-	public void setPropertyValue(PropertyValue pv) throws BeansException {
-		setPropertyValue(pv.getName(), pv.getValue());
-	}
-
-	@Override
-	public void setPropertyValues(Map<?, ?> map) throws BeansException {
-		setPropertyValues(new MutablePropertyValues(map));
-	}
-
-	@Override
-	public void setPropertyValues(PropertyValues pvs) throws BeansException {
-		setPropertyValues(pvs, false, false);
-	}
-
-	@Override
-	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown) throws BeansException {
-		setPropertyValues(pvs, ignoreUnknown, false);
-	}
-
-	@Override
-	public void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
-			throws BeansException {
-
-		List<PropertyAccessException> propertyAccessExceptions = null;
-		List<PropertyValue> propertyValues = (pvs instanceof MutablePropertyValues ?
-				((MutablePropertyValues) pvs).getPropertyValueList() : Arrays.asList(pvs.getPropertyValues()));
-		for (PropertyValue pv : propertyValues) {
-			try {
-				// This method may throw any BeansException, which won't be caught
-				// here, if there is a critical failure such as no matching field.
-				// We can attempt to deal only with less serious exceptions.
-				setPropertyValue(pv);
-			}
-			catch (NotWritablePropertyException ex) {
-				if (!ignoreUnknown) {
-					throw ex;
-				}
-				// Otherwise, just ignore it and continue...
-			}
-			catch (NullValueInNestedPathException ex) {
-				if (!ignoreInvalid) {
-					throw ex;
-				}
-				// Otherwise, just ignore it and continue...
-			}
-			catch (PropertyAccessException ex) {
-				if (propertyAccessExceptions == null) {
-					propertyAccessExceptions = new LinkedList<>();
-				}
-				propertyAccessExceptions.add(ex);
-			}
-		}
-
-		// If we encountered individual exceptions, throw the composite exception.
-		if (propertyAccessExceptions != null) {
-			PropertyAccessException[] paeArray =
-					propertyAccessExceptions.toArray(new PropertyAccessException[propertyAccessExceptions.size()]);
-			throw new PropertyBatchUpdateException(paeArray);
-		}
 	}
 
 

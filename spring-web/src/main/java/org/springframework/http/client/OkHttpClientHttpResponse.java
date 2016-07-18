@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @deprecated as of Spring 5.0, in favor of OkHttp 3.x
  */
 @Deprecated
-class OkHttpClientHttpResponse extends AbstractClientHttpResponse {
+class OkHttpClientHttpResponse implements ClientHttpResponse {
 
 	private final Response response;
 

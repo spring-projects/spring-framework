@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 4.1.2
  */
-class Netty4ClientHttpResponse extends AbstractClientHttpResponse {
+class Netty4ClientHttpResponse implements ClientHttpResponse {
 
 	private final ChannelHandlerContext context;
 

@@ -186,8 +186,8 @@ public class ExecutorSubscribableChannelTests {
 	}
 
 
-	private abstract static class AbstractTestInterceptor extends ChannelInterceptorAdapter
-			implements ExecutorChannelInterceptor {
+	private abstract static class AbstractTestInterceptor implements ChannelInterceptor,
+			ExecutorChannelInterceptor {
 
 		private AtomicInteger counter = new AtomicInteger();
 

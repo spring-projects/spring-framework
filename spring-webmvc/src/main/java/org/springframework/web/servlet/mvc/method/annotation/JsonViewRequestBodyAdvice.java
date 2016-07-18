@@ -47,7 +47,7 @@ import org.springframework.http.converter.json.MappingJacksonInputMessage;
  * @see com.fasterxml.jackson.annotation.JsonView
  * @see com.fasterxml.jackson.databind.ObjectMapper#readerWithView(Class)
  */
-public class JsonViewRequestBodyAdvice extends RequestBodyAdviceAdapter {
+public class JsonViewRequestBodyAdvice implements RequestBodyAdvice {
 
 	@Override
 	public boolean supports(MethodParameter methodParameter, Type targetType,
