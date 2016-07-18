@@ -18,10 +18,13 @@ package org.springframework.scheduling.quartz;
 
 import org.quartz.SchedulerContext;
 import org.quartz.spi.TriggerFiredBundle;
-
 import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.Nullable;
 
 /**
@@ -37,17 +40,19 @@ import org.springframework.lang.Nullable;
  * <p>Compatible with Quartz 2.1.4 and higher, as of Spring 4.1.
  *
  * @author Juergen Hoeller
+ * @author Marten Deinum
  * @since 2.0
  * @see SchedulerFactoryBean#setJobFactory
  * @see QuartzJobBean
  */
-public class SpringBeanJobFactory extends AdaptableJobFactory implements SchedulerContextAware {
+public class SpringBeanJobFactory extends AdaptableJobFactory implements SchedulerContextAware, ApplicationContextAware {
 
 	@Nullable
 	private String[] ignoredUnknownProperties;
 
 	@Nullable
 	private SchedulerContext schedulerContext;
+	private AutowireCapableBeanFactory beanFactory;
 
 
 	/**
@@ -66,7 +71,6 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	public void setSchedulerContext(SchedulerContext schedulerContext) {
 		this.schedulerContext = schedulerContext;
 	}
-
 
 	/**
 	 * Create the job instance, populating it with property values taken
@@ -95,7 +99,8 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 				bw.setPropertyValues(pvs, true);
 			}
 		}
-		return job;
+		this.beanFactory.autowireBean(job);
+		return this.beanFactory.initializeBean(job, "");
 	}
 
 	/**
@@ -108,6 +113,11 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 	 */
 	protected boolean isEligibleForPropertyPopulation(Object jobObject) {
 		return (!(jobObject instanceof QuartzJobBean));
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.beanFactory=applicationContext.getAutowireCapableBeanFactory();
 	}
 
 }
