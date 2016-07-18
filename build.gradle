@@ -840,6 +840,7 @@ project("spring-web-reactive") {
 		compile(project(":spring-web"))
 		compile "org.reactivestreams:reactive-streams:1.0.0"
 		compile "io.projectreactor:reactor-core:${reactorCoreVersion}"
+		compile "io.netty:netty-buffer:${nettyVersion}" // Temporarily for JsonObjectDecoder
 		optional(project(":spring-context-support"))  // for FreeMarker support
 		provided "javax.servlet:javax.servlet-api:${servletVersion}"
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
