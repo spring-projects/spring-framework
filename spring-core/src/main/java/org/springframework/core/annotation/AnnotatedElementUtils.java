@@ -107,8 +107,10 @@ public class AnnotatedElementUtils {
 	private static final Processor<Boolean> alwaysTrueAnnotationProcessor = new AlwaysTrueBooleanAnnotationProcessor();
 	
 	/** annotations cache for methed,field to find from, ,improve 10% of tps */
-	private final static Map<AnnotatedElement, Map<Class<?>, AnnotationWrap>> AnnotatedElementCache =new ConcurrentHashMap<AnnotatedElement, Map<Class<?>,AnnotationWrap>>();
-
+	private final static Map<AnnotatedElement, Map<Class<?>, AnnotationWrap>> annotatedElementCache =new ConcurrentHashMap<AnnotatedElement, Map<Class<?>,AnnotationWrap>>();
+	
+	/**  another annotations cache for methed,field to find from, ,improve 10% of tps */
+	private final static Map<AnnotatedElement, Map<Class<?>, AnnotationWrap>> annotatedElementHasAnnotationCache =new ConcurrentHashMap<AnnotatedElement, Map<Class<?>,AnnotationWrap>>();
 
 	/**
 	 * Build an adapted {@link AnnotatedElement} for the given annotations,
@@ -595,10 +597,12 @@ public class AnnotatedElementUtils {
 				return CONTINUE;
 			}
 		});
-
+		
 		return (!attributesMap.isEmpty() ? attributesMap : null);
 	}
+	
 
+	
 	/**
 	 * Determine if an annotation of the specified {@code annotationType}
 	 * is <em>available</em> on the supplied {@link AnnotatedElement} or
@@ -621,8 +625,16 @@ public class AnnotatedElementUtils {
 		if (element.isAnnotationPresent(annotationType)) {
 			return true;
 		}
-
-		return Boolean.TRUE.equals(searchWithFindSemantics(element, annotationType, null, alwaysTrueAnnotationProcessor));
+		
+	    AnnotationWrap wrap =findAnnotationFromCache(element, annotationType, annotatedElementHasAnnotationCache);
+	    if (wrap!=null){
+	    	return (Boolean)wrap.getAnn();
+	    }
+	    
+	    Object result =searchWithFindSemantics(element, annotationType, null, alwaysTrueAnnotationProcessor);
+	    boolean bResult = Boolean.TRUE.equals(result);
+	    putAnnotationToCache(element, annotationType, bResult, annotatedElementHasAnnotationCache);
+		return bResult;
 	}
 
 	/**
@@ -706,46 +718,49 @@ public class AnnotatedElementUtils {
 	 * @since 4.3
 	 */
 	static class AnnotationWrap {
-		/** ann can be null*/
-		private Annotation ann;
+		/** ann can be null,Annotation,Processor result*/
+		private Object ann;
 		
-		public AnnotationWrap(Annotation ann) {
+		public AnnotationWrap(Object ann) {
 			this.ann=ann;
 		}
 		
-		public Annotation getAnn() {
+		public Object getAnn() {
 			return ann;
 		}
 	}
+
 	
 	/**
 	 * @since 4.2
 	 * @param element
 	 * @param annotationType
+	 * @param cacheMap AnnotatedElementCache ,AnnotatedElementProcessorCache
 	 * @return AnnotationWrap , wrap of  annotation
 	 */
-	private static AnnotationWrap  findAnnotationFromCache(AnnotatedElement element, Class<?> annotationType){
-		Map<Class<?>, AnnotationWrap> annotations =AnnotatedElementCache.get(element);
+	private static AnnotationWrap  findAnnotationFromCache(AnnotatedElement element, Class<?> annotationType,Map<AnnotatedElement, Map<Class<?>, AnnotationWrap>> cacheMap){
+		Map<Class<?>, AnnotationWrap> annotations =cacheMap.get(element);
 		if (annotations!=null){
 			return annotations.get(annotationType);
 		}
 		return null;
 	}
+	
 	/**
-	 *  save an annotation(can be null) wrapped with AnnotationWrap to the AnnotatedElementCache
+	 *  save an annotation(can be null) wrapped with AnnotationWrap to the gived cache
 	 * @since 4.2
 	 * @param element
 	 * @param annotationType
 	 * @param anno
+	 * @param cacheMap AnnotatedElementCache ,AnnotatedElementProcessorCache
 	 */
-	private static  void putAnnotationToCache(AnnotatedElement element, Class<?> annotationType, Annotation anno){
-			Map<Class<?>, AnnotationWrap> annotations =AnnotatedElementCache.get(element);
-			if (annotations==null){
-				annotations =new ConcurrentHashMap<Class<?>, AnnotationWrap>();
-				AnnotatedElementCache.put(element, annotations);
-			}
-			
-			annotations.put(annotationType, new AnnotationWrap(anno));
+	private static  void putAnnotationToCache(AnnotatedElement element, Class<?> annotationType, Object anno, Map<AnnotatedElement, Map<Class<?>, AnnotationWrap>> cacheMap){
+		Map<Class<?>, AnnotationWrap> annotations =cacheMap.get(element);
+		if (annotations==null){
+			annotations =new ConcurrentHashMap<Class<?>, AnnotationWrap>();
+			cacheMap.put(element, annotations);
+		}
+		annotations.put(annotationType, new AnnotationWrap(anno));
 	}
 
 	/**
@@ -771,7 +786,7 @@ public class AnnotatedElementUtils {
 		Assert.notNull(annotationType, "annotationType must not be null");
 		
 		//find from cache can improve 10% http tps
-		AnnotationWrap wrap=findAnnotationFromCache(element, annotationType);
+		AnnotationWrap wrap=findAnnotationFromCache(element, annotationType,annotatedElementCache );
 		if (wrap!=null){
 			return (A) wrap.getAnn();
 		}
@@ -784,7 +799,7 @@ public class AnnotatedElementUtils {
 			if (annotation != null) {
 				A result = AnnotationUtils.synthesizeAnnotation(annotation, element);
 				//save to cache
-				putAnnotationToCache(element, annotationType, result);
+				putAnnotationToCache(element, annotationType, result,annotatedElementCache);
 				return result;
 			}
 		}
@@ -793,7 +808,7 @@ public class AnnotatedElementUtils {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationType, false, false);
 		A result= AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
 		//save to cache
-		putAnnotationToCache(element, annotationType, result);
+		putAnnotationToCache(element, annotationType, result,annotatedElementCache);
 		return result;		
 	}
 
