@@ -16,7 +16,6 @@
 
 package org.springframework.cache.jcache;
 
-import javax.annotation.Resource;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.MutableConfiguration;
@@ -26,6 +25,7 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.config.AbstractCacheAnnotationTests;
@@ -81,7 +81,7 @@ public class JCacheEhCacheAnnotationTests extends AbstractCacheAnnotationTests {
 	@EnableCaching
 	static class EnableCachingConfig extends CachingConfigurerSupport {
 
-		@Resource
+		@Autowired
 		CachingProvider cachingProvider;
 
 		@Override

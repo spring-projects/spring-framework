@@ -74,9 +74,9 @@ public class PathMatchingResourcePatternResolverTests {
 
 	@Test
 	public void singleResourceInJar() throws IOException {
-		Resource[] resources = resolver.getResources("java/net/URL.class");
+		Resource[] resources = resolver.getResources("org/apache/commons/logging/Log.class");
 		assertEquals(1, resources.length);
-		assertProtocolAndFilenames(resources, "jar", "URL.class");
+		assertProtocolAndFilenames(resources, "jar", "Log.class");
 	}
 
 	@Ignore  // passes under Eclipse, fails under Ant
@@ -145,8 +145,7 @@ public class PathMatchingResourcePatternResolverTests {
 		assertEquals("Correct number of files found", filenames.length, resources.length);
 		for (Resource resource : resources) {
 			String actualProtocol = resource.getURL().getProtocol();
-			// resources from rt.jar get retrieved as jrt images on JDK 9, so let's simply accept that as a match too
-			assertTrue(actualProtocol.equals(protocol) || ("jar".equals(protocol) && "jrt".equals(actualProtocol)));
+			assertEquals(protocol, actualProtocol);
 			assertFilenameIn(resource, filenames);
 		}
 	}
@@ -154,7 +153,7 @@ public class PathMatchingResourcePatternResolverTests {
 	private void assertFilenameIn(Resource resource, String... filenames) {
 		String filename = resource.getFilename();
 		assertTrue(resource + " does not have a filename that matches any of the specified names",
-			Arrays.stream(filenames).anyMatch(filename::endsWith));
+				Arrays.stream(filenames).anyMatch(filename::endsWith));
 	}
 
 }
