@@ -61,16 +61,15 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 				.toURI();
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 2);
+		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 5);
 
 		TestSubscriber
 				.subscribe(flux)
 				.assertNoError()
 				.assertComplete()
 				.assertValuesWith(
-						stringConsumer("fo"), stringConsumer("ob"),
-						stringConsumer("ar"), stringConsumer("ba"),
-						stringConsumer("zq"), stringConsumer("ux")
+						stringConsumer("fooba"), stringConsumer("rbazq"),
+						stringConsumer("ux")
 				);
 
 		assertFalse(channel.isOpen());
