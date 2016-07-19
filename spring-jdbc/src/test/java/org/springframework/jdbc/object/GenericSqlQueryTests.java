@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 package org.springframework.jdbc.object;
-
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -43,11 +42,12 @@ import static org.mockito.BDDMockito.*;
 
 /**
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class GenericSqlQueryTests  {
 
 	private static final String SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED =
-		"select id, forename from custmr where id = ? and country = ?";
+			"select id, forename from custmr where id = ? and country = ?";
 
 	private BeanFactory beanFactory;
 
@@ -56,6 +56,7 @@ public class GenericSqlQueryTests  {
 	private PreparedStatement preparedStatement;
 
 	private ResultSet resultSet;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -72,14 +73,20 @@ public class GenericSqlQueryTests  {
 	}
 
 	@Test
-	public void testPlaceHoldersCustomerQuery() throws SQLException {
-		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithPlaceHolders");
+	public void testCustomerQueryWithPlaceholders() throws SQLException {
+		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithPlaceholders");
 		doTestCustomerQuery(query, false);
 	}
 
 	@Test
-	public void testNamedParameterCustomerQuery() throws SQLException {
+	public void testCustomerQueryWithNamedParameters() throws SQLException {
 		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithNamedParameters");
+		doTestCustomerQuery(query, true);
+	}
+
+	@Test
+	public void testCustomerQueryWithRowMapperInstance() throws SQLException {
+		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithRowMapperBean");
 		doTestCustomerQuery(query, true);
 	}
 
