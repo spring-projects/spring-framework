@@ -18,10 +18,14 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -152,6 +156,69 @@ public class AnnotationAttributesTests {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(containsString("Attribute 'color' is of type [String], but [Enum] was expected"));
 		attributes.getEnum("color");
+	}
+
+	@Test
+	public void getAliasedStringWithImplicitAliases() {
+		String value = "metaverse";
+		List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("value", value);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertEquals(value, attributes.getString(alias)));
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("location1", value);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertEquals(value, attributes.getString(alias)));
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("value", value);
+		attributes.put("location1", value);
+		attributes.put("xmlFile", value);
+		attributes.put("groovyScript", value);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertEquals(value, attributes.getString(alias)));
+	}
+
+	@Test
+	public void getAliasedStringArrayWithImplicitAliases() {
+		String[] value = new String[] {"test.xml"};
+		List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("location1", value);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("value", value);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("location1", value);
+		attributes.put("value", value);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("location1", value);
+		AnnotationUtils.registerDefaultValues(attributes);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("value", value);
+		AnnotationUtils.registerDefaultValues(attributes);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertArrayEquals(value, attributes.getStringArray(alias)));
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		AnnotationUtils.registerDefaultValues(attributes);
+		AnnotationUtils.postProcessAnnotationAttributes(null, attributes, false);
+		aliases.stream().forEach(alias -> assertArrayEquals(new String[] {""}, attributes.getStringArray(alias)));
 	}
 
 
