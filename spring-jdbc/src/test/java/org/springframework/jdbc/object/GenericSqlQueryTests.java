@@ -16,7 +16,6 @@
 
 package org.springframework.jdbc.object;
 
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -43,11 +42,12 @@ import static org.mockito.BDDMockito.*;
 
 /**
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class GenericSqlQueryTests  {
 
 	private static final String SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED =
-		"select id, forename from custmr where id = ? and country = ?";
+			"select id, forename from custmr where id = ? and country = ?";
 
 	private BeanFactory beanFactory;
 
@@ -56,6 +56,7 @@ public class GenericSqlQueryTests  {
 	private PreparedStatement preparedStatement;
 
 	private ResultSet resultSet;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -72,14 +73,20 @@ public class GenericSqlQueryTests  {
 	}
 
 	@Test
-	public void testPlaceHoldersCustomerQuery() throws SQLException {
-		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithPlaceHolders");
+	public void testCustomerQueryWithPlaceholders() throws SQLException {
+		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithPlaceholders");
 		doTestCustomerQuery(query, false);
 	}
 
 	@Test
-	public void testNamedParameterCustomerQuery() throws SQLException {
+	public void testCustomerQueryWithNamedParameters() throws SQLException {
 		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithNamedParameters");
+		doTestCustomerQuery(query, true);
+	}
+
+	@Test
+	public void testCustomerQueryWithRowMapperInstance() throws SQLException {
+		SqlQuery<?> query = (SqlQuery<?>) beanFactory.getBean("queryWithRowMapperBean");
 		doTestCustomerQuery(query, true);
 	}
 
