@@ -372,6 +372,8 @@ abstract class SerializableTypeWrapper {
 
 		private final String methodName;
 
+		private final Class<?> declaringClass;
+
 		private final int index;
 
 		private transient Method method;
@@ -381,6 +383,7 @@ abstract class SerializableTypeWrapper {
 		public MethodInvokeTypeProvider(TypeProvider provider, Method method, int index) {
 			this.provider = provider;
 			this.methodName = method.getName();
+			this.declaringClass = method.getDeclaringClass();
 			this.index = index;
 			this.method = method;
 		}
@@ -404,7 +407,7 @@ abstract class SerializableTypeWrapper {
 
 		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
-			this.method = ReflectionUtils.findMethod(this.provider.getType().getClass(), this.methodName);
+			this.method = ReflectionUtils.findMethod(this.declaringClass, this.methodName);
 			Assert.state(Type.class == this.method.getReturnType() || Type[].class == this.method.getReturnType());
 		}
 	}
