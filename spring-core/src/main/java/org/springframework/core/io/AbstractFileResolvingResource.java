@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,20 @@ import org.springframework.util.ResourceUtils;
  */
 public abstract class AbstractFileResolvingResource extends AbstractResource {
 
+	@Override
+	public boolean isFile() {
+		try {
+			URL url = getURL();
+			if (url.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				return VfsResourceDelegate.getResource(url).isFile();
+			}
+			return ResourceUtils.URL_PROTOCOL_FILE.equals(url.getProtocol());
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+
 	/**
 	 * This implementation returns a File reference for the underlying class path
 	 * resource, provided that it refers to a file in the file system.
@@ -72,7 +86,25 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 	}
 
 	/**
-	 * This implementation returns a File reference for the underlying class path
+	 * This implementation returns a File reference for the given URI-identified
+	 * resource, provided that it refers to a file in the file system.
+	 * @since 5.0
+	 * @see #getFile(URI)
+	 */
+	protected boolean isFile(URI uri) {
+		try {
+			if (uri.getScheme().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				return VfsResourceDelegate.getResource(uri).isFile();
+			}
+			return ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme());
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * This implementation returns a File reference for the given URI-identified
 	 * resource, provided that it refers to a file in the file system.
 	 * @see org.springframework.util.ResourceUtils#getFile(java.net.URI, String)
 	 */

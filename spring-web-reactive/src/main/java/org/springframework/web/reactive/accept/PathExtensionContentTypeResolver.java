@@ -18,13 +18,11 @@ package org.springframework.web.reactive.accept;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.util.Assert;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -94,8 +92,7 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 	@Override
 	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
 		if (this.useJaf) {
-			Optional<MimeType> mimeType = MimeTypeUtils.getMimeType("file." + key);
-			MediaType mediaType = mimeType.map(MediaType::toMediaType).orElse(null);
+			MediaType mediaType = MediaTypeFactory.getMediaType("file." + key);
 			if (mediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 				return mediaType;
 			}
@@ -111,10 +108,10 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 	 * determine the media type for a given {@link Resource}. First it checks
 	 * the explicitly registered mappings and then falls back on JAF.
 	 * @param resource the resource
-	 * @return the MediaType for the extension or {@code null}.
+	 * @return the MediaType for the extension, or {@code null} if none determined
 	 */
 	public MediaType resolveMediaTypeForResource(Resource resource) {
-		Assert.notNull(resource);
+		Assert.notNull(resource, "Resource must not be null");
 		MediaType mediaType = null;
 		String filename = resource.getFilename();
 		String extension = StringUtils.getFilenameExtension(filename);
@@ -122,7 +119,7 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 			mediaType = getMediaType(extension);
 		}
 		if (mediaType == null) {
-			mediaType = MimeTypeUtils.getMimeType(filename).map(MediaType::toMediaType).orElse(null);
+			mediaType = MediaTypeFactory.getMediaType(filename);
 		}
 		if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 			mediaType = null;

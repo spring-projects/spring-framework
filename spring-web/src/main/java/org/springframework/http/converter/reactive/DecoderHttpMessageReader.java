@@ -28,8 +28,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 
 /**
- * Implementation of the {@link HttpMessageReader} interface that delegates to
- * a {@link Decoder}.
+ * Implementation of the {@link HttpMessageReader} interface that delegates
+ * to a {@link Decoder}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -49,9 +49,8 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 	 */
 	public DecoderHttpMessageReader(Decoder<T> decoder) {
 		this.decoder = decoder;
-		this.readableMediaTypes = decoder != null ?
-				MediaType.toMediaTypes(decoder.getDecodableMimeTypes()) :
-				Collections.emptyList();
+		this.readableMediaTypes = (decoder != null ?
+				MediaType.asMediaTypes(decoder.getDecodableMimeTypes()) : Collections.emptyList());
 	}
 
 

@@ -265,6 +265,11 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		}
 
 		@Override
+		public boolean isFile() {
+			return this.original.isFile();
+		}
+
+		@Override
 		public URL getURL() throws IOException {
 			return this.original.getURL();
 		}

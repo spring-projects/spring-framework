@@ -172,6 +172,14 @@ public class PathResource extends AbstractResource implements WritableResource {
 	}
 
 	/**
+	 * This implementation always indicates a file.
+	 */
+	@Override
+	public boolean isFile() {
+		return true;
+	}
+
+	/**
 	 * This implementation returns the underlying File reference.
 	 */
 	@Override
@@ -180,8 +188,8 @@ public class PathResource extends AbstractResource implements WritableResource {
 			return this.path.toFile();
 		}
 		catch (UnsupportedOperationException ex) {
-			// only Paths on the default file system can be converted to a File
-			// do exception translation for cases where conversion is not possible
+			// Only paths on the default file system can be converted to a File:
+			// Do exception translation for cases where conversion is not possible.
 			throw new FileNotFoundException(this.path + " cannot be resolved to " + "absolute file path");
 		}
 	}

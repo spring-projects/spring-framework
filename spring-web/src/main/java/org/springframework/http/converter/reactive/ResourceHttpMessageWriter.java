@@ -31,10 +31,9 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.ResourceUtils;
 
 /**
  * Implementation of {@link HttpMessageWriter} that can write
@@ -67,8 +66,7 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 				concatMap(resource -> {
 					HttpHeaders headers = outputMessage.getHeaders();
 					addHeaders(headers, resource, contentType);
-
-					return writeContent(resource, type, contentType, outputMessage);
+					return writeContent(resource, type, outputMessage);
 				}));
 	}
 
@@ -76,8 +74,7 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 		if (headers.getContentType() == null) {
 			if (contentType == null || !contentType.isConcrete() ||
 					MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
-				contentType = MimeTypeUtils.getMimeType(resource.getFilename()).
-						map(MediaType::toMediaType).
+				contentType = Optional.ofNullable(MediaTypeFactory.getMediaType(resource)).
 						orElse(MediaType.APPLICATION_OCTET_STREAM);
 			}
 			headers.setContentType(contentType);
@@ -87,9 +84,7 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 		}
 	}
 
-	private Mono<Void> writeContent(Resource resource, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
-
+	private Mono<Void> writeContent(Resource resource, ResolvableType type, ReactiveHttpOutputMessage outputMessage) {
 		if (outputMessage instanceof ZeroCopyHttpOutputMessage) {
 			Optional<File> file = getFile(resource);
 			if (file.isPresent()) {
@@ -119,11 +114,11 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 	}
 
 	private static Optional<File> getFile(Resource resource) {
-		if (ResourceUtils.hasFile(resource)) {
+		if (resource.isFile()) {
 			try {
 				return Optional.of(resource.getFile());
 			}
-			catch (IOException ignored) {
+			catch (IOException ex) {
 				// should not happen
 			}
 		}

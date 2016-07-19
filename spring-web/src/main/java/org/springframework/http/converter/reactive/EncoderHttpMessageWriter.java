@@ -32,8 +32,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 
 /**
- * Implementation of the {@link HttpMessageWriter} interface that delegates to
- * an {@link Encoder}.
+ * Implementation of the {@link HttpMessageWriter} interface that delegates
+ * to an {@link Encoder}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -53,9 +53,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	 */
 	public EncoderHttpMessageWriter(Encoder<T> encoder) {
 		this.encoder = encoder;
-		this.writableMediaTypes = encoder != null ?
-				MediaType.toMediaTypes(encoder.getEncodableMimeTypes()) :
-				Collections.emptyList();
+		this.writableMediaTypes = (encoder != null ?
+				MediaType.asMediaTypes(encoder.getEncodableMimeTypes()) : Collections.emptyList());
 	}
 
 

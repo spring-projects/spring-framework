@@ -75,10 +75,10 @@ public class CollectionToCollectionConverterTests {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
 		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) conversionService.convert(list, sourceType, targetType);
+		List<Integer> result = (List<Integer>) conversionService.convert(list, sourceType, targetType);
 		assertFalse(list.equals(result));
-		assertEquals(9, result.get(0));
-		assertEquals(37, result.get(1));
+		assertEquals(9, result.get(0).intValue());
+		assertEquals(37, result.get(1).intValue());
 	}
 
 	@Test
@@ -300,6 +300,11 @@ public class CollectionToCollectionConverterTests {
 
 		@Override
 		public boolean isOpen() {
+			return false;
+		}
+
+		@Override
+		public boolean isFile() {
 			return false;
 		}
 

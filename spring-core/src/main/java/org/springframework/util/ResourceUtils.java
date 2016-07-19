@@ -18,17 +18,11 @@ package org.springframework.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.DescriptiveResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 
 /**
  * Utility methods for resolving resource locations to files in the
@@ -235,6 +229,7 @@ public abstract class ResourceUtils {
 	 * @return a corresponding File object
 	 * @throws FileNotFoundException if the URL cannot be resolved to
 	 * a file in the file system
+	 * @since 2.5
 	 */
 	public static File getFile(URI resourceUri) throws FileNotFoundException {
 		return getFile(resourceUri, "URI");
@@ -249,6 +244,7 @@ public abstract class ResourceUtils {
 	 * @return a corresponding File object
 	 * @throws FileNotFoundException if the URL cannot be resolved to
 	 * a file in the file system
+	 * @since 2.5
 	 */
 	public static File getFile(URI resourceUri, String description) throws FileNotFoundException {
 		Assert.notNull(resourceUri, "Resource URI must not be null");
@@ -294,32 +290,6 @@ public abstract class ResourceUtils {
 	public static boolean isJarFileURL(URL url) {
 		return (URL_PROTOCOL_FILE.equals(url.getProtocol()) &&
 				url.getPath().toLowerCase().endsWith(JAR_FILE_EXTENSION));
-	}
-
-	/**
-	 * Indicates whether the given resource has a file, so that {@link
-	 * Resource#getFile()}
-	 * can be called without an {@link java.io.IOException}.
-	 * @param resource the resource to check
-	 * @return {@code true} if the given resource has a file; {@code false} otherwise
-	 * @since 5.0
-	 */
-	public static boolean hasFile(Resource resource) {
-		Assert.notNull(resource, "'resource' must not be null");
-
-		// the following Resource implementations do not support getURI/getFile
-		if (resource instanceof ByteArrayResource ||
-				resource instanceof DescriptiveResource ||
-				resource instanceof InputStreamResource) {
-			return false;
-		}
-		try {
-			URI resourceUri = resource.getURI();
-			return URL_PROTOCOL_FILE.equals(resourceUri.getScheme());
-		}
-		catch (IOException ignored) {
-		}
-		return false;
 	}
 
 	/**
