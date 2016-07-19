@@ -27,6 +27,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Servlet 3.0 {@link ServletContainerInitializer} designed to support code-based
@@ -149,7 +150,8 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 				if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
 						WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
 					try {
-						initializers.add((WebApplicationInitializer) waiClass.newInstance());
+						initializers.add((WebApplicationInitializer)
+								ReflectionUtils.accessibleConstructor(waiClass).newInstance());
 					}
 					catch (Throwable ex) {
 						throw new ServletException("Failed to instantiate WebApplicationInitializer class", ex);

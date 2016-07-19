@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -264,13 +265,16 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 		public ElementInstantiationException(String msg) {
 			super(msg);
 		}
+
+		public ElementInstantiationException(String message, Throwable cause) {
+			super(message, cause);
+		}
 	}
 
 
 	/**
-	 * Reflective implementation of the ElementFactory interface,
-	 * using {@code Class.newInstance()} on a given element class.
-	 * @see Class#newInstance()
+	 * Reflective implementation of the ElementFactory interface, using
+	 * {@code Class.getDeclaredConstructor().newInstance()} on a given element class.
 	 */
 	private static class ReflectiveElementFactory<E> implements ElementFactory<E>, Serializable {
 
@@ -286,15 +290,23 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 		@Override
 		public E createElement(int index) {
 			try {
-				return this.elementClass.newInstance();
+				return ReflectionUtils.accessibleConstructor(this.elementClass).newInstance();
+			}
+			catch (NoSuchMethodException ex) {
+				throw new ElementInstantiationException(
+						"No default constructor on element class: " + this.elementClass.getName(), ex);
 			}
 			catch (InstantiationException ex) {
-				throw new ElementInstantiationException("Unable to instantiate element class [" +
-						this.elementClass.getName() + "]. Root cause is " + ex);
+				throw new ElementInstantiationException(
+						"Unable to instantiate element class: " + this.elementClass.getName(), ex);
 			}
 			catch (IllegalAccessException ex) {
-				throw new ElementInstantiationException("Cannot access element class [" +
-						this.elementClass.getName() + "]. Root cause is " + ex);
+				throw new ElementInstantiationException(
+						"Could not access element constructor: " + this.elementClass.getName(), ex);
+			}
+			catch (InvocationTargetException ex) {
+				throw new ElementInstantiationException(
+						"Failed to invoke element constructor: " + this.elementClass.getName(), ex.getTargetException());
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -185,12 +186,11 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	protected T createCollection(Class<?> collectionClass) {
 		if (!collectionClass.isInterface()) {
 			try {
-				return (T) collectionClass.newInstance();
+				return (T) ReflectionUtils.accessibleConstructor(collectionClass).newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException(
-						"Could not instantiate collection class [" +
-								collectionClass.getName() + "]: " + ex.getMessage());
+						"Could not instantiate collection class: " + collectionClass.getName(), ex);
 			}
 		}
 		else if (List.class == collectionClass) {

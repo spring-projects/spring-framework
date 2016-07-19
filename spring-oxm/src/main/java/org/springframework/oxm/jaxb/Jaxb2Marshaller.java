@@ -76,7 +76,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -545,6 +544,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private Schema loadSchema(Resource[] resources, String schemaLanguage) throws IOException, SAXException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Setting validation schema to " +
@@ -553,7 +553,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		Assert.notEmpty(resources, "No resources given");
 		Assert.hasLength(schemaLanguage, "No schema language provided");
 		Source[] schemaSources = new Source[resources.length];
-		XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+		XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 		xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
 		for (int i = 0; i < resources.length; i++) {
 			Assert.notNull(resources[i], "Resource is null");
@@ -805,6 +805,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private Source processSource(Source source) {
 		if (StaxUtils.isStaxSource(source) || source instanceof DOMSource) {
 			return source;
@@ -833,7 +834,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 
 		try {
 			if (xmlReader == null) {
-				xmlReader = XMLReaderFactory.createXMLReader();
+				xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 			}
 			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 			String name = "http://xml.org/sax/features/external-general-entities";

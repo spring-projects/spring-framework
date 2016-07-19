@@ -81,7 +81,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 						}
 						bd.resolvedConstructorOrFactoryMethod = constructorToUse;
 					}
-					catch (Exception ex) {
+					catch (Throwable ex) {
 						throw new BeanInstantiationException(clazz, "No default constructor found", ex);
 					}
 				}

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.config;
 
 import java.util.ArrayList;
@@ -73,18 +74,18 @@ import org.springframework.web.reactive.result.view.ViewResolver;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@Configuration @SuppressWarnings("unused")
+@Configuration
 public class WebReactiveConfiguration implements ApplicationContextAware {
 
-	private static final ClassLoader classLoader = WebReactiveConfiguration.class.getClassLoader();
-
 	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", classLoader);
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebReactiveConfiguration.class.getClassLoader()) &&
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebReactiveConfiguration.class.getClassLoader());
 
-	private static final boolean jaxb2Present = ClassUtils.isPresent("javax.xml.bind.Binder", classLoader);
+	private static final boolean jaxb2Present =
+			ClassUtils.isPresent("javax.xml.bind.Binder", WebReactiveConfiguration.class.getClassLoader());
 
-	private static final boolean rxJava1Present = ClassUtils.isPresent("rx.Observable", classLoader);
+	private static final boolean rxJava1Present =
+			ClassUtils.isPresent("rx.Observable", WebReactiveConfiguration.class.getClassLoader());
 
 
 	private PathMatchConfigurer pathMatchConfigurer;
@@ -302,7 +303,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 				Class<?> clazz;
 				try {
 					String name = "org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean";
-					clazz = ClassUtils.forName(name, classLoader);
+					clazz = ClassUtils.forName(name, getClass().getClassLoader());
 				}
 				catch (ClassNotFoundException ex) {
 					throw new BeanInitializationException("Could not find default validator class", ex);
@@ -310,7 +311,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 				catch (LinkageError ex) {
 					throw new BeanInitializationException("Could not load default validator class", ex);
 				}
-				validator = (Validator) BeanUtils.instantiate(clazz);
+				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new NoOpValidator();
@@ -401,7 +402,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	@Bean
 	public ViewResolutionResultHandler viewResolutionResultHandler() {
-		ViewResolverRegistry registry = new ViewResolverRegistry(this.applicationContext);
+		ViewResolverRegistry registry = new ViewResolverRegistry(getApplicationContext());
 		configureViewResolvers(registry);
 		List<ViewResolver> resolvers = registry.getViewResolvers();
 		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, mvcConversionService());

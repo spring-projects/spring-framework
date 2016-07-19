@@ -25,6 +25,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -87,7 +88,7 @@ public abstract class ProfileValueUtils {
 		}
 		else {
 			try {
-				profileValueSource = profileValueSourceType.newInstance();
+				profileValueSource = ReflectionUtils.accessibleConstructor(profileValueSourceType).newInstance();
 			}
 			catch (Exception ex) {
 				if (logger.isWarnEnabled()) {

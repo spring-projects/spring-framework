@@ -218,7 +218,7 @@ public class FormattingConversionServiceTests {
 		assertEquals(new LocalDate(2009, 11, 1), new LocalDate(dates.get(1)));
 		assertEquals(new LocalDate(2009, 11, 2), new LocalDate(dates.get(2)));
 
-		Object model = BeanUtils.instantiate(modelClass);
+		Object model = modelClass.newInstance();
 		ConfigurablePropertyAccessor accessor = directFieldAccess ? PropertyAccessorFactory.forDirectFieldAccess(model) :
 				PropertyAccessorFactory.forBeanPropertyAccess(model);
 		accessor.setConversionService(formattingService);

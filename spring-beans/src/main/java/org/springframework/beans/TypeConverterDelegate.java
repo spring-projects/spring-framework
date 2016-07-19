@@ -36,6 +36,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.NumberUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -543,7 +544,8 @@ class TypeConverterDelegate {
 				convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 			}
 			else {
-				convertedCopy = (Collection<Object>) requiredType.newInstance();
+				convertedCopy = (Collection<Object>)
+						ReflectionUtils.accessibleConstructor(requiredType).newInstance();
 			}
 		}
 		catch (Throwable ex) {
@@ -625,7 +627,8 @@ class TypeConverterDelegate {
 				convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 			}
 			else {
-				convertedCopy = (Map<Object, Object>) requiredType.newInstance();
+				convertedCopy = (Map<Object, Object>)
+						ReflectionUtils.accessibleConstructor(requiredType).newInstance();
 			}
 		}
 		catch (Throwable ex) {

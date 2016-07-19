@@ -35,6 +35,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.SubProtocolCapable;
 import org.springframework.web.socket.WebSocketExtension;
@@ -72,25 +73,23 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
 
-	private static final ClassLoader classLoader = AbstractHandshakeHandler.class.getClassLoader();
-
 	private static final boolean jettyWsPresent = ClassUtils.isPresent(
-			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", classLoader);
+			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", AbstractHandshakeHandler.class.getClassLoader());
 
 	private static final boolean tomcatWsPresent = ClassUtils.isPresent(
-			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", classLoader);
+			"org.apache.tomcat.websocket.server.WsHttpUpgradeHandler", AbstractHandshakeHandler.class.getClassLoader());
 
 	private static final boolean undertowWsPresent = ClassUtils.isPresent(
-			"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
+			"io.undertow.websockets.jsr.ServerWebSocketContainer", AbstractHandshakeHandler.class.getClassLoader());
 
 	private static final boolean glassfishWsPresent = ClassUtils.isPresent(
-			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", classLoader);
+			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", AbstractHandshakeHandler.class.getClassLoader());
 
 	private static final boolean weblogicWsPresent = ClassUtils.isPresent(
-			"weblogic.websocket.tyrus.TyrusServletWriter", classLoader);
+			"weblogic.websocket.tyrus.TyrusServletWriter", AbstractHandshakeHandler.class.getClassLoader());
 
 	private static final boolean websphereWsPresent = ClassUtils.isPresent(
-			"com.ibm.websphere.wsoc.WsWsocServerContainer", classLoader);
+			"com.ibm.websphere.wsoc.WsWsocServerContainer", AbstractHandshakeHandler.class.getClassLoader());
 
 
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -146,8 +145,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		}
 
 		try {
-			Class<?> clazz = ClassUtils.forName(className, classLoader);
-			return (RequestUpgradeStrategy) clazz.newInstance();
+			Class<?> clazz = ClassUtils.forName(className, AbstractHandshakeHandler.class.getClassLoader());
+			return (RequestUpgradeStrategy) ReflectionUtils.accessibleConstructor(clazz).newInstance();
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException(

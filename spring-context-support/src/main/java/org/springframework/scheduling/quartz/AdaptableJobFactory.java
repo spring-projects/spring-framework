@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
+
+import org.springframework.util.ReflectionUtils;
 
 /**
  * JobFactory implementation that supports {@link java.lang.Runnable}
@@ -55,7 +57,8 @@ public class AdaptableJobFactory implements JobFactory {
 	 * @throws Exception if job instantiation failed
 	 */
 	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
-		return bundle.getJobDetail().getJobClass().newInstance();
+		Class<?> jobClass = bundle.getJobDetail().getJobClass();
+		return ReflectionUtils.accessibleConstructor(jobClass).newInstance();
 	}
 
 	/**

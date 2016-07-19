@@ -26,6 +26,7 @@ import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.scripting.ScriptFactory} implementation
@@ -154,7 +155,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		if (clazz != null) {
 			// A Class: We need to create an instance for every call.
 			try {
-				return clazz.newInstance();
+				return ReflectionUtils.accessibleConstructor(clazz).newInstance();
 			}
 			catch (Throwable ex) {
 				throw new ScriptCompilationException(

@@ -612,9 +612,9 @@ public class MvcUriComponentsBuilder {
 
 			if (proxy == null) {
 				try {
-					proxy = proxyClass.newInstance();
+					proxy = ReflectionUtils.accessibleConstructor(proxyClass).newInstance();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException("Unable to instantiate controller proxy using Objenesis, " +
 							"and regular controller instantiation via default constructor fails as well", ex);
 				}

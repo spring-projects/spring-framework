@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Simple implementation of a JNDI naming context builder.
@@ -210,10 +211,10 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 							"Specified class does not implement [" + InitialContextFactory.class.getName() + "]: " + icf);
 				}
 				try {
-					return (InitialContextFactory) icfClass.newInstance();
+					return (InitialContextFactory) ReflectionUtils.accessibleConstructor(icfClass).newInstance();
 				}
 				catch (Throwable ex) {
-					throw new IllegalStateException("Cannot instantiate specified InitialContextFactory: " + icf, ex);
+					throw new IllegalStateException("Unable to instantiate specified InitialContextFactory: " + icf, ex);
 				}
 			}
 		}

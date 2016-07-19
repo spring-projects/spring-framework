@@ -38,6 +38,7 @@ import java.util.TreeSet;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Factory for collections that is aware of Java 5, Java 6, and Spring
@@ -201,9 +202,9 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
 			}
 			try {
-				return (Collection<E>) collectionType.newInstance();
+				return (Collection<E>) ReflectionUtils.accessibleConstructor(collectionType).newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException(
 					"Could not instantiate Collection type: " + collectionType.getName(), ex);
 			}
@@ -316,9 +317,9 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
 			}
 			try {
-				return (Map<K, V>) mapType.newInstance();
+				return (Map<K, V>) ReflectionUtils.accessibleConstructor(mapType).newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
 			}
 		}

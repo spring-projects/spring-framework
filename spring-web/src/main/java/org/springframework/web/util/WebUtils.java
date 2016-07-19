@@ -327,40 +327,6 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Get the specified session attribute, creating and setting a new attribute if
-	 * no existing found. The given class needs to have a public no-arg constructor.
-	 * Useful for on-demand state objects in a web tier, like shopping carts.
-	 * @param session current HTTP session
-	 * @param name the name of the session attribute
-	 * @param clazz the class to instantiate for a new attribute
-	 * @return the value of the session attribute, newly created if not found
-	 * @throws IllegalArgumentException if the session attribute could not be instantiated
-	 */
-	public static Object getOrCreateSessionAttribute(HttpSession session, String name, Class<?> clazz)
-			throws IllegalArgumentException {
-
-		Assert.notNull(session, "Session must not be null");
-		Object sessionObject = session.getAttribute(name);
-		if (sessionObject == null) {
-			try {
-				sessionObject = clazz.newInstance();
-			}
-			catch (InstantiationException ex) {
-				throw new IllegalArgumentException(
-					"Could not instantiate class [" + clazz.getName() +
-					"] for session attribute '" + name + "': " + ex.getMessage());
-			}
-			catch (IllegalAccessException ex) {
-				throw new IllegalArgumentException(
-					"Could not access default constructor of class [" + clazz.getName() +
-					"] for session attribute '" + name + "': " + ex.getMessage());
-			}
-			session.setAttribute(name, sessionObject);
-		}
-		return sessionObject;
-	}
-
-	/**
 	 * Return the best available mutex for the given session:
 	 * that is, an object to synchronize on for the given session.
 	 * <p>Returns the session mutex attribute if available; usually,

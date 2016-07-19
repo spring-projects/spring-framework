@@ -477,6 +477,22 @@ public abstract class ReflectionUtils {
 	}
 
 	/**
+	 * Obtain an accessible constructor for the given class and parameters.
+	 * @param clazz the clazz to check
+	 * @param parameterTypes the parameter types of the desired constructor
+	 * @return the constructor reference
+	 * @throws NoSuchMethodException if no such constructor exists
+	 * @since 5.0
+	 */
+	public static <T> Constructor<T> accessibleConstructor(Class<T> clazz, Class<?>... parameterTypes)
+			throws NoSuchMethodException {
+
+		Constructor<T> ctor = clazz.getDeclaredConstructor(parameterTypes);
+		makeAccessible(ctor);
+		return ctor;
+	}
+
+	/**
 	 * Perform the given callback operation on all matching methods of the given
 	 * class, as locally declared or equivalent thereof (such as default methods
 	 * on Java 8 based interfaces that the given class implements).

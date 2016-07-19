@@ -37,6 +37,7 @@ import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * A SpelCompiler will take a regular parsed expression and create (and load) a class
@@ -105,7 +106,7 @@ public class SpelCompiler implements Opcodes {
 			Class<? extends CompiledExpression> clazz = createExpressionClass(expression);
 			if (clazz != null) {
 				try {
-					return clazz.newInstance();
+					return ReflectionUtils.accessibleConstructor(clazz).newInstance();
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Failed to instantiate CompiledExpression", ex);

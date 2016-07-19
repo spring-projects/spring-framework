@@ -336,7 +336,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 				LocaleResolver resolver) {
 
 			if (definitionsFactoryClass != null) {
-				DefinitionsFactory factory = BeanUtils.instantiate(definitionsFactoryClass);
+				DefinitionsFactory factory = BeanUtils.instantiateClass(definitionsFactoryClass);
 				if (factory instanceof ApplicationContextAware) {
 					((ApplicationContextAware) factory).setApplicationContext(applicationContext);
 				}
@@ -357,7 +357,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		@Override
 		protected PreparerFactory createPreparerFactory(ApplicationContext context) {
 			if (preparerFactoryClass != null) {
-				return BeanUtils.instantiate(preparerFactoryClass);
+				return BeanUtils.instantiateClass(preparerFactoryClass);
 			}
 			else {
 				return super.createPreparerFactory(context);

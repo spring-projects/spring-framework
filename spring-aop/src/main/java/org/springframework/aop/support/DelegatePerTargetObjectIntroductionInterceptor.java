@@ -24,6 +24,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.DynamicIntroductionAdvice;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.ProxyMethodInvocation;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Convenient implementation of the
@@ -131,7 +132,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 
 	private Object createNewDelegate() {
 		try {
-			return this.defaultImplType.newInstance();
+			return ReflectionUtils.accessibleConstructor(this.defaultImplType).newInstance();
 		}
 		catch (Throwable ex) {
 			throw new IllegalArgumentException("Cannot create default implementation for '" +

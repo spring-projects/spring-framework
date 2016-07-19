@@ -18,7 +18,9 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.PrivilegedActionException;
 import java.util.ArrayList;
@@ -890,14 +892,16 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				return CollectionFactory.createMap(type, (keyDesc != null ? keyDesc.getType() : null), 16);
 			}
 			else {
-				return BeanUtils.instantiate(type);
+				Constructor<?> ctor = type.getDeclaredConstructor();
+				if (Modifier.isPrivate(ctor.getModifiers())) {
+					throw new IllegalAccessException("Auto-growing not allowed with private constructor: " + ctor);
+				}
+				return BeanUtils.instantiateClass(ctor);
 			}
 		}
-		catch (Exception ex) {
-			// TODO: Root cause exception context is lost here; just exception message preserved.
-			// Should we throw another exception type that preserves context instead?
+		catch (Throwable ex) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name,
-					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
+					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path", ex);
 		}
 	}
 

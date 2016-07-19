@@ -567,7 +567,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				catch (LinkageError ex) {
 					throw new BeanInitializationException("Could not load default validator class", ex);
 				}
-				validator = (Validator) BeanUtils.instantiate(clazz);
+				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new NoOpValidator();
