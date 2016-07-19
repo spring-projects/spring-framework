@@ -2121,12 +2121,12 @@ public class AnnotationUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface ImplicitAliasesContextConfig {
+	public @interface ImplicitAliasesContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String xmlFile() default "";
 
-		@AliasFor(annotation = ContextConfig.class, value = "location")
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String groovyScript() default "";
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")
