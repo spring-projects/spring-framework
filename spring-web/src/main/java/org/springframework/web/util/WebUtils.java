@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,7 +278,6 @@ public abstract class WebUtils {
 		return realPath;
 	}
 
-
 	/**
 	 * Determine the session id of the given request, if any.
 	 * @param request current HTTP request
@@ -353,7 +352,9 @@ public abstract class WebUtils {
 	 * @param clazz the class to instantiate for a new attribute
 	 * @return the value of the session attribute, newly created if not found
 	 * @throws IllegalArgumentException if the session attribute could not be instantiated
+	 * @deprecated as of Spring 4.3.2, in favor of custom code for such purposes
 	 */
+	@Deprecated
 	public static Object getOrCreateSessionAttribute(HttpSession session, String name, Class<?> clazz)
 			throws IllegalArgumentException {
 
@@ -527,7 +528,9 @@ public abstract class WebUtils {
 	 * and the values as corresponding attribute values. Keys need to be Strings.
 	 * @param request current HTTP request
 	 * @param attributes the attributes Map
+	 * @deprecated as of Spring 4.3.2, in favor of custom code for such purposes
 	 */
+	@Deprecated
 	public static void exposeRequestAttributes(ServletRequest request, Map<String, ?> attributes) {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(attributes, "Attributes Map must not be null");
@@ -689,7 +692,9 @@ public abstract class WebUtils {
 	 * @param currentPage the current page, to be returned as fallback
 	 * if no target page specified
 	 * @return the page specified in the request, or current page if not found
+	 * @deprecated as of Spring 4.3.2, in favor of custom code for such purposes
 	 */
+	@Deprecated
 	public static int getTargetPage(ServletRequest request, String paramPrefix, int currentPage) {
 		Enumeration<String> paramNames = request.getParameterNames();
 		while (paramNames.hasMoreElements()) {
@@ -713,7 +718,9 @@ public abstract class WebUtils {
 	 * Correctly resolves nested paths such as "/products/view.html" as well.
 	 * @param urlPath the request URL path (e.g. "/index.html")
 	 * @return the extracted URI filename (e.g. "index")
+	 * @deprecated as of Spring 4.3.2, in favor of custom code for such purposes
 	 */
+	@Deprecated
 	public static String extractFilenameFromUrlPath(String urlPath) {
 		String filename = extractFullFilenameFromUrlPath(urlPath);
 		int dotIndex = filename.lastIndexOf('.');
@@ -729,7 +736,10 @@ public abstract class WebUtils {
 	 * "/products/view.html" and remove any path and or query parameters.
 	 * @param urlPath the request URL path (e.g. "/products/index.html")
 	 * @return the extracted URI filename (e.g. "index.html")
+	 * @deprecated as of Spring 4.3.2, in favor of custom code for such purposes
+	 * (or {@link UriUtils#extractFileExtension} for the file extension use case)
 	 */
+	@Deprecated
 	public static String extractFullFilenameFromUrlPath(String urlPath) {
 		int end = urlPath.indexOf('?');
 		if (end == -1) {

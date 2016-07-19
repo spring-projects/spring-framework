@@ -35,8 +35,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.WebUtils;
 
 /**
  * A {@code ContentNegotiationStrategy} that resolves the file extension in the
@@ -118,9 +118,8 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 			return null;
 		}
 		String path = this.urlPathHelper.getLookupPathForRequest(request);
-		String filename = WebUtils.extractFullFilenameFromUrlPath(path);
-		String extension = StringUtils.getFilenameExtension(filename);
-		return (StringUtils.hasText(extension)) ? extension.toLowerCase(Locale.ENGLISH) : null;
+		String extension = UriUtils.extractFileExtension(path);
+		return (StringUtils.hasText(extension) ? extension.toLowerCase(Locale.ENGLISH) : null);
 	}
 
 	@Override
@@ -128,7 +127,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 			throws HttpMediaTypeNotAcceptableException {
 
 		if (this.useJaf && JAF_PRESENT) {
-			MediaType mediaType = JafMediaTypeFactory.getMediaType("file." + extension);
+			MediaType mediaType = ActivationMediaTypeFactory.getMediaType("file." + extension);
 			if (mediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 				return mediaType;
 			}
@@ -157,7 +156,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 			mediaType = lookupMediaType(extension);
 		}
 		if (mediaType == null && JAF_PRESENT) {
-			mediaType = JafMediaTypeFactory.getMediaType(filename);
+			mediaType = ActivationMediaTypeFactory.getMediaType(filename);
 		}
 		if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 			mediaType = null;
@@ -169,7 +168,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 	/**
 	 * Inner class to avoid hard-coded dependency on JAF.
 	 */
-	private static class JafMediaTypeFactory {
+	private static class ActivationMediaTypeFactory {
 
 		private static final FileTypeMap fileTypeMap;
 
