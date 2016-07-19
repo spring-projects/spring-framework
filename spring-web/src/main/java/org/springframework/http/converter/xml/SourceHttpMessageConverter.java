@@ -174,9 +174,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		}
 		catch (NullPointerException ex) {
 			if (!isSupportDtd()) {
-				throw new HttpMessageNotReadableException("NPE while unmarshalling. " +
-						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.", ex);
+				throw new HttpMessageNotReadableException("NPE while unmarshalling: " +
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
 			}
 			throw ex;
 		}
