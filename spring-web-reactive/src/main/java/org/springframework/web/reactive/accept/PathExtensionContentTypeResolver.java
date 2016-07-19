@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.WebUtils;
+import org.springframework.web.util.UriUtils;
 
 /**
  * A {@link RequestedContentTypeResolver} that extracts the file extension from
@@ -84,8 +84,7 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 	@Override
 	protected String extractKey(ServerWebExchange exchange) {
 		String path = exchange.getRequest().getURI().getRawPath();
-		String filename = WebUtils.extractFullFilenameFromUrlPath(path);
-		String extension = StringUtils.getFilenameExtension(filename);
+		String extension = UriUtils.extractFileExtension(path);
 		return (StringUtils.hasText(extension)) ? extension.toLowerCase(Locale.ENGLISH) : null;
 	}
 

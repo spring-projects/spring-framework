@@ -31,8 +31,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.WebUtils;
 
 /**
  * A {@code ContentNegotiationStrategy} that resolves the file extension in the
@@ -114,9 +114,8 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 			return null;
 		}
 		String path = this.urlPathHelper.getLookupPathForRequest(request);
-		String filename = WebUtils.extractFullFilenameFromUrlPath(path);
-		String extension = StringUtils.getFilenameExtension(filename);
-		return (StringUtils.hasText(extension)) ? extension.toLowerCase(Locale.ENGLISH) : null;
+		String extension = UriUtils.extractFileExtension(path);
+		return (StringUtils.hasText(extension) ? extension.toLowerCase(Locale.ENGLISH) : null);
 	}
 
 	@Override

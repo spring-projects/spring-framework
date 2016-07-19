@@ -28,8 +28,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.WebUtils;
 
 /**
  * A UriComponentsBuilder that extracts information from the HttpServletRequest.
@@ -44,7 +44,6 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 
 	/**
 	 * Default constructor. Protected to prevent direct instantiation.
-	 *
 	 * @see #fromContextPath(HttpServletRequest)
 	 * @see #fromServletMapping(HttpServletRequest)
 	 * @see #fromRequest(HttpServletRequest)
@@ -219,8 +218,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	public String removePathExtension() {
 		String extension = null;
 		if (this.originalPath != null) {
-			String filename = WebUtils.extractFullFilenameFromUrlPath(this.originalPath);
-			extension = StringUtils.getFilenameExtension(filename);
+			extension = UriUtils.extractFileExtension(this.originalPath);
 			if (!StringUtils.isEmpty(extension)) {
 				int end = this.originalPath.length() - (extension.length() + 1);
 				replacePath(this.originalPath.substring(0, end));

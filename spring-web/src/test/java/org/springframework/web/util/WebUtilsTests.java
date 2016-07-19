@@ -56,34 +56,6 @@ public class WebUtilsTests {
 	}
 
 	@Test
-	public void extractFilenameFromUrlPath() {
-		assertEquals("index", WebUtils.extractFilenameFromUrlPath("index.html"));
-		assertEquals("index", WebUtils.extractFilenameFromUrlPath("/index.html"));
-		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html"));
-		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=a"));
-		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=/path/a"));
-		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
-	}
-
-	@Test
-	public void extractFullFilenameFromUrlPath() {
-		assertEquals("index.html", WebUtils.extractFullFilenameFromUrlPath("index.html"));
-		assertEquals("index.html", WebUtils.extractFullFilenameFromUrlPath("/index.html"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/path/a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a#/path/a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do#/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html?param=/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html;r=22?param=/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html;r=22;s=33?param=/path/a.do"));
-	}
-
-	@Test
 	public void parseMatrixVariablesString() {
 		MultiValueMap<String, String> variables;
 
