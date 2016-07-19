@@ -18,10 +18,13 @@ package org.springframework.orm.jpa.hibernate;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.junit.Test;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerProxy;
+
+import static org.junit.Assert.*;
 
 /**
  * Hibernate-specific JPA tests.
@@ -29,20 +32,21 @@ import org.springframework.orm.jpa.EntityManagerProxy;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-@SuppressWarnings("deprecation")
-public class HibernateEntityManagerFactoryIntegrationTests extends
-		AbstractContainerEntityManagerFactoryIntegrationTests {
+public class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	@Override
-	protected String[] getConfigPaths() {
+	protected String[] getConfigLocations() {
 		return HIBERNATE_CONFIG_LOCATIONS;
 	}
 
+
+	@Test
 	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
 		assertTrue(emfi.getNativeEntityManagerFactory() instanceof SessionFactory);  // as of Hibernate 5.2
 	}
 
+	@Test
 	public void testCanCastSharedEntityManagerProxyToHibernateEntityManager() {
 		assertTrue(((EntityManagerProxy) sharedEntityManager).getTargetEntityManager() instanceof Session);  // as of Hibernate 5.2
 	}
