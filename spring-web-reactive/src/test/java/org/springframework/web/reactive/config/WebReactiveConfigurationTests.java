@@ -43,8 +43,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Decoder;
 import org.springframework.http.codec.xml.Jaxb2Encoder;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.util.MimeType;
@@ -56,7 +58,7 @@ import org.springframework.web.reactive.result.method.annotation.RequestMappingH
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
-import org.springframework.web.reactive.result.view.HttpMessageConverterView;
+import org.springframework.web.reactive.result.view.HttpMessageWriterView;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
@@ -142,15 +144,15 @@ public class WebReactiveConfigurationTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(name,  RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
-		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertEquals(6, converters.size());
+		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
+		assertEquals(5, readers.size());
 
-		assertHasConverter(converters, ByteBuffer.class, APPLICATION_OCTET_STREAM, APPLICATION_OCTET_STREAM);
-		assertHasConverter(converters, String.class, TEXT_PLAIN, TEXT_PLAIN);
-		assertHasConverter(converters, Resource.class, IMAGE_PNG, IMAGE_PNG);
-		assertHasConverter(converters, TestBean.class, APPLICATION_XML, APPLICATION_XML);
-		assertHasConverter(converters, TestBean.class, APPLICATION_JSON, APPLICATION_JSON);
-		assertHasConverter(converters, TestBean.class, null, MediaType.parseMediaType("text/event-stream"));
+		assertHasMessageReader(readers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
+		assertHasMessageReader(readers, String.class, TEXT_PLAIN);
+		assertHasMessageReader(readers, Resource.class, IMAGE_PNG);
+		assertHasMessageReader(readers, TestBean.class, APPLICATION_XML);
+		assertHasMessageReader(readers, TestBean.class, APPLICATION_JSON);
+		assertHasMessageReader(readers, TestBean.class, null);
 
 		name = "mvcConversionService";
 		ConversionService service = context.getBean(name, ConversionService.class);
@@ -170,11 +172,11 @@ public class WebReactiveConfigurationTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
-		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertEquals(2, converters.size());
+		List<HttpMessageReader<?>> messageReaders = adapter.getMessageReaders();
+		assertEquals(2, messageReaders.size());
 
-		assertHasConverter(converters, String.class, TEXT_PLAIN, TEXT_PLAIN);
-		assertHasConverter(converters, TestBean.class, APPLICATION_XML, APPLICATION_XML);
+		assertHasMessageReader(messageReaders, String.class, TEXT_PLAIN);
+		assertHasMessageReader(messageReaders, TestBean.class, APPLICATION_XML);
 	}
 
 	@Test
@@ -199,15 +201,15 @@ public class WebReactiveConfigurationTests {
 
 		assertEquals(0, handler.getOrder());
 
-		List<HttpMessageConverter<?>> converters = handler.getMessageConverters();
-		assertEquals(6, converters.size());
+		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
+		assertEquals(6, writers.size());
 
-		assertHasConverter(converters, ByteBuffer.class, APPLICATION_OCTET_STREAM, APPLICATION_OCTET_STREAM);
-		assertHasConverter(converters, String.class, TEXT_PLAIN, TEXT_PLAIN);
-		assertHasConverter(converters, Resource.class, IMAGE_PNG, IMAGE_PNG);
-		assertHasConverter(converters, TestBean.class, APPLICATION_XML, APPLICATION_XML);
-		assertHasConverter(converters, TestBean.class, APPLICATION_JSON, APPLICATION_JSON);
-		assertHasConverter(converters, TestBean.class, null, MediaType.parseMediaType("text/event-stream"));
+		assertHasMessageWriter(writers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
+		assertHasMessageWriter(writers, String.class, TEXT_PLAIN);
+		assertHasMessageWriter(writers, Resource.class, IMAGE_PNG);
+		assertHasMessageWriter(writers, TestBean.class, APPLICATION_XML);
+		assertHasMessageWriter(writers, TestBean.class, APPLICATION_JSON);
+		assertHasMessageWriter(writers, TestBean.class, MediaType.parseMediaType("text/event-stream"));
 
 		name = "mvcContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -224,15 +226,15 @@ public class WebReactiveConfigurationTests {
 
 		assertEquals(100, handler.getOrder());
 
-		List<HttpMessageConverter<?>> converters = handler.getMessageConverters();
-		assertEquals(6, converters.size());
+		List<HttpMessageWriter<?>> writers = handler.getMessageWriters();
+		assertEquals(6, writers.size());
 
-		assertHasConverter(converters, ByteBuffer.class, APPLICATION_OCTET_STREAM, APPLICATION_OCTET_STREAM);
-		assertHasConverter(converters, String.class, TEXT_PLAIN, TEXT_PLAIN);
-		assertHasConverter(converters, Resource.class, IMAGE_PNG, IMAGE_PNG);
-		assertHasConverter(converters, TestBean.class, APPLICATION_XML, APPLICATION_XML);
-		assertHasConverter(converters, TestBean.class, APPLICATION_JSON, APPLICATION_JSON);
-		assertHasConverter(converters, TestBean.class, null, MediaType.parseMediaType("text/event-stream"));
+		assertHasMessageWriter(writers, ByteBuffer.class, APPLICATION_OCTET_STREAM);
+		assertHasMessageWriter(writers, String.class, TEXT_PLAIN);
+		assertHasMessageWriter(writers, Resource.class, IMAGE_PNG);
+		assertHasMessageWriter(writers, TestBean.class, APPLICATION_XML);
+		assertHasMessageWriter(writers, TestBean.class, APPLICATION_JSON);
+		assertHasMessageWriter(writers, TestBean.class, null);
 
 		name = "mvcContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
@@ -261,12 +263,18 @@ public class WebReactiveConfigurationTests {
 	}
 
 
-	private void assertHasConverter(List<HttpMessageConverter<?>> converters, Class<?> clazz,
-			MediaType readMediaType, MediaType writeMediaType) {
+	private void assertHasMessageReader(List<HttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
-		assertTrue(converters.stream()
-				.filter(c -> (readMediaType == null || c.canRead(type, readMediaType))
-						&& (writeMediaType == null || c.canWrite(type, writeMediaType)))
+		assertTrue(readers.stream()
+				.filter(c -> mediaType == null || c.canRead(type, mediaType))
+				.findAny()
+				.isPresent());
+	}
+
+	private void assertHasMessageWriter(List<HttpMessageWriter<?>> writers, Class<?> clazz, MediaType mediaType) {
+		ResolvableType type = ResolvableType.forClass(clazz);
+		assertTrue(writers.stream()
+				.filter(c -> mediaType == null || c.canWrite(type, mediaType))
 				.findAny()
 				.isPresent());
 	}
@@ -293,13 +301,23 @@ public class WebReactiveConfigurationTests {
 	static class CustomMessageConverterConfig extends WebReactiveConfiguration {
 
 		@Override
-		protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-			converters.add(new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder()));
+		protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+			messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 		}
 
 		@Override
-		protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-			converters.add(new CodecHttpMessageConverter<>(new Jaxb2Encoder(), new Jaxb2Decoder()));
+		protected void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+			messageWriters.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+		}
+
+		@Override
+		protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+			messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2Decoder()));
+		}
+
+		@Override
+		protected void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
 		}
 	}
 
@@ -309,7 +327,7 @@ public class WebReactiveConfigurationTests {
 		@Override
 		protected void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
-			registry.defaultViews(new HttpMessageConverterView(new JacksonJsonEncoder()));
+			registry.defaultViews(new HttpMessageWriterView(new JacksonJsonEncoder()));
 		}
 
 		@Bean

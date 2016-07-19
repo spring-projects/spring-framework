@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 
 /**
  * Default implementation of the {@link ResponseErrorHandler} interface
@@ -33,13 +33,13 @@ import org.springframework.http.converter.reactive.HttpMessageConverter;
 public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
 	@Override
-	public void handleError(ClientHttpResponse response, List<HttpMessageConverter<?>> messageConverters) {
+	public void handleError(ClientHttpResponse response, List<HttpMessageReader<?>> messageReaders) {
 		HttpStatus responseStatus = response.getStatusCode();
 		if (responseStatus.is4xxClientError()) {
-			throw new WebClientErrorException(response, messageConverters);
+			throw new WebClientErrorException(response, messageReaders);
 		}
 		if (responseStatus.is5xxServerError()) {
-			throw new WebServerErrorException(response, messageConverters);
+			throw new WebServerErrorException(response, messageReaders);
 		}
 	}
 }

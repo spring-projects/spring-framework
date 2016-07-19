@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +32,7 @@ import org.springframework.web.server.ServerWebInputException;
 
 /**
  * Resolves method arguments annotated with {@code @RequestBody} by reading the
- * body of the request through a compatible {@code HttpMessageConverter}.
+ * body of the request through a compatible {@code HttpMessageReader}.
  *
  * <p>An {@code @RequestBody} method argument is also validated if it is
  * annotated with {@code @javax.validation.Valid} or
@@ -44,31 +44,31 @@ import org.springframework.web.server.ServerWebInputException;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class RequestBodyArgumentResolver extends AbstractMessageConverterArgumentResolver
+public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentResolver
 		implements HandlerMethodArgumentResolver {
 
 
 	/**
 	 * Constructor with message converters and a ConversionService.
-	 * @param converters converters for reading the request body with
+	 * @param messageReaders readers for de-serializing the request body with
 	 * @param service for converting to other reactive types from Flux and Mono
 	 */
-	public RequestBodyArgumentResolver(List<HttpMessageConverter<?>> converters,
+	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> messageReaders,
 			ConversionService service) {
 
-		this(converters, service, null);
+		this(messageReaders, service, null);
 	}
 
 	/**
 	 * Constructor with message converters and a ConversionService.
-	 * @param converters converters for reading the request body with
+	 * @param messageReaders readers for de-serializing the request body with
 	 * @param service for converting to other reactive types from Flux and Mono
 	 * @param validator validator to validate decoded objects with
 	 */
-	public RequestBodyArgumentResolver(List<HttpMessageConverter<?>> converters,
+	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> messageReaders,
 			ConversionService service, Validator validator) {
 
-		super(converters, service, validator);
+		super(messageReaders, service, validator);
 	}
 
 

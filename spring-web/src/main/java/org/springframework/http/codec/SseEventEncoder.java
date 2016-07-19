@@ -90,8 +90,7 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 
 			Object data = event.getData();
 			Flux<DataBuffer> dataBuffer = Flux.empty();
-			MediaType mediaType = (event.getMediaType() == null ?
-					MediaType.ALL : event.getMediaType());
+			MediaType mediaType = (event.getMediaType() == null ? MediaType.ALL : event.getMediaType());
 			if (data != null) {
 				sb.append("data:");
 				if (data instanceof String) {

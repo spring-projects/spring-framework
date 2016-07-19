@@ -36,9 +36,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Encoder;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
-import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
+import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
+import org.springframework.http.converter.reactive.ResourceHttpMessageWriter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -62,7 +62,7 @@ import static org.junit.Assert.assertEquals;
  * Unit tests for {@link ResponseBodyResultHandler}.When adding a test also
  * consider whether the logic under test is in a parent class, then see:
  * <ul>
- * 	<li>{@code MessageConverterResultHandlerTests},
+ * 	<li>{@code MessageWriterResultHandlerTests},
  *  <li>{@code ContentNegotiatingResultHandlerSupportTests}
  * </ul>
  *
@@ -86,25 +86,25 @@ public class ResponseBodyResultHandlerTests {
 	}
 
 
-	private ResponseBodyResultHandler createHandler(HttpMessageConverter<?>... converters) {
-		List<HttpMessageConverter<?>> converterList;
-		if (ObjectUtils.isEmpty(converters)) {
-			converterList = new ArrayList<>();
-			converterList.add(new CodecHttpMessageConverter<>(new ByteBufferEncoder()));
-			converterList.add(new CodecHttpMessageConverter<>(new StringEncoder()));
-			converterList.add(new ResourceHttpMessageConverter());
-			converterList.add(new CodecHttpMessageConverter<>(new Jaxb2Encoder()));
-			converterList.add(new CodecHttpMessageConverter<>(new JacksonJsonEncoder()));
+	private ResponseBodyResultHandler createHandler(HttpMessageWriter<?>... writers) {
+		List<HttpMessageWriter<?>> writerList;
+		if (ObjectUtils.isEmpty(writers)) {
+			writerList = new ArrayList<>();
+			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+			writerList.add(new ResourceHttpMessageWriter());
+			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
 		}
 		else {
-			converterList = Arrays.asList(converters);
+			writerList = Arrays.asList(writers);
 		}
 		FormattingConversionService service = new DefaultFormattingConversionService();
 		service.addConverter(new MonoToCompletableFutureConverter());
 		service.addConverter(new ReactorToRxJava1Converter());
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 
-		return new ResponseBodyResultHandler(converterList, new DefaultConversionService(), resolver);
+		return new ResponseBodyResultHandler(writerList, new DefaultConversionService(), resolver);
 	}
 
 	@Test

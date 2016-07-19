@@ -28,8 +28,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.converter.Converter;
@@ -45,9 +45,11 @@ import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Decoder;
 import org.springframework.http.codec.xml.Jaxb2Encoder;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
-import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
+import org.springframework.http.converter.reactive.ResourceHttpMessageWriter;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -87,7 +89,9 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	private PathMatchConfigurer pathMatchConfigurer;
 
-	private List<HttpMessageConverter<?>> messageConverters;
+	private List<HttpMessageReader<?>> messageReaders;
+
+	private List<HttpMessageWriter<?>> messageWriters;
 
 	private ApplicationContext applicationContext;
 
@@ -189,7 +193,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			adapter.setCustomArgumentResolvers(resolvers);
 		}
 
-		adapter.setMessageConverters(getMessageConverters());
+		adapter.setMessageReaders(getMessageReaders());
 		adapter.setConversionService(mvcConversionService());
 		adapter.setValidator(mvcValidator());
 
@@ -210,65 +214,54 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	}
 
 	/**
-	 * Main method to access message converters to use for decoding
-	 * controller method arguments and encoding return values.
-	 * <p>Use {@link #configureMessageConverters} to configure the list or
-	 * {@link #extendMessageConverters} to add in addition to the default ones.
+	 * Main method to access message readers to use for decoding
+	 * controller method arguments with.
+	 * <p>Use {@link #configureMessageReaders} to configure the list or
+	 * {@link #extendMessageReaders} to add in addition to the default ones.
 	 */
-	protected final List<HttpMessageConverter<?>> getMessageConverters() {
-		if (this.messageConverters == null) {
-			this.messageConverters = new ArrayList<>();
-			configureMessageConverters(this.messageConverters);
-			if (this.messageConverters.isEmpty()) {
-				addDefaultHttpMessageConverters(this.messageConverters);
+	protected final List<HttpMessageReader<?>> getMessageReaders() {
+		if (this.messageReaders == null) {
+			this.messageReaders = new ArrayList<>();
+			configureMessageReaders(this.messageReaders);
+			if (this.messageReaders.isEmpty()) {
+				addDefaultHttpMessageReaders(this.messageReaders);
 			}
-			extendMessageConverters(this.messageConverters);
+			extendMessageReaders(this.messageReaders);
 		}
-		return this.messageConverters;
+		return this.messageReaders;
 	}
 
 	/**
-	 * Override to configure the message converters to use for decoding
-	 * controller method arguments and encoding return values.
-	 * <p>If no converters are specified, default will be added via
-	 * {@link #addDefaultHttpMessageConverters}.
-	 * @param converters a list to add converters to, initially an empty
+	 * Override to configure the message readers to use for decoding
+	 * controller method arguments.
+	 * <p>If no message readres are specified, default will be added via
+	 * {@link #addDefaultHttpMessageReaders}.
+	 * @param messageReaders a list to add message readers to, initially an empty
 	 */
-	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
 	}
 
 	/**
 	 * Adds default converters that sub-classes can call from
-	 * {@link #configureMessageConverters(List)}.
+	 * {@link #configureMessageReaders(List)}.
 	 */
-	protected final void addDefaultHttpMessageConverters(List<HttpMessageConverter<?>> converters) {
-		List<Encoder<?>> sseDataEncoders = new ArrayList<>();
-		converters.add(converter(new ByteBufferEncoder(), new ByteBufferDecoder()));
-		converters.add(converter(new StringEncoder(), new StringDecoder()));
-		converters.add(new ResourceHttpMessageConverter());
+	protected final void addDefaultHttpMessageReaders(List<HttpMessageReader<?>> readers) {
+		readers.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
 		if (jaxb2Present) {
-			converters.add(converter(new Jaxb2Encoder(), new Jaxb2Decoder()));
+			readers.add(new DecoderHttpMessageReader<>(new Jaxb2Decoder()));
 		}
 		if (jackson2Present) {
-			JacksonJsonEncoder jacksonEncoder = new JacksonJsonEncoder();
-			JacksonJsonDecoder jacksonDecoder = new JacksonJsonDecoder();
-			converters.add(converter(jacksonEncoder, jacksonDecoder));
-			sseDataEncoders.add(jacksonEncoder);
-		} else {
-
+			readers.add(new DecoderHttpMessageReader<>(new JacksonJsonDecoder()));
 		}
-		converters.add(converter(new SseEventEncoder(sseDataEncoders), null));
-	}
-
-	private static <T> HttpMessageConverter<T> converter(Encoder<T> encoder, Decoder<T> decoder) {
-		return new CodecHttpMessageConverter<>(encoder, decoder);
 	}
 
 	/**
-	 * Override this to modify the list of converters after it has been
+	 * Override this to modify the list of message readers after it has been
 	 * configured, for example to add some in addition to the default ones.
 	 */
-	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+	protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
 	}
 
 	@Bean
@@ -345,14 +338,65 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
-		return new ResponseEntityResultHandler(getMessageConverters(), mvcConversionService(),
+		return new ResponseEntityResultHandler(getMessageWriters(), mvcConversionService(),
 				mvcContentTypeResolver());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(getMessageConverters(), mvcConversionService(),
+		return new ResponseBodyResultHandler(getMessageWriters(), mvcConversionService(),
 				mvcContentTypeResolver());
+	}
+
+	/**
+	 * Main method to access message writers to use for encoding return values.
+	 * <p>Use {@link #configureMessageWriters(List)} to configure the list or
+	 * {@link #extendMessageWriters(List)} to add in addition to the default ones.
+	 */
+	protected final List<HttpMessageWriter<?>> getMessageWriters() {
+		if (this.messageWriters == null) {
+			this.messageWriters = new ArrayList<>();
+			configureMessageWriters(this.messageWriters);
+			if (this.messageWriters.isEmpty()) {
+				addDefaultHttpMessageWriters(this.messageWriters);
+			}
+			extendMessageWriters(this.messageWriters);
+		}
+		return this.messageWriters;
+	}
+	/**
+	 * Override to configure the message writers to use for encoding
+	 * return values.
+	 * <p>If no message readers are specified, default will be added via
+	 * {@link #addDefaultHttpMessageWriters}.
+	 * @param messageWriters a list to add message writers to, initially an empty
+	 */
+	protected void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+	}
+	/**
+	 * Adds default converters that sub-classes can call from
+	 * {@link #configureMessageWriters(List)}.
+	 */
+	protected final void addDefaultHttpMessageWriters(List<HttpMessageWriter<?>> writers) {
+		List<Encoder<?>> sseDataEncoders = new ArrayList<>();
+		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
+		writers.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+		writers.add(new ResourceHttpMessageWriter());
+		if (jaxb2Present) {
+			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
+		}
+		if (jackson2Present) {
+			JacksonJsonEncoder jacksonEncoder = new JacksonJsonEncoder();
+			writers.add(new EncoderHttpMessageWriter<>(jacksonEncoder));
+			sseDataEncoders.add(jacksonEncoder);
+		}
+		writers.add(new EncoderHttpMessageWriter<>(new SseEventEncoder(sseDataEncoders)));
+	}
+	/**
+	 * Override this to modify the list of message writers after it has been
+	 * configured, for example to add some in addition to the default ones.
+	 */
+	protected void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
 	}
 
 	@Bean

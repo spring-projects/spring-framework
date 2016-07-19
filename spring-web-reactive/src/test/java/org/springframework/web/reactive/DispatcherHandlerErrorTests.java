@@ -36,7 +36,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
+import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
@@ -197,7 +197,7 @@ public class DispatcherHandlerErrorTests {
 		@Bean
 		public ResponseBodyResultHandler resultHandler() {
 			return new ResponseBodyResultHandler(
-					Collections.singletonList(new CodecHttpMessageConverter<>(new StringEncoder())),
+					Collections.singletonList(new EncoderHttpMessageWriter<>(new StringEncoder())),
 					new DefaultConversionService());
 		}
 

@@ -18,7 +18,8 @@ package org.springframework.web.client.reactive;
 
 import java.util.List;
 
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
 
 /**
  * Interface that makes the {@link WebClient} configuration information
@@ -30,9 +31,14 @@ import org.springframework.http.converter.reactive.HttpMessageConverter;
 public interface WebClientConfig {
 
 	/**
-	 * Return the message converters that can help encoding/decoding the HTTP message body
+	 * Return the message readers that can help decoding the HTTP response body
 	 */
-	List<HttpMessageConverter<?>> getMessageConverters();
+	List<HttpMessageReader<?>> getMessageReaders();
+
+	/**
+	 * Return the message writers that can help encode the HTTP request body
+	 */
+	List<HttpMessageWriter<?>> getMessageWriters();
 
 	/**
 	 * Return the configured {@link ResponseErrorHandler}

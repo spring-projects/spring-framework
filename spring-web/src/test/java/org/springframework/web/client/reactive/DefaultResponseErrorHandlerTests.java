@@ -1,11 +1,5 @@
 package org.springframework.web.client.reactive;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
-import static org.springframework.web.client.reactive.ResponseExtractors.*;
-
 import java.util.Collections;
 import java.util.List;
 
@@ -15,15 +9,21 @@ import reactor.core.publisher.Flux;
 import reactor.test.TestSubscriber;
 
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageReader;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.springframework.web.client.reactive.ResponseExtractors.as;
 
 /**
  * Unit tests for {@link DefaultResponseErrorHandler}.
@@ -36,20 +36,20 @@ public class DefaultResponseErrorHandlerTests {
 
 	private ClientHttpResponse response;
 
-	private List<HttpMessageConverter<?>> messageConverters;
+	private List<HttpMessageReader<?>> messageReaders;
 
 	@Before
 	public void setUp() throws Exception {
 		this.errorHandler = new DefaultResponseErrorHandler();
 		this.response = mock(ClientHttpResponse.class);
-		this.messageConverters = Collections
-				.singletonList(new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder()));
+		this.messageReaders = Collections
+				.singletonList(new DecoderHttpMessageReader<>(new StringDecoder()));
 	}
 
 	@Test
 	public void noError() throws Exception {
 		given(this.response.getStatusCode()).willReturn(HttpStatus.OK);
-		this.errorHandler.handleError(this.response, this.messageConverters);
+		this.errorHandler.handleError(this.response, this.messageReaders);
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class DefaultResponseErrorHandlerTests {
 		given(this.response.getHeaders()).willReturn(headers);
 		given(this.response.getBody()).willReturn(Flux.just(buffer));
 		try {
-			this.errorHandler.handleError(this.response, this.messageConverters);
+			this.errorHandler.handleError(this.response, this.messageReaders);
 			fail("expected HttpClientErrorException");
 		}
 		catch (WebClientErrorException exc) {
@@ -84,7 +84,7 @@ public class DefaultResponseErrorHandlerTests {
 		given(this.response.getHeaders()).willReturn(headers);
 		given(this.response.getBody()).willReturn(Flux.just(buffer));
 		try {
-			this.errorHandler.handleError(this.response, this.messageConverters);
+			this.errorHandler.handleError(this.response, this.messageReaders);
 			fail("expected HttpServerErrorException");
 		}
 		catch (WebServerErrorException exc) {

@@ -24,68 +24,35 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ReactiveHttpOutputMessage;
 
 /**
- * Implementation of the {@link HttpMessageConverter} interface that delegates to
- * {@link Encoder} and {@link Decoder}.
+ * Implementation of the {@link HttpMessageWriter} interface that delegates to
+ * an {@link Encoder}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
+public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private final Encoder<T> encoder;
-
-	private final Decoder<T> decoder;
-
-	private final List<MediaType> readableMediaTypes;
 
 	private final List<MediaType> writableMediaTypes;
 
 
 	/**
-	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder}. When
-	 * using this constructor, all read-related methods will in {@code false} or an
-	 * {@link IllegalStateException}.
+	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder}.
 	 * @param encoder the encoder to use
 	 */
-	public CodecHttpMessageConverter(Encoder<T> encoder) {
-		this(encoder, null);
-	}
-
-	/**
-	 * Create a {@code CodecHttpMessageConverter} with the given {@link Decoder}. When
-	 * using this constructor, all write-related methods will in {@code false} or an
-	 * {@link IllegalStateException}.
-	 * @param decoder the decoder to use
-	 */
-	public CodecHttpMessageConverter(Decoder<T> decoder) {
-		this(null, decoder);
-	}
-
-	/**
-	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder} and
-	 * {@link Decoder}.
-	 * @param encoder the encoder to use, can be {@code null}
-	 * @param decoder the decoder to use, can be {@code null}
-	 */
-	public CodecHttpMessageConverter(Encoder<T> encoder, Decoder<T> decoder) {
+	public EncoderHttpMessageWriter(Encoder<T> encoder) {
 		this.encoder = encoder;
-		this.decoder = decoder;
-
-		this.readableMediaTypes = decoder != null ?
-				MediaType.toMediaTypes(decoder.getDecodableMimeTypes()) :
-				Collections.emptyList();
 		this.writableMediaTypes = encoder != null ?
 				MediaType.toMediaTypes(encoder.getEncodableMimeTypes()) :
 				Collections.emptyList();
@@ -93,47 +60,13 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 
 
 	@Override
-	public boolean canRead(ResolvableType type, MediaType mediaType) {
-		return this.decoder != null && this.decoder.canDecode(type, mediaType);
-	}
-
-	@Override
 	public boolean canWrite(ResolvableType type, MediaType mediaType) {
 		return this.encoder != null && this.encoder.canEncode(type, mediaType);
 	}
 
 	@Override
-	public List<MediaType> getReadableMediaTypes() {
-		return this.readableMediaTypes;
-	}
-
-	@Override
 	public List<MediaType> getWritableMediaTypes() {
 		return this.writableMediaTypes;
-	}
-
-
-	@Override
-	public Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
-		if (this.decoder == null) {
-			return Flux.error(new IllegalStateException("No decoder set"));
-		}
-		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decode(inputMessage.getBody(), type, contentType);
-	}
-
-	@Override
-	public Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
-		if (this.decoder == null) {
-			return Mono.error(new IllegalStateException("No decoder set"));
-		}
-		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decodeToMono(inputMessage.getBody(), type, contentType);
-	}
-
-	private MediaType getContentType(ReactiveHttpInputMessage inputMessage) {
-		MediaType contentType = inputMessage.getHeaders().getContentType();
-		return (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 	}
 
 

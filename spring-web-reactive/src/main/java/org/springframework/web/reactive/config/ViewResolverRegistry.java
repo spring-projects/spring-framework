@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.reactive.result.view.HttpMessageWriterView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.ViewResolver;
@@ -97,9 +98,9 @@ public class ViewResolverRegistry {
 	/**
 	 * Set default views associated with any view name and selected based on the
 	 * best match for the requested content type.
-	 * <p>Use {@link org.springframework.web.reactive.result.view.HttpMessageConverterView
-	 * HttpMessageConverterView} to adapt and use any existing
-	 * {@code HttpMessageConverter} (e.g. JSON, XML) as a {@code View}.
+	 * <p>Use {@link HttpMessageWriterView
+	 * HttpMessageWriterView} to adapt and use any existing
+	 * {@code HttpMessageWriter} (e.g. JSON, XML) as a {@code View}.
 	 */
 	public void defaultViews(View... defaultViews) {
 		this.defaultViews.addAll(Arrays.asList(defaultViews));

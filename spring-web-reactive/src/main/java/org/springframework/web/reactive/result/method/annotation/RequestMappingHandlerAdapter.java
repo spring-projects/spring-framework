@@ -35,8 +35,8 @@ import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
@@ -64,7 +64,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private List<HandlerMethodArgumentResolver> argumentResolvers;
 
-	private final List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(10);
+	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(10);
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -77,8 +77,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 
 	public RequestMappingHandlerAdapter() {
-		this.messageConverters.add(new CodecHttpMessageConverter<>(new ByteBufferDecoder()));
-		this.messageConverters.add(new CodecHttpMessageConverter<>(new StringDecoder()));
+		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		this.messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 	}
 
 
@@ -112,18 +112,18 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	}
 
 	/**
-	 * Configure message converters to read the request body with.
+	 * Configure message readers to de-serialize the request body with.
 	 */
-	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		this.messageConverters.clear();
-		this.messageConverters.addAll(messageConverters);
+	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		this.messageReaders.clear();
+		this.messageReaders.addAll(messageReaders);
 	}
 
 	/**
-	 * Return the configured message converters.
+	 * Return the configured message readers.
 	 */
-	public List<HttpMessageConverter<?>> getMessageConverters() {
-		return this.messageConverters;
+	public List<HttpMessageReader<?>> getMessageReaders() {
+		return this.messageReaders;
 	}
 
 	/**
@@ -193,7 +193,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver(cs, getBeanFactory()));
 		resolvers.add(new PathVariableMapMethodArgumentResolver());
-		resolvers.add(new RequestBodyArgumentResolver(getMessageConverters(), cs, getValidator()));
+		resolvers.add(new RequestBodyArgumentResolver(getMessageReaders(), cs, getValidator()));
 		resolvers.add(new RequestHeaderMethodArgumentResolver(cs, getBeanFactory()));
 		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
 		resolvers.add(new CookieValueMethodArgumentResolver(cs, getBeanFactory()));

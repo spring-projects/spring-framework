@@ -1,24 +1,17 @@
 package org.springframework.web.client.reactive;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
-
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.TestSubscriber;
-import reactor.core.Exceptions;
 
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
@@ -27,9 +20,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageReader;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ResponseExtractors}.
@@ -42,7 +44,7 @@ public class ResponseExtractorsTests {
 
 	private ClientHttpResponse response;
 
-	private List<HttpMessageConverter<?>> messageConverters;
+	private List<HttpMessageReader<?>> messageReaders;
 
 	private WebClientConfig webClientConfig;
 
@@ -53,12 +55,12 @@ public class ResponseExtractorsTests {
 		this.headers = new HttpHeaders();
 		this.response = mock(ClientHttpResponse.class);
 		given(this.response.getHeaders()).willReturn(headers);
-		this.messageConverters = Arrays.asList(
-				new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder()),
-				new CodecHttpMessageConverter<>(new JacksonJsonEncoder(), new JacksonJsonDecoder()));
+		this.messageReaders = Arrays.asList(
+				new DecoderHttpMessageReader<>(new StringDecoder()),
+				new DecoderHttpMessageReader<>(new JacksonJsonDecoder()));
 		this.webClientConfig = mock(WebClientConfig.class);
 		this.errorHandler = mock(ResponseErrorHandler.class);
-		given(this.webClientConfig.getMessageConverters()).willReturn(this.messageConverters);
+		given(this.webClientConfig.getMessageReaders()).willReturn(this.messageReaders);
 		given(this.webClientConfig.getResponseErrorHandler()).willReturn(this.errorHandler);
 	}
 
@@ -182,7 +184,7 @@ public class ResponseExtractorsTests {
 				.assertValueCount(1)
 				.assertComplete();
 
-		then(this.errorHandler).should().handleError(eq(this.response), eq(this.messageConverters));
+		then(this.errorHandler).should().handleError(eq(this.response), eq(this.messageReaders));
 	}
 
 

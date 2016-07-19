@@ -27,7 +27,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -37,43 +37,43 @@ import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Abstract base class for result handlers that handle return values by writing
- * to the response with {@link HttpMessageConverter}.
+ * to the response with {@link HttpMessageWriter}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractMessageConverterResultHandler extends ContentNegotiatingResultHandlerSupport {
+public abstract class AbstractMessageWriterResultHandler extends ContentNegotiatingResultHandlerSupport {
 
 	protected static final TypeDescriptor MONO_TYPE = TypeDescriptor.valueOf(Mono.class);
 
 	protected static final TypeDescriptor FLUX_TYPE = TypeDescriptor.valueOf(Flux.class);
 
 
-	private final List<HttpMessageConverter<?>> messageConverters;
+	private final List<HttpMessageWriter<?>> messageWriters;
 
 
 	/**
 	 * Constructor with message converters, a {@code ConversionService}, and a
 	 * {@code RequestedContentTypeResolver}.
 	 *
-	 * @param converters converters for writing the response body with
+	 * @param messageWriters for serializing Objects to the response body stream
 	 * @param conversionService for converting other reactive types (e.g.
 	 * rx.Observable, rx.Single, etc.) to Flux or Mono
 	 * @param contentTypeResolver for resolving the requested content type
 	 */
-	protected AbstractMessageConverterResultHandler(List<HttpMessageConverter<?>> converters,
+	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			ConversionService conversionService, RequestedContentTypeResolver contentTypeResolver) {
 
 		super(conversionService, contentTypeResolver);
-		Assert.notEmpty(converters, "At least one message converter is required.");
-		this.messageConverters = converters;
+		Assert.notEmpty(messageWriters, "At least one message writer is required.");
+		this.messageWriters = messageWriters;
 	}
 
 	/**
 	 * Return the configured message converters.
 	 */
-	public List<HttpMessageConverter<?>> getMessageConverters() {
-		return this.messageConverters;
+	public List<HttpMessageWriter<?>> getMessageWriters() {
+		return this.messageWriters;
 	}
 
 
@@ -118,10 +118,10 @@ public abstract class AbstractMessageConverterResultHandler extends ContentNegot
 		MediaType bestMediaType = selectMediaType(exchange, producibleTypes);
 
 		if (bestMediaType != null) {
-			for (HttpMessageConverter<?> converter : getMessageConverters()) {
-				if (converter.canWrite(elementType, bestMediaType)) {
+			for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
+				if (messageWriter.canWrite(elementType, bestMediaType)) {
 					ServerHttpResponse response = exchange.getResponse();
-					return converter.write((Publisher) publisher, elementType, bestMediaType, response);
+					return messageWriter.write((Publisher) publisher, elementType, bestMediaType, response);
 				}
 			}
 		}
@@ -130,7 +130,7 @@ public abstract class AbstractMessageConverterResultHandler extends ContentNegot
 	}
 
 	private List<MediaType> getProducibleMediaTypes(ResolvableType elementType) {
-		return getMessageConverters().stream()
+		return getMessageWriters().stream()
 				.filter(converter -> converter.canWrite(elementType, null))
 				.flatMap(converter -> converter.getWritableMediaTypes().stream())
 				.collect(Collectors.toList());

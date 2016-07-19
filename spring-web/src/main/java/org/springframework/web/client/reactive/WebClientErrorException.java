@@ -19,7 +19,7 @@ package org.springframework.web.client.reactive;
 import java.util.List;
 
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 
 /**
  * Exception thrown when an HTTP 4xx is received.
@@ -33,14 +33,14 @@ public class WebClientErrorException extends WebClientResponseException {
 
 	/**
 	 * Construct a new instance of {@code HttpClientErrorException} based on a
-	 * {@link ClientHttpResponse} and {@link HttpMessageConverter}s to optionally
+	 * {@link ClientHttpResponse} and {@link HttpMessageReader}s to optionally
 	 * help decoding the response body
 	 *
 	 * @param response the HTTP response
-	 * @param converters the message converters that may decode the HTTP response body
+	 * @param messageReaders the message converters that may decode the HTTP response body
 	 */
-	public WebClientErrorException(ClientHttpResponse response, List<HttpMessageConverter<?>> converters) {
-		super(initMessage(response), response, converters);
+	public WebClientErrorException(ClientHttpResponse response, List<HttpMessageReader<?>> messageReaders) {
+		super(initMessage(response), response, messageReaders);
 	}
 
 	private static String initMessage(ClientHttpResponse response) {

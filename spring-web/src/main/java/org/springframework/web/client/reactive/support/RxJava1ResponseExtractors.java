@@ -29,7 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.web.client.reactive.BodyExtractor;
 import org.springframework.web.client.reactive.ResponseExtractor;
 import org.springframework.web.client.reactive.WebClientException;
@@ -53,8 +53,8 @@ public class RxJava1ResponseExtractors {
 		return (clientResponse, webClientConfig) -> (Single<T>) RxJava1Adapter
 				.publisherToSingle(clientResponse
 						.doOnNext(response -> webClientConfig.getResponseErrorHandler()
-								.handleError(response, webClientConfig.getMessageConverters()))
-						.flatMap(resp -> decodeResponseBodyAsMono(resp, bodyType, webClientConfig.getMessageConverters())));
+								.handleError(response, webClientConfig.getMessageReaders()))
+						.flatMap(resp -> decodeResponseBodyAsMono(resp, bodyType, webClientConfig.getMessageReaders())));
 	}
 
 	/**
@@ -95,8 +95,8 @@ public class RxJava1ResponseExtractors {
 		return (clientResponse, webClientConfig) -> RxJava1Adapter
 				.publisherToObservable(clientResponse
 						.doOnNext(response -> webClientConfig.getResponseErrorHandler()
-								.handleError(response, webClientConfig.getMessageConverters()))
-						.flatMap(resp -> decodeResponseBody(resp, bodyType, webClientConfig.getMessageConverters())));
+								.handleError(response, webClientConfig.getMessageReaders()))
+						.flatMap(resp -> decodeResponseBody(resp, bodyType, webClientConfig.getMessageReaders())));
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class RxJava1ResponseExtractors {
 				RxJava1Adapter.publisherToSingle(clientResponse
 						.then(response ->
 								Mono.when(
-										decodeResponseBody(response, bodyType, webClientConfig.getMessageConverters()).next(),
+										decodeResponseBody(response, bodyType, webClientConfig.getMessageReaders()).next(),
 										Mono.just(response.getHeaders()),
 										Mono.just(response.getStatusCode())))
 						.map(tuple ->
@@ -174,7 +174,7 @@ public class RxJava1ResponseExtractors {
 		return (clientResponse, webClientConfig) -> RxJava1Adapter.publisherToSingle(clientResponse
 				.map(response -> new ResponseEntity<>(
 								RxJava1Adapter
-								.publisherToObservable(decodeResponseBody(response, bodyType, webClientConfig.getMessageConverters())),
+								.publisherToObservable(decodeResponseBody(response, bodyType, webClientConfig.getMessageReaders())),
 						response.getHeaders(),
 						response.getStatusCode())));
 	}
@@ -189,26 +189,26 @@ public class RxJava1ResponseExtractors {
 
 	@SuppressWarnings("unchecked")
 	protected static <T> Flux<T> decodeResponseBody(ClientHttpResponse response,
-			ResolvableType responseType, List<HttpMessageConverter<?>> messageConverters) {
+			ResolvableType responseType, List<HttpMessageReader<?>> messageReaders) {
 
 		MediaType contentType = response.getHeaders().getContentType();
-		HttpMessageConverter<?> converter = resolveConverter(messageConverters, responseType, contentType);
+		HttpMessageReader<?> converter = resolveMessageReader(messageReaders, responseType, contentType);
 		return (Flux<T>) converter.read(responseType, response);
 	}
 
 	@SuppressWarnings("unchecked")
 	protected static <T> Mono<T> decodeResponseBodyAsMono(ClientHttpResponse response,
-			ResolvableType responseType, List<HttpMessageConverter<?>> messageConverters) {
+			ResolvableType responseType, List<HttpMessageReader<?>> messageReaders) {
 
 		MediaType contentType = response.getHeaders().getContentType();
-		HttpMessageConverter<?> converter = resolveConverter(messageConverters, responseType, contentType);
+		HttpMessageReader<?> converter = resolveMessageReader(messageReaders, responseType, contentType);
 		return (Mono<T>) converter.readMono(responseType, response);
 	}
 
-	protected static HttpMessageConverter<?> resolveConverter(
-			List<HttpMessageConverter<?>> messageConverters, ResolvableType responseType, MediaType contentType) {
+	protected static HttpMessageReader<?> resolveMessageReader(List<HttpMessageReader<?>> messageReaders,
+			ResolvableType responseType, MediaType contentType) {
 
-		return messageConverters.stream()
+		return messageReaders.stream()
 				.filter(e -> e.canRead(responseType, contentType))
 				.findFirst()
 				.orElseThrow(() ->

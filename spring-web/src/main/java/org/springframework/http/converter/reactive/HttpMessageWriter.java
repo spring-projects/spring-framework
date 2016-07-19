@@ -19,57 +19,21 @@ package org.springframework.http.converter.reactive;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
-import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ReactiveHttpOutputMessage;
 
 /**
- * Strategy interface that specifies a converter that can convert from and to HTTP
- * requests and responses.
+ * Strategy interface that specifies a converter that can convert a stream of
+ * Objects to a stream of bytes to be written to the HTTP response body.
  *
+ * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @since 5.0
  */
-public interface HttpMessageConverter<T> {
-
-	/**
-	 * Indicates whether the given class can be read by this converter.
-	 * @param type the type to test for readability
-	 * @param mediaType the media type to read, can be {@code null} if not specified.
-	 * Typically the value of a {@code Content-Type} header.
-	 * @return {@code true} if readable; {@code false} otherwise
-	 */
-	boolean canRead(ResolvableType type, MediaType mediaType);
-
-	/**
-	 * Return the list of {@link MediaType} objects that can be read by this converter.
-	 * @return the list of supported readable media types
-	 */
-	List<MediaType> getReadableMediaTypes();
-
-	/**
-	 * Read a {@link Flux} of the given type form the given input message, and returns it.
-	 * @param type the type of object to return. This type must have previously been
-	 * passed to the {@link #canRead canRead} method of this interface, which must have
-	 * returned {@code true}.
-	 * @param inputMessage the HTTP input message to read from
-	 * @return the converted {@link Flux} of elements
-	 */
-	Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage);
-
-	/**
-	 * Read a {@link Mono} of the given type form the given input message, and returns it.
-	 * @param type the type of object to return. This type must have previously been
-	 * passed to the {@link #canRead canRead} method of this interface, which must have
-	 * returned {@code true}.
-	 * @param inputMessage the HTTP input message to read from
-	 * @return the converted {@link Mono} of object
-	 */
-	Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage);
+public interface HttpMessageWriter<T> {
 
 	/**
 	 * Indicates whether the given class can be written by this converter.

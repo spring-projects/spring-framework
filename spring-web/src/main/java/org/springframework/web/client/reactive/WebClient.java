@@ -25,29 +25,29 @@ import java.util.function.Function;
 import java.util.logging.Level;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.http.codec.json.JacksonJsonDecoder;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Decoder;
 import org.springframework.http.codec.xml.Jaxb2Encoder;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
-import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
+import org.springframework.http.converter.reactive.ResourceHttpMessageWriter;
 import org.springframework.util.ClassUtils;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Reactive Web client supporting the HTTP/1.1 protocol
@@ -96,6 +96,7 @@ public final class WebClient {
 
 	private final DefaultWebClientConfig webClientConfig;
 
+
 	/**
 	 * Create a {@code WebClient} instance, using the {@link ClientHttpConnector}
 	 * implementation given as an argument to drive the underlying
@@ -114,39 +115,54 @@ public final class WebClient {
 	public WebClient(ClientHttpConnector clientHttpConnector) {
 		this.clientHttpConnector = clientHttpConnector;
 		this.webClientConfig = new DefaultWebClientConfig();
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		addDefaultHttpMessageConverters(converters);
-		this.webClientConfig.setMessageConverters(converters);
 		this.webClientConfig.setResponseErrorHandler(new DefaultResponseErrorHandler());
 	}
 
 	/**
-	 * Adds default HTTP message converters
+	 * Adds default HTTP message readers.
 	 */
-	protected final void addDefaultHttpMessageConverters(
-			List<HttpMessageConverter<?>> converters) {
-		converters.add(converter(new ByteBufferEncoder(), new ByteBufferDecoder()));
-		converters.add(converter(new StringEncoder(), new StringDecoder()));
-		converters.add(new ResourceHttpMessageConverter());
+	protected final void addDefaultHttpMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder(false)));
+		messageReaders.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
 		if (jaxb2Present) {
-			converters.add(converter(new Jaxb2Encoder(), new Jaxb2Decoder()));
+			messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2Decoder()));
 		}
 		if (jackson2Present) {
-			converters.add(converter(new JacksonJsonEncoder(), new JacksonJsonDecoder()));
+			messageReaders.add(new DecoderHttpMessageReader<>(new JacksonJsonDecoder()));
 		}
-	}
-
-	private static <T> HttpMessageConverter<T> converter(Encoder<T> encoder,
-			Decoder<T> decoder) {
-		return new CodecHttpMessageConverter<>(encoder, decoder);
 	}
 
 	/**
-	 * Set the list of {@link HttpMessageConverter}s to use for encoding and decoding HTTP
-	 * messages
+	 * Adds default HTTP message writers.
 	 */
-	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		this.webClientConfig.setMessageConverters(messageConverters);
+	protected final void addDefaultHttpMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
+		messageWriters.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+		messageWriters.add(new ResourceHttpMessageWriter());
+		if (jaxb2Present) {
+			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
+		}
+		if (jackson2Present) {
+			messageWriters.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
+		}
+	}
+
+
+	/**
+	 * Set the list of {@link HttpMessageReader}s to use for decoding the HTTP
+	 * response body.
+	 */
+	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		this.webClientConfig.setMessageReaders(messageReaders);
+	}
+
+	/**
+	 * Set the list of {@link HttpMessageWriter}s to use for encoding the HTTP
+	 * request body.
+	 */
+	public void setMessageWriters(List<HttpMessageWriter<?>> messageWrters) {
+		this.webClientConfig.setMessageWriters(messageWrters);
 	}
 
 	/**
@@ -163,7 +179,7 @@ public final class WebClient {
 	 * Requesting from the exposed {@code Flux} will result in:
 	 * <ul>
 	 * <li>building the actual HTTP request using the provided {@code ClientWebRequestBuilder}</li>
-	 * <li>encoding the HTTP request body with the configured {@code HttpMessageConverter}s</li>
+	 * <li>encoding the HTTP request body with the configured {@code HttpMessageWriter}s</li>
 	 * <li>returning the response with a publisher of the body</li>
 	 * </ul>
 	 */
@@ -191,17 +207,36 @@ public final class WebClient {
 
 	protected class DefaultWebClientConfig implements WebClientConfig {
 
-		private List<HttpMessageConverter<?>> messageConverters;
+		private List<HttpMessageReader<?>> messageReaders;
+
+		private List<HttpMessageWriter<?>> messageWriters;
 
 		private ResponseErrorHandler responseErrorHandler;
 
-		@Override
-		public List<HttpMessageConverter<?>> getMessageConverters() {
-			return messageConverters;
+
+		public DefaultWebClientConfig() {
+			this.messageReaders = new ArrayList<>();
+			addDefaultHttpMessageReaders(this.messageReaders);
+			this.messageWriters = new ArrayList<>();
+			addDefaultHttpMessageWriters(this.messageWriters);
 		}
 
-		public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-			this.messageConverters = messageConverters;
+		@Override
+		public List<HttpMessageReader<?>> getMessageReaders() {
+			return this.messageReaders;
+		}
+
+		public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+			this.messageReaders = messageReaders;
+		}
+
+		@Override
+		public List<HttpMessageWriter<?>> getMessageWriters() {
+			return this.messageWriters;
+		}
+
+		public void setMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+			this.messageWriters = messageWriters;
 		}
 
 		@Override
@@ -218,9 +253,11 @@ public final class WebClient {
 
 		private final ClientWebRequest clientWebRequest;
 
+
 		public DefaultRequestCallback(ClientWebRequest clientWebRequest) {
 			this.clientWebRequest = clientWebRequest;
 		}
+
 
 		@Override
 		public Mono<Void> apply(ClientHttpRequest clientHttpRequest) {
@@ -229,13 +266,13 @@ public final class WebClient {
 				clientHttpRequest.getHeaders().setAccept(
 						Collections.singletonList(MediaType.ALL));
 			}
-			clientWebRequest.getCookies().values()
+			this.clientWebRequest.getCookies().values()
 					.stream().flatMap(cookies -> cookies.stream())
 					.forEach(cookie -> clientHttpRequest.getCookies().add(cookie.getName(), cookie));
 			if (this.clientWebRequest.getBody() != null) {
 				return writeRequestBody(this.clientWebRequest.getBody(),
 						this.clientWebRequest.getElementType(),
-						clientHttpRequest, webClientConfig.getMessageConverters());
+						clientHttpRequest, WebClient.this.webClientConfig.getMessageWriters());
 			}
 			else {
 				return clientHttpRequest.setComplete();
@@ -245,22 +282,22 @@ public final class WebClient {
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		protected Mono<Void> writeRequestBody(Publisher<?> content,
 				ResolvableType requestType, ClientHttpRequest request,
-				List<HttpMessageConverter<?>> messageConverters) {
+				List<HttpMessageWriter<?>> messageWriters) {
 
 			MediaType contentType = request.getHeaders().getContentType();
-			Optional<HttpMessageConverter<?>> converter = resolveConverter(messageConverters, requestType, contentType);
-			if (!converter.isPresent()) {
+			Optional<HttpMessageWriter<?>> messageWriter = resolveWriter(messageWriters, requestType, contentType);
+			if (!messageWriter.isPresent()) {
 				return Mono.error(new IllegalStateException(
 						"Could not encode request body of type '" + contentType
 								+ "' with target type '" + requestType.toString() + "'"));
 			}
-			return converter.get().write((Publisher) content, requestType, contentType, request);
+			return messageWriter.get().write((Publisher) content, requestType, contentType, request);
 		}
 
-		protected Optional<HttpMessageConverter<?>> resolveConverter(
-				List<HttpMessageConverter<?>> messageConverters, ResolvableType type,
-				MediaType mediaType) {
-			return messageConverters.stream().filter(e -> e.canWrite(type, mediaType)).findFirst();
+		protected Optional<HttpMessageWriter<?>> resolveWriter(List<HttpMessageWriter<?>> messageWriters,
+				ResolvableType type, MediaType mediaType) {
+
+			return messageWriters.stream().filter(e -> e.canWrite(type, mediaType)).findFirst();
 		}
 	}
 

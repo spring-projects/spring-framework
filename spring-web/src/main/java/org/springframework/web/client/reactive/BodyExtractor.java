@@ -19,7 +19,7 @@ package org.springframework.web.client.reactive;
 import java.util.List;
 
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 
 /**
  * Contract to extract the content of a raw {@link ClientHttpResponse} decoding
@@ -36,9 +36,9 @@ public interface BodyExtractor<T> {
 	/**
 	 * Extract content from the response body
 	 * @param clientResponse the raw HTTP response
-	 * @param messageConverters the message converters that decode the response body
+	 * @param messageReaders the message readers that decode the response body
 	 * @return the relevant content
 	 */
-	T extract(ClientHttpResponse clientResponse, List<HttpMessageConverter<?>> messageConverters);
+	T extract(ClientHttpResponse clientResponse, List<HttpMessageReader<?>> messageReaders);
 
 }

@@ -49,9 +49,9 @@ import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Encoder;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
-import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
+import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
+import org.springframework.http.converter.reactive.ResourceHttpMessageWriter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -70,12 +70,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
- * Unit tests for {@link AbstractMessageConverterResultHandler}.
+ * Unit tests for {@link AbstractMessageWriterResultHandler}.
  * @author Rossen Stoyanchev
  */
-public class MessageConverterResultHandlerTests {
+public class MessageWriterResultHandlerTests {
 
-	private AbstractMessageConverterResultHandler resultHandler;
+	private AbstractMessageWriterResultHandler resultHandler;
 
 	private MockServerHttpResponse response = new MockServerHttpResponse();
 
@@ -131,8 +131,8 @@ public class MessageConverterResultHandlerTests {
 		ByteArrayOutputStream body = new ByteArrayOutputStream();
 		ResolvableType type = ResolvableType.forType(OutputStream.class);
 
-		HttpMessageConverter<?> converter = new CodecHttpMessageConverter<>(new ByteBufferEncoder());
-		Mono<Void> mono = createResultHandler(converter).writeBody(this.exchange, body, type, returnType(type));
+		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
+		Mono<Void> mono = createResultHandler(writer).writeBody(this.exchange, body, type, returnType(type));
 
 		TestSubscriber.subscribe(mono).assertError(IllegalStateException.class);
 	}
@@ -175,18 +175,18 @@ public class MessageConverterResultHandlerTests {
 		return ResolvableMethod.onClass(TestController.class).returning(bodyType).resolveReturnType();
 	}
 
-	private AbstractMessageConverterResultHandler createResultHandler(HttpMessageConverter<?>... converters) {
-		List<HttpMessageConverter<?>> converterList;
-		if (ObjectUtils.isEmpty(converters)) {
-			converterList = new ArrayList<>();
-			converterList.add(new CodecHttpMessageConverter<>(new ByteBufferEncoder()));
-			converterList.add(new CodecHttpMessageConverter<>(new StringEncoder()));
-			converterList.add(new ResourceHttpMessageConverter());
-			converterList.add(new CodecHttpMessageConverter<>(new Jaxb2Encoder()));
-			converterList.add(new CodecHttpMessageConverter<>(new JacksonJsonEncoder()));
+	private AbstractMessageWriterResultHandler createResultHandler(HttpMessageWriter<?>... writers) {
+		List<HttpMessageWriter<?>> writerList;
+		if (ObjectUtils.isEmpty(writers)) {
+			writerList = new ArrayList<>();
+			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+			writerList.add(new ResourceHttpMessageWriter());
+			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
 		}
 		else {
-			converterList = Arrays.asList(converters);
+			writerList = Arrays.asList(writers);
 		}
 
 		GenericConversionService service = new GenericConversionService();
@@ -195,7 +195,7 @@ public class MessageConverterResultHandlerTests {
 
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
 
-		return new AbstractMessageConverterResultHandler(converterList, service, resolver) {};
+		return new AbstractMessageWriterResultHandler(writerList, service, resolver) {};
 	}
 
 	private void assertResponseBody(String responseBody) {

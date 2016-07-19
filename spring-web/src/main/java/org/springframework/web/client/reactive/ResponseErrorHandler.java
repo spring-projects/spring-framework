@@ -19,7 +19,7 @@ package org.springframework.web.client.reactive;
 import java.util.List;
 
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 
 /**
  * Strategy interface used by the {@link WebClient} to handle errors in
@@ -37,6 +37,6 @@ public interface ResponseErrorHandler {
 	 * {@link ClientHttpResponse#getStatusCode() HttpStatus} of the response and
 	 * throw {@link WebClientException}s in case of errors.
 	 */
-	void handleError(ClientHttpResponse response, List<HttpMessageConverter<?>> messageConverters);
+	void handleError(ClientHttpResponse response, List<HttpMessageReader<?>> messageReaders);
 
 }

@@ -27,7 +27,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -44,7 +44,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class ResponseEntityResultHandler extends AbstractMessageConverterResultHandler
+public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler
 		implements HandlerResultHandler {
 
 	/**
@@ -52,28 +52,28 @@ public class ResponseEntityResultHandler extends AbstractMessageConverterResultH
 	 * and creating a {@link HeaderContentTypeResolver}, i.e. using Accept header
 	 * to determine the requested content type.
 	 *
-	 * @param converters converters for writing the response body with
+	 * @param messageWriters writers for serializing to the response body stream
 	 * @param conversionService for converting to Flux and Mono from other reactive types
 	 */
-	public ResponseEntityResultHandler(List<HttpMessageConverter<?>> converters,
+	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			ConversionService conversionService) {
 
-		this(converters, conversionService, new HeaderContentTypeResolver());
+		this(messageWriters, conversionService, new HeaderContentTypeResolver());
 	}
 
 	/**
 	 * Constructor with message converters, a {@code ConversionService}, and a
 	 * {@code RequestedContentTypeResolver}.
 	 *
-	 * @param converters converters for writing the response body with
+	 * @param messageWriters writers for serializing to the response body stream
 	 * @param conversionService for converting other reactive types (e.g.
 	 * rx.Observable, rx.Single, etc.) to Flux or Mono
 	 * @param contentTypeResolver for resolving the requested content type
 	 */
-	public ResponseEntityResultHandler(List<HttpMessageConverter<?>> converters,
+	public ResponseEntityResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			ConversionService conversionService, RequestedContentTypeResolver contentTypeResolver) {
 
-		super(converters, conversionService, contentTypeResolver);
+		super(messageWriters, conversionService, contentTypeResolver);
 		setOrder(0);
 	}
 

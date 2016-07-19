@@ -16,13 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import static org.junit.Assume.assumeFalse;
-import static org.springframework.web.client.reactive.ClientWebRequestBuilders.*;
-import static org.springframework.web.client.reactive.ResponseExtractors.*;
-
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Before;
@@ -34,18 +29,13 @@ import reactor.test.TestSubscriber;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.ByteBufferDecoder;
-import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.codec.StringEncoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.SseEventEncoder;
+import org.springframework.http.codec.SseEvent;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
@@ -54,8 +44,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.WebClient;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
-import org.springframework.http.codec.SseEvent;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+
+import static org.junit.Assume.assumeFalse;
+import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
+import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
 
 /**
  * @author Sebastien Deleuze
@@ -74,11 +67,6 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		assumeFalse(server instanceof JettyHttpServer);
 
 		this.webClient = new WebClient(new ReactorClientHttpConnector());
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new CodecHttpMessageConverter<>(new ByteBufferEncoder(), new ByteBufferDecoder()));
-		converters.add(new CodecHttpMessageConverter<>(new StringEncoder(), new StringDecoder(false)));
-		converters.add(new CodecHttpMessageConverter<>(new JacksonJsonEncoder(), new JacksonJsonDecoder()));
-		this.webClient.setMessageConverters(converters);
 	}
 
 	@Override
@@ -110,16 +98,14 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 
 	@Test
-	public void sseAsPojo() throws Exception {
+	public void sseAsPerson() throws Exception {
 		Mono<String> result = this.webClient
 				.perform(get("http://localhost:" + port + "/sse/person")
 				.accept(new MediaType("text", "event-stream")))
 				.extract(bodyStream(String.class))
 				.filter(s -> !s.equals("\n"))
-				.map(s -> (s.replace("\n", "")))
-				.takeUntil(s -> {
-					return s.endsWith("foo 1\"}");
-				})
+				.map(s -> s.replace("\n", ""))
+				.takeUntil(s -> s.endsWith("foo 1\"}"))
 				.reduce((s1, s2) -> s1 + s2);
 
 		TestSubscriber
@@ -135,7 +121,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.accept(new MediaType("text", "event-stream")))
 				.extract(bodyStream(String.class))
 				.filter(s -> !s.equals("\n"))
-				.map(s -> (s.replace("\n", "")))
+				.map(s -> s.replace("\n", ""))
 				.take(2);
 
 		TestSubscriber
@@ -181,12 +167,6 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		@Bean
 		public SseController sseController() {
 			return new SseController();
-		}
-
-		@Override
-		protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-			Encoder<Object> sseEncoder = new SseEventEncoder(Arrays.asList(new JacksonJsonEncoder()));
-			converters.add(new CodecHttpMessageConverter<>(sseEncoder));
 		}
 	}
 

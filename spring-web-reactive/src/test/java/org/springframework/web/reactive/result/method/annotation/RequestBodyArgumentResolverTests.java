@@ -44,8 +44,8 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
@@ -67,7 +67,7 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
 /**
  * Unit tests for {@link RequestBodyArgumentResolver}. When adding a test also
  * consider whether the logic under test is in a parent class, then see:
- * {@link MessageConverterArgumentResolverTests}.
+ * {@link MessageReaderArgumentResolverTests}.
  *
  * @author Rossen Stoyanchev
  */
@@ -90,14 +90,14 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	private RequestBodyArgumentResolver resolver() {
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(new CodecHttpMessageConverter<>(new StringDecoder()));
+		List<HttpMessageReader<?>> readers = new ArrayList<>();
+		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 
 		FormattingConversionService service = new DefaultFormattingConversionService();
 		service.addConverter(new MonoToCompletableFutureConverter());
 		service.addConverter(new ReactorToRxJava1Converter());
 
-		return new RequestBodyArgumentResolver(converters, service);
+		return new RequestBodyArgumentResolver(readers, service);
 	}
 
 

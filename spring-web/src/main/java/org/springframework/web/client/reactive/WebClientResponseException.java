@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 
 /**
  * Base class for exceptions associated with specific HTTP client response
@@ -35,20 +35,20 @@ public class WebClientResponseException extends WebClientException {
 
 	private final ClientHttpResponse clientResponse;
 
-	private final List<HttpMessageConverter<?>> messageConverters;
+	private final List<HttpMessageReader<?>> messageReaders;
 
 
 	/**
 	 * Construct a new instance of {@code WebClientResponseException} with the given response data
 	 * @param message the given error message
 	 * @param clientResponse the HTTP response
-	 * @param messageConverters the message converters that maay decode the HTTP response body
+	 * @param messageReaders the message converters that maay decode the HTTP response body
 	 */
 	public WebClientResponseException(String message, ClientHttpResponse clientResponse,
-			List<HttpMessageConverter<?>> messageConverters) {
+			List<HttpMessageReader<?>> messageReaders) {
 		super(message);
 		this.clientResponse = clientResponse;
-		this.messageConverters = messageConverters;
+		this.messageReaders = messageReaders;
 	}
 
 
@@ -76,6 +76,6 @@ public class WebClientResponseException extends WebClientException {
 	 * </pre>
 	 */
 	public <T> T getResponseBody(BodyExtractor<T> extractor) {
-		return extractor.extract(this.clientResponse, this.messageConverters);
+		return extractor.extract(this.clientResponse, this.messageReaders);
 	}
 }

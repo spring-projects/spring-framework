@@ -37,27 +37,31 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can read and write
- * {@link Resource Resources} and supports byte range requests.
+ * Implementation of {@link HttpMessageWriter} that can write
+ * {@link Resource Resources}.
+ *
+ * <p>For a Resource reader simply use {@link ResourceDecoder} wrapped with
+ * {@link DecoderHttpMessageReader}.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Resource> {
+public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource> {
 
-	public ResourceHttpMessageConverter() {
-		super(new ResourceEncoder(), new ResourceDecoder());
+
+	public ResourceHttpMessageWriter() {
+		super(new ResourceEncoder());
 	}
 
-	public ResourceHttpMessageConverter(int bufferSize) {
-		super(new ResourceEncoder(bufferSize), new ResourceDecoder());
+	public ResourceHttpMessageWriter(int bufferSize) {
+		super(new ResourceEncoder(bufferSize));
 	}
 
 
 	@Override
-	public Mono<Void> write(Publisher<? extends Resource> inputStream,
-			ResolvableType type, MediaType contentType,
-			ReactiveHttpOutputMessage outputMessage) {
+	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType type,
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+
 		return Mono.from(Flux.from(inputStream).
 				take(1).
 				concatMap(resource -> {
@@ -68,11 +72,9 @@ public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Reso
 				}));
 	}
 
-	protected void addHeaders(HttpHeaders headers, Resource resource,
-			MediaType contentType) {
+	protected void addHeaders(HttpHeaders headers, Resource resource, MediaType contentType) {
 		if (headers.getContentType() == null) {
-			if (contentType == null ||
-					!contentType.isConcrete() ||
+			if (contentType == null || !contentType.isConcrete() ||
 					MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
 				contentType = MimeTypeUtils.getMimeType(resource.getFilename()).
 						map(MediaType::toMediaType).
@@ -87,6 +89,7 @@ public class ResourceHttpMessageConverter extends CodecHttpMessageConverter<Reso
 
 	private Mono<Void> writeContent(Resource resource, ResolvableType type,
 			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+
 		if (outputMessage instanceof ZeroCopyHttpOutputMessage) {
 			Optional<File> file = getFile(resource);
 			if (file.isPresent()) {

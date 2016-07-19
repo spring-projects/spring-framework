@@ -25,7 +25,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
@@ -35,36 +35,36 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * Resolves method arguments of type {@link HttpEntity} or {@link RequestEntity}
  * by reading the body of the request through a compatible
- * {@code HttpMessageConverter}.
+ * {@code HttpMessageReader}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class HttpEntityArgumentResolver extends AbstractMessageConverterArgumentResolver
+public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentResolver
 		implements HandlerMethodArgumentResolver {
 
 
 	/**
 	 * Constructor with message converters and a ConversionService.
-	 * @param converters converters for reading the request body with
+	 * @param messageReaders readers for de-serializing the request body with
 	 * @param service for converting to other reactive types from Flux and Mono
 	 */
-	public HttpEntityArgumentResolver(List<HttpMessageConverter<?>> converters,
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> messageReaders,
 			ConversionService service) {
 
-		this(converters, service, null);
+		this(messageReaders, service, null);
 	}
 
 	/**
 	 * Constructor with message converters and a ConversionService.
-	 * @param converters converters for reading the request body with
+	 * @param messageReaders readers for de-serializing the request body with
 	 * @param service for converting to other reactive types from Flux and Mono
 	 * @param validator validator to validate decoded objects with
 	 */
-	public HttpEntityArgumentResolver(List<HttpMessageConverter<?>> converters,
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> messageReaders,
 			ConversionService service, Validator validator) {
 
-		super(converters, service, validator);
+		super(messageReaders, service, validator);
 	}
 
 

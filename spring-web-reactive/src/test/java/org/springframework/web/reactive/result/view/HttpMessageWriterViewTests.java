@@ -58,12 +58,12 @@ import static org.junit.Assert.fail;
 
 
 /**
- * Unit tests for {@link HttpMessageConverterView}.
+ * Unit tests for {@link HttpMessageWriterView}.
  * @author Rossen Stoyanchev
  */
-public class HttpMessageConverterViewTests {
+public class HttpMessageWriterViewTests {
 
-	private HttpMessageConverterView view = new HttpMessageConverterView(new JacksonJsonEncoder());
+	private HttpMessageWriterView view = new HttpMessageWriterView(new JacksonJsonEncoder());
 
 	private HandlerResult result;
 
@@ -123,7 +123,7 @@ public class HttpMessageConverterViewTests {
 
 	@Test
 	public void extractObjectMultipleMatchesNotSupported() throws Exception {
-		HttpMessageConverterView view = new HttpMessageConverterView(new StringEncoder());
+		HttpMessageWriterView view = new HttpMessageWriterView(new StringEncoder());
 		view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
 		this.model.addAttribute("foo1", "bar1");
 		this.model.addAttribute("foo2", "bar2");
@@ -140,7 +140,7 @@ public class HttpMessageConverterViewTests {
 
 	@Test
 	public void extractObjectNotSupported() throws Exception {
-		HttpMessageConverterView view = new HttpMessageConverterView(new Jaxb2Encoder());
+		HttpMessageWriterView view = new HttpMessageWriterView(new Jaxb2Encoder());
 		view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
 		this.model.addAttribute("foo1", "bar1");
 

@@ -27,8 +27,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
@@ -37,14 +37,14 @@ import org.springframework.web.server.ServerWebExchange;
 
 
 /**
- * A {@link View} that delegates to an {@link HttpMessageConverter}.
+ * A {@link View} that delegates to an {@link HttpMessageWriter}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class HttpMessageConverterView implements View {
+public class HttpMessageWriterView implements View {
 
-	private final HttpMessageConverter<?> converter;
+	private final HttpMessageWriter<?> messageWriter;
 
 	private final Set<String> modelKeys = new HashSet<>(4);
 
@@ -52,35 +52,33 @@ public class HttpMessageConverterView implements View {
 
 
 	/**
-	 * Create a {@code View} with the given {@code Encoder}.
-	 * Internally this creates
-	 * {@link CodecHttpMessageConverter#CodecHttpMessageConverter(Encoder)
-	 * CodecHttpMessageConverter(Encoder)}.
+	 * Create a {@code View} with the given {@code Encoder} wrapping it as an
+	 * {@link EncoderHttpMessageWriter}.
 	 */
-	public HttpMessageConverterView(Encoder<?> encoder) {
-		this(new CodecHttpMessageConverter<>(encoder));
+	public HttpMessageWriterView(Encoder<?> encoder) {
+		this(new EncoderHttpMessageWriter<>(encoder));
 	}
 
 	/**
-	 * Create a View that delegates to the given message converter.
+	 * Create a View that delegates to the given message messageWriter.
 	 */
-	public HttpMessageConverterView(HttpMessageConverter<?> converter) {
-		Assert.notNull(converter, "'converter' is required.");
-		this.converter = converter;
-		this.mediaTypes = converter.getWritableMediaTypes();
+	public HttpMessageWriterView(HttpMessageWriter<?> messageWriter) {
+		Assert.notNull(messageWriter, "'messageWriter' is required.");
+		this.messageWriter = messageWriter;
+		this.mediaTypes = messageWriter.getWritableMediaTypes();
 	}
 
 
 	/**
-	 * Return the configured message converter.
+	 * Return the configured message messageWriter.
 	 */
-	public HttpMessageConverter<?> getConverter() {
-		return this.converter;
+	public HttpMessageWriter<?> getMessageWriter() {
+		return this.messageWriter;
 	}
 
 	/**
 	 * By default model attributes are filtered with
-	 * {@link HttpMessageConverter#canWrite} to find the ones that can be
+	 * {@link HttpMessageWriter#canWrite} to find the ones that can be
 	 * rendered. Use this property to further narrow the list and consider only
 	 * attribute(s) under specific model key(s).
 	 * <p>If more than one matching attribute is found, than a Map is rendered,
@@ -109,7 +107,7 @@ public class HttpMessageConverterView implements View {
 	@Override
 	public Mono<Void> render(HandlerResult result, MediaType contentType, ServerWebExchange exchange) {
 		Object value = extractObjectToRender(result);
-		return applyConverter(value, contentType, exchange);
+		return applyMessageWriter(value, contentType, exchange);
 	}
 
 	protected Object extractObjectToRender(HandlerResult result) {
@@ -126,13 +124,13 @@ public class HttpMessageConverterView implements View {
 		else if (map.size() == 1) {
 			return map.values().iterator().next();
 		}
-		else if (getConverter().canWrite(ResolvableType.forClass(Map.class), null)) {
+		else if (getMessageWriter().canWrite(ResolvableType.forClass(Map.class), null)) {
 			return map;
 		}
 		else {
 			throw new IllegalStateException(
 					"Multiple matching attributes found: " + map + ". " +
-							"However Map rendering is not supported by " + getConverter());
+							"However Map rendering is not supported by " + getMessageWriter());
 		}
 	}
 
@@ -145,28 +143,28 @@ public class HttpMessageConverterView implements View {
 	protected boolean isEligibleAttribute(String attributeName, Object attributeValue) {
 		ResolvableType type = ResolvableType.forClass(attributeValue.getClass());
 		if (getModelKeys().isEmpty()) {
-			return getConverter().canWrite(type, null);
+			return getMessageWriter().canWrite(type, null);
 		}
 		if (getModelKeys().contains(attributeName)) {
-			if (getConverter().canWrite(type, null)) {
+			if (getMessageWriter().canWrite(type, null)) {
 				return true;
 			}
 			throw new IllegalStateException(
 					"Model object [" + attributeValue + "] retrieved via key " +
-							"[" + attributeName + "] is not supported by " + getConverter());
+							"[" + attributeName + "] is not supported by " + getMessageWriter());
 		}
 		return false;
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Mono<Void> applyConverter(Object value, MediaType contentType, ServerWebExchange exchange) {
+	private <T> Mono<Void> applyMessageWriter(Object value, MediaType contentType, ServerWebExchange exchange) {
 		if (value == null) {
 			return Mono.empty();
 		}
 		Publisher<? extends T> stream = Mono.just((T) value);
 		ResolvableType type = ResolvableType.forClass(value.getClass());
 		ServerHttpResponse response = exchange.getResponse();
-		return ((HttpMessageConverter<T>) getConverter()).write(stream, type, contentType, response);
+		return ((HttpMessageWriter<T>) getMessageWriter()).write(stream, type, contentType, response);
 	}
 
 }

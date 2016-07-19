@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.springframework.core.Ordered;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.reactive.result.view.HttpMessageConverterView;
+import org.springframework.web.reactive.result.view.HttpMessageWriterView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
@@ -80,7 +80,7 @@ public class ViewResolverRegistryTests {
 
 	@Test
 	public void defaultViews() throws Exception {
-		View view = new HttpMessageConverterView(new JacksonJsonEncoder());
+		View view = new HttpMessageWriterView(new JacksonJsonEncoder());
 		this.registry.defaultViews(view);
 
 		assertEquals(1, this.registry.getDefaultViews().size());

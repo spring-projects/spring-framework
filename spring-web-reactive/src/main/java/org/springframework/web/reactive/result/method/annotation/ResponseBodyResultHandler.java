@@ -25,7 +25,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageWriter;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -37,7 +37,7 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * {@code HandlerResultHandler} that handles return values from methods annotated
  * with {@code @ResponseBody} writing to the body of the request or response with
- * an {@link HttpMessageConverter}.
+ * an {@link HttpMessageWriter}.
  *
  * <p>By default the order for this result handler is set to 100. As it detects
  * the presence of {@code @ResponseBody} it should be ordered after result
@@ -50,7 +50,7 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class ResponseBodyResultHandler extends AbstractMessageConverterResultHandler
+public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandler
 		implements HandlerResultHandler {
 
 	/**
@@ -58,28 +58,28 @@ public class ResponseBodyResultHandler extends AbstractMessageConverterResultHan
 	 * and creating a {@link HeaderContentTypeResolver}, i.e. using Accept header
 	 * to determine the requested content type.
 	 *
-	 * @param converters converters for writing the response body with
+	 * @param messageWriters writers for serializing to the response body stream
 	 * @param conversionService for converting to Flux and Mono from other reactive types
 	 */
-	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> converters,
+	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			ConversionService conversionService) {
 
-		this(converters, conversionService, new HeaderContentTypeResolver());
+		this(messageWriters, conversionService, new HeaderContentTypeResolver());
 	}
 
 	/**
 	 * Constructor with message converters, a {@code ConversionService}, and a
 	 * {@code RequestedContentTypeResolver}.
 	 *
-	 * @param converters converters for writing the response body with
+	 * @param messageWriters writers for serializing to the response body stream
 	 * @param conversionService for converting other reactive types (e.g.
 	 * rx.Observable, rx.Single, etc.) to Flux or Mono
 	 * @param contentTypeResolver for resolving the requested content type
 	 */
-	public ResponseBodyResultHandler(List<HttpMessageConverter<?>> converters,
+	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			ConversionService conversionService, RequestedContentTypeResolver contentTypeResolver) {
 
-		super(converters, conversionService, contentTypeResolver);
+		super(messageWriters, conversionService, contentTypeResolver);
 		setOrder(100);
 	}
 

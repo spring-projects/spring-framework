@@ -30,7 +30,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -45,7 +45,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * Abstract base class for argument resolvers that resolve method arguments
- * by reading the request body with an {@link HttpMessageConverter}.
+ * by reading the request body with an {@link HttpMessageReader}.
  *
  * <p>Applies validation if the method argument is annotated with
  * {@code @javax.validation.Valid} or
@@ -55,14 +55,14 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public abstract class AbstractMessageConverterArgumentResolver {
+public abstract class AbstractMessageReaderArgumentResolver {
 
 	private static final TypeDescriptor MONO_TYPE = TypeDescriptor.valueOf(Mono.class);
 
 	private static final TypeDescriptor FLUX_TYPE = TypeDescriptor.valueOf(Flux.class);
 
 
-	private final List<HttpMessageConverter<?>> messageConverters;
+	private final List<HttpMessageReader<?>> messageReaders;
 
 	private final ConversionService conversionService;
 
@@ -73,19 +73,19 @@ public abstract class AbstractMessageConverterArgumentResolver {
 
 	/**
 	 * Constructor with message converters and a ConversionService.
-	 * @param converters converters for reading the request body with
+	 * @param messageReaders readers to convert from the request body
 	 * @param service for converting to other reactive types from Flux and Mono
 	 * @param validator validator to validate decoded objects with
 	 */
-	protected AbstractMessageConverterArgumentResolver(List<HttpMessageConverter<?>> converters,
+	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
 			ConversionService service, Validator validator) {
 
-		Assert.notEmpty(converters, "At least one message converter is required.");
+		Assert.notEmpty(messageReaders, "At least one message reader is required.");
 		Assert.notNull(service, "'conversionService' is required.");
-		this.messageConverters = converters;
+		this.messageReaders = messageReaders;
 		this.conversionService = service;
 		this.validator = validator;
-		this.supportedMediaTypes = converters.stream()
+		this.supportedMediaTypes = messageReaders.stream()
 				.flatMap(converter -> converter.getReadableMediaTypes().stream())
 				.collect(Collectors.toList());
 	}
@@ -94,8 +94,8 @@ public abstract class AbstractMessageConverterArgumentResolver {
 	/**
 	 * Return the configured message converters.
 	 */
-	public List<HttpMessageConverter<?>> getMessageConverters() {
-		return this.messageConverters;
+	public List<HttpMessageReader<?>> getMessageReaders() {
+		return this.messageReaders;
 	}
 
 	/**
@@ -124,10 +124,10 @@ public abstract class AbstractMessageConverterArgumentResolver {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
-		for (HttpMessageConverter<?> converter : getMessageConverters()) {
-			if (converter.canRead(elementType, mediaType)) {
+		for (HttpMessageReader<?> reader : getMessageReaders()) {
+			if (reader.canRead(elementType, mediaType)) {
 				if (convertFromFlux) {
-					Flux<?> flux = converter.read(elementType, request)
+					Flux<?> flux = reader.read(elementType, request)
 							.onErrorResumeWith(ex -> Flux.error(getReadError(ex, bodyParameter)));
 					if (checkRequired(bodyParameter, isBodyRequired)) {
 						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
@@ -138,7 +138,7 @@ public abstract class AbstractMessageConverterArgumentResolver {
 					return Mono.just(getConversionService().convert(flux, FLUX_TYPE, typeDescriptor));
 				}
 				else {
-					Mono<?> mono = converter.readMono(elementType, request)
+					Mono<?> mono = reader.readMono(elementType, request)
 							.otherwise(ex -> Mono.error(getReadError(ex, bodyParameter)));
 					if (checkRequired(bodyParameter, isBodyRequired)) {
 						mono = mono.otherwiseIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));

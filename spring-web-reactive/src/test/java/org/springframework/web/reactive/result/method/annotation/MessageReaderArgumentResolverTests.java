@@ -50,8 +50,8 @@ import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.JacksonJsonDecoder;
-import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
-import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
+import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.validation.Errors;
@@ -72,12 +72,12 @@ import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
- * Unit tests for {@link AbstractMessageConverterArgumentResolver}.
+ * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
  * @author Rossen Stoyanchev
  */
-public class MessageConverterArgumentResolverTests {
+public class MessageReaderArgumentResolverTests {
 
-	private AbstractMessageConverterArgumentResolver resolver = resolver(new JacksonJsonDecoder());
+	private AbstractMessageReaderArgumentResolver resolver = resolver(new JacksonJsonDecoder());
 
 	private ServerWebExchange exchange;
 
@@ -276,16 +276,16 @@ public class MessageConverterArgumentResolverTests {
 	}
 
 	@SuppressWarnings("Convert2MethodRef")
-	private AbstractMessageConverterArgumentResolver resolver(Decoder<?>... decoders) {
+	private AbstractMessageReaderArgumentResolver resolver(Decoder<?>... decoders) {
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		Arrays.asList(decoders).forEach(decoder -> converters.add(new CodecHttpMessageConverter<>(decoder)));
+		List<HttpMessageReader<?>> readers = new ArrayList<>();
+		Arrays.asList(decoders).forEach(decoder -> readers.add(new DecoderHttpMessageReader<>(decoder)));
 
 		FormattingConversionService service = new DefaultFormattingConversionService();
 		service.addConverter(new MonoToCompletableFutureConverter());
 		service.addConverter(new ReactorToRxJava1Converter());
 
-		return new AbstractMessageConverterArgumentResolver(converters, service, new TestBeanValidator()) {};
+		return new AbstractMessageReaderArgumentResolver(readers, service, new TestBeanValidator()) {};
 	}
 
 	private DataBuffer dataBuffer(String body) {
