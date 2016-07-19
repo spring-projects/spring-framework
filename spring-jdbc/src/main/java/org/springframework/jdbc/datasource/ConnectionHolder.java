@@ -161,9 +161,9 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 */
 	public boolean supportsSavepoints() throws SQLException {
 		if (this.savepointsSupported == null) {
-			this.savepointsSupported = new Boolean(getConnection().getMetaData().supportsSavepoints());
+			this.savepointsSupported = getConnection().getMetaData().supportsSavepoints();
 		}
-		return this.savepointsSupported.booleanValue();
+		return this.savepointsSupported;
 	}
 
 	/**

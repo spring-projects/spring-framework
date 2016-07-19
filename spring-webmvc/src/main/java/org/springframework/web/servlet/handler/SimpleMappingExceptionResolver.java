@@ -46,6 +46,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	/** The default name of the exception attribute: "exception". */
 	public static final String DEFAULT_EXCEPTION_ATTRIBUTE = "exception";
 
+
 	private Properties exceptionMappings;
 
 	private Class<?>[] excludedExceptions;
@@ -108,7 +109,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	public void setStatusCodes(Properties statusCodes) {
 		for (Enumeration<?> enumeration = statusCodes.propertyNames(); enumeration.hasMoreElements();) {
 			String viewName = (String) enumeration.nextElement();
-			Integer statusCode = new Integer(statusCodes.getProperty(viewName));
+			Integer statusCode = Integer.valueOf(statusCodes.getProperty(viewName));
 			this.statusCodes.put(viewName, statusCode);
 		}
 	}
