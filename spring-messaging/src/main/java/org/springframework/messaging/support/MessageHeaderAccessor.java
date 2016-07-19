@@ -17,6 +17,7 @@
 package org.springframework.messaging.support;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -115,7 +116,7 @@ import org.springframework.util.StringUtils;
  */
 public class MessageHeaderAccessor {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final MimeType[] READABLE_MIME_TYPES = new MimeType[] {
 			MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.APPLICATION_XML,

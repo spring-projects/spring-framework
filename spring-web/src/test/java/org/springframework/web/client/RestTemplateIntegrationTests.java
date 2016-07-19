@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -43,8 +45,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import com.fasterxml.jackson.annotation.JsonView;
 
 import static org.junit.Assert.*;
 
@@ -215,7 +215,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 	@Test
 	public void jsonPostForObject() throws URISyntaxException {
 		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+		entityHeaders.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
 		MySampleBean bean = new MySampleBean();
 		bean.setWith1("with");
 		bean.setWith2("with");
@@ -230,7 +230,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 	@Test
 	public void jsonPostForObjectWithJacksonView() throws URISyntaxException {
 		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+		entityHeaders.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
 		MySampleBean bean = new MySampleBean("with", "with", "without");
 		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
 		jacksonValue.setSerializationView(MyJacksonView1.class);
@@ -257,7 +257,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<ParentClass>>() {};
 		RequestEntity<List<ParentClass>> entity = RequestEntity
 				.post(new URI(baseUrl + "/jsonpost"))
-				.contentType(new MediaType("application", "json", Charset.forName("UTF-8")))
+				.contentType(new MediaType("application", "json", StandardCharsets.UTF_8))
 				.body(list, typeReference.getType());
 		String content = template.exchange(entity, String.class).getBody();
 		assertTrue(content.contains("\"type\":\"foo\""));

@@ -16,7 +16,7 @@
 
 package org.springframework.http.server;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -64,7 +64,7 @@ public class ServletServerHttpResponseTests {
 		headers.add(headerName, headerValue1);
 		String headerValue2 = "value2";
 		headers.add(headerName, headerValue2);
-		headers.setContentType(new MediaType("text", "plain", Charset.forName("UTF-8")));
+		headers.setContentType(new MediaType("text", "plain", StandardCharsets.UTF_8));
 
 		response.close();
 		assertTrue("Header not set", mockResponse.getHeaderNames().contains(headerName));

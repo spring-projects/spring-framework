@@ -17,7 +17,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,12 +56,8 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link HttpEntityArgumentResolver}.When adding a test also
@@ -288,7 +284,7 @@ public class HttpEntityArgumentResolverTests {
 	}
 
 	private DataBuffer dataBuffer(String body) {
-		byte[] bytes = body.getBytes(Charset.forName("UTF-8"));
+		byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 		return new DefaultDataBufferFactory().wrap(byteBuffer);
 	}

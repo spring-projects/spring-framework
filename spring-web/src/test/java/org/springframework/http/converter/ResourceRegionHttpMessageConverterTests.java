@@ -17,7 +17,7 @@
 package org.springframework.http.converter;
 
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,7 +82,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		assertThat(headers.getContentLength(), is(6L));
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 0-5/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("Spring"));
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8), is("Spring"));
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		assertThat(headers.getContentLength(), is(32L));
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 7-38/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("Framework test resource content."));
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8), is("Framework test resource content."));
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		HttpHeaders headers = outputMessage.getHeaders();
 		assertThat(headers.getContentType().toString(), Matchers.startsWith("multipart/byteranges;boundary="));
 		String boundary = "--" + headers.getContentType().toString().substring(30);
-		String content = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		String content = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
 
 		assertThat(ranges[0], is(boundary));

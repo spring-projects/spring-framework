@@ -19,7 +19,7 @@ package org.springframework.web.reactive.result.view;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,13 +62,13 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link ViewResolutionResultHandler}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ViewResolutionResultHandlerTests {
@@ -289,7 +289,7 @@ public class ViewResolutionResultHandlerTests {
 	private void assertResponseBody(String responseBody) {
 		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
 	}
 
 
@@ -298,7 +298,6 @@ public class ViewResolutionResultHandlerTests {
 		private final Map<String, View> views = new HashMap<>();
 
 		private int order = Ordered.LOWEST_PRECEDENCE;
-
 
 		TestViewResolver(String... viewNames) {
 			Arrays.stream(viewNames).forEach(name -> this.views.put(name, new TestView(name)));
@@ -318,8 +317,8 @@ public class ViewResolutionResultHandlerTests {
 			View view = this.views.get(viewName);
 			return Mono.justOrEmpty(view);
 		}
-
 	}
+
 
 	private static final class TestView implements View {
 
@@ -355,11 +354,12 @@ public class ViewResolutionResultHandlerTests {
 			if (mediaType != null) {
 				response.getHeaders().setContentType(mediaType);
 			}
-			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(Charset.forName("UTF-8")));
+			ByteBuffer byteBuffer = ByteBuffer.wrap(value.getBytes(StandardCharsets.UTF_8));
 			DataBuffer dataBuffer = new DefaultDataBufferFactory().wrap(byteBuffer);
 			return response.writeWith(Flux.just(dataBuffer));
 		}
 	}
+
 
 	private static class TestBean {
 
@@ -378,6 +378,7 @@ public class ViewResolutionResultHandlerTests {
 			return "TestBean[name=" + this.name + "]";
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class TestController {

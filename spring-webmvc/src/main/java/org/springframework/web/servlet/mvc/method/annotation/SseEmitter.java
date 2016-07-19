@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -36,9 +36,9 @@ import org.springframework.http.server.ServerHttpResponse;
  */
 public class SseEmitter extends ResponseBodyEmitter {
 
-	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", Charset.forName("UTF-8"));
+	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
-	static final MediaType UTF8_TEXT_EVENTSTREAM = new MediaType("text", "event-stream", Charset.forName("UTF-8"));
+	static final MediaType UTF8_TEXT_EVENTSTREAM = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
 
 
 	/**

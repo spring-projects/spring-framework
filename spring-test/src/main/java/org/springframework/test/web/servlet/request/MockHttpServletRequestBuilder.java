@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -272,12 +273,7 @@ public class MockHttpServletRequestBuilder
 	 * @param content the body content
 	 */
 	public MockHttpServletRequestBuilder content(String content) {
-		try {
-			this.content = content.getBytes("UTF-8");
-		}
-		catch (UnsupportedEncodingException e) {
-			// should never happen
-		}
+		this.content = content.getBytes(StandardCharsets.UTF_8);
 		return this;
 	}
 
@@ -286,7 +282,6 @@ public class MockHttpServletRequestBuilder
 	 * @param cookies the cookies to add
 	 */
 	public MockHttpServletRequestBuilder cookie(Cookie... cookies) {
-		Assert.notNull(cookies, "'cookies' must not be null");
 		Assert.notEmpty(cookies, "'cookies' must not be empty");
 		this.cookies.addAll(Arrays.asList(cookies));
 		return this;

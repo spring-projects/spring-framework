@@ -20,7 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
@@ -109,7 +109,7 @@ public class RestTemplateXhrTransportTests {
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.SEND);
 		accessor.setDestination("/destination");
 		MessageHeaders headers = accessor.getMessageHeaders();
-		Message<byte[]> message = MessageBuilder.createMessage("body".getBytes(Charset.forName("UTF-8")), headers);
+		Message<byte[]> message = MessageBuilder.createMessage("body".getBytes(StandardCharsets.UTF_8), headers);
 		byte[] bytes = new StompEncoder().encode(message);
 		TextMessage textMessage = new TextMessage(bytes);
 		SockJsFrame frame = SockJsFrame.messageFrame(new Jackson2SockJsMessageCodec(), textMessage.getPayload());
@@ -197,7 +197,7 @@ public class RestTemplateXhrTransportTests {
 	}
 
 	private InputStream getInputStream(String content) {
-		byte[] bytes = content.getBytes(Charset.forName("UTF-8"));
+		byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
 		return new ByteArrayInputStream(bytes);
 	}
 

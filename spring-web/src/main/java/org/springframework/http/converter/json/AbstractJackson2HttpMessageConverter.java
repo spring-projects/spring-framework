@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
@@ -60,7 +61,7 @@ import org.springframework.util.TypeUtils;
  */
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
 	protected ObjectMapper objectMapper;

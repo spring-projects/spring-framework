@@ -17,7 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,16 +31,16 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.ResponseCookie;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
 public class ServerHttpResponseTests {
-
-	public static final Charset UTF_8 = Charset.forName("UTF-8");
-
 
 	@Test
 	public void writeWith() throws Exception {
@@ -52,9 +52,9 @@ public class ServerHttpResponseTests {
 		assertTrue(response.cookiesWritten);
 
 		assertEquals(3, response.body.size());
-		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), UTF_8));
-		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), UTF_8));
-		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), UTF_8));
+		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -96,9 +96,9 @@ public class ServerHttpResponseTests {
 		assertSame(cookie, response.getCookies().getFirst("ID"));
 
 		assertEquals(3, response.body.size());
-		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), UTF_8));
-		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), UTF_8));
-		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), UTF_8));
+		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -114,9 +114,9 @@ public class ServerHttpResponseTests {
 		assertNull(response.getCookies().get("ID"));
 
 		assertEquals(3, response.body.size());
-		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), UTF_8));
-		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), UTF_8));
-		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), UTF_8));
+		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8));
+		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class ServerHttpResponseTests {
 
 
 	private DataBuffer wrap(String a) {
-		return new DefaultDataBufferFactory().wrap(ByteBuffer.wrap(a.getBytes(UTF_8)));
+		return new DefaultDataBufferFactory().wrap(ByteBuffer.wrap(a.getBytes(StandardCharsets.UTF_8)));
 	}
 
 

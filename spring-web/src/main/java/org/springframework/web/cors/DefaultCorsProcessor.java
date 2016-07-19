@@ -17,7 +17,7 @@
 package org.springframework.web.cors;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -51,8 +51,6 @@ import org.springframework.web.util.WebUtils;
  * @since 4.2
  */
 public class DefaultCorsProcessor implements CorsProcessor {
-
-	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
 	private static final Log logger = LogFactory.getLog(DefaultCorsProcessor.class);
 
@@ -109,7 +107,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 	 */
 	protected void rejectRequest(ServerHttpResponse response) throws IOException {
 		response.setStatusCode(HttpStatus.FORBIDDEN);
-		response.getBody().write("Invalid CORS request".getBytes(UTF8_CHARSET));
+		response.getBody().write("Invalid CORS request".getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**

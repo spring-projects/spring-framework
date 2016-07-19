@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +28,7 @@ import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-import static java.util.Collections.singletonMap;
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
 /**
@@ -84,7 +85,7 @@ public class MimeTypeTests {
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "application", mimeType.getType());
 		assertEquals("Invalid subtype", "xml", mimeType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("UTF-8"), mimeType.getCharset());
+		assertEquals("Invalid charset", StandardCharsets.UTF_8, mimeType.getCharset());
 	}
 
 	@Test

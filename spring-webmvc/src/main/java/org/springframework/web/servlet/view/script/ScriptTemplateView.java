@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.script;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	public static final String DEFAULT_CONTENT_TYPE = "text/html";
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final String DEFAULT_RESOURCE_LOADER_PATH = "classpath:";
 

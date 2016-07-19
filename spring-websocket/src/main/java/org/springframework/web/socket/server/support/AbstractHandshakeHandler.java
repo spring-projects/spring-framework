@@ -17,7 +17,7 @@
 package org.springframework.web.socket.server.support;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,9 +69,6 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * @see org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
-
-	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
 
 	private static final boolean jettyWsPresent = ClassUtils.isPresent(
 			"org.eclipse.jetty.websocket.server.WebSocketServerFactory", AbstractHandshakeHandler.class.getClassLoader());
@@ -286,7 +283,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			logger.error("Handshake failed due to invalid Upgrade header: " + request.getHeaders().getUpgrade());
 		}
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
-		response.getBody().write("Can \"Upgrade\" only to \"WebSocket\".".getBytes(UTF8_CHARSET));
+		response.getBody().write("Can \"Upgrade\" only to \"WebSocket\".".getBytes(StandardCharsets.UTF_8));
 	}
 
 	protected void handleInvalidConnectHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
@@ -294,7 +291,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			logger.error("Handshake failed due to invalid Connection header " + request.getHeaders().getConnection());
 		}
 		response.setStatusCode(HttpStatus.BAD_REQUEST);
-		response.getBody().write("\"Connection\" must be \"upgrade\".".getBytes(UTF8_CHARSET));
+		response.getBody().write("\"Connection\" must be \"upgrade\".".getBytes(StandardCharsets.UTF_8));
 	}
 
 	protected boolean isWebSocketVersionSupported(WebSocketHttpHeaders httpHeaders) {

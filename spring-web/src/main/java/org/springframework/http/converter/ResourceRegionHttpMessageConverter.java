@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 import org.springframework.core.io.support.ResourceRegion;
@@ -184,7 +185,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	private static void print(OutputStream os, String buf) throws IOException {
-		os.write(buf.getBytes("US-ASCII"));
+		os.write(buf.getBytes(StandardCharsets.US_ASCII));
 	}
 
 }

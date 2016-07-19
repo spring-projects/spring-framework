@@ -17,6 +17,7 @@
 package org.springframework.util;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -31,7 +32,7 @@ import java.util.Base64;
  */
 public abstract class Base64Utils {
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
 	/**

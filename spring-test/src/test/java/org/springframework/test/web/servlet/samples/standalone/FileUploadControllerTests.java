@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.test.web.servlet.samples.standalone;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import javax.servlet.Filter;
@@ -40,25 +40,21 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * @author Rossen Stoyanchev
  */
 public class FileUploadControllerTests {
 
-	private static final Charset CHARSET = Charset.forName("UTF-8");
-
-
 	@Test
 	public void multipartRequest() throws Exception {
-
-		byte[] fileContent = "bar".getBytes(CHARSET);
+		byte[] fileContent = "bar".getBytes(StandardCharsets.UTF_8);
 		MockMultipartFile filePart = new MockMultipartFile("file", "orig", null, fileContent);
 
-		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(CHARSET);
+		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(StandardCharsets.UTF_8);
 		MockMultipartFile jsonPart = new MockMultipartFile("json", "json", "application/json", json);
 
 		MockMvc mockMvc = standaloneSetup(new MultipartController()).build();
@@ -67,12 +63,9 @@ public class FileUploadControllerTests {
 				.andExpect(model().attribute("jsonContent", Collections.singletonMap("name", "yeeeah")));
 	}
 
-	// SPR-13317
-
-	@Test
+	@Test  // SPR-13317
 	public void multipartRequestWrapped() throws Exception {
-
-		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(CHARSET);
+		byte[] json = "{\"name\":\"yeeeah\"}".getBytes(StandardCharsets.UTF_8);
 		MockMultipartFile jsonPart = new MockMultipartFile("json", "json", "application/json", json);
 
 		Filter filter = new RequestWrappingFilter();
@@ -102,6 +95,7 @@ public class FileUploadControllerTests {
 			return "redirect:/index";
 		}
 	}
+
 
 	private static class RequestWrappingFilter extends OncePerRequestFilter {
 

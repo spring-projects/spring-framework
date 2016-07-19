@@ -17,7 +17,7 @@
 package org.springframework.http.server;
 
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.Before;
@@ -93,7 +93,7 @@ public class ServletServerHttpRequestTests {
 		assertEquals("Invalid header values returned", 2, headerValues.size());
 		assertTrue("Invalid header values returned", headerValues.contains(headerValue1));
 		assertTrue("Invalid header values returned", headerValues.contains(headerValue2));
-		assertEquals("Invalid Content-Type", new MediaType("text", "plain", Charset.forName("UTF-8")),
+		assertEquals("Invalid Content-Type", new MediaType("text", "plain", StandardCharsets.UTF_8),
 				headers.getContentType());
 	}
 

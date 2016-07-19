@@ -21,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
-
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
@@ -31,8 +31,6 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -47,14 +45,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.never;
-import static org.mockito.BDDMockito.verify;
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -62,16 +56,7 @@ import static org.mockito.BDDMockito.verify;
  */
 public class FormHttpMessageConverterTests {
 
-	public static final Charset UTF_8 = Charset.forName("UTF-8");
-
-
-	private FormHttpMessageConverter converter;
-
-
-	@Before
-	public void setUp() {
-		this.converter = new AllEncompassingFormHttpMessageConverter();
-	}
+	private final FormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
 
 
 	@Test
@@ -89,7 +74,7 @@ public class FormHttpMessageConverterTests {
 		assertTrue(this.converter.canWrite(MultiValueMap.class,
 				new MediaType("multipart", "form-data")));
 		assertTrue(this.converter.canWrite(MultiValueMap.class,
-				new MediaType("multipart", "form-data", Charset.forName("UTF-8"))));
+				new MediaType("multipart", "form-data", StandardCharsets.UTF_8)));
 		assertTrue(this.converter.canWrite(MultiValueMap.class, MediaType.ALL));
 	}
 
@@ -121,7 +106,7 @@ public class FormHttpMessageConverterTests {
 		this.converter.write(body, MediaType.APPLICATION_FORM_URLENCODED, outputMessage);
 
 		assertEquals("Invalid result", "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3",
-				outputMessage.getBodyAsString(UTF_8));
+				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 		assertEquals("Invalid content-type", new MediaType("application", "x-www-form-urlencoded"),
 				outputMessage.getHeaders().getContentType());
 		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
@@ -155,8 +140,8 @@ public class FormHttpMessageConverterTests {
 		parts.add("xml", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setMultipartCharset(UTF_8);
-		this.converter.write(parts, new MediaType("multipart", "form-data", UTF_8), outputMessage);
+		this.converter.setMultipartCharset(StandardCharsets.UTF_8);
+		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
 		assertNotNull("No boundary found", contentType.getParameter("boundary"));
@@ -218,8 +203,8 @@ public class FormHttpMessageConverterTests {
 		parts.add("part2", entity);
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setMultipartCharset(UTF_8);
-		this.converter.write(parts, new MediaType("multipart", "form-data", UTF_8), outputMessage);
+		this.converter.setMultipartCharset(StandardCharsets.UTF_8);
+		this.converter.write(parts, new MediaType("multipart", "form-data", StandardCharsets.UTF_8), outputMessage);
 
 		final MediaType contentType = outputMessage.getHeaders().getContentType();
 		assertNotNull("No boundary found", contentType.getParameter("boundary"));

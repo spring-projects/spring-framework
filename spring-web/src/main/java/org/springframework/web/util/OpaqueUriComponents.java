@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
@@ -89,7 +90,7 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
-	public UriComponents encode(String encoding) throws UnsupportedEncodingException {
+	public UriComponents encode(Charset charset) throws UnsupportedEncodingException {
 		return this;
 	}
 

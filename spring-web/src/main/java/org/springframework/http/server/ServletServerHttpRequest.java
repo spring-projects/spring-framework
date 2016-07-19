@@ -27,6 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -54,7 +55,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	protected static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
-	protected static final String FORM_CHARSET = "UTF-8";
+	protected static final Charset FORM_CHARSET = StandardCharsets.UTF_8;
 
 
 	private final HttpServletRequest servletRequest;
@@ -210,10 +211,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			List<String> values = Arrays.asList(form.get(name));
 			for (Iterator<String> valueIterator = values.iterator(); valueIterator.hasNext();) {
 				String value = valueIterator.next();
-				writer.write(URLEncoder.encode(name, FORM_CHARSET));
+				writer.write(URLEncoder.encode(name, FORM_CHARSET.name()));
 				if (value != null) {
 					writer.write('=');
-					writer.write(URLEncoder.encode(value, FORM_CHARSET));
+					writer.write(URLEncoder.encode(value, FORM_CHARSET.name()));
 					if (valueIterator.hasNext()) {
 						writer.write('&');
 					}

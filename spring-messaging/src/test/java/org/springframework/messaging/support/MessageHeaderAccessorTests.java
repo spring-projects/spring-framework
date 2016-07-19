@@ -16,7 +16,7 @@
 
 package org.springframework.messaging.support;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,8 +44,6 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  */
 public class MessageHeaderAccessorTests {
-
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
@@ -334,7 +332,7 @@ public class MessageHeaderAccessorTests {
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
 		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p"));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p".getBytes(UTF_8)));
+		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage("p".getBytes(StandardCharsets.UTF_8)));
 		assertEquals("headers={contentType=text/plain} payload=p", accessor.getShortLogMessage(new Object() {
 			@Override
 			public String toString() {
@@ -351,7 +349,7 @@ public class MessageHeaderAccessorTests {
 		String actual = accessor.getShortLogMessage(payload);
 		assertEquals("headers={contentType=text/plain} payload=" + sb + "...(truncated)", actual);
 
-		actual = accessor.getShortLogMessage(payload.getBytes(UTF_8));
+		actual = accessor.getShortLogMessage(payload.getBytes(StandardCharsets.UTF_8));
 		assertEquals("headers={contentType=text/plain} payload=" + sb + "...(truncated)", actual);
 
 		actual = accessor.getShortLogMessage(new Object() {
@@ -369,7 +367,7 @@ public class MessageHeaderAccessorTests {
 		accessor.setContentType(MimeTypeUtils.TEXT_PLAIN);
 
 		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p"));
-		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p".getBytes(UTF_8)));
+		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage("p".getBytes(StandardCharsets.UTF_8)));
 		assertEquals("headers={contentType=text/plain} payload=p", accessor.getDetailedLogMessage(new Object() {
 			@Override
 			public String toString() {
@@ -386,7 +384,7 @@ public class MessageHeaderAccessorTests {
 		String actual = accessor.getDetailedLogMessage(payload);
 		assertEquals("headers={contentType=text/plain} payload=" + sb + " > 80", actual);
 
-		actual = accessor.getDetailedLogMessage(payload.getBytes(UTF_8));
+		actual = accessor.getDetailedLogMessage(payload.getBytes(StandardCharsets.UTF_8));
 		assertEquals("headers={contentType=text/plain} payload=" + sb + " > 80", actual);
 
 		actual = accessor.getDetailedLogMessage(new Object() {

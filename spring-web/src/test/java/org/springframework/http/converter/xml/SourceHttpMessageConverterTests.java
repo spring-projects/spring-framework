@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -300,7 +301,7 @@ public class SourceHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(domSource, null, outputMessage);
 		assertXMLEqual("Invalid result", "<root>Hello World</root>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
 		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
@@ -315,7 +316,7 @@ public class SourceHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(saxSource, null, outputMessage);
 		assertXMLEqual("Invalid result", "<root>Hello World</root>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
 	}
@@ -328,7 +329,7 @@ public class SourceHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(streamSource, null, outputMessage);
 		assertXMLEqual("Invalid result", "<root>Hello World</root>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
 	}

@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,11 +64,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.web.reactive.HandlerMapping.*;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -90,7 +89,7 @@ public class MessageWriterResultHandlerTests {
 	}
 
 
-	@Test // SPR-12894
+	@Test  // SPR-12894
 	public void useDefaultContentType() throws Exception {
 		Resource body = new ClassPathResource("logo.png", getClass());
 		ResolvableType type = ResolvableType.forType(Resource.class);
@@ -99,7 +98,7 @@ public class MessageWriterResultHandlerTests {
 		assertEquals("image/x-png", this.response.getHeaders().getFirst("Content-Type"));
 	}
 
-	@Test // SPR-13631
+	@Test  // SPR-13631
 	public void useDefaultCharset() throws Exception {
 		this.exchange.getAttributes().put(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE,
 				Collections.singleton(APPLICATION_JSON));
@@ -126,7 +125,7 @@ public class MessageWriterResultHandlerTests {
 		assertNull(this.response.getBody());
 	}
 
-	@Test // SPR-13135
+	@Test  // SPR-13135
 	public void unsupportedReturnType() throws Exception {
 		ByteArrayOutputStream body = new ByteArrayOutputStream();
 		ResolvableType type = ResolvableType.forType(OutputStream.class);
@@ -137,7 +136,7 @@ public class MessageWriterResultHandlerTests {
 		TestSubscriber.subscribe(mono).assertError(IllegalStateException.class);
 	}
 
-	@Test // SPR-12811
+	@Test  // SPR-12811
 	public void jacksonTypeOfListElement() throws Exception {
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
 		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, ParentClass.class);
@@ -148,7 +147,7 @@ public class MessageWriterResultHandlerTests {
 				"{\"type\":\"bar\",\"parentProperty\":\"bar\"}]");
 	}
 
-	@Test // SPR-13318
+	@Test  // SPR-13318
 	@Ignore
 	public void jacksonTypeWithSubType() throws Exception {
 		SimpleBean body = new SimpleBean(123L, "foo");
@@ -159,7 +158,7 @@ public class MessageWriterResultHandlerTests {
 		assertResponseBody("{\"id\":123,\"name\":\"foo\"}");
 	}
 
-	@Test // SPR-13318
+	@Test  // SPR-13318
 	@Ignore
 	public void jacksonTypeWithSubTypeOfListElement() throws Exception {
 		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
@@ -201,7 +200,7 @@ public class MessageWriterResultHandlerTests {
 	private void assertResponseBody(String responseBody) {
 		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
 	}
 
 

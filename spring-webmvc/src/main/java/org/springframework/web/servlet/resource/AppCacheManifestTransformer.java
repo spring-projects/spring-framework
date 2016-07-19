@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +61,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 	private static final String MANIFEST_HEADER = "CACHE MANIFEST";
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final Log logger = LogFactory.getLog(AppCacheManifestTransformer.class);
 

@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -246,7 +247,7 @@ public class RequestBodyArgumentResolverTests {
 	}
 
 	private DataBuffer dataBuffer(String body) {
-		byte[] bytes = body.getBytes(Charset.forName("UTF-8"));
+		byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
 		return new DefaultDataBufferFactory().wrap(byteBuffer);
 	}

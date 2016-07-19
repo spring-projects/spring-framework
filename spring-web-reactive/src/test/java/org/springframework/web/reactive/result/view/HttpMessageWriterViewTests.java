@@ -172,7 +172,7 @@ public class HttpMessageWriterViewTests {
 		TestSubscriber
 				.subscribe(response.getBody())
 				.assertValuesWith(buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
-						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
 	}
 
 

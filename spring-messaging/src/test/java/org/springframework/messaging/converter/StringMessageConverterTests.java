@@ -17,6 +17,7 @@
 package org.springframework.messaging.converter;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,16 +74,13 @@ public class StringMessageConverterTests {
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(iso88591))
 				.setHeader(MessageHeaders.CONTENT_TYPE, new MimeType("text", "plain", iso88591)).build();
-
 		assertEquals(payload, this.converter.fromMessage(message, String.class));
 	}
 
 	@Test
 	public void fromMessageDefaultCharset() {
-		Charset utf8 = Charset.forName("UTF-8");
 		String payload = "H\u00e9llo W\u00f6rld";
-		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(utf8)).build();
-
+		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		assertEquals(payload, this.converter.fromMessage(message, String.class));
 	}
 

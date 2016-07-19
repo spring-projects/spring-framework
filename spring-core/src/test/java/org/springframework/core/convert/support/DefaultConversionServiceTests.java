@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -277,12 +278,12 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void testStringToCharset() {
-		assertEquals(Charset.forName("UTF-8"), conversionService.convert("UTF-8", Charset.class));
+		assertEquals(StandardCharsets.UTF_8, conversionService.convert("UTF-8", Charset.class));
 	}
 
 	@Test
 	public void testCharsetToString() {
-		assertEquals("UTF-8", conversionService.convert(Charset.forName("UTF-8"), String.class));
+		assertEquals("UTF-8", conversionService.convert(StandardCharsets.UTF_8, String.class));
 	}
 
 	@Test

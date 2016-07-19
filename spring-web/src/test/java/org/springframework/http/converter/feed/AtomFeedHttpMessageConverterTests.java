@@ -19,6 +19,7 @@ package org.springframework.http.converter.feed;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,32 +45,31 @@ public class AtomFeedHttpMessageConverterTests {
 
 	private AtomFeedHttpMessageConverter converter;
 
-	private Charset utf8;
 
 	@Before
 	public void setUp() {
-		utf8 = Charset.forName("UTF-8");
 		converter = new AtomFeedHttpMessageConverter();
 		XMLUnit.setIgnoreWhitespace(true);
 	}
 
+
 	@Test
 	public void canRead() {
 		assertTrue(converter.canRead(Feed.class, new MediaType("application", "atom+xml")));
-		assertTrue(converter.canRead(Feed.class, new MediaType("application", "atom+xml", utf8)));
+		assertTrue(converter.canRead(Feed.class, new MediaType("application", "atom+xml", StandardCharsets.UTF_8)));
 	}
 
 	@Test
 	public void canWrite() {
 		assertTrue(converter.canWrite(Feed.class, new MediaType("application", "atom+xml")));
-		assertTrue(converter.canWrite(Feed.class, new MediaType("application", "atom+xml", Charset.forName("UTF-8"))));
+		assertTrue(converter.canWrite(Feed.class, new MediaType("application", "atom+xml", StandardCharsets.UTF_8)));
 	}
 
 	@Test
 	public void read() throws IOException {
 		InputStream is = getClass().getResourceAsStream("atom.xml");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(is);
-		inputMessage.getHeaders().setContentType(new MediaType("application", "atom+xml", utf8));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "atom+xml", StandardCharsets.UTF_8));
 		Feed result = converter.read(Feed.class, inputMessage);
 		assertEquals("title", result.getTitle());
 		assertEquals("subtitle", result.getSubtitle().getValue());
@@ -106,12 +106,12 @@ public class AtomFeedHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(feed, null, outputMessage);
 
-		assertEquals("Invalid content-type", new MediaType("application", "atom+xml", utf8),
+		assertEquals("Invalid content-type", new MediaType("application", "atom+xml", StandardCharsets.UTF_8),
 				outputMessage.getHeaders().getContentType());
 		String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>title</title>" +
 				"<entry><id>id1</id><title>title1</title></entry>" +
 				"<entry><id>id2</id><title>title2</title></entry></feed>";
-		assertXMLEqual(expected, outputMessage.getBodyAsString(utf8));
+		assertXMLEqual(expected, outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 	}
 
 	@Test

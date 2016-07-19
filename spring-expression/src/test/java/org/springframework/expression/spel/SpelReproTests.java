@@ -19,7 +19,7 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2091,7 +2091,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		Expression ex = parser.parseExpression("T(java.nio.charset.Charset).forName(#encoding)");
 		Object result = ex.getValue(context);
-		assertEquals(Charset.forName("UTF-8"), result);
+		assertEquals(StandardCharsets.UTF_8, result);
 	}
 
 

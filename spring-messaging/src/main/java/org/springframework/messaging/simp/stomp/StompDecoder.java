@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.stomp;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,12 +48,9 @@ import org.springframework.util.MultiValueMap;
  */
 public class StompDecoder {
 
-	static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
 	static final byte[] HEARTBEAT_PAYLOAD = new byte[] {'\n'};
 
 	private static final Log logger = LogFactory.getLog(StompDecoder.class);
-
 
 	private MessageHeaderInitializer headerInitializer;
 
@@ -202,7 +200,7 @@ public class StompDecoder {
 		while (buffer.remaining() > 0 && !tryConsumeEndOfLine(buffer)) {
 			command.write(buffer.get());
 		}
-		return new String(command.toByteArray(), UTF8_CHARSET);
+		return new String(command.toByteArray(), StandardCharsets.UTF_8);
 	}
 
 	private void readHeaders(ByteBuffer buffer, StompHeaderAccessor headerAccessor) {
@@ -217,7 +215,7 @@ public class StompDecoder {
 				headerStream.write(buffer.get());
 			}
 			if (headerStream.size() > 0 && headerComplete) {
-				String header = new String(headerStream.toByteArray(), UTF8_CHARSET);
+				String header = new String(headerStream.toByteArray(), StandardCharsets.UTF_8);
 				int colonIndex = header.indexOf(':');
 				if (colonIndex <= 0) {
 					if (buffer.remaining() > 0) {

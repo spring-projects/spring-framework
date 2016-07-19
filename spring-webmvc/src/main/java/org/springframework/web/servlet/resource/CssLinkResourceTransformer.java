@@ -19,6 +19,7 @@ package org.springframework.web.servlet.resource;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,7 +50,7 @@ import org.springframework.util.StringUtils;
  */
 public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final Log logger = LogFactory.getLog(CssLinkResourceTransformer.class);
 

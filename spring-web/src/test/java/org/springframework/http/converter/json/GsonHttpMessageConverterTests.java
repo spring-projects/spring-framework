@@ -19,6 +19,7 @@ package org.springframework.http.converter.json;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,8 +42,6 @@ import static org.junit.Assert.*;
  * @author Roy Clarkson
  */
 public class GsonHttpMessageConverterTests {
-
-	private static final Charset UTF8 = Charset.forName("UTF-8");
 
 	private GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
 
@@ -118,7 +117,7 @@ public class GsonHttpMessageConverterTests {
 		body.setBool(true);
 		body.setBytes(new byte[]{0x1, 0x2});
 		this.converter.write(body, null, outputMessage);
-		Charset utf8 = Charset.forName("UTF-8");
+		Charset utf8 = StandardCharsets.UTF_8;
 		String result = outputMessage.getBodyAsString(utf8);
 		assertTrue(result.contains("\"string\":\"Foo\""));
 		assertTrue(result.contains("\"number\":42"));
@@ -166,8 +165,7 @@ public class GsonHttpMessageConverterTests {
 		};
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(
-				body.getBytes(UTF8));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		List<MyBean> results = (List<MyBean>) converter.read(List.class, inputMessage);
@@ -189,8 +187,7 @@ public class GsonHttpMessageConverterTests {
 
 		String body = "[{\"bytes\":[1,2],\"array\":[\"Foo\",\"Bar\"]," +
 				"\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}]";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(
-				body.getBytes(UTF8));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		GsonHttpMessageConverter converter = new GsonHttpMessageConverter();
@@ -210,7 +207,7 @@ public class GsonHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
 		this.converter.writeInternal("foo", null, outputMessage);
-		assertEquals(")]}', \"foo\"", outputMessage.getBodyAsString(UTF8));
+		assertEquals(")]}', \"foo\"", outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -218,7 +215,7 @@ public class GsonHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setJsonPrefix(")))");
 		this.converter.writeInternal("foo", null, outputMessage);
-		assertEquals(")))\"foo\"", outputMessage.getBodyAsString(UTF8));
+		assertEquals(")))\"foo\"", outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 	}
 
 

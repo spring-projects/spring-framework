@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,18 +59,15 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
  * consider whether the logic under test is in a parent class, then see:
  * <ul>
- * 	<li>{@code MessageWriterResultHandlerTests},
- *  <li>{@code ContentNegotiatingResultHandlerSupportTests}
+ * <li>{@code MessageWriterResultHandlerTests},
+ * <li>{@code ContentNegotiatingResultHandlerSupportTests}
  * </ul>
  * @author Rossen Stoyanchev
  */
@@ -206,7 +204,7 @@ public class ResponseEntityResultHandlerTests {
 	private void assertResponseBody(String responseBody) {
 		TestSubscriber.subscribe(this.response.getBody())
 				.assertValuesWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, Charset.forName("UTF-8"))));
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
 	}
 
 

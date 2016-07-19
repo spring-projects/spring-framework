@@ -17,7 +17,7 @@ package org.springframework.web.reactive.result.view.freemarker;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import freemarker.template.Configuration;
@@ -42,8 +42,7 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
@@ -51,8 +50,6 @@ import static org.junit.Assert.assertTrue;
 public class FreeMarkerViewTests {
 
 	public static final String TEMPLATE_PATH = "classpath*:org/springframework/web/reactive/view/freemarker/";
-
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
 
 	private ServerWebExchange exchange;
@@ -140,7 +137,7 @@ public class FreeMarkerViewTests {
 		ByteBuffer byteBuffer = dataBuffer.asByteBuffer();
 		final byte[] bytes = new byte[byteBuffer.remaining()];
 		byteBuffer.get(bytes);
-		return new String(bytes, UTF_8);
+		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
 

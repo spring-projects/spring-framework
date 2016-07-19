@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.match;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -100,7 +101,7 @@ public class ContentRequestMatchersTests {
 		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
 
 		this.request.getHeaders().setContentType(MediaType.parseMediaType(contentType));
-		this.request.getBody().write(body.getBytes(Charset.forName("UTF-8")));
+		this.request.getBody().write(body.getBytes(StandardCharsets.UTF_8));
 
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 		map.add("name 1", "value 1");
