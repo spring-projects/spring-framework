@@ -17,6 +17,7 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.nio.charset.Charset;
@@ -311,11 +312,37 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
-		if (type instanceof TypeVariable && contextClass != null) {
-			ResolvableType resolvedType = resolveVariable(
-					(TypeVariable<?>) type, ResolvableType.forClass(contextClass));
-			if (resolvedType != ResolvableType.NONE) {
-				return typeFactory.constructType(resolvedType.resolve());
+		if (contextClass != null) {
+			ResolvableType resolvedType = ResolvableType.forType(type);
+			if (type instanceof TypeVariable) {
+				ResolvableType resolvedTypeVariable = resolveVariable(
+						(TypeVariable<?>) type, ResolvableType.forClass(contextClass));
+				if (resolvedTypeVariable != ResolvableType.NONE) {
+					return typeFactory.constructType(resolvedTypeVariable.resolve());
+				}
+			}
+			else if (type instanceof ParameterizedType && resolvedType.hasUnresolvableGenerics()) {
+				ParameterizedType parameterizedType = (ParameterizedType) type;
+				Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
+				Type[] typeArguments = parameterizedType.getActualTypeArguments();
+				for (int i = 0; i < typeArguments.length; i++) {
+					Type typeArgument = typeArguments[i];
+					if (typeArgument instanceof TypeVariable) {
+						ResolvableType resolvedTypeArgument = resolveVariable(
+								(TypeVariable<?>) typeArgument, ResolvableType.forClass(contextClass));
+						if (resolvedTypeArgument != ResolvableType.NONE) {
+							generics[i] = resolvedTypeArgument.resolve();
+						}
+						else {
+							generics[i] = ResolvableType.forType(typeArgument).resolve();
+						}
+					}
+					else {
+						generics[i] = ResolvableType.forType(typeArgument).resolve();
+					}
+				}
+				return typeFactory.constructType(ResolvableType.
+						forClassWithGenerics(resolvedType.getRawClass(), generics).getType());
 			}
 		}
 		return typeFactory.constructType(type);
