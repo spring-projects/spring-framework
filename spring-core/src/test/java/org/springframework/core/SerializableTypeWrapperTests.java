@@ -80,7 +80,7 @@ public class SerializableTypeWrapperTests {
 	}
 
 	@Test
-	public void forTypeParamters() throws Exception {
+	public void forTypeParameters() throws Exception {
 		Type type = SerializableTypeWrapper.forTypeParameters(List.class)[0];
 		assertThat(type.toString(), equalTo("E"));
 		assertSerializable(type);

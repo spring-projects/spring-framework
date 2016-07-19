@@ -350,7 +350,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	private void assertAttributePresence(String attributeName, Object attributeValue) {
-		Assert.notNull(attributeValue, () -> String.format("Attribute '%s' not found in attributes for annotation [%s]",
+		Assert.notNull(attributeValue, () -> String.format(
+				"Attribute '%s' not found in attributes for annotation [%s]",
 				attributeName, this.displayName));
 	}
 

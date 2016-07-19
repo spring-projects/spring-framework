@@ -1237,8 +1237,8 @@ public abstract class AnnotationUtils {
 										(annotatedElement != null ? annotatedElement.toString() : "unknown element");
 								throw new AnnotationConfigurationException(String.format(
 										"In AnnotationAttributes for annotation [%s] declared on %s, " +
-												"attribute '%s' and its alias '%s' are declared with values of [%s] and [%s], " +
-												"but only one is permitted.", annotationType.getName(), elementAsString,
+										"attribute '%s' and its alias '%s' are declared with values of [%s] and [%s], " +
+										"but only one is permitted.", annotationType.getName(), elementAsString,
 										attributeName, aliasedAttributeName, ObjectUtils.nullSafeToString(value),
 										ObjectUtils.nullSafeToString(aliasedValue)));
 							}

@@ -72,7 +72,7 @@ public class MethodNameBasedMBeanInfoAssembler extends AbstractConfigurableMBean
 	 * @param methodNames an array of method names indicating the methods to use
 	 * @see #setMethodMappings
 	 */
-	public void setManagedMethods(String[] methodNames) {
+	public void setManagedMethods(String... methodNames) {
 		this.managedMethods = new HashSet<>(Arrays.asList(methodNames));
 	}
 
