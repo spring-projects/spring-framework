@@ -137,11 +137,7 @@ public class ServletWrappingController extends AbstractController
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.servletClass == null) {
-			throw new IllegalArgumentException("servletClass is required");
-		}
-		if (!Servlet.class.isAssignableFrom(this.servletClass)) {
-			throw new IllegalArgumentException("servletClass [" + this.servletClass.getName() +
-					"] needs to implement interface [javax.servlet.Servlet]");
+			throw new IllegalArgumentException("'servletClass' is required");
 		}
 		if (this.servletName == null) {
 			this.servletName = this.beanName;

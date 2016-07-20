@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for {@code java.io.File} handles.
- * Obviously supports resolution as File, and also as URL.
+ * Supports resolution as a {@code File} and also as a {@code URL}.
  * Implements the extended {@link WritableResource} interface.
  *
  * @author Juergen Hoeller

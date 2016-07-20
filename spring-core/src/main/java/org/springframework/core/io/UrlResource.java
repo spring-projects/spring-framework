@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for {@code java.net.URL} locators.
- * <p>Supports resolution as a {@code URL} and also as a {@code File} in
+ * Supports resolution as a {@code URL} and also as a {@code File} in
  * case of the {@code "file:"} protocol.
  *
  * @author Juergen Hoeller
@@ -134,6 +134,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 		}
 	}
 
+
 	/**
 	 * Determine a cleaned URL for the given original URL.
 	 * @param originalUrl the original URL
@@ -151,7 +152,6 @@ public class UrlResource extends AbstractFileResolvingResource {
 			return originalUrl;
 		}
 	}
-
 
 	/**
 	 * This implementation opens an InputStream for the given URL.
