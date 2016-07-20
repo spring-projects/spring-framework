@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.Advised;
@@ -37,6 +38,7 @@ import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.ReflectionUtils;
@@ -63,6 +65,18 @@ public class EnableAsyncTests {
 		ctx.refresh();
 
 		AsyncBean asyncBean = ctx.getBean(AsyncBean.class);
+		assertThat(AopUtils.isAopProxy(asyncBean), is(true));
+		asyncBean.work();
+	}
+
+	@Test
+	public void proxyingOccursWithMockitoStub() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(AsyncConfigWithMockito.class, AsyncBeanUser.class);
+		ctx.refresh();
+
+		AsyncBeanUser asyncBeanUser = ctx.getBean(AsyncBeanUser.class);
+		AsyncBean asyncBean = asyncBeanUser.getAsyncBean();
 		assertThat(AopUtils.isAopProxy(asyncBean), is(true));
 		asyncBean.work();
 	}
@@ -200,6 +214,20 @@ public class EnableAsyncTests {
 	}
 
 
+	static class AsyncBeanUser {
+
+		private final AsyncBean asyncBean;
+
+		public AsyncBeanUser(AsyncBean asyncBean) {
+			this.asyncBean = asyncBean;
+		}
+
+		public AsyncBean getAsyncBean() {
+			return asyncBean;
+		}
+	}
+
+
 	@EnableAsync(annotation = CustomAsync.class)
 	static class CustomAsyncAnnotationConfig {
 	}
@@ -248,6 +276,17 @@ public class EnableAsyncTests {
 		@Bean
 		public AsyncBean asyncBean() {
 			return new AsyncBean();
+		}
+	}
+
+
+	@Configuration
+	@EnableAsync
+	static class AsyncConfigWithMockito {
+
+		@Bean @Lazy
+		public AsyncBean asyncBean() {
+			return Mockito.mock(AsyncBean.class);
 		}
 	}
 
