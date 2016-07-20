@@ -243,7 +243,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	@Test  // SPR-14470
 	public void resolveParameterizedWithTypeVariableArgument() throws Exception {
 		Method method = MyParameterizedControllerWithList.class.getMethod("handleDto", List.class);
-		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
+		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedControllerWithList(), method);
 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
 
 		String content = "[{\"name\" : \"Jad\"}, {\"name\" : \"Robert\"}]";
