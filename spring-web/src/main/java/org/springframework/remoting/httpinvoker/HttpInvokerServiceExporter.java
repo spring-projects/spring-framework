@@ -41,12 +41,12 @@ import org.springframework.web.util.NestedServletException;
  *
  * <p>Deserializes remote invocation objects and serializes remote invocation
  * result objects. Uses Java serialization just like RMI, but provides the
- * same ease of setup as Caucho's HTTP-based Hessian and Burlap protocols.
+ * same ease of setup as Caucho's HTTP-based Hessian protocol.
  *
  * <p><b>HTTP invoker is the recommended protocol for Java-to-Java remoting.</b>
- * It is more powerful and more extensible than Hessian and Burlap, at the
- * expense of being tied to Java. Nevertheless, it is as easy to set up as
- * Hessian and Burlap, which is its main advantage compared to RMI.
+ * It is more powerful and more extensible than Hessian, at the expense of
+ * being tied to Java. Nevertheless, it is as easy to set up as Hessian,
+ * which is its main advantage compared to RMI.
  *
  * <p><b>WARNING: Be aware of vulnerabilities due to unsafe Java deserialization:
  * Manipulated input streams could lead to unwanted code execution on the server
@@ -59,7 +59,6 @@ import org.springframework.web.util.NestedServletException;
  * @see HttpInvokerProxyFactoryBean
  * @see org.springframework.remoting.rmi.RmiServiceExporter
  * @see org.springframework.remoting.caucho.HessianServiceExporter
- * @see org.springframework.remoting.caucho.BurlapServiceExporter
  */
 public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExporter
 		implements HttpRequestHandler {

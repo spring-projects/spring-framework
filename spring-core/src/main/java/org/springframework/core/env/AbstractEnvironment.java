@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,9 +104,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Set<String> activeProfiles = new LinkedHashSet<String>();
+	private final Set<String> activeProfiles = new LinkedHashSet<>();
 
-	private final Set<String> defaultProfiles = new LinkedHashSet<String>(getReservedDefaultProfiles());
+	private final Set<String> defaultProfiles = new LinkedHashSet<>(getReservedDefaultProfiles());
 
 	private final MutablePropertySources propertySources = new MutablePropertySources(this.logger);
 
@@ -544,11 +544,6 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	@Override
 	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
 		return this.propertyResolver.getProperty(key, targetType, defaultValue);
-	}
-
-	@Override
-	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetType) {
-		return this.propertyResolver.getPropertyAsClass(key, targetType);
 	}
 
 	@Override

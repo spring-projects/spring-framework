@@ -51,8 +51,8 @@ import org.springframework.web.util.WebUtils;
  * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction
  * with Servlet 3.0 multipart requests. This resolver can also be created in default
  * resolution mode in which simple types (int, long, etc.) not annotated with
- * @{@link RequestParam} are also treated as request parameters with the
- * parameter name derived from the argument name.
+ * {@link RequestParam @RequestParam} are also treated as request parameters with
+ * the parameter name derived from the argument name.
  *
  * <p>If the method parameter type is {@link Map}, the name specified in the
  * annotation is used to resolve the request parameter String value. The value is
@@ -211,6 +211,11 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 				parameter.getParameterName() : requestParam.name());
 
 		if (value == null) {
+			if (requestParam != null) {
+				if (!requestParam.required() || !requestParam.defaultValue().equals(ValueConstants.DEFAULT_NONE)) {
+					return;
+				}
+			}
 			builder.queryParam(name);
 		}
 		else if (value instanceof Collection) {

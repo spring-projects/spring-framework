@@ -154,7 +154,6 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	/**
 	 * Configure default URI variable values. This is a shortcut for:
 	 * <pre class="code">
-	 *
 	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
 	 * handler.setDefaultUriVariables(...);
 	 *
@@ -167,7 +166,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
 		UriTemplateHandler handler = this.syncTemplate.getUriTemplateHandler();
 		Assert.isInstanceOf(AbstractUriTemplateHandler.class, handler,
-				"Can only use this property in conjunction with a DefaultUriTemplateHandler.");
+				"Can only use this property in conjunction with a DefaultUriTemplateHandler");
 		((AbstractUriTemplateHandler) handler).setDefaultUriVariables(defaultUriVariables);
 	}
 
@@ -504,7 +503,7 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 				requestCallback.doWithRequest(request);
 			}
 			ListenableFuture<ClientHttpResponse> responseFuture = request.executeAsync();
-			return new ResponseExtractorFuture<T>(method, url, responseFuture, responseExtractor);
+			return new ResponseExtractorFuture<>(method, url, responseFuture, responseExtractor);
 		}
 		catch (IOException ex) {
 			throw new ResourceAccessException("I/O error on " + method.name() +

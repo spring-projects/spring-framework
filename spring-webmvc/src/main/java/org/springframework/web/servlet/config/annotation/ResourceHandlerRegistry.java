@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class ResourceHandlerRegistry {
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
-	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
+	private final List<ResourceHandlerRegistration> registrations = new ArrayList<>();
 
 	private int order = Integer.MAX_VALUE -1;
 
@@ -116,7 +116,7 @@ public class ResourceHandlerRegistry {
 			return null;
 		}
 
-		Map<String, HttpRequestHandler> urlMap = new LinkedHashMap<String, HttpRequestHandler>();
+		Map<String, HttpRequestHandler> urlMap = new LinkedHashMap<>();
 		for (ResourceHandlerRegistration registration : this.registrations) {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();

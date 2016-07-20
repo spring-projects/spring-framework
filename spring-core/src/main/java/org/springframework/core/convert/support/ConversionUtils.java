@@ -20,6 +20,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.util.Assert;
 
 /**
  * Internal utilities for the conversion package.
@@ -38,7 +39,7 @@ abstract class ConversionUtils {
 		catch (ConversionFailedException ex) {
 			throw ex;
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new ConversionFailedException(sourceType, targetType, source, ex);
 		}
 	}
@@ -71,10 +72,7 @@ abstract class ConversionUtils {
 		while (enumType != null && !enumType.isEnum()) {
 			enumType = enumType.getSuperclass();
 		}
-		if (enumType == null) {
-			throw new IllegalArgumentException(
-					"The target type " + targetType.getName() + " does not refer to an enum");
-		}
+		Assert.notNull(enumType, () -> "The target type " + targetType.getName() + " does not refer to an enum");
 		return enumType;
 	}
 

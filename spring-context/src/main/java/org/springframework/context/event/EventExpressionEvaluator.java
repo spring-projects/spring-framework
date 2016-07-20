@@ -40,9 +40,9 @@ import org.springframework.expression.Expression;
  */
 class EventExpressionEvaluator extends CachedExpressionEvaluator {
 
-	private final Map<ExpressionKey, Expression> conditionCache = new ConcurrentHashMap<ExpressionKey, Expression>(64);
+	private final Map<ExpressionKey, Expression> conditionCache = new ConcurrentHashMap<>(64);
 
-	private final Map<AnnotatedElementKey, Method> targetMethodCache = new ConcurrentHashMap<AnnotatedElementKey, Method>(64);
+	private final Map<AnnotatedElementKey, Method> targetMethodCache = new ConcurrentHashMap<>(64);
 
 
 	/**

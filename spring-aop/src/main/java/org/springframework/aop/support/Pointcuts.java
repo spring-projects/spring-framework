@@ -99,7 +99,7 @@ public abstract class Pointcuts {
 		@Override
 		public boolean matches(Method method, Class<?> targetClass) {
 			return (method.getName().startsWith("set") &&
-					method.getParameterTypes().length == 1 &&
+					method.getParameterCount() == 1 &&
 					method.getReturnType() == Void.TYPE);
 		}
 
@@ -120,7 +120,7 @@ public abstract class Pointcuts {
 		@Override
 		public boolean matches(Method method, Class<?> targetClass) {
 			return (method.getName().startsWith("get") &&
-					method.getParameterTypes().length == 0);
+					method.getParameterCount() == 0);
 		}
 
 		private Object readResolve() {

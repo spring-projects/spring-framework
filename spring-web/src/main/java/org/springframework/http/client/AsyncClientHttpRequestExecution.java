@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package org.springframework.http.client;
 
+import java.io.IOException;
+
 import org.springframework.http.HttpRequest;
 import org.springframework.util.concurrent.ListenableFuture;
-
-import java.io.IOException;
 
 /**
  * Represents the context of a client-side HTTP request execution.
  *
- * <p>Used to invoke the next interceptor in the interceptor chain, or - if the
- * calling interceptor is last - execute the request itself.
+ * <p>Used to invoke the next interceptor in the interceptor chain, or -
+ * if the calling interceptor is last - execute the request itself.
  *
  * @author Jakub Narloch
  * @author Rossen Stoyanchev
@@ -35,15 +35,13 @@ import java.io.IOException;
 public interface AsyncClientHttpRequestExecution {
 
     /**
-     * Resume the request execution by invoking next interceptor in the chain
+     * Resume the request execution by invoking the next interceptor in the chain
      * or executing the request to the remote service.
-     *
-     * @param request the http request, containing the http method and headers
-     * @param body    the body of the request
-     * @return the future
+     * @param request the HTTP request, containing the HTTP method and headers
+     * @param body the body of the request
+     * @return a corresponding future handle
      * @throws IOException in case of I/O errors
      */
-    ListenableFuture<ClientHttpResponse> executeAsync(HttpRequest request, byte[] body)
-            throws IOException;
+    ListenableFuture<ClientHttpResponse> executeAsync(HttpRequest request, byte[] body) throws IOException;
 
 }

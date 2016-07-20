@@ -44,8 +44,6 @@ import org.springframework.util.ObjectUtils;
  */
 final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttributesVisitor {
 
-	private final String annotationType;
-
 	private final MultiValueMap<String, AnnotationAttributes> attributesMap;
 
 	private final Map<String, Set<String>> metaAnnotationMap;
@@ -55,38 +53,41 @@ final class AnnotationAttributesReadingVisitor extends RecursiveAnnotationAttrib
 			MultiValueMap<String, AnnotationAttributes> attributesMap, Map<String, Set<String>> metaAnnotationMap,
 			ClassLoader classLoader) {
 
-		super(annotationType, new AnnotationAttributes(), classLoader);
-		this.annotationType = annotationType;
+		super(annotationType, new AnnotationAttributes(annotationType, classLoader), classLoader);
 		this.attributesMap = attributesMap;
 		this.metaAnnotationMap = metaAnnotationMap;
 	}
 
 
 	@Override
-	public void doVisitEnd(Class<?> annotationClass) {
-		super.doVisitEnd(annotationClass);
-		List<AnnotationAttributes> attributes = this.attributesMap.get(this.annotationType);
-		if (attributes == null) {
-			this.attributesMap.add(this.annotationType, this.attributes);
-		}
-		else {
-			attributes.add(0, this.attributes);
-		}
-		Set<Annotation> visited = new LinkedHashSet<Annotation>();
-		Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
-		if (!ObjectUtils.isEmpty(metaAnnotations)) {
-			for (Annotation metaAnnotation : metaAnnotations) {
-				if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
-					recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+	public void visitEnd() {
+		super.visitEnd();
+
+		Class<?> annotationClass = this.attributes.annotationType();
+		if (annotationClass != null) {
+			List<AnnotationAttributes> attributeList = this.attributesMap.get(this.annotationType);
+			if (attributeList == null) {
+				this.attributesMap.add(this.annotationType, this.attributes);
+			}
+			else {
+				attributeList.add(0, this.attributes);
+			}
+			Set<Annotation> visited = new LinkedHashSet<>();
+			Annotation[] metaAnnotations = AnnotationUtils.getAnnotations(annotationClass);
+			if (!ObjectUtils.isEmpty(metaAnnotations)) {
+				for (Annotation metaAnnotation : metaAnnotations) {
+					if (!AnnotationUtils.isInJavaLangAnnotationPackage(metaAnnotation)) {
+						recursivelyCollectMetaAnnotations(visited, metaAnnotation);
+					}
 				}
 			}
-		}
-		if (this.metaAnnotationMap != null) {
-			Set<String> metaAnnotationTypeNames = new LinkedHashSet<String>(visited.size());
-			for (Annotation ann : visited) {
-				metaAnnotationTypeNames.add(ann.annotationType().getName());
+			if (this.metaAnnotationMap != null) {
+				Set<String> metaAnnotationTypeNames = new LinkedHashSet<>(visited.size());
+				for (Annotation ann : visited) {
+					metaAnnotationTypeNames.add(ann.annotationType().getName());
+				}
+				this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 			}
-			this.metaAnnotationMap.put(annotationClass.getName(), metaAnnotationTypeNames);
 		}
 	}
 

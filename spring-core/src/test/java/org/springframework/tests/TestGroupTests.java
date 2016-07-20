@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class TestGroupTests {
 
 	@Test
 	public void parseAllExcept() throws Exception {
-		Set<TestGroup> expected = new HashSet<TestGroup>(EnumSet.allOf(TestGroup.class));
+		Set<TestGroup> expected = new HashSet<>(EnumSet.allOf(TestGroup.class));
 		expected.remove(TestGroup.CUSTOM_COMPILATION);
 		expected.remove(TestGroup.PERFORMANCE);
 		assertThat(TestGroup.parse("all-custom_compilation,performance"), equalTo(expected));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,12 +61,12 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 	private static final String MANIFEST_HEADER = "CACHE MANIFEST";
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final Log logger = LogFactory.getLog(AppCacheManifestTransformer.class);
 
 
-	private final Map<String, SectionTransformer> sectionTransformers = new HashMap<String, SectionTransformer>();
+	private final Map<String, SectionTransformer> sectionTransformers = new HashMap<>();
 
 	private final String fileExtension;
 
@@ -143,7 +144,8 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 	}
 
 
-	private static interface SectionTransformer {
+	@FunctionalInterface
+	private interface SectionTransformer {
 
 		/**
 		 * Transforms a line in a section of the manifest.

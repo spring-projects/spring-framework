@@ -36,7 +36,7 @@ public class NamedCacheResolver extends AbstractCacheResolver {
 
 	public NamedCacheResolver(CacheManager cacheManager, String... cacheNames) {
 		super(cacheManager);
-		this.cacheNames = new ArrayList<String>(Arrays.asList(cacheNames));
+		this.cacheNames = new ArrayList<>(Arrays.asList(cacheNames));
 	}
 
 	public NamedCacheResolver() {

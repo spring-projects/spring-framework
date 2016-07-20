@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -205,7 +206,7 @@ public class BufferingStompDecoderTests {
 	}
 
 	private ByteBuffer toByteBuffer(String chunk) {
-		return ByteBuffer.wrap(chunk.getBytes(Charset.forName("UTF-8")));
+		return ByteBuffer.wrap(chunk.getBytes(StandardCharsets.UTF_8));
 	}
 
 }

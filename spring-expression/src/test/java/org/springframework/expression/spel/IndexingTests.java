@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoGenericPropertyContainingMap() {
-		Map<String, String> property = new HashMap<String, String>();
+		Map<String, String> property = new HashMap<>();
 		property.put("foo", "bar");
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -61,8 +61,8 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoGenericPropertyContainingMapObject() {
-		Map<String, Map<String, String>> property = new HashMap<String, Map<String, String>>();
-		Map<String, String> map =  new HashMap<String, String>();
+		Map<String, Map<String, String>> property = new HashMap<>();
+		Map<String, String> map = new HashMap<>();
 		map.put("foo", "bar");
 		property.put("property", map);
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -110,7 +110,7 @@ public class IndexingTests {
 
 	@Test
 	public void setGenericPropertyContainingMap() {
-		Map<String, String> property = new HashMap<String, String>();
+		Map<String, String> property = new HashMap<>();
 		property.put("foo", "bar");
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -125,7 +125,7 @@ public class IndexingTests {
 
 	@Test
 	public void setPropertyContainingMap() {
-		Map<Integer, Integer> property = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> property = new HashMap<>();
 		property.put(9, 3);
 		this.parameterizedMap = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -154,7 +154,7 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoGenericPropertyContainingList() {
-		List<String> property = new ArrayList<String>();
+		List<String> property = new ArrayList<>();
 		property.add("bar");
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -167,7 +167,7 @@ public class IndexingTests {
 
 	@Test
 	public void setGenericPropertyContainingList() {
-		List<Integer> property = new ArrayList<Integer>();
+		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -182,7 +182,7 @@ public class IndexingTests {
 
 	@Test
 	public void setGenericPropertyContainingListAutogrow() {
-		List<Integer> property = new ArrayList<Integer>();
+		List<Integer> property = new ArrayList<>();
 		this.property = property;
 		SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Expression expression = parser.parseExpression("property");
@@ -199,7 +199,7 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoPropertyContainingList() {
-		List<Integer> property = new ArrayList<Integer>();
+		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.parameterizedList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -214,7 +214,7 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoPropertyContainingListOfList() {
-		List<List<Integer>> property = new ArrayList<List<Integer>>();
+		List<List<Integer>> property = new ArrayList<>();
 		property.add(Arrays.asList(3));
 		this.parameterizedListOfList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -229,7 +229,7 @@ public class IndexingTests {
 
 	@Test
 	public void setPropertyContainingList() {
-		List<Integer> property = new ArrayList<Integer>();
+		List<Integer> property = new ArrayList<>();
 		property.add(3);
 		this.parameterizedList = property;
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -260,7 +260,7 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoGenericPropertyContainingGrowingList() {
-		List<String> property = new ArrayList<String>();
+		List<String> property = new ArrayList<>();
 		this.property = property;
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);
@@ -278,7 +278,7 @@ public class IndexingTests {
 
 	@Test
 	public void indexIntoGenericPropertyContainingGrowingList2() {
-		List<String> property2 = new ArrayList<String>();
+		List<String> property2 = new ArrayList<>();
 		this.property2 = property2;
 		SpelParserConfiguration configuration = new SpelParserConfiguration(true, true);
 		SpelExpressionParser parser = new SpelExpressionParser(configuration);

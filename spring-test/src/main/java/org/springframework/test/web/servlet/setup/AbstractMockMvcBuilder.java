@@ -47,17 +47,17 @@ import org.springframework.web.context.WebApplicationContext;
 public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>>
 		extends MockMvcBuilderSupport implements ConfigurableMockMvcBuilder<B> {
 
-	private List<Filter> filters = new ArrayList<Filter>();
+	private List<Filter> filters = new ArrayList<>();
 
 	private RequestBuilder defaultRequestBuilder;
 
-	private final List<ResultMatcher> globalResultMatchers = new ArrayList<ResultMatcher>();
+	private final List<ResultMatcher> globalResultMatchers = new ArrayList<>();
 
-	private final List<ResultHandler> globalResultHandlers = new ArrayList<ResultHandler>();
+	private final List<ResultHandler> globalResultHandlers = new ArrayList<>();
 
 	private Boolean dispatchOptions = Boolean.TRUE;
 
-	private final List<MockMvcConfigurer> configurers = new ArrayList<MockMvcConfigurer>(4);
+	private final List<MockMvcConfigurer> configurers = new ArrayList<>(4);
 
 
 	@SuppressWarnings("unchecked")

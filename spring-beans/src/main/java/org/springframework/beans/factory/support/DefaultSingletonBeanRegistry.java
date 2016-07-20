@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,16 +83,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/** Cache of singleton objects: bean name --> bean instance */
-	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(256);
+	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
 
 	/** Cache of singleton factories: bean name --> ObjectFactory */
-	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16);
+	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
 
 	/** Cache of early singleton objects: bean name --> bean instance */
-	private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>(16);
+	private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);
 
 	/** Set of registered singletons, containing the bean names in registration order */
-	private final Set<String> registeredSingletons = new LinkedHashSet<String>(256);
+	private final Set<String> registeredSingletons = new LinkedHashSet<>(256);
 
 	/** Names of beans that are currently in creation */
 	private final Set<String> singletonsCurrentlyInCreation =
@@ -109,16 +109,16 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private boolean singletonsCurrentlyInDestruction = false;
 
 	/** Disposable bean instances: bean name --> disposable instance */
-	private final Map<String, Object> disposableBeans = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> disposableBeans = new LinkedHashMap<>();
 
 	/** Map between containing bean names: bean name --> Set of bean names that the bean contains */
-	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<String, Set<String>>(16);
+	private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<>(16);
 
 	/** Map between dependent bean names: bean name --> Set of dependent bean names */
-	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<String, Set<String>>(64);
+	private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
 
 	/** Map between depending bean names: bean name --> Set of bean names for the bean's dependencies */
-	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<String, Set<String>>(64);
+	private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<>(64);
 
 
 	@Override
@@ -224,7 +224,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
 				if (recordSuppressedExceptions) {
-					this.suppressedExceptions = new LinkedHashSet<Exception>();
+					this.suppressedExceptions = new LinkedHashSet<>();
 				}
 				try {
 					singletonObject = singletonFactory.getObject();
@@ -396,7 +396,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.containedBeanMap) {
 			containedBeans = this.containedBeanMap.get(containingBeanName);
 			if (containedBeans == null) {
-				containedBeans = new LinkedHashSet<String>(8);
+				containedBeans = new LinkedHashSet<>(8);
 				this.containedBeanMap.put(containingBeanName, containedBeans);
 			}
 			containedBeans.add(containedBeanName);
@@ -422,7 +422,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.dependentBeanMap) {
 			dependentBeans = this.dependentBeanMap.get(canonicalName);
 			if (dependentBeans == null) {
-				dependentBeans = new LinkedHashSet<String>(8);
+				dependentBeans = new LinkedHashSet<>(8);
 				this.dependentBeanMap.put(canonicalName, dependentBeans);
 			}
 			dependentBeans.add(dependentBeanName);
@@ -430,7 +430,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		synchronized (this.dependenciesForBeanMap) {
 			Set<String> dependenciesForBean = this.dependenciesForBeanMap.get(dependentBeanName);
 			if (dependenciesForBean == null) {
-				dependenciesForBean = new LinkedHashSet<String>(8);
+				dependenciesForBean = new LinkedHashSet<>(8);
 				this.dependenciesForBeanMap.put(dependentBeanName, dependenciesForBean);
 			}
 			dependenciesForBean.add(canonicalName);
@@ -449,10 +449,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	private boolean isDependent(String beanName, String dependentBeanName, Set<String> alreadySeen) {
-		String canonicalName = canonicalName(beanName);
 		if (alreadySeen != null && alreadySeen.contains(beanName)) {
 			return false;
 		}
+		String canonicalName = canonicalName(beanName);
 		Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
 		if (dependentBeans == null) {
 			return false;
@@ -462,7 +462,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 		for (String transitiveDependency : dependentBeans) {
 			if (alreadySeen == null) {
-				alreadySeen = new HashSet<String>();
+				alreadySeen = new HashSet<>();
 			}
 			alreadySeen.add(beanName);
 			if (isDependent(transitiveDependency, dependentBeanName, alreadySeen)) {

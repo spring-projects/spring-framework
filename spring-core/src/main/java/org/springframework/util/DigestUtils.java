@@ -23,14 +23,15 @@ import java.security.NoSuchAlgorithmException;
 
 /**
  * Miscellaneous methods for calculating digests.
+ *
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/codec/">Apache Commons Codec</a> for a
- * more comprehensive suite of digest utilities.
+ * <a href="http://commons.apache.org/codec/">Apache Commons Codec</a>
+ * for a more comprehensive suite of digest utilities.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @author Craig Andrews
  * @since 3.0
- * @see org.apache.commons.codec.digest.DigestUtils
  */
 public abstract class DigestUtils {
 
@@ -50,8 +51,8 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Calculate the MD5 digest of the given InputStream.
-	 * @param inputStream the inputStream to calculate the digest over
+	 * Calculate the MD5 digest of the given stream.
+	 * @param inputStream the InputStream to calculate the digest over
 	 * @return the digest
 	 * @since 4.2
 	 */
@@ -60,8 +61,7 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Return a hexadecimal string representation of the MD5 digest of the given
-	 * bytes.
+	 * Return a hexadecimal string representation of the MD5 digest of the given bytes.
 	 * @param bytes the bytes to calculate the digest over
 	 * @return a hexadecimal digest string
 	 */
@@ -70,9 +70,8 @@ public abstract class DigestUtils {
 	}
 
 	/**
-	 * Return a hexadecimal string representation of the MD5 digest of the given
-	 * inputStream.
-	 * @param inputStream the inputStream to calculate the digest over
+	 * Return a hexadecimal string representation of the MD5 digest of the given stream.
+	 * @param inputStream the InputStream to calculate the digest over
 	 * @return a hexadecimal digest string
 	 * @since 4.2
 	 */
@@ -128,7 +127,12 @@ public abstract class DigestUtils {
 			return messageDigest.digest();
 		}
 		else {
-			return messageDigest.digest(StreamUtils.copyToByteArray(inputStream));
+			final byte[] buffer = new byte[StreamUtils.BUFFER_SIZE];
+			int bytesRead = -1;
+			while ((bytesRead = inputStream.read(buffer)) != -1) {
+				messageDigest.update(buffer, 0, bytesRead);
+			}
+			return messageDigest.digest();
 		}
 	}
 

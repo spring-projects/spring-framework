@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 * Return the actually supported HTTP methods, if known, as {@link HttpMethod} instances.
 	 */
 	public Set<HttpMethod> getSupportedHttpMethods() {
-		List<HttpMethod> supportedMethods = new LinkedList<HttpMethod>();
+		List<HttpMethod> supportedMethods = new LinkedList<>();
 		for (String value : this.supportedMethods) {
 			HttpMethod resolved = HttpMethod.resolve(value);
 			if (resolved != null) {

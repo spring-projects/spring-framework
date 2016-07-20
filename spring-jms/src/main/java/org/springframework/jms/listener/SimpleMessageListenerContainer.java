@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,8 +258,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		// Register Sessions and MessageConsumers.
 		synchronized (this.consumersMonitor) {
 			if (this.consumers == null) {
-				this.sessions = new HashSet<Session>(this.concurrentConsumers);
-				this.consumers = new HashSet<MessageConsumer>(this.concurrentConsumers);
+				this.sessions = new HashSet<>(this.concurrentConsumers);
+				this.consumers = new HashSet<>(this.concurrentConsumers);
 				Connection con = getSharedConnection();
 				for (int i = 0; i < this.concurrentConsumers; i++) {
 					Session session = createSession(con);

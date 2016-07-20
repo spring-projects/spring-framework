@@ -203,6 +203,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * Strategy interface to provide an order source for a given object.
 	 * @since 4.1
 	 */
+	@FunctionalInterface
 	public interface OrderSourceProvider {
 
 		/**

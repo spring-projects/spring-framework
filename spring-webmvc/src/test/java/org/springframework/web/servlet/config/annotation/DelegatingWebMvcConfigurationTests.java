@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class DelegatingWebMvcConfigurationTests {
 	public void configureMessageConverters() {
 		final HttpMessageConverter customConverter = mock(HttpMessageConverter.class);
 		final StringHttpMessageConverter stringConverter = new StringHttpMessageConverter();
-		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+		List<WebMvcConfigurer> configurers = new ArrayList<>();
 		configurers.add(new WebMvcConfigurerAdapter() {
 			@Override
 			public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
@@ -176,7 +176,7 @@ public class DelegatingWebMvcConfigurationTests {
 
 	@Test
 	public void configureExceptionResolvers() throws Exception {
-		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+		List<WebMvcConfigurer> configurers = new ArrayList<>();
 		configurers.add(new WebMvcConfigurerAdapter() {
 			@Override
 			public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
@@ -195,7 +195,7 @@ public class DelegatingWebMvcConfigurationTests {
 		final PathMatcher pathMatcher = mock(PathMatcher.class);
 		final UrlPathHelper pathHelper = mock(UrlPathHelper.class);
 
-		List<WebMvcConfigurer> configurers = new ArrayList<WebMvcConfigurer>();
+		List<WebMvcConfigurer> configurers = new ArrayList<>();
 		configurers.add(new WebMvcConfigurerAdapter() {
 			@Override
 			public void configurePathMatch(PathMatchConfigurer configurer) {

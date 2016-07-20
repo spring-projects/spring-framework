@@ -151,6 +151,7 @@ class ConfigurationClassEnhancer {
 	 * must remain public in order to allow access to subclasses generated from other
 	 * packages (i.e. user code).
 	 */
+	@FunctionalInterface
 	public interface EnhancedConfiguration extends BeanFactoryAware {
 	}
 
@@ -159,6 +160,7 @@ class ConfigurationClassEnhancer {
 	 * Conditional {@link Callback}.
 	 * @see ConditionalCallbackFilter
 	 */
+	@FunctionalInterface
 	private interface ConditionalCallback extends Callback {
 
 		boolean isMatch(Method candidateMethod);
@@ -282,7 +284,7 @@ class ConfigurationClassEnhancer {
 		@Override
 		public boolean isMatch(Method candidateMethod) {
 			return (candidateMethod.getName().equals("setBeanFactory") &&
-					candidateMethod.getParameterTypes().length == 1 &&
+					candidateMethod.getParameterCount() == 1 &&
 					BeanFactory.class == candidateMethod.getParameterTypes()[0] &&
 					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass()));
 		}
@@ -464,9 +466,9 @@ class ConfigurationClassEnhancer {
 
 			if (fbProxy == null) {
 				try {
-					fbProxy = fbClass.newInstance();
+					fbProxy = ReflectionUtils.accessibleConstructor(fbClass).newInstance();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException("Unable to instantiate enhanced FactoryBean using Objenesis, " +
 							"and regular FactoryBean instantiation via default constructor fails as well", ex);
 				}

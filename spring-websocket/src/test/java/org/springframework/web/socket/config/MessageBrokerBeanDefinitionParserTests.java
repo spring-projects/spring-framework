@@ -198,7 +198,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		SimpleBrokerMessageHandler brokerMessageHandler = this.appContext.getBean(SimpleBrokerMessageHandler.class);
 		assertNotNull(brokerMessageHandler);
 		Collection<String> prefixes = brokerMessageHandler.getDestinationPrefixes();
-		assertEquals(Arrays.asList("/topic", "/queue"), new ArrayList<String>(prefixes));
+		assertEquals(Arrays.asList("/topic", "/queue"), new ArrayList<>(prefixes));
 		assertNotNull(brokerMessageHandler.getTaskScheduler());
 		assertArrayEquals(new long[] {15000, 15000}, brokerMessageHandler.getHeartbeatValue());
 

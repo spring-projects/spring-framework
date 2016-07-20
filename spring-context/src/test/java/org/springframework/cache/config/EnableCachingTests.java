@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ import org.springframework.context.annotation.Configuration;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests for @EnableCaching and its related @Configuration classes.
+ * Integration tests for {@code @EnableCaching} and its related
+ * {@code @Configuration} classes.
  *
  * @author Chris Beams
  * @author Stephane Nicoll
@@ -54,14 +55,14 @@ public class EnableCachingTests extends AbstractCacheAnnotationTests {
 
 	@Test
 	public void testKeyStrategy() {
-		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
-		assertSame(ctx.getBean("keyGenerator", KeyGenerator.class), ci.getKeyGenerator());
+		CacheInterceptor ci = this.ctx.getBean(CacheInterceptor.class);
+		assertSame(this.ctx.getBean("keyGenerator", KeyGenerator.class), ci.getKeyGenerator());
 	}
 
 	@Test
 	public void testCacheErrorHandler() {
-		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
-		assertSame(ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
+		CacheInterceptor ci = this.ctx.getBean(CacheInterceptor.class);
+		assertSame(this.ctx.getBean("errorHandler", CacheErrorHandler.class), ci.getErrorHandler());
 	}
 
 	// --- local tests -------

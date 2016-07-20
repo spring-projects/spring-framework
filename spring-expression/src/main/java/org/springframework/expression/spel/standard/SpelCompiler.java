@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * A SpelCompiler will take a regular parsed expression and create (and load) a class
@@ -72,7 +73,7 @@ public class SpelCompiler implements Opcodes {
 	// A compiler is created for each classloader, it manages a child class loader of that
 	// classloader and the child is used to load the compiled expressions.
 	private static final Map<ClassLoader, SpelCompiler> compilers =
-			new ConcurrentReferenceHashMap<ClassLoader, SpelCompiler>();
+			new ConcurrentReferenceHashMap<>();
 
 
 	// The child ClassLoader used to load the compiled expression classes
@@ -105,7 +106,7 @@ public class SpelCompiler implements Opcodes {
 			Class<? extends CompiledExpression> clazz = createExpressionClass(expression);
 			if (clazz != null) {
 				try {
-					return clazz.newInstance();
+					return ReflectionUtils.accessibleConstructor(clazz).newInstance();
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Failed to instantiate CompiledExpression", ex);

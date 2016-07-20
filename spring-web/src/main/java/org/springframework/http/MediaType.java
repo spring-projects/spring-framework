@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.InvalidMimeTypeException;
@@ -42,8 +43,7 @@ import org.springframework.util.comparator.CompoundComparator;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @since 3.0
- * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics
- * and Content, section 3.1.1.1</a>
+ * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics and Content, section 3.1.1.1</a>
  */
 public class MediaType extends MimeType implements Serializable {
 
@@ -374,7 +374,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (!mediaType.getParameters().containsKey(PARAM_QUALITY_FACTOR)) {
 			return this;
 		}
-		Map<String, String> params = new LinkedHashMap<String, String>(getParameters());
+		Map<String, String> params = new LinkedHashMap<>(getParameters());
 		params.put(PARAM_QUALITY_FACTOR, mediaType.getParameters().get(PARAM_QUALITY_FACTOR));
 		return new MediaType(this, params);
 	}
@@ -387,7 +387,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (!getParameters().containsKey(PARAM_QUALITY_FACTOR)) {
 			return this;
 		}
-		Map<String, String> params = new LinkedHashMap<String, String>(getParameters());
+		Map<String, String> params = new LinkedHashMap<>(getParameters());
 		params.remove(PARAM_QUALITY_FACTOR);
 		return new MediaType(this, params);
 	}
@@ -438,11 +438,30 @@ public class MediaType extends MimeType implements Serializable {
 			return Collections.emptyList();
 		}
 		String[] tokens = mediaTypes.split(",\\s*");
-		List<MediaType> result = new ArrayList<MediaType>(tokens.length);
+		List<MediaType> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMediaType(token));
 		}
 		return result;
+	}
+
+	/**
+	 * Re-create the given mime types as media types.
+	 * @since 5.0
+	 */
+	public static List<MediaType> asMediaTypes(List<MimeType> mimeTypes) {
+		return mimeTypes.stream().map(MediaType::asMediaType).collect(Collectors.toList());
+	}
+
+	/**
+	 * Re-create the given mime type as a media type.
+	 * @since 5.0
+	 */
+	public static MediaType asMediaType(MimeType mimeType) {
+		if (mimeType instanceof MediaType) {
+			return (MediaType) mimeType;
+		}
+		return new MediaType(mimeType.getType(), mimeType.getSubtype(), mimeType.getParameters());
 	}
 
 	/**
@@ -525,7 +544,7 @@ public class MediaType extends MimeType implements Serializable {
 	public static void sortBySpecificityAndQuality(List<MediaType> mediaTypes) {
 		Assert.notNull(mediaTypes, "'mediaTypes' must not be null");
 		if (mediaTypes.size() > 1) {
-			Collections.sort(mediaTypes, new CompoundComparator<MediaType>(
+			Collections.sort(mediaTypes, new CompoundComparator<>(
 					MediaType.SPECIFICITY_COMPARATOR, MediaType.QUALITY_VALUE_COMPARATOR));
 		}
 	}

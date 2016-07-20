@@ -148,7 +148,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals(200, this.response.getStatus());
-		assertEquals("text/event-stream", this.response.getContentType());
+		assertEquals("text/event-stream;charset=UTF-8", this.response.getContentType());
 
 		SimpleBean bean1 = new SimpleBean();
 		bean1.setId(1L);
@@ -178,7 +178,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals(200, this.response.getStatus());
-		assertEquals("text/event-stream", this.response.getContentType());
+		assertEquals("text/event-stream;charset=UTF-8", this.response.getContentType());
 		assertEquals("bar", this.response.getHeader("foo"));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ public class MockHttpServletRequestTests {
 	public void setMultipleParameters() {
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");
-		Map<String, Object> params = new HashMap<String, Object>(2);
+		Map<String, Object> params = new HashMap<>(2);
 		params.put("key1", "newValue1");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.setParameters(params);
@@ -175,7 +175,7 @@ public class MockHttpServletRequestTests {
 	public void addMultipleParameters() {
 		request.setParameter("key1", "value1");
 		request.setParameter("key2", "value2");
-		Map<String, Object> params = new HashMap<String, Object>(2);
+		Map<String, Object> params = new HashMap<>(2);
 		params.put("key1", "newValue1");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
@@ -193,7 +193,7 @@ public class MockHttpServletRequestTests {
 	@Test
 	public void removeAllParameters() {
 		request.setParameter("key1", "value1");
-		Map<String, Object> params = new HashMap<String, Object>(2);
+		Map<String, Object> params = new HashMap<>(2);
 		params.put("key2", "value2");
 		params.put("key3", new String[] { "value3A", "value3B" });
 		request.addParameters(params);
@@ -245,7 +245,7 @@ public class MockHttpServletRequestTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void setPreferredLocalesWithEmptyList() {
-		request.setPreferredLocales(new ArrayList<Locale>());
+		request.setPreferredLocales(new ArrayList<>());
 	}
 
 	@Test

@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -56,7 +57,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	}
 
 	private RequestMethodsRequestCondition(Collection<RequestMethod> requestMethods) {
-		this.methods = Collections.unmodifiableSet(new LinkedHashSet<RequestMethod>(requestMethods));
+		this.methods = Collections.unmodifiableSet(new LinkedHashSet<>(requestMethods));
 	}
 
 
@@ -88,7 +89,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public RequestMethodsRequestCondition combine(RequestMethodsRequestCondition other) {
-		Set<RequestMethod> set = new LinkedHashSet<RequestMethod>(this.methods);
+		Set<RequestMethod> set = new LinkedHashSet<>(this.methods);
 		set.addAll(other.methods);
 		return new RequestMethodsRequestCondition(set);
 	}
@@ -109,7 +110,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		}
 
 		if (getMethods().isEmpty()) {
-			if (RequestMethod.OPTIONS.name().equals(request.getMethod())) {
+			if (RequestMethod.OPTIONS.name().equals(request.getMethod()) &&
+					!DispatcherType.ERROR.equals(request.getDispatcherType())) {
+
 				return null; // No implicit match for OPTIONS (we handle it)
 			}
 			return this;

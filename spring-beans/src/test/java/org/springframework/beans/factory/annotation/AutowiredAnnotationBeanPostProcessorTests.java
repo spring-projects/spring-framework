@@ -918,7 +918,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition tbm = new RootBeanDefinition(CollectionFactoryMethods.class);
 		tbm.setUniqueFactoryMethodName("testBeanMap");
 		bf.registerBeanDefinition("myTestBeanMap", tbm);
-		bf.registerSingleton("otherMap", new HashMap<Object, Object>());
+		bf.registerSingleton("otherMap", new HashMap<>());
 
 		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("myTestBeanMap"), bean.getTestBeanMap());
@@ -940,7 +940,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		tbs.add(new TestBean("tb1"));
 		tbs.add(new TestBean("tb2"));
 		bf.registerSingleton("testBeans", tbs);
-		bf.registerSingleton("otherSet", new HashSet<Object>());
+		bf.registerSingleton("otherSet", new HashSet<>());
 
 		SetConstructorInjectionBean bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(tbs, bean.getTestBeanSet());
@@ -961,7 +961,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition tbs = new RootBeanDefinition(CollectionFactoryMethods.class);
 		tbs.setUniqueFactoryMethodName("testBeanSet");
 		bf.registerBeanDefinition("myTestBeanSet", tbs);
-		bf.registerSingleton("otherSet", new HashSet<Object>());
+		bf.registerSingleton("otherSet", new HashSet<>());
 
 		SetConstructorInjectionBean bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("myTestBeanSet"), bean.getTestBeanSet());
@@ -3101,7 +3101,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 
 		public static GenericInterface1<String> createErased() {
-			return new GenericInterface1Impl<String>();
+			return new GenericInterface1Impl<>();
 		}
 
 		@SuppressWarnings("rawtypes")
@@ -3257,14 +3257,14 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public static class CollectionFactoryMethods {
 
 		public static Map<String, TestBean> testBeanMap() {
-			Map<String, TestBean> tbm = new LinkedHashMap<String, TestBean>();
+			Map<String, TestBean> tbm = new LinkedHashMap<>();
 			tbm.put("testBean1", new TestBean("tb1"));
 			tbm.put("testBean2", new TestBean("tb2"));
 			return tbm;
 		}
 
 		public static Set<TestBean> testBeanSet() {
-			Set<TestBean> tbs = new LinkedHashSet<TestBean>();
+			Set<TestBean> tbs = new LinkedHashSet<>();
 			tbs.add(new TestBean("tb1"));
 			tbs.add(new TestBean("tb2"));
 			return tbs;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -28,7 +25,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.test.context.testng.TrackingTestNGTestListener;
@@ -41,25 +37,15 @@ import org.testng.TestNG;
 import static org.junit.Assert.*;
 
 /**
- * <p>
- * JUnit 4 based integration test for verifying that '<i>before</i>' and '<i>after</i>'
+ * Integration tests which verify that '<i>before</i>' and '<i>after</i>'
  * methods of {@link TestExecutionListener TestExecutionListeners} as well as
- * {@link BeforeTransaction &#064;BeforeTransaction} and
- * {@link AfterTransaction &#064;AfterTransaction} methods can fail a test in a
- * TestNG environment, as requested in <a
- * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3960"
- * target="_blank">SPR-3960</a>.
- * </p>
- * <p>
- * Indirectly, this class also verifies that all {@link TestExecutionListener}
+ * {@code @BeforeTransaction} and {@code @AfterTransaction} methods can fail
+ * tests in a TestNG environment.
+ *
+ * <p>See: <a href="https://jira.spring.io/browse/SPR-3960" target="_blank">SPR-3960</a>.
+ *
+ * <p>Indirectly, this class also verifies that all {@code TestExecutionListener}
  * lifecycle callbacks are called.
- * </p>
- * <p>
- * As of Spring 3.0, this class also tests support for the new
- * {@link TestExecutionListener#beforeTestClass(TestContext) beforeTestClass()}
- * and {@link TestExecutionListener#afterTestClass(TestContext)
- * afterTestClass()} lifecycle callback methods.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
@@ -75,17 +61,20 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 
 	@Parameters(name = "{0}")
-	public static Collection<Object[]> testData() {
-		return Arrays.asList(new Object[][] {//
-		//
-			{ AlwaysFailingBeforeTestClassTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
-			{ AlwaysFailingAfterTestClassTestCase.class.getSimpleName(), 1, 1, 0, 1 },//
-			{ AlwaysFailingPrepareTestInstanceTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
-			{ AlwaysFailingBeforeTestMethodTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
-			{ AlwaysFailingAfterTestMethodTestCase.class.getSimpleName(), 1, 1, 0, 1 },//
-			{ FailingBeforeTransactionTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
-			{ FailingAfterTransactionTestCase.class.getSimpleName(), 1, 1, 0, 1 } //
-		});
+	public static Object[][] testData() {
+		// @formatter:off
+		return new Object[][] {
+			{ AlwaysFailingBeforeTestClassTestCase.class.getSimpleName(), 1, 0, 0, 1 },
+			{ AlwaysFailingAfterTestClassTestCase.class.getSimpleName(), 1, 1, 0, 1 },
+			{ AlwaysFailingPrepareTestInstanceTestCase.class.getSimpleName(), 1, 0, 0, 1 },
+			{ AlwaysFailingBeforeTestMethodTestCase.class.getSimpleName(), 1, 0, 0, 1 },
+			{ AlwaysFailingBeforeTestExecutionTestCase.class.getSimpleName(), 1, 0, 1, 0 },
+			{ AlwaysFailingAfterTestExecutionTestCase.class.getSimpleName(), 1, 0, 1, 0 },
+			{ AlwaysFailingAfterTestMethodTestCase.class.getSimpleName(), 1, 1, 0, 1 },
+			{ FailingBeforeTransactionTestCase.class.getSimpleName(), 1, 0, 0, 1 },
+			{ FailingAfterTransactionTestCase.class.getSimpleName(), 1, 1, 0, 1 } 
+		};
+		// @formatter:on
 	}
 
 	public FailingBeforeAndAfterMethodsTestNGTests(String testClassName, int expectedTestStartCount,
@@ -106,19 +95,19 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 		testNG.setVerbose(0);
 		testNG.run();
 
-		assertEquals("Verifying number of test starts for test class [" + this.clazz + "].",
-			this.expectedTestStartCount, listener.testStartCount);
-		assertEquals("Verifying number of successful tests for test class [" + this.clazz + "].",
-			this.expectedTestSuccessCount, listener.testSuccessCount);
-		assertEquals("Verifying number of failures for test class [" + this.clazz + "].", this.expectedFailureCount,
-			listener.testFailureCount);
-		assertEquals("Verifying number of failed configurations for test class [" + this.clazz + "].",
-			this.expectedFailedConfigurationsCount, listener.failedConfigurationsCount);
+		String name = this.clazz.getSimpleName();
+
+		assertEquals("tests started for [" + name + "] ==> ", this.expectedTestStartCount, listener.testStartCount);
+		assertEquals("successful tests for [" + name + "] ==> ", this.expectedTestSuccessCount,
+			listener.testSuccessCount);
+		assertEquals("failed tests for [" + name + "] ==> ", this.expectedFailureCount, listener.testFailureCount);
+		assertEquals("failed configurations for [" + name + "] ==> ", this.expectedFailedConfigurationsCount,
+			listener.failedConfigurationsCount);
 	}
 
 	// -------------------------------------------------------------------
 
-	static class AlwaysFailingBeforeTestClassTestExecutionListener extends AbstractTestExecutionListener {
+	static class AlwaysFailingBeforeTestClassTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void beforeTestClass(TestContext testContext) {
@@ -126,7 +115,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 		}
 	}
 
-	static class AlwaysFailingAfterTestClassTestExecutionListener extends AbstractTestExecutionListener {
+	static class AlwaysFailingAfterTestClassTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void afterTestClass(TestContext testContext) {
@@ -134,7 +123,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 		}
 	}
 
-	static class AlwaysFailingPrepareTestInstanceTestExecutionListener extends AbstractTestExecutionListener {
+	static class AlwaysFailingPrepareTestInstanceTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void prepareTestInstance(TestContext testContext) throws Exception {
@@ -142,7 +131,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 		}
 	}
 
-	static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
+	static class AlwaysFailingBeforeTestMethodTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void beforeTestMethod(TestContext testContext) {
@@ -150,7 +139,23 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 		}
 	}
 
-	static class AlwaysFailingAfterTestMethodTestExecutionListener extends AbstractTestExecutionListener {
+	static class AlwaysFailingBeforeTestExecutionTestExecutionListener implements TestExecutionListener {
+
+		@Override
+		public void beforeTestExecution(TestContext testContext) {
+			org.testng.Assert.fail("always failing beforeTestExecution()");
+		}
+	}
+
+	static class AlwaysFailingAfterTestExecutionTestExecutionListener implements TestExecutionListener {
+
+		@Override
+		public void afterTestExecution(TestContext testContext) {
+			org.testng.Assert.fail("always failing afterTestExecution()");
+		}
+	}
+
+	static class AlwaysFailingAfterTestMethodTestExecutionListener implements TestExecutionListener {
 
 		@Override
 		public void afterTestMethod(TestContext testContext) {
@@ -160,7 +165,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 	// -------------------------------------------------------------------
 
-	@TestExecutionListeners(value = {}, inheritListeners = false)
+	@TestExecutionListeners(inheritListeners = false)
 	public static abstract class BaseTestCase extends AbstractTestNGSpringContextTests {
 
 		@org.testng.annotations.Test
@@ -182,6 +187,14 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 
 	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
+	}
+
+	@TestExecutionListeners(AlwaysFailingBeforeTestExecutionTestExecutionListener.class)
+	public static class AlwaysFailingBeforeTestExecutionTestCase extends BaseTestCase {
+	}
+
+	@TestExecutionListeners(AlwaysFailingAfterTestExecutionTestExecutionListener.class)
+	public static class AlwaysFailingAfterTestExecutionTestCase extends BaseTestCase {
 	}
 
 	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)

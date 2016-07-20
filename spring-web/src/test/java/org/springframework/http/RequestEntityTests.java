@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +95,6 @@ public class RequestEntityTests {
 	@Test
 	public void headers() throws URISyntaxException {
 		MediaType accept = MediaType.TEXT_PLAIN;
-		Charset charset = Charset.forName("UTF-8");
 		long ifModifiedSince = 12345L;
 		String ifNoneMatch = "\"foo\"";
 		long contentLength = 67890;
@@ -102,7 +102,7 @@ public class RequestEntityTests {
 
 		RequestEntity<Void> responseEntity = RequestEntity.post(new URI("http://example.com")).
 				accept(accept).
-				acceptCharset(charset).
+				acceptCharset(StandardCharsets.UTF_8).
 				ifModifiedSince(ifModifiedSince).
 				ifNoneMatch(ifNoneMatch).
 				contentLength(contentLength).

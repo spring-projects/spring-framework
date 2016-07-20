@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Properties;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.mock.env.MockPropertySource;
 
 import static org.hamcrest.Matchers.*;
@@ -87,7 +87,7 @@ public class PropertySourcesPropertyResolverTests {
 	@Test
 	public void getProperty_withExplicitNullValue() {
 		// java.util.Properties does not allow null values (because Hashtable does not)
-		Map<String, Object> nullableProperties = new HashMap<String, Object>();
+		Map<String, Object> nullableProperties = new HashMap<>();
 		propertySources.addLast(new MapPropertySource("nullableProperties", nullableProperties));
 		nullableProperties.put("foo", null);
 		assertThat(propertyResolver.getProperty("foo"), nullValue());
@@ -114,9 +114,9 @@ public class PropertySourcesPropertyResolverTests {
 
 		try {
 			propertyResolver.getProperty("foo", TestType.class);
-			fail("Expected IllegalArgumentException due to non-convertible types");
+			fail("Expected ConverterNotFoundException due to non-convertible types");
 		}
-		catch (IllegalArgumentException ex) {
+		catch (ConverterNotFoundException ex) {
 			// expected
 		}
 	}
@@ -127,7 +127,7 @@ public class PropertySourcesPropertyResolverTests {
 		String value1 = "bar";
 		String value2 = "biz";
 
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		map.put(key, value1); // before construction
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MapPropertySource("testProperties", map));
@@ -139,7 +139,7 @@ public class PropertySourcesPropertyResolverTests {
 
 	@Test
 	public void getProperty_doesNotCache_addNewKeyPostConstruction() {
-		HashMap<String, Object> map = new HashMap<String, Object>();
+		HashMap<String, Object> map = new HashMap<>();
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MapPropertySource("testProperties", map));
 		PropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySources);
@@ -254,70 +254,6 @@ public class PropertySourcesPropertyResolverTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void resolveRequiredPlaceholders_withNullInput() {
 		new PropertySourcesPropertyResolver(new MutablePropertySources()).resolveRequiredPlaceholders(null);
-	}
-
-	@Test
-	public void getPropertyAsClass() throws ClassNotFoundException, LinkageError {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SpecificType.class.getName()));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SpecificType.class));
-	}
-
-	@Test
-	public void getPropertyAsClass_withInterfaceAsTarget() throws ClassNotFoundException, LinkageError {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SomeType.class.getName()));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SomeType.class));
-	}
-
-	@Test(expected=ConversionException.class)
-	public void getPropertyAsClass_withMismatchedTypeForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", "java.lang.String"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.getPropertyAsClass("some.class", SomeType.class);
-	}
-
-	@Test(expected=ConversionException.class)
-	public void getPropertyAsClass_withNonExistentClassForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", "some.bogus.Class"));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.getPropertyAsClass("some.class", SomeType.class);
-	}
-
-	@Test
-	public void getPropertyAsClass_withObjectForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", new SpecificType()));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SpecificType.class));
-	}
-
-	@Test(expected=ConversionException.class)
-	public void getPropertyAsClass_withMismatchedObjectForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", new Integer(42)));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.getPropertyAsClass("some.class", SomeType.class);
-	}
-
-	@Test
-	public void getPropertyAsClass_withRealClassForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", SpecificType.class));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		assertTrue(resolver.getPropertyAsClass("some.class", SomeType.class).equals(SpecificType.class));
-	}
-
-	@Test(expected=ConversionException.class)
-	public void getPropertyAsClass_withMismatchedRealClassForValue() {
-		MutablePropertySources propertySources = new MutablePropertySources();
-		propertySources.addFirst(new MockPropertySource().withProperty("some.class", Integer.class));
-		PropertyResolver resolver = new PropertySourcesPropertyResolver(propertySources);
-		resolver.getPropertyAsClass("some.class", SomeType.class);
 	}
 
 	@Test

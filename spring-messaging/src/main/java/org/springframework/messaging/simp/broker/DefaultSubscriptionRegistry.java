@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			return allMatches;
 		}
 		EvaluationContext context = null;
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(allMatches.size());
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(allMatches.size());
 		for (String sessionId : allMatches.keySet()) {
 			for (String subId : allMatches.get(sessionId)) {
 				SessionSubscriptionInfo info = this.subscriptionRegistry.getSubscriptions(sessionId);
@@ -244,7 +244,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		/** Map from destination -> <sessionId, subscriptionId> for fast look-ups */
 		private final Map<String, LinkedMultiValueMap<String, String>> accessCache =
-				new ConcurrentHashMap<String, LinkedMultiValueMap<String, String>>(DEFAULT_CACHE_LIMIT);
+				new ConcurrentHashMap<>(DEFAULT_CACHE_LIMIT);
 
 		/** Map from destination -> <sessionId, subscriptionId> with locking */
 		@SuppressWarnings("serial")
@@ -267,7 +267,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			LinkedMultiValueMap<String, String> result = this.accessCache.get(destination);
 			if (result == null) {
 				synchronized (this.updateCache) {
-					result = new LinkedMultiValueMap<String, String>();
+					result = new LinkedMultiValueMap<>();
 					for (SessionSubscriptionInfo info : subscriptionRegistry.getAllSubscriptions()) {
 						for (String destinationPattern : info.getDestinations()) {
 							if (getPathMatcher().match(destinationPattern, destination)) {
@@ -301,7 +301,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public void updateAfterRemovedSubscription(String sessionId, String subsId) {
 			synchronized (this.updateCache) {
-				Set<String> destinationsToRemove = new HashSet<String>();
+				Set<String> destinationsToRemove = new HashSet<>();
 				for (Map.Entry<String, LinkedMultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
 					String destination = entry.getKey();
 					LinkedMultiValueMap<String, String> sessionMap = entry.getValue();
@@ -328,7 +328,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public void updateAfterRemovedSession(SessionSubscriptionInfo info) {
 			synchronized (this.updateCache) {
-				Set<String> destinationsToRemove = new HashSet<String>();
+				Set<String> destinationsToRemove = new HashSet<>();
 				for (Map.Entry<String, LinkedMultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
 					String destination = entry.getKey();
 					LinkedMultiValueMap<String, String> sessionMap = entry.getValue();
@@ -362,7 +362,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		// sessionId -> SessionSubscriptionInfo
 		private final ConcurrentMap<String, SessionSubscriptionInfo> sessions =
-				new ConcurrentHashMap<String, SessionSubscriptionInfo>();
+				new ConcurrentHashMap<>();
 
 		public SessionSubscriptionInfo getSubscriptions(String sessionId) {
 			return this.sessions.get(sessionId);
@@ -407,7 +407,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		// destination -> subscriptions
 		private final Map<String, Set<Subscription>> destinationLookup =
-				new ConcurrentHashMap<String, Set<Subscription>>(4);
+				new ConcurrentHashMap<>(4);
 
 		public SessionSubscriptionInfo(String sessionId) {
 			Assert.notNull(sessionId, "sessionId must not be null");
@@ -446,7 +446,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 				synchronized (this.destinationLookup) {
 					subs = this.destinationLookup.get(destination);
 					if (subs == null) {
-						subs = new CopyOnWriteArraySet<Subscription>();
+						subs = new CopyOnWriteArraySet<>();
 						this.destinationLookup.put(destination, subs);
 					}
 				}

@@ -447,7 +447,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder allow(HttpMethod... allowedMethods) {
-			this.headers.setAllow(new LinkedHashSet<HttpMethod>(Arrays.asList(allowedMethods)));
+			this.headers.setAllow(new LinkedHashSet<>(Arrays.asList(allowedMethods)));
 			return this;
 		}
 
@@ -511,7 +511,7 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public <T> ResponseEntity<T> body(T body) {
-			return new ResponseEntity<T>(body, this.headers, this.statusCode);
+			return new ResponseEntity<>(body, this.headers, this.statusCode);
 		}
 	}
 

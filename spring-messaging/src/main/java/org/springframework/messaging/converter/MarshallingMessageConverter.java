@@ -40,7 +40,7 @@ import org.springframework.util.MimeType;
  * {@link Marshaller} and {@link Unmarshaller} abstractions.
  *
  * <p>This converter requires a {@code Marshaller} and {@code Unmarshaller} before it can
- * be used. These can be injected by the {@linkplain MarshallingMessageConverter(Marshaller)
+ * be used. These can be injected by the {@linkplain #MarshallingMessageConverter(Marshaller)
  * constructor} or {@linkplain #setMarshaller(Marshaller) bean properties}.
  *
  * @author Arjen Poutsma

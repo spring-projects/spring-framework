@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	private final TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory;
 
 	private final List<TcpClient<Message<P>, Message<P>>> tcpClients =
-			new ArrayList<TcpClient<Message<P>, Message<P>>>();
+			new ArrayList<>();
 
 	private boolean stopping;
 
@@ -173,7 +173,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 			if (this.stopping) {
 				IllegalStateException ex = new IllegalStateException("Shutting down.");
 				connectionHandler.afterConnectFailure(ex);
-				return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>error(ex));
+				return new PassThroughPromiseToListenableFutureAdapter<>(Promises.<Void>error(ex));
 			}
 			tcpClient = NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE, this.tcpClientSpecFactory);
 			this.tcpClients.add(tcpClient);
@@ -188,9 +188,9 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		}
 
 		Promise<Void> promise = tcpClient.start(
-				new MessageChannelStreamHandler<P>(connectionHandler, cleanupTask));
+				new MessageChannelStreamHandler<>(connectionHandler, cleanupTask));
 
-		return new PassThroughPromiseToListenableFutureAdapter<Void>(
+		return new PassThroughPromiseToListenableFutureAdapter<>(
 				promise.onError(new Consumer<Throwable>() {
 					@Override
 					public void accept(Throwable ex) {
@@ -212,7 +212,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 			if (this.stopping) {
 				IllegalStateException ex = new IllegalStateException("Shutting down.");
 				connectionHandler.afterConnectFailure(ex);
-				return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>error(ex));
+				return new PassThroughPromiseToListenableFutureAdapter<>(Promises.<Void>error(ex));
 			}
 			tcpClient = NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE, this.tcpClientSpecFactory);
 			this.tcpClients.add(tcpClient);
@@ -227,10 +227,10 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		}
 
 		Stream<Tuple2<InetSocketAddress, Integer>> stream = tcpClient.start(
-				new MessageChannelStreamHandler<P>(connectionHandler, cleanupTask),
+				new MessageChannelStreamHandler<>(connectionHandler, cleanupTask),
 				new ReactorReconnectAdapter(strategy));
 
-		return new PassThroughPromiseToListenableFutureAdapter<Void>(stream.next().after());
+		return new PassThroughPromiseToListenableFutureAdapter<>(stream.next().after());
 	}
 
 	@Override
@@ -283,13 +283,13 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 			});
 		}
 
-		return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
+		return new PassThroughPromiseToListenableFutureAdapter<>(promise);
 	}
 
 
 	private static Method initEventLoopGroupMethod() {
 		for (Method method : NettyClientSocketOptions.class.getMethods()) {
-			if (method.getName().equals("eventLoopGroup") && method.getParameterTypes().length == 1) {
+			if (method.getName().equals("eventLoopGroup") && method.getParameterCount() == 1) {
 				return method;
 			}
 		}
@@ -322,7 +322,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		@Override
 		public Publisher<Void> apply(ChannelStream<Message<P>, Message<P>> channelStream) {
 			Promise<Void> closePromise = Promises.prepare();
-			this.connectionHandler.afterConnected(new Reactor2TcpConnection<P>(channelStream, closePromise));
+			this.connectionHandler.afterConnected(new Reactor2TcpConnection<>(channelStream, closePromise));
 			channelStream
 					.finallyDo(new Consumer<Signal<Message<P>>>() {
 						@Override

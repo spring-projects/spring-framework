@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 			urlMap = (Map<String, BeanDefinition>) hm.getPropertyValues().getPropertyValue("urlMap").getValue();
 		}
 		else {
-			urlMap = new ManagedMap<String, BeanDefinition>();
+			urlMap = new ManagedMap<>();
 			hm.getPropertyValues().add("urlMap", urlMap);
 		}
 		urlMap.put(element.getAttribute("path"), controller);

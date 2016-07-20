@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class BaseViewTests {
 		tv.setApplicationContext(wac);
 		tv.setApplicationContext(wac);
 
-		Map<String, Object> model = new HashMap<String, Object>();
+		Map<String, Object> model = new HashMap<>();
 		model.put("foo", "bar");
 		model.put("something", new Object());
 		tv.render(model, request, response);
@@ -89,8 +89,8 @@ public class BaseViewTests {
 		p.setProperty("something", "else");
 		tv.setAttributes(p);
 
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("one", new HashMap<Object, Object>());
+		Map<String, Object> model = new HashMap<>();
+		model.put("one", new HashMap<>());
 		model.put("two", new Object());
 		tv.render(model, request, response);
 
@@ -116,12 +116,12 @@ public class BaseViewTests {
 		p.setProperty("something", "else");
 		tv.setAttributes(p);
 
-		Map<String, Object> pathVars = new HashMap<String, Object>();
-		pathVars.put("one", new HashMap<Object, Object>());
+		Map<String, Object> pathVars = new HashMap<>();
+		pathVars.put("one", new HashMap<>());
 		pathVars.put("two", new Object());
 		request.setAttribute(View.PATH_VARIABLES, pathVars);
 
-		tv.render(new HashMap<String, Object>(), request, response);
+		tv.render(new HashMap<>(), request, response);
 
 		checkContainsAll(pathVars, tv.model);
 
@@ -145,8 +145,8 @@ public class BaseViewTests {
 		p.setProperty("something", "else");
 		tv.setAttributes(p);
 
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("one", new HashMap<Object, Object>());
+		Map<String, Object> model = new HashMap<>();
+		model.put("one", new HashMap<>());
 		model.put("two", new Object());
 		tv.render(model, request, response);
 
@@ -169,13 +169,13 @@ public class BaseViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		Map<String, Object> pathVars = new HashMap<String, Object>();
+		Map<String, Object> pathVars = new HashMap<>();
 		pathVars.put("one", "bar");
 		pathVars.put("something", "else");
 		request.setAttribute(View.PATH_VARIABLES, pathVars);
 
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("one", new HashMap<Object, Object>());
+		Map<String, Object> model = new HashMap<>();
+		model.put("one", new HashMap<>());
 		model.put("two", new Object());
 
 		tv.render(model, request, response);

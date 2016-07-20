@@ -23,14 +23,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -72,10 +70,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 */
 	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
-
-	/** Checking for Servlet 3.0+ HttpServletResponse.getHeader(String) */
-	private static final boolean servlet3Present =
-			ClassUtils.hasMethod(HttpServletResponse.class, "getHeader", String.class);
 
 	private boolean notModified = false;
 
@@ -283,19 +277,19 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private boolean isCompatibleWithConditionalRequests(HttpServletResponse response) {
 		try {
-			if (response == null || !servlet3Present) {
+			if (response == null) {
 				// Can't check response.getStatus() - let's assume we're good
 				return true;
 			}
 			return HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException ex) {
 			return true;
 		}
 	}
 
 	private boolean isHeaderAbsent(HttpServletResponse response, String header) {
-		if (response == null || !servlet3Present) {
+		if (response == null) {
 			// Can't check response.getHeader(header) - let's assume it's not set
 			return true;
 		}

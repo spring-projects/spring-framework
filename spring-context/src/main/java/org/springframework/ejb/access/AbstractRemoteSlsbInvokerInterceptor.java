@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.rmi.RemoteException;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBObject;
 import javax.naming.NamingException;
-import javax.rmi.PortableRemoteObject;
 
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -87,27 +86,6 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 		return this.refreshHomeOnConnectFailure;
 	}
 
-
-	/**
-	 * This overridden lookup implementation performs a narrow operation
-	 * after the JNDI lookup, provided that a home interface is specified.
-	 * @see #setHomeInterface
-	 * @see javax.rmi.PortableRemoteObject#narrow
-	 */
-	@Override
-	protected Object lookup() throws NamingException {
-		Object homeObject = super.lookup();
-		if (this.homeInterface != null) {
-			try {
-				homeObject = PortableRemoteObject.narrow(homeObject, this.homeInterface);
-			}
-			catch (ClassCastException ex) {
-				throw new RemoteLookupFailureException(
-						"Could not narrow EJB home stub to home interface [" + this.homeInterface.getName() + "]", ex);
-			}
-		}
-		return homeObject;
-	}
 
 	/**
 	 * Check for EJB3-style home object that serves as EJB component directly.

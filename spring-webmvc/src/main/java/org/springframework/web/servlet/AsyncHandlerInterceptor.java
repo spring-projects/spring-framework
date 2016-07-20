@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,6 @@ import org.springframework.web.method.HandlerMethod;
  *
  * @author Rossen Stoyanchev
  * @since 3.2
- *
  * @see org.springframework.web.context.request.async.WebAsyncManager
  * @see org.springframework.web.context.request.async.CallableProcessingInterceptor
  * @see org.springframework.web.context.request.async.DeferredResultProcessingInterceptor
@@ -67,15 +66,13 @@ public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 	 * avoid modifying them in ways that would conflict with the concurrent
 	 * execution of the handler. A typical use of this method would be to
 	 * clean up thread-local variables.
-	 *
 	 * @param request the current request
 	 * @param response the current response
 	 * @param handler the handler (or {@link HandlerMethod}) that started async
 	 * execution, for type and/or instance examination
 	 * @throws Exception in case of errors
 	 */
-	void afterConcurrentHandlingStarted(
-			HttpServletRequest request, HttpServletResponse response, Object handler)
+	void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception;
 
 }

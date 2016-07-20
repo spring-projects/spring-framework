@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.http.converter.xml;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -176,7 +176,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
 		assertXMLEqual("Invalid result", "<rootElement><type s=\"Hello World\"/></rootElement>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 	}
 
 	@Test
@@ -186,7 +186,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
 		assertXMLEqual("Invalid result", "<rootElement><type s=\"Hello World\"/></rootElement>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 	}
 
 	// SPR-11488
@@ -197,7 +197,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		MyJaxb2RootElementHttpMessageConverter myConverter = new MyJaxb2RootElementHttpMessageConverter();
 		myConverter.write(new MyRootElement(new MyCustomElement("a", "b")), null, outputMessage);
 		assertXMLEqual("Invalid result", "<myRootElement><element>a|||b</element></myRootElement>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+				outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 	}
 
 	@Test

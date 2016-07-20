@@ -16,7 +16,6 @@
 
 package org.springframework.cache;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -128,8 +127,8 @@ public class CacheReproTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Spr13081Config.class);
 		Spr13081Service bean = context.getBean(Spr13081Service.class);
 
-		thrown.expect(IllegalStateException.class);
-		thrown.expectMessage(MyCacheResolver.class.getName());
+		this.thrown.expect(IllegalStateException.class);
+		this.thrown.expectMessage(MyCacheResolver.class.getName());
 		bean.getSimple(null);
 	}
 
@@ -235,7 +234,7 @@ public class CacheReproTests {
 		@Bean
 		public CacheManager cacheManager() {
 			SimpleCacheManager cacheManager = new SimpleCacheManager();
-			cacheManager.setCaches(Arrays.asList(cache()));
+			cacheManager.setCaches(Collections.singletonList(cache()));
 			return cacheManager;
 		}
 

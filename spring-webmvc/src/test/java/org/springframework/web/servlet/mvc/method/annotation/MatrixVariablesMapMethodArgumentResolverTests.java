@@ -77,7 +77,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		this.request = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 
-		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<String, MultiValueMap<String, String>>();
+		Map<String, MultiValueMap<String, String>> params = new LinkedHashMap<>();
 		this.request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, params);
 	}
 
@@ -163,7 +163,7 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 				(Map<String, MultiValueMap<String, String>>) this.request.getAttribute(
 						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		matrixVariables.put(pathVarName, params);
 
 		return params;

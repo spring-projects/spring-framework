@@ -93,42 +93,6 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 		initCause(ex);
 	}
 
-	/**
-	 * Create a new UnsatisfiedDependencyException.
-	 * @param resourceDescription description of the resource that the bean definition came from
-	 * @param beanName the name of the bean requested
-	 * @param ctorArgIndex the index of the constructor argument that couldn't be satisfied
-	 * @param ctorArgType the type of the constructor argument that couldn't be satisfied
-	 * @param msg the detail message
-	 * @deprecated in favor of {@link #UnsatisfiedDependencyException(String, String, InjectionPoint, String)}
-	 */
-	@Deprecated
-	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, int ctorArgIndex, Class<?> ctorArgType, String msg) {
-
-		super(resourceDescription, beanName,
-				"Unsatisfied dependency expressed through constructor argument with index " +
-				ctorArgIndex + " of type [" + ClassUtils.getQualifiedName(ctorArgType) + "]" +
-				(msg != null ? ": " + msg : ""));
-	}
-
-	/**
-	 * Create a new UnsatisfiedDependencyException.
-	 * @param resourceDescription description of the resource that the bean definition came from
-	 * @param beanName the name of the bean requested
-	 * @param ctorArgIndex the index of the constructor argument that couldn't be satisfied
-	 * @param ctorArgType the type of the constructor argument that couldn't be satisfied
-	 * @param ex the bean creation exception that indicated the unsatisfied dependency
-	 * @deprecated in favor of {@link #UnsatisfiedDependencyException(String, String, InjectionPoint, BeansException)}
-	 */
-	@Deprecated
-	public UnsatisfiedDependencyException(
-			String resourceDescription, String beanName, int ctorArgIndex, Class<?> ctorArgType, BeansException ex) {
-
-		this(resourceDescription, beanName, ctorArgIndex, ctorArgType, (ex != null ? ex.getMessage() : ""));
-		initCause(ex);
-	}
-
 
 	/**
 	 * Return the injection point (field or method/constructor parameter), if known.

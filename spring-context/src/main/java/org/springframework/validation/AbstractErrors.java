@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	private String nestedPath = "";
 
-	private final Stack<String> nestedPathStack = new Stack<String>();
+	private final Stack<String> nestedPathStack = new Stack<>();
 
 
 	@Override
@@ -144,7 +144,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	@Override
 	public List<ObjectError> getAllErrors() {
-		List<ObjectError> result = new LinkedList<ObjectError>();
+		List<ObjectError> result = new LinkedList<>();
 		result.addAll(getGlobalErrors());
 		result.addAll(getFieldErrors());
 		return Collections.unmodifiableList(result);
@@ -195,7 +195,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 	@Override
 	public List<FieldError> getFieldErrors(String field) {
 		List<FieldError> fieldErrors = getFieldErrors();
-		List<FieldError> result = new LinkedList<FieldError>();
+		List<FieldError> result = new LinkedList<>();
 		String fixedField = fixedField(field);
 		for (FieldError error : fieldErrors) {
 			if (isMatchingFieldError(fixedField, error)) {

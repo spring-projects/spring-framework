@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.lang.UsesJava8;
 
 /**
  * A holder for a thread-local user {@link DateTimeContext}.
@@ -28,11 +27,10 @@ import org.springframework.lang.UsesJava8;
  * @author Juergen Hoeller
  * @since 4.0
  */
-@UsesJava8
 public final class DateTimeContextHolder {
 
 	private static final ThreadLocal<DateTimeContext> dateTimeContextHolder =
-			new NamedThreadLocal<DateTimeContext>("DateTime Context");
+			new NamedThreadLocal<>("DateTime Context");
 
 
 	/**

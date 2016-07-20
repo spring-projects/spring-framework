@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 
 import org.xml.sax.InputSource;
 
@@ -33,6 +34,7 @@ import org.springframework.beans.propertyeditors.ClassEditor;
 import org.springframework.beans.propertyeditors.FileEditor;
 import org.springframework.beans.propertyeditors.InputSourceEditor;
 import org.springframework.beans.propertyeditors.InputStreamEditor;
+import org.springframework.beans.propertyeditors.PathEditor;
 import org.springframework.beans.propertyeditors.ReaderEditor;
 import org.springframework.beans.propertyeditors.URIEditor;
 import org.springframework.beans.propertyeditors.URLEditor;
@@ -103,6 +105,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 		doRegisterEditor(registry, InputStream.class, new InputStreamEditor(baseEditor));
 		doRegisterEditor(registry, InputSource.class, new InputSourceEditor(baseEditor));
 		doRegisterEditor(registry, File.class, new FileEditor(baseEditor));
+		doRegisterEditor(registry, Path.class, new PathEditor(baseEditor));
 		doRegisterEditor(registry, Reader.class, new ReaderEditor(baseEditor));
 		doRegisterEditor(registry, URL.class, new URLEditor(baseEditor));
 

@@ -19,6 +19,7 @@ package org.springframework.messaging.simp.stomp;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public final class StompEncoder  {
 			else {
 				StompCommand command = StompHeaderAccessor.getCommand(headers);
 				Assert.notNull(command, "Missing STOMP command: " + headers);
-				output.write(command.toString().getBytes(StompDecoder.UTF8_CHARSET));
+				output.write(command.toString().getBytes(StandardCharsets.UTF_8));
 				output.write(LF);
 				writeHeaders(command, headers, payload, output);
 				output.write(LF);
@@ -132,15 +133,15 @@ public final class StompEncoder  {
 		}
 		if (command.requiresContentLength()) {
 			int contentLength = payload.length;
-			output.write("content-length:".getBytes(StompDecoder.UTF8_CHARSET));
-			output.write(Integer.toString(contentLength).getBytes(StompDecoder.UTF8_CHARSET));
+			output.write("content-length:".getBytes(StandardCharsets.UTF_8));
+			output.write(Integer.toString(contentLength).getBytes(StandardCharsets.UTF_8));
 			output.write(LF);
 		}
 	}
 
 	private byte[] encodeHeaderString(String input, boolean escape) {
 		String inputToUse = (escape ? escape(input) : input);
-		return inputToUse.getBytes(StompDecoder.UTF8_CHARSET);
+		return inputToUse.getBytes(StandardCharsets.UTF_8);
 	}
 
 	/**

@@ -160,7 +160,7 @@
 							x="-78.63" dy="1.2em" class="st4">WebWork<v:newlineChar/></tspan><tspan x="-76.14" dy="1.2em"
 							class="st4">Tapestry<v:newlineChar/></tspan><tspan x="-65.57" dy="1.2em" class="st4">JSF<v:newlineChar/></tspan><tspan
 							x="-97.82" dy="1.2em" class="st4">Rich View Support<v:newlineChar/></tspan><tspan x="-68.36" dy="1.2em"
-							class="st4">JSPs<v:newlineChar/></tspan><tspan x="-74.19" dy="1.2em" class="st4">Velocity<v:newlineChar/></tspan><tspan
+							class="st4">JSPs<v:newlineChar/></tspan><tspan x="-74.19" dy="1.2em" class="st4">FreeMarker<v:newlineChar/></tspan><tspan
 							x="-82.52" dy="1.2em" class="st4">FreeMarker<v:newlineChar/></tspan><tspan x="-66.69" dy="1.2em"
 							class="st4">PDF<v:newlineChar/></tspan><tspan x="-90.59" dy="1.2em" class="st4">Jasper Reports<v:newlineChar/></tspan><tspan
 							x="-68.91" dy="1.2em" class="st4">Excel<v:newlineChar/></tspan><tspan x="-99.48" dy="1.2em" class="st4">Spring Portlet MVC</tspan></text>			</g>
@@ -190,9 +190,7 @@
 				<v:textRect cx="53.8583" cy="749.764" width="107.72" height="184.252"/>
 				<text x="-88.86" y="717.96" transform="scale(-1,1)" class="st3" v:langID="2057"><v:paragraph v:horizAlign="1"/><v:tabList/>ORM<v:newlineChar/><v:newlineChar/><tspan
 							x="-75.55" dy="2.76em" class="st4">Hibernate<v:newlineChar/></tspan><tspan x="-63.04" dy="1.2em"
-							class="st4">JPA<v:newlineChar/></tspan><tspan x="-71.65" dy="1.2em" class="st4">TopLink<v:newlineChar/></tspan><tspan
-							x="-63.87" dy="1.2em" class="st4">JDO<v:newlineChar/></tspan><tspan x="-63.59" dy="1.2em" class="st4">OJB<v:newlineChar/></tspan><tspan
-							x="-66.09" dy="1.2em" class="st4">iBatis</tspan></text>			</g>
+							class="st4">JPA<v:newlineChar/></tspan></g>
 		</g>
 	</g>
 </svg>

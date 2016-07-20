@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,14 +183,14 @@ public class RequestPartIntegrationTests {
 	}
 
 	private void testCreate(String url, String basename) {
-		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
-		parts.add("json-data", new HttpEntity<TestData>(new TestData(basename)));
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+		parts.add("json-data", new HttpEntity<>(new TestData(basename)));
 		parts.add("file-data", new ClassPathResource("logo.jpg", getClass()));
-		parts.add("empty-data", new HttpEntity<byte[]>(new byte[0])); // SPR-12860
+		parts.add("empty-data", new HttpEntity<>(new byte[0])); // SPR-12860
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(new MediaType("application", "octet-stream", Charset.forName("ISO-8859-1")));
-		parts.add("iso-8859-1-data", new HttpEntity<byte[]>(new byte[] {(byte) 0xC4}, headers)); // SPR-13096
+		parts.add("iso-8859-1-data", new HttpEntity<>(new byte[] {(byte) 0xC4}, headers)); // SPR-13096
 
 		URI location = restTemplate.postForLocation(url, parts);
 		assertEquals("http://localhost:8080/test/" + basename + "/logo.jpg", location.toString());
@@ -245,7 +245,7 @@ public class RequestPartIntegrationTests {
 			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.get().getOriginalFilename();
 			HttpHeaders headers = new HttpHeaders();
 			headers.setLocation(URI.create(url));
-			return new ResponseEntity<Object>(headers, HttpStatus.CREATED);
+			return new ResponseEntity<>(headers, HttpStatus.CREATED);
 		}
 
 		@RequestMapping(value = "/spr13319", method = POST, consumes = "multipart/form-data")

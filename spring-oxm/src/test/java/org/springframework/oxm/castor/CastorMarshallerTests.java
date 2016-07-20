@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,24 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamResult;
 
+import org.castor.xml.XMLProperties;
 import org.custommonkey.xmlunit.NamespaceContext;
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.custommonkey.xmlunit.XpathEngine;
-
+import org.exolab.castor.xml.XercesXMLSerializerFactory;
 import org.junit.Test;
-
 import org.mockito.InOrder;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractMarshallerTests;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertEquals;
@@ -117,6 +114,9 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 		CastorMarshaller marshaller = new CastorMarshaller();
 		ClassPathResource mappingLocation = new ClassPathResource("mapping.xml", CastorMarshaller.class);
 		marshaller.setMappingLocation(mappingLocation);
+		Map<String, String> props = new HashMap<>(1);
+		props.put(XMLProperties.SERIALIZER_FACTORY, XercesXMLSerializerFactory.class.getName());
+		marshaller.setCastorProperties(props);
 		marshaller.afterPropertiesSet();
 		return marshaller;
 	}
@@ -278,7 +278,7 @@ public class CastorMarshallerTests extends AbstractMarshallerTests<CastorMarshal
 	 * @throws Exception if any error occurs during xpath evaluation
 	 */
 	private void assertXpathEvaluatesTo(String msg, String expected, String xpath, String xmlDoc) throws Exception {
-		Map<String, String> namespaces = new HashMap<String, String>();
+		Map<String, String> namespaces = new HashMap<>();
 		namespaces.put("tns", "http://samples.springframework.org/flight");
 		namespaces.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 

@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 import org.springframework.core.io.support.ResourceRegion;
@@ -65,7 +66,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 	@Override
-	protected ResourceRegion readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage)
+	protected ResourceRegion readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
 		return null;
@@ -79,7 +80,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	@Override
 	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
 		if (!(type instanceof ParameterizedType)) {
-			return ResourceRegion.class.isAssignableFrom((Class) type);
+			return ResourceRegion.class.isAssignableFrom((Class<?>) type);
 		}
 		ParameterizedType parameterizedType = (ParameterizedType) type;
 		if (!(parameterizedType.getRawType() instanceof Class)) {
@@ -119,10 +120,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		}
 	}
 
-	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage)
-			throws IOException {
-
-		Assert.notNull(region, "ResourceRegion should not be null");
+	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage) throws IOException {
+		Assert.notNull(region, "ResourceRegion must not be null");
 		HttpHeaders responseHeaders = outputMessage.getHeaders();
 		long start = region.getPosition();
 		long end = start + region.getCount() - 1;
@@ -179,13 +178,14 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	}
 
 
+
 	private static void println(OutputStream os) throws IOException {
 		os.write('\r');
 		os.write('\n');
 	}
 
 	private static void print(OutputStream os, String buf) throws IOException {
-		os.write(buf.getBytes("US-ASCII"));
+		os.write(buf.getBytes(StandardCharsets.US_ASCII));
 	}
 
 }

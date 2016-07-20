@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private boolean primary = false;
 
 	private final Map<String, AutowireCandidateQualifier> qualifiers =
-			new LinkedHashMap<String, AutowireCandidateQualifier>(0);
+			new LinkedHashMap<>(0);
 
 	private boolean nonPublicAccessAllowed = true;
 
@@ -516,7 +516,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 			// otherwise we'll try constructor autowiring.
 			Constructor<?>[] constructors = getBeanClass().getConstructors();
 			for (Constructor<?> constructor : constructors) {
-				if (constructor.getParameterTypes().length == 0) {
+				if (constructor.getParameterCount() == 0) {
 					return AUTOWIRE_BY_TYPE;
 				}
 			}
@@ -631,7 +631,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * @return the Set of {@link AutowireCandidateQualifier} objects.
 	 */
 	public Set<AutowireCandidateQualifier> getQualifiers() {
-		return new LinkedHashSet<AutowireCandidateQualifier>(this.qualifiers.values());
+		return new LinkedHashSet<>(this.qualifiers.values());
 	}
 
 	/**
@@ -731,7 +731,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Return information about methods to be overridden by the IoC
 	 * container. This will be empty if there are no method overrides.
-	 * Never returns null.
+	 * Never returns {@code null}.
 	 */
 	public MethodOverrides getMethodOverrides() {
 		return this.methodOverrides;
@@ -934,8 +934,11 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		// Check that lookup methods exists.
 		MethodOverrides methodOverrides = getMethodOverrides();
 		if (!methodOverrides.isEmpty()) {
-			for (MethodOverride mo : methodOverrides.getOverrides()) {
-				prepareMethodOverride(mo);
+			Set<MethodOverride> overrides = methodOverrides.getOverrides();
+			synchronized (overrides) {
+				for (MethodOverride mo : overrides) {
+					prepareMethodOverride(mo);
+				}
 			}
 		}
 	}

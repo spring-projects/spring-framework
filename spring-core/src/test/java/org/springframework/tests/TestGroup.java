@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public enum TestGroup {
 			return EnumSet.allOf(TestGroup.class);
 		}
 		if (value.toUpperCase().startsWith("ALL-")) {
-			Set<TestGroup> groups = new HashSet<TestGroup>(EnumSet.allOf(TestGroup.class));
+			Set<TestGroup> groups = new HashSet<>(EnumSet.allOf(TestGroup.class));
 			groups.removeAll(parseGroups(value.substring(4)));
 			return groups;
 		}
@@ -89,7 +89,7 @@ public enum TestGroup {
 	}
 
 	private static Set<TestGroup> parseGroups(String value) {
-		Set<TestGroup> groups = new HashSet<TestGroup>();
+		Set<TestGroup> groups = new HashSet<>();
 		for (String group : value.split(",")) {
 			try {
 				groups.add(valueOf(group.trim().toUpperCase()));

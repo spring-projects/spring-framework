@@ -22,9 +22,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -47,12 +45,10 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 
 
 	public DeferredResultMethodReturnValueHandler() {
-		this.adapterMap = new HashMap<Class<?>, DeferredResultAdapter>(5);
+		this.adapterMap = new HashMap<>(5);
 		this.adapterMap.put(DeferredResult.class, new SimpleDeferredResultAdapter());
 		this.adapterMap.put(ListenableFuture.class, new ListenableFutureAdapter());
-		if (ClassUtils.isPresent("java.util.concurrent.CompletionStage", getClass().getClassLoader())) {
-			this.adapterMap.put(CompletionStage.class, new CompletionStageAdapter());
-		}
+		this.adapterMap.put(CompletionStage.class, new CompletionStageAdapter());
 	}
 
 
@@ -114,6 +110,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		}
 	}
 
+
 	/**
 	 * Adapter for {@code ListenableFuture} return values.
 	 */
@@ -122,7 +119,7 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
 			Assert.isInstanceOf(ListenableFuture.class, returnValue);
-			final DeferredResult<Object> result = new DeferredResult<Object>();
+			final DeferredResult<Object> result = new DeferredResult<>();
 			((ListenableFuture<?>) returnValue).addCallback(new ListenableFutureCallback<Object>() {
 				@Override
 				public void onSuccess(Object value) {
@@ -137,16 +134,16 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		}
 	}
 
+
 	/**
 	 * Adapter for {@code CompletionStage} return values.
 	 */
-	@UsesJava8
 	private static class CompletionStageAdapter implements DeferredResultAdapter {
 
 		@Override
 		public DeferredResult<?> adaptToDeferredResult(Object returnValue) {
 			Assert.isInstanceOf(CompletionStage.class, returnValue);
-			final DeferredResult<Object> result = new DeferredResult<Object>();
+			final DeferredResult<Object> result = new DeferredResult<>();
 			@SuppressWarnings("unchecked")
 			CompletionStage<?> future = (CompletionStage<?>) returnValue;
 			future.handle(new BiFunction<Object, Throwable, Object>() {

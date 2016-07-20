@@ -52,9 +52,8 @@ import org.springframework.util.ReflectionUtils;
  * web application). There is no direct API dependency between this LoadTimeWeaver
  * adapter and the underlying ClassLoader, just a 'loose' method contract.
  *
- * <p>This is the LoadTimeWeaver to use in combination with Spring's
- * {@link org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader}
- * for Tomcat 5.0+ as well as with the Resin application server version 3.1+.
+ * <p>This is the LoadTimeWeaver to use e.g. with the Resin application server
+ * version 3.1+.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -62,7 +61,6 @@ import org.springframework.util.ReflectionUtils;
  * @see #addTransformer(java.lang.instrument.ClassFileTransformer)
  * @see #getThrowawayClassLoader()
  * @see SimpleThrowawayClassLoader
- * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
  */
 public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 

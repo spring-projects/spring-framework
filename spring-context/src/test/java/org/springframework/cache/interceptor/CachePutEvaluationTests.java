@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ public class CachePutEvaluationTests {
 	@Before
 	public void setup() {
 		this.context = new AnnotationConfigApplicationContext(Config.class);
-		this.cache = context.getBean(CacheManager.class).getCache("test");
-		this.service = context.getBean(SimpleService.class);
+		this.cache = this.context.getBean(CacheManager.class).getCache("test");
+		this.service = this.context.getBean(SimpleService.class);
 	}
 
 	@After
@@ -69,38 +69,38 @@ public class CachePutEvaluationTests {
 	public void mutualGetPutExclusion() {
 		String key = "1";
 
-		Long first = service.getOrPut(key, true);
-		Long second = service.getOrPut(key, true);
+		Long first = this.service.getOrPut(key, true);
+		Long second = this.service.getOrPut(key, true);
 		assertSame(first, second);
 
 		// This forces the method to be executed again
 		Long expected = first + 1;
-		Long third = service.getOrPut(key, false);
+		Long third = this.service.getOrPut(key, false);
 		assertEquals(expected, third);
 
-		Long fourth = service.getOrPut(key, true);
+		Long fourth = this.service.getOrPut(key, true);
 		assertSame(third, fourth);
 	}
 
 	@Test
 	public void getAndPut() {
-		cache.clear();
+		this.cache.clear();
 
 		long key = 1;
-		Long value = service.getAndPut(key);
+		Long value = this.service.getAndPut(key);
 
-		assertEquals("Wrong value for @Cacheable key", value, cache.get(key).get());
-		assertEquals("Wrong value for @CachePut key", value, cache.get(value + 100).get()); // See @CachePut
+		assertEquals("Wrong value for @Cacheable key", value, this.cache.get(key).get());
+		assertEquals("Wrong value for @CachePut key", value, this.cache.get(value + 100).get()); // See @CachePut
 
 		// CachePut forced a method call
-		Long anotherValue = service.getAndPut(key);
+		Long anotherValue = this.service.getAndPut(key);
 		assertNotSame(value, anotherValue);
 		// NOTE: while you might expect the main key to have been updated, it hasn't. @Cacheable operations
 		// are only processed in case of a cache miss. This is why combining @Cacheable with @CachePut
 		// is a very bad idea. We could refine the condition now that we can figure out if we are going
 		// to invoke the method anyway but that brings a whole new set of potential regressions.
 		//assertEquals("Wrong value for @Cacheable key", anotherValue, cache.get(key).get());
-		assertEquals("Wrong value for @CachePut key", anotherValue, cache.get(anotherValue + 100).get());
+		assertEquals("Wrong value for @CachePut key", anotherValue, this.cache.get(anotherValue + 100).get());
 	}
 
 	@Configuration
@@ -130,7 +130,7 @@ public class CachePutEvaluationTests {
 		@Cacheable(condition = "#p1", key = "#p0")
 		@CachePut(condition = "!#p1", key = "#p0")
 		public Long getOrPut(Object id, boolean flag) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 
 		/**
@@ -140,7 +140,7 @@ public class CachePutEvaluationTests {
 		@Cacheable
 		@CachePut(key = "#result + 100", condition = "#result != null")
 		public Long getAndPut(long id) {
-			return counter.getAndIncrement();
+			return this.counter.getAndIncrement();
 		}
 	}
 }

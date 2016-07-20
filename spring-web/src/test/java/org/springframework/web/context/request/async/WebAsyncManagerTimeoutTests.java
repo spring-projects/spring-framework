@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class WebAsyncManagerTimeoutTests {
 	public void startCallableProcessingTimeoutAndResumeThroughCallback() throws Exception {
 
 		StubCallable callable = new StubCallable();
-		WebAsyncTask<Object> webAsyncTask = new WebAsyncTask<Object>(callable);
+		WebAsyncTask<Object> webAsyncTask = new WebAsyncTask<>(callable);
 		webAsyncTask.onTimeout(new Callable<Object>() {
 			@Override
 			public Object call() throws Exception {
@@ -152,7 +152,7 @@ public class WebAsyncManagerTimeoutTests {
 	@Test
 	public void startDeferredResultProcessingTimeoutAndComplete() throws Exception {
 
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 
 		DeferredResultProcessingInterceptor interceptor = mock(DeferredResultProcessingInterceptor.class);
 		given(interceptor.handleTimeout(this.asyncWebRequest, deferredResult)).willReturn(true);
@@ -175,7 +175,7 @@ public class WebAsyncManagerTimeoutTests {
 	@Test
 	public void startDeferredResultProcessingTimeoutAndResumeWithDefaultResult() throws Exception {
 
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>(null, 23);
+		DeferredResult<Integer> deferredResult = new DeferredResult<>(null, 23);
 		this.asyncManager.startDeferredResultProcessing(deferredResult);
 
 		AsyncEvent event = null;
@@ -189,7 +189,7 @@ public class WebAsyncManagerTimeoutTests {
 	@Test
 	public void startDeferredResultProcessingTimeoutAndResumeThroughCallback() throws Exception {
 
-		final DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		final DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		deferredResult.onTimeout(new Runnable() {
 			@Override
 			public void run() {
@@ -210,7 +210,7 @@ public class WebAsyncManagerTimeoutTests {
 	@Test
 	public void startDeferredResultProcessingTimeoutAndResumeThroughInterceptor() throws Exception {
 
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 
 		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
 			@Override
@@ -234,7 +234,7 @@ public class WebAsyncManagerTimeoutTests {
 	@Test
 	public void startDeferredResultProcessingAfterTimeoutException() throws Exception {
 
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		DeferredResult<Integer> deferredResult = new DeferredResult<>();
 		final Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {

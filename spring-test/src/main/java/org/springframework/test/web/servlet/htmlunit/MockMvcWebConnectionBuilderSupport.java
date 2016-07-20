@@ -45,7 +45,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 
 	private final MockMvc mockMvc;
 
-	private final List<WebRequestMatcher> requestMatchers = new ArrayList<WebRequestMatcher>();
+	private final List<WebRequestMatcher> requestMatchers = new ArrayList<>();
 
 	private String contextPath = "";
 
@@ -140,27 +140,8 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * Create a new {@link WebConnection} that will use a {@link MockMvc}
 	 * instance if one of the specified {@link WebRequestMatcher} instances
 	 * matches.
-	 * @param defaultConnection the default WebConnection to use if none of
-	 * the specified {@code WebRequestMatcher} instances matches; never {@code null}
-	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
-	 * instance if one of the specified {@code WebRequestMatcher} matches
-	 * @see #alwaysUseMockMvc()
-	 * @see #useMockMvc(WebRequestMatcher...)
-	 * @see #useMockMvcForHosts(String...)
-	 * @deprecated Use {@link #createConnection(WebClient)} instead
-	 */
-	@Deprecated
-	protected final WebConnection createConnection(WebConnection defaultConnection) {
-		Assert.notNull(defaultConnection, "Default WebConnection must not be null");
-		return createConnection(new WebClient(), defaultConnection);
-	}
-
-	/**
-	 * Create a new {@link WebConnection} that will use a {@link MockMvc}
-	 * instance if one of the specified {@link WebRequestMatcher} instances
-	 * matches.
-	 * @param webClient the WebClient to use if none of
-	 * the specified {@code WebRequestMatcher} instances matches; never {@code null}
+	 * @param webClient the WebClient to use if none of the specified
+	 * {@code WebRequestMatcher} instances matches (never {@code null})
 	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
 	 * instance if one of the specified {@code WebRequestMatcher} matches
 	 * @see #alwaysUseMockMvc()
@@ -178,7 +159,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 		if (this.alwaysUseMockMvc) {
 			return connection;
 		}
-		List<DelegateWebConnection> delegates = new ArrayList<DelegateWebConnection>(this.requestMatchers.size());
+		List<DelegateWebConnection> delegates = new ArrayList<>(this.requestMatchers.size());
 		for (WebRequestMatcher matcher : this.requestMatchers) {
 			delegates.add(new DelegateWebConnection(matcher, connection));
 		}

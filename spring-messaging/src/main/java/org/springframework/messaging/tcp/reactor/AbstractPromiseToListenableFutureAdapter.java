@@ -43,7 +43,7 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 
 	private final Promise<S> promise;
 
-	private final ListenableFutureCallbackRegistry<T> registry = new ListenableFutureCallbackRegistry<T>();
+	private final ListenableFutureCallbackRegistry<T> registry = new ListenableFutureCallbackRegistry<>();
 
 
 	protected AbstractPromiseToListenableFutureAdapter(Promise<S> promise) {

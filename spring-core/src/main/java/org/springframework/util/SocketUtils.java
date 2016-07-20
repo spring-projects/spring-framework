@@ -287,7 +287,7 @@ public class SocketUtils {
 			Assert.isTrue((maxPort - minPort) >= numRequested,
 					"'numRequested' must not be greater than 'maxPort' - 'minPort'");
 
-			SortedSet<Integer> availablePorts = new TreeSet<Integer>();
+			SortedSet<Integer> availablePorts = new TreeSet<>();
 			int attemptCount = 0;
 			while ((++attemptCount <= numRequested + 100) && availablePorts.size() < numRequested) {
 				availablePorts.add(findAvailablePort(minPort, maxPort));

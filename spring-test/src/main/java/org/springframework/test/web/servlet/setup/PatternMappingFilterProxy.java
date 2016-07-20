@@ -49,13 +49,13 @@ final class PatternMappingFilterProxy implements Filter {
 	private final Filter delegate;
 
 	/** Patterns that require an exact match, e.g. "/test" */
-	private final List<String> exactMatches = new ArrayList<String>();
+	private final List<String> exactMatches = new ArrayList<>();
 
 	/** Patterns that require the URL to have a specific prefix, e.g. "/test/*" */
-	private final List<String> startsWithMatches = new ArrayList<String>();
+	private final List<String> startsWithMatches = new ArrayList<>();
 
 	/** Patterns that require the request URL to have a specific suffix, e.g. "*.html" */
-	private final List<String> endsWithMatches = new ArrayList<String>();
+	private final List<String> endsWithMatches = new ArrayList<>();
 
 
 	/**

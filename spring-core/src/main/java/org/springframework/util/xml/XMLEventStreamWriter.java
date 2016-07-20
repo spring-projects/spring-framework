@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 
 	private final XMLEventFactory eventFactory;
 
-	private final List<EndElement> endElements = new ArrayList<EndElement>();
+	private final List<EndElement> endElements = new ArrayList<>();
 
 	private boolean emptyElement = false;
 
@@ -201,7 +201,7 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 		int last = this.endElements.size() - 1;
 		EndElement oldEndElement = this.endElements.get(last);
 		Iterator oldNamespaces = oldEndElement.getNamespaces();
-		List<Namespace> newNamespaces = new ArrayList<Namespace>();
+		List<Namespace> newNamespaces = new ArrayList<>();
 		while (oldNamespaces.hasNext()) {
 			Namespace oldNamespace = (Namespace) oldNamespaces.next();
 			newNamespaces.add(oldNamespace);

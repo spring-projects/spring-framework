@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.support;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ import org.springframework.util.StringUtils;
  * </pre>
  *
  * <p>Note that the above examples aim to demonstrate the general idea of using
- * header accessors. The most likely usage however is through sub-classes.
+ * header accessors. The most likely usage however is through subclasses.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -115,7 +116,7 @@ import org.springframework.util.StringUtils;
  */
 public class MessageHeaderAccessor {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final MimeType[] READABLE_MIME_TYPES = new MimeType[] {
 			MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.APPLICATION_XML,
@@ -282,7 +283,7 @@ public class MessageHeaderAccessor {
 	 * where each new call returns a fresh copy of the current header values.
 	 */
 	public Map<String, Object> toMap() {
-		return new HashMap<String, Object>(this.headers);
+		return new HashMap<>(this.headers);
 	}
 
 
@@ -306,12 +307,17 @@ public class MessageHeaderAccessor {
 			throw new IllegalArgumentException("'" + name + "' header is read-only");
 		}
 		verifyType(name, value);
-		if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
-			this.modified = true;
-			if (value != null) {
+		if (value != null) {
+			// Modify header if necessary
+			if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
+				this.modified = true;
 				this.headers.getRawHeaders().put(name, value);
 			}
-			else {
+		}
+		else {
+			// Remove header if available
+			if (this.headers.containsKey(name)) {
+				this.modified = true;
 				this.headers.getRawHeaders().remove(name);
 			}
 		}
@@ -354,7 +360,7 @@ public class MessageHeaderAccessor {
 	 * names. Supported pattern styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
 	 */
 	public void removeHeaders(String... headerPatterns) {
-		List<String> headersToRemove = new ArrayList<String>();
+		List<String> headersToRemove = new ArrayList<>();
 		for (String pattern : headerPatterns) {
 			if (StringUtils.hasLength(pattern)){
 				if (pattern.contains("*")){
@@ -371,7 +377,7 @@ public class MessageHeaderAccessor {
 	}
 
 	private List<String> getMatchingHeaderNames(String pattern, Map<String, Object> headers) {
-		List<String> matchingHeaderNames = new ArrayList<String>();
+		List<String> matchingHeaderNames = new ArrayList<>();
 		if (headers != null) {
 			for (String key : headers.keySet()) {
 				if (PatternMatchUtils.simpleMatch(pattern, key)) {

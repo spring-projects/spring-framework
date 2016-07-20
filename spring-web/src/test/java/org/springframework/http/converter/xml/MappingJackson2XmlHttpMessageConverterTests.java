@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.http.converter.xml;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -91,15 +91,14 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		body.setBool(true);
 		body.setBytes(new byte[]{0x1, 0x2});
 		converter.write(body, null, outputMessage);
-		Charset utf8 = Charset.forName("UTF-8");
-		String result = outputMessage.getBodyAsString(utf8);
+		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertTrue(result.contains("<string>Foo</string>"));
 		assertTrue(result.contains("<number>42</number>"));
 		assertTrue(result.contains("<fraction>42.0</fraction>"));
 		assertTrue(result.contains("<array><array>Foo</array><array>Bar</array></array>"));
 		assertTrue(result.contains("<bool>true</bool>"));
 		assertTrue(result.contains("<bytes>AQI=</bytes>"));
-		assertEquals("Invalid content-type", new MediaType("application", "xml", utf8),
+		assertEquals("Invalid content-type", new MediaType("application", "xml", StandardCharsets.UTF_8),
 				outputMessage.getHeaders().getContentType());
 	}
 
@@ -132,7 +131,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		jacksonValue.setSerializationView(MyJacksonView1.class);
 		this.writeInternal(jacksonValue, outputMessage);
 
-		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		String result = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		assertThat(result, containsString("<withView1>with</withView1>"));
 		assertThat(result, not(containsString("<withView2>with</withView2>")));
 		assertThat(result, not(containsString("<withoutView>without</withoutView>")));

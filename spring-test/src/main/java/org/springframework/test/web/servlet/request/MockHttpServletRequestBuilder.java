@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,15 +83,15 @@ public class MockHttpServletRequestBuilder
 
 	private final URI url;
 
-	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<String, Object>();
+	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<>();
 
 	private String contentType;
 
 	private byte[] content;
 
-	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<String, String>();
+	private final MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 
-	private final List<Cookie> cookies = new ArrayList<Cookie>();
+	private final List<Cookie> cookies = new ArrayList<>();
 
 	private Locale locale;
 
@@ -100,13 +101,13 @@ public class MockHttpServletRequestBuilder
 
 	private Principal principal;
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private MockHttpSession session;
 
-	private final Map<String, Object> sessionAttributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> sessionAttributes = new LinkedHashMap<>();
 
-	private final Map<String, Object> flashAttributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> flashAttributes = new LinkedHashMap<>();
 
 	private String contextPath = "";
 
@@ -114,7 +115,7 @@ public class MockHttpServletRequestBuilder
 
 	private String pathInfo = ValueConstants.DEFAULT_NONE;
 
-	private final List<RequestPostProcessor> postProcessors = new ArrayList<RequestPostProcessor>();
+	private final List<RequestPostProcessor> postProcessors = new ArrayList<>();
 
 
 	/**
@@ -149,8 +150,8 @@ public class MockHttpServletRequestBuilder
 	 * @since 4.3
 	 */
 	MockHttpServletRequestBuilder(String httpMethod, URI url) {
-		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(url, "url is required");
+		Assert.notNull(httpMethod, "'httpMethod' is required");
+		Assert.notNull(url, "'url' is required");
 		this.method = httpMethod;
 		this.url = url;
 	}
@@ -250,7 +251,7 @@ public class MockHttpServletRequestBuilder
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
 		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
-		List<MediaType> result = new ArrayList<MediaType>(mediaTypes.length);
+		List<MediaType> result = new ArrayList<>(mediaTypes.length);
 		for (String mediaType : mediaTypes) {
 			result.add(MediaType.parseMediaType(mediaType));
 		}
@@ -272,12 +273,7 @@ public class MockHttpServletRequestBuilder
 	 * @param content the body content
 	 */
 	public MockHttpServletRequestBuilder content(String content) {
-		try {
-			this.content = content.getBytes("UTF-8");
-		}
-		catch (UnsupportedEncodingException e) {
-			// should never happen
-		}
+		this.content = content.getBytes(StandardCharsets.UTF_8);
 		return this;
 	}
 
@@ -286,7 +282,6 @@ public class MockHttpServletRequestBuilder
 	 * @param cookies the cookies to add
 	 */
 	public MockHttpServletRequestBuilder cookie(Cookie... cookies) {
-		Assert.notNull(cookies, "'cookies' must not be null");
 		Assert.notEmpty(cookies, "'cookies' must not be empty");
 		this.cookies.addAll(Arrays.asList(cookies));
 		return this;
@@ -751,10 +746,8 @@ public class MockHttpServletRequestBuilder
 	public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
 		for (RequestPostProcessor postProcessor : this.postProcessors) {
 			request = postProcessor.postProcessRequest(request);
-			if (request == null) {
-				throw new IllegalStateException(
-						"Post-processor [" + postProcessor.getClass().getName() + "] returned null");
-			}
+			Assert.state(request != null,
+					() -> "Post-processor [" + postProcessor.getClass().getName() + "] returned null");
 		}
 		return request;
 	}

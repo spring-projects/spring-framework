@@ -39,8 +39,6 @@ usual (Spring) POJOs. Currently, Spring supports the following remoting technolo
 * __Hessian__. By using Spring's `HessianProxyFactoryBean` and the
   `HessianServiceExporter` you can transparently expose your services using the
   lightweight binary HTTP-based protocol provided by Caucho.
-* __Burlap__. Burlap is Caucho's XML-based alternative to Hessian. Spring provides
-  support classes such as `BurlapProxyFactoryBean` and `BurlapServiceExporter`.
 * __JAX-WS__. Spring provides remoting support for web services via JAX-WS (the
   successor of JAX-RPC, as introduced in Java EE 5 and Java 6).
 * __JMS__. Remoting using JMS as the underlying protocol is supported via the
@@ -207,7 +205,7 @@ will transparently create an invoker and remotely enable the account service thr
 
 
 [[remoting-caucho-protocols]]
-=== Using Hessian or Burlap to remotely call services via HTTP
+=== Using Hessian to remotely call services via HTTP
 Hessian offers a binary HTTP-based remoting protocol. It is developed by Caucho and more
 information about Hessian itself can be found at http://www.caucho.com[].
 
@@ -329,22 +327,13 @@ the `AccountService` to manage accounts:
 
 
 
-[[remoting-caucho-protocols-burlap]]
-==== Using Burlap
-We won't discuss Burlap, the XML-based equivalent of Hessian, in detail here, since it
-is configured and set up in exactly the same way as the Hessian variant explained above.
-Just replace the word `Hessian` with `Burlap` and you're all set to go.
-
-
-
 [[remoting-caucho-protocols-security]]
-==== Applying HTTP basic authentication to a service exposed through Hessian or Burlap
-One of the advantages of Hessian and Burlap is that we can easily apply HTTP basic
-authentication, because both protocols are HTTP-based. Your normal HTTP server security
-mechanism can easily be applied through using the `web.xml` security features, for
-example. Usually, you don't use per-user security credentials here, but rather shared
-credentials defined at the `Hessian/BurlapProxyFactoryBean` level (similar to a JDBC
-`DataSource`).
+==== Applying HTTP basic authentication to a service exposed through Hessian
+One of the advantages of Hessian is that we can easily apply HTTP basic authentication,
+because both protocols are HTTP-based. Your normal HTTP server security mechanism can
+easily be applied through using the `web.xml` security features, for example. Usually,
+you don't use per-user security credentials here, but rather shared credentials defined
+at the `HessianProxyFactoryBean` level (similar to a JDBC `DataSource`).
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -375,12 +364,12 @@ at http://projects.spring.io/spring-security/[].
 
 [[remoting-httpinvoker]]
 === Exposing services using HTTP invokers
-As opposed to Burlap and Hessian, which are both lightweight protocols using their own
-slim serialization mechanisms, Spring HTTP invokers use the standard Java serialization
+As opposed to Hessian, which are both lightweight protocols using their own slim
+serialization mechanisms, Spring HTTP invokers use the standard Java serialization
 mechanism to expose services through HTTP. This has a huge advantage if your arguments
 and return types are complex types that cannot be serialized using the serialization
-mechanisms Hessian and Burlap use (refer to the next section for more considerations
-when choosing a remoting technology).
+mechanisms Hessian uses (refer to the next section for more considerations when
+choosing a remoting technology).
 
 Under the hood, Spring uses either the standard facilities provided by the JDK or
 Apache `HttpComponents` to perform HTTP calls. Use the latter if you need more
@@ -393,7 +382,7 @@ for more information.
 [[remoting-httpinvoker-server]]
 ==== Exposing the service object
 Setting up the HTTP invoker infrastructure for a service object resembles closely the
-way you would do the same using Hessian or Burlap. Just as Hessian support provides the
+way you would do the same using Hessian. Just as Hessian support provides the
 `HessianServiceExporter`, Spring's HttpInvoker support provides the
 `org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter`.
 
@@ -472,8 +461,8 @@ shown in this example:
 [[remoting-httpinvoker-client]]
 ==== Linking in the service at the client
 Again, linking in the service from the client much resembles the way you would do it
-when using Hessian or Burlap. Using a proxy, Spring will be able to translate your calls
-to HTTP POST requests to the URL pointing to the exported service.
+when using Hessian. Using a proxy, Spring will be able to translate your calls to
+HTTP POST requests to the URL pointing to the exported service.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -924,11 +913,11 @@ HTTP as transport. Note that HTTP invokers are not only limited to Java-to-Java 
 but also to Spring on both the client and server side. (The latter also applies to
 Spring's RMI invoker for non-RMI interfaces.)
 
-Hessian and/or Burlap might provide significant value when operating in a heterogeneous
-environment, because they explicitly allow for non-Java clients. However, non-Java
-support is still limited. Known issues include the serialization of Hibernate objects in
-combination with lazily-initialized collections. If you have such a data model, consider
-using RMI or HTTP invokers instead of Hessian.
+Hessian might provide significant value when operating in a heterogeneous environment,
+because they explicitly allow for non-Java clients. However, non-Java support is still
+limited. Known issues include the serialization of Hibernate objects in combination with
+lazily-initialized collections. If you have such a data model, consider using RMI or
+HTTP invokers instead of Hessian.
 
 JMS can be useful for providing clusters of services and allowing the JMS broker to take
 care of load balancing, discovery and auto-failover. By default: Java serialization is
@@ -1290,9 +1279,9 @@ a better feel for its functionality
 
 Concrete implementations for the main media (mime) types are provided in the framework
 and are registered by default with the `RestTemplate` on the client-side and with
-`AnnotationMethodHandlerAdapter` on the server-side.
+`RequestMethodHandlerAdapter` on the server-side.
 
-The implementations of ++HttpMessageConverter++s are described in the following sections.
+The implementations of ``HttpMessageConverter``s are described in the following sections.
 For all converters a default media type is used but can be overridden by setting the
 `supportedMediaTypes` bean property
 
@@ -3894,7 +3883,7 @@ lists of method names.
 === Controlling the ObjectNames for your beans
 
 Behind the scenes, the `MBeanExporter` delegates to an implementation of the
-`ObjectNamingStrategy` to obtain ++ObjectName++s for each of the beans it is registering.
+`ObjectNamingStrategy` to obtain ``ObjectName``s for each of the beans it is registering.
 The default implementation, `KeyNamingStrategy`, will, by default, use the key of the
 `beans` `Map` as the `ObjectName`. In addition, the `KeyNamingStrategy` can map the key
 of the `beans` `Map` to an entry in a `Properties` file (or files) to resolve the
@@ -3909,7 +3898,7 @@ uses source level metadata to obtain the `ObjectName`.
 ==== Reading ObjectNames from Properties
 
 You can configure your own `KeyNamingStrategy` instance and configure it to read
-++ObjectName++s from a `Properties` instance rather than use bean key. The
+``ObjectName``s from a `Properties` instance rather than use bean key. The
 `KeyNamingStrategy` will attempt to locate an entry in the `Properties` with a key
 corresponding to the bean key. If no entry is found or if the `Properties` instance is
 `null` then the bean key itself is used.
@@ -4170,13 +4159,12 @@ To create an `MBeanServerConnection` to a remote JSR-160 enabled `MBeanServer` u
 
 
 [[jmx-jsr160-protocols]]
-==== JMX over Burlap/Hessian/SOAP
+==== JMX over Hessian or SOAP
 JSR-160 permits extensions to the way in which communication is done between the client
 and the server. The examples above are using the mandatory RMI-based implementation
 required by the JSR-160 specification (IIOP and JRMP) and the (optional) JMXMP. By using
 other providers or JMX implementations (such as http://mx4j.sourceforge.net[MX4J]) you
-can take advantage of protocols like SOAP, Hessian, Burlap over simple HTTP or SSL and
-others:
+can take advantage of protocols like SOAP or Hessian over simple HTTP or SSL and others:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -6043,124 +6031,11 @@ of your emails using the above approach for a number of reasons.
   recompiling, redeploying...
 
 Typically the approach taken to address these issues is to use a template library such
-as FreeMarker or Velocity to define the display structure of email content. This leaves
-your code tasked only with creating the data that is to be rendered in the email
-template and sending the email. It is definitely a best practice for when the content of
-your emails becomes even moderately complex, and with the Spring Framework's support
-classes for FreeMarker and Velocity becomes quite easy to do. Find below an example of
-using the Velocity template library to create email content.
-
-
-[[mail-templates-example]]
-===== A Velocity-based example
-To use http://velocity.apache.org[Velocity] to create your email template(s), you will
-need to have the Velocity libraries available on your classpath. You will also need to
-create one or more Velocity templates for the email content that your application needs.
-Find below the Velocity template that this example will be using. As you can see it is
-HTML-based, and since it is plain text it can be created using your favorite HTML or
-text editor.
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	# in the com/foo/package
-	<html>
-		<body>
-			<h3>Hi ${user.userName}, welcome to the Chipping Sodbury On-the-Hill message boards!</h3>
-
-			<div>
-				Your email address is <a href="mailto:${user.emailAddress}">${user.emailAddress}</a>.
-			</div>
-		</body>
-	</html>
-----
-
-Find below some simple code and Spring XML configuration that makes use of the above
-Velocity template to create email content and send email(s).
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	package com.foo;
-
-	import org.apache.velocity.app.VelocityEngine;
-	import org.springframework.mail.javamail.JavaMailSender;
-	import org.springframework.mail.javamail.MimeMessageHelper;
-	import org.springframework.mail.javamail.MimeMessagePreparator;
-	import org.springframework.ui.velocity.VelocityEngineUtils;
-
-	import javax.mail.internet.MimeMessage;
-	import java.util.HashMap;
-	import java.util.Map;
-
-	public class SimpleRegistrationService implements RegistrationService {
-
-		private JavaMailSender mailSender;
-		private VelocityEngine velocityEngine;
-
-		public void setMailSender(JavaMailSender mailSender) {
-			this.mailSender = mailSender;
-		}
-
-		public void setVelocityEngine(VelocityEngine velocityEngine) {
-			this.velocityEngine = velocityEngine;
-		}
-
-		public void register(User user) {
-
-			// Do the registration logic...
-
-			sendConfirmationEmail(user);
-		}
-
-		private void sendConfirmationEmail(final User user) {
-			MimeMessagePreparator preparator = new MimeMessagePreparator() {
-				public void prepare(MimeMessage mimeMessage) throws Exception {
-					MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
-					message.setTo(user.getEmailAddress());
-					message.setFrom("webmaster@csonth.gov.uk"); // could be parameterized...
-					Map model = new HashMap();
-					model.put("user", user);
-					String text = VelocityEngineUtils.mergeTemplateIntoString(
-							velocityEngine, "com/dns/registration-confirmation.vm", model);
-					message.setText(text, true);
-				}
-			};
-			this.mailSender.send(preparator);
-		}
-
-	}
-----
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-		<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
-			<property name="host" value="mail.csonth.gov.uk"/>
-		</bean>
-
-		<bean id="registrationService" class="com.foo.SimpleRegistrationService">
-			<property name="mailSender" ref="mailSender"/>
-			<property name="velocityEngine" ref="velocityEngine"/>
-		</bean>
-
-		<bean id="velocityEngine" class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
-			<property name="velocityProperties">
-				<value>
-					resource.loader=class
-					class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
-				</value>
-			</property>
-		</bean>
-
-	</beans>
-----
+as FreeMarker to define the display structure of email content. This leaves your code
+tasked only with creating the data that is to be rendered in the email template and
+sending the email. It is definitely a best practice for when the content of your emails
+becomes even moderately complex, and with the Spring Framework's support classes for
+FreeMarker becomes quite easy to do.
 
 
 
@@ -8176,10 +8051,9 @@ materialized by the `org.springframework.cache.Cache` and
 There are <<cache-store-configuration,a few implementations>> of that abstraction
 available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
 http://ehcache.org/[EhCache], Gemfire cache,
-https://github.com/ben-manes/caffeine/wiki[Caffeine],
-https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
-JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
-other cache stores/providers.
+https://github.com/ben-manes/caffeine/wiki[Caffeine] and JSR-107 compliant
+caches. See <<cache-plug>> for more information on plugging in other cache
+stores/providers.
 
 [IMPORTANT]
 ====
@@ -8403,15 +8277,42 @@ result in an exception as a custom `CacheManager` will be ignored by the
 `CacheResolver` implementation. This is probably not what you expect.
 ====
 
+[[cache-annotations-cacheable-synchronized]]
+===== Synchronized caching
+In a multi-threaded environment, certain operations might be concurrently invoked for
+the same argument (typically on startup). By default, the cache abstraction does not
+lock anything and the same value may be computed several times, defeating the purpose
+of caching.
+
+For those particular cases, the `sync` attribute can be used to instruct the underlying
+cache provider to _lock_ the cache entry while the value is being computed. As a result,
+only one thread will be busy computing the value while the others are blocked until the
+entry is updated in the cache.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(cacheNames="foos", **sync="true"**)
+	public Foo executeExpensiveOperation(String id) {...}
+----
+
+[NOTE]
+====
+This is an optional feature and your favorite cache library may not support it. All
+`CacheManager` implementations provided by the core framework support it. Check the
+documentation of your cache provider for more details.
+====
+
+
 [[cache-annotations-cacheable-condition]]
 ===== Conditional caching
 Sometimes, a method might not be suitable for caching all the time (for example, it
 might depend on the given arguments). The cache annotations support such functionality
 through the `condition` parameter which takes a `SpEL` expression that is evaluated to
 either `true` or `false`. If `true`, the method is cached - if not, it behaves as if the
-method is not cached, that is executed every since time no matter what values are in the
-cache or what arguments are used. A quick example - the following method will be cached
-only if the argument `name` has a length shorter than 32:
+method is not cached, that is executed every time no matter what values are in the cache
+or what arguments are used. A quick example - the following method will be cached only
+if the argument `name` has a length shorter than 32:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -9013,7 +8914,7 @@ we did in the example above by defining the target cache through the `cache:defi
 === Configuring the cache storage
 Out of the box, the cache abstraction provides several storage integration. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
-controls and manages ++Cache++s and can be used to retrieve these for storage.
+controls and manages ``Cache``s and can be used to retrieve these for storage.
 
 
 [[cache-store-configuration-jdk]]
@@ -9105,41 +9006,6 @@ The Caffeine `CacheManager` also supports customs `Caffeine` and `CacheLoader`. 
 the https://github.com/ben-manes/caffeine/wiki[Caffeine documentation] for more
 information about those.
 
-[[cache-store-configuration-guava]]
-==== Guava Cache
-
-The Guava implementation is located under `org.springframework.cache.guava` package and
-provides access to several features of Guava.
-
-Configuring a `CacheManager` that creates the cache on demand is straightforward:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="cacheManager"
-	      class="org.springframework.cache.guava.GuavaCacheManager"/>
-----
-
-It is also possible to provide the caches to use explicitly. In that case, only those
-will be made available by the manager:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="cacheManager" class="org.springframework.cache.guava.GuavaCacheManager">
-		<property name="caches">
-			<set>
-				<value>default</value>
-				<value>books</value>
-			</set>
-		</property>
-	</bean>
-----
-
-The Guava `CacheManager` also supports customs `CacheBuilder` and `CacheLoader`. See
-the https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava documentation]
-for more information about those.
-
 [[cache-store-configuration-gemfire]]
 ==== GemFire-based Cache
 
@@ -9192,7 +9058,7 @@ performs no caching - that is, forces the cached methods to be executed every ti
 	</bean>
 ----
 
-The `CompositeCacheManager` above chains multiple ++CacheManager++s and additionally,
+The `CompositeCacheManager` above chains multiple ``CacheManager``s and additionally,
 through the `fallbackToNoOpCache` flag, adds a __no op__ cache that for all the
 definitions not handled by the configured cache managers. That is, every cache
 definition not found in either `jdkCache` or `gemfireCache` (configured above) will be

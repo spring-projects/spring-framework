@@ -115,7 +115,8 @@ public abstract class CacheOperation implements BasicOperation {
 	/**
 	 * Return an identifying description for this cache operation.
 	 * <p>Returned value is produced by calling {@link Builder#getOperationDescription()}
-	 * during object construction. This method is used in {#hashCode} and {#equals}.
+	 * during object construction. This method is used in {@link #hashCode} and
+	 * {@link #equals}.
 	 * @see Builder#getOperationDescription()
 	 */
 	@Override
@@ -154,7 +155,7 @@ public abstract class CacheOperation implements BasicOperation {
 		}
 
 		public void setCacheNames(String... cacheNames) {
-			this.cacheNames = new LinkedHashSet<String>(cacheNames.length);
+			this.cacheNames = new LinkedHashSet<>(cacheNames.length);
 			for (String cacheName : cacheNames) {
 				Assert.hasText(cacheName, "Cache name must be non-null if specified");
 				this.cacheNames.add(cacheName);

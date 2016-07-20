@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,13 +84,13 @@ public class GzipResourceResolverTests {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(versionStrategyMap);
 
-		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		List<ResourceResolver> resolvers = new ArrayList<>();
 		resolvers.add(new CachingResourceResolver(this.cache));
 		resolvers.add(new GzipResourceResolver());
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
 		resolver = new DefaultResourceResolverChain(resolvers);
-		locations = new ArrayList<Resource>();
+		locations = new ArrayList<>();
 		locations.add(new ClassPathResource("test/", getClass()));
 		locations.add(new ClassPathResource("testalternatepath/", getClass()));
 	}

@@ -57,7 +57,7 @@ import static org.mockito.BDDMockito.*;
  */
 public class SubscriptionMethodReturnValueHandlerTests {
 
-	public static final MimeType MIME_TYPE = new MimeType("text", "plain", Charset.forName("UTF-8"));
+	public static final MimeType MIME_TYPE = new MimeType("text", "plain", StandardCharsets.UTF_8);
 
 	private static final String PAYLOAD = "payload";
 

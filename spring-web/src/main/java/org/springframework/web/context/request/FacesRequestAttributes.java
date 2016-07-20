@@ -20,13 +20,11 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.portlet.PortletSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
@@ -51,9 +49,6 @@ import org.springframework.web.util.WebUtils;
  * @see RequestContextHolder#currentRequestAttributes()
  */
 public class FacesRequestAttributes implements RequestAttributes {
-
-	private static final boolean portletApiPresent =
-			ClassUtils.isPresent("javax.portlet.PortletSession", FacesRequestAttributes.class.getClassLoader());
 
 	/**
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
@@ -108,42 +103,22 @@ public class FacesRequestAttributes implements RequestAttributes {
 
 	@Override
 	public Object getAttribute(String name, int scope) {
-		if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
-			return PortletSessionAccessor.getAttribute(name, getExternalContext());
-		}
-		else {
-			return getAttributeMap(scope).get(name);
-		}
+		return getAttributeMap(scope).get(name);
 	}
 
 	@Override
 	public void setAttribute(String name, Object value, int scope) {
-		if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
-			PortletSessionAccessor.setAttribute(name, value, getExternalContext());
-		}
-		else {
-			getAttributeMap(scope).put(name, value);
-		}
+		getAttributeMap(scope).put(name, value);
 	}
 
 	@Override
 	public void removeAttribute(String name, int scope) {
-		if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
-			PortletSessionAccessor.removeAttribute(name, getExternalContext());
-		}
-		else {
-			getAttributeMap(scope).remove(name);
-		}
+		getAttributeMap(scope).remove(name);
 	}
 
 	@Override
 	public String[] getAttributeNames(int scope) {
-		if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
-			return PortletSessionAccessor.getAttributeNames(getExternalContext());
-		}
-		else {
-			return StringUtils.toStringArray(getAttributeMap(scope).keySet());
-		}
+		return StringUtils.toStringArray(getAttributeMap(scope).keySet());
 	}
 
 	@Override
@@ -235,60 +210,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 			mutex = (session != null ? session : externalContext);
 		}
 		return mutex;
-	}
-
-
-	/**
-	 * Inner class to avoid hard-coded Portlet API dependency.
- 	 */
-	private static class PortletSessionAccessor {
-
-		public static Object getAttribute(String name, ExternalContext externalContext) {
-			Object session = externalContext.getSession(false);
-			if (session instanceof PortletSession) {
-				return ((PortletSession) session).getAttribute(name, PortletSession.APPLICATION_SCOPE);
-			}
-			else if (session != null) {
-				return externalContext.getSessionMap().get(name);
-			}
-			else {
-				return null;
-			}
-		}
-
-		public static void setAttribute(String name, Object value, ExternalContext externalContext) {
-			Object session = externalContext.getSession(true);
-			if (session instanceof PortletSession) {
-				((PortletSession) session).setAttribute(name, value, PortletSession.APPLICATION_SCOPE);
-			}
-			else {
-				externalContext.getSessionMap().put(name, value);
-			}
-		}
-
-		public static void removeAttribute(String name, ExternalContext externalContext) {
-			Object session = externalContext.getSession(false);
-			if (session instanceof PortletSession) {
-				((PortletSession) session).removeAttribute(name, PortletSession.APPLICATION_SCOPE);
-			}
-			else if (session != null) {
-				externalContext.getSessionMap().remove(name);
-			}
-		}
-
-		public static String[] getAttributeNames(ExternalContext externalContext) {
-			Object session = externalContext.getSession(false);
-			if (session instanceof PortletSession) {
-				return StringUtils.toStringArray(
-						((PortletSession) session).getAttributeNames(PortletSession.APPLICATION_SCOPE));
-			}
-			else if (session != null) {
-				return StringUtils.toStringArray(externalContext.getSessionMap().keySet());
-			}
-			else {
-				return new String[0];
-			}
-		}
 	}
 
 }

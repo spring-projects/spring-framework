@@ -59,7 +59,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * @param name the name of the cache
 	 */
 	public ConcurrentMapCache(String name) {
-		this(name, new ConcurrentHashMap<Object, Object>(256), true);
+		this(name, new ConcurrentHashMap<>(256), true);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * values for this cache
 	 */
 	public ConcurrentMapCache(String name, boolean allowNullValues) {
-		this(name, new ConcurrentHashMap<Object, Object>(256), allowNullValues);
+		this(name, new ConcurrentHashMap<>(256), allowNullValues);
 	}
 
 	/**
@@ -141,20 +141,14 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 			return (T) get(key).get();
 		}
 		else {
-			synchronized (this.store) {
-				if (this.store.containsKey(key)) {
-					return (T) get(key).get();
-				}
-				T value;
+			return (T) fromStoreValue(this.store.computeIfAbsent(key, r -> {
 				try {
-					value = valueLoader.call();
+					return toStoreValue(valueLoader.call());
 				}
 				catch (Exception ex) {
 					throw new ValueRetrievalException(key, valueLoader, ex);
 				}
-				put(key, value);
-				return value;
-			}
+			}));
 		}
 	}
 

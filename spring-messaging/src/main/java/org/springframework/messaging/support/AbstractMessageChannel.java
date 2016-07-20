@@ -41,7 +41,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final List<ChannelInterceptor> interceptors = new ArrayList<ChannelInterceptor>(5);
+	private final List<ChannelInterceptor> interceptors = new ArrayList<>(5);
 
 	private String beanName;
 
@@ -126,7 +126,7 @@ public abstract class AbstractMessageChannel implements MessageChannel, Intercep
 			}
 			throw new MessageDeliveryException(message,"Failed to send message to " + this, ex);
 		}
-		catch (Error err) {
+		catch (Throwable err) {
 			MessageDeliveryException ex2 =
 					new MessageDeliveryException(message, "Failed to send message to " + this, err);
 			chain.triggerAfterSendCompletion(message, this, sent, ex2);

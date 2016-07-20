@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.util.StringValueResolver;
 public class SimpleAliasRegistry implements AliasRegistry {
 
 	/** Map from alias to canonical name */
-	private final Map<String, String> aliasMap = new ConcurrentHashMap<String, String>(16);
+	private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
 
 
 	@Override
@@ -105,7 +105,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 
 	@Override
 	public String[] getAliases(String name) {
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		synchronized (this.aliasMap) {
 			retrieveAliases(name, result);
 		}
@@ -138,7 +138,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	public void resolveAliases(StringValueResolver valueResolver) {
 		Assert.notNull(valueResolver, "StringValueResolver must not be null");
 		synchronized (this.aliasMap) {
-			Map<String, String> aliasCopy = new HashMap<String, String>(this.aliasMap);
+			Map<String, String> aliasCopy = new HashMap<>(this.aliasMap);
 			for (String alias : aliasCopy.keySet()) {
 				String registeredName = aliasCopy.get(alias);
 				String resolvedAlias = valueResolver.resolveStringValue(alias);

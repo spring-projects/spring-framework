@@ -47,9 +47,9 @@ import org.springframework.web.context.request.WebRequest;
  */
 public class SessionAttributesHandler {
 
-	private final Set<String> attributeNames = new HashSet<String>();
+	private final Set<String> attributeNames = new HashSet<>();
 
-	private final Set<Class<?>> attributeTypes = new HashSet<Class<?>>();
+	private final Set<Class<?>> attributeTypes = new HashSet<>();
 
 	private final Set<String> knownAttributeNames =
 			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(4));
@@ -135,7 +135,7 @@ public class SessionAttributesHandler {
 	 * @return a map with handler session attributes, possibly empty
 	 */
 	public Map<String, Object> retrieveAttributes(WebRequest request) {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		for (String name : this.knownAttributeNames) {
 			Object value = this.sessionAttributeStore.retrieveAttribute(request, name);
 			if (value != null) {

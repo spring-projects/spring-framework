@@ -700,38 +700,6 @@ public class DispatcherServletTests {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
-	public void webApplicationContextLookup() {
-		MockServletContext servletContext = new MockServletContext();
-		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/invalid.do");
-
-		try {
-			RequestContextUtils.getWebApplicationContext(request);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-
-		try {
-			RequestContextUtils.getWebApplicationContext(request, servletContext);
-			fail("Should have thrown IllegalStateException");
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
-
-		servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
-				new StaticWebApplicationContext());
-		try {
-			RequestContextUtils.getWebApplicationContext(request, servletContext);
-		}
-		catch (IllegalStateException ex) {
-			fail("Should not have thrown IllegalStateException: " + ex.getMessage());
-		}
-	}
-
-	@Test
 	public void withNoView() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext, "GET", "/noview.do");

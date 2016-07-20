@@ -44,8 +44,8 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 
 	public SettableListenableFuture() {
-		this.settableTask = new SettableTask<T>();
-		this.listenableFuture = new ListenableFutureTask<T>(this.settableTask);
+		this.settableTask = new SettableTask<>();
+		this.listenableFuture = new ListenableFutureTask<>(this.settableTask);
 	}
 
 
@@ -152,7 +152,7 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 		private static final Object NO_VALUE = new Object();
 
-		private final AtomicReference<Object> value = new AtomicReference<Object>(NO_VALUE);
+		private final AtomicReference<Object> value = new AtomicReference<>(NO_VALUE);
 
 		private volatile boolean cancelled = false;
 

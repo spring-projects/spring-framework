@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,12 +56,12 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 
 	private boolean frozen = false;
 
-	private final List<Connection> connections = new LinkedList<Connection>();
+	private final List<Connection> connections = new LinkedList<>();
 
-	private final List<Session> sessions = new LinkedList<Session>();
+	private final List<Session> sessions = new LinkedList<>();
 
 	private final Map<Connection, List<Session>> sessionsPerConnection =
-			new HashMap<Connection, List<Session>>();
+			new HashMap<>();
 
 
 	/**
@@ -140,7 +140,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 			if (connection != null) {
 				List<Session> sessions = this.sessionsPerConnection.get(connection);
 				if (sessions == null) {
-					sessions = new LinkedList<Session>();
+					sessions = new LinkedList<>();
 					this.sessionsPerConnection.put(connection, sessions);
 				}
 				sessions.add(session);

@@ -31,9 +31,11 @@ abstract class AbstractConditionalEnumConverter implements ConditionalConverter 
 
 	private final ConversionService conversionService;
 
+
 	protected AbstractConditionalEnumConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {

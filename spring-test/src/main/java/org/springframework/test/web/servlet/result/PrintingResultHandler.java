@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected final MultiValueMap<String, String> getParamsMultiValueMap(MockHttpServletRequest request) {
 		Map<String, String[]> params = request.getParameterMap();
-		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
 		for (String name : params.keySet()) {
 			if (params.get(name) != null) {
 				for (String value : params.get(name)) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class RssFeedViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		Map<String, String> model = new LinkedHashMap<String, String>();
+		Map<String, String> model = new LinkedHashMap<>();
 		model.put("2", "This is entry 2");
 		model.put("1", "This is entry 1");
 
@@ -79,7 +79,7 @@ public class RssFeedViewTests {
 
 		@Override
 		protected List<Item> buildFeedItems(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-			List<Item> items = new ArrayList<Item>();
+			List<Item> items = new ArrayList<>();
 			for (String name : model.keySet()) {
 				Item item = new Item();
 				item.setTitle(name);

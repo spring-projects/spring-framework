@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,8 @@ public interface DestructionAwareBeanPostProcessor extends BeanPostProcessor {
 	 * be called for this bean instance eventually, or {@code false} if not needed
 	 * @since 4.3
 	 */
-	boolean requiresDestruction(Object bean);
+	default boolean requiresDestruction(Object bean) {
+		return true;
+	}
 
 }

@@ -38,8 +38,8 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.MethodIntrospector;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -118,7 +118,7 @@ public class MvcUriComponentsBuilder {
 	 * @see #fromMethodName(Class, String, Object...)
 	 * @see #fromMethodCall(Object)
 	 * @see #fromMappingName(String)
-	 * @see #fromMethod(java.lang.reflect.Method, Object...)
+	 * @see #fromMethod(Class, Method, Object...)
 	 */
 	protected MvcUriComponentsBuilder(UriComponentsBuilder baseUrl) {
 		Assert.notNull(baseUrl, "'baseUrl' is required");
@@ -168,7 +168,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * Create a {@link UriComponentsBuilder} from the mapping of a controller
 	 * method and an array of method argument values. This method delegates
-	 * to {@link #fromMethod(java.lang.reflect.Method, Object...)}.
+	 * to {@link #fromMethod(Class, Method, Object...)}.
 	 * @param controllerType the controller
 	 * @param methodName the method name
 	 * @param args the argument values
@@ -207,7 +207,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * Create a {@link UriComponentsBuilder} by invoking a "mock" controller method.
 	 * The controller method and the supplied argument values are then used to
-	 * delegate to {@link #fromMethod(java.lang.reflect.Method, Object...)}.
+	 * delegate to {@link #fromMethod(Class, Method, Object...)}.
 	 * <p>For example, given this controller:
 	 * <pre class="code">
 	 * &#064;RequestMapping("/people/{id}/addresses")
@@ -361,7 +361,7 @@ public class MvcUriComponentsBuilder {
 	}
 
 	/**
-	 * An alternative to {@link #fromMethod(java.lang.reflect.Method, Object...)}
+	 * An alternative to {@link #fromMethod(Class, Method, Object...)}
 	 * that accepts a {@code UriComponentsBuilder} representing the base URL.
 	 * This is useful when using MvcUriComponentsBuilder outside the context of
 	 * processing a request or to apply a custom baseUrl not matching the
@@ -379,17 +379,6 @@ public class MvcUriComponentsBuilder {
 
 		return fromMethodInternal(baseUrl,
 				(controllerType != null ? controllerType : method.getDeclaringClass()), method, args);
-	}
-
-	/**
-	 * @see #fromMethod(Class, Method, Object...)
-	 * @see #fromMethod(UriComponentsBuilder, Class, Method, Object...)
-	 * @deprecated as of 4.2, this is deprecated in favor of the overloaded
-	 * method that also accepts a controllerType argument
-	 */
-	@Deprecated
-	public static UriComponentsBuilder fromMethod(Method method, Object... args) {
-		return fromMethodInternal(null, method.getDeclaringClass(), method, args);
 	}
 
 	private static UriComponentsBuilder fromMethodInternal(UriComponentsBuilder baseUrl,
@@ -450,7 +439,7 @@ public class MvcUriComponentsBuilder {
 			@Override
 			public boolean matches(Method method) {
 				String name = method.getName();
-				int argLength = method.getParameterTypes().length;
+				int argLength = method.getParameterCount();
 				return (name.equals(methodName) && argLength == args.length);
 			}
 		};
@@ -476,14 +465,14 @@ public class MvcUriComponentsBuilder {
 			contributor = defaultUriComponentsContributor;
 		}
 
-		int paramCount = method.getParameterTypes().length;
+		int paramCount = method.getParameterCount();
 		int argCount = args.length;
 		if (paramCount != argCount) {
 			throw new IllegalArgumentException("Number of method parameters " + paramCount +
 					" does not match number of argument values " + argCount);
 		}
 
-		final Map<String, Object> uriVars = new HashMap<String, Object>();
+		final Map<String, Object> uriVars = new HashMap<>();
 		for (int i = 0; i < paramCount; i++) {
 			MethodParameter param = new SynthesizingMethodParameter(method, i);
 			param.initParameterNameDiscovery(parameterNameDiscoverer);
@@ -557,8 +546,7 @@ public class MvcUriComponentsBuilder {
 	 * on the controller is invoked, the supplied argument values are remembered
 	 * and the result can then be used to create a {@code UriComponentsBuilder}
 	 * via {@link #fromMethodCall(Object)}.
-	 * <p>
-	 * Note that this is a shorthand version of {@link #controller(Class)} intended
+	 * <p>Note that this is a shorthand version of {@link #controller(Class)} intended
 	 * for inline use (with a static import), for example:
 	 * <pre class="code">
 	 * MvcUriComponentsBuilder.fromMethodCall(on(FooController.class).getFoo(1)).build();
@@ -574,8 +562,7 @@ public class MvcUriComponentsBuilder {
 	 * on the controller is invoked, the supplied argument values are remembered
 	 * and the result can then be used to create {@code UriComponentsBuilder} via
 	 * {@link #fromMethodCall(Object)}.
-	 * <p>
-	 * This is a longer version of {@link #on(Class)}. It is needed with controller
+	 * <p>This is a longer version of {@link #on(Class)}. It is needed with controller
 	 * methods returning void as well for repeated invocations.
 	 * <pre class="code">
 	 * FooController fooController = controller(FooController.class);
@@ -625,9 +612,9 @@ public class MvcUriComponentsBuilder {
 
 			if (proxy == null) {
 				try {
-					proxy = proxyClass.newInstance();
+					proxy = ReflectionUtils.accessibleConstructor(proxyClass).newInstance();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException("Unable to instantiate controller proxy using Objenesis, " +
 							"and regular controller instantiation via default constructor fails as well", ex);
 				}
@@ -771,20 +758,10 @@ public class MvcUriComponentsBuilder {
 			this.baseUrl = (baseUrl != null ? baseUrl : initBaseUrl());
 			this.controllerType = controllerType;
 			this.method = method;
-			this.argumentValues = new Object[method.getParameterTypes().length];
+			this.argumentValues = new Object[method.getParameterCount()];
 			for (int i = 0; i < this.argumentValues.length; i++) {
 				this.argumentValues[i] = null;
 			}
-		}
-
-		/**
-		 * @see #MethodArgumentBuilder(Class, Method)
-		 * @deprecated as of 4.2, this is deprecated in favor of alternative constructors
-		 * that accept a controllerType argument
-		 */
-		@Deprecated
-		public MethodArgumentBuilder(Method method) {
-			this(method.getDeclaringClass(), method);
 		}
 
 		private static UriComponentsBuilder initBaseUrl() {

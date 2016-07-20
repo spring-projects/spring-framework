@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.StreamUtils;
  * by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class StringHttpMessageConverter extends AbstractHttpMessageConverter<String> {
@@ -60,7 +61,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	 */
 	public StringHttpMessageConverter(Charset defaultCharset) {
 		super(defaultCharset, MediaType.TEXT_PLAIN, MediaType.ALL);
-		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
+		this.availableCharsets = new ArrayList<>(Charset.availableCharsets().values());
 	}
 
 
@@ -115,7 +116,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			return contentType.getCharset();
 		}
 		else {
-			return this.getDefaultCharset();
+			return getDefaultCharset();
 		}
 	}
 

@@ -51,7 +51,7 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 
 	@Test
 	public void enrichAndValidateAttributesWithImplicitAliasesAndMinimalAttributes() {
-		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> attributes = new HashMap<>();
 		Map<String, Object> expectedAttributes = new HashMap<String, Object>() {{
 			put("groovyScript", "");
 			put("xmlFile", "");
@@ -127,7 +127,7 @@ public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnno
 
 		// Declare aliases in an order that will cause enrichAndValidateAttributes() to
 		// fail unless it considers all aliases in the set of implicit aliases.
-		MultiValueMap<String, String> aliases = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> aliases = new LinkedMultiValueMap<>();
 		aliases.put("xmlFile", Arrays.asList("value", "groovyScript", "location1", "location2", "location3"));
 		aliases.put("groovyScript", Arrays.asList("value", "xmlFile", "location1", "location2", "location3"));
 		aliases.put("value", Arrays.asList("xmlFile", "groovyScript", "location1", "location2", "location3"));

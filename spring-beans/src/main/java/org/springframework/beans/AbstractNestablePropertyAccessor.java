@@ -18,7 +18,9 @@ package org.springframework.beans;
 
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.security.PrivilegedActionException;
 import java.util.ArrayList;
@@ -38,9 +40,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -74,19 +74,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * We'll create a lot of these objects, so we don't want a new logger every time.
 	 */
 	private static final Log logger = LogFactory.getLog(AbstractNestablePropertyAccessor.class);
-
-	private static Class<?> javaUtilOptionalClass = null;
-
-	static {
-		try {
-			javaUtilOptionalClass =
-					ClassUtils.forName("java.util.Optional", AbstractNestablePropertyAccessor.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 not available - Optional references simply not supported then.
-		}
-	}
-
 
 	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
 
@@ -202,13 +189,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param rootObject the root object at the top of the path
 	 */
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
-		Assert.notNull(object, "Target object must not be null");
-		if (object.getClass() == javaUtilOptionalClass) {
-			this.wrappedObject = OptionalUnwrapper.unwrap(object);
-		}
-		else {
-			this.wrappedObject = object;
-		}
+		this.wrappedObject = ObjectUtils.unwrapOptional(object);
+		Assert.notNull(this.wrappedObject, "Target object must not be null");
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
 		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : this.wrappedObject);
 		this.nestedPropertyAccessors = null;
@@ -590,7 +572,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 			throw new ConversionNotSupportedException(pce, requiredType, ex);
 		}
-		catch (IllegalArgumentException ex) {
+		catch (Throwable ex) {
 			PropertyChangeEvent pce =
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 			throw new TypeMismatchException(pce, requiredType, ex);
@@ -828,13 +810,13 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	private AbstractNestablePropertyAccessor getNestedPropertyAccessor(String nestedProperty) {
 		if (this.nestedPropertyAccessors == null) {
-			this.nestedPropertyAccessors = new HashMap<String, AbstractNestablePropertyAccessor>();
+			this.nestedPropertyAccessors = new HashMap<>();
 		}
 		// Get value of bean property.
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
 		String canonicalName = tokens.canonicalName;
 		Object value = getPropertyValue(tokens);
-		if (value == null || (value.getClass() == javaUtilOptionalClass && OptionalUnwrapper.isEmpty(value))) {
+		if (value == null || (value instanceof Optional && !((Optional) value).isPresent())) {
 			if (isAutoGrowNestedPaths()) {
 				value = setDefaultValue(tokens);
 			}
@@ -845,8 +827,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 		// Lookup cached sub-PropertyAccessor, create new one if not found.
 		AbstractNestablePropertyAccessor nestedPa = this.nestedPropertyAccessors.get(canonicalName);
-		if (nestedPa == null || nestedPa.getWrappedInstance() !=
-				(value.getClass() == javaUtilOptionalClass ? OptionalUnwrapper.unwrap(value) : value)) {
+		if (nestedPa == null || nestedPa.getWrappedInstance() != ObjectUtils.unwrapOptional(value)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Creating new nested " + getClass().getSimpleName() + " for property '" + canonicalName + "'");
 			}
@@ -911,14 +892,16 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				return CollectionFactory.createMap(type, (keyDesc != null ? keyDesc.getType() : null), 16);
 			}
 			else {
-				return BeanUtils.instantiate(type);
+				Constructor<?> ctor = type.getDeclaredConstructor();
+				if (Modifier.isPrivate(ctor.getModifiers())) {
+					throw new IllegalAccessException("Auto-growing not allowed with private constructor: " + ctor);
+				}
+				return BeanUtils.instantiateClass(ctor);
 			}
 		}
-		catch (Exception ex) {
-			// TODO: Root cause exception context is lost here; just exception message preserved.
-			// Should we throw another exception type that preserves context instead?
+		catch (Throwable ex) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name,
-					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
+					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path", ex);
 		}
 	}
 
@@ -930,7 +913,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	private PropertyTokenHolder getPropertyNameTokens(String propertyName) {
 		PropertyTokenHolder tokens = new PropertyTokenHolder();
 		String actualName = null;
-		List<String> keys = new ArrayList<String>(2);
+		List<String> keys = new ArrayList<>(2);
 		int searchIndex = 0;
 		while (searchIndex != -1) {
 			int keyStart = propertyName.indexOf(PROPERTY_KEY_PREFIX, searchIndex);
@@ -1035,26 +1018,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		public String actualName;
 
 		public String[] keys;
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class OptionalUnwrapper {
-
-		public static Object unwrap(Object optionalObject) {
-			Optional<?> optional = (Optional<?>) optionalObject;
-			Assert.isTrue(optional.isPresent(), "Optional value must be present");
-			Object result = optional.get();
-			Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
-			return result;
-		}
-
-		public static boolean isEmpty(Object optionalObject) {
-			return !((Optional<?>) optionalObject).isPresent();
-		}
 	}
 
 }

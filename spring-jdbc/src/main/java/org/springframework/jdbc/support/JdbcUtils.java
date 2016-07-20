@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.lang.UsesJava7;
-import org.springframework.util.ClassUtils;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -53,11 +51,6 @@ public abstract class JdbcUtils {
 	 * @see java.sql.Types
 	 */
 	public static final int TYPE_UNKNOWN = Integer.MIN_VALUE;
-
-
-	// Check for JDBC 4.1 getObject(int, Class) method - available on JDK 7 and higher
-	private static final boolean getObjectWithTypeAvailable =
-			ClassUtils.hasMethod(ResultSet.class, "getObject", int.class, Class.class);
 
 	private static final Log logger = LogFactory.getLog(JdbcUtils.class);
 
@@ -135,7 +128,6 @@ public abstract class JdbcUtils {
 	 * @return the value object
 	 * @throws SQLException if thrown by the JDBC API
 	 */
-	@UsesJava7  // guard optional use of JDBC 4.1 (safe with 1.6 due to getObjectWithTypeAvailable check)
 	public static Object getResultSetValue(ResultSet rs, int index, Class<?> requiredType) throws SQLException {
 		if (requiredType == null) {
 			return getResultSetValue(rs, index);
@@ -192,19 +184,17 @@ public abstract class JdbcUtils {
 		}
 		else {
 			// Some unknown type desired -> rely on getObject.
-			if (getObjectWithTypeAvailable) {
-				try {
-					return rs.getObject(index, requiredType);
-				}
-				catch (AbstractMethodError err) {
-					logger.debug("JDBC driver does not implement JDBC 4.1 'getObject(int, Class)' method", err);
-				}
-				catch (SQLFeatureNotSupportedException ex) {
-					logger.debug("JDBC driver does not support JDBC 4.1 'getObject(int, Class)' method", ex);
-				}
-				catch (SQLException ex) {
-					logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
-				}
+			try {
+				return rs.getObject(index, requiredType);
+			}
+			catch (AbstractMethodError err) {
+				logger.debug("JDBC driver does not implement JDBC 4.1 'getObject(int, Class)' method", err);
+			}
+			catch (SQLFeatureNotSupportedException ex) {
+				logger.debug("JDBC driver does not support JDBC 4.1 'getObject(int, Class)' method", ex);
+			}
+			catch (SQLException ex) {
+				logger.debug("JDBC driver has limited support for JDBC 4.1 'getObject(int, Class)' method", ex);
 			}
 			// Fall back to getObject without type specification...
 			return getResultSetValue(rs, index);

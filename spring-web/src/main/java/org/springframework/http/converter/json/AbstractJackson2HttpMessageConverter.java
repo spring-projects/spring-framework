@@ -17,9 +17,11 @@
 package org.springframework.http.converter.json;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
@@ -60,7 +62,7 @@ import org.springframework.util.TypeUtils;
  */
 public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
 	protected ObjectMapper objectMapper;
@@ -145,7 +147,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (!logger.isWarnEnabled()) {
 			return this.objectMapper.canDeserialize(javaType);
 		}
-		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
+		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
 		}
@@ -161,7 +163,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (!logger.isWarnEnabled()) {
 			return this.objectMapper.canSerialize(clazz);
 		}
-		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
+		AtomicReference<Throwable> causeRef = new AtomicReference<>();
 		if (this.objectMapper.canSerialize(clazz, causeRef)) {
 			return true;
 		}
@@ -311,11 +313,37 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
-		if (type instanceof TypeVariable && contextClass != null) {
-			ResolvableType resolvedType = resolveVariable(
-					(TypeVariable<?>) type, ResolvableType.forClass(contextClass));
-			if (resolvedType != ResolvableType.NONE) {
-				return typeFactory.constructType(resolvedType.resolve());
+		if (contextClass != null) {
+			ResolvableType resolvedType = ResolvableType.forType(type);
+			if (type instanceof TypeVariable) {
+				ResolvableType resolvedTypeVariable = resolveVariable(
+						(TypeVariable<?>) type, ResolvableType.forClass(contextClass));
+				if (resolvedTypeVariable != ResolvableType.NONE) {
+					return typeFactory.constructType(resolvedTypeVariable.resolve());
+				}
+			}
+			else if (type instanceof ParameterizedType && resolvedType.hasUnresolvableGenerics()) {
+				ParameterizedType parameterizedType = (ParameterizedType) type;
+				Class<?>[] generics = new Class<?>[parameterizedType.getActualTypeArguments().length];
+				Type[] typeArguments = parameterizedType.getActualTypeArguments();
+				for (int i = 0; i < typeArguments.length; i++) {
+					Type typeArgument = typeArguments[i];
+					if (typeArgument instanceof TypeVariable) {
+						ResolvableType resolvedTypeArgument = resolveVariable(
+								(TypeVariable<?>) typeArgument, ResolvableType.forClass(contextClass));
+						if (resolvedTypeArgument != ResolvableType.NONE) {
+							generics[i] = resolvedTypeArgument.resolve();
+						}
+						else {
+							generics[i] = ResolvableType.forType(typeArgument).resolve();
+						}
+					}
+					else {
+						generics[i] = ResolvableType.forType(typeArgument).resolve();
+					}
+				}
+				return typeFactory.constructType(ResolvableType.
+						forClassWithGenerics(resolvedType.getRawClass(), generics).getType());
 			}
 		}
 		return typeFactory.constructType(type);

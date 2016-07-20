@@ -17,6 +17,7 @@
 package org.springframework.messaging.converter;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -35,7 +36,7 @@ public class StringMessageConverter extends AbstractMessageConverter {
 
 
 	public StringMessageConverter() {
-		this(Charset.forName("UTF-8"));
+		this(StandardCharsets.UTF_8);
 	}
 
 	public StringMessageConverter(Charset defaultCharset) {

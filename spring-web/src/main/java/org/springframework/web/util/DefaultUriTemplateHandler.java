@@ -127,7 +127,7 @@ public class DefaultUriTemplateHandler extends AbstractUriTemplateHandler {
 			return builder.buildAndExpand(uriVariables).encode();
 		}
 		else {
-			Map<String, Object> encodedUriVars = new HashMap<String, Object>(uriVariables.size());
+			Map<String, Object> encodedUriVars = new HashMap<>(uriVariables.size());
 			for (Map.Entry<String, ?> entry : uriVariables.entrySet()) {
 				encodedUriVars.put(entry.getKey(), applyStrictEncoding(entry.getValue()));
 			}

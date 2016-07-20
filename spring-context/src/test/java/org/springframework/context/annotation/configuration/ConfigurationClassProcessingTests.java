@@ -31,9 +31,7 @@ import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Value;
@@ -210,16 +208,17 @@ public class ConfigurationClassProcessingTests {
 
 	@Test
 	public void configurationWithAdaptivePrototypes() {
-		DefaultListableBeanFactory factory =
-				initBeanFactory(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
-		AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
-		aabpp.setBeanFactory(factory);
-		factory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
-		factory.addBeanPostProcessor(aabpp);
+		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
+		factory.register(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
+		factory.refresh();
 
 		AdaptiveInjectionPoints adaptive = factory.getBean(AdaptiveInjectionPoints.class);
 		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
-		assertEquals("adaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+
+		adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
+		assertEquals("setAdaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
 	}
 
 	@Test
@@ -357,13 +356,18 @@ public class ConfigurationClassProcessingTests {
 	}
 
 
+	@Scope("prototype")
 	static class AdaptiveInjectionPoints {
 
 		@Autowired @Qualifier("adaptive1")
 		public TestBean adaptiveInjectionPoint1;
 
-		@Autowired @Qualifier("adaptive2")
 		public TestBean adaptiveInjectionPoint2;
+
+		@Autowired @Qualifier("adaptive2")
+		public void setAdaptiveInjectionPoint2(TestBean adaptiveInjectionPoint2) {
+			this.adaptiveInjectionPoint2 = adaptiveInjectionPoint2;
+		}
 	}
 
 

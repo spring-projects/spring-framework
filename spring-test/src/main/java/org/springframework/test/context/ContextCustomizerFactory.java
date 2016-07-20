@@ -34,6 +34,7 @@ import java.util.List;
  * @author Sam Brannen
  * @since 4.3
  */
+@FunctionalInterface
 public interface ContextCustomizerFactory {
 
 	/**

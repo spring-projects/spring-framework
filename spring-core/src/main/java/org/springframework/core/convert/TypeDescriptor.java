@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -49,10 +48,7 @@ public class TypeDescriptor implements Serializable {
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
-	private static final boolean streamAvailable = ClassUtils.isPresent(
-			"java.util.stream.Stream", TypeDescriptor.class.getClassLoader());
-
-	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>(18);
+	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(18);
 
 	private static final Class<?>[] CACHED_COMMON_TYPES = {
 			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
@@ -145,10 +141,9 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * The type of the backing class, method parameter, field, or property
 	 * described by this TypeDescriptor.
-	 * <p>Returns primitive types as-is.
-	 * <p>See {@link #getObjectType()} for a variation of this operation that
-	 * resolves primitive types to their corresponding Object types if necessary.
-	 * @return the type, or {@code null} if it cannot be determined
+	 * <p>Returns primitive types as-is. See {@link #getObjectType()} for a
+	 * variation of this operation that resolves primitive types to their
+	 * corresponding Object types if necessary.
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {
@@ -341,10 +336,10 @@ public class TypeDescriptor implements Serializable {
 		if (this.resolvableType.isArray()) {
 			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
 		}
-		if (streamAvailable && StreamDelegate.isStream(this.type)) {
-			return StreamDelegate.getStreamElementType(this);
+		if (Stream.class.isAssignableFrom(this.type)) {
+			return getRelatedIfResolvable(this, this.resolvableType.as(Stream.class).getGeneric(0));
 		}
-		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
+		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric(0));
 	}
 
 	/**
@@ -693,22 +688,6 @@ public class TypeDescriptor implements Serializable {
 			return null;
 		}
 		return new TypeDescriptor(type, null, source.annotations);
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class StreamDelegate {
-
-		public static boolean isStream(Class<?> type) {
-			return Stream.class.isAssignableFrom(type);
-		}
-
-		public static TypeDescriptor getStreamElementType(TypeDescriptor source) {
-			return getRelatedIfResolvable(source, source.resolvableType.as(Stream.class).getGeneric());
-		}
 	}
 
 }

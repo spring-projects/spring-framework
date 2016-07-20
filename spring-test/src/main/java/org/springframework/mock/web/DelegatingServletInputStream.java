@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.mock.web;
 
 import java.io.IOException;
 import java.io.InputStream;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
 import org.springframework.util.Assert;
@@ -35,6 +36,8 @@ import org.springframework.util.Assert;
 public class DelegatingServletInputStream extends ServletInputStream {
 
 	private final InputStream sourceStream;
+
+	private boolean finished = false;
 
 
 	/**
@@ -56,13 +59,32 @@ public class DelegatingServletInputStream extends ServletInputStream {
 
 	@Override
 	public int read() throws IOException {
-		return this.sourceStream.read();
+		int data = this.sourceStream.read();
+		if (data == -1) {
+			this.finished = true;
+		}
+		return data;
 	}
 
 	@Override
 	public void close() throws IOException {
 		super.close();
 		this.sourceStream.close();
+	}
+
+	@Override
+	public boolean isFinished() {
+		return this.finished;
+	}
+
+	@Override
+	public boolean isReady() {
+		return true;
+	}
+
+	@Override
+	public void setReadListener(ReadListener readListener) {
+		throw new UnsupportedOperationException();
 	}
 
 }

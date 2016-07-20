@@ -128,7 +128,6 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.multipart.support.StringMultipartFileEditor;
 import org.springframework.web.servlet.ModelAndView;
@@ -142,22 +141,6 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import static org.junit.Assert.*;
 
 /**
- * The origin of this test class is {@link ServletAnnotationControllerHandlerMethodTests}.
- *
- * Tests in this class run against the {@link HandlerMethod} infrastructure:
- * <ul>
- * <li>RequestMappingHandlerMapping
- * <li>RequestMappingHandlerAdapter
- * <li>ExceptionHandlerExceptionResolver
- * </ul>
- *
- * <p>Rather than against the existing infrastructure:
- * <ul>
- * <li>DefaultAnnotationHandlerMapping
- * <li>AnnotationMethodHandlerAdapter
- * <li>AnnotationMethodHandlerExceptionResolver
- * </ul>
- *
  * @author Rossen Stoyanchev
  */
 public class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
@@ -330,7 +313,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals("Invalid response status", HttpServletResponse.SC_METHOD_NOT_ALLOWED, response.getStatus());
 		String allowHeader = response.getHeader("Allow");
 		assertNotNull("No Allow header", allowHeader);
-		Set<String> allowedMethods = new HashSet<String>();
+		Set<String> allowedMethods = new HashSet<>();
 		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
 		assertEquals("Invalid amount of supported methods", 6, allowedMethods.size());
 		assertTrue("PUT not allowed", allowedMethods.contains("PUT"));
@@ -631,7 +614,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 				wac.registerBeanDefinition("viewResolver", new RootBeanDefinition(TestViewResolver.class));
 				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 				adapterDef.getPropertyValues().add("webBindingInitializer", new MyWebBindingInitializer());
-				List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+				List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 				argumentResolvers.add(new ServletWebArgumentResolverAdapter(new MySpecialArgumentResolver()));
 				adapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
 				wac.registerBeanDefinition("handlerAdapter", adapterDef);
@@ -1001,7 +984,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			@Override
 			public void initialize(GenericWebApplicationContext wac) {
 				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
-				List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
+				List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
 				messageConverters.add(new StringHttpMessageConverter());
 				messageConverters
 						.add(new SimpleMessageConverter(new MediaType("application","json"), MediaType.ALL));
@@ -1802,10 +1785,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 
-	/*
-	 * Controllers
-	 */
-
 	@Controller
 	static class ControllerWithEmptyValueMapping {
 
@@ -2039,7 +2018,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@Override
 		public List<TestBean> getTestBeans() {
-			List<TestBean> list = new LinkedList<TestBean>();
+			List<TestBean> list = new LinkedList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -2065,7 +2044,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@Override
 		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans() {
-			List<TestBean> list = new LinkedList<TestBean>();
+			List<TestBean> list = new LinkedList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -2092,7 +2071,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@ModelAttribute("testBeanList")
 		public List<TestBean> getTestBeans() {
-			List<TestBean> list = new LinkedList<TestBean>();
+			List<TestBean> list = new LinkedList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -2129,7 +2108,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@ModelAttribute
 		public List<TestBean> getTestBeans() {
-			List<TestBean> list = new LinkedList<TestBean>();
+			List<TestBean> list = new LinkedList<>();
 			list.add(new TestBean("tb1"));
 			list.add(new TestBean("tb2"));
 			return list;
@@ -2517,7 +2496,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Retention(RetentionPolicy.RUNTIME)
 	@Controller
 	public @interface MyControllerAnnotation {
-
 	}
 
 	@MyControllerAnnotation
@@ -2951,7 +2929,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	public static class MyEntity {
-
 	}
 
 	@Controller
@@ -2980,8 +2957,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 
 		@RequestMapping("/multiValueMap")
-		public void multiValueMap(@RequestParam MultiValueMap<String, String> params, Writer writer)
-				throws IOException {
+		public void multiValueMap(@RequestParam MultiValueMap<String, String> params, Writer writer) throws IOException {
 			for (Iterator<Map.Entry<String, List<String>>> it1 = params.entrySet().iterator(); it1.hasNext();) {
 				Map.Entry<String, List<String>> entry = it1.next();
 				writer.write(entry.getKey() + "=[");
@@ -3151,7 +3127,6 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 				setValue(null);
 			}
 		}
-
 	}
 
 	@Controller
@@ -3190,6 +3165,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	@RequestMapping("/t1")
 	protected static class NoPathGetAndM2PostController {
+
 		@RequestMapping(method = RequestMethod.GET)
 		public void handle1(Writer writer) throws IOException {
 			writer.write("handle1");
@@ -3324,38 +3300,5 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			return new ModelAndView("view", new ModelMap(), HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
-
-
-// Test cases deleted from the original ServletAnnotationControllerTests:
-
-//	@Ignore("Controller interface => no method-level @RequestMapping annotation")
-//	public void standardHandleMethod() throws Exception {
-
-//	@Ignore("ControllerClassNameHandlerMapping")
-//	public void emptyRequestMapping() throws Exception {
-
-//	@Ignore("Controller interface => no method-level @RequestMapping annotation")
-//	public void proxiedStandardHandleMethod() throws Exception {
-
-//	@Ignore("ServletException no longer thrown for unmatched parameter constraints")
-//	public void constrainedParameterDispatchingController() throws Exception {
-
-//	@Ignore("Method name dispatching")
-//	public void methodNameDispatchingController() throws Exception {
-
-//	@Ignore("Method name dispatching")
-//	public void methodNameDispatchingControllerWithSuffix() throws Exception {
-
-//	@Ignore("ControllerClassNameHandlerMapping")
-//	public void controllerClassNamePlusMethodNameDispatchingController() throws Exception {
-
-//	@Ignore("Method name dispatching")
-//	public void postMethodNameDispatchingController() throws Exception {
-
-//	@Ignore("ControllerClassNameHandlerMapping")
-//	public void controllerClassNameNoTypeLevelAnn() throws Exception {
-
-//	@Ignore("SimpleUrlHandlerMapping")
-//	public void simpleUrlHandlerMapping() throws Exception {
 
 }

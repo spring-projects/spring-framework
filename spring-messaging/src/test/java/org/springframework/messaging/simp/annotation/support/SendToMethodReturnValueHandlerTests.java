@@ -68,7 +68,7 @@ import static org.springframework.messaging.support.MessageHeaderAccessor.*;
  */
 public class SendToMethodReturnValueHandlerTests {
 
-	private static final MimeType MIME_TYPE = new MimeType("text", "plain", Charset.forName("UTF-8"));
+	private static final MimeType MIME_TYPE = new MimeType("text", "plain", StandardCharsets.UTF_8);
 
 	private static final String PAYLOAD = "payload";
 

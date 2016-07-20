@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,9 +50,9 @@ public class TemporaryLobCreator implements LobCreator {
 
 	protected static final Log logger = LogFactory.getLog(TemporaryLobCreator.class);
 
-	private final Set<Blob> temporaryBlobs = new LinkedHashSet<Blob>(1);
+	private final Set<Blob> temporaryBlobs = new LinkedHashSet<>(1);
 
-	private final Set<Clob> temporaryClobs = new LinkedHashSet<Clob>(1);
+	private final Set<Clob> temporaryClobs = new LinkedHashSet<>(1);
 
 
 	@Override

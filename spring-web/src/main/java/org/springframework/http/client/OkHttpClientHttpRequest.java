@@ -34,7 +34,9 @@ import org.springframework.http.HttpMethod;
  * @author Arjen Poutsma
  * @since 4.2
  * @see org.springframework.http.client.OkHttp3ClientHttpRequest
+ * @deprecated as of Spring 5.0, in favor of OkHttp 3.x
  */
+@Deprecated
 class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final OkHttpClient client;

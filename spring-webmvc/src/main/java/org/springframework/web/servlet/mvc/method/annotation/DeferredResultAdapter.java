@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.web.context.request.async.DeferredResult;
@@ -27,7 +28,7 @@ public interface DeferredResultAdapter {
 
 	/**
 	 * Create a {@code DeferredResult} for the given return value.
-	 * @param returnValue the return value, never {@code null}
+	 * @param returnValue the return value (never {@code null})
 	 * @return the DeferredResult
 	 */
 	DeferredResult<?> adaptToDeferredResult(Object returnValue);

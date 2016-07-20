@@ -856,7 +856,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<Object> genericRepo() {
-			return new GenericRepository<Object>();
+			return new GenericRepository<>();
 		}
 	}
 
@@ -918,12 +918,12 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<? extends String> stringRepo() {
-			return new Repository<String>();
+			return new Repository<>();
 		}
 
 		@Bean
 		public Repository<? extends Number> numberRepo() {
-			return new Repository<Number>();
+			return new Repository<>();
 		}
 
 		@Bean
@@ -942,7 +942,7 @@ public class ConfigurationClassPostProcessorTests {
 
 		@Bean
 		public Repository<? extends Number> numberRepo() {
-			return new Repository<Number>();
+			return new Repository<>();
 		}
 
 		@Bean
@@ -955,7 +955,7 @@ public class ConfigurationClassPostProcessorTests {
 	@ComponentScan(basePackages = "org.springframework.context.annotation.componentscan.simple")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface ComposedConfiguration {
+	public @interface ComposedConfiguration {
 	}
 
 	@ComposedConfiguration
@@ -966,7 +966,7 @@ public class ConfigurationClassPostProcessorTests {
 	@ComponentScan
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface ComposedConfigurationWithAttributeOverrides {
+	public @interface ComposedConfigurationWithAttributeOverrides {
 
 		String[] basePackages() default {};
 
@@ -985,7 +985,7 @@ public class ConfigurationClassPostProcessorTests {
 	@ComposedConfigurationWithAttributeOverrides
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface ComposedComposedConfigurationWithAttributeOverrides {
+	public @interface ComposedComposedConfigurationWithAttributeOverrides {
 
 		String[] basePackages() default {};
 	}
@@ -997,14 +997,14 @@ public class ConfigurationClassPostProcessorTests {
 	@ComponentScan
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaComponentScan {
+	public @interface MetaComponentScan {
 	}
 
 	@MetaComponentScan
 	@Configuration
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface MetaComponentScanConfigurationWithAttributeOverrides {
+	public @interface MetaComponentScanConfigurationWithAttributeOverrides {
 
 		String[] basePackages() default {};
 	}

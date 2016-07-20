@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,6 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 		return this.path;
 	}
 
-
 	/**
 	 * This implementation returns whether the underlying file exists.
 	 * @see java.io.File#exists()
@@ -151,6 +150,14 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	@Override
 	public URI getURI() throws IOException {
 		return this.file.toURI();
+	}
+
+	/**
+	 * This implementation always indicates a file.
+	 */
+	@Override
+	public boolean isFile() {
+		return true;
 	}
 
 	/**

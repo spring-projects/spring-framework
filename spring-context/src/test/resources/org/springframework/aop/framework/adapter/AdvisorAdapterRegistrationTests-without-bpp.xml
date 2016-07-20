@@ -8,7 +8,7 @@
 	<bean id="simpleBeforeAdvice" class="org.springframework.aop.framework.adapter.SimpleBeforeAdviceImpl"/>
 
 	<bean id="simpleBeforeAdviceAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-		<constructor-arg><ref local="simpleBeforeAdvice"/></constructor-arg>
+		<constructor-arg><ref bean="simpleBeforeAdvice"/></constructor-arg>
 	</bean>
    
 	<bean id="testBean" class="org.springframework.aop.framework.ProxyFactoryBean">

@@ -95,7 +95,7 @@ public class BridgeMethodResolverTests {
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
 		assertFalse(bridgedMethod.isBridge());
 		assertEquals("add", bridgedMethod.getName());
-		assertEquals(1, bridgedMethod.getParameterTypes().length);
+		assertEquals(1, bridgedMethod.getParameterCount());
 		assertEquals(Date.class, bridgedMethod.getParameterTypes()[0]);
 	}
 

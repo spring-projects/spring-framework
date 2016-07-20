@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class FreeMarkerConfigurationFactory {
 
 	private String defaultEncoding;
 
-	private final List<TemplateLoader> templateLoaders = new ArrayList<TemplateLoader>();
+	private final List<TemplateLoader> templateLoaders = new ArrayList<>();
 
 	private List<TemplateLoader> preTemplateLoaders;
 
@@ -277,7 +277,7 @@ public class FreeMarkerConfigurationFactory {
 			config.setDefaultEncoding(this.defaultEncoding);
 		}
 
-		List<TemplateLoader> templateLoaders = new LinkedList<TemplateLoader>(this.templateLoaders);
+		List<TemplateLoader> templateLoaders = new LinkedList<>(this.templateLoaders);
 
 		// Register template loaders that are supposed to kick in early.
 		if (this.preTemplateLoaders != null) {

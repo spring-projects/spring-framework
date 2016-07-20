@@ -19,6 +19,7 @@ package org.springframework.web.servlet.view.script;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,13 +69,13 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	public static final String DEFAULT_CONTENT_TYPE = "text/html";
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final String DEFAULT_RESOURCE_LOADER_PATH = "classpath:";
 
 
 	private static final ThreadLocal<Map<Object, ScriptEngine>> enginesHolder =
-			new NamedThreadLocal<Map<Object, ScriptEngine>>("ScriptTemplateView engines");
+			new NamedThreadLocal<>("ScriptTemplateView engines");
 
 
 	private ScriptEngine engine;
@@ -254,7 +255,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			Map<Object, ScriptEngine> engines = enginesHolder.get();
 			if (engines == null) {
-				engines = new HashMap<Object, ScriptEngine>(4);
+				engines = new HashMap<>(4);
 				enginesHolder.set(engines);
 			}
 			Object engineKey = (!ObjectUtils.isEmpty(this.scripts) ?

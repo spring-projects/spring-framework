@@ -61,7 +61,7 @@ public abstract class AbstractApplicationEventMulticaster
 	private final ListenerRetriever defaultRetriever = new ListenerRetriever(false);
 
 	final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
-			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>(64);
+			new ConcurrentHashMap<>(64);
 
 	private ClassLoader beanClassLoader;
 
@@ -203,12 +203,12 @@ public abstract class AbstractApplicationEventMulticaster
 	private Collection<ApplicationListener<?>> retrieveApplicationListeners(
 			ResolvableType eventType, Class<?> sourceType, ListenerRetriever retriever) {
 
-		LinkedList<ApplicationListener<?>> allListeners = new LinkedList<ApplicationListener<?>>();
+		LinkedList<ApplicationListener<?>> allListeners = new LinkedList<>();
 		Set<ApplicationListener<?>> listeners;
 		Set<String> listenerBeans;
 		synchronized (this.retrievalMutex) {
-			listeners = new LinkedHashSet<ApplicationListener<?>>(this.defaultRetriever.applicationListeners);
-			listenerBeans = new LinkedHashSet<String>(this.defaultRetriever.applicationListenerBeans);
+			listeners = new LinkedHashSet<>(this.defaultRetriever.applicationListeners);
+			listenerBeans = new LinkedHashSet<>(this.defaultRetriever.applicationListenerBeans);
 		}
 		for (ApplicationListener<?> listener : listeners) {
 			if (supportsEvent(listener, eventType, sourceType)) {
@@ -345,13 +345,13 @@ public abstract class AbstractApplicationEventMulticaster
 		private final boolean preFiltered;
 
 		public ListenerRetriever(boolean preFiltered) {
-			this.applicationListeners = new LinkedHashSet<ApplicationListener<?>>();
-			this.applicationListenerBeans = new LinkedHashSet<String>();
+			this.applicationListeners = new LinkedHashSet<>();
+			this.applicationListenerBeans = new LinkedHashSet<>();
 			this.preFiltered = preFiltered;
 		}
 
 		public Collection<ApplicationListener<?>> getApplicationListeners() {
-			LinkedList<ApplicationListener<?>> allListeners = new LinkedList<ApplicationListener<?>>();
+			LinkedList<ApplicationListener<?>> allListeners = new LinkedList<>();
 			for (ApplicationListener<?> listener : this.applicationListeners) {
 				allListeners.add(listener);
 			}

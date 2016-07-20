@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 				}
 			}
 			try {
-				return Proxy.getProxyClass(this.classLoader, resolvedInterfaces);
+				return ClassUtils.createCompositeInterface(resolvedInterfaces, this.classLoader);
 			}
 			catch (IllegalArgumentException ex) {
 				throw new ClassNotFoundException(null, ex);
@@ -117,7 +117,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 				for (int i = 0; i < interfaces.length; i++) {
 					resolvedInterfaces[i] = resolveFallbackIfPossible(interfaces[i], ex);
 				}
-				return Proxy.getProxyClass(getFallbackClassLoader(), resolvedInterfaces);
+				return ClassUtils.createCompositeInterface(resolvedInterfaces, getFallbackClassLoader());
 			}
 		}
 	}

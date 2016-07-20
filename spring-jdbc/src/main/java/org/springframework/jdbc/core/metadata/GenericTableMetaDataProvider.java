@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			Arrays.asList("Apache Derby", "HSQL Database Engine");
 
 	/** Collection of TableParameterMetaData objects */
-	private List<TableParameterMetaData> tableParameterMetaData = new ArrayList<TableParameterMetaData>();
+	private List<TableParameterMetaData> tableParameterMetaData = new ArrayList<>();
 
 	/** NativeJdbcExtractor that can be used to retrieve the native connection */
 	private NativeJdbcExtractor nativeJdbcExtractor;
@@ -294,7 +294,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	private void locateTableAndProcessMetaData(DatabaseMetaData databaseMetaData, String catalogName,
 			String schemaName, String tableName) {
 
-		Map<String, TableMetaData> tableMeta = new HashMap<String, TableMetaData>();
+		Map<String, TableMetaData> tableMeta = new HashMap<>();
 		ResultSet tables = null;
 		try {
 			tables = databaseMetaData.getTables(

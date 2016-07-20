@@ -229,7 +229,7 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	protected static class ManagedTaskBuilder {
 
 		public static Runnable buildManagedTask(Runnable task, String identityName) {
-			Map<String, String> properties = new HashMap<String, String>(2);
+			Map<String, String> properties = new HashMap<>(2);
 			if (task instanceof SchedulingAwareRunnable) {
 				properties.put(ManagedTask.LONGRUNNING_HINT,
 						Boolean.toString(((SchedulingAwareRunnable) task).isLongLived()));
@@ -239,7 +239,7 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 		}
 
 		public static <T> Callable<T> buildManagedTask(Callable<T> task, String identityName) {
-			Map<String, String> properties = new HashMap<String, String>(1);
+			Map<String, String> properties = new HashMap<>(1);
 			properties.put(ManagedTask.IDENTITY_NAME, identityName);
 			return ManagedExecutors.managedTask(task, properties, null);
 		}

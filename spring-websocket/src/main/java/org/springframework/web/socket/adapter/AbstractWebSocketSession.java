@@ -45,7 +45,7 @@ public abstract class AbstractWebSocketSession<T> implements NativeWebSocketSess
 
 	private T nativeSession;
 
-	private final Map<String, Object> attributes = new ConcurrentHashMap<String, Object>();
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 
 	/**

@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class SettableListenableFutureTests {
 
-	private final SettableListenableFuture<String> settableListenableFuture = new SettableListenableFuture<String>();
+	private final SettableListenableFuture<String> settableListenableFuture = new SettableListenableFuture<>();
 
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), "hello"});
+		mcfb.setArguments(new Object[] {new ArrayList<>(), new ArrayList<Object>(), "hello"});
 		mcfb.afterPropertiesSet();
 		mcfb.getObjectType();
 
@@ -225,7 +225,7 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), "hello"});
+		mcfb.setArguments(new Object[] {new ArrayList<>(), new ArrayList<Object>(), "hello"});
 		// should pass
 		mcfb.afterPropertiesSet();
 	}
@@ -235,7 +235,7 @@ public class MethodInvokingFactoryBeanTests {
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes");
-		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), "hello", "bogus"});
+		mcfb.setArguments(new Object[] {new ArrayList<>(), new ArrayList<Object>(), "hello", "bogus"});
 		try {
 			mcfb.afterPropertiesSet();
 			fail("Matched method with wrong number of args");
@@ -260,14 +260,14 @@ public class MethodInvokingFactoryBeanTests {
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
-		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), "hello", "bogus"});
+		mcfb.setArguments(new Object[] {new ArrayList<>(), new ArrayList<Object>(), "hello", "bogus"});
 		mcfb.afterPropertiesSet();
 		assertEquals("hello", mcfb.getObject());
 
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetClass(TestClass1.class);
 		mcfb.setTargetMethod("supertypes2");
-		mcfb.setArguments(new Object[] {new ArrayList<Object>(), new ArrayList<Object>(), new Object()});
+		mcfb.setArguments(new Object[] {new ArrayList<>(), new ArrayList<Object>(), new Object()});
 		try {
 			mcfb.afterPropertiesSet();
 			fail("Matched method when shouldn't have matched");

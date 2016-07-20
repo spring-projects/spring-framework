@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
 public final class Property {
 
 	private static Map<Property, Annotation[]> annotationCache =
-			new ConcurrentReferenceHashMap<Property, Annotation[]>();
+			new ConcurrentReferenceHashMap<>();
 
 	private final Class<?> objectType;
 
@@ -194,7 +194,7 @@ public final class Property {
 	private Annotation[] resolveAnnotations() {
 		Annotation[] annotations = annotationCache.get(this);
 		if (annotations == null) {
-			Map<Class<? extends Annotation>, Annotation> annotationMap = new LinkedHashMap<Class<? extends Annotation>, Annotation>();
+			Map<Class<? extends Annotation>, Annotation> annotationMap = new LinkedHashMap<>();
 			addAnnotationsToMap(annotationMap, getReadMethod());
 			addAnnotationsToMap(annotationMap, getWriteMethod());
 			addAnnotationsToMap(annotationMap, getField());

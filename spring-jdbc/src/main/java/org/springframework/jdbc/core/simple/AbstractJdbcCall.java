@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,10 +58,10 @@ public abstract class AbstractJdbcCall {
 	private final CallMetaDataContext callMetaDataContext = new CallMetaDataContext();
 
 	/** List of SqlParameter objects */
-	private final List<SqlParameter> declaredParameters = new ArrayList<SqlParameter>();
+	private final List<SqlParameter> declaredParameters = new ArrayList<>();
 
 	/** List of RefCursor/ResultSet RowMapper objects */
-	private final Map<String, RowMapper<?>> declaredRowMappers = new LinkedHashMap<String, RowMapper<?>>();
+	private final Map<String, RowMapper<?>> declaredRowMappers = new LinkedHashMap<>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at least checking

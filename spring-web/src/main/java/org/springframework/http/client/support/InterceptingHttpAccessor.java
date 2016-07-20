@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.CollectionUtils;
  */
 public abstract class InterceptingHttpAccessor extends HttpAccessor {
 
-	private List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
+	private List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
 
 	/**
 	 * Sets the request interceptors that this accessor should use.

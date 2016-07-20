@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class ConversionServiceFactoryBeanTests {
 	@Test
 	public void createDefaultConversionServiceWithSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
-		Set<Object> converters = new HashSet<Object>();
+		Set<Object> converters = new HashSet<>();
 		converters.add(new Converter<String, Foo>() {
 			@Override
 			public Foo convert(String source) {
@@ -94,7 +94,7 @@ public class ConversionServiceFactoryBeanTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void createDefaultConversionServiceWithInvalidSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
-		Set<Object> converters = new HashSet<Object>();
+		Set<Object> converters = new HashSet<>();
 		converters.add("bogus");
 		factory.setConverters(converters);
 		factory.afterPropertiesSet();

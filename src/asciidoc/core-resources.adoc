@@ -253,7 +253,7 @@ Similarly, one can force a `UrlResource` to be used by specifying any of the sta
 	Resource template = ctx.getResource("http://myhost.com/resource/path/myTemplate.txt");
 ----
 
-The following table summarizes the strategy for converting ++String++s to ++Resource++s:
+The following table summarizes the strategy for converting ``String``s to ``Resource``s:
 
 [[resources-resource-strings]]
 .Resource strings

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class ResolvableTypeTests {
 
 	@Test
 	public void forInstanceProvider() {
-		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(String.class));
+		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<>(String.class));
 		assertThat(type.getRawClass(), equalTo(MyGenericInterfaceType.class));
 		assertThat(type.getGeneric().resolve(), equalTo(String.class));
 	}
@@ -214,7 +214,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void forMethodParameter() throws Exception {
 		Method method = Methods.class.getMethod("charSequenceParameter", List.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.getType(), equalTo(method.getGenericParameterTypes()[0]));
 	}
@@ -222,7 +222,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void forMethodParameterWithNesting() throws Exception {
 		Method method = Methods.class.getMethod("nested", Map.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		methodParameter.increaseNestingLevel();
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve(), equalTo((Class) Map.class));
@@ -233,7 +233,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void forMethodParameterWithNestingAndLevels() throws Exception {
 		Method method = Methods.class.getMethod("nested", Map.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		methodParameter.increaseNestingLevel();
 		methodParameter.setTypeIndexForCurrentLevel(0);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
@@ -401,7 +401,7 @@ public class ResolvableTypeTests {
 	public void getInterfaces() throws Exception {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class);
 		assertThat(type.getInterfaces().length, equalTo(0));
-		SortedSet<String> interfaces = new TreeSet<String>();
+		SortedSet<String> interfaces = new TreeSet<>();
 		for (ResolvableType interfaceType : type.getSuperType().getInterfaces()) {
 			interfaces.add(interfaceType.toString());
 		}
@@ -782,7 +782,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveTypeVariableFromMethodParameterType() throws Exception {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve(), nullValue());
 		assertThat(type.getType().toString(), equalTo("T"));
@@ -791,7 +791,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveTypeVariableFromMethodParameterTypeWithImplementsClass() throws Exception {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		methodParameter.setContainingClass(TypedMethods.class);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve(), equalTo((Class) String.class));
@@ -801,7 +801,7 @@ public class ResolvableTypeTests {
 	@Test
 	public void resolveTypeVariableFromMethodParameterTypeWithImplementsType() throws Exception {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		ResolvableType implementationType = ResolvableType.forClassWithGenerics(Methods.class, Integer.class);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter, implementationType);
 		assertThat(type.resolve(), equalTo((Class) Integer.class));
@@ -893,7 +893,7 @@ public class ResolvableTypeTests {
 		Field basicField = Fields.class.getField("classType");
 		Field field = Fields.class.getField("charSequenceList");
 		Method method = Methods.class.getMethod("charSequenceParameter", List.class);
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, 0);
+		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		assertThat(ResolvableType.forField(basicField).getSource(), equalTo((Object) basicField));
 		assertThat(ResolvableType.forField(field).getSource(), equalTo((Object) field));
 		assertThat(ResolvableType.forMethodParameter(methodParameter).getSource(), equalTo((Object) methodParameter));

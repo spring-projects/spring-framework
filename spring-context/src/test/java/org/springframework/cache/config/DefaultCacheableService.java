@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable("testCache")
 	public Long cache(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable(cacheNames = "testCache", sync = true)
 	public Long cacheSync(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
@@ -96,13 +96,13 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable(cacheNames = "testCache", condition = "#p0 == 3")
 	public Long conditional(int classField) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", sync = true, condition = "#p0 == 3")
 	public Long conditionalSync(int classField) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
@@ -114,55 +114,55 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable(cacheNames = "testCache", key = "#p0")
 	public Long key(Object arg1, Object arg2) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache")
 	public Long varArgsKey(Object... args) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", key = "#root.methodName")
 	public Long name(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", key = "#root.methodName + #root.method.name + #root.targetClass + #root.target")
 	public Long rootVars(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", keyGenerator = "customKeyGenerator")
 	public Long customKeyGenerator(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", keyGenerator = "unknownBeanName")
 	public Long unknownCustomKeyGenerator(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", cacheManager = "customCacheManager")
 	public Long customCacheManager(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Cacheable(cacheNames = "testCache", cacheManager = "unknownBeanName")
 	public Long unknownCustomCacheManager(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@CachePut("testCache")
 	public Long update(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
@@ -174,13 +174,13 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable("testCache")
 	public Long nullValue(Object arg1) {
-		nullInvocations.incrementAndGet();
+		this.nullInvocations.incrementAndGet();
 		return null;
 	}
 
 	@Override
 	public Number nullInvocations() {
-		return nullInvocations.get();
+		return this.nullInvocations.get();
 	}
 
 	@Override
@@ -212,25 +212,25 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Caching(cacheable = { @Cacheable("primary"), @Cacheable("secondary") })
 	public Long multiCache(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames = "secondary", key = "#p0"), @CacheEvict(cacheNames = "primary", key = "#p0 + 'A'") })
 	public Long multiEvict(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Caching(cacheable = { @Cacheable(cacheNames = "primary", key = "#root.methodName") }, evict = { @CacheEvict("secondary") })
 	public Long multiCacheAndEvict(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override
 	@Caching(cacheable = { @Cacheable(cacheNames = "primary", condition = "#p0 == 3") }, evict = { @CacheEvict("secondary") })
 	public Long multiConditionalCacheAndEvict(Object arg1) {
-		return counter.getAndIncrement();
+		return this.counter.getAndIncrement();
 	}
 
 	@Override

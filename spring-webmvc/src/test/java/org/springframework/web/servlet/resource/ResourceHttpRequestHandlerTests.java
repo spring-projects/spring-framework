@@ -281,6 +281,34 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
+	@Test // SPR-14368
+	public void getResourceWithMediaTypeResolvedThroughServletContext() throws Exception {
+		MockServletContext servletContext = new MockServletContext() {
+
+			@Override
+			public String getMimeType(String filePath) {
+				return "foo/bar";
+			}
+
+			@Override
+			public String getVirtualServerName() {
+				return null;
+			}
+		};
+
+		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
+		this.handler = new ResourceHttpRequestHandler();
+		this.handler.setServletContext(servletContext);
+		this.handler.setLocations(paths);
+		this.handler.afterPropertiesSet();
+
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("foo/bar", this.response.getContentType());
+		assertEquals("h1 { color:red; }", this.response.getContentAsString());
+	}
+
 	@Test
 	public void invalidPath() throws Exception {
 		for (HttpMethod method : HttpMethod.values()) {

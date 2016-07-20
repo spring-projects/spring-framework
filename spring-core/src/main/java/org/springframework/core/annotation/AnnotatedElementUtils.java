@@ -189,14 +189,14 @@ public class AnnotatedElementUtils {
 		}
 
 		try {
-			final Set<String> types = new LinkedHashSet<String>();
+			final Set<String> types = new LinkedHashSet<>();
 			searchWithGetSemantics(composed.annotationType(), null, null, null, new SimpleAnnotationProcessor<Object>(true) {
 					@Override
 					public Object process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 						types.add(annotation.annotationType().getName());
 						return CONTINUE;
 					}
-				}, new HashSet<AnnotatedElement>(), 1);
+				}, new HashSet<>(), 1);
 			return (!types.isEmpty() ? types : null);
 		}
 		catch (Throwable ex) {
@@ -299,24 +299,6 @@ public class AnnotatedElementUtils {
 		Assert.hasLength(annotationName, "annotationName must not be null or empty");
 
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, null, annotationName, alwaysTrueAnnotationProcessor));
-	}
-
-	/**
-	 * @deprecated As of Spring Framework 4.2, use {@link #getMergedAnnotationAttributes(AnnotatedElement, String)} instead.
-	 */
-	@Deprecated
-	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName) {
-		return getMergedAnnotationAttributes(element, annotationName);
-	}
-
-	/**
-	 * @deprecated As of Spring Framework 4.2, use {@link #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)} instead.
-	 */
-	@Deprecated
-	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName,
-			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-
-		return getMergedAnnotationAttributes(element, annotationName, classValuesAsString, nestedAnnotationsAsMap);
 	}
 
 	/**
@@ -584,7 +566,7 @@ public class AnnotatedElementUtils {
 	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
 			String annotationName, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
 
-		final MultiValueMap<String, Object> attributesMap = new LinkedMultiValueMap<String, Object>();
+		final MultiValueMap<String, Object> attributesMap = new LinkedMultiValueMap<>();
 
 		searchWithGetSemantics(element, null, annotationName, new SimpleAnnotationProcessor<Object>() {
 			@Override
@@ -813,35 +795,6 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Find the first annotation of the specified {@code annotationName} within
-	 * the annotation hierarchy <em>above</em> the supplied {@code element},
-	 * merge that annotation's attributes with <em>matching</em> attributes from
-	 * annotations in lower levels of the annotation hierarchy, and synthesize
-	 * the result back into an annotation of the specified {@code annotationName}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
-	 * <p>This method delegates to {@link #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)}
-	 * (supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap})
-	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
-	 * <p>This method follows <em>find semantics</em> as described in the
-	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
-	 * @param element the annotated element
-	 * @param annotationName the fully qualified class name of the annotation type to find
-	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
-	 * @since 4.2
-	 * @see #findMergedAnnotation(AnnotatedElement, Class)
-	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
-	 * @deprecated As of Spring Framework 4.2.3, use {@link #findMergedAnnotation(AnnotatedElement, Class)} instead.
-	 */
-	@Deprecated
-	@SuppressWarnings("unchecked")
-	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, String annotationName) {
-		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationName, false, false);
-		return AnnotationUtils.synthesizeAnnotation(attributes, (Class<A>) attributes.annotationType(), element);
-	}
-
-	/**
 	 * Find <strong>all</strong> annotations of the specified {@code annotationType}
 	 * within the annotation hierarchy <em>above</em> the supplied {@code element};
 	 * and for each annotation found, merge that annotation's attributes with
@@ -981,7 +934,7 @@ public class AnnotatedElementUtils {
 
 		try {
 			return searchWithGetSemantics(element, annotationType, annotationName, containerType, processor,
-					new HashSet<AnnotatedElement>(), 0);
+					new HashSet<>(), 0);
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
@@ -1023,7 +976,7 @@ public class AnnotatedElementUtils {
 				}
 
 				if (element instanceof Class) { // otherwise getAnnotations doesn't return anything new
-					List<Annotation> inheritedAnnotations = new ArrayList<Annotation>();
+					List<Annotation> inheritedAnnotations = new ArrayList<>();
 					for (Annotation annotation : element.getAnnotations()) {
 						if (!declaredAnnotations.contains(annotation)) {
 							inheritedAnnotations.add(annotation);
@@ -1165,7 +1118,7 @@ public class AnnotatedElementUtils {
 
 		try {
 			return searchWithFindSemantics(
-					element, annotationType, annotationName, containerType, processor, new HashSet<AnnotatedElement>(), 0);
+					element, annotationType, annotationName, containerType, processor, new HashSet<>(), 0);
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
@@ -1201,7 +1154,7 @@ public class AnnotatedElementUtils {
 			try {
 				// Locally declared annotations (ignoring @Inherited)
 				Annotation[] annotations = element.getDeclaredAnnotations();
-				List<T> aggregatedResults = (processor.aggregates() ? new ArrayList<T>() : null);
+				List<T> aggregatedResults = (processor.aggregates() ? new ArrayList<>() : null);
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
@@ -1430,7 +1383,7 @@ public class AnnotatedElementUtils {
 	private static <A extends Annotation> Set<A> postProcessAndSynthesizeAggregatedResults(AnnotatedElement element,
 			Class<A> annotationType, List<AnnotationAttributes> aggregatedResults) {
 
-		Set<A> annotations = new LinkedHashSet<A>();
+		Set<A> annotations = new LinkedHashSet<>();
 		for (AnnotationAttributes attributes : aggregatedResults) {
 			AnnotationUtils.postProcessAnnotationAttributes(element, attributes, false, false);
 			annotations.add(AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element));
@@ -1539,6 +1492,7 @@ public class AnnotatedElementUtils {
 		List<T> getAggregatedResults();
 	}
 
+
 	/**
 	 * {@link Processor} that {@linkplain #process(AnnotatedElement, Annotation, int)
 	 * processes} annotations but does not {@linkplain #postProcess post-process} or
@@ -1548,7 +1502,6 @@ public class AnnotatedElementUtils {
 	private abstract static class SimpleAnnotationProcessor<T> implements Processor<T> {
 
 		private final boolean alwaysProcesses;
-
 
 		public SimpleAnnotationProcessor() {
 			this(false);
@@ -1579,6 +1532,7 @@ public class AnnotatedElementUtils {
 		}
 	}
 
+
 	/**
 	 * {@link SimpleAnnotationProcessor} that always returns {@link Boolean#TRUE} when
 	 * asked to {@linkplain #process(AnnotatedElement, Annotation, int) process} an
@@ -1592,6 +1546,7 @@ public class AnnotatedElementUtils {
 			return Boolean.TRUE;
 		}
 	}
+
 
 	/**
 	 * {@link Processor} that gets the {@code AnnotationAttributes} for the
@@ -1614,7 +1569,6 @@ public class AnnotatedElementUtils {
 
 		private final List<AnnotationAttributes> aggregatedResults;
 
-
 		MergedAnnotationAttributesProcessor() {
 			this(false, false, false);
 		}
@@ -1629,7 +1583,7 @@ public class AnnotatedElementUtils {
 			this.classValuesAsString = classValuesAsString;
 			this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
 			this.aggregates = aggregates;
-			this.aggregatedResults = (aggregates ? new ArrayList<AnnotationAttributes>() : null);
+			this.aggregatedResults = (aggregates ? new ArrayList<>() : null);
 		}
 
 		@Override
@@ -1660,7 +1614,7 @@ public class AnnotatedElementUtils {
 
 			// Track which attribute values have already been replaced so that we can short
 			// circuit the search algorithms.
-			Set<String> valuesAlreadyReplaced = new HashSet<String>();
+			Set<String> valuesAlreadyReplaced = new HashSet<>();
 
 			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
 				String attributeName = attributeMethod.getName();
@@ -1672,7 +1626,7 @@ public class AnnotatedElementUtils {
 						continue;
 					}
 
-					List<String> targetAttributeNames = new ArrayList<String>();
+					List<String> targetAttributeNames = new ArrayList<>();
 					targetAttributeNames.add(attributeOverrideName);
 					valuesAlreadyReplaced.add(attributeOverrideName);
 
@@ -1716,7 +1670,6 @@ public class AnnotatedElementUtils {
 			Object value = AnnotationUtils.getValue(annotation, sourceAttributeName);
 			return AnnotationUtils.adaptValue(element, value, this.classValuesAsString, this.nestedAnnotationsAsMap);
 		}
-
 	}
 
 }

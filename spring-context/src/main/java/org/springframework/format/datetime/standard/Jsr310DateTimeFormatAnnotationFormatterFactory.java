@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 
 	static {
 		// Create the set of field types that may be annotated with @DateTimeFormat.
-		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(8);
+		Set<Class<?>> fieldTypes = new HashSet<>(8);
 		fieldTypes.add(LocalDate.class);
 		fieldTypes.add(LocalTime.class);
 		fieldTypes.add(LocalDateTime.class);

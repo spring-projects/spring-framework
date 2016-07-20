@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.web.servlet.ViewResolver;
 public class ViewResolverComposite implements ViewResolver, Ordered, InitializingBean,
 		ApplicationContextAware, ServletContextAware {
 
-	private final List<ViewResolver> viewResolvers = new ArrayList<ViewResolver>();
+	private final List<ViewResolver> viewResolvers = new ArrayList<>();
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 

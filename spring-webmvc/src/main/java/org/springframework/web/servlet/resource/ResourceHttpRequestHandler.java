@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -98,17 +99,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
 
-	private final List<Resource> locations = new ArrayList<Resource>(4);
+	private final List<Resource> locations = new ArrayList<>(4);
 
-	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>(4);
+	private final List<ResourceResolver> resourceResolvers = new ArrayList<>(4);
 
-	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>(4);
+	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
 	private ResourceHttpMessageConverter resourceHttpMessageConverter;
 
 	private ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
 
 	private ContentNegotiationManager contentNegotiationManager;
+
+	private final ContentNegotiationManagerFactoryBean cnmFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private CorsConfiguration corsConfiguration;
 
@@ -249,6 +252,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		return this.corsConfiguration;
 	}
 
+	@Override
+	protected void initServletContext(ServletContext servletContext) {
+		this.cnmFactoryBean.setServletContext(servletContext);
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -261,7 +269,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 		initAllowedLocations();
 		if (this.contentNegotiationManager == null) {
-			this.contentNegotiationManager = initContentNegotiationManager();
+			this.cnmFactoryBean.afterPropertiesSet();
+			this.contentNegotiationManager = this.cnmFactoryBean.getObject();
 		}
 		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
@@ -290,18 +299,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			}
 		}
 	}
-
-	/**
-	 * Create the {@code ContentNegotiationManager} to use to resolve the
-	 * {@link MediaType} for requests. This implementation delegates to
-	 * {@link ContentNegotiationManagerFactoryBean} with default settings.
-	 */
-	protected ContentNegotiationManager initContentNegotiationManager() {
-		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
-		factory.afterPropertiesSet();
-		return factory.getObject();
-	}
-
 
 	/**
 	 * Processes a resource request.
@@ -490,7 +487,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				return true;
 			}
 		}
-		if (path.contains("../")) {
+		if (path.contains("..")) {
 			path = StringUtils.cleanPath(path);
 			if (path.contains("../")) {
 				if (logger.isTraceEnabled()) {
@@ -513,13 +510,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @param resource the resource to check
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
-	@SuppressWarnings("deprecation")
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
-		// For backwards compatibility
-		MediaType mediaType = getMediaType(resource);
-		if (mediaType != null) {
-			return mediaType;
-		}
+		MediaType mediaType = null;
 
 		Class<PathExtensionContentNegotiationStrategy> clazz = PathExtensionContentNegotiationStrategy.class;
 		PathExtensionContentNegotiationStrategy strategy = this.contentNegotiationManager.getStrategy(clazz);
@@ -541,18 +533,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		return mediaType;
-	}
-
-	/**
-	 * Determine an appropriate media type for the given resource.
-	 * @param resource the resource to check
-	 * @return the corresponding media type, or {@code null} if none found
-	 * @deprecated as of 4.3 this method is deprecated; please override
-	 * {@link #getMediaType(HttpServletRequest, Resource)} instead.
-	 */
-	@Deprecated
-	protected MediaType getMediaType(Resource resource) {
-		return null;
 	}
 
 	/**

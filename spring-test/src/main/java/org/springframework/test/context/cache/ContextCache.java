@@ -22,13 +22,13 @@ import org.springframework.test.context.MergedContextConfiguration;
 
 /**
  * {@code ContextCache} defines the SPI for caching Spring
- * {@link ApplicationContext ApplicationContexts} within the <em>Spring
- * TestContext Framework</em>.
+ * {@link ApplicationContext ApplicationContexts} within the
+ * <em>Spring TestContext Framework</em>.
  *
  * <p>A {@code ContextCache} maintains a cache of {@code ApplicationContexts}
- * keyed by {@link MergedContextConfiguration} instances, potentially
- * configured with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize
- * maximum size} and a custom eviction policy.
+ * keyed by {@link MergedContextConfiguration} instances, potentially configured
+ * with a {@linkplain ContextCacheUtils#retrieveMaxCacheSize maximum size} and
+ * a custom eviction policy.
  *
  * <h3>Rationale</h3>
  * <p>Context caching can have significant performance benefits if context
@@ -50,25 +50,26 @@ public interface ContextCache {
 	 * The name of the logging category used for reporting {@code ContextCache}
 	 * statistics.
 	 */
-	public static final String CONTEXT_CACHE_LOGGING_CATEGORY = "org.springframework.test.context.cache";
+	String CONTEXT_CACHE_LOGGING_CATEGORY = "org.springframework.test.context.cache";
 
 	/**
 	 * The default maximum size of the context cache: {@value #DEFAULT_MAX_CONTEXT_CACHE_SIZE}.
+	 * @since 4.3
 	 * @see #MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME
 	 */
-	public static final int DEFAULT_MAX_CONTEXT_CACHE_SIZE = 32;
+	int DEFAULT_MAX_CONTEXT_CACHE_SIZE = 32;
 
 	/**
 	 * System property used to configure the maximum size of the {@link ContextCache}
-	 * as a positive integer.
-	 * <p>May alternatively be configured via
-	 * {@link org.springframework.core.SpringProperties SpringProperties}.
-	 * <p>Note that implementations of {@code ContextCache} are not required
-	 * to support a maximum cache size. Consult the documentation of the
+	 * as a positive integer. May alternatively be configured via the
+	 * {@link org.springframework.core.SpringProperties} mechanism.
+	 * <p>Note that implementations of {@code ContextCache} are not required to
+	 * actually support a maximum cache size. Consult the documentation of the
 	 * corresponding implementation for details.
+	 * @since 4.3
 	 * @see #DEFAULT_MAX_CONTEXT_CACHE_SIZE
 	 */
-	public static final String MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME = "spring.test.context.cache.maxSize";
+	String MAX_CONTEXT_CACHE_SIZE_PROPERTY_NAME = "spring.test.context.cache.maxSize";
 
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ public class UriComponentsBuilderTests {
 		assertEquals(80, result.getPort());
 		assertEquals("/javase/6/docs/api/java/util/BitSet.html", result.getPath());
 		assertEquals("foo=bar", result.getQuery());
-		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<String, String>(1);
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(1);
 		expectedQueryParams.add("foo", "bar");
 		assertEquals(expectedQueryParams, result.getQueryParams());
 		assertEquals("and(java.util.BitSet)", result.getFragment());
@@ -550,7 +550,7 @@ public class UriComponentsBuilderTests {
 		UriComponents result = builder.queryParam("baz", "qux", 42).build();
 
 		assertEquals("baz=qux&baz=42", result.getQuery());
-		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<String, String>(2);
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(2);
 		expectedQueryParams.add("baz", "qux");
 		expectedQueryParams.add("baz", "42");
 		assertEquals(expectedQueryParams, result.getQueryParams());
@@ -562,7 +562,7 @@ public class UriComponentsBuilderTests {
 		UriComponents result = builder.queryParam("baz").build();
 
 		assertEquals("baz", result.getQuery());
-		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<String, String>(2);
+		MultiValueMap<String, String> expectedQueryParams = new LinkedMultiValueMap<>(2);
 		expectedQueryParams.add("baz", null);
 		assertEquals(expectedQueryParams, result.getQueryParams());
 	}
@@ -587,7 +587,7 @@ public class UriComponentsBuilderTests {
 		UriComponents result = UriComponentsBuilder.fromPath("/{foo}").buildAndExpand("fooValue");
 		assertEquals("/fooValue", result.toUriString());
 
-		Map<String, String> values = new HashMap<String, String>();
+		Map<String, String> values = new HashMap<>();
 		values.put("foo", "fooValue");
 		values.put("bar", "barValue");
 		result = UriComponentsBuilder.fromPath("/{foo}/{bar}").buildAndExpand(values);
@@ -599,7 +599,7 @@ public class UriComponentsBuilderTests {
 		UriComponents result = UriComponentsBuilder.fromUriString("mailto:{user}@{domain}").buildAndExpand("foo", "example.com");
 		assertEquals("mailto:foo@example.com", result.toUriString());
 
-		Map<String, String> values = new HashMap<String, String>();
+		Map<String, String> values = new HashMap<>();
 		values.put("user", "foo");
 		values.put("domain", "example.com");
 		UriComponentsBuilder.fromUriString("mailto:{user}@{domain}").buildAndExpand(values);

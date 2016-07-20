@@ -17,7 +17,7 @@
 		We want to invoke the getStatsMixin method on our ThreadLocal invoker
 	-->
 	<bean id="statsAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-		<property name="targetObject"><ref local="threadLocalTs" /></property>
+		<property name="targetObject"><ref bean="threadLocalTs" /></property>
 		<property name="targetMethod"><value>getStatsMixin</value></property>
 	</bean>
 
@@ -26,7 +26,7 @@
 	-->
 	<bean id="apartment" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interceptorNames"><value>debugInterceptor,statsAdvisor</value></property>
-		<property name="targetSource"><ref local="threadLocalTs"/></property>
+		<property name="targetSource"><ref bean="threadLocalTs"/></property>
 		<!-- Necessary as have a mixin and want to avoid losing the class,
 			 because there's no target interface -->
 		<property name="proxyTargetClass"><value>true</value></property>
@@ -36,7 +36,7 @@
 
 	<bean id="test" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
+		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
 	<bean id="wife" class="org.springframework.tests.sample.beans.TestBean">
@@ -48,7 +48,7 @@
 	</bean>
 
 	<bean id="threadLocal2" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="targetSource"><ref local="threadLocalTs2"/></property>
+		<property name="targetSource"><ref bean="threadLocalTs2"/></property>
 	</bean>
 
 </beans>
