@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ public abstract class CollectionFactory {
 			try {
 				return (Collection<E>) collectionType.newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException(
 					"Could not instantiate Collection type: " + collectionType.getName(), ex);
 			}
@@ -318,7 +318,7 @@ public abstract class CollectionFactory {
 			try {
 				return (Map<K, V>) mapType.newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName(), ex);
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,13 @@ import static org.junit.Assert.assertTrue;
  */
 public class AtomFeedHttpMessageConverterTests {
 
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
+
 	private AtomFeedHttpMessageConverter converter;
 
-	private Charset utf8;
 
 	@Before
 	public void setUp() {
-		utf8 = Charset.forName("UTF-8");
 		converter = new AtomFeedHttpMessageConverter();
 		XMLUnit.setIgnoreWhitespace(true);
 	}
@@ -56,20 +56,20 @@ public class AtomFeedHttpMessageConverterTests {
 	@Test
 	public void canRead() {
 		assertTrue(converter.canRead(Feed.class, new MediaType("application", "atom+xml")));
-		assertTrue(converter.canRead(Feed.class, new MediaType("application", "atom+xml", utf8)));
+		assertTrue(converter.canRead(Feed.class, new MediaType("application", "atom+xml", UTF_8)));
 	}
 
 	@Test
 	public void canWrite() {
 		assertTrue(converter.canWrite(Feed.class, new MediaType("application", "atom+xml")));
-		assertTrue(converter.canWrite(Feed.class, new MediaType("application", "atom+xml", Charset.forName("UTF-8"))));
+		assertTrue(converter.canWrite(Feed.class, new MediaType("application", "atom+xml", UTF_8)));
 	}
 
 	@Test
 	public void read() throws IOException {
 		InputStream is = getClass().getResourceAsStream("atom.xml");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(is);
-		inputMessage.getHeaders().setContentType(new MediaType("application", "atom+xml", utf8));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "atom+xml", UTF_8));
 		Feed result = converter.read(Feed.class, inputMessage);
 		assertEquals("title", result.getTitle());
 		assertEquals("subtitle", result.getSubtitle().getValue());
@@ -106,12 +106,12 @@ public class AtomFeedHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		converter.write(feed, null, outputMessage);
 
-		assertEquals("Invalid content-type", new MediaType("application", "atom+xml", utf8),
+		assertEquals("Invalid content-type", new MediaType("application", "atom+xml", UTF_8),
 				outputMessage.getHeaders().getContentType());
 		String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>title</title>" +
 				"<entry><id>id1</id><title>title1</title></entry>" +
 				"<entry><id>id2</id><title>title2</title></entry></feed>";
-		assertXMLEqual(expected, outputMessage.getBodyAsString(utf8));
+		assertXMLEqual(expected, outputMessage.getBodyAsString(UTF_8));
 	}
 
 	@Test

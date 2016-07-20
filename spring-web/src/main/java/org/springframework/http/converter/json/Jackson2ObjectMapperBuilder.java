@@ -725,7 +725,7 @@ public class Jackson2ObjectMapperBuilder {
 			try {
 				Class<? extends Module> jdk7Module = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module", this.moduleClassLoader);
-				objectMapper.registerModule(BeanUtils.instantiate(jdk7Module));
+				objectMapper.registerModule(BeanUtils.instantiateClass(jdk7Module));
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-jdk7 not available
@@ -737,7 +737,7 @@ public class Jackson2ObjectMapperBuilder {
 			try {
 				Class<? extends Module> jdk8Module = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.jdk8.Jdk8Module", this.moduleClassLoader);
-				objectMapper.registerModule(BeanUtils.instantiate(jdk8Module));
+				objectMapper.registerModule(BeanUtils.instantiateClass(jdk8Module));
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-jdk8 not available
@@ -749,7 +749,7 @@ public class Jackson2ObjectMapperBuilder {
 			try {
 				Class<? extends Module> javaTimeModule = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", this.moduleClassLoader);
-				objectMapper.registerModule(BeanUtils.instantiate(javaTimeModule));
+				objectMapper.registerModule(BeanUtils.instantiateClass(javaTimeModule));
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-jsr310 not available
@@ -761,7 +761,7 @@ public class Jackson2ObjectMapperBuilder {
 			try {
 				Class<? extends Module> jodaModule = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.datatype.joda.JodaModule", this.moduleClassLoader);
-				objectMapper.registerModule(BeanUtils.instantiate(jodaModule));
+				objectMapper.registerModule(BeanUtils.instantiateClass(jodaModule));
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-joda not available
@@ -773,7 +773,7 @@ public class Jackson2ObjectMapperBuilder {
 			try {
 				Class<? extends Module> kotlinModule = (Class<? extends Module>)
 						ClassUtils.forName("com.fasterxml.jackson.module.kotlin.KotlinModule", this.moduleClassLoader);
-				objectMapper.registerModule(BeanUtils.instantiate(kotlinModule));
+				objectMapper.registerModule(BeanUtils.instantiateClass(kotlinModule));
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-module-kotlin not available

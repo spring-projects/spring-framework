@@ -466,7 +466,7 @@ class ConfigurationClassEnhancer {
 				try {
 					fbProxy = fbClass.newInstance();
 				}
-				catch (Exception ex) {
+				catch (Throwable ex) {
 					throw new IllegalStateException("Unable to instantiate enhanced FactoryBean using Objenesis, " +
 							"and regular FactoryBean instantiation via default constructor fails as well", ex);
 				}

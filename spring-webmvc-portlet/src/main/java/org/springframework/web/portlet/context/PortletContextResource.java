@@ -77,6 +77,7 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 		this.path = pathToUse;
 	}
 
+
 	/**
 	 * Return the PortletContext for this resource.
 	 */
@@ -90,7 +91,6 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 	public final String getPath() {
 		return this.path;
 	}
-
 
 	/**
 	 * This implementation checks {@code PortletContext.getResource}.

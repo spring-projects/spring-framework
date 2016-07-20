@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,12 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 			return this.aspectClass.newInstance();
 		}
 		catch (InstantiationException ex) {
-			throw new AopConfigException("Unable to instantiate aspect class [" + this.aspectClass.getName() + "]", ex);
+			throw new AopConfigException(
+					"Unable to instantiate aspect class: " + this.aspectClass.getName(), ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new AopConfigException("Cannot access element class [" + this.aspectClass.getName() + "]", ex);
+			throw new AopConfigException(
+					"Could not access aspect constructor: " + this.aspectClass.getName(), ex);
 		}
 	}
 

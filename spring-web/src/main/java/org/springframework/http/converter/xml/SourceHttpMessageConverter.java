@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,9 +175,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		}
 		catch (NullPointerException ex) {
 			if (!isSupportDtd()) {
-				throw new HttpMessageNotReadableException("NPE while unmarshalling. " +
-						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.", ex);
+				throw new HttpMessageNotReadableException("NPE while unmarshalling: " +
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
 			}
 			throw ex;
 		}
@@ -191,14 +190,14 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 	private SAXSource readSAXSource(InputStream body) throws IOException {
 		try {
-			XMLReader reader = XMLReaderFactory.createXMLReader();
-			reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
-			reader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
+			XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {
-				reader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 			}
 			byte[] bytes = StreamUtils.copyToByteArray(body);
-			return new SAXSource(reader, new InputSource(new ByteArrayInputStream(bytes)));
+			return new SAXSource(xmlReader, new InputSource(new ByteArrayInputStream(bytes)));
 		}
 		catch (SAXException ex) {
 			throw new HttpMessageNotReadableException("Could not parse document: " + ex.getMessage(), ex);

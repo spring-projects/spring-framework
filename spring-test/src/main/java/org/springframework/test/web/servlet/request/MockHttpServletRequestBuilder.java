@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,6 +78,9 @@ import org.springframework.web.util.UriUtils;
  */
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
+
+	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
 
 	private final String method;
 
@@ -272,12 +276,7 @@ public class MockHttpServletRequestBuilder
 	 * @param content the body content
 	 */
 	public MockHttpServletRequestBuilder content(String content) {
-		try {
-			this.content = content.getBytes("UTF-8");
-		}
-		catch (UnsupportedEncodingException e) {
-			// should never happen
-		}
+		this.content = content.getBytes(UTF8_CHARSET);
 		return this;
 	}
 

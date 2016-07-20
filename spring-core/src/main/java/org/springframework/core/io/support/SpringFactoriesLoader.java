@@ -139,7 +139,7 @@ public abstract class SpringFactoriesLoader {
 			return (T) constructor.newInstance();
 		}
 		catch (Throwable ex) {
-			throw new IllegalArgumentException("Cannot instantiate factory class: " + factoryClass.getName(), ex);
+			throw new IllegalArgumentException("Unable to instantiate factory class: " + factoryClass.getName(), ex);
 		}
 	}
 

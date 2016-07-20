@@ -60,7 +60,7 @@ import org.springframework.util.StringUtils;
  * <p>To facilitate mapping between columns and fields that don't have matching names,
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
  *
- * <p>For 'null' values read from the databasem, we will attempt to call the setter, but in the case of
+ * <p>For 'null' values read from the database, we will attempt to call the setter, but in the case of
  * Java primitives, this causes a TypeMismatchException. This class can be configured (using the
  * primitivesDefaultedForNullValue property) to trap this exception and use the primitives default value.
  * Be aware that if you use the values from the generated bean to update the database the primitive value
@@ -274,7 +274,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
-		T mappedObject = BeanUtils.instantiate(this.mappedClass);
+		T mappedObject = BeanUtils.instantiateClass(this.mappedClass);
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
 		initBeanWrapper(bw);
 

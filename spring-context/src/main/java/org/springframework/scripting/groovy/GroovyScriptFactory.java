@@ -266,7 +266,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 		}
 		catch (InstantiationException ex) {
 			throw new ScriptCompilationException(
-					scriptSource, "Could not instantiate Groovy script class: " + scriptClass.getName(), ex);
+					scriptSource, "Unable to instantiate Groovy script class: " + scriptClass.getName(), ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new ScriptCompilationException(

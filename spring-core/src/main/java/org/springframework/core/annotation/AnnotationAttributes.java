@@ -92,7 +92,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	/**
 	 * Create a new, empty {@link AnnotationAttributes} instance for the
 	 * specified {@code annotationType}.
-	 * @param annotationType the type of annotation represented by this
+	 * @param annotationType the annotation type name represented by this
 	 * {@code AnnotationAttributes} instance; never {@code null}
 	 * @param classLoader the ClassLoader to try to load the annotation type on,
 	 * or {@code null} to just store the annotation type name

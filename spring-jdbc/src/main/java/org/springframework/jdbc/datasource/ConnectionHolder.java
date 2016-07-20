@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,9 +161,9 @@ public class ConnectionHolder extends ResourceHolderSupport {
 	 */
 	public boolean supportsSavepoints() throws SQLException {
 		if (this.savepointsSupported == null) {
-			this.savepointsSupported = new Boolean(getConnection().getMetaData().supportsSavepoints());
+			this.savepointsSupported = getConnection().getMetaData().supportsSavepoints();
 		}
-		return this.savepointsSupported.booleanValue();
+		return this.savepointsSupported;
 	}
 
 	/**

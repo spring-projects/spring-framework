@@ -16,11 +16,6 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
 import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Map;
@@ -51,6 +46,14 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.same;
+
 /**
  * Unit tests for {@link DefaultStompSession}.
  *
@@ -80,7 +83,6 @@ public class DefaultStompSessionTests {
 
 	@Before
 	public void setUp() throws Exception {
-
 		MockitoAnnotations.initMocks(this);
 
 		this.sessionHandler = mock(StompSessionHandler.class);
@@ -96,7 +98,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void afterConnected() throws Exception {
-
 		assertFalse(this.session.isConnected());
 		this.connectHeaders.setHost("my-host");
 		this.connectHeaders.setHeartbeat(new long[] {11, 12});
@@ -122,7 +123,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleConnectedFrame() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -141,7 +141,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void heartbeatValues() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -164,7 +163,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void heartbeatNotSupportedByServer() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		verify(this.connection).send(any());
 
@@ -181,7 +179,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void heartbeatTasks() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		verify(this.connection).send(any());
 
@@ -217,7 +214,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleErrorFrame() throws Exception {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.setContentType(new MimeType("text", "plain", UTF_8));
 		accessor.addNativeHeader("foo", "bar");
@@ -236,7 +232,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleErrorFrameWithEmptyPayload() throws Exception {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.addNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
@@ -249,7 +244,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleErrorFrameWithConversionException() throws Exception {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.setContentType(MimeTypeUtils.APPLICATION_JSON);
 		accessor.addNativeHeader("foo", "bar");
@@ -269,7 +263,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleMessageFrame() throws Exception {
-
 		this.session.afterConnected(this.connection);
 
 		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
@@ -296,7 +289,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleMessageFrameWithConversionException() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -344,7 +336,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void send() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -361,13 +352,12 @@ public class DefaultStompSessionTests {
 
 		assertEquals(destination, stompHeaders.getDestination());
 		assertEquals(new MimeType("text", "plain", UTF_8), stompHeaders.getContentType());
-		assertEquals(-1, stompHeaders.getContentLength()); // StompEncoder isn't involved
+		assertEquals(-1, stompHeaders.getContentLength());  // StompEncoder isn't involved
 		assertEquals(payload, new String(message.getPayload(), UTF_8));
 	}
 
 	@Test
 	public void sendWithReceipt() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -391,7 +381,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void sendWithConversionException() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -407,7 +396,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void sendWithExecutionException() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -426,7 +414,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void subscribe() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -446,7 +433,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void subscribeWithHeaders() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -473,7 +459,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void unsubscribe() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -493,7 +478,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void ack() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -511,7 +495,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void nack() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -529,7 +512,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void receiptReceived() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		this.session.setTaskScheduler(mock(TaskScheduler.class));
 
@@ -554,7 +536,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void receiptReceivedBeforeTaskAdded() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		this.session.setTaskScheduler(mock(TaskScheduler.class));
 
@@ -579,7 +560,6 @@ public class DefaultStompSessionTests {
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void receiptNotReceived() throws Exception {
-
 		TaskScheduler taskScheduler = mock(TaskScheduler.class);
 
 		this.session.afterConnected(this.connection);
@@ -611,7 +591,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void disconnect() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 

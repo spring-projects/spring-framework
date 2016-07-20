@@ -74,7 +74,7 @@ public abstract class HtmlUtils {
 	 * http://www.w3.org/TR/html4/sgml/entities.html
 	 * </a>
 	 * @param input the (unescaped) input string
-	 * @param encoding The name of a supported {@link java.nio.charset.Charset charset}
+	 * @param encoding the name of a supported {@link java.nio.charset.Charset charset}
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */
@@ -125,7 +125,7 @@ public abstract class HtmlUtils {
 	 * http://www.w3.org/TR/html4/sgml/entities.html
 	 * </a>
 	 * @param input the (unescaped) input string
-	 * @param encoding The name of a supported {@link java.nio.charset.Charset charset}
+	 * @param encoding the name of a supported {@link java.nio.charset.Charset charset}
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */
@@ -177,7 +177,7 @@ public abstract class HtmlUtils {
 	 * http://www.w3.org/TR/html4/sgml/entities.html
 	 * </a>
 	 * @param input the (unescaped) input string
-	 * @param encoding The name of a supported {@link java.nio.charset.Charset charset}
+	 * @param encoding the name of a supported {@link java.nio.charset.Charset charset}
 	 * @return the escaped string
 	 * @since 4.1.2
 	 */

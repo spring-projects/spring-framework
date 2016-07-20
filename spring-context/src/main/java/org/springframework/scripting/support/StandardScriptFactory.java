@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,7 +154,7 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 			}
 			catch (InstantiationException ex) {
 				throw new ScriptCompilationException(
-						scriptSource, "Could not instantiate script class: " + scriptClass.getName(), ex);
+						scriptSource, "Unable to instantiate script class: " + scriptClass.getName(), ex);
 			}
 			catch (IllegalAccessException ex) {
 				throw new ScriptCompilationException(

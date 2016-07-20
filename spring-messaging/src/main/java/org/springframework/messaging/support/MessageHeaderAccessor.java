@@ -107,7 +107,7 @@ import org.springframework.util.StringUtils;
  * </pre>
  *
  * <p>Note that the above examples aim to demonstrate the general idea of using
- * header accessors. The most likely usage however is through sub-classes.
+ * header accessors. The most likely usage however is through subclasses.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller

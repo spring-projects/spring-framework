@@ -61,6 +61,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private final boolean encoded;
 
+
 	/**
 	 * Package-private constructor. All arguments are optional, and can be {@code null}.
 	 * @param scheme the scheme

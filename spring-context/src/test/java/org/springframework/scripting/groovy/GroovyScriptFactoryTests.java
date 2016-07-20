@@ -268,7 +268,7 @@ public class GroovyScriptFactoryTests {
 	@Test
 	public void testScriptedClassThatDoesNotHaveANoArgCtor() throws Exception {
 		ScriptSource script = mock(ScriptSource.class);
-		final String badScript = "class Foo { public Foo(String foo) {}}";
+		String badScript = "class Foo { public Foo(String foo) {}}";
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.suggestedClassName()).willReturn("someName");
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
@@ -285,11 +285,10 @@ public class GroovyScriptFactoryTests {
 	@Test
 	public void testScriptedClassThatHasNoPublicNoArgCtor() throws Exception {
 		ScriptSource script = mock(ScriptSource.class);
-		final String badScript = "class Foo { protected Foo() {}}";
+		String badScript = "class Foo { protected Foo() {} \n String toString() { 'X' }}";
 		given(script.getScriptAsString()).willReturn(badScript);
 		given(script.suggestedClassName()).willReturn("someName");
-		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
-				+ badScript);
+		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript);
 		try {
 			factory.getScriptedObject(script);
 			fail("Must have thrown a ScriptCompilationException (no oublic no-arg ctor in scripted class).");
@@ -562,7 +561,7 @@ public class GroovyScriptFactoryTests {
 		testMetaClass("org/springframework/scripting/groovy/calculators-with-xsd.xml");
 	}
 
-	private void testMetaClass(final String xmlFile) {
+	private void testMetaClass(String xmlFile) {
 		// expect the exception we threw in the custom metaclass to show it got invoked
 		try {
 			ApplicationContext ctx = new ClassPathXmlApplicationContext(xmlFile);

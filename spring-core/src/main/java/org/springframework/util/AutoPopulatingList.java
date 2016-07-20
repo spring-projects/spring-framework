@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,13 +263,16 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 		public ElementInstantiationException(String msg) {
 			super(msg);
 		}
+
+		public ElementInstantiationException(String message, Throwable cause) {
+			super(message, cause);
+		}
 	}
 
 
 	/**
 	 * Reflective implementation of the ElementFactory interface,
 	 * using {@code Class.newInstance()} on a given element class.
-	 * @see Class#newInstance()
 	 */
 	private static class ReflectiveElementFactory<E> implements ElementFactory<E>, Serializable {
 
@@ -288,12 +291,12 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 				return this.elementClass.newInstance();
 			}
 			catch (InstantiationException ex) {
-				throw new ElementInstantiationException("Unable to instantiate element class [" +
-						this.elementClass.getName() + "]. Root cause is " + ex);
+				throw new ElementInstantiationException(
+						"Unable to instantiate element class: " + this.elementClass.getName(), ex);
 			}
 			catch (IllegalAccessException ex) {
-				throw new ElementInstantiationException("Cannot access element class [" +
-						this.elementClass.getName() + "]. Root cause is " + ex);
+				throw new ElementInstantiationException(
+						"Could not access element constructor: " + this.elementClass.getName(), ex);
 			}
 		}
 	}

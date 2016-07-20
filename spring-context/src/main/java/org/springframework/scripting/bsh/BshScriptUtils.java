@@ -94,8 +94,7 @@ public abstract class BshScriptUtils {
 				return clazz.newInstance();
 			}
 			catch (Throwable ex) {
-				throw new IllegalStateException("Could not instantiate script class [" +
-						clazz.getName() + "]. Root cause is " + ex);
+				throw new IllegalStateException("Could not instantiate script class: " + clazz.getName(), ex);
 			}
 		}
 		else {
