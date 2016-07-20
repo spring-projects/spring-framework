@@ -29,7 +29,9 @@ import java.lang.annotation.Target;
  *
  * @author Rod Johnson
  * @author Sam Brannen
+ * @deprecated as of Spring 4.3, in favor of a custom aspect for such purposes
  */
+@Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface MockStaticEntityMethods {

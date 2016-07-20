@@ -36,7 +36,9 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @author Sam Brannen
+ * @deprecated as of Spring 4.3, in favor of a custom aspect for such purposes
  */
+@Deprecated
 public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMethod()) {
 
 	private final Expectations expectations = new Expectations();

@@ -59,7 +59,9 @@ import org.aspectj.lang.annotation.SuppressAjWarnings;
  * @author Ramnivas Laddad
  * @author Sam Brannen
  * @see MockStaticEntityMethods
+ * @deprecated as of Spring 4.3, in favor of a custom aspect for such purposes
  */
+@Deprecated
 @RequiredTypes("javax.persistence.Entity")
 public aspect AnnotationDrivenStaticEntityMockingControl extends AbstractMethodMockingControl {
 
