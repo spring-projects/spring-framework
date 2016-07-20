@@ -16,21 +16,21 @@
 
 package org.springframework.http.server.reactive;
 
-import io.netty.buffer.ByteBuf;
+import java.util.function.Function;
+
 import reactor.core.publisher.Mono;
-import reactor.io.ipc.ChannelHandler;
 import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
- * Adapt {@link HttpHandler} to the Reactor Netty {@link ChannelHandler}.
+ * Adapt {@link HttpHandler} to the Reactor Netty channel handling function.
  *
  * @author Stephane Maldini
  * @since 5.0
  */
-public class ReactorHttpHandlerAdapter implements ChannelHandler<ByteBuf, ByteBuf, HttpChannel> {
+public class ReactorHttpHandlerAdapter implements Function<HttpChannel, Mono<Void>> {
 
 	private final HttpHandler httpHandler;
 
