@@ -99,7 +99,6 @@ public class XsltView extends AbstractUrlBasedView {
 	 * to build the TransformerFactory for this view.
 	 */
 	public void setTransformerFactoryClass(Class<? extends TransformerFactory> transformerFactoryClass) {
-		Assert.isAssignable(TransformerFactory.class, transformerFactoryClass);
 		this.transformerFactoryClass = transformerFactoryClass;
 	}
 
