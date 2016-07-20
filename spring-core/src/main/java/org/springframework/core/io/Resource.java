@@ -37,20 +37,20 @@ import java.net.URL;
  * @see #getFile()
  * @see WritableResource
  * @see ContextResource
- * @see FileSystemResource
- * @see ClassPathResource
  * @see UrlResource
+ * @see ClassPathResource
+ * @see FileSystemResource
+ * @see PathResource
  * @see ByteArrayResource
  * @see InputStreamResource
- * @see PathResource
  */
 public interface Resource extends InputStreamSource {
 
 	/**
 	 * Determine whether this resource actually exists in physical form.
 	 * <p>This method performs a definitive existence check, whereas the
-	 * existence of a {@code Resource} handle only guarantees a
-	 * valid descriptor handle.
+	 * existence of a {@code Resource} handle only guarantees a valid
+	 * descriptor handle.
 	 */
 	boolean exists();
 
