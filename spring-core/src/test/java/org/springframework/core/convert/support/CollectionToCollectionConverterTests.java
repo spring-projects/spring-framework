@@ -74,10 +74,10 @@ public class CollectionToCollectionConverterTests {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
 		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) conversionService.convert(list, sourceType, targetType);
+		List<Integer> result = (List<Integer>) conversionService.convert(list, sourceType, targetType);
 		assertFalse(list.equals(result));
-		assertEquals(9, result.get(0));
-		assertEquals(37, result.get(1));
+		assertEquals(9, result.get(0).intValue());
+		assertEquals(37, result.get(1).intValue());
 	}
 
 	@Test
@@ -199,7 +199,7 @@ public class CollectionToCollectionConverterTests {
 	public void listToCollectionNoCopyRequired() throws NoSuchFieldException {
 		List<?> input = new ArrayList<String>(Arrays.asList("foo", "bar"));
 		assertSame(input, conversionService.convert(input, TypeDescriptor.forObject(input),
-				new TypeDescriptor(getClass().getField("wildCardCollection"))));
+				new TypeDescriptor(getClass().getField("wildcardCollection"))));
 	}
 
 	@Test
@@ -232,7 +232,7 @@ public class CollectionToCollectionConverterTests {
 		assertSame(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-	@Test(expected=ConverterNotFoundException.class)
+	@Test(expected = ConverterNotFoundException.class)
 	public void elementTypesNotConvertible() throws Exception {
 		List<String> resources = new ArrayList<String>();
 		resources.add(null);
@@ -241,7 +241,7 @@ public class CollectionToCollectionConverterTests {
 		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void nothingInCommon() throws Exception {
 		List<Object> resources = new ArrayList<Object>();
 		resources.add(new ClassPathResource("test"));
@@ -261,9 +261,9 @@ public class CollectionToCollectionConverterTests {
 
 	public List<String> strings;
 
-	public List list = Collections.emptyList();
+	public List<?> list = Collections.emptyList();
 
-	public Collection<?> wildCardCollection = Collections.emptyList();
+	public Collection<?> wildcardCollection = Collections.emptyList();
 
 	public List<Resource> resources;
 

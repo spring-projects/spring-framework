@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,8 +126,8 @@ public abstract class ResourceUtils {
 			URL url = (cl != null ? cl.getResource(path) : ClassLoader.getSystemResource(path));
 			if (url == null) {
 				String description = "class path resource [" + path + "]";
-				throw new FileNotFoundException(
-						description + " cannot be resolved to URL because it does not exist");
+				throw new FileNotFoundException(description +
+						" cannot be resolved to URL because it does not exist");
 			}
 			return url;
 		}
@@ -166,9 +166,8 @@ public abstract class ResourceUtils {
 			ClassLoader cl = ClassUtils.getDefaultClassLoader();
 			URL url = (cl != null ? cl.getResource(path) : ClassLoader.getSystemResource(path));
 			if (url == null) {
-				throw new FileNotFoundException(
-						description + " cannot be resolved to absolute file path " +
-						"because it does not reside in the file system");
+				throw new FileNotFoundException(description +
+						" cannot be resolved to absolute file path because it does not exist");
 			}
 			return getFile(url, description);
 		}
@@ -227,6 +226,7 @@ public abstract class ResourceUtils {
 	 * @return a corresponding File object
 	 * @throws FileNotFoundException if the URL cannot be resolved to
 	 * a file in the file system
+	 * @since 2.5
 	 */
 	public static File getFile(URI resourceUri) throws FileNotFoundException {
 		return getFile(resourceUri, "URI");
@@ -241,6 +241,7 @@ public abstract class ResourceUtils {
 	 * @return a corresponding File object
 	 * @throws FileNotFoundException if the URL cannot be resolved to
 	 * a file in the file system
+	 * @since 2.5
 	 */
 	public static File getFile(URI resourceUri, String description) throws FileNotFoundException {
 		Assert.notNull(resourceUri, "Resource URI must not be null");

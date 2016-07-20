@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,7 @@ public class UrlPathHelper {
 			if (c1 == c2) {
 				continue;
 			}
-			if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
+			else if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
 				continue;
 			}
 			return null;
@@ -251,7 +251,7 @@ public class UrlPathHelper {
 		if (index2 != mapping.length()) {
 			return null;
 		}
-		if (index1 == requestUri.length()) {
+		else if (index1 == requestUri.length()) {
 			return "";
 		}
 		else if (requestUri.charAt(index1) == ';') {
@@ -452,8 +452,8 @@ public class UrlPathHelper {
 	 * @return the updated URI string
 	 */
 	public String removeSemicolonContent(String requestUri) {
-		return this.removeSemicolonContent ?
-				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri);
+		return (this.removeSemicolonContent ?
+				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri));
 	}
 
 	private String removeSemicolonContentInternal(String requestUri) {
