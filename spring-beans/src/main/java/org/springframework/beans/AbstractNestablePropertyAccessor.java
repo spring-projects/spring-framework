@@ -94,7 +94,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	private String nestedPath = "";
 
-	private Object rootObject;
+	Object rootObject;
 
 	/**
 	 * Map with cached nested Accessors: nested path -> Accessor instance.
@@ -914,11 +914,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				return BeanUtils.instantiate(type);
 			}
 		}
-		catch (Exception ex) {
-			// TODO: Root cause exception context is lost here; just exception message preserved.
-			// Should we throw another exception type that preserves context instead?
+		catch (Throwable ex) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name,
-					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
+					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path", ex);
 		}
 	}
 
