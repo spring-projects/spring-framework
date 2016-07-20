@@ -43,6 +43,7 @@ import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 
@@ -204,6 +205,17 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	public LocalSessionFactoryBuilder setMultiTenantConnectionProvider(MultiTenantConnectionProvider multiTenantConnectionProvider) {
 		getProperties().put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
 		return this;
+	}
+
+	/**
+	 * Overridden to reliably pass a {@link CurrentTenantIdentifierResolver} to the SessionFactory.
+	 * @since 4.3.2
+	 * @see AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER
+	 */
+	@Override
+	public void setCurrentTenantIdentifierResolver(CurrentTenantIdentifierResolver currentTenantIdentifierResolver) {
+		getProperties().put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, currentTenantIdentifierResolver);
+		super.setCurrentTenantIdentifierResolver(currentTenantIdentifierResolver);
 	}
 
 	/**
