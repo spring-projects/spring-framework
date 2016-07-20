@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,16 +56,16 @@ public abstract class ClassUtils {
 	/** Prefix for internal non-primitive array class names: "[L" */
 	private static final String NON_PRIMITIVE_ARRAY_PREFIX = "[L";
 
-	/** The package separator character '.' */
+	/** The package separator character: '.' */
 	private static final char PACKAGE_SEPARATOR = '.';
 
-	/** The path separator character '/' */
+	/** The path separator character: '/' */
 	private static final char PATH_SEPARATOR = '/';
 
-	/** The inner class separator character '$' */
+	/** The inner class separator character: '$' */
 	private static final char INNER_CLASS_SEPARATOR = '$';
 
-	/** The CGLIB class separator character "$$" */
+	/** The CGLIB class separator: "$$" */
 	public static final String CGLIB_CLASS_SEPARATOR = "$$";
 
 	/** The ".class" file suffix */
