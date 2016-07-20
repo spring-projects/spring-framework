@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,10 +75,10 @@ public class CollectionToCollectionConverterTests {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
 		@SuppressWarnings("unchecked")
-		List<String> result = (List<String>) conversionService.convert(list, sourceType, targetType);
+		List<Integer> result = (List<Integer>) conversionService.convert(list, sourceType, targetType);
 		assertFalse(list.equals(result));
-		assertEquals(9, result.get(0));
-		assertEquals(37, result.get(1));
+		assertEquals(9, result.get(0).intValue());
+		assertEquals(37, result.get(1).intValue());
 	}
 
 	@Test
@@ -262,6 +262,25 @@ public class CollectionToCollectionConverterTests {
 	}
 
 
+	public ArrayList<Integer> scalarListTarget;
+
+	public List<Integer> emptyListTarget;
+
+	public LinkedList<Integer> emptyListDifferentTarget;
+
+	public List<List<List<Integer>>> objectToCollection;
+
+	public List<String> strings;
+
+	public List<?> list = Collections.emptyList();
+
+	public Collection<?> wildcardCollection = Collections.emptyList();
+
+	public List<Resource> resources;
+
+	public EnumSet<MyEnum> enumSet;
+
+
 	public static abstract class BaseResource implements Resource {
 
 		@Override
@@ -330,25 +349,6 @@ public class CollectionToCollectionConverterTests {
 	}
 
 
-	public static enum MyEnum {A, B, C}
-
-
-	public ArrayList<Integer> scalarListTarget;
-
-	public List<Integer> emptyListTarget;
-
-	public LinkedList<Integer> emptyListDifferentTarget;
-
-	public List<List<List<Integer>>> objectToCollection;
-
-	public List<String> strings;
-
-	public List<?> list = Collections.emptyList();
-
-	public Collection<?> wildcardCollection = Collections.emptyList();
-
-	public List<Resource> resources;
-
-	public EnumSet<MyEnum> enumSet;
+	public enum MyEnum {A, B, C}
 
 }

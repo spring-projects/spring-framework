@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,26 +37,26 @@ import java.net.URL;
  * @see #getFile()
  * @see WritableResource
  * @see ContextResource
- * @see FileSystemResource
- * @see ClassPathResource
  * @see UrlResource
+ * @see ClassPathResource
+ * @see FileSystemResource
+ * @see PathResource
  * @see ByteArrayResource
  * @see InputStreamResource
- * @see PathResource
  */
 public interface Resource extends InputStreamSource {
 
 	/**
-	 * Return whether this resource actually exists in physical form.
+	 * Determine whether this resource actually exists in physical form.
 	 * <p>This method performs a definitive existence check, whereas the
-	 * existence of a {@code Resource} handle only guarantees a
-	 * valid descriptor handle.
+	 * existence of a {@code Resource} handle only guarantees a valid
+	 * descriptor handle.
 	 */
 	boolean exists();
 
 	/**
-	 * Return whether the contents of this resource can be read,
-	 * e.g. via {@link #getInputStream()} or {@link #getFile()}.
+	 * Indicate whether the contents of this resource can be read via
+	 * {@link #getInputStream()}.
 	 * <p>Will be {@code true} for typical resource descriptors;
 	 * note that actual content reading may still fail when attempted.
 	 * However, a value of {@code false} is a definitive indication
@@ -66,8 +66,8 @@ public interface Resource extends InputStreamSource {
 	boolean isReadable();
 
 	/**
-	 * Return whether this resource represents a handle with an open
-	 * stream. If true, the InputStream cannot be read multiple times,
+	 * Indicate whether this resource represents a handle with an open stream.
+	 * If {@code true}, the InputStream cannot be read multiple times,
 	 * and must be read and closed to avoid resource leaks.
 	 * <p>Will be {@code false} for typical resource descriptors.
 	 */
@@ -84,6 +84,7 @@ public interface Resource extends InputStreamSource {
 	 * Return a URI handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URI,
 	 * i.e. if the resource is not available as descriptor
+	 * @since 2.5
 	 */
 	URI getURI() throws IOException;
 

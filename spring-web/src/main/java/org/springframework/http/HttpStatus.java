@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 package org.springframework.http;
 
 /**
- * Java 5 enumeration of HTTP status codes.
+ * Enumeration of HTTP status codes.
  *
  * <p>The HTTP status code series can be retrieved via {@link #series()}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @since 3.0
  * @see HttpStatus.Series
  * @see <a href="http://www.iana.org/assignments/http-status-codes">HTTP Status Code Registry</a>
  * @see <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">List of HTTP status codes - Wikipedia</a>
@@ -385,16 +386,16 @@ public enum HttpStatus {
 	NETWORK_AUTHENTICATION_REQUIRED(511, "Network Authentication Required");
 
 
-
 	private final int value;
 
 	private final String reasonPhrase;
 
 
-	private HttpStatus(int value, String reasonPhrase) {
+	HttpStatus(int value, String reasonPhrase) {
 		this.value = value;
 		this.reasonPhrase = reasonPhrase;
 	}
+
 
 	/**
 	 * Return the integer value of this status code.
@@ -407,7 +408,7 @@ public enum HttpStatus {
 	 * Return the reason phrase of this status code.
 	 */
 	public String getReasonPhrase() {
-		return reasonPhrase;
+		return this.reasonPhrase;
 	}
 
 	/**
@@ -416,7 +417,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is1xxInformational() {
-		return (Series.INFORMATIONAL.equals(series()));
+		return Series.INFORMATIONAL.equals(series());
 	}
 
 	/**
@@ -425,7 +426,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is2xxSuccessful() {
-		return (Series.SUCCESSFUL.equals(series()));
+		return Series.SUCCESSFUL.equals(series());
 	}
 
 	/**
@@ -434,7 +435,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is3xxRedirection() {
-		return (Series.REDIRECTION.equals(series()));
+		return Series.REDIRECTION.equals(series());
 	}
 
 
@@ -444,7 +445,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is4xxClientError() {
-		return (Series.CLIENT_ERROR.equals(series()));
+		return Series.CLIENT_ERROR.equals(series());
 	}
 
 	/**
@@ -453,7 +454,7 @@ public enum HttpStatus {
 	 * This is a shortcut for checking the value of {@link #series()}.
 	 */
 	public boolean is5xxServerError() {
-		return (Series.SERVER_ERROR.equals(series()));
+		return Series.SERVER_ERROR.equals(series());
 	}
 
 	/**
@@ -469,7 +470,7 @@ public enum HttpStatus {
 	 */
 	@Override
 	public String toString() {
-		return Integer.toString(value);
+		return Integer.toString(this.value);
 	}
 
 
@@ -490,10 +491,10 @@ public enum HttpStatus {
 
 
 	/**
-	 * Java 5 enumeration of HTTP status series.
+	 * Enumeration of HTTP status series.
 	 * <p>Retrievable via {@link HttpStatus#series()}.
 	 */
-	public static enum Series {
+	public enum Series {
 
 		INFORMATIONAL(1),
 		SUCCESSFUL(2),
@@ -503,7 +504,7 @@ public enum HttpStatus {
 
 		private final int value;
 
-		private Series(int value) {
+		Series(int value) {
 			this.value = value;
 		}
 
@@ -527,7 +528,6 @@ public enum HttpStatus {
 		public static Series valueOf(HttpStatus status) {
 			return valueOf(status.value);
 		}
-
 	}
 
 }
