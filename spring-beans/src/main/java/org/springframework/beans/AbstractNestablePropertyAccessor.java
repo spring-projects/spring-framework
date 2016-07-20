@@ -81,7 +81,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	private String nestedPath = "";
 
-	private Object rootObject;
+	Object rootObject;
 
 	/**
 	 * Map with cached nested Accessors: nested path -> Accessor instance.

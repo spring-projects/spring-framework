@@ -141,6 +141,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 */
 	public void setBeanInstance(Object object) {
 		this.wrappedObject = object;
+		this.rootObject = object;
 		this.typeConverterDelegate = new TypeConverterDelegate(this, this.wrappedObject);
 		setIntrospectionClass(object.getClass());
 	}
