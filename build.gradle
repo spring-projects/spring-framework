@@ -52,7 +52,7 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.4"
 	ext.httpasyncVersion     = "4.1.2"
 	ext.httpclientVersion    = "4.5.2"
-	ext.jackson2Version      = "2.8.0"
+	ext.jackson2Version      = "2.8.1"
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.5"
 	ext.jettyVersion         = "9.3.10.v20160621"
