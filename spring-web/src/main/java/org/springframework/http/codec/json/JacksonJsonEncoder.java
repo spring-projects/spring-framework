@@ -19,8 +19,9 @@ package org.springframework.http.codec.json;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -29,11 +30,13 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
-import org.springframework.core.codec.AbstractEncoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -45,7 +48,7 @@ import org.springframework.util.MimeType;
  * @since 5.0
  * @see JacksonJsonDecoder
  */
-public class JacksonJsonEncoder extends AbstractEncoder<Object> {
+public class JacksonJsonEncoder extends AbstractJacksonJsonCodec implements Encoder<Object> {
 
 	private static final ByteBuffer START_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{'['});
 
@@ -54,21 +57,26 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 	private static final ByteBuffer END_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{']'});
 
 
-	private final ObjectMapper mapper;
-
-
 	public JacksonJsonEncoder() {
-		this(new ObjectMapper());
+		super(Jackson2ObjectMapperBuilder.json().build());
 	}
 
 	public JacksonJsonEncoder(ObjectMapper mapper) {
-		super(new MimeType("application", "json", StandardCharsets.UTF_8),
-				new MimeType("application", "*+json", StandardCharsets.UTF_8));
-		Assert.notNull(mapper, "'mapper' must not be null");
-
-		this.mapper = mapper;
+		super(mapper);
 	}
 
+	@Override
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		if (mimeType == null) {
+			return true;
+		}
+		return JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
+	}
+
+	@Override
+	public List<MimeType> getEncodableMimeTypes() {
+		return JSON_MIME_TYPES;
+	}
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
@@ -97,7 +105,29 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType type) {
 		TypeFactory typeFactory = this.mapper.getTypeFactory();
 		JavaType javaType = typeFactory.constructType(type.getType());
-		ObjectWriter writer = this.mapper.writerFor(javaType);
+		MethodParameter returnType = (type.getSource() instanceof MethodParameter ?
+				(MethodParameter)type.getSource() : null);
+
+		if (type != null && value != null && type.isAssignableFrom(value.getClass())) {
+			javaType = getJavaType(type.getType(), null);
+		}
+		ObjectWriter writer;
+
+		if (returnType != null && returnType.getMethodAnnotation(JsonView.class) != null) {
+			JsonView annotation = returnType.getMethodAnnotation(JsonView.class);
+			Class<?>[] classes = annotation.value();
+			if (classes.length != 1) {
+				throw new IllegalArgumentException(
+						"@JsonView only supported for response body advice with exactly 1 class argument: " + returnType);
+			}
+			writer = this.mapper.writerWithView(classes[0]);
+		}
+		else {
+			writer = this.mapper.writer();
+		}
+		if (javaType != null && javaType.isContainerType()) {
+			writer = writer.forType(javaType);
+		}
 
 		DataBuffer buffer = bufferFactory.allocateBuffer();
 		OutputStream outputStream = buffer.asOutputStream();

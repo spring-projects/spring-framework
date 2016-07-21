@@ -18,9 +18,11 @@ package org.springframework.http.codec.json;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
@@ -92,6 +94,22 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 						stringConsumer("]"));
 	}
 
+	@Test
+	public void jsonView() throws Exception {
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+
+		ResolvableType type =  ResolvableType.forMethodReturnType(JacksonController.class.getMethod("foo"));
+		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null);
+
+		TestSubscriber.subscribe(output)
+				.assertComplete()
+				.assertNoError()
+				.assertValuesWith(stringConsumer("{\"withView1\":\"with\"}"));
+	}
+
 	
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 	private static class ParentClass {
@@ -103,6 +121,54 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 
 	@JsonTypeName("bar")
 	private static class Bar extends ParentClass {
+	}
+
+	private interface MyJacksonView1 {}
+
+	private interface MyJacksonView2 {}
+
+	@SuppressWarnings("unused")
+	private static class JacksonViewBean {
+
+		@JsonView(MyJacksonView1.class)
+		private String withView1;
+
+		@JsonView(MyJacksonView2.class)
+		private String withView2;
+
+		private String withoutView;
+
+		public String getWithView1() {
+			return withView1;
+		}
+
+		public void setWithView1(String withView1) {
+			this.withView1 = withView1;
+		}
+
+		public String getWithView2() {
+			return withView2;
+		}
+
+		public void setWithView2(String withView2) {
+			this.withView2 = withView2;
+		}
+
+		public String getWithoutView() {
+			return withoutView;
+		}
+
+		public void setWithoutView(String withoutView) {
+			this.withoutView = withoutView;
+		}
+	}
+
+	private static class JacksonController {
+
+		@JsonView(MyJacksonView1.class)
+		public JacksonViewBean foo() {
+			return null;
+		}
 	}
 
 }
