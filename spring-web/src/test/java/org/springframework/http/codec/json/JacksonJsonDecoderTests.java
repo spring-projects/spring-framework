@@ -20,6 +20,8 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -84,7 +86,74 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 				assertValues(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
 	}
 
+	@Test
+	public void jsonView() throws Exception {
+		Flux<DataBuffer> source = Flux.just(
+				stringBuffer("{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}"));
+		ResolvableType elementType =  ResolvableType
+				.forMethodParameter(JacksonController.class.getMethod("foo", JacksonViewBean.class), 0);
+		Flux<JacksonViewBean> flux = new JacksonJsonDecoder()
+				.decode(source, elementType, null).cast(JacksonViewBean.class);
+
+		TestSubscriber
+				.subscribe(flux)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(b -> {
+					assertTrue(b.getWithView1().equals("with"));
+					assertNull(b.getWithView2());
+					assertNull(b.getWithoutView());
+				});
+	}
+
 	void handle(List<Pojo> list) {
+	}
+
+	private interface MyJacksonView1 {}
+
+	private interface MyJacksonView2 {}
+
+	@SuppressWarnings("unused")
+	private static class JacksonViewBean {
+
+		@JsonView(MyJacksonView1.class)
+		private String withView1;
+
+		@JsonView(MyJacksonView2.class)
+		private String withView2;
+
+		private String withoutView;
+
+		public String getWithView1() {
+			return withView1;
+		}
+
+		public void setWithView1(String withView1) {
+			this.withView1 = withView1;
+		}
+
+		public String getWithView2() {
+			return withView2;
+		}
+
+		public void setWithView2(String withView2) {
+			this.withView2 = withView2;
+		}
+
+		public String getWithoutView() {
+			return withoutView;
+		}
+
+		public void setWithoutView(String withoutView) {
+			this.withoutView = withoutView;
+		}
+	}
+
+	private static class JacksonController {
+
+		public JacksonViewBean foo(@JsonView(MyJacksonView1.class) JacksonViewBean bean) {
+			return bean;
+		}
 	}
 
 }
