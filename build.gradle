@@ -69,6 +69,7 @@ configure(allprojects) { project ->
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.1"
 	ext.poiVersion             = "3.14"
+	ext.protobufVersion        = "3.0.0-beta-4"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.0.BUILD-SNAPSHOT'
@@ -734,7 +735,8 @@ project("spring-web") {
 		optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
-		optional("com.google.protobuf:protobuf-java:2.6.1")
+		optional("com.google.protobuf:protobuf-java:${protobufVersion}")
+		optional("com.google.protobuf:protobuf-java-util:${protobufVersion}")
 		optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
