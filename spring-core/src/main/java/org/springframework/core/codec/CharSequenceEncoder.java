@@ -16,6 +16,8 @@
 
 package org.springframework.core.codec;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -28,18 +30,19 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from a String stream to a bytes stream.
+ * Encode from a CharSequence stream to a bytes stream.
  *
  * @author Sebastien Deleuze
+ * @author Arjen Poutsma
  * @since 5.0
  * @see StringDecoder
  */
-public class StringEncoder extends AbstractEncoder<String> {
+public class CharSequenceEncoder extends AbstractEncoder<CharSequence> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
-	public StringEncoder() {
+	public CharSequenceEncoder() {
 		super(new MimeType("text", "plain", DEFAULT_CHARSET));
 	}
 
@@ -47,11 +50,11 @@ public class StringEncoder extends AbstractEncoder<String> {
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
 		Class<?> clazz = elementType.getRawClass();
-		return (super.canEncode(elementType, mimeType, hints) && String.class.equals(clazz));
+		return (super.canEncode(elementType, mimeType, hints) && CharSequence.class.isAssignableFrom(clazz));
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<? extends String> inputStream,
+	public Flux<DataBuffer> encode(Publisher<? extends CharSequence> inputStream,
 			DataBufferFactory bufferFactory, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
 
@@ -62,11 +65,10 @@ public class StringEncoder extends AbstractEncoder<String> {
 		else {
 			 charset = DEFAULT_CHARSET;
 		}
-		return Flux.from(inputStream).map(s -> {
-			byte[] bytes = s.getBytes(charset);
-			DataBuffer dataBuffer = bufferFactory.allocateBuffer(bytes.length);
-			dataBuffer.write(bytes);
-			return dataBuffer;
+		return Flux.from(inputStream).map(charSequence -> {
+			CharBuffer charBuffer = CharBuffer.wrap(charSequence);
+			ByteBuffer byteBuffer = charset.encode(charBuffer);
+			return bufferFactory.wrap(byteBuffer);
 		});
 	}
 

@@ -33,7 +33,7 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.StringEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -91,7 +91,7 @@ public class ResponseEntityResultHandlerTests {
 		if (ObjectUtils.isEmpty(writers)) {
 			writerList = new ArrayList<>();
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 			writerList.add(new ResourceHttpMessageWriter());
 			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
 			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));

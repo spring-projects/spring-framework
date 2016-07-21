@@ -30,7 +30,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,7 +39,7 @@ import rx.Observable;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.StringEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
@@ -176,7 +175,7 @@ public class MessageWriterResultHandlerTests {
 		if (ObjectUtils.isEmpty(writers)) {
 			writerList = new ArrayList<>();
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 			writerList.add(new ResourceHttpMessageWriter());
 			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
 			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
