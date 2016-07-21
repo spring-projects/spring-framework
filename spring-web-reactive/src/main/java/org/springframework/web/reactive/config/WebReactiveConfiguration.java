@@ -29,10 +29,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
@@ -381,7 +381,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	protected final void addDefaultHttpMessageWriters(List<HttpMessageWriter<?>> writers) {
 		List<Encoder<?>> sseDataEncoders = new ArrayList<>();
 		writers.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		writers.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+		writers.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		writers.add(new ResourceHttpMessageWriter());
 		if (jaxb2Present) {
 			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));

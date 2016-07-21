@@ -26,7 +26,7 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.StringEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
@@ -91,7 +91,7 @@ public class ResponseBodyResultHandlerTests {
 		if (ObjectUtils.isEmpty(writers)) {
 			writerList = new ArrayList<>();
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 			writerList.add(new ResourceHttpMessageWriter());
 			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
 			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));

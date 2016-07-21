@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
-
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +31,7 @@ import org.junit.Test;
 import reactor.test.TestSubscriber;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.codec.StringEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -51,10 +50,7 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 
 /**
@@ -123,7 +119,7 @@ public class HttpMessageWriterViewTests {
 
 	@Test
 	public void extractObjectMultipleMatchesNotSupported() throws Exception {
-		HttpMessageWriterView view = new HttpMessageWriterView(new StringEncoder());
+		HttpMessageWriterView view = new HttpMessageWriterView(new CharSequenceEncoder());
 		view.setModelKeys(new HashSet<>(Arrays.asList("foo1", "foo2")));
 		this.model.addAttribute("foo1", "bar1");
 		this.model.addAttribute("foo2", "bar2");

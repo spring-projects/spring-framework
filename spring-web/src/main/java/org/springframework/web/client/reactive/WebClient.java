@@ -30,9 +30,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.codec.StringEncoder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -105,7 +105,7 @@ public final class WebClient {
 	 * Register by default the following Encoders and Decoders:
 	 * <ul>
 	 * <li>{@link ByteBufferEncoder} / {@link ByteBufferDecoder}</li>
-	 * <li>{@link StringEncoder} / {@link StringDecoder}</li>
+	 * <li>{@link CharSequenceEncoder} / {@link StringDecoder}</li>
 	 * <li>{@link Jaxb2Encoder} / {@link Jaxb2Decoder}</li>
 	 * <li>{@link JacksonJsonEncoder} / {@link JacksonJsonDecoder}</li>
 	 * </ul>
@@ -138,7 +138,7 @@ public final class WebClient {
 	 */
 	protected final void addDefaultHttpMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
 		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-		messageWriters.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		messageWriters.add(new ResourceHttpMessageWriter());
 		if (jaxb2Present) {
 			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
