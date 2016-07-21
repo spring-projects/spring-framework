@@ -98,8 +98,8 @@ public class JacksonJsonDecoder extends AbstractJacksonJsonCodec implements Deco
 
 		MethodParameter methodParameter = (elementType.getSource() instanceof MethodParameter ?
 				(MethodParameter)elementType.getSource() : null);
-		// TODO Find a way to pass the real concrete controller contextClass
-		JavaType javaType = getJavaType(elementType.getType(), null);
+		Class<?> contextClass = (methodParameter != null ? methodParameter.getContainingClass() : null);
+		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 		ObjectReader reader;
 
 		if (methodParameter != null && methodParameter.getParameter().getAnnotation(JsonView.class) != null) {

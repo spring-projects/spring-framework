@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +32,6 @@ import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -58,6 +58,7 @@ import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -246,11 +247,11 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test // SPR-9964
-	@Ignore
 	public void parameterizedMethodArgument() throws Exception {
-		Class<?> clazz = ConcreteParameterizedController.class;
-		MethodParameter param = ResolvableMethod.onClass(clazz).name("handleDto").resolveParam();
-		SimpleBean simpleBean = resolveValue(param, "{\"name\" : \"Jad\"}");
+		Method method = AbstractParameterizedController.class.getMethod("handleDto", Identifiable.class);
+ 		HandlerMethod handlerMethod = new HandlerMethod(new ConcreteParameterizedController(), method);
+ 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
+		SimpleBean simpleBean = resolveValue(methodParam, "{\"name\" : \"Jad\"}");
 
 		assertEquals("Jad", simpleBean.getName());
 	}
