@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core;
 
 import org.reactivestreams.Publisher;
@@ -22,8 +23,8 @@ import reactor.core.publisher.Mono;
 /**
  * Contract for adapting to and from {@link Flux} and {@link Mono}.
  *
- * <p>An adapter supports a specific adaptee type whose stream semantics can be
- * checked via {@link #getDescriptor()}.
+ * <p>An adapter supports a specific adaptee type whose stream semantics
+ * can be checked via {@link #getDescriptor()}.
  *
  * <p>Use the {@link ReactiveAdapterRegistry} to obtain an adapter for a
  * supported adaptee type or to register additional adapters.
@@ -78,13 +79,11 @@ public interface ReactiveAdapter {
 
 		private final boolean isNoValue;
 
-
 		public Descriptor(boolean isMultiValue, boolean canBeEmpty, boolean isNoValue) {
 			this.isMultiValue = isMultiValue;
 			this.supportsEmpty = canBeEmpty;
 			this.isNoValue = isNoValue;
 		}
-
 
 		/**
 		 * Return {@code true} if the adaptee implies 0..N values can be produced
@@ -110,7 +109,6 @@ public interface ReactiveAdapter {
 		public boolean isNoValue() {
 			return this.isNoValue;
 		}
-
 	}
 
 }
