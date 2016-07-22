@@ -87,7 +87,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		TestSubscriber
 				.subscribe(result)
-				.await()
+				.await(Duration.ofSeconds(5))
 				.assertValues("data:foo 0", "data:foo 1");
 	}
 
@@ -104,7 +104,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		TestSubscriber
 				.subscribe(result)
-				.await()
+				.await(Duration.ofSeconds(5))
 				.assertValues("data:{\"name\":\"foo 0\"}data:{\"name\":\"foo 1\"}");
 	}
 
@@ -120,7 +120,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		TestSubscriber
 				.subscribe(result)
-				.await()
+				.await(Duration.ofSeconds(5))
 				.assertValues(
 						"id:0:bardata:foo",
 						"id:1:bardata:foo"
