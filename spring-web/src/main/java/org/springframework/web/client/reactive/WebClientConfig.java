@@ -18,8 +18,8 @@ package org.springframework.web.client.reactive;
 
 import java.util.List;
 
-import org.springframework.http.converter.reactive.HttpMessageReader;
-import org.springframework.http.converter.reactive.HttpMessageWriter;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
 
 /**
  * Interface that makes the {@link WebClient} configuration information

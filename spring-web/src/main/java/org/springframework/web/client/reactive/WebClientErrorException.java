@@ -19,7 +19,7 @@ package org.springframework.web.client.reactive;
 import java.util.List;
 
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 
 /**
  * Exception thrown when an HTTP 4xx is received.

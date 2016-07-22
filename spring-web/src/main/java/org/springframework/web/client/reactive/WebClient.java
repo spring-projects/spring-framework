@@ -42,11 +42,11 @@ import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2Decoder;
 import org.springframework.http.codec.xml.Jaxb2Encoder;
-import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
-import org.springframework.http.converter.reactive.EncoderHttpMessageWriter;
-import org.springframework.http.converter.reactive.HttpMessageReader;
-import org.springframework.http.converter.reactive.HttpMessageWriter;
-import org.springframework.http.converter.reactive.ResourceHttpMessageWriter;
+import org.springframework.http.codec.DecoderHttpMessageReader;
+import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.util.ClassUtils;
 
 /**

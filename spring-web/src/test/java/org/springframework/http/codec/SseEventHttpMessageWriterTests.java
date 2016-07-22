@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.converter.reactive;
+package org.springframework.http.codec;
 
 import java.util.Collections;
 
@@ -30,6 +30,7 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 import org.springframework.http.codec.SseEvent;
+import org.springframework.http.codec.SseEventHttpMessageWriter;
 import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 

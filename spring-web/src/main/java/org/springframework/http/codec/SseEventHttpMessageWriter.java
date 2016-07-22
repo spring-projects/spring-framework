@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.converter.reactive;
+package org.springframework.http.codec;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -32,7 +32,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
-import org.springframework.http.codec.SseEvent;
 import org.springframework.util.Assert;
 
 /**

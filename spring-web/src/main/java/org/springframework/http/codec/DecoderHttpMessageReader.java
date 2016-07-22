@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.converter.reactive;
+package org.springframework.http.codec;
 
 import java.util.Collections;
 import java.util.List;

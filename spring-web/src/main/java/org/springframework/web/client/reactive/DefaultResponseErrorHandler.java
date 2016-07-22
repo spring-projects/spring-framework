@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 
 /**
  * Default implementation of the {@link ResponseErrorHandler} interface

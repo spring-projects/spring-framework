@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.RequestBody;

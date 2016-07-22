@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.converter.reactive;
+package org.springframework.http.codec;
 
 import java.io.File;
 import java.io.IOException;

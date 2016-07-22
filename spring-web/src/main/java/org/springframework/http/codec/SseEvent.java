@@ -17,7 +17,6 @@
 package org.springframework.http.codec;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.reactive.SseEventHttpMessageWriter;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web

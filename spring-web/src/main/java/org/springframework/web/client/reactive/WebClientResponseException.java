@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 
 /**
  * Base class for exceptions associated with specific HTTP client response

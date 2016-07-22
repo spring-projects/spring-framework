@@ -29,7 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.converter.reactive.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.web.client.reactive.BodyExtractor;
 import org.springframework.web.client.reactive.ResponseExtractor;
 import org.springframework.web.client.reactive.WebClientException;
