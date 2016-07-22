@@ -32,6 +32,8 @@ import org.springframework.web.client.reactive.WebClient;
 
 import static org.junit.Assume.assumeFalse;
 
+import java.time.Duration;
+
 /**
  * @author Sebastien Deleuze
  */
@@ -57,7 +59,7 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 
 		TestSubscriber
 				.subscribe(result)
-				.await()
+				.await(Duration.ofSeconds(5))
 				.assertValues("data0data1");
 	}
 

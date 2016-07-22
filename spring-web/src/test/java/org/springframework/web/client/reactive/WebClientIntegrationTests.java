@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 import static org.springframework.web.client.reactive.ClientWebRequestBuilders.*;
 import static org.springframework.web.client.reactive.ResponseExtractors.*;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 
 import okhttp3.HttpUrl;
@@ -291,7 +292,7 @@ public class WebClientIntegrationTests {
 
 		TestSubscriber
 				.subscribe(result)
-				.await()
+				.await(Duration.ofSeconds(3))
 				.assertErrorWith(t -> {
 					assertThat(t, Matchers.instanceOf(WebClientErrorException.class));
 					WebClientErrorException exc = (WebClientErrorException) t;
@@ -324,7 +325,7 @@ public class WebClientIntegrationTests {
 
 		TestSubscriber
 				.subscribe(result)
-				.await()
+				.await(Duration.ofSeconds(3))
 				.assertErrorWith(t -> {
 					assertThat(t, Matchers.instanceOf(WebServerErrorException.class));
 					WebServerErrorException exc = (WebServerErrorException) t;
