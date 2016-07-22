@@ -138,7 +138,7 @@ public class MediaTypeTests {
 		assertNotNull("No media types returned", mediaTypes);
 		assertEquals("Invalid amount of media types", 4, mediaTypes.size());
 
-		mediaTypes = MediaType.parseMediaTypes(null);
+		mediaTypes = MediaType.parseMediaTypes("");
 		assertNotNull("No media types returned", mediaTypes);
 		assertEquals("Invalid amount of media types", 0, mediaTypes.size());
 	}

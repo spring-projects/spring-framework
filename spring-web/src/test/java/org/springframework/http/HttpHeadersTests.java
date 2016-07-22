@@ -68,10 +68,19 @@ public class HttpHeadersTests {
 	}
 
 	@Test  // SPR-9655
-	public void acceptIPlanet() {
+	public void acceptWithMultipleHeaderValues() {
 		headers.add("Accept", "text/html");
 		headers.add("Accept", "text/plain");
 		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "plain"));
+		assertEquals("Invalid Accept header", expected, headers.getAccept());
+	}
+
+	@Test  // SPR-14506
+	public void acceptWithMultipleCommaSeparatedHeaderValues() {
+		headers.add("Accept", "text/html,text/pdf");
+		headers.add("Accept", "text/plain,text/csv");
+		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "pdf"),
+				new MediaType("text", "plain"), new MediaType("text", "csv"));
 		assertEquals("Invalid Accept header", expected, headers.getAccept());
 	}
 

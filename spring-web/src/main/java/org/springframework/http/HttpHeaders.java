@@ -429,19 +429,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * <p>Returns an empty list when the acceptable media types are unspecified.
 	 */
 	public List<MediaType> getAccept() {
-		String value = getFirst(ACCEPT);
-		List<MediaType> result = (value != null ? MediaType.parseMediaTypes(value) : Collections.<MediaType>emptyList());
-
-		// Some containers parse 'Accept' into multiple values
-		if (result.size() == 1) {
-			List<String> acceptHeader = get(ACCEPT);
-			if (acceptHeader.size() > 1) {
-				value = StringUtils.collectionToCommaDelimitedString(acceptHeader);
-				result = MediaType.parseMediaTypes(value);
-			}
-		}
-
-		return result;
+		return MediaType.parseMediaTypes(get(ACCEPT));
 	}
 
 	/**
@@ -452,7 +440,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Allow-Credentials} response header.
+	 * Return the value of the {@code Access-Control-Allow-Credentials} response header.
 	 */
 	public boolean getAccessControlAllowCredentials() {
 		return Boolean.parseBoolean(getFirst(ACCESS_CONTROL_ALLOW_CREDENTIALS));
@@ -466,7 +454,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Allow-Headers} response header.
+	 * Return the value of the {@code Access-Control-Allow-Headers} response header.
 	 */
 	public List<String> getAccessControlAllowHeaders() {
 		return getValuesAsList(ACCESS_CONTROL_ALLOW_HEADERS);
@@ -519,7 +507,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Expose-Headers} response header.
+	 * Return the value of the {@code Access-Control-Expose-Headers} response header.
 	 */
 	public List<String> getAccessControlExposeHeaders() {
 		return getValuesAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
@@ -533,7 +521,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Max-Age} response header.
+	 * Return the value of the {@code Access-Control-Max-Age} response header.
 	 * <p>Returns -1 when the max age is unknown.
 	 */
 	public long getAccessControlMaxAge() {
@@ -549,7 +537,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Request-Headers} request header.
+	 * Return the value of the {@code Access-Control-Request-Headers} request header.
 	 */
 	public List<String> getAccessControlRequestHeaders() {
 		return getValuesAsList(ACCESS_CONTROL_REQUEST_HEADERS);

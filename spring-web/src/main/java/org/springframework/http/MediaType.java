@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.InvalidMimeTypeException;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -397,6 +398,8 @@ public class MediaType extends MimeType implements Serializable {
 	 * Parse the given String value into a {@code MediaType} object,
 	 * with this method name following the 'valueOf' naming convention
 	 * (as supported by {@link org.springframework.core.convert.ConversionService}.
+	 * @param value the string to parse
+	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 * @see #parseMediaType(String)
 	 */
 	public static MediaType valueOf(String value) {
@@ -407,7 +410,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * Parse the given String into a single {@code MediaType}.
 	 * @param mediaType the string to parse
 	 * @return the media type
-	 * @throws InvalidMediaTypeException if the string cannot be parsed
+	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 */
 	public static MediaType parseMediaType(String mediaType) {
 		MimeType type;
@@ -425,13 +428,12 @@ public class MediaType extends MimeType implements Serializable {
 		}
 	}
 
-
 	/**
-	 * Parse the given, comma-separated string into a list of {@code MediaType} objects.
+	 * Parse the given comma-separated string into a list of {@code MediaType} objects.
 	 * <p>This method can be used to parse an Accept or Content-Type header.
 	 * @param mediaTypes the string to parse
 	 * @return the list of media types
-	 * @throws IllegalArgumentException if the string cannot be parsed
+	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
 	 */
 	public static List<MediaType> parseMediaTypes(String mediaTypes) {
 		if (!StringUtils.hasLength(mediaTypes)) {
@@ -443,6 +445,31 @@ public class MediaType extends MimeType implements Serializable {
 			result.add(parseMediaType(token));
 		}
 		return result;
+	}
+
+	/**
+	 * Parse the given list of (potentially) comma-separated strings into a
+	 * list of {@code MediaType} objects.
+	 * <p>This method can be used to parse an Accept or Content-Type header.
+	 * @param mediaTypes the string to parse
+	 * @return the list of media types
+	 * @throws InvalidMediaTypeException if the media type value cannot be parsed
+	 * @since 4.3.2
+	 */
+	public static List<MediaType> parseMediaTypes(List<String> mediaTypes) {
+		if (CollectionUtils.isEmpty(mediaTypes)) {
+			return Collections.<MediaType>emptyList();
+		}
+		else if (mediaTypes.size() == 1) {
+			return parseMediaTypes(mediaTypes.get(0));
+		}
+		else {
+			List<MediaType> result = new ArrayList<>(8);
+			for (String mediaType : mediaTypes) {
+				result.addAll(parseMediaTypes(mediaType));
+			}
+			return result;
+		}
 	}
 
 	/**
