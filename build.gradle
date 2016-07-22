@@ -709,7 +709,7 @@ project("spring-web") {
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
 		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
 		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
-		optional("io.projectreactor:reactor-netty:${reactorNettyVersion}")
+		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
 		optional("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
