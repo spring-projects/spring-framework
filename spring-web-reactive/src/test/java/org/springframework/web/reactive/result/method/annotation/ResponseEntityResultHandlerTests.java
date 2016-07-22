@@ -33,7 +33,7 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.StringEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
@@ -60,7 +60,7 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
@@ -92,7 +92,7 @@ public class ResponseEntityResultHandlerTests {
 		if (ObjectUtils.isEmpty(writers)) {
 			writerList = new ArrayList<>();
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 			writerList.add(new ResourceHttpMessageWriter());
 			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
 			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));

@@ -29,7 +29,7 @@ import reactor.test.TestSubscriber;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.StringEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -57,9 +57,7 @@ import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import org.springframework.web.server.session.MockWebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Test the effect of exceptions at different stages of request processing by
@@ -197,7 +195,7 @@ public class DispatcherHandlerErrorTests {
 		@Bean
 		public ResponseBodyResultHandler resultHandler() {
 			return new ResponseBodyResultHandler(
-					Collections.singletonList(new EncoderHttpMessageWriter<>(new StringEncoder())),
+					Collections.singletonList(new EncoderHttpMessageWriter<>(new CharSequenceEncoder())),
 					new DefaultConversionService());
 		}
 

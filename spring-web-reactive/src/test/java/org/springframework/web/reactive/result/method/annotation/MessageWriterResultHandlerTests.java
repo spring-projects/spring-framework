@@ -40,7 +40,7 @@ import rx.Observable;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
-import org.springframework.core.codec.StringEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactorToRxJava1Converter;
@@ -64,9 +64,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.reactive.HandlerMapping.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -177,7 +179,7 @@ public class MessageWriterResultHandlerTests {
 		if (ObjectUtils.isEmpty(writers)) {
 			writerList = new ArrayList<>();
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 			writerList.add(new ResourceHttpMessageWriter());
 			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
 			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));

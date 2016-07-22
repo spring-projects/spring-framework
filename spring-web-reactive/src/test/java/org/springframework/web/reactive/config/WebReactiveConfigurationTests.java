@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.config;
 
 import java.net.URI;
@@ -34,8 +35,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
@@ -68,16 +69,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
-import static org.springframework.http.MediaType.APPLICATION_XML;
-import static org.springframework.http.MediaType.IMAGE_PNG;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * Unit tests for {@link WebReactiveConfiguration}.
@@ -307,7 +300,7 @@ public class WebReactiveConfigurationTests {
 
 		@Override
 		protected void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
-			messageWriters.add(new EncoderHttpMessageWriter<>(new StringEncoder()));
+			messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		}
 
 		@Override
