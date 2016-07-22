@@ -23,7 +23,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.FlushingDataBuffer;
 
 /**
  * A "reactive" HTTP output message that accepts output as a {@link Publisher}.
@@ -45,16 +44,22 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 
 	/**
 	 * Use the given {@link Publisher} to write the body of the message to the underlying
-	 * HTTP layer, and flush the data when the complete signal is received (data could be
-	 * flushed before depending on the configuration, the HTTP engine and the amount of
-	 * data sent).
-	 *
-	 * <p>Each {@link FlushingDataBuffer} element will trigger a flush.
+	 * HTTP layer.
 	 *
 	 * @param body the body content publisher
 	 * @return a publisher that indicates completion or error.
 	 */
 	Mono<Void> writeWith(Publisher<DataBuffer> body);
+
+	/**
+	 * Use the given {@link Publisher} of {@code Publishers} to write the body of the
+	 * message to the underlying HTTP layer, flushing after each
+	 * {@code Publisher<DataBuffer>}.
+	 *
+	 * @param body the body content publisher
+	 * @return a publisher that indicates completion or error.
+	 */
+	Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body);
 
 	/**
 	 * Returns a {@link DataBufferFactory} that can be used for creating the body.

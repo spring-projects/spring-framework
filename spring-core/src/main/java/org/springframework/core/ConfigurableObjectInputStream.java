@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
-import java.lang.reflect.Proxy;
 
 import org.springframework.util.ClassUtils;
 
@@ -139,8 +138,9 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 
 	/**
 	 * Return the fallback ClassLoader to use when no ClassLoader was specified
-	 * and ObjectInputStream's own default ClassLoader failed.
-	 * <p>The default implementation simply returns {@code null}.
+	 * and ObjectInputStream's own default class loader failed.
+	 * <p>The default implementation simply returns {@code null}, indicating
+	 * that no specific fallback is available.
 	 */
 	protected ClassLoader getFallbackClassLoader() throws IOException {
 		return null;

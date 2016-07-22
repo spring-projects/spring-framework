@@ -17,9 +17,9 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Collection;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -28,7 +28,6 @@ import reactor.io.netty.http.HttpClientRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpMethod;
 
@@ -50,7 +49,8 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	private final NettyDataBufferFactory bufferFactory;
 
 
-	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri, HttpClientRequest httpRequest) {
+	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri,
+			HttpClientRequest httpRequest) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpRequest = httpRequest;
@@ -75,8 +75,21 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	@Override
 	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
-		return applyBeforeCommit()
-				.then(httpRequest.send(Flux.from(body).map(this::toByteBuf)));
+		return applyBeforeCommit().then(this.httpRequest
+				.send(Flux.from(body).map(NettyDataBufferFactory::toByteBuf)));
+	}
+
+	@Override
+	public Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body) {
+		Publisher<Publisher<ByteBuf>> byteBufs = Flux.from(body).
+				map(ReactorClientHttpRequest::toByteBufs);
+		return applyBeforeCommit().then(this.httpRequest
+				.sendAndFlush(byteBufs));
+	}
+
+	private static Publisher<ByteBuf> toByteBufs(Publisher<DataBuffer> dataBuffers) {
+		return Flux.from(dataBuffers).
+				map(NettyDataBufferFactory::toByteBuf);
 	}
 
 	@Override
@@ -84,27 +97,17 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		return applyBeforeCommit().then(httpRequest.sendHeaders());
 	}
 
-	private ByteBuf toByteBuf(DataBuffer buffer) {
-		if (buffer instanceof NettyDataBuffer) {
-			return ((NettyDataBuffer) buffer).getNativeBuffer();
-		}
-		else {
-			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
-		}
-	}
-
 	@Override
 	protected void writeHeaders() {
-		getHeaders().entrySet().stream()
+		getHeaders().entrySet()
 				.forEach(e -> this.httpRequest.headers().set(e.getKey(), e.getValue()));
 	}
 
 	@Override
 	protected void writeCookies() {
-		getCookies().values()
-				.stream().flatMap(cookies -> cookies.stream())
+		getCookies().values().stream().flatMap(Collection::stream)
 				.map(cookie -> new DefaultCookie(cookie.getName(), cookie.getValue()))
-				.forEach(cookie -> this.httpRequest.addCookie(cookie));
+				.forEach(this.httpRequest::addCookie);
 	}
 
 }

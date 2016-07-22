@@ -16,12 +16,10 @@
 
 package org.springframework.http.codec.xml;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import reactor.core.publisher.Flux;
 import reactor.test.TestSubscriber;
 
@@ -33,10 +31,10 @@ import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Sebastien Deleuze
@@ -80,10 +78,8 @@ public class Jaxb2EncoderTests extends AbstractDataBufferAllocatingTestCase {
 			try {
 				String s = DataBufferTestUtils
 						.dumpString(dataBuffer, StandardCharsets.UTF_8);
-				assertXMLEqual("<pojo><bar>barbar</bar><foo>foofoo</foo></pojo>", s);
-			}
-			catch (SAXException | IOException e) {
-				fail(e.getMessage());
+				assertThat(s, isSimilarTo("<?xml version='1.0' encoding='UTF-8' standalone='yes'?>" +
+						"<pojo><bar>barbar</bar><foo>foofoo</foo></pojo>"));
 			}
 			finally {
 				DataBufferUtils.release(dataBuffer);

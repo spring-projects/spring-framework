@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -26,12 +25,11 @@ import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.ResponseContentWriter;
 import org.reactivestreams.Publisher;
 import reactor.adapter.RxJava1Adapter;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.FlushingDataBuffer;
-import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -48,6 +46,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final HttpServerResponse<ByteBuf> response;
 
+	private static final ByteBuf FLUSH_SIGNAL = Unpooled.buffer(0, 0);
 
 	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response,
 			NettyDataBufferFactory dataBufferFactory) {
@@ -73,23 +72,32 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
-		Observable<ByteBuf> content = RxJava1Adapter.publisherToObservable(body).map(this::toByteBuf);
-		ResponseContentWriter<ByteBuf> writer = this.response.write(content, bb -> bb instanceof FlushingByteBuf);
-		return RxJava1Adapter.observableToFlux(writer).then();
+		Observable<ByteBuf> content = RxJava1Adapter.publisherToObservable(body)
+				.map(NettyDataBufferFactory::toByteBuf);
+		return RxJava1Adapter.observableToFlux(this.response.write(content))
+				.then();
 	}
 
-	private ByteBuf toByteBuf(DataBuffer buffer) {
-		ByteBuf byteBuf = (buffer instanceof NettyDataBuffer ?
-				((NettyDataBuffer) buffer).getNativeBuffer() :
-				Unpooled.wrappedBuffer(buffer.asByteBuffer()));
-		return (buffer instanceof FlushingDataBuffer ? new FlushingByteBuf(byteBuf) : byteBuf);
+	@Override
+	protected Mono<Void> writeAndFlushWithInternal(
+			Publisher<Publisher<DataBuffer>> body) {
+		Flux<ByteBuf> bodyWithFlushSignals = Flux.from(body).
+				flatMap(publisher -> {
+					return Flux.from(publisher).
+							map(NettyDataBufferFactory::toByteBuf).
+							concatWith(Mono.just(FLUSH_SIGNAL));
+				});
+		Observable<ByteBuf> content = RxJava1Adapter.publisherToObservable(bodyWithFlushSignals);
+		ResponseContentWriter<ByteBuf> writer = this.response.write(content, bb -> bb == FLUSH_SIGNAL);
+		return RxJava1Adapter.observableToFlux(writer).then();
 	}
 
 	@Override
 	protected void writeHeaders() {
 		for (String name : getHeaders().keySet()) {
-			for (String value : getHeaders().get(name))
+			for (String value : getHeaders().get(name)) {
 				this.response.addHeader(name, value);
+			}
 		}
 	}
 
@@ -110,15 +118,8 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 		}
 	}
 
-	private class FlushingByteBuf extends CompositeByteBuf {
 
-		public FlushingByteBuf(ByteBuf byteBuf) {
-			super(byteBuf.alloc(), byteBuf.isDirect(), 1);
-			this.addComponent(true, byteBuf);
-		}
-	}
-
-/*
+	/*
 	While the underlying implementation of {@link ZeroCopyHttpOutputMessage} seems to
 	work; it does bypass {@link #applyBeforeCommit} and more importantly it doesn't change
 	its {@linkplain #state()). Therefore it's commented out, for now.

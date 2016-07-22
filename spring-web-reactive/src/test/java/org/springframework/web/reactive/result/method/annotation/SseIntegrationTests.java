@@ -17,8 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,13 +27,9 @@ import reactor.test.TestSubscriber;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.SseEvent;
-import org.springframework.http.codec.json.JacksonJsonDecoder;
-import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
-import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;

@@ -28,7 +28,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.HttpString;
-import org.reactivestreams.Publisher;
+import org.reactivestreams.Processor;
 import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
@@ -48,14 +48,12 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class UndertowServerHttpResponse extends AbstractServerHttpResponse
+public class UndertowServerHttpResponse extends AbstractListenerServerHttpResponse
 		implements ZeroCopyHttpOutputMessage {
 
-	private final Object bodyProcessorMonitor = new Object();
-
-	private volatile ResponseBodyProcessor bodyProcessor;
-
 	private final HttpServerExchange exchange;
+
+	private StreamSinkChannel responseChannel;
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
 			DataBufferFactory dataBufferFactory) {
@@ -75,37 +73,6 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 			getUndertowExchange().setStatusCode(statusCode.value());
 		}
 	}
-
-	@Override
-	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		Assert.state(this.bodyProcessor == null,
-				"Response body publisher is already provided");
-		try {
-			synchronized (this.bodyProcessorMonitor) {
-				if (this.bodyProcessor == null) {
-					this.bodyProcessor = createBodyProcessor();
-				}
-				else {
-					throw new IllegalStateException(
-							"Response body publisher is already provided");
-				}
-			}
-			return Mono.from(subscriber -> {
-				publisher.subscribe(this.bodyProcessor);
-				this.bodyProcessor.subscribe(subscriber);
-			});
-		}
-		catch (IOException ex) {
-			return Mono.error(ex);
-		}
-	}
-
-	private ResponseBodyProcessor createBodyProcessor() throws IOException {
-		ResponseBodyProcessor bodyProcessor = new ResponseBodyProcessor(this.exchange);
-		bodyProcessor.registerListener();
-		return bodyProcessor;
-	}
-
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
@@ -156,6 +123,22 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 		}
 	}
 
+	@Override
+	protected ResponseBodyProcessor createBodyProcessor() {
+		if (this.responseChannel == null) {
+			this.responseChannel = this.exchange.getResponseChannel();
+		}
+		ResponseBodyProcessor bodyProcessor =
+				new ResponseBodyProcessor( this.responseChannel);
+		bodyProcessor.registerListener();
+		return bodyProcessor;
+	}
+
+	@Override
+	protected AbstractResponseBodyFlushProcessor createBodyFlushProcessor() {
+		return new ResponseBodyFlushProcessor();
+	}
+
 	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
 
 		private final ChannelListener<StreamSinkChannel> listener = new WriteListener();
@@ -164,21 +147,14 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 
 		private volatile ByteBuffer byteBuffer;
 
-		public ResponseBodyProcessor(HttpServerExchange exchange) {
-			this.responseChannel = exchange.getResponseChannel();
+		public ResponseBodyProcessor(StreamSinkChannel responseChannel) {
+			Assert.notNull(responseChannel, "'responseChannel' must not be null");
+			this.responseChannel = responseChannel;
 		}
 
 		public void registerListener() {
 			this.responseChannel.getWriteSetter().set(this.listener);
 			this.responseChannel.resumeWrites();
-		}
-
-		@Override
-		protected void flush() throws IOException {
-			if (logger.isTraceEnabled()) {
-				logger.trace("flush");
-			}
-			this.responseChannel.flush();
 		}
 
 		@Override
@@ -228,6 +204,25 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse
 				onWritePossible();
 			}
 
+		}
+
+	}
+
+	private class ResponseBodyFlushProcessor extends AbstractResponseBodyFlushProcessor {
+
+		@Override
+		protected Processor<DataBuffer, Void> createBodyProcessor() {
+			return UndertowServerHttpResponse.this.createBodyProcessor();
+		}
+
+		@Override
+		protected void flush() throws IOException {
+			if (UndertowServerHttpResponse.this.responseChannel != null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("flush");
+				}
+				UndertowServerHttpResponse.this.responseChannel.flush();
+			}
 		}
 
 	}

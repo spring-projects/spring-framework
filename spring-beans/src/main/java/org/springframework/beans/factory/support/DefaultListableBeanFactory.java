@@ -1200,7 +1200,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		for (String candidateName : candidateNames) {
 			if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, descriptor)) {
-				result.put(candidateName, descriptor.resolveCandidate(candidateName, this));
+				result.put(candidateName, descriptor.resolveCandidate(candidateName, requiredType, this));
 			}
 		}
 		if (result.isEmpty() && !indicatesMultipleBeans(requiredType)) {
@@ -1208,14 +1208,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
 			for (String candidateName : candidateNames) {
 				if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
-					result.put(candidateName, descriptor.resolveCandidate(candidateName, this));
+					result.put(candidateName, descriptor.resolveCandidate(candidateName, requiredType, this));
 				}
 			}
 			if (result.isEmpty()) {
 				// Consider self references before as a final pass
 				for (String candidateName : candidateNames) {
 					if (isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
-						result.put(candidateName, descriptor.resolveCandidate(candidateName, this));
+						result.put(candidateName, descriptor.resolveCandidate(candidateName, requiredType, this));
 					}
 				}
 			}
@@ -1399,11 +1399,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			public boolean isRequired() {
 				return false;
 			}
-
 			@Override
-			public Object resolveCandidate(String beanName, BeanFactory beanFactory) {
-				return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, args) :
-						super.resolveCandidate(beanName, beanFactory));
+			public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory) {
+				return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, requiredType, args) :
+						super.resolveCandidate(beanName, requiredType, beanFactory));
 			}
 		};
 		descriptorToUse.increaseNestingLevel();
@@ -1509,8 +1508,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			else {
 				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
 					@Override
-					public Object resolveCandidate(String beanName, BeanFactory beanFactory) {
-						return beanFactory.getBean(beanName, args);
+					public Object resolveCandidate(String beanName, Class<?> requiredType, BeanFactory beanFactory) {
+						return ((AbstractBeanFactory) beanFactory).getBean(beanName, requiredType, args);
 					}
 				};
 				return doResolveDependency(descriptorToUse, this.beanName, null, null);

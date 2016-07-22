@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive;
 import java.io.File;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -30,8 +29,7 @@ import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.FlushingDataBuffer;
-import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
@@ -73,12 +71,16 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> publisher) {
-		return Flux.from(publisher)
-				.window()
-				.concatMap(w -> this.channel.send(w
-						.takeUntil(db -> db instanceof FlushingDataBuffer)
-						.map(this::toByteBuf)))
-				.then();
+		Publisher<ByteBuf> body = toByteBufs(publisher);
+		return this.channel.send(body);
+	}
+
+	@Override
+	protected Mono<Void> writeAndFlushWithInternal(
+			Publisher<Publisher<DataBuffer>> publisher) {
+		Publisher<Publisher<ByteBuf>> body = Flux.from(publisher).
+				map(ReactorServerHttpResponse::toByteBufs);
+		return this.channel.sendAndFlush(body);
 	}
 
 	@Override
@@ -107,20 +109,16 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 		}
 	}
 
-	private ByteBuf toByteBuf(DataBuffer buffer) {
-		if (buffer instanceof NettyDataBuffer) {
-			return ((NettyDataBuffer) buffer).getNativeBuffer();
-		}
-		else {
-			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
-		}
-	}
-
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
-		return applyBeforeCommit().then(() -> {
-			return this.channel.sendFile(file, position, count);
-		});
+		return applyBeforeCommit().then(() -> this.channel.sendFile(file, position, count));
 	}
+
+	private static Publisher<ByteBuf> toByteBufs(Publisher<DataBuffer> dataBuffers) {
+		return Flux.from(dataBuffers).
+				map(NettyDataBufferFactory::toByteBuf);
+	}
+
+
 
 }

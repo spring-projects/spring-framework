@@ -25,16 +25,16 @@ import javax.servlet.WriteListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class for {@code Subscriber} implementations that bridge between
+ * Abstract base class for {@code Processor} implementations that bridge between
  * event-listener APIs and Reactive Streams. Specifically, base class for the
  * Servlet 3.1 and Undertow support.
  *
@@ -42,6 +42,7 @@ import org.springframework.util.Assert;
  * @since 5.0
  * @see ServletServerHttpRequest
  * @see UndertowHttpHandlerAdapter
+ * @see ServerHttpResponse#writeWith(Publisher)
  */
 abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Void> {
 
@@ -158,11 +159,6 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	 */
 	protected abstract boolean write(DataBuffer dataBuffer) throws IOException;
 
-	/**
-	 * Flushes the output.
-	 */
-	protected abstract void flush() throws IOException;
-
 	private boolean changeState(State oldState, State newState) {
 		return this.state.compareAndSet(oldState, newState);
 	}
@@ -246,9 +242,6 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 					try {
 						boolean writeCompleted = processor.write(dataBuffer);
 						if (writeCompleted) {
-							if (dataBuffer instanceof FlushingDataBuffer) {
-								processor.flush();
-							}
 							processor.releaseBuffer();
 							if (!processor.subscriberCompleted) {
 								processor.changeState(WRITING, REQUESTED);

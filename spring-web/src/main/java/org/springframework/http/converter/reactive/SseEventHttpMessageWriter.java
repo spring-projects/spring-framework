@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.http.codec;
+package org.springframework.http.converter.reactive;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,15 +26,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.AbstractEncoder;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.FlushingDataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.codec.SseEvent;
 import org.springframework.util.Assert;
-import org.springframework.util.MimeType;
 
 /**
  * Encoder that supports a stream of {@link SseEvent}s and also plain
@@ -42,25 +42,53 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @since 5.0
+ * @author Arjen Poutsma
  */
-public class SseEventEncoder extends AbstractEncoder<Object> {
+public class SseEventHttpMessageWriter implements HttpMessageWriter<Object> {
+
+	private static final MediaType TEXT_EVENT_STREAM =
+			new MediaType("text", "event-stream");
 
 	private final List<Encoder<?>> dataEncoders;
 
-
-	public SseEventEncoder(List<Encoder<?>> dataEncoders) {
-		super(new MimeType("text", "event-stream"));
+	public SseEventHttpMessageWriter(List<Encoder<?>> dataEncoders) {
 		Assert.notNull(dataEncoders, "'dataEncoders' must not be null");
 		this.dataEncoders = dataEncoders;
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType type, MimeType sseMimeType, Object... hints) {
+	public boolean canWrite(ResolvableType type, MediaType mediaType) {
+		return mediaType == null || TEXT_EVENT_STREAM.isCompatibleWith(mediaType);
+	}
 
-		return Flux.from(inputStream).flatMap(input -> {
-			SseEvent event = (SseEvent.class.equals(type.getRawClass()) ?
-					(SseEvent)input : new SseEvent(input));
+	@Override
+	public List<MediaType> getWritableMediaTypes() {
+		return Collections.singletonList(TEXT_EVENT_STREAM);
+	}
+
+	@Override
+	public Mono<Void> write(Publisher<?> inputStream, ResolvableType type,
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+
+		outputMessage.getHeaders().setContentType(TEXT_EVENT_STREAM);
+
+		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
+		Flux<Publisher<DataBuffer>> body = encode(inputStream, bufferFactory, type);
+
+		//  Keep the SSE connection open even for cold stream in order to avoid
+		// unexpected browser reconnection
+		body = body.concatWith(Flux.never());
+
+		return outputMessage.writeAndFlushWith(body);
+	}
+
+	private Flux<Publisher<DataBuffer>> encode(Publisher<?> inputStream,
+			DataBufferFactory bufferFactory, ResolvableType type) {
+
+		return Flux.from(inputStream).map(input -> {
+			SseEvent event =
+					(SseEvent.class.equals(type.getRawClass()) ? (SseEvent) input :
+							new SseEvent(input));
 
 			StringBuilder sb = new StringBuilder();
 
@@ -90,26 +118,20 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 
 			Object data = event.getData();
 			Flux<DataBuffer> dataBuffer = Flux.empty();
-			MediaType mediaType = (event.getMediaType() == null ? MediaType.ALL : event.getMediaType());
+			MediaType mediaType =
+					(event.getMediaType() == null ? MediaType.ALL : event.getMediaType());
 			if (data != null) {
 				sb.append("data:");
 				if (data instanceof String) {
-					sb.append(((String)data).replaceAll("\\n", "\ndata:")).append("\n");
+					sb.append(((String) data).replaceAll("\\n", "\ndata:")).append("\n");
 				}
 				else {
 					dataBuffer = applyEncoder(data, mediaType, bufferFactory);
 				}
 			}
 
-			// Keep the SSE connection open even for cold stream in order to avoid
-			// unexpected browser reconnection
-			return Flux.concat(
-					encodeString(sb.toString(), bufferFactory),
-					dataBuffer,
-					encodeString("\n", bufferFactory),
-					Mono.just(FlushingDataBuffer.INSTANCE),
-					Flux.never()
-			);
+			return Flux.concat(encodeString(sb.toString(), bufferFactory), dataBuffer,
+					encodeString("\n", bufferFactory));
 		});
 
 	}
@@ -121,10 +143,7 @@ public class SseEventEncoder extends AbstractEncoder<Object> {
 			.stream()
 			.filter(e -> e.canEncode(elementType, mediaType))
 			.findFirst();
-		if (!encoder.isPresent()) {
-			return Flux.error(new CodecException("No suitable encoder found!"));
-		}
-		return ((Encoder<T>) encoder.get())
+		return ((Encoder<T>) encoder.orElseThrow(() -> new CodecException("No suitable encoder found!")))
 				.encode(Mono.just((T) data), bufferFactory, elementType, mediaType)
 				.concatWith(encodeString("\n", bufferFactory));
 	}

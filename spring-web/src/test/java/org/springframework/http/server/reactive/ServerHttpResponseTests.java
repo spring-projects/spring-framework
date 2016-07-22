@@ -182,6 +182,12 @@ public class ServerHttpResponseTests {
 				return b;
 			}).then();
 		}
+
+		@Override
+		protected Mono<Void> writeAndFlushWithInternal(
+				Publisher<Publisher<DataBuffer>> body) {
+			return Mono.error(new UnsupportedOperationException());
+		}
 	}
 
 }

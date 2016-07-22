@@ -128,9 +128,15 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Mono<Void> writeWith(Publisher<DataBuffer> publisher) {
-		return new ChannelSendOperator<>(publisher, writePublisher ->
-						applyBeforeCommit().then(() -> writeWithInternal(writePublisher)));
+	public final Mono<Void> writeWith(Publisher<DataBuffer> body) {
+		return new ChannelSendOperator<>(body, writePublisher -> applyBeforeCommit()
+				.then(() -> writeWithInternal(writePublisher)));
+	}
+
+	@Override
+	public final Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body) {
+		return new ChannelSendOperator<>(body, writePublisher -> applyBeforeCommit()
+				.then(() -> writeAndFlushWithInternal(writePublisher)));
 	}
 
 	protected Mono<Void> applyBeforeCommit() {
@@ -159,6 +165,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * @param body the publisher to write with
 	 */
 	protected abstract Mono<Void> writeWithInternal(Publisher<DataBuffer> body);
+
+	/**
+	 * Implement this method to write to the underlying the response, and flush after
+	 * each {@code Publisher<DataBuffer>}.
+	 * @param body the publisher to write and flush with
+	 */
+	protected abstract Mono<Void> writeAndFlushWithInternal(
+			Publisher<Publisher<DataBuffer>> body);
 
 	/**
 	 * Implement this method to write the status code to the underlying response.

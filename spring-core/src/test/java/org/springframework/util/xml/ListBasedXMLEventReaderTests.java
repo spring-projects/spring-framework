@@ -16,6 +16,9 @@
 
 package org.springframework.util.xml;
 
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -28,8 +31,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
 
 import org.junit.Test;
-
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
 /**
  * @author Arjen Poutsma
@@ -51,7 +52,7 @@ public class ListBasedXMLEventReaderTests {
 		XMLEventWriter writer = this.outputFactory.createXMLEventWriter(resultWriter);
 		writer.add(reader);
 
-		assertXMLEqual(xml, resultWriter.toString());
+		assertThat(resultWriter.toString(), isSimilarTo(xml));
 	}
 
 	private List<XMLEvent> readEvents(String xml) throws XMLStreamException {

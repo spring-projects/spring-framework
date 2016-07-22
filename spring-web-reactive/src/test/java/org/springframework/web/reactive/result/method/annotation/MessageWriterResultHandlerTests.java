@@ -148,7 +148,6 @@ public class MessageWriterResultHandlerTests {
 	}
 
 	@Test  // SPR-13318
-	@Ignore
 	public void jacksonTypeWithSubType() throws Exception {
 		SimpleBean body = new SimpleBean(123L, "foo");
 		ResolvableType type = ResolvableType.forClass(Identifiable.class);
@@ -159,7 +158,6 @@ public class MessageWriterResultHandlerTests {
 	}
 
 	@Test  // SPR-13318
-	@Ignore
 	public void jacksonTypeWithSubTypeOfListElement() throws Exception {
 		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
 		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, Identifiable.class);

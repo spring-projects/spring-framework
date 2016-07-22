@@ -23,12 +23,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.Matcher;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.Diff;
 
 import static org.hamcrest.MatcherAssert.*;
 
@@ -77,15 +77,12 @@ public class XmlExpectationsHelper {
 	 * @see org.springframework.test.web.servlet.result.MockMvcResultMatchers#xpath(String, Map, Object...)
 	 */
 	public void assertXmlEqual(String expected, String actual) throws Exception {
-		XMLUnit.setIgnoreWhitespace(true);
-		XMLUnit.setIgnoreComments(true);
-		XMLUnit.setIgnoreAttributeOrder(true);
-
-		Document control = XMLUnit.buildControlDocument(expected);
-		Document test = XMLUnit.buildTestDocument(actual);
-		Diff diff = new Diff(control, test);
-		if (!diff.similar()) {
-			AssertionErrors.fail("Body content " + diff.toString());
+		Diff diffSimilar = DiffBuilder.compare(expected).withTest(actual)
+				.ignoreWhitespace().ignoreComments()
+				.checkForSimilar()
+				.build();
+		if (diffSimilar.hasDifferences()) {
+			AssertionErrors.fail("Body content " + diffSimilar.toString());
 		}
 	}
 

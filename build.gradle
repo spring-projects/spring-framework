@@ -52,7 +52,7 @@ configure(allprojects) { project ->
 	ext.httpasyncVersion       = "4.1.2"
 	ext.httpclientVersion      = "4.5.2"
 	ext.interceptorApiVersion  = "1.2"
-	ext.jackson2Version        = "2.8.0"
+	ext.jackson2Version        = "2.8.1"
 	ext.javamailVersion        = "1.5.5"
 	ext.jaxbVersion            = "2.2.11"
 	ext.jcaVersion             = "1.7"
@@ -69,6 +69,7 @@ configure(allprojects) { project ->
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.1"
 	ext.poiVersion             = "3.14"
+	ext.protobufVersion        = "3.0.0-beta-4"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.0.BUILD-SNAPSHOT'
@@ -86,7 +87,7 @@ configure(allprojects) { project ->
 	ext.undertowVersion        = "1.4.0.CR3"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.2"
-	ext.xmlunitVersion         = "1.6"
+	ext.xmlunitVersion         = "2.2.1"
 	ext.xstreamVersion         = "1.4.9"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -378,7 +379,7 @@ project("spring-core") {
 		optional "io.reactivex:rxjava:${rxjavaVersion}"
 		optional("io.netty:netty-buffer:${nettyVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") {
 			exclude group: "stax", module: "stax-api"
 		}
@@ -531,7 +532,7 @@ project("spring-oxm") {
 		}
 		optional("org.jibx:jibx-run:1.2.6")
 		testCompile(project(":spring-context"))
-		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("xpp3:xpp3:1.1.4c")
 		testCompile("org.codehaus.jettison:jettison:1.3.7") {
 			exclude group: 'stax', module: 'stax-api'
@@ -584,7 +585,7 @@ project("spring-messaging") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
@@ -708,7 +709,7 @@ project("spring-web") {
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
 		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
 		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
-		optional("io.projectreactor:reactor-netty:${reactorNettyVersion}")
+		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
 		optional("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
@@ -734,11 +735,12 @@ project("spring-web") {
 		optional("org.eclipse.jetty:jetty-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
-		optional("com.google.protobuf:protobuf-java:2.6.1")
+		optional("com.google.protobuf:protobuf-java:${protobufVersion}")
+		optional("com.google.protobuf:protobuf-java-util:${protobufVersion}")
 		optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
-		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
@@ -786,7 +788,7 @@ project("spring-web-reactive") {
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
-		testCompile("xmlunit:xmlunit:1.6")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
@@ -862,7 +864,7 @@ project("spring-webmvc") {
 			exclude group: "org.springframework", module: "spring-web"
 		}
 		optional('org.webjars:webjars-locator:0.32')
-		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
@@ -973,7 +975,7 @@ project("spring-test") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
-		optional("xmlunit:xmlunit:${xmlunitVersion}")
+		optional("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		optional("net.sourceforge.htmlunit:htmlunit:2.22")
 		optional("org.seleniumhq.selenium:htmlunit-driver:2.21")
 		optional("org.seleniumhq.selenium:selenium-java:2.53.1") {

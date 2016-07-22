@@ -17,21 +17,23 @@
 package org.springframework.http.codec.json;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
-import org.springframework.core.codec.AbstractDecoder;
+import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
@@ -44,15 +46,7 @@ import org.springframework.util.MimeType;
  * @since 5.0
  * @see JacksonJsonEncoder
  */
-public class JacksonJsonDecoder extends AbstractDecoder<Object> {
-
-	private static final MimeType[] MIME_TYPES = new MimeType[] {
-			new MimeType("application", "json", StandardCharsets.UTF_8),
-			new MimeType("application", "*+json", StandardCharsets.UTF_8)
-	};
-
-
-	private final ObjectMapper mapper;
+public class JacksonJsonDecoder extends AbstractJacksonJsonCodec implements Decoder<Object> {
 
 	private final JsonObjectDecoder fluxObjectDecoder = new JsonObjectDecoder(true);
 
@@ -60,14 +54,25 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 
 
 	public JacksonJsonDecoder() {
-		this(new ObjectMapper());
+		super(Jackson2ObjectMapperBuilder.json().build());
 	}
 
 	public JacksonJsonDecoder(ObjectMapper mapper) {
-		super(MIME_TYPES);
-		this.mapper = mapper;
+		super(mapper);
 	}
 
+	@Override
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+		if (mimeType == null) {
+			return true;
+		}
+		return JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
+	}
+
+	@Override
+	public List<MimeType> getDecodableMimeTypes() {
+		return JSON_MIME_TYPES;
+	}
 
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
@@ -91,10 +96,24 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
-		TypeFactory typeFactory = this.mapper.getTypeFactory();
-		JavaType javaType = typeFactory.constructType(elementType.getType());
+		MethodParameter methodParameter = (elementType.getSource() instanceof MethodParameter ?
+				(MethodParameter)elementType.getSource() : null);
+		Class<?> contextClass = (methodParameter != null ? methodParameter.getContainingClass() : null);
+		JavaType javaType = getJavaType(elementType.getType(), contextClass);
+		ObjectReader reader;
 
-		ObjectReader reader = this.mapper.readerFor(javaType);
+		if (methodParameter != null && methodParameter.getParameter().getAnnotation(JsonView.class) != null) {
+			JsonView annotation = methodParameter.getParameter().getAnnotation(JsonView.class);
+			Class<?>[] classes = annotation.value();
+			if (classes.length != 1) {
+				throw new IllegalArgumentException(
+						"@JsonView only supported for response body advice with exactly 1 class argument: " + methodParameter);
+			}
+			reader = mapper.readerWithView(classes[0]).forType(javaType);
+		}
+		else {
+			reader = mapper.readerFor(javaType);
+		}
 
 		return objectDecoder.decode(inputStream, elementType, mimeType, hints)
 				.map(dataBuffer -> {

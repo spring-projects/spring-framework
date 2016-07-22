@@ -78,6 +78,24 @@ public class NettyDataBufferFactory implements DataBufferFactory {
 		return new NettyDataBuffer(byteBuf, this);
 	}
 
+	/**
+	 * Returns the given Netty {@link DataBuffer} as a {@link ByteBuf}. Returns the
+	 * {@linkplain NettyDataBuffer#getNativeBuffer() native buffer} if {@code buffer} is
+	 * a {@link NettyDataBuffer}; returns {@link Unpooled#wrappedBuffer(ByteBuffer)}
+	 * otherwise.
+	 * @param buffer the {@code DataBuffer} to return a {@code ByteBuf} for.
+	 * @return the netty {@code ByteBuf}
+	 */
+	public static ByteBuf toByteBuf(DataBuffer buffer) {
+		if (buffer instanceof NettyDataBuffer) {
+			return ((NettyDataBuffer) buffer).getNativeBuffer();
+		}
+		else {
+			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
+		}
+	}
+
+
 	@Override
 	public String toString() {
 		return "NettyDataBufferFactory (" + this.byteBufAllocator + ")";
