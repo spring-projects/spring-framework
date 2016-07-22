@@ -151,7 +151,6 @@ abstract class AbstractResponseBodyFlushProcessor
 			public void writeComplete(AbstractResponseBodyFlushProcessor processor) {
 				if (processor.subscriberCompleted) {
 					if (processor.changeState(this, COMPLETED)) {
-						processor.subscriberCompleted = true;
 						processor.publisherDelegate.publishComplete();
 					}
 				}
