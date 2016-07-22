@@ -18,14 +18,12 @@ package org.springframework.web.reactive.result;
 
 import java.util.Optional;
 
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -45,27 +43,26 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 
-	protected static final TypeDescriptor MONO_TYPE = TypeDescriptor.valueOf(Mono.class);
-
-	protected static final TypeDescriptor FLUX_TYPE = TypeDescriptor.valueOf(Flux.class);
-
-
-	private ConversionService conversionService;
+	private ReactiveAdapterRegistry adapterRegistry;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 
-	public SimpleResultHandler(ConversionService conversionService) {
-		Assert.notNull(conversionService, "'conversionService' is required.");
-		this.conversionService = conversionService;
+	public SimpleResultHandler() {
+		this.adapterRegistry = new ReactiveAdapterRegistry();
+	}
+
+	public SimpleResultHandler(ReactiveAdapterRegistry adapterRegistry) {
+		Assert.notNull(adapterRegistry, "'adapterRegistry' is required.");
+		this.adapterRegistry = adapterRegistry;
 	}
 
 
 	/**
-	 * Return the configured {@link ConversionService}.
+	 * Return the configured {@link ReactiveAdapterRegistry}.
 	 */
-	public ConversionService getConversionService() {
-		return this.conversionService;
+	public ReactiveAdapterRegistry getAdapterRegistry() {
+		return this.adapterRegistry;
 	}
 
 	/**
@@ -88,37 +85,28 @@ public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 	@Override
 	public boolean supports(HandlerResult result) {
 		ResolvableType type = result.getReturnType();
-		if (Void.TYPE.equals(type.getRawClass())) {
+		Class<?> rawClass = type.getRawClass();
+		if (Void.TYPE.equals(rawClass)) {
 			return true;
 		}
-		TypeDescriptor source = new TypeDescriptor(result.getReturnTypeSource());
-		if (Publisher.class.isAssignableFrom(type.getRawClass()) ||
-				canConvert(source, MONO_TYPE) || canConvert(source, FLUX_TYPE)) {
-			Class<?> clazz = result.getReturnType().getGeneric(0).getRawClass();
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(rawClass, result.getReturnValue());
+		if (adapter != null) {
+			Class<?> clazz = type.getGeneric(0).getRawClass();
 			return Void.class.equals(clazz);
 		}
 		return false;
 	}
 
-	private boolean canConvert(TypeDescriptor source, TypeDescriptor target) {
-		return getConversionService().canConvert(source, target);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		Optional<Object> optional = result.getReturnValue();
-		if (!optional.isPresent()) {
+		Optional<Object> optionalValue = result.getReturnValue();
+		if (!optionalValue.isPresent()) {
 			return Mono.empty();
 		}
-		Object value = optional.get();
-		if (Publisher.class.isAssignableFrom(result.getReturnType().getRawClass())) {
-			return Mono.from((Publisher<?>) value).then();
-		}
-		TypeDescriptor source = new TypeDescriptor(result.getReturnTypeSource());
-		return canConvert(source, MONO_TYPE) ?
-				((Mono<Void>) getConversionService().convert(value, source, MONO_TYPE)) :
-				((Flux<Void>) getConversionService().convert(value, source, FLUX_TYPE)).single();
+		Class<?> returnType = result.getReturnType().getRawClass();
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(returnType, optionalValue);
+		return adapter.toMono(optionalValue);
 	}
 
 }

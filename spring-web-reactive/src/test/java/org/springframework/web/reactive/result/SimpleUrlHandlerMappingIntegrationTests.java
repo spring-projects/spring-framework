@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -147,7 +146,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Bean
 		public SimpleResultHandler resultHandler() {
-			return new SimpleResultHandler(new DefaultConversionService());
+			return new SimpleResultHandler();
 		}
 	}
 

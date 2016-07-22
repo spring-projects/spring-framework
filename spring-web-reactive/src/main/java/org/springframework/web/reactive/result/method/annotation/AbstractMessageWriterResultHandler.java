@@ -19,13 +19,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -44,30 +43,41 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public abstract class AbstractMessageWriterResultHandler extends ContentNegotiatingResultHandlerSupport {
 
-	protected static final TypeDescriptor MONO_TYPE = TypeDescriptor.valueOf(Mono.class);
-
-	protected static final TypeDescriptor FLUX_TYPE = TypeDescriptor.valueOf(Flux.class);
-
-
 	private final List<HttpMessageWriter<?>> messageWriters;
 
 
 	/**
-	 * Constructor with message converters, a {@code ConversionService}, and a
+	 * Constructor with {@link HttpMessageWriter}s and a
 	 * {@code RequestedContentTypeResolver}.
 	 *
 	 * @param messageWriters for serializing Objects to the response body stream
-	 * @param conversionService for converting other reactive types (e.g.
-	 * rx.Observable, rx.Single, etc.) to Flux or Mono
 	 * @param contentTypeResolver for resolving the requested content type
 	 */
 	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
-			ConversionService conversionService, RequestedContentTypeResolver contentTypeResolver) {
+			RequestedContentTypeResolver contentTypeResolver) {
 
-		super(conversionService, contentTypeResolver);
+		super(contentTypeResolver);
 		Assert.notEmpty(messageWriters, "At least one message writer is required.");
 		this.messageWriters = messageWriters;
 	}
+
+	/**
+	 * Constructor with an additional {@link ReactiveAdapterRegistry}.
+	 *
+	 * @param messageWriters for serializing Objects to the response body stream
+	 * @param contentTypeResolver for resolving the requested content type
+	 * @param adapterRegistry for adapting other reactive types (e.g. rx.Observable,
+	 * rx.Single, etc.) to Flux or Mono
+	 */
+	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
+			RequestedContentTypeResolver contentTypeResolver,
+			ReactiveAdapterRegistry adapterRegistry) {
+
+		super(contentTypeResolver, adapterRegistry);
+		Assert.notEmpty(messageWriters, "At least one message writer is required.");
+		this.messageWriters = messageWriters;
+	}
+
 
 	/**
 	 * Return the configured message converters.
@@ -78,31 +88,20 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 
 
 	@SuppressWarnings("unchecked")
-	protected Mono<Void> writeBody(ServerWebExchange exchange, Object body,
-			ResolvableType bodyType, MethodParameter bodyTypeParameter) {
+	protected Mono<Void> writeBody(Object body, MethodParameter bodyType, ServerWebExchange exchange) {
 
-		Publisher<?> publisher = null;
+		Class<?> bodyClass = bodyType.getParameterType();
+		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(bodyClass, body);
+
+		Publisher<?> publisher;
 		ResolvableType elementType;
-
-		if (Publisher.class.isAssignableFrom(bodyType.getRawClass())) {
-			publisher = (Publisher<?>) body;
+		if (adapter != null) {
+			publisher = adapter.toPublisher(body);
+			elementType = ResolvableType.forMethodParameter(bodyType).getGeneric(0);
 		}
 		else {
-			TypeDescriptor descriptor = new TypeDescriptor(bodyTypeParameter);
-			if (getConversionService().canConvert(descriptor, MONO_TYPE)) {
-				publisher = (Publisher<?>) getConversionService().convert(body, descriptor, MONO_TYPE);
-			}
-			else if (getConversionService().canConvert(descriptor, FLUX_TYPE)) {
-				publisher = (Publisher<?>) getConversionService().convert(body, descriptor, FLUX_TYPE);
-			}
-		}
-
-		if (publisher != null) {
-			elementType = bodyType.getGeneric(0);
-		}
-		else {
-			elementType = bodyType;
 			publisher = Mono.justOrEmpty(body);
+			elementType = ResolvableType.forMethodParameter(bodyType);
 		}
 
 		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {

@@ -34,8 +34,6 @@ import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.codec.StringEncoder;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
@@ -274,17 +272,8 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	/**
 	 * Override to add custom {@link Converter}s and {@link Formatter}s.
-	 * <p>By default this method method registers:
-	 * <ul>
-	 * <li>{@link MonoToCompletableFutureConverter}
-	 * <li>{@link ReactorToRxJava1Converter}
-	 * </ul>
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
-		registry.addConverter(new MonoToCompletableFutureConverter());
-		if (rxJava1Present) {
-			registry.addConverter(new ReactorToRxJava1Converter());
-		}
 	}
 
 	/**
@@ -334,19 +323,17 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	@Bean
 	public SimpleResultHandler simpleResultHandler() {
-		return new SimpleResultHandler(mvcConversionService());
+		return new SimpleResultHandler();
 	}
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
-		return new ResponseEntityResultHandler(getMessageWriters(), mvcConversionService(),
-				mvcContentTypeResolver());
+		return new ResponseEntityResultHandler(getMessageWriters(), mvcContentTypeResolver());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(getMessageWriters(), mvcConversionService(),
-				mvcContentTypeResolver());
+		return new ResponseBodyResultHandler(getMessageWriters(), mvcContentTypeResolver());
 	}
 
 	/**
@@ -405,7 +392,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		ViewResolverRegistry registry = new ViewResolverRegistry(getApplicationContext());
 		configureViewResolvers(registry);
 		List<ViewResolver> resolvers = registry.getViewResolvers();
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, mvcConversionService());
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, mvcContentTypeResolver());
 		handler.setDefaultViews(registry.getDefaultViews());
 		handler.setOrder(registry.getOrder());
 		return handler;

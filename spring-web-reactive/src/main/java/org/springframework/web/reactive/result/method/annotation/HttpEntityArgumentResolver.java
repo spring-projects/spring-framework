@@ -20,8 +20,8 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
@@ -45,26 +45,24 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 
 
 	/**
-	 * Constructor with message converters and a ConversionService.
-	 * @param messageReaders readers for de-serializing the request body with
-	 * @param service for converting to other reactive types from Flux and Mono
+	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
+	 * @param readers readers for de-serializing the request body with
+	 * @param validator validator to validate decoded objects with
 	 */
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> messageReaders,
-			ConversionService service) {
-
-		this(messageReaders, service, null);
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator) {
+		super(readers, validator);
 	}
 
 	/**
-	 * Constructor with message converters and a ConversionService.
-	 * @param messageReaders readers for de-serializing the request body with
-	 * @param service for converting to other reactive types from Flux and Mono
+	 * Constructor that also accepts a {@link ReactiveAdapterRegistry}.
+	 * @param readers readers for de-serializing the request body with
 	 * @param validator validator to validate decoded objects with
+	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
 	 */
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> messageReaders,
-			ConversionService service, Validator validator) {
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator,
+			ReactiveAdapterRegistry adapterRegistry) {
 
-		super(messageReaders, service, validator);
+		super(readers, validator, adapterRegistry);
 	}
 
 
@@ -77,20 +75,9 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 	@Override
 	public Mono<Object> resolveArgument(MethodParameter param, ModelMap model, ServerWebExchange exchange) {
 
-		ResolvableType entityType;
-		MethodParameter bodyParameter;
-
-		if (getConversionService().canConvert(Mono.class, param.getParameterType())) {
-			entityType = ResolvableType.forMethodParameter(param).getGeneric(0);
-			bodyParameter = new MethodParameter(param);
-			bodyParameter.increaseNestingLevel();
-			bodyParameter.increaseNestingLevel();
-		}
-		else {
-			entityType = ResolvableType.forMethodParameter(param);
-			bodyParameter = new MethodParameter(param);
-			bodyParameter.increaseNestingLevel();
-		}
+		ResolvableType entityType = ResolvableType.forMethodParameter(param);
+		MethodParameter bodyParameter = new MethodParameter(param);
+		bodyParameter.increaseNestingLevel();
 
 		return readBody(bodyParameter, false, exchange)
 				.map(body -> createHttpEntity(body, entityType, exchange))

@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -38,18 +37,15 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.reactive.DecoderHttpMessageReader;
 import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
+import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
@@ -62,6 +58,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
@@ -93,12 +90,7 @@ public class RequestBodyArgumentResolverTests {
 	private RequestBodyArgumentResolver resolver() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
-
-		FormattingConversionService service = new DefaultFormattingConversionService();
-		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new ReactorToRxJava1Converter());
-
-		return new RequestBodyArgumentResolver(readers, service);
+		return new RequestBodyArgumentResolver(readers, mock(Validator.class));
 	}
 
 

@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.core.Ordered;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
@@ -43,28 +43,32 @@ public abstract class ContentNegotiatingResultHandlerSupport implements Ordered 
 	private static final MediaType MEDIA_TYPE_APPLICATION_ALL = new MediaType("application");
 
 
-	private final ConversionService conversionService;
-
 	private final RequestedContentTypeResolver contentTypeResolver;
+
+	private final ReactiveAdapterRegistry adapterRegistry;
 
 	private int order = LOWEST_PRECEDENCE;
 
 
-	protected ContentNegotiatingResultHandlerSupport(ConversionService conversionService,
-			RequestedContentTypeResolver contentTypeResolver) {
+	protected ContentNegotiatingResultHandlerSupport(RequestedContentTypeResolver contentTypeResolver) {
+		this(contentTypeResolver, new ReactiveAdapterRegistry());
+	}
 
-		Assert.notNull(conversionService, "'conversionService' is required.");
+	protected ContentNegotiatingResultHandlerSupport(RequestedContentTypeResolver contentTypeResolver,
+			ReactiveAdapterRegistry adapterRegistry) {
+
 		Assert.notNull(contentTypeResolver, "'contentTypeResolver' is required.");
-		this.conversionService = conversionService;
+		Assert.notNull(adapterRegistry, "'adapterRegistry' is required.");
 		this.contentTypeResolver = contentTypeResolver;
+		this.adapterRegistry = adapterRegistry;
 	}
 
 
 	/**
-	 * Return the configured {@link ConversionService}.
+	 * Return the configured {@link ReactiveAdapterRegistry}.
 	 */
-	public ConversionService getConversionService() {
-		return this.conversionService;
+	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+		return this.adapterRegistry;
 	}
 
 	/**

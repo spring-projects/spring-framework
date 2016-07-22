@@ -38,13 +38,9 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
-import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
@@ -55,6 +51,8 @@ import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -62,9 +60,10 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.http.MediaType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
  * Unit tests for {@link ViewResolutionResultHandler}.
@@ -247,12 +246,9 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private ViewResolutionResultHandler createResultHandler(List<View> defaultViews, ViewResolver... resolvers) {
-		FormattingConversionService service = new DefaultFormattingConversionService();
-		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new ReactorToRxJava1Converter());
 		List<ViewResolver> resolverList = Arrays.asList(resolvers);
-
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolverList, service);
+		RequestedContentTypeResolver contentTypeResolver = new HeaderContentTypeResolver();
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolverList, contentTypeResolver);
 		handler.setDefaultViews(defaultViews);
 		return handler;
 	}

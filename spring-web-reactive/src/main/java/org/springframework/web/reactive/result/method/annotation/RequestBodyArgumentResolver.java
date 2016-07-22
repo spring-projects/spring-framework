@@ -21,7 +21,7 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
@@ -49,26 +49,24 @@ public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentRe
 
 
 	/**
-	 * Constructor with message converters and a ConversionService.
-	 * @param messageReaders readers for de-serializing the request body with
-	 * @param service for converting to other reactive types from Flux and Mono
+	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
+	 * @param readers readers for de-serializing the request body with
+	 * @param validator validator to validate decoded objects with
 	 */
-	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> messageReaders,
-			ConversionService service) {
-
-		this(messageReaders, service, null);
+	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator) {
+		super(readers, validator);
 	}
 
 	/**
-	 * Constructor with message converters and a ConversionService.
-	 * @param messageReaders readers for de-serializing the request body with
-	 * @param service for converting to other reactive types from Flux and Mono
+	 * Constructor that also accepts a {@link ReactiveAdapterRegistry}.
+	 * @param readers readers for de-serializing the request body with
 	 * @param validator validator to validate decoded objects with
+	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
 	 */
-	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> messageReaders,
-			ConversionService service, Validator validator) {
+	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator,
+			ReactiveAdapterRegistry adapterRegistry) {
 
-		super(messageReaders, service, validator);
+		super(readers, validator, adapterRegistry);
 	}
 
 

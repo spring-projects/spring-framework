@@ -27,10 +27,6 @@ import rx.Observable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactorToRxJava1Converter;
-import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.format.support.FormattingConversionService;
 import org.springframework.web.reactive.HandlerResult;
 
 import static org.junit.Assert.assertEquals;
@@ -47,10 +43,7 @@ public class SimpleResultHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		FormattingConversionService service = new DefaultFormattingConversionService();
-		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new ReactorToRxJava1Converter());
-		this.resultHandler = new SimpleResultHandler(service);
+		this.resultHandler = new SimpleResultHandler();
 	}
 
 

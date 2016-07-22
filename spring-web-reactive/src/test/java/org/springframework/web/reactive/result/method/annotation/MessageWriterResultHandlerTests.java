@@ -41,9 +41,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.StringEncoder;
-import org.springframework.core.convert.support.GenericConversionService;
-import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
@@ -64,9 +61,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.reactive.HandlerMapping.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -93,7 +92,7 @@ public class MessageWriterResultHandlerTests {
 	public void useDefaultContentType() throws Exception {
 		Resource body = new ClassPathResource("logo.png", getClass());
 		ResolvableType type = ResolvableType.forType(Resource.class);
-		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
+		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals("image/x-png", this.response.getHeaders().getFirst("Content-Type"));
 	}
@@ -105,7 +104,7 @@ public class MessageWriterResultHandlerTests {
 
 		String body = "foo";
 		ResolvableType type = ResolvableType.forType(String.class);
-		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
+		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 	}
@@ -119,7 +118,7 @@ public class MessageWriterResultHandlerTests {
 	}
 
 	private void testVoidReturnType(Object body, ResolvableType type) {
-		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
+		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
 
 		assertNull(this.response.getHeaders().get("Content-Type"));
 		assertNull(this.response.getBody());
@@ -131,7 +130,7 @@ public class MessageWriterResultHandlerTests {
 		ResolvableType type = ResolvableType.forType(OutputStream.class);
 
 		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
-		Mono<Void> mono = createResultHandler(writer).writeBody(this.exchange, body, type, returnType(type));
+		Mono<Void> mono = createResultHandler(writer).writeBody(body, returnType(type), this.exchange);
 
 		TestSubscriber.subscribe(mono).assertError(IllegalStateException.class);
 	}
@@ -140,7 +139,7 @@ public class MessageWriterResultHandlerTests {
 	public void jacksonTypeOfListElement() throws Exception {
 		List<ParentClass> body = Arrays.asList(new Foo("foo"), new Bar("bar"));
 		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, ParentClass.class);
-		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
+		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("[{\"type\":\"foo\",\"parentProperty\":\"foo\"}," +
@@ -151,7 +150,7 @@ public class MessageWriterResultHandlerTests {
 	public void jacksonTypeWithSubType() throws Exception {
 		SimpleBean body = new SimpleBean(123L, "foo");
 		ResolvableType type = ResolvableType.forClass(Identifiable.class);
-		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
+		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("{\"id\":123,\"name\":\"foo\"}");
@@ -161,7 +160,7 @@ public class MessageWriterResultHandlerTests {
 	public void jacksonTypeWithSubTypeOfListElement() throws Exception {
 		List<SimpleBean> body = Arrays.asList(new SimpleBean(123L, "foo"), new SimpleBean(456L, "bar"));
 		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, Identifiable.class);
-		this.resultHandler.writeBody(this.exchange, body, type, returnType(type)).block(Duration.ofSeconds(5));
+		this.resultHandler.writeBody(body, returnType(type), this.exchange).block(Duration.ofSeconds(5));
 
 		assertEquals(APPLICATION_JSON_UTF8, this.response.getHeaders().getContentType());
 		assertResponseBody("[{\"id\":123,\"name\":\"foo\"},{\"id\":456,\"name\":\"bar\"}]");
@@ -185,14 +184,8 @@ public class MessageWriterResultHandlerTests {
 		else {
 			writerList = Arrays.asList(writers);
 		}
-
-		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new ReactorToRxJava1Converter());
-
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
-
-		return new AbstractMessageWriterResultHandler(writerList, service, resolver) {};
+		return new AbstractMessageWriterResultHandler(writerList, resolver) {};
 	}
 
 	private void assertResponseBody(String responseBody) {

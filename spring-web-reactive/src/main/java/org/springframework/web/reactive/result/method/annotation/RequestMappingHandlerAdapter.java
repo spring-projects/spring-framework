@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.convert.ConversionService;
@@ -65,6 +66,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	private List<HandlerMethodArgumentResolver> argumentResolvers;
 
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(10);
+
+	private ReactiveAdapterRegistry reactiveAdapters = new ReactiveAdapterRegistry();
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -124,6 +127,14 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	 */
 	public List<HttpMessageReader<?>> getMessageReaders() {
 		return this.messageReaders;
+	}
+
+	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
+		this.reactiveAdapters = registry;
+	}
+
+	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+		return this.reactiveAdapters;
 	}
 
 	/**
@@ -187,13 +198,15 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
-		// Annotation-based argument resolution
 		ConversionService cs = getConversionService();
+		ReactiveAdapterRegistry adapterRegistry = getReactiveAdapterRegistry();
+
+		// Annotation-based argument resolution
 		resolvers.add(new RequestParamMethodArgumentResolver(cs, getBeanFactory(), false));
 		resolvers.add(new RequestParamMapMethodArgumentResolver());
 		resolvers.add(new PathVariableMethodArgumentResolver(cs, getBeanFactory()));
 		resolvers.add(new PathVariableMapMethodArgumentResolver());
-		resolvers.add(new RequestBodyArgumentResolver(getMessageReaders(), cs, getValidator()));
+		resolvers.add(new RequestBodyArgumentResolver(getMessageReaders(), getValidator(), adapterRegistry));
 		resolvers.add(new RequestHeaderMethodArgumentResolver(cs, getBeanFactory()));
 		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
 		resolvers.add(new CookieValueMethodArgumentResolver(cs, getBeanFactory()));
@@ -202,6 +215,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		resolvers.add(new RequestAttributeMethodArgumentResolver(cs , getBeanFactory()));
 
 		// Type-based argument resolution
+		resolvers.add(new HttpEntityArgumentResolver(getMessageReaders(), getValidator(), adapterRegistry));
 		resolvers.add(new ModelArgumentResolver());
 
 		// Custom resolvers

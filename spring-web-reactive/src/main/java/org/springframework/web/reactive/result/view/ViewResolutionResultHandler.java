@@ -31,16 +31,16 @@ import org.springframework.core.Conventions;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.ContentNegotiatingResultHandlerSupport;
 import org.springframework.web.server.NotAcceptableStatusException;
@@ -84,26 +84,28 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 
 
 	/**
-	 * Constructor with {@code ViewResolver}s and a {@code ConversionService} only
-	 * and creating a {@link HeaderContentTypeResolver}, i.e. using Accept header
-	 * to determine the requested content type.
+	 * Constructor with {@link ViewResolver}s and a {@link RequestedContentTypeResolver}.
 	 * @param resolvers the resolver to use
-	 * @param conversionService for converting other reactive types (e.g. rx.Single) to Mono
+	 * @param contentTypeResolver for resolving the requested content type
 	 */
-	public ViewResolutionResultHandler(List<ViewResolver> resolvers, ConversionService conversionService) {
-		this(resolvers, conversionService, new HeaderContentTypeResolver());
+	public ViewResolutionResultHandler(List<ViewResolver> resolvers,
+			RequestedContentTypeResolver contentTypeResolver) {
+
+		this(resolvers, contentTypeResolver, new ReactiveAdapterRegistry());
 	}
 
 	/**
 	 * Constructor with {@code ViewResolver}s tand a {@code ConversionService}.
 	 * @param resolvers the resolver to use
-	 * @param conversionService for converting other reactive types (e.g. rx.Single) to Mono
 	 * @param contentTypeResolver for resolving the requested content type
+	 * @param adapterRegistry for adapting from other reactive types (e.g.
+	 * rx.Single) to Mono
 	 */
-	public ViewResolutionResultHandler(List<ViewResolver> resolvers, ConversionService conversionService,
-			RequestedContentTypeResolver contentTypeResolver) {
+	public ViewResolutionResultHandler(List<ViewResolver> resolvers,
+			RequestedContentTypeResolver contentTypeResolver,
+			ReactiveAdapterRegistry adapterRegistry) {
 
-		super(conversionService, contentTypeResolver);
+		super(contentTypeResolver, adapterRegistry);
 		this.viewResolvers.addAll(resolvers);
 		AnnotationAwareOrderComparator.sort(this.viewResolvers);
 	}
@@ -143,7 +145,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		if (isSupportedType(clazz)) {
 			return true;
 		}
-		if (getConversionService().canConvert(clazz, Mono.class)) {
+		if (getReactiveAdapterRegistry().getAdapterFrom(clazz, result.getReturnValue()) != null) {
 			clazz = result.getReturnType().getGeneric(0).getRawClass();
 			return isSupportedType(clazz);
 		}
@@ -168,10 +170,12 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		ResolvableType elementType;
 		ResolvableType returnType = result.getReturnType();
 
-		if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
-			Optional<Object> optionalValue = result.getReturnValue();
+		Class<?> rawClass = returnType.getRawClass();
+		Optional<Object> optionalValue = result.getReturnValue();
+		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(rawClass, optionalValue);
+		if (adapter != null) {
 			if (optionalValue.isPresent()) {
-				Mono<?> converted = getConversionService().convert(optionalValue.get(), Mono.class);
+				Mono<?> converted = adapter.toMono(optionalValue);
 				valueMono = converted.map(o -> o);
 			}
 			else {

@@ -24,7 +24,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
@@ -125,7 +124,7 @@ public class ContentNegotiatingResultHandlerSupportTests {
 		}
 
 		public TestResultHandler(RequestedContentTypeResolver contentTypeResolver) {
-			super(new GenericConversionService(), contentTypeResolver);
+			super(contentTypeResolver);
 		}
 	}
 

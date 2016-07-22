@@ -21,15 +21,14 @@ import java.util.List;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.converter.reactive.HttpMessageWriter;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -53,42 +52,41 @@ import org.springframework.web.server.ServerWebExchange;
 public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandler
 		implements HandlerResultHandler {
 
-	/**
-	 * Constructor with message converters and a {@code ConversionService} only
-	 * and creating a {@link HeaderContentTypeResolver}, i.e. using Accept header
-	 * to determine the requested content type.
-	 *
-	 * @param messageWriters writers for serializing to the response body stream
-	 * @param conversionService for converting to Flux and Mono from other reactive types
-	 */
-	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
-			ConversionService conversionService) {
-
-		this(messageWriters, conversionService, new HeaderContentTypeResolver());
-	}
 
 	/**
-	 * Constructor with message converters, a {@code ConversionService}, and a
+	 * Constructor with {@link HttpMessageWriter}s and a
 	 * {@code RequestedContentTypeResolver}.
 	 *
 	 * @param messageWriters writers for serializing to the response body stream
-	 * @param conversionService for converting other reactive types (e.g.
-	 * rx.Observable, rx.Single, etc.) to Flux or Mono
 	 * @param contentTypeResolver for resolving the requested content type
 	 */
 	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
-			ConversionService conversionService, RequestedContentTypeResolver contentTypeResolver) {
+			RequestedContentTypeResolver contentTypeResolver) {
 
-		super(messageWriters, conversionService, contentTypeResolver);
+		this(messageWriters, contentTypeResolver, new ReactiveAdapterRegistry());
+	}
+
+	/**
+	 * Constructor with an additional {@link ReactiveAdapterRegistry}.
+	 *
+	 * @param messageWriters writers for serializing to the response body stream
+	 * @param contentTypeResolver for resolving the requested content type
+	 * @param adapterRegistry for adapting other reactive types (e.g. rx.Observable,
+	 * rx.Single, etc.) to Flux or Mono
+	 */
+	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
+			RequestedContentTypeResolver contentTypeResolver,
+			ReactiveAdapterRegistry adapterRegistry) {
+
+		super(messageWriters, contentTypeResolver, adapterRegistry);
 		setOrder(100);
 	}
 
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		ResolvableType returnType = result.getReturnType();
 		MethodParameter parameter = result.getReturnTypeSource();
-		return hasResponseBodyAnnotation(parameter) && !isHttpEntityType(returnType);
+		return hasResponseBodyAnnotation(parameter) && !isHttpEntityType(result);
 	}
 
 	private boolean hasResponseBodyAnnotation(MethodParameter parameter) {
@@ -97,26 +95,27 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 				parameter.getMethodAnnotation(ResponseBody.class) != null);
 	}
 
-	private boolean isHttpEntityType(ResolvableType returnType) {
-		if (HttpEntity.class.isAssignableFrom(returnType.getRawClass())) {
+	private boolean isHttpEntityType(HandlerResult result) {
+		Class<?> rawClass = result.getReturnType().getRawClass();
+		if (HttpEntity.class.isAssignableFrom(rawClass)) {
 			return true;
 		}
-		else if (getConversionService().canConvert(returnType.getRawClass(), Mono.class)) {
-			ResolvableType genericType = returnType.getGeneric(0);
-			if (HttpEntity.class.isAssignableFrom(genericType.getRawClass())) {
-				return true;
+		else {
+			if (getReactiveAdapterRegistry().getAdapterFrom(rawClass, result.getReturnValue()) != null) {
+				ResolvableType genericType = result.getReturnType().getGeneric(0);
+				if (HttpEntity.class.isAssignableFrom(genericType.getRawClass())) {
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
-
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Object body = result.getReturnValue().orElse(null);
-		ResolvableType bodyType = result.getReturnType();
 		MethodParameter bodyTypeParameter = result.getReturnTypeSource();
-		return writeBody(exchange, body, bodyType, bodyTypeParameter);
+		return writeBody(body, bodyTypeParameter, exchange);
 	}
 
 }

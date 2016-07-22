@@ -34,11 +34,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.StringEncoder;
-import org.springframework.core.convert.support.MonoToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactorToRxJava1Converter;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
-import org.springframework.format.support.DefaultFormattingConversionService;
-import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,8 +55,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
@@ -100,14 +99,8 @@ public class ResponseEntityResultHandlerTests {
 		else {
 			writerList = Arrays.asList(writers);
 		}
-		FormattingConversionService service = new DefaultFormattingConversionService();
-		service.addConverter(new MonoToCompletableFutureConverter());
-		service.addConverter(new ReactorToRxJava1Converter());
-
-
 		RequestedContentTypeResolver resolver = new RequestedContentTypeResolverBuilder().build();
-
-		return new ResponseEntityResultHandler(writerList, service, resolver);
+		return new ResponseEntityResultHandler(writerList, resolver);
 	}
 
 

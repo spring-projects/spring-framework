@@ -25,10 +25,10 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.reactive.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -57,34 +57,39 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public abstract class AbstractMessageReaderArgumentResolver {
 
-	private static final TypeDescriptor MONO_TYPE = TypeDescriptor.valueOf(Mono.class);
-
-	private static final TypeDescriptor FLUX_TYPE = TypeDescriptor.valueOf(Flux.class);
-
-
 	private final List<HttpMessageReader<?>> messageReaders;
 
-	private final ConversionService conversionService;
-
 	private final Validator validator;
+
+	private final ReactiveAdapterRegistry adapterRegistry;
 
 	private final List<MediaType> supportedMediaTypes;
 
 
 	/**
-	 * Constructor with message converters and a ConversionService.
-	 * @param messageReaders readers to convert from the request body
-	 * @param service for converting to other reactive types from Flux and Mono
+	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
+	 * @param readers readers to convert from the request body
 	 * @param validator validator to validate decoded objects with
 	 */
-	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
-			ConversionService service, Validator validator) {
+	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator) {
 
-		Assert.notEmpty(messageReaders, "At least one message reader is required.");
-		Assert.notNull(service, "'conversionService' is required.");
+		this(readers, validator, new ReactiveAdapterRegistry());
+	}
+
+	/**
+	 * Constructor that also accepts a {@link ReactiveAdapterRegistry}.
+	 * @param messageReaders readers to convert from the request body
+	 * @param validator validator to validate decoded objects with
+	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
+	 */
+	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
+			Validator validator, ReactiveAdapterRegistry adapterRegistry) {
+
+		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required.");
+		Assert.notNull(adapterRegistry, "'adapterRegistry' is required");
 		this.messageReaders = messageReaders;
-		this.conversionService = service;
 		this.validator = validator;
+		this.adapterRegistry = adapterRegistry;
 		this.supportedMediaTypes = messageReaders.stream()
 				.flatMap(converter -> converter.getReadableMediaTypes().stream())
 				.collect(Collectors.toList());
@@ -99,22 +104,21 @@ public abstract class AbstractMessageReaderArgumentResolver {
 	}
 
 	/**
-	 * Return the configured {@link ConversionService}.
+	 * Return the configured {@link ReactiveAdapterRegistry}.
 	 */
-	public ConversionService getConversionService() {
-		return this.conversionService;
+	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+		return this.adapterRegistry;
 	}
 
 
 	protected Mono<Object> readBody(MethodParameter bodyParameter, boolean isBodyRequired,
 			ServerWebExchange exchange) {
 
-		TypeDescriptor typeDescriptor = new TypeDescriptor(bodyParameter);
-		boolean convertFromMono = getConversionService().canConvert(MONO_TYPE, typeDescriptor);
-		boolean convertFromFlux = getConversionService().canConvert(FLUX_TYPE, typeDescriptor);
+		Class<?> bodyType = ResolvableType.forMethodParameter(bodyParameter).resolve();
+		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterTo(bodyType);
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(bodyParameter);
-		if (convertFromMono || convertFromFlux) {
+		if (adapter != null) {
 			elementType = elementType.getGeneric(0);
 		}
 
@@ -126,28 +130,28 @@ public abstract class AbstractMessageReaderArgumentResolver {
 
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
 			if (reader.canRead(elementType, mediaType)) {
-				if (convertFromFlux) {
+				if (adapter != null && adapter.getDescriptor().isMultiValue()) {
 					Flux<?> flux = reader.read(elementType, request)
 							.onErrorResumeWith(ex -> Flux.error(getReadError(ex, bodyParameter)));
-					if (checkRequired(bodyParameter, isBodyRequired)) {
+					if (checkRequired(adapter, isBodyRequired)) {
 						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
 					}
 					if (this.validator != null) {
 						flux = flux.map(applyValidationIfApplicable(bodyParameter));
 					}
-					return Mono.just(getConversionService().convert(flux, FLUX_TYPE, typeDescriptor));
+					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
 					Mono<?> mono = reader.readMono(elementType, request)
 							.otherwise(ex -> Mono.error(getReadError(ex, bodyParameter)));
-					if (checkRequired(bodyParameter, isBodyRequired)) {
+					if (checkRequired(adapter, isBodyRequired)) {
 						mono = mono.otherwiseIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));
 					}
 					if (this.validator != null) {
 						mono = mono.map(applyValidationIfApplicable(bodyParameter));
 					}
-					if (convertFromMono) {
-						return Mono.just(getConversionService().convert(mono, MONO_TYPE, typeDescriptor));
+					if (adapter != null) {
+						return Mono.just(adapter.fromPublisher(mono));
 					}
 					else {
 						return Mono.from(mono);
@@ -159,11 +163,8 @@ public abstract class AbstractMessageReaderArgumentResolver {
 		return Mono.error(new UnsupportedMediaTypeStatusException(mediaType, this.supportedMediaTypes));
 	}
 
-	protected boolean checkRequired(MethodParameter bodyParameter, boolean isBodyRequired) {
-		if ("rx.Single".equals(bodyParameter.getNestedParameterType().getName())) {
-			return true;
-		}
-		return isBodyRequired;
+	protected boolean checkRequired(ReactiveAdapter adapter, boolean isBodyRequired) {
+		return adapter != null && !adapter.getDescriptor().supportsEmpty() || isBodyRequired;
 	}
 
 	protected ServerWebInputException getReadError(Throwable ex, MethodParameter parameter) {
