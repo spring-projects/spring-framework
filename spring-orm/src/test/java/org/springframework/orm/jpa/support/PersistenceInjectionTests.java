@@ -30,8 +30,6 @@ import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 
-import org.hibernate.ejb.HibernateEntityManager;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -715,7 +713,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public static class DefaultVendorSpecificPrivatePersistenceContextField {
 
 		@PersistenceContext
-		private HibernateEntityManager em;
+		@SuppressWarnings("deprecation")
+		private org.hibernate.ejb.HibernateEntityManager em;
 	}
 
 
@@ -896,4 +895,5 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 			throw new IllegalStateException();
 		}
 	}
+
 }
