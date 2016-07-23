@@ -153,7 +153,6 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	protected Source processSource(Source source) {
 		if (source instanceof StreamSource) {
 			StreamSource streamSource = (StreamSource) source;
