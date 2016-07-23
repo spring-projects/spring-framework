@@ -25,12 +25,9 @@ import reactor.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.web.client.reactive.ClientWebRequestBuilders;
 import org.springframework.web.client.reactive.ResponseExtractors;
 import org.springframework.web.client.reactive.WebClient;
-
-import static org.junit.Assume.assumeFalse;
 
 import java.time.Duration;
 
