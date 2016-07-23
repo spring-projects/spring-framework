@@ -65,7 +65,6 @@ public class ResponseExtractors {
 	 * Extract the response body and decode it, returning it as a {@code Mono<T>}.
 	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> BodyExtractor<Mono<T>> as(ResolvableType bodyType) {
 		return (clientResponse, messageConverters) ->
 				decodeResponseBodyAsMono(clientResponse, bodyType, messageConverters);
@@ -153,7 +152,8 @@ public class ResponseExtractors {
 	public static <T> ResponseExtractor<Mono<ResponseEntity<Flux<T>>>> responseStream(ResolvableType type) {
 		return (clientResponse, webClientConfig) -> clientResponse
 				.map(response -> new ResponseEntity<>(
-						decodeResponseBody(response, type, webClientConfig.getMessageReaders()),
+						// ResponseExtractors.<T> is required for Eclipse JDT.
+						ResponseExtractors.<T> decodeResponseBody(response, type, webClientConfig.getMessageReaders()),
 						response.getHeaders(), response.getStatusCode()));
 	}
 

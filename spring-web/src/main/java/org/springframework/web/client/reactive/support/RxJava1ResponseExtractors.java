@@ -60,9 +60,7 @@ public class RxJava1ResponseExtractors {
 	/**
 	 * Extract the response body and decode it, returning it as a {@code Single<T>}.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Single<T>> body(Class<T> sourceClass) {
-
 		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
 		return body(bodyType);
 	}
@@ -174,7 +172,9 @@ public class RxJava1ResponseExtractors {
 		return (clientResponse, webClientConfig) -> RxJava1Adapter.publisherToSingle(clientResponse
 				.map(response -> new ResponseEntity<>(
 								RxJava1Adapter
-								.publisherToObservable(decodeResponseBody(response, bodyType, webClientConfig.getMessageReaders())),
+								.publisherToObservable(
+										// RxJava1ResponseExtractors.<T> is required for Eclipse JDT.
+										RxJava1ResponseExtractors.<T> decodeResponseBody(response, bodyType, webClientConfig.getMessageReaders())),
 						response.getHeaders(),
 						response.getStatusCode())));
 	}
