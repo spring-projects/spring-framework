@@ -19,7 +19,7 @@ package org.springframework.http.server.reactive;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
-import reactor.io.netty.http.HttpChannel;
+import reactor.ipc.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;

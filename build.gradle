@@ -779,7 +779,7 @@ project("spring-web-reactive") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-		testCompile("io.projectreactor:reactor-netty:${reactorNettyVersion}")
+		testCompile("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
 		testCompile("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}

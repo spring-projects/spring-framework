@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 
 import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
-import reactor.io.netty.http.HttpChannel;
+import reactor.ipc.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;

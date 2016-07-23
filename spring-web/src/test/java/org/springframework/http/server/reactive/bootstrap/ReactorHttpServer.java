@@ -28,7 +28,7 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
-	private reactor.io.netty.http.HttpServer reactorServer;
+	private reactor.ipc.netty.http.HttpServer reactorServer;
 
 	private boolean running;
 
@@ -38,7 +38,7 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 
 		Assert.notNull(getHttpHandler());
 		this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
-		this.reactorServer = reactor.io.netty.http.HttpServer.create(getHost(), getPort());
+		this.reactorServer = reactor.ipc.netty.http.HttpServer.create(getHost(), getPort());
 	}
 
 

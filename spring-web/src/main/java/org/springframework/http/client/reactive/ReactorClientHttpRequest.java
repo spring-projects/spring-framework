@@ -24,7 +24,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.io.netty.http.HttpClientRequest;
+import reactor.ipc.netty.http.HttpClientRequest;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -36,7 +36,7 @@ import org.springframework.http.HttpMethod;
  *
  * @author Brian Clozel
  * @since 5.0
- * @see reactor.io.netty.http.HttpClient
+ * @see reactor.ipc.netty.http.HttpClient
  */
 public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
