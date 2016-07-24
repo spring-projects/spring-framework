@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -59,7 +60,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	final Object constructorArgumentLock = new Object();
 
 	/** Package-visible field for caching the resolved constructor or factory method */
-	Object resolvedConstructorOrFactoryMethod;
+	Executable resolvedConstructorOrFactoryMethod;
 
 	/** Package-visible field for caching the return type of a generically typed factory method */
 	volatile Class<?> resolvedFactoryMethodReturnType;
@@ -125,7 +126,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		setBeanClass(beanClass);
 		setAutowireMode(autowireMode);
 		if (dependencyCheck && getResolvedAutowireMode() != AUTOWIRE_CONSTRUCTOR) {
-			setDependencyCheck(RootBeanDefinition.DEPENDENCY_CHECK_OBJECTS);
+			setDependencyCheck(DEPENDENCY_CHECK_OBJECTS);
 		}
 	}
 
@@ -250,7 +251,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public Method getResolvedFactoryMethod() {
 		synchronized (this.constructorArgumentLock) {
-			Object candidate = this.resolvedConstructorOrFactoryMethod;
+			Executable candidate = this.resolvedConstructorOrFactoryMethod;
 			return (candidate instanceof Method ? (Method) candidate : null);
 		}
 	}
@@ -258,7 +259,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public void registerExternallyManagedConfigMember(Member configMember) {
 		synchronized (this.postProcessingLock) {
 			if (this.externallyManagedConfigMembers == null) {
-				this.externallyManagedConfigMembers = new HashSet<Member>(1);
+				this.externallyManagedConfigMembers = new HashSet<>(1);
 			}
 			this.externallyManagedConfigMembers.add(configMember);
 		}
@@ -274,7 +275,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public void registerExternallyManagedInitMethod(String initMethod) {
 		synchronized (this.postProcessingLock) {
 			if (this.externallyManagedInitMethods == null) {
-				this.externallyManagedInitMethods = new HashSet<String>(1);
+				this.externallyManagedInitMethods = new HashSet<>(1);
 			}
 			this.externallyManagedInitMethods.add(initMethod);
 		}
@@ -290,7 +291,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public void registerExternallyManagedDestroyMethod(String destroyMethod) {
 		synchronized (this.postProcessingLock) {
 			if (this.externallyManagedDestroyMethods == null) {
-				this.externallyManagedDestroyMethods = new HashSet<String>(1);
+				this.externallyManagedDestroyMethods = new HashSet<>(1);
 			}
 			this.externallyManagedDestroyMethods.add(destroyMethod);
 		}

@@ -42,6 +42,7 @@ import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Register {@link EventListener} annotated method as individual {@link ApplicationListener}
@@ -118,21 +119,30 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 	 */
 	protected List<EventListenerFactory> getEventListenerFactories() {
 		Map<String, EventListenerFactory> beans = this.applicationContext.getBeansOfType(EventListenerFactory.class);
-		List<EventListenerFactory> allFactories = new ArrayList<EventListenerFactory>(beans.values());
+		List<EventListenerFactory> allFactories = new ArrayList<>(beans.values());
 		AnnotationAwareOrderComparator.sort(allFactories);
 		return allFactories;
 	}
 
 	protected void processBean(final List<EventListenerFactory> factories, final String beanName, final Class<?> targetType) {
 		if (!this.nonAnnotatedClasses.contains(targetType)) {
-			Map<Method, EventListener> annotatedMethods = MethodIntrospector.selectMethods(targetType,
-					new MethodIntrospector.MetadataLookup<EventListener>() {
-						@Override
-						public EventListener inspect(Method method) {
-							return AnnotatedElementUtils.findMergedAnnotation(method, EventListener.class);
-						}
-					});
-			if (annotatedMethods.isEmpty()) {
+			Map<Method, EventListener> annotatedMethods = null;
+			try {
+				annotatedMethods = MethodIntrospector.selectMethods(targetType,
+						new MethodIntrospector.MetadataLookup<EventListener>() {
+							@Override
+							public EventListener inspect(Method method) {
+								return AnnotatedElementUtils.findMergedAnnotation(method, EventListener.class);
+							}
+						});
+			}
+			catch (Throwable ex) {
+				// An unresolvable type in a method signature, probably from a lazy bean - let's ignore it.
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not resolve methods for bean with name '" + beanName + "'", ex);
+				}
+			}
+			if (CollectionUtils.isEmpty(annotatedMethods)) {
 				this.nonAnnotatedClasses.add(targetType);
 				if (logger.isTraceEnabled()) {
 					logger.trace("No @EventListener annotations found on bean class: " + targetType);

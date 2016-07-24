@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ import org.springframework.util.StringUtils;
  * Helper class for URL path matching. Provides support for URL paths in
  * RequestDispatcher includes and support for consistent URL decoding.
  *
- * <p>Used by {@link org.springframework.web.servlet.handler.AbstractUrlHandlerMapping},
- * {@link org.springframework.web.servlet.mvc.multiaction.AbstractUrlMethodNameResolver}
+ * <p>Used by {@link org.springframework.web.servlet.handler.AbstractUrlHandlerMapping}
  * and {@link org.springframework.web.servlet.support.RequestContext} for path matching
  * and/or URI determination.
  *
@@ -179,8 +178,8 @@ public class UrlPathHelper {
 		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
 		String path;
 
-		// if the app container sanitized the servletPath, check against the sanitized version
-		if (servletPath.indexOf(sanitizedPathWithinApp) != -1) {
+		// If the app container sanitized the servletPath, check against the sanitized version
+		if (servletPath.contains(sanitizedPathWithinApp)) {
 			path = getRemainingPath(sanitizedPathWithinApp, servletPath, false);
 		}
 		else {
@@ -485,8 +484,8 @@ public class UrlPathHelper {
 	 * @return the updated URI string
 	 */
 	public String removeSemicolonContent(String requestUri) {
-		return this.removeSemicolonContent ?
-				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri);
+		return (this.removeSemicolonContent ?
+				removeSemicolonContentInternal(requestUri) : removeJsessionid(requestUri));
 	}
 
 	private String removeSemicolonContentInternal(String requestUri) {
@@ -526,7 +525,7 @@ public class UrlPathHelper {
 			return vars;
 		}
 		else {
-			Map<String, String> decodedVars = new LinkedHashMap<String, String>(vars.size());
+			Map<String, String> decodedVars = new LinkedHashMap<>(vars.size());
 			for (Entry<String, String> entry : vars.entrySet()) {
 				decodedVars.put(entry.getKey(), decodeInternal(request, entry.getValue()));
 			}
@@ -550,7 +549,7 @@ public class UrlPathHelper {
 			return vars;
 		}
 		else {
-			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap	<String, String>(vars.size());
+			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap<>(vars.size());
 			for (String key : vars.keySet()) {
 				for (String value : vars.get(key)) {
 					decodedVars.add(key, decodeInternal(request, value));

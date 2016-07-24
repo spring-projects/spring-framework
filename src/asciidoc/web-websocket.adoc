@@ -1512,7 +1512,8 @@ it acts as a "relay" that forwards messages in both directions.
 
 [NOTE]
 ====
-Please add a dependency on `org.projectreactor:reactor-net` for TCP connection management.
+Please `org.projectreactor:reactor-net` and `io.netty:netty-all`
+dependencies to your project for TCP connection management.
 ====
 
 Furthermore, application components (e.g. HTTP request handling methods,
@@ -1530,13 +1531,13 @@ This connection is used for messages originating from the server-side applicatio
 only, not for receiving messages. You can configure the STOMP credentials
 for this connection, i.e. the STOMP frame `login` and `passcode` headers. This
 is exposed in both the XML namespace and the Java config as the
-++systemLogin++/++systemPasscode++ properties with default values ++guest++/++guest++.
+``systemLogin``/``systemPasscode`` properties with default values ``guest``/``guest``.
 
 The STOMP broker relay also creates a separate TCP connection for every connected
 WebSocket client. You can configure the STOMP credentials to use for all TCP
 connections created on behalf of clients. This is exposed in both the XML namespace
-and the Java config as the ++clientLogin++/++clientPasscode++ properties with default
-values ++guest++/++guest++.
+and the Java config as the ``clientLogin``/``clientPasscode`` properties with default
+values ``guest``/``guest``.
 
 [NOTE]
 ====
@@ -2010,7 +2011,7 @@ public class MyController {
 }
 ----
 
-It is also possible to declare a Spring-managed bean in the `"websocket"` scope.
+It is also possible to declare a Spring-managed bean in the `websocket` scope.
 WebSocket-scoped beans can be injected into controllers and any channel interceptors
 registered on the "clientInboundChannel". Those are typically singletons and live
 longer than any individual WebSocket session. Therefore you will need to use a
@@ -2020,7 +2021,7 @@ scope proxy mode for WebSocket-scoped beans:
 [subs="verbatim,quotes"]
 ----
 @Component
-@Scope(name = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(scopeName = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MyBean {
 
     @PostConstruct

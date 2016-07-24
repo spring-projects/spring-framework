@@ -64,7 +64,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	private final BeanExpressionContext expressionContext;
 
 	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache =
-			new ConcurrentHashMap<MethodParameter, NamedValueInfo>(256);
+			new ConcurrentHashMap<>(256);
 
 
 	/**

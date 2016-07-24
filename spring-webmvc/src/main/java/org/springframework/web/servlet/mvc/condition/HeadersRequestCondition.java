@@ -57,12 +57,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	}
 
 	private HeadersRequestCondition(Collection<HeaderExpression> conditions) {
-		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<HeaderExpression>(conditions));
+		this.expressions = Collections.unmodifiableSet(new LinkedHashSet<>(conditions));
 	}
 
 
 	private static Collection<HeaderExpression> parseExpressions(String... headers) {
-		Set<HeaderExpression> expressions = new LinkedHashSet<HeaderExpression>();
+		Set<HeaderExpression> expressions = new LinkedHashSet<>();
 		if (headers != null) {
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);
@@ -79,7 +79,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * Return the contained request header expressions.
 	 */
 	public Set<NameValueExpression<String>> getExpressions() {
-		return new LinkedHashSet<NameValueExpression<String>>(this.expressions);
+		return new LinkedHashSet<>(this.expressions);
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 */
 	@Override
 	public HeadersRequestCondition combine(HeadersRequestCondition other) {
-		Set<HeaderExpression> set = new LinkedHashSet<HeaderExpression>(this.expressions);
+		Set<HeaderExpression> set = new LinkedHashSet<>(this.expressions);
 		set.addAll(other.expressions);
 		return new HeadersRequestCondition(set);
 	}

@@ -29,8 +29,8 @@ import org.springframework.core.Ordered;
 /**
  * Enables Spring's annotation-driven transaction management capability, similar to
  * the support found in Spring's {@code <tx:*>} XML namespace. To be used on
- * @{@link org.springframework.context.annotation.Configuration Configuration} classes
- * as follows:
+ * {@link org.springframework.context.annotation.Configuration @Configuration}
+ * classes as follows:
  *
  * <pre class="code">
  * &#064;Configuration

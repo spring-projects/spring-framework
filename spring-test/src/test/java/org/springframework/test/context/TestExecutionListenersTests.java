@@ -116,6 +116,12 @@ public class TestExecutionListenersTests {
 	}
 
 	@Test
+	public void customListenersDeclaredOnInterface() {
+		assertRegisteredListeners(ExplicitListenersOnTestInterfaceTestCase.class,
+			asList(FooTestExecutionListener.class, BarTestExecutionListener.class));
+	}
+
+	@Test
 	public void nonInheritedListeners() {
 		assertNumRegisteredListeners(NonInheritedListenersTestCase.class, 1);
 	}
@@ -227,6 +233,13 @@ public class TestExecutionListenersTests {
 
 	@TestExecutionListeners(listeners = QuuxTestExecutionListener.class, inheritListeners = false)
 	static class NonInheritedListenersTestCase extends InheritedListenersTestCase {
+	}
+
+	@TestExecutionListeners({ FooTestExecutionListener.class, BarTestExecutionListener.class })
+	interface ExplicitListenersTestInterface {
+	}
+
+	static class ExplicitListenersOnTestInterfaceTestCase implements ExplicitListenersTestInterface {
 	}
 
 	@TestExecutionListeners(listeners = FooTestExecutionListener.class, value = BarTestExecutionListener.class)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
@@ -159,7 +158,7 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 			StreamSource streamSource = (StreamSource) source;
 			InputSource inputSource = new InputSource(streamSource.getInputStream());
 			try {
-				XMLReader xmlReader = XMLReaderFactory.createXMLReader();
+				XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
 				xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 				String featureName = "http://xml.org/sax/features/external-general-entities";
 				xmlReader.setFeature(featureName, isProcessExternalEntities());

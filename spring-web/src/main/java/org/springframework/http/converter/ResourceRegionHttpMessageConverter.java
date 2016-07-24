@@ -21,9 +21,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
-import org.springframework.core.io.ResourceRegion;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -33,16 +34,42 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
 /**
- * Implementation of {@link HttpMessageConverter} that can write a single {@link ResourceRegion ResourceRegion},
+ * Implementation of {@link HttpMessageConverter} that can write a single {@link ResourceRegion},
  * or Collections of {@link ResourceRegion ResourceRegions}.
  *
  * @author Brian Clozel
- * @since 4.3.0
+ * @since 4.3
  */
 public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
 	public ResourceRegionHttpMessageConverter() {
 		super(MediaType.ALL);
+	}
+
+
+	@Override
+	protected boolean supports(Class<?> clazz) {
+		// should not be called as we override canRead/canWrite
+		return false;
+	}
+
+	@Override
+	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+		return false;
+	}
+
+	@Override
+	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		return null;
+	}
+
+	@Override
+	protected ResourceRegion readInternal(Class<?> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
+		return null;
 	}
 
 	@Override
@@ -53,7 +80,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 	@Override
 	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
 		if (!(type instanceof ParameterizedType)) {
-			return ResourceRegion.class.isAssignableFrom((Class) type);
+			return ResourceRegion.class.isAssignableFrom((Class<?>) type);
 		}
 		ParameterizedType parameterizedType = (ParameterizedType) type;
 		if (!(parameterizedType.getRawType() instanceof Class)) {
@@ -93,10 +120,8 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		}
 	}
 
-	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage)
-			throws IOException {
-
-		Assert.notNull(region, "ResourceRegion should not be null");
+	protected void writeResourceRegion(ResourceRegion region, HttpOutputMessage outputMessage) throws IOException {
+		Assert.notNull(region, "ResourceRegion must not be null");
 		HttpHeaders responseHeaders = outputMessage.getHeaders();
 		long start = region.getPosition();
 		long end = start + region.getCount() - 1;
@@ -152,37 +177,15 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		print(out, "--" + boundaryString + "--");
 	}
 
+
+
 	private static void println(OutputStream os) throws IOException {
 		os.write('\r');
 		os.write('\n');
 	}
 
 	private static void print(OutputStream os, String buf) throws IOException {
-		os.write(buf.getBytes("US-ASCII"));
-	}
-
-	@Override
-	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		return false;
-	}
-
-	@Override
-	protected boolean supports(Class<?> clazz) {
-		// should not be called as we override canRead/canWrite
-		return false;
-	}
-
-
-	@Override
-	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-		return null;
-	}
-
-	@Override
-	protected ResourceRegion readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage)
-			throws IOException, HttpMessageNotReadableException {
-		return null;
+		os.write(buf.getBytes(StandardCharsets.US_ASCII));
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,32 +73,6 @@ public class NativeJdbcExtractorTests {
 
 		ResultSet nativeRs = extractor.getNativeResultSet(cs.getResultSet());
 		assertEquals(nativeRs, rs);
-	}
-
-	@SuppressWarnings("deprecation")
-	public void commonsDbcpNativeJdbcExtractor() throws SQLException {
-		org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor extractor = new org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor();
-		assertFalse(extractor.isNativeConnectionNecessaryForNativeStatements());
-
-		Connection con = mock(Connection.class);
-		Statement stmt = mock(Statement.class);
-		given(stmt.getConnection()).willReturn(con);
-
-		Connection nativeConnection = extractor.getNativeConnection(con);
-		assertEquals(con, nativeConnection);
-
-		nativeConnection = extractor.getNativeConnectionFromStatement(stmt);
-		assertEquals(con, nativeConnection);
-		assertEquals(stmt, extractor.getNativeStatement(stmt));
-
-		PreparedStatement ps = mock(PreparedStatement.class);
-		assertEquals(ps, extractor.getNativePreparedStatement(ps));
-
-		CallableStatement cs = mock(CallableStatement.class);
-		assertEquals(cs, extractor.getNativePreparedStatement(cs));
-
-		ResultSet rs = mock(ResultSet.class);
-		assertEquals(rs, extractor.getNativeResultSet(rs));
 	}
 
 }

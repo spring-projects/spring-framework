@@ -36,7 +36,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.transaction.annotation.Propagation.*;
@@ -47,13 +46,13 @@ import static org.springframework.transaction.annotation.Propagation.*;
  * @author Sam Brannen
  * @since 4.0
  */
-@SuppressWarnings("deprecation")
 public class TransactionalTestExecutionListenerTests {
 
 	private final PlatformTransactionManager tm = mock(PlatformTransactionManager.class);
 
 	private final TransactionalTestExecutionListener listener = new TransactionalTestExecutionListener() {
 
+		@Override
 		protected PlatformTransactionManager getTransactionManager(TestContext testContext, String qualifier) {
 			return tm;
 		}
@@ -132,16 +131,6 @@ public class TransactionalTestExecutionListenerTests {
 		listener.beforeTestMethod(testContext);
 		listener.afterTestMethod(testContext);
 		assertFalse("callback should not have been invoked", instance.invoked());
-	}
-
-	private void assertTransactionConfigurationAttributes(Class<?> clazz, String transactionManagerName,
-			boolean defaultRollback) {
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
-
-		TransactionConfigurationAttributes attributes = listener.retrieveConfigurationAttributes(testContext);
-		assertNotNull(attributes);
-		assertEquals(transactionManagerName, attributes.getTransactionManagerName());
-		assertEquals(defaultRollback, attributes.isDefaultRollback());
 	}
 
 	private void assertIsRollback(Class<?> clazz, boolean rollback) throws NoSuchMethodException, Exception {
@@ -255,70 +244,6 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 	@Test
-	public void retrieveConfigurationAttributesWithMissingTransactionConfiguration() throws Exception {
-		assertTransactionConfigurationAttributes(MissingTransactionConfigurationTestCase.class, "", true);
-	}
-
-	@Test
-	public void retrieveConfigurationAttributesWithEmptyTransactionConfiguration() throws Exception {
-		assertTransactionConfigurationAttributes(EmptyTransactionConfigurationTestCase.class, "", true);
-	}
-
-	@Test
-	public void retrieveConfigurationAttributesWithExplicitValues() throws Exception {
-		assertTransactionConfigurationAttributes(TransactionConfigurationWithExplicitValuesTestCase.class, "tm", false);
-	}
-
-	@Test
-	public void retrieveConfigurationAttributesViaMetaAnnotation() throws Exception {
-		assertTransactionConfigurationAttributes(TransactionConfigurationViaMetaAnnotationTestCase.class, "metaTxMgr",
-			true);
-	}
-
-	@Test
-	public void retrieveConfigurationAttributesViaMetaAnnotationWithOverride() throws Exception {
-		assertTransactionConfigurationAttributes(TransactionConfigurationViaMetaAnnotationWithOverrideTestCase.class,
-			"overriddenTxMgr", true);
-	}
-
-	@Test
-	public void retrieveConfigurationAttributesWithEmptyTransactionalAnnotation() throws Exception {
-		assertTransactionConfigurationAttributes(EmptyTransactionalTestCase.class, "", true);
-	}
-
-	@Test
-	public void retrieveConfigurationAttributesFromTransactionalAnnotationWithExplicitQualifier() throws Exception {
-		// The test class configures "tm" as the qualifier via @Transactional;
-		// however, retrieveConfigurationAttributes() only supports
-		// @TransactionConfiguration. So we actually expect "" as the qualifier here,
-		// relying on beforeTestMethod() to properly obtain the actual qualifier via the
-		// TransactionAttribute.
-		assertTransactionConfigurationAttributes(TransactionalWithExplicitQualifierTestCase.class, "", true);
-	}
-
-	@Test
-	public void retrieveConfigurationAttributesFromTransactionalAnnotationViaMetaAnnotation() throws Exception {
-		// The test class configures "metaTxMgr" as the qualifier via @Transactional;
-		// however, retrieveConfigurationAttributes() only supports
-		// @TransactionConfiguration. So we actually expect "" as the qualifier here,
-		// relying on beforeTestMethod() to properly obtain the actual qualifier via the
-		// TransactionAttribute.
-		assertTransactionConfigurationAttributes(TransactionalViaMetaAnnotationTestCase.class, "", true);
-	}
-
-	@Test
-	public void retrieveConfigurationAttributesFromTransactionalAnnotationViaMetaAnnotationWithExplicitQualifier()
-			throws Exception {
-		// The test class configures "overriddenTxMgr" as the qualifier via
-		// @Transactional; however, retrieveConfigurationAttributes() only supports
-		// @TransactionConfiguration. So we actually expect "" as the qualifier here,
-		// relying on beforeTestMethod() to properly obtain the actual qualifier via the
-		// TransactionAttribute.
-		assertTransactionConfigurationAttributes(TransactionalViaMetaAnnotationWithExplicitQualifierTestCase.class, "",
-			true);
-	}
-
-	@Test
 	public void isRollbackWithMissingRollback() throws Exception {
 		assertIsRollback(MissingRollbackTestCase.class, true);
 	}
@@ -354,13 +279,13 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 	@Test
-	public void isRollbackWithRollbackAndTransactionConfigurationDeclaredAtClassLevel() throws Exception {
-		Class<?> clazz = ClassLevelRollbackAndTransactionConfigurationTestCase.class;
-		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
+	public void isRollbackWithClassLevelRollbackWithExplicitValueOnTestInterface() throws Exception {
+		assertIsRollback(ClassLevelRollbackWithExplicitValueOnTestInterfaceTestCase.class, false);
+	}
 
-		exception.expect(IllegalStateException.class);
-		exception.expectMessage(containsString("annotated with both @Rollback and @TransactionConfiguration, but only one is permitted"));
-		listener.isRollback(testContext);
+	@Test
+	public void isRollbackWithClassLevelRollbackViaMetaAnnotationOnTestInterface() throws Exception {
+		assertIsRollback(ClassLevelRollbackViaMetaAnnotationOnTestInterfaceTestCase.class, false);
 	}
 
 
@@ -389,13 +314,6 @@ public class TransactionalTestExecutionListenerTests {
 	@AfterTransaction
 	@Retention(RetentionPolicy.RUNTIME)
 	private static @interface MetaAfterTransaction {
-	}
-
-	@TransactionConfiguration
-	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface MetaTxConfig {
-
-		String transactionManager() default "metaTxMgr";
 	}
 
 	private interface Invocable {
@@ -621,41 +539,6 @@ public class TransactionalTestExecutionListenerTests {
 		}
 	}
 
-	static class MissingTransactionConfigurationTestCase {
-	}
-
-	@TransactionConfiguration
-	static class EmptyTransactionConfigurationTestCase {
-	}
-
-	@TransactionConfiguration(transactionManager = "tm", defaultRollback = false)
-	static class TransactionConfigurationWithExplicitValuesTestCase {
-	}
-
-	@MetaTxConfig
-	static class TransactionConfigurationViaMetaAnnotationTestCase {
-	}
-
-	@MetaTxConfig(transactionManager = "overriddenTxMgr")
-	static class TransactionConfigurationViaMetaAnnotationWithOverrideTestCase {
-	}
-
-	@Transactional
-	static class EmptyTransactionalTestCase {
-	}
-
-	@Transactional(transactionManager = "tm")
-	static class TransactionalWithExplicitQualifierTestCase {
-	}
-
-	@MetaTransactional
-	static class TransactionalViaMetaAnnotationTestCase {
-	}
-
-	@MetaTxWithOverride(transactionManager = "tm")
-	static class TransactionalViaMetaAnnotationWithExplicitQualifierTestCase {
-	}
-
 	static class MissingRollbackTestCase {
 
 		public void test() {
@@ -684,14 +567,6 @@ public class TransactionalTestExecutionListenerTests {
 	}
 
 	@Rollback
-	@TransactionConfiguration
-	static class ClassLevelRollbackAndTransactionConfigurationTestCase {
-
-		public void test() {
-		}
-	}
-
-	@Rollback
 	static class EmptyClassLevelRollbackTestCase {
 
 		public void test() {
@@ -707,6 +582,27 @@ public class TransactionalTestExecutionListenerTests {
 
 	@Commit
 	static class ClassLevelRollbackViaMetaAnnotationTestCase {
+
+		public void test() {
+		}
+	}
+
+	@Rollback(false)
+	interface RollbackFalseTestInterface {
+	}
+
+	static class ClassLevelRollbackWithExplicitValueOnTestInterfaceTestCase implements RollbackFalseTestInterface {
+
+		public void test() {
+		}
+	}
+
+	@Commit
+	interface RollbackFalseViaMetaAnnotationTestInterface {
+	}
+
+	static class ClassLevelRollbackViaMetaAnnotationOnTestInterfaceTestCase
+			implements RollbackFalseViaMetaAnnotationTestInterface {
 
 		public void test() {
 		}

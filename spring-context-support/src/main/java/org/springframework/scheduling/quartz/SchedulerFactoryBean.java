@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,16 +94,16 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 
 
 	private static final ThreadLocal<ResourceLoader> configTimeResourceLoaderHolder =
-			new ThreadLocal<ResourceLoader>();
+			new ThreadLocal<>();
 
 	private static final ThreadLocal<Executor> configTimeTaskExecutorHolder =
-			new ThreadLocal<Executor>();
+			new ThreadLocal<>();
 
 	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =
-			new ThreadLocal<DataSource>();
+			new ThreadLocal<>();
 
 	private static final ThreadLocal<DataSource> configTimeNonTransactionalDataSourceHolder =
-			new ThreadLocal<DataSource>();
+			new ThreadLocal<>();
 
 	/**
 	 * Return the ResourceLoader for the currently configured Quartz Scheduler,

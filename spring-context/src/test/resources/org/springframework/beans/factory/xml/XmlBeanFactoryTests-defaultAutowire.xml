@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
-<beans default-autowire="byType" default-dependency-check="objects">
+<beans default-autowire="byType">
 
 	<bean id="rod1" class="org.springframework.tests.sample.beans.DependenciesBean">
 		<!-- Should pick up spouse automatically -->
@@ -15,7 +15,7 @@
 		<!-- Should not pick up spouse automatically -->
 	</bean>
 
-	<bean id="spouse" class="org.springframework.tests.sample.beans.TestBean" autowire="no" dependency-check="none">
+	<bean id="spouse" class="org.springframework.tests.sample.beans.TestBean" autowire="no">
 		<property name="name">
 			<value>Kerry</value>
 		</property>

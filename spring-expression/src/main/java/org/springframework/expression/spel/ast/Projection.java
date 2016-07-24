@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class Projection extends SpelNodeImpl {
 		// eg. {'a':'y','b':'n'}.![value=='y'?key:null]" == ['a', null]
 		if (operand instanceof Map) {
 			Map<?, ?> mapData = (Map<?, ?>) operand;
-			List<Object> result = new ArrayList<Object>();
+			List<Object> result = new ArrayList<>();
 			for (Map.Entry<?, ?> entry : mapData.entrySet()) {
 				try {
 					state.pushActiveContextObject(new TypedValue(entry));
@@ -90,7 +90,7 @@ public class Projection extends SpelNodeImpl {
 			Iterable<?> data = (operand instanceof Iterable ?
 					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
 
-			List<Object> result = new ArrayList<Object>();
+			List<Object> result = new ArrayList<>();
 			int idx = 0;
 			Class<?> arrayElementType = null;
 			for (Object element : data) {

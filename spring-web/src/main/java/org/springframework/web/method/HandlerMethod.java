@@ -146,7 +146,7 @@ public class HandlerMethod {
 
 
 	private MethodParameter[] initMethodParameters() {
-		int count = this.bridgedMethod.getParameterTypes().length;
+		int count = this.bridgedMethod.getParameterCount();
 		MethodParameter[] result = new MethodParameter[count];
 		for (int i = 0; i < count; i++) {
 			result[i] = new HandlerMethodParameter(i);
@@ -262,7 +262,7 @@ public class HandlerMethod {
 	 * @since 4.3
 	 */
 	public String getShortLogMessage() {
-		int args = this.method.getParameterTypes().length;
+		int args = this.method.getParameterCount();
 		return getBeanType().getName() + "#" + this.method.getName() + "[" + args + " args]";
 	}
 

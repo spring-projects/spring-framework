@@ -104,8 +104,8 @@ StandardJUnit4FeaturesTests.class,//
 	ConcreteTransactionalJUnit4SpringContextTests.class,//
 	ClassLevelTransactionalSpringRunnerTests.class,//
 	MethodLevelTransactionalSpringRunnerTests.class,//
-	DefaultRollbackTrueTransactionalTests.class,//
-	DefaultRollbackFalseTransactionalTests.class,//
+	DefaultRollbackTrueRollbackAnnotationTransactionalTests.class,//
+	DefaultRollbackFalseRollbackAnnotationTransactionalTests.class,//
 	RollbackOverrideDefaultRollbackTrueTransactionalTests.class,//
 	RollbackOverrideDefaultRollbackFalseTransactionalTests.class,//
 	BeforeAndAfterTransactionAnnotationTests.class,//

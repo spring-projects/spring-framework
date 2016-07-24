@@ -281,16 +281,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			if (this.returnValue != null) {
 				return this.returnValue.getClass();
 			}
-			Class<?> parameterType = super.getParameterType();
-			if (ResponseBodyEmitter.class.isAssignableFrom(parameterType) ||
-					StreamingResponseBody.class.isAssignableFrom(parameterType)) {
-				return parameterType;
+			if (!ResolvableType.NONE.equals(this.returnType)) {
+				return this.returnType.getRawClass();
 			}
-			if (ResolvableType.NONE.equals(this.returnType)) {
-				throw new IllegalArgumentException("Expected one of Callable, DeferredResult, or ListenableFuture: " +
-						super.getParameterType());
-			}
-			return this.returnType.getRawClass();
+			return super.getParameterType();
 		}
 
 		@Override

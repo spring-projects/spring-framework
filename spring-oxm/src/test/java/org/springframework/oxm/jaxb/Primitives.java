@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,31 +30,31 @@ public class Primitives {
 
 	// following methods are used to test support for primitives
 	public JAXBElement<Boolean> primitiveBoolean() {
-		return new JAXBElement<Boolean>(NAME, Boolean.class, true);
+		return new JAXBElement<>(NAME, Boolean.class, true);
 	}
 
 	public JAXBElement<Byte> primitiveByte() {
-		return new JAXBElement<Byte>(NAME, Byte.class, (byte)42);
+		return new JAXBElement<>(NAME, Byte.class, (byte) 42);
 	}
 
 	public JAXBElement<Short> primitiveShort() {
-		return new JAXBElement<Short>(NAME, Short.class, (short)42);
+		return new JAXBElement<>(NAME, Short.class, (short) 42);
 	}
 
 	public JAXBElement<Integer> primitiveInteger() {
-		return new JAXBElement<Integer>(NAME, Integer.class, 42);
+		return new JAXBElement<>(NAME, Integer.class, 42);
 	}
 
 	public JAXBElement<Long> primitiveLong() {
-		return new JAXBElement<Long>(NAME, Long.class, 42L);
+		return new JAXBElement<>(NAME, Long.class, 42L);
 	}
 
 	public JAXBElement<Double> primitiveDouble() {
-		return new JAXBElement<Double>(NAME, Double.class, 42D);
+		return new JAXBElement<>(NAME, Double.class, 42D);
 	}
 
 	public JAXBElement<byte[]> primitiveByteArray() {
-		return new JAXBElement<byte[]>(NAME, byte[].class, new byte[]{42});
+		return new JAXBElement<>(NAME, byte[].class, new byte[] {42});
 	}
 
 

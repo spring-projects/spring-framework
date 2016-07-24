@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.xml.sax.ext.LexicalHandler;
  */
 abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 
-	private final List<Map<String, String>> namespaceMappings = new ArrayList<Map<String, String>>();
+	private final List<Map<String, String>> namespaceMappings = new ArrayList<>();
 
 	private boolean inCData;
 
@@ -233,7 +233,7 @@ abstract class AbstractStaxHandler implements ContentHandler, LexicalHandler {
 	}
 
 	private void newNamespaceMapping() {
-		this.namespaceMappings.add(new HashMap<String, String>());
+		this.namespaceMappings.add(new HashMap<>());
 	}
 
 	private void removeNamespaceMapping() {

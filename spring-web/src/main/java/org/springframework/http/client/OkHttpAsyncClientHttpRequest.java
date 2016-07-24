@@ -39,7 +39,9 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * @author Arjen Poutsma
  * @since 4.3
  * @see org.springframework.http.client.OkHttp3AsyncClientHttpRequest
+ * @deprecated as of Spring 5.0, in favor of OkHttp 3.x
  */
+@Deprecated
 class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
 
 	private final OkHttpClient client;
@@ -75,6 +77,7 @@ class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpReque
 	}
 
 
+	@Deprecated
 	private static class OkHttpListenableFuture extends SettableListenableFuture<ClientHttpResponse> {
 
 		private final Call call;

@@ -20,9 +20,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.lang.UsesJava7;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Base class for decorating ClassLoaders such as {@link OverridingClassLoader}
@@ -33,20 +31,10 @@ import org.springframework.util.ClassUtils;
  * @author Rod Johnson
  * @since 2.5.2
  */
-@UsesJava7
 public abstract class DecoratingClassLoader extends ClassLoader {
 
-	/**
-	 * Java 7+ {@code ClassLoader.registerAsParallelCapable()} available?
-	 * @since 4.1.2
-	 */
-	protected static final boolean parallelCapableClassLoaderAvailable =
-			ClassUtils.hasMethod(ClassLoader.class, "registerAsParallelCapable");
-
 	static {
-		if (parallelCapableClassLoaderAvailable) {
-			ClassLoader.registerAsParallelCapable();
-		}
+		ClassLoader.registerAsParallelCapable();
 	}
 
 

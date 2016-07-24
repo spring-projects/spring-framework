@@ -18,6 +18,7 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,10 +36,7 @@ import static org.junit.Assert.*;
  */
 public class StringHttpMessageConverterTests {
 
-	public static final Charset UTF_8 = Charset.forName("UTF-8");
-
-	public static final MediaType TEXT_PLAIN_UTF_8 = new MediaType("text", "plain", UTF_8);
-
+	public static final MediaType TEXT_PLAIN_UTF_8 = new MediaType("text", "plain", StandardCharsets.UTF_8);
 
 	private StringHttpMessageConverter converter;
 
@@ -66,7 +64,7 @@ public class StringHttpMessageConverterTests {
 	@Test
 	public void read() throws IOException {
 		String body = "Hello World";
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(UTF_8));
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes(StandardCharsets.UTF_8));
 		inputMessage.getHeaders().setContentType(TEXT_PLAIN_UTF_8);
 		String result = this.converter.read(String.class, inputMessage);
 
@@ -92,15 +90,13 @@ public class StringHttpMessageConverterTests {
 		this.converter.write(body, TEXT_PLAIN_UTF_8, this.outputMessage);
 
 		HttpHeaders headers = this.outputMessage.getHeaders();
-		assertEquals(body, this.outputMessage.getBodyAsString(UTF_8));
+		assertEquals(body, this.outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 		assertEquals(TEXT_PLAIN_UTF_8, headers.getContentType());
-		assertEquals(body.getBytes(UTF_8).length, headers.getContentLength());
+		assertEquals(body.getBytes(StandardCharsets.UTF_8).length, headers.getContentLength());
 		assertFalse(headers.getAcceptCharset().isEmpty());
 	}
 
-	// SPR-8867
-
-	@Test
+	@Test  // SPR-8867
 	public void writeOverrideRequestedContentType() throws IOException {
 		String body = "H\u00e9llo W\u00f6rld";
 		MediaType requestedContentType = new MediaType("text", "html");
@@ -109,9 +105,9 @@ public class StringHttpMessageConverterTests {
 		headers.setContentType(TEXT_PLAIN_UTF_8);
 		this.converter.write(body, requestedContentType, this.outputMessage);
 
-		assertEquals(body, this.outputMessage.getBodyAsString(UTF_8));
+		assertEquals(body, this.outputMessage.getBodyAsString(StandardCharsets.UTF_8));
 		assertEquals(TEXT_PLAIN_UTF_8, headers.getContentType());
-		assertEquals(body.getBytes(UTF_8).length, headers.getContentLength());
+		assertEquals(body.getBytes(StandardCharsets.UTF_8).length, headers.getContentLength());
 		assertFalse(headers.getAcceptCharset().isEmpty());
 	}
 

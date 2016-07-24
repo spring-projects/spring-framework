@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,6 @@ import java.net.URLConnection;
  * method can resolve any location to a {@link org.springframework.core.io.Resource}
  * object, which in turn allows one to obtain a {@code java.io.File} in the
  * file system through its {@code getFile()} method.
- *
- * <p>The main reason for these utility methods for resource location handling
- * is to support {@link Log4jConfigurer}, which must be able to resolve
- * resource locations <i>before the logging system has been initialized</i>.
- * Spring's {@code Resource} abstraction in the core package, on the other hand,
- * already expects the logging system to be available.
  *
  * @author Juergen Hoeller
  * @since 1.1.5
@@ -235,6 +229,7 @@ public abstract class ResourceUtils {
 	 * @return a corresponding File object
 	 * @throws FileNotFoundException if the URL cannot be resolved to
 	 * a file in the file system
+	 * @since 2.5
 	 */
 	public static File getFile(URI resourceUri) throws FileNotFoundException {
 		return getFile(resourceUri, "URI");
@@ -249,6 +244,7 @@ public abstract class ResourceUtils {
 	 * @return a corresponding File object
 	 * @throws FileNotFoundException if the URL cannot be resolved to
 	 * a file in the file system
+	 * @since 2.5
 	 */
 	public static File getFile(URI resourceUri, String description) throws FileNotFoundException {
 		Assert.notNull(resourceUri, "Resource URI must not be null");

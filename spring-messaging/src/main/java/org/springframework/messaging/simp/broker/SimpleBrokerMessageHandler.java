@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<String, SessionInfo>();
+	private final Map<String, SessionInfo> sessions = new ConcurrentHashMap<>();
 
 	private SubscriptionRegistry subscriptionRegistry;
 
@@ -221,12 +221,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		if (!checkDestinationPrefix(destination)) {
 			return;
-		}
-
-		SimpMessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
-		if (accessor == null) {
-			throw new IllegalStateException(
-					"No header accessor (not using the SimpMessagingTemplate?): " + message);
 		}
 
 		if (SimpMessageType.MESSAGE.equals(messageType)) {

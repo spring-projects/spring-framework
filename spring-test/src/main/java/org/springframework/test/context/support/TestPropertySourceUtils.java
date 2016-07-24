@@ -39,7 +39,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
-import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
+import org.springframework.test.util.MetaAnnotationUtils.*;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -58,19 +58,15 @@ import static org.springframework.test.util.MetaAnnotationUtils.*;
  */
 public abstract class TestPropertySourceUtils {
 
-	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
-
 	/**
 	 * The name of the {@link MapPropertySource} created from <em>inlined properties</em>.
 	 * @since 4.1.5
-	 * @see {@link #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])}
+	 * @see #addInlinedPropertiesToEnvironment
 	 */
 	public static final String INLINED_PROPERTIES_PROPERTY_SOURCE_NAME = "Inlined Test Properties";
 
+	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
 
-	private TestPropertySourceUtils() {
-		/* no-op */
-	}
 
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
 		Class<TestPropertySource> annotationType = TestPropertySource.class;
@@ -79,7 +75,6 @@ public abstract class TestPropertySourceUtils {
 			return new MergedTestPropertySources();
 		}
 
-		// else...
 		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(testClass);
 		String[] locations = mergeLocations(attributesList);
 		String[] properties = mergeProperties(attributesList);
@@ -88,30 +83,27 @@ public abstract class TestPropertySourceUtils {
 
 	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
+		List<TestPropertySourceAttributes> attributesList = new ArrayList<>();
+		Class<TestPropertySource> annotationType = TestPropertySource.class;
 
-		final List<TestPropertySourceAttributes> attributesList = new ArrayList<TestPropertySourceAttributes>();
-		final Class<TestPropertySource> annotationType = TestPropertySource.class;
 		AnnotationDescriptor<TestPropertySource> descriptor = findAnnotationDescriptor(testClass, annotationType);
 		Assert.notNull(descriptor, String.format(
-			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-			annotationType.getName(), testClass.getName()));
+				"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
+				annotationType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
 			TestPropertySource testPropertySource = descriptor.synthesizeAnnotation();
 			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
-
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @TestPropertySource [%s] for declaring class [%s].",
 					testPropertySource, rootDeclaringClass.getName()));
 			}
-
-			TestPropertySourceAttributes attributes = new TestPropertySourceAttributes(rootDeclaringClass,
-				testPropertySource);
+			TestPropertySourceAttributes attributes =
+					new TestPropertySourceAttributes(rootDeclaringClass, testPropertySource);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved TestPropertySource attributes: " + attributes);
 			}
 			attributesList.add(attributes);
-
 			descriptor = findAnnotationDescriptor(rootDeclaringClass.getSuperclass(), annotationType);
 		}
 
@@ -119,40 +111,32 @@ public abstract class TestPropertySourceUtils {
 	}
 
 	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {
-		final List<String> locations = new ArrayList<String>();
-
+		List<String> locations = new ArrayList<>();
 		for (TestPropertySourceAttributes attrs : attributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations for TestPropertySource attributes %s", attrs));
 			}
-
 			String[] locationsArray = TestContextResourceUtils.convertToClasspathResourcePaths(
-				attrs.getDeclaringClass(), attrs.getLocations());
-			locations.addAll(0, Arrays.<String> asList(locationsArray));
-
+					attrs.getDeclaringClass(), attrs.getLocations());
+			locations.addAll(0, Arrays.asList(locationsArray));
 			if (!attrs.isInheritLocations()) {
 				break;
 			}
 		}
-
 		return StringUtils.toStringArray(locations);
 	}
 
 	private static String[] mergeProperties(List<TestPropertySourceAttributes> attributesList) {
-		final List<String> properties = new ArrayList<String>();
-
+		List<String> properties = new ArrayList<>();
 		for (TestPropertySourceAttributes attrs : attributesList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing inlined properties for TestPropertySource attributes %s", attrs));
 			}
-
-			properties.addAll(0, Arrays.<String> asList(attrs.getProperties()));
-
+			properties.addAll(0, Arrays.<String>asList(attrs.getProperties()));
 			if (!attrs.isInheritProperties()) {
 				break;
 			}
 		}
-
 		return StringUtils.toStringArray(properties);
 	}
 
@@ -172,8 +156,8 @@ public abstract class TestPropertySourceUtils {
 	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 */
 	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context, String... locations) {
-		Assert.notNull(context, "context must not be null");
-		Assert.notNull(locations, "locations must not be null");
+		Assert.notNull(context, "'context' must not be null");
+		Assert.notNull(locations, "'locations' must not be null");
 		addPropertiesFilesToEnvironment(context.getEnvironment(), context, locations);
 	}
 
@@ -200,9 +184,9 @@ public abstract class TestPropertySourceUtils {
 	public static void addPropertiesFilesToEnvironment(ConfigurableEnvironment environment,
 			ResourceLoader resourceLoader, String... locations) {
 
-		Assert.notNull(environment, "environment must not be null");
-		Assert.notNull(resourceLoader, "resourceLoader must not be null");
-		Assert.notNull(locations, "locations must not be null");
+		Assert.notNull(environment, "'environment' must not be null");
+		Assert.notNull(resourceLoader, "'resourceLoader' must not be null");
+		Assert.notNull(locations, "'locations' must not be null");
 		try {
 			for (String location : locations) {
 				String resolvedLocation = environment.resolveRequiredPlaceholders(location);
@@ -228,10 +212,9 @@ public abstract class TestPropertySourceUtils {
 	 * @see TestPropertySource#properties
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
-	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
-			String... inlinedProperties) {
-		Assert.notNull(context, "context must not be null");
-		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
+	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context, String... inlinedProperties) {
+		Assert.notNull(context, "'context' must not be null");
+		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
 		addInlinedPropertiesToEnvironment(context.getEnvironment(), inlinedProperties);
 	}
 
@@ -252,17 +235,17 @@ public abstract class TestPropertySourceUtils {
 	 * @see #convertInlinedPropertiesToMap
 	 */
 	public static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String... inlinedProperties) {
-		Assert.notNull(environment, "environment must not be null");
-		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
+		Assert.notNull(environment, "'environment' must not be null");
+		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
 		if (!ObjectUtils.isEmpty(inlinedProperties)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Adding inlined properties to environment: "
-						+ ObjectUtils.nullSafeToString(inlinedProperties));
+				logger.debug("Adding inlined properties to environment: " +
+						ObjectUtils.nullSafeToString(inlinedProperties));
 			}
-			MapPropertySource ps = (MapPropertySource) environment.getPropertySources().get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
+			MapPropertySource ps = (MapPropertySource)
+					environment.getPropertySources().get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
 			if (ps == null) {
-				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME,
-						new LinkedHashMap<String, Object>());
+				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME, new LinkedHashMap<>());
 				environment.getPropertySources().addFirst(ps);
 			}
 			ps.getSource().putAll(convertInlinedPropertiesToMap(inlinedProperties));
@@ -287,23 +270,21 @@ public abstract class TestPropertySourceUtils {
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
 	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
-		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
-
+		Assert.notNull(inlinedProperties, "'inlinedProperties' must not be null");
+		Map<String, Object> map = new LinkedHashMap<>();
 		Properties props = new Properties();
+
 		for (String pair : inlinedProperties) {
 			if (!StringUtils.hasText(pair)) {
 				continue;
 			}
-
 			try {
 				props.load(new StringReader(pair));
 			}
-			catch (Exception e) {
-				throw new IllegalStateException("Failed to load test environment property from [" + pair + "].", e);
+			catch (Exception ex) {
+				throw new IllegalStateException("Failed to load test environment property from [" + pair + "]", ex);
 			}
-			Assert.state(props.size() == 1, "Failed to load exactly one test environment property from [" + pair + "].");
-
+			Assert.state(props.size() == 1, "Failed to load exactly one test environment property from [" + pair + "]");
 			for (String name : props.stringPropertyNames()) {
 				map.put(name, props.getProperty(name));
 			}

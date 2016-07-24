@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class ScriptUtilsUnitTests {
 		String cleanedStatement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		char delim = ';';
 		String script = rawStatement1 + delim + rawStatement2 + delim + rawStatement3 + delim;
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, delim, statements);
 		assertEquals("wrong number of statements", 3, statements.size());
 		assertEquals("statement 1 not split correctly", cleanedStatement1, statements.get(0));
@@ -65,7 +65,7 @@ public class ScriptUtilsUnitTests {
 		String statement3 = "insert into orders(id, order_date, customer_id) values (1, '2008-01-02', 2)";
 		char delim = '\n';
 		String script = statement1 + delim + statement2 + delim + statement3 + delim;
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, delim, statements);
 		assertEquals("wrong number of statements", 3, statements.size());
 		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
@@ -79,7 +79,7 @@ public class ScriptUtilsUnitTests {
 		String statement2 = "do something else";
 		char delim = '\n';
 		String script = statement1 + delim + statement2 + delim;
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, DEFAULT_STATEMENT_SEPARATOR, statements);
 		assertEquals("wrong number of statements", 1, statements.size());
 		assertEquals("script should have been 'stripped' but not actually 'split'", script.replace('\n', ' '),
@@ -95,7 +95,7 @@ public class ScriptUtilsUnitTests {
 		String statement2 = "select '2' as \"Dilbert's\" from dual";
 		char delim = ';';
 		String script = statement1 + delim + statement2 + delim;
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
 		assertEquals("wrong number of statements", 2, statements.size());
 		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
@@ -108,7 +108,7 @@ public class ScriptUtilsUnitTests {
 	@Test
 	public void readAndSplitScriptWithMultipleNewlinesAsSeparator() throws Exception {
 		String script = readScript("db-test-data-multi-newline.sql");
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, "\n\n", statements);
 
 		String statement1 = "insert into T_TEST (NAME) values ('Keith')";
@@ -122,7 +122,7 @@ public class ScriptUtilsUnitTests {
 	@Test
 	public void readAndSplitScriptContainingComments() throws Exception {
 		String script = readScript("test-data-with-comments.sql");
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Rod; Johnson'), (2, 'Adrian Collier')";
@@ -144,7 +144,7 @@ public class ScriptUtilsUnitTests {
 	@Test
 	public void readAndSplitScriptContainingCommentsWithLeadingTabs() throws Exception {
 		String script = readScript("test-data-with-comments-and-leading-tabs.sql");
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
 
 		String statement1 = "insert into customer (id, name) values (1, 'Sam Brannen')";
@@ -163,7 +163,7 @@ public class ScriptUtilsUnitTests {
 	@Test
 	public void readAndSplitScriptContainingMuliLineComments() throws Exception {
 		String script = readScript("test-data-with-multi-line-comments.sql");
-		List<String> statements = new ArrayList<String>();
+		List<String> statements = new ArrayList<>();
 		splitSqlScript(script, ';', statements);
 
 		String statement1 = "INSERT INTO users(first_name, last_name) VALUES('Juergen', 'Hoeller')";

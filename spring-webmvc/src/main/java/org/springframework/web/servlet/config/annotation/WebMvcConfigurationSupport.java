@@ -339,7 +339,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	protected Map<String, MediaType> getDefaultMediaTypes() {
-		Map<String, MediaType> map = new HashMap<String, MediaType>();
+		Map<String, MediaType> map = new HashMap<>();
 		if (romePresent) {
 			map.put("atom", MediaType.APPLICATION_ATOM_XML);
 			map.put("rss", MediaType.valueOf("application/rss+xml"));
@@ -487,11 +487,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 
 		if (jackson2Present) {
-			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<RequestBodyAdvice>();
+			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<>();
 			requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
 			adapter.setRequestBodyAdvice(requestBodyAdvices);
 
-			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<ResponseBodyAdvice<?>>();
+			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<>();
 			responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
 			adapter.setResponseBodyAdvice(responseBodyAdvices);
 		}
@@ -567,7 +567,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				catch (LinkageError ex) {
 					throw new BeanInitializationException("Could not load default validator class", ex);
 				}
-				validator = (Validator) BeanUtils.instantiate(clazz);
+				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new NoOpValidator();
@@ -632,7 +632,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected final List<HandlerMethodArgumentResolver> getArgumentResolvers() {
 		if (this.argumentResolvers == null) {
-			this.argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+			this.argumentResolvers = new ArrayList<>();
 			addArgumentResolvers(this.argumentResolvers);
 		}
 		return this.argumentResolvers;
@@ -660,7 +660,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected final List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
 		if (this.returnValueHandlers == null) {
-			this.returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+			this.returnValueHandlers = new ArrayList<>();
 			addReturnValueHandlers(this.returnValueHandlers);
 		}
 		return this.returnValueHandlers;
@@ -691,7 +691,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected final List<HttpMessageConverter<?>> getMessageConverters() {
 		if (this.messageConverters == null) {
-			this.messageConverters = new ArrayList<HttpMessageConverter<?>>();
+			this.messageConverters = new ArrayList<>();
 			configureMessageConverters(this.messageConverters);
 			if (this.messageConverters.isEmpty()) {
 				addDefaultHttpMessageConverters(this.messageConverters);
@@ -737,7 +737,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(stringConverter);
 		messageConverters.add(new ResourceHttpMessageConverter());
-		messageConverters.add(new SourceHttpMessageConverter<Source>());
+		messageConverters.add(new SourceHttpMessageConverter<>());
 		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
 		if (romePresent) {
@@ -815,7 +815,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerExceptionResolver handlerExceptionResolver() {
-		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<HandlerExceptionResolver>();
+		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
 		configureHandlerExceptionResolvers(exceptionResolvers);
 
 		if (exceptionResolvers.isEmpty()) {
@@ -847,7 +847,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * be useful for example to allow default resolvers to be registered and then
 	 * insert a custom one through this method.
 	 * @param exceptionResolvers the list of configured resolvers to extend.
-	 * @since 4.3.1
+	 * @since 4.3
 	 */
 	protected void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 	}
@@ -871,7 +871,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
 		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
 		if (jackson2Present) {
-			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<ResponseBodyAdvice<?>>();
+			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<>();
 			interceptors.add(new JsonViewResponseBodyAdvice());
 			exceptionHandlerResolver.setResponseBodyAdvice(interceptors);
 		}

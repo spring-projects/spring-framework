@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	private static <A extends Annotation> AspectJAnnotation<A> findAnnotation(Method method, Class<A> toLookFor) {
 		A result = AnnotationUtils.findAnnotation(method, toLookFor);
 		if (result != null) {
-			return new AspectJAnnotation<A>(result);
+			return new AspectJAnnotation<>(result);
 		}
 		else {
 			return null;
@@ -212,7 +212,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		private static final String[] EXPRESSION_PROPERTIES = new String[] {"value", "pointcut"};
 
 		private static Map<Class<?>, AspectJAnnotationType> annotationTypes =
-				new HashMap<Class<?>, AspectJAnnotationType>();
+				new HashMap<>();
 
 		static {
 			annotationTypes.put(Pointcut.class,AspectJAnnotationType.AtPointcut);
@@ -305,7 +305,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		@Override
 		public String[] getParameterNames(Method method) {
-			if (method.getParameterTypes().length == 0) {
+			if (method.getParameterCount() == 0) {
 				return new String[0];
 			}
 			AspectJAnnotation<?> annotation = findAspectJAnnotationOnMethod(method);

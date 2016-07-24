@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,10 @@ public class WeakReferenceMonitor {
 	private static final Log logger = LogFactory.getLog(WeakReferenceMonitor.class);
 
 	// Queue receiving reachability events
-	private static final ReferenceQueue<Object> handleQueue = new ReferenceQueue<Object>();
+	private static final ReferenceQueue<Object> handleQueue = new ReferenceQueue<>();
 
 	// All tracked entries (WeakReference => ReleaseListener)
-	private static final Map<Reference<?>, ReleaseListener> trackedEntries = new HashMap<Reference<?>, ReleaseListener>();
+	private static final Map<Reference<?>, ReleaseListener> trackedEntries = new HashMap<>();
 
 	// Thread polling handleQueue, lazy initialized
 	private static Thread monitoringThread = null;
@@ -72,7 +72,7 @@ public class WeakReferenceMonitor {
 
 		// Make weak reference to this handle, so we can say when
 		// handle is not used any more by polling on handleQueue.
-		WeakReference<Object> weakRef = new WeakReference<Object>(handle, handleQueue);
+		WeakReference<Object> weakRef = new WeakReference<>(handle, handleQueue);
 
 		// Add monitored entry to internal map of all monitored entries.
 		addEntry(weakRef, listener);

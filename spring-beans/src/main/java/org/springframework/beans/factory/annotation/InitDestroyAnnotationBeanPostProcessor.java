@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache =
-			new ConcurrentHashMap<Class<?>, LifecycleMetadata>(256);
+			new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -194,13 +194,13 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
 		final boolean debug = logger.isDebugEnabled();
-		LinkedList<LifecycleElement> initMethods = new LinkedList<LifecycleElement>();
-		LinkedList<LifecycleElement> destroyMethods = new LinkedList<LifecycleElement>();
+		LinkedList<LifecycleElement> initMethods = new LinkedList<>();
+		LinkedList<LifecycleElement> destroyMethods = new LinkedList<>();
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<LifecycleElement> currInitMethods = new LinkedList<LifecycleElement>();
-			final LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<LifecycleElement>();
+			final LinkedList<LifecycleElement> currInitMethods = new LinkedList<>();
+			final LinkedList<LifecycleElement> currDestroyMethods = new LinkedList<>();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
 				@Override
@@ -272,7 +272,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-			Set<LifecycleElement> checkedInitMethods = new LinkedHashSet<LifecycleElement>(this.initMethods.size());
+			Set<LifecycleElement> checkedInitMethods = new LinkedHashSet<>(this.initMethods.size());
 			for (LifecycleElement element : this.initMethods) {
 				String methodIdentifier = element.getIdentifier();
 				if (!beanDefinition.isExternallyManagedInitMethod(methodIdentifier)) {
@@ -283,7 +283,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 					}
 				}
 			}
-			Set<LifecycleElement> checkedDestroyMethods = new LinkedHashSet<LifecycleElement>(this.destroyMethods.size());
+			Set<LifecycleElement> checkedDestroyMethods = new LinkedHashSet<>(this.destroyMethods.size());
 			for (LifecycleElement element : this.destroyMethods) {
 				String methodIdentifier = element.getIdentifier();
 				if (!beanDefinition.isExternallyManagedDestroyMethod(methodIdentifier)) {
@@ -344,7 +344,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		private final String identifier;
 
 		public LifecycleElement(Method method) {
-			if (method.getParameterTypes().length != 0) {
+			if (method.getParameterCount() != 0) {
 				throw new IllegalStateException("Lifecycle method annotation requires a no-arg method: " + method);
 			}
 			this.method = method;

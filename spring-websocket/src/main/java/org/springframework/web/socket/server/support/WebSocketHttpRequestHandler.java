@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 
 	private final HandshakeHandler handshakeHandler;
 
-	private final List<HandshakeInterceptor> interceptors = new ArrayList<HandshakeInterceptor>();
+	private final List<HandshakeInterceptor> interceptors = new ArrayList<>();
 
 	private volatile boolean running = false;
 
@@ -159,7 +159,7 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 			if (logger.isDebugEnabled()) {
 				logger.debug(servletRequest.getMethod() + " " + servletRequest.getRequestURI());
 			}
-			Map<String, Object> attributes = new HashMap<String, Object>();
+			Map<String, Object> attributes = new HashMap<>();
 			if (!chain.applyBeforeHandshake(request, response, attributes)) {
 				return;
 			}

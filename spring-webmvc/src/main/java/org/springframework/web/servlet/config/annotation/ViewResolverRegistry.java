@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public class ViewResolverRegistry {
 
 	private ContentNegotiatingViewResolver contentNegotiatingResolver;
 
-	private final List<ViewResolver> viewResolvers = new ArrayList<ViewResolver>(4);
+	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
 	private Integer order;
 
@@ -113,7 +113,7 @@ public class ViewResolverRegistry {
 		if (this.contentNegotiatingResolver != null) {
 			if (!ObjectUtils.isEmpty(defaultViews)) {
 				if (!CollectionUtils.isEmpty(this.contentNegotiatingResolver.getDefaultViews())) {
-					List<View> views = new ArrayList<View>(this.contentNegotiatingResolver.getDefaultViews());
+					List<View> views = new ArrayList<>(this.contentNegotiatingResolver.getDefaultViews());
 					views.addAll(Arrays.asList(defaultViews));
 					this.contentNegotiatingResolver.setDefaultViews(views);
 				}
@@ -186,26 +186,6 @@ public class ViewResolverRegistry {
 					"This bean may be given any name.");
 		}
 		FreeMarkerRegistration registration = new FreeMarkerRegistration();
-		this.viewResolvers.add(registration.getViewResolver());
-		return registration;
-	}
-
-	/**
-	 * Register Velocity view resolver with an empty default view name
-	 * prefix and a default suffix of ".vm".
-	 * <p><strong>Note</strong> that you must also configure Velocity by adding a
-	 * {@link org.springframework.web.servlet.view.velocity.VelocityConfigurer} bean.
-	 * @deprecated as of Spring 4.3, in favor of FreeMarker
-	 */
-	@Deprecated
-	public UrlBasedViewResolverRegistration velocity() {
-		if (this.applicationContext != null && !hasBeanOfType(org.springframework.web.servlet.view.velocity.VelocityConfigurer.class)) {
-			throw new BeanInitializationException("In addition to a Velocity view resolver " +
-					"there must also be a single VelocityConfig bean in this web application context " +
-					"(or its parent): VelocityConfigurer is the usual implementation. " +
-					"This bean may be given any name.");
-		}
-		VelocityRegistration registration = new VelocityRegistration();
 		this.viewResolvers.add(registration.getViewResolver());
 		return registration;
 	}
@@ -306,15 +286,6 @@ public class ViewResolverRegistry {
 
 		public TilesRegistration() {
 			super(new TilesViewResolver());
-		}
-	}
-
-	private static class VelocityRegistration extends UrlBasedViewResolverRegistration {
-
-		@SuppressWarnings("deprecation")
-		public VelocityRegistration() {
-			super(new org.springframework.web.servlet.view.velocity.VelocityViewResolver());
-			getViewResolver().setSuffix(".vm");
 		}
 	}
 

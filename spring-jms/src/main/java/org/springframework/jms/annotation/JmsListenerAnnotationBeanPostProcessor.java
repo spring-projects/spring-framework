@@ -205,8 +205,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 					new MethodIntrospector.MetadataLookup<Set<JmsListener>>() {
 						@Override
 						public Set<JmsListener> inspect(Method method) {
-							Set<JmsListener> listenerMethods =
-									AnnotatedElementUtils.getMergedRepeatableAnnotations(method, JmsListener.class, JmsListeners.class);
+							Set<JmsListener> listenerMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+									method, JmsListener.class, JmsListeners.class);
 							return (!listenerMethods.isEmpty() ? listenerMethods : null);
 						}
 					});

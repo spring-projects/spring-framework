@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -34,7 +35,7 @@ import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondit
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Encapsulates the following request mapping conditions:
+ * A {@link RequestCondition} that consists of the following other conditions:
  * <ol>
  * <li>{@link PatternsRequestCondition}
  * <li>{@link RequestMethodsRequestCondition}
@@ -238,7 +239,15 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	@Override
 	public int compareTo(RequestMappingInfo other, HttpServletRequest request) {
-		int result = this.patternsCondition.compareTo(other.getPatternsCondition(), request);
+		int result;
+		// Automatic vs explicit HTTP HEAD mapping
+		if (HttpMethod.HEAD.matches(request.getMethod())) {
+			result = this.methodsCondition.compareTo(other.getMethodsCondition(), request);
+			if (result != 0) {
+				return result;
+			}
+		}
+		result = this.patternsCondition.compareTo(other.getPatternsCondition(), request);
 		if (result != 0) {
 			return result;
 		}
@@ -258,6 +267,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (result != 0) {
 			return result;
 		}
+		// Implicit (no method) vs explicit HTTP method mappings
 		result = this.methodsCondition.compareTo(other.getMethodsCondition(), request);
 		if (result != 0) {
 			return result;
@@ -513,11 +523,15 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		/**
 		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.
 		 * <p>By default this is not set.
+		 * @since 4.2.8
 		 */
-		public void setPathHelper(UrlPathHelper pathHelper) {
-			this.urlPathHelper = pathHelper;
+		public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
+			this.urlPathHelper = urlPathHelper;
 		}
 
+		/**
+		 * Return a custom UrlPathHelper to use for the PatternsRequestCondition, if any.
+		 */
 		public UrlPathHelper getUrlPathHelper() {
 			return this.urlPathHelper;
 		}
@@ -530,24 +544,30 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			this.pathMatcher = pathMatcher;
 		}
 
+		/**
+		 * Return a custom PathMatcher to use for the PatternsRequestCondition, if any.
+		 */
 		public PathMatcher getPathMatcher() {
 			return this.pathMatcher;
 		}
 
 		/**
-		 * Whether to apply trailing slash matching in PatternsRequestCondition.
+		 * Set whether to apply trailing slash matching in PatternsRequestCondition.
 		 * <p>By default this is set to 'true'.
 		 */
 		public void setTrailingSlashMatch(boolean trailingSlashMatch) {
 			this.trailingSlashMatch = trailingSlashMatch;
 		}
 
+		/**
+		 * Return whether to apply trailing slash matching in PatternsRequestCondition.
+		 */
 		public boolean useTrailingSlashMatch() {
 			return this.trailingSlashMatch;
 		}
 
 		/**
-		 * Whether to apply suffix pattern matching in PatternsRequestCondition.
+		 * Set whether to apply suffix pattern matching in PatternsRequestCondition.
 		 * <p>By default this is set to 'true'.
 		 * @see #setRegisteredSuffixPatternMatch(boolean)
 		 */
@@ -555,14 +575,17 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			this.suffixPatternMatch = suffixPatternMatch;
 		}
 
+		/**
+		 * Return whether to apply suffix pattern matching in PatternsRequestCondition.
+		 */
 		public boolean useSuffixPatternMatch() {
 			return this.suffixPatternMatch;
 		}
 
 		/**
-		 * Whether suffix pattern matching should be restricted to registered
+		 * Set whether suffix pattern matching should be restricted to registered
 		 * file extensions only. Setting this property also sets
-		 * suffixPatternMatch=true and requires that a
+		 * {@code suffixPatternMatch=true} and requires that a
 		 * {@link #setContentNegotiationManager} is also configured in order to
 		 * obtain the registered file extensions.
 		 */
@@ -571,6 +594,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 			this.suffixPatternMatch = (registeredSuffixPatternMatch || this.suffixPatternMatch);
 		}
 
+		/**
+		 * Return whether suffix pattern matching should be restricted to registered
+		 * file extensions only.
+		 */
 		public boolean useRegisteredSuffixPatternMatch() {
 			return this.registeredSuffixPatternMatch;
 		}
@@ -591,10 +618,14 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * Set the ContentNegotiationManager to use for the ProducesRequestCondition.
 		 * <p>By default this is not set.
 		 */
-		public void setContentNegotiationManager(ContentNegotiationManager manager) {
-			this.contentNegotiationManager = manager;
+		public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+			this.contentNegotiationManager = contentNegotiationManager;
 		}
 
+		/**
+		 * Return the ContentNegotiationManager to use for the ProducesRequestCondition,
+		 * if any.
+		 */
 		public ContentNegotiationManager getContentNegotiationManager() {
 			return this.contentNegotiationManager;
 		}

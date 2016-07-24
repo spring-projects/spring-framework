@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,9 @@ public class OperatorInstanceof extends Operator {
 	 */
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		SpelNodeImpl rightOperand = getRightOperand();
 		TypedValue left = getLeftOperand().getValueInternal(state);
-		TypedValue right = getRightOperand().getValueInternal(state);
+		TypedValue right = rightOperand.getValueInternal(state);
 		Object leftValue = left.getValue();
 		Object rightValue = right.getValue();
 		BooleanTypedValue result = null;
@@ -71,7 +72,11 @@ public class OperatorInstanceof extends Operator {
 			result = BooleanTypedValue.forValue(rightClass.isAssignableFrom(leftValue.getClass()));
 		}
 		this.type = rightClass;
-		this.exitTypeDescriptor = "Z";
+		if (rightOperand instanceof TypeReference) {
+			// Can only generate bytecode where the right operand is a direct type reference, 
+			// not if it is indirect (for example when right operand is a variable reference)
+			this.exitTypeDescriptor = "Z";
+		}
 		return result;
 	}
 
@@ -83,7 +88,16 @@ public class OperatorInstanceof extends Operator {
 	@Override
 	public void generateCode(MethodVisitor mv, CodeFlow cf) {
 		getLeftOperand().generateCode(mv, cf);
-		mv.visitTypeInsn(INSTANCEOF,Type.getInternalName(this.type));
+		CodeFlow.insertBoxIfNecessary(mv, cf.lastDescriptor());
+		if (this.type.isPrimitive()) {
+			// always false - but left operand code always driven
+			// in case it had side effects
+			mv.visitInsn(POP);
+			mv.visitInsn(ICONST_0); // value of false
+		} 
+		else {
+			mv.visitTypeInsn(INSTANCEOF,Type.getInternalName(this.type));
+		}
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 

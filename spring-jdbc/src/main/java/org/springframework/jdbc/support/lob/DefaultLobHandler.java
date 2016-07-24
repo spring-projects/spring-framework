@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,9 +60,8 @@ import org.apache.commons.logging.LogFactory;
  * argument directly. Consider switching the {@link #setStreamAsLob "streamAsLob"}
  * property to "true" when operating against a fully compliant JDBC 4.0 driver.
  *
- * <p>Finally, primarily as a direct equivalent to {@link OracleLobHandler},
- * this LobHandler also supports the creation of temporary BLOB/CLOB objects.
- * Consider switching the {@link #setCreateTemporaryLob "createTemporaryLob"}
+ * <p>Finally, this LobHandler also supports the creation of temporary BLOB/CLOB
+ * objects. Consider switching the {@link #setCreateTemporaryLob "createTemporaryLob"}
  * property to "true" when "streamAsLob" happens to run into LOB size limitations.
  *
  * <p>See the {@link LobHandler} interface javadoc for a summary of recommendations.

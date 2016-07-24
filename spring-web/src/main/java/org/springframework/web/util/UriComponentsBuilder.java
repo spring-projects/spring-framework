@@ -106,7 +106,7 @@ public class UriComponentsBuilder implements Cloneable {
 
 	private CompositePathComponentBuilder pathBuilder;
 
-	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
 	private String fragment;
 
@@ -665,7 +665,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * "Forwarded" is not found.
 	 * @param headers the HTTP headers to consider
 	 * @return this UriComponentsBuilder
-	 * @since 4.3
+	 * @since 4.2.7
 	 */
 	UriComponentsBuilder adaptFromForwardedHeaders(HttpHeaders headers) {
 		String forwardedHeader = headers.getFirst("Forwarded");
@@ -743,7 +743,7 @@ public class UriComponentsBuilder implements Cloneable {
 	/**
 	 * Clone this {@code UriComponentsBuilder}.
 	 * @return the cloned {@code UriComponentsBuilder} object
-	 * @since 4.3
+	 * @since 4.2.7
 	 */
 	public UriComponentsBuilder cloneBuilder() {
 		return new UriComponentsBuilder(this);
@@ -760,7 +760,7 @@ public class UriComponentsBuilder implements Cloneable {
 
 	private static class CompositePathComponentBuilder implements PathComponentBuilder {
 
-		private final LinkedList<PathComponentBuilder> builders = new LinkedList<PathComponentBuilder>();
+		private final LinkedList<PathComponentBuilder> builders = new LinkedList<>();
 
 		public CompositePathComponentBuilder() {
 		}
@@ -813,7 +813,7 @@ public class UriComponentsBuilder implements Cloneable {
 		@Override
 		public PathComponent build() {
 			int size = this.builders.size();
-			List<PathComponent> components = new ArrayList<PathComponent>(size);
+			List<PathComponent> components = new ArrayList<>(size);
 			for (PathComponentBuilder componentBuilder : this.builders) {
 				PathComponent pathComponent = componentBuilder.build();
 				if (pathComponent != null) {
@@ -882,7 +882,7 @@ public class UriComponentsBuilder implements Cloneable {
 
 	private static class PathSegmentComponentBuilder implements PathComponentBuilder {
 
-		private final List<String> pathSegments = new LinkedList<String>();
+		private final List<String> pathSegments = new LinkedList<>();
 
 		public void append(String... pathSegments) {
 			for (String pathSegment : pathSegments) {

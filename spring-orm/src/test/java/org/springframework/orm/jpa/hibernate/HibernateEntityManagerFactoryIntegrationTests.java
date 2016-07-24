@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,15 @@
 
 package org.springframework.orm.jpa.hibernate;
 
-import org.hibernate.ejb.HibernateEntityManager;
-import org.hibernate.ejb.HibernateEntityManagerFactory;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.junit.Test;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+import org.springframework.orm.jpa.EntityManagerProxy;
+
+import static org.junit.Assert.*;
 
 /**
  * Hibernate-specific JPA tests.
@@ -28,24 +32,23 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
  * @author Juergen Hoeller
  * @author Rod Johnson
  */
-@SuppressWarnings("deprecation")
-public class HibernateEntityManagerFactoryIntegrationTests extends
-		AbstractContainerEntityManagerFactoryIntegrationTests {
+public class HibernateEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	@Override
-	protected String[] getConfigPaths() {
+	protected String[] getConfigLocations() {
 		return HIBERNATE_CONFIG_LOCATIONS;
 	}
 
+
+	@Test
 	public void testCanCastNativeEntityManagerFactoryToHibernateEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
-		assertTrue(emfi.getNativeEntityManagerFactory() instanceof HibernateEntityManagerFactory);
+		assertTrue(emfi.getNativeEntityManagerFactory() instanceof SessionFactory);  // as of Hibernate 5.2
 	}
 
+	@Test
 	public void testCanCastSharedEntityManagerProxyToHibernateEntityManager() {
-		assertTrue(sharedEntityManager instanceof HibernateEntityManager);
-		HibernateEntityManager hibernateEntityManager = (HibernateEntityManager) sharedEntityManager;
-		assertNotNull(hibernateEntityManager.getSession());
+		assertTrue(((EntityManagerProxy) sharedEntityManager).getTargetEntityManager() instanceof Session);  // as of Hibernate 5.2
 	}
 
 }

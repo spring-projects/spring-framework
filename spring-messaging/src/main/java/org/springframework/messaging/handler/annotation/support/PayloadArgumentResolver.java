@@ -106,7 +106,8 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 		}
 
 		Class<?> targetClass = parameter.getParameterType();
-		if (ClassUtils.isAssignable(targetClass, payload.getClass())) {
+		Class<?> payloadClass = payload.getClass();
+		if (ClassUtils.isAssignable(targetClass, payloadClass)) {
 			validate(message, parameter, payload);
 			return payload;
 		}
@@ -119,8 +120,8 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 				payload = this.converter.fromMessage(message, targetClass);
 			}
 			if (payload == null) {
-				throw new MessageConversionException(message,
-						"No converter found to convert to " + targetClass + ", message=" + message);
+				throw new MessageConversionException(message, "Cannot convert from [" +
+						payloadClass.getName() + "] to [" + targetClass.getName() + "] for " + message);
 			}
 			validate(message, parameter, payload);
 			return payload;

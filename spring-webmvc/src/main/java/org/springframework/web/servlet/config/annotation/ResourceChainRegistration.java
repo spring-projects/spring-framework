@@ -46,9 +46,9 @@ public class ResourceChainRegistration {
 			"org.webjars.WebJarAssetLocator", ResourceChainRegistration.class.getClassLoader());
 
 
-	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>(4);
+	private final List<ResourceResolver> resolvers = new ArrayList<>(4);
 
-	private final List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>(4);
+	private final List<ResourceTransformer> transformers = new ArrayList<>(4);
 
 	private boolean hasVersionResolver;
 
@@ -108,7 +108,7 @@ public class ResourceChainRegistration {
 
 	protected List<ResourceResolver> getResourceResolvers() {
 		if (!this.hasPathResolver) {
-			List<ResourceResolver> result = new ArrayList<ResourceResolver>(this.resolvers);
+			List<ResourceResolver> result = new ArrayList<>(this.resolvers);
 			if (isWebJarsAssetLocatorPresent && !this.hasWebjarsResolver) {
 				result.add(new WebJarsResourceResolver());
 			}
@@ -120,7 +120,7 @@ public class ResourceChainRegistration {
 
 	protected List<ResourceTransformer> getResourceTransformers() {
 		if (this.hasVersionResolver && !this.hasCssLinkTransformer) {
-			List<ResourceTransformer> result = new ArrayList<ResourceTransformer>(this.transformers);
+			List<ResourceTransformer> result = new ArrayList<>(this.transformers);
 			boolean hasTransformers = !this.transformers.isEmpty();
 			boolean hasCaching = hasTransformers && this.transformers.get(0) instanceof CachingResourceTransformer;
 			result.add(hasCaching ? 1 : 0, new CssLinkResourceTransformer());

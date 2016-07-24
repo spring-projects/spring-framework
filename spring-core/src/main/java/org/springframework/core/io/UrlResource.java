@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link Resource} implementation for {@code java.net.URL} locators.
- * <p>Supports resolution as a {@code URL} and also as a {@code File} in
+ * Supports resolution as a {@code URL} and also as a {@code File} in
  * case of the {@code "file:"} protocol.
  *
  * @author Juergen Hoeller
@@ -61,6 +61,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * Create a new {@code UrlResource} based on the given URI object.
 	 * @param uri a URI
 	 * @throws MalformedURLException if the given URL path is not valid
+	 * @since 2.5
 	 */
 	public UrlResource(URI uri) throws MalformedURLException {
 		Assert.notNull(uri, "URI must not be null");
@@ -133,6 +134,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 		}
 	}
 
+
 	/**
 	 * Determine a cleaned URL for the given original URL.
 	 * @param originalUrl the original URL
@@ -150,7 +152,6 @@ public class UrlResource extends AbstractFileResolvingResource {
 			return originalUrl;
 		}
 	}
-
 
 	/**
 	 * This implementation opens an InputStream for the given URL.
@@ -195,6 +196,16 @@ public class UrlResource extends AbstractFileResolvingResource {
 		}
 		else {
 			return super.getURI();
+		}
+	}
+
+	@Override
+	public boolean isFile() {
+		if (this.uri != null) {
+			return super.isFile(this.uri);
+		}
+		else {
+			return super.isFile();
 		}
 	}
 

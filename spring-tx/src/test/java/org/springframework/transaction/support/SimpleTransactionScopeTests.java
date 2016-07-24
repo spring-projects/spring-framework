@@ -148,7 +148,7 @@ public class SimpleTransactionScopeTests {
 
 		CallCountingTransactionManager tm = new CallCountingTransactionManager();
 		TransactionTemplate tt = new TransactionTemplate(tm);
-		Set<DerivedTestBean> finallyDestroy = new HashSet<DerivedTestBean>();
+		Set<DerivedTestBean> finallyDestroy = new HashSet<>();
 
 		tt.execute(status -> {
 			TestBean bean1 = context.getBean(TestBean.class);
@@ -173,7 +173,7 @@ public class SimpleTransactionScopeTests {
 			assertNotSame(bean2, bean2b);
 			assertNotSame(bean2a, bean2b);
 
-			Set<DerivedTestBean> immediatelyDestroy = new HashSet<DerivedTestBean>();
+			Set<DerivedTestBean> immediatelyDestroy = new HashSet<>();
 			TransactionTemplate tt2 = new TransactionTemplate(tm);
 			tt2.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRED);
 			tt2.execute(status2 -> {

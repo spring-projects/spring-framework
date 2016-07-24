@@ -17,16 +17,16 @@
 package org.springframework.test.context;
 
 import java.lang.reflect.Constructor;
-import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.MultiValueMap;
 
 /**
  * {@code BootstrapUtils} is a collection of utility methods to assist with
@@ -137,39 +137,32 @@ abstract class BootstrapUtils {
 			testContextBootstrapper.setBootstrapContext(bootstrapContext);
 			return testContextBootstrapper;
 		}
+		catch (IllegalStateException ex) {
+			throw ex;
+		}
 		catch (Throwable ex) {
-			if (ex instanceof IllegalStateException) {
-				throw (IllegalStateException) ex;
-			}
 			throw new IllegalStateException("Could not load TestContextBootstrapper [" + clazz +
 					"]. Specify @BootstrapWith's 'value' attribute or make the default bootstrapper class available.",
 					ex);
 		}
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private static Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
-		MultiValueMap<String, Object> attributesMultiMap =
-				AnnotatedElementUtils.getAllAnnotationAttributes(testClass, BootstrapWith.class.getName());
-		List<Object> values = (attributesMultiMap != null ? attributesMultiMap.get(AnnotationUtils.VALUE) : null);
-		if (values == null) {
+		Set<BootstrapWith> annotations = AnnotatedElementUtils.findAllMergedAnnotations(testClass, BootstrapWith.class);
+		if (annotations.size() < 1) {
 			return null;
 		}
-		if (values.size() != 1) {
-			throw new IllegalStateException(String.format("Configuration error: found multiple declarations of " +
-					"@BootstrapWith on test class [%s] with values %s", testClass.getName(), values));
-		}
-		return (Class<?>) values.get(0);
+		Assert.state(annotations.size() <= 1, () -> String.format(
+				"Configuration error: found multiple declarations of @BootstrapWith for test class [%s]: %s",
+				testClass.getName(), annotations));
+		return annotations.iterator().next().value();
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {
 		ClassLoader classLoader = BootstrapUtils.class.getClassLoader();
-		if (AnnotatedElementUtils.isAnnotated(testClass, WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME)) {
+		AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(testClass,
+			WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME, false, false);
+		if (attributes != null) {
 			return ClassUtils.forName(DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME, classLoader);
 		}
 		return ClassUtils.forName(DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME, classLoader);

@@ -16,11 +16,8 @@
 
 package org.springframework.http.converter;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,12 +27,15 @@ import org.junit.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceRegion;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.StringUtils;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for {@link ResourceRegionHttpMessageConverter} class.
@@ -82,7 +82,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		assertThat(headers.getContentLength(), is(6L));
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 0-5/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("Spring"));
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8), is("Spring"));
 	}
 
 	@Test
@@ -97,7 +97,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		assertThat(headers.getContentLength(), is(32L));
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
 		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 7-38/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("Framework test resource content."));
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8), is("Framework test resource content."));
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
 		List<HttpRange> rangeList = HttpRange.parseRanges("bytes=0-5,7-15,17-20,22-38");
-		List<ResourceRegion> regions = new ArrayList<ResourceRegion>();
+		List<ResourceRegion> regions = new ArrayList<>();
 		for(HttpRange range : rangeList) {
 			regions.add(range.toResourceRegion(body));
 		}
@@ -115,7 +115,7 @@ public class ResourceRegionHttpMessageConverterTests {
 		HttpHeaders headers = outputMessage.getHeaders();
 		assertThat(headers.getContentType().toString(), Matchers.startsWith("multipart/byteranges;boundary="));
 		String boundary = "--" + headers.getContentType().toString().substring(30);
-		String content = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		String content = outputMessage.getBodyAsString(StandardCharsets.UTF_8);
 		String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
 
 		assertThat(ranges[0], is(boundary));

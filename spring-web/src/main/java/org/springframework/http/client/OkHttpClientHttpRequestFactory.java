@@ -42,7 +42,9 @@ import org.springframework.util.StringUtils;
  * @author Arjen Poutsma
  * @since 4.2
  * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
+ * @deprecated as of Spring 5.0, in favor of OkHttp 3.x
  */
+@Deprecated
 public class OkHttpClientHttpRequestFactory
 		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory, DisposableBean {
 

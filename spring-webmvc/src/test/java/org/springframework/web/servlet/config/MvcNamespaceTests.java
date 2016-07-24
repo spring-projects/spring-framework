@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,6 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
-import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.ParameterizableViewController;
@@ -141,12 +140,10 @@ import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
-import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
-import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -281,11 +278,6 @@ public class MvcNamespaceTests {
 		doTestCustomValidator("mvc-config-custom-validator.xml");
 	}
 
-	@Test
-	public void testCustomValidator32() throws Exception {
-		doTestCustomValidator("mvc-config-custom-validator-32.xml");
-	}
-
 	private void doTestCustomValidator(String xml) throws Exception {
 		loadBeanDefinitions(xml, 14);
 
@@ -309,7 +301,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testInterceptors() throws Exception {
-		loadBeanDefinitions("mvc-config-interceptors.xml", 21);
+		loadBeanDefinitions("mvc-config-interceptors.xml", 18);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -321,26 +313,23 @@ public class MvcNamespaceTests {
 		request.addParameter("theme", "green");
 
 		HandlerExecutionChain chain = mapping.getHandler(request);
-		assertEquals(5, chain.getInterceptors().length);
+		assertEquals(4, chain.getInterceptors().length);
 		assertTrue(chain.getInterceptors()[0] instanceof ConversionServiceExposingInterceptor);
 		assertTrue(chain.getInterceptors()[1] instanceof LocaleChangeInterceptor);
-		assertTrue(chain.getInterceptors()[2] instanceof WebRequestHandlerInterceptorAdapter);
-		assertTrue(chain.getInterceptors()[3] instanceof ThemeChangeInterceptor);
-		assertTrue(chain.getInterceptors()[4] instanceof UserRoleAuthorizationInterceptor);
+		assertTrue(chain.getInterceptors()[2] instanceof ThemeChangeInterceptor);
+		assertTrue(chain.getInterceptors()[3] instanceof UserRoleAuthorizationInterceptor);
 
 		request.setRequestURI("/admin/users");
 		chain = mapping.getHandler(request);
-		assertEquals(3, chain.getInterceptors().length);
+		assertEquals(2, chain.getInterceptors().length);
 
 		request.setRequestURI("/logged/accounts/12345");
 		chain = mapping.getHandler(request);
-		assertEquals(5, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
+		assertEquals(3, chain.getInterceptors().length);
 
 		request.setRequestURI("/foo/logged");
 		chain = mapping.getHandler(request);
-		assertEquals(5, chain.getInterceptors().length);
-		assertTrue(chain.getInterceptors()[4] instanceof WebRequestHandlerInterceptorAdapter);
+		assertEquals(3, chain.getInterceptors().length);
 	}
 
 	@Test
@@ -742,11 +731,11 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewResolution() throws Exception {
-		loadBeanDefinitions("mvc-config-view-resolution.xml", 7);
+		loadBeanDefinitions("mvc-config-view-resolution.xml", 6);
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
-		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 9, compositeResolver.getViewResolvers().size());
+		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 8, compositeResolver.getViewResolvers().size());
 		assertEquals(Ordered.LOWEST_PRECEDENCE, compositeResolver.getOrder());
 
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
@@ -768,28 +757,21 @@ public class MvcNamespaceTests {
 		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
 		resolver = resolvers.get(4);
-		assertThat(resolver, instanceOf(VelocityViewResolver.class));
-		accessor = new DirectFieldAccessor(resolver);
-		assertEquals("", accessor.getPropertyValue("prefix"));
-		assertEquals(".vm", accessor.getPropertyValue("suffix"));
-		assertEquals(0, accessor.getPropertyValue("cacheLimit"));
-
-		resolver = resolvers.get(5);
 		assertThat(resolver, instanceOf(GroovyMarkupViewResolver.class));
 		accessor = new DirectFieldAccessor(resolver);
 		assertEquals("", accessor.getPropertyValue("prefix"));
 		assertEquals(".tpl", accessor.getPropertyValue("suffix"));
 		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
-		resolver = resolvers.get(6);
+		resolver = resolvers.get(5);
 		assertThat(resolver, instanceOf(ScriptTemplateViewResolver.class));
 		accessor = new DirectFieldAccessor(resolver);
 		assertEquals("", accessor.getPropertyValue("prefix"));
 		assertEquals("", accessor.getPropertyValue("suffix"));
 		assertEquals(1024, accessor.getPropertyValue("cacheLimit"));
 
+		assertEquals(InternalResourceViewResolver.class, resolvers.get(6).getClass());
 		assertEquals(InternalResourceViewResolver.class, resolvers.get(7).getClass());
-		assertEquals(InternalResourceViewResolver.class, resolvers.get(8).getClass());
 
 		TilesConfigurer tilesConfigurer = appContext.getBean(TilesConfigurer.class);
 		assertNotNull(tilesConfigurer);
@@ -807,11 +789,6 @@ public class MvcNamespaceTests {
 		assertNotNull(freeMarkerConfigurer);
 		accessor = new DirectFieldAccessor(freeMarkerConfigurer);
 		assertArrayEquals(new String[] {"/", "/test"}, (String[]) accessor.getPropertyValue("templateLoaderPaths"));
-
-		VelocityConfigurer velocityConfigurer = appContext.getBean(VelocityConfigurer.class);
-		assertNotNull(velocityConfigurer);
-		accessor = new DirectFieldAccessor(velocityConfigurer);
-		assertEquals("/test", accessor.getPropertyValue("resourceLoaderPath"));
 
 		GroovyMarkupConfigurer groovyMarkupConfigurer = appContext.getBean(GroovyMarkupConfigurer.class);
 		assertNotNull(groovyMarkupConfigurer);
@@ -833,7 +810,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewResolutionWithContentNegotiation() throws Exception {
-		loadBeanDefinitions("mvc-config-view-resolution-content-negotiation.xml", 7);
+		loadBeanDefinitions("mvc-config-view-resolution-content-negotiation.xml", 6);
 
 		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
 		assertNotNull(compositeResolver);
@@ -843,7 +820,7 @@ public class MvcNamespaceTests {
 		List<ViewResolver> resolvers = compositeResolver.getViewResolvers();
 		assertEquals(ContentNegotiatingViewResolver.class, resolvers.get(0).getClass());
 		ContentNegotiatingViewResolver cnvr = (ContentNegotiatingViewResolver) resolvers.get(0);
-		assertEquals(7, cnvr.getViewResolvers().size());
+		assertEquals(6, cnvr.getViewResolvers().size());
 		assertEquals(1, cnvr.getDefaultViews().size());
 		assertTrue(cnvr.isUseNotAcceptableStatusCode());
 
@@ -1030,6 +1007,11 @@ public class MvcNamespaceTests {
 			else {
 				return null;
 			}
+		}
+
+		@Override
+		public String getVirtualServerName() {
+			return null;
 		}
 	}
 

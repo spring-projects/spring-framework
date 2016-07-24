@@ -35,10 +35,8 @@ import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -84,21 +82,12 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
-		validateMethod(method);
 		this.beanName = beanName;
 		this.method = method;
 		this.targetClass = targetClass;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.declaredEventTypes = resolveDeclaredEventTypes();
 		this.methodKey = new AnnotatedElementKey(this.method, this.targetClass);
-	}
-
-	private static void validateMethod(Method method) {
-		if (method.getReturnType() != void.class &&
-				AnnotationUtils.findAnnotation(method, Async.class) != null) {
-			throw new IllegalStateException(
-					"Asynchronous @EventListener method is not allowed to return reply events: " + method);
-		}
 	}
 
 
@@ -172,7 +161,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (declaredEventType == null) {
 			return null;
 		}
-		if (this.method.getParameterTypes().length == 0) {
+		if (this.method.getParameterCount() == 0) {
 			return new Object[0];
 		}
 		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass())
@@ -358,14 +347,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	private List<ResolvableType> resolveDeclaredEventTypes() {
-		int count = this.method.getParameterTypes().length;
+		int count = this.method.getParameterCount();
 		if (count > 1) {
 			throw new IllegalStateException(
 					"Maximum one parameter is allowed for event listener method: " + this.method);
 		}
 		EventListener ann = getEventListener();
 		if (ann != null && ann.classes().length > 0) {
-			List<ResolvableType> types = new ArrayList<ResolvableType>();
+			List<ResolvableType> types = new ArrayList<>();
 			for (Class<?> eventType : ann.classes()) {
 				types.add(ResolvableType.forClass(eventType));
 			}

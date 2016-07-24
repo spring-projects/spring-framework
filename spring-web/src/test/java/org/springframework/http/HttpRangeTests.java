@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.ResourceRegion;
+import org.springframework.core.io.support.ResourceRegion;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link HttpRange}.
@@ -111,7 +112,7 @@ public class HttpRangeTests {
 
 	@Test
 	public void toResourceRegion() {
-		byte[] bytes = "Spring Framework".getBytes(Charset.forName("UTF-8"));
+		byte[] bytes = "Spring Framework".getBytes(StandardCharsets.UTF_8);
 		ByteArrayResource resource = new ByteArrayResource(bytes);
 		HttpRange range = HttpRange.createByteRange(0, 5);
 		ResourceRegion region = range.toResourceRegion(resource);

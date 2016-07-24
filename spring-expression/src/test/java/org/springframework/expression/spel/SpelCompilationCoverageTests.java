@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,7 +198,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertEquals(false,expression.getValue());
 
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		expression = parse("#root instanceof T(java.util.List)");
 		assertEquals(true,expression.getValue(list));
 		assertCanCompile(expression);
@@ -235,6 +235,53 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(true,expression.getValue(root));
 	}
 
+	@Test
+	public void operatorInstanceOf_SPR14250() throws Exception {
+		// primitive left operand - should get boxed, return true
+		expression = parse("3 instanceof T(Integer)");
+		assertEquals(true,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(true,expression.getValue());
+
+		// primitive left operand - should get boxed, return false
+		expression = parse("3 instanceof T(String)");
+		assertEquals(false,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(false,expression.getValue());
+		
+		// double slot left operand - should get boxed, return false
+		expression = parse("3.0d instanceof T(Integer)");
+		assertEquals(false,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(false,expression.getValue());
+
+		// double slot left operand - should get boxed, return true
+		expression = parse("3.0d instanceof T(Double)");
+		assertEquals(true,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(true,expression.getValue());
+		
+		// Only when the right hand operand is a direct type reference
+		// will it be compilable.
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setVariable("foo", String.class);
+		expression = parse("3 instanceof #foo");
+		assertEquals(false,expression.getValue(ctx));
+		assertCantCompile(expression);
+
+		// use of primitive as type for instanceof check - compilable
+		// but always false
+		expression = parse("3 instanceof T(int)");
+		assertEquals(false,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(false,expression.getValue());
+		
+		expression = parse("3 instanceof T(long)");
+		assertEquals(false,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(false,expression.getValue());
+	}
+	
 	@Test
 	public void stringLiteral() throws Exception {
 		expression = parser.parseExpression("'abcde'");
@@ -2876,11 +2923,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(0,expression.getValue());
 
 		expression = parse("payload%2==0");
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.TYPE));
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(5),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(5),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.TYPE));
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(5),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(5),Boolean.TYPE));
 
 		expression = parse("8%3");
 		assertEquals(2,expression.getValue());
@@ -3850,7 +3897,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@Test
 	public void mixingItUp_indexerOpEqTernary() throws Exception {
-		Map<String, String> m = new HashMap<String,String>();
+		Map<String, String> m = new HashMap<>();
 		m.put("andy","778");
 
 		expression = parse("['andy']==null?1:2");
@@ -3981,7 +4028,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("C",getAst().getExitDescriptor());
 
 		// Collections
-		List<String> strings = new ArrayList<String>();
+		List<String> strings = new ArrayList<>();
 		strings.add("aaa");
 		strings.add("bbb");
 		strings.add("ccc");
@@ -3991,7 +4038,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("bbb",expression.getValue(strings));
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 
-		List<Integer> ints = new ArrayList<Integer>();
+		List<Integer> ints = new ArrayList<>();
 		ints.add(123);
 		ints.add(456);
 		ints.add(789);
@@ -4002,7 +4049,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 
 		// Maps
-		Map<String,Integer> map1 = new HashMap<String,Integer>();
+		Map<String,Integer> map1 = new HashMap<>();
 		map1.put("aaa", 111);
 		map1.put("bbb", 222);
 		map1.put("ccc", 333);
@@ -4035,7 +4082,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// list of arrays
 
-		List<String[]> listOfStringArrays = new ArrayList<String[]>();
+		List<String[]> listOfStringArrays = new ArrayList<>();
 		listOfStringArrays.add(new String[]{"a","b","c"});
 		listOfStringArrays.add(new String[]{"d","e","f"});
 		expression = parser.parseExpression("[1]");
@@ -4050,7 +4097,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("d",stringify(expression.getValue(listOfStringArrays)));
 		assertEquals("Ljava/lang/String",getAst().getExitDescriptor());
 
-		List<Integer[]> listOfIntegerArrays = new ArrayList<Integer[]>();
+		List<Integer[]> listOfIntegerArrays = new ArrayList<>();
 		listOfIntegerArrays.add(new Integer[]{1,2,3});
 		listOfIntegerArrays.add(new Integer[]{4,5,6});
 		expression = parser.parseExpression("[0]");
@@ -4067,11 +4114,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// array of lists
 		List<String>[] stringArrayOfLists = new ArrayList[2];
-		stringArrayOfLists[0] = new ArrayList<String>();
+		stringArrayOfLists[0] = new ArrayList<>();
 		stringArrayOfLists[0].add("a");
 		stringArrayOfLists[0].add("b");
 		stringArrayOfLists[0].add("c");
-		stringArrayOfLists[1] = new ArrayList<String>();
+		stringArrayOfLists[1] = new ArrayList<>();
 		stringArrayOfLists[1].add("d");
 		stringArrayOfLists[1].add("e");
 		stringArrayOfLists[1].add("f");
@@ -4116,13 +4163,13 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("I",getAst().getExitDescriptor());
 
 		// list of lists of reference types
-		List<List<String>> listOfListOfStrings = new ArrayList<List<String>>();
-		List<String> list = new ArrayList<String>();
+		List<List<String>> listOfListOfStrings = new ArrayList<>();
+		List<String> list = new ArrayList<>();
 		list.add("a");
 		list.add("b");
 		list.add("c");
 		listOfListOfStrings.add(list);
-		list = new ArrayList<String>();
+		list = new ArrayList<>();
 		list.add("d");
 		list.add("e");
 		list.add("f");
@@ -4142,8 +4189,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 
 		// Map of lists
-		Map<String,List<String>> mapToLists = new HashMap<String,List<String>>();
-		list = new ArrayList<String>();
+		Map<String,List<String>> mapToLists = new HashMap<>();
+		list = new ArrayList<>();
 		list.add("a");
 		list.add("b");
 		list.add("c");
@@ -4162,7 +4209,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 
 		// Map to array
-		Map<String,int[]> mapToIntArray = new HashMap<String,int[]>();
+		Map<String,int[]> mapToIntArray = new HashMap<>();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.addPropertyAccessor(new CompilableMapAccessor());
 		mapToIntArray.put("foo",new int[]{1,2,3});
@@ -4197,7 +4244,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// Map array
 		Map<String,String>[] mapArray = new Map[1];
-		mapArray[0] = new HashMap<String,String>();
+		mapArray[0] = new HashMap<>();
 		mapArray[0].put("key", "value1");
 		expression = parser.parseExpression("[0]");
 		assertEquals("{key=value1}",stringify(expression.getValue(mapArray)));
@@ -4287,197 +4334,197 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	@Test
 	public void compilerWithGenerics_12040() {
 		expression = parser.parseExpression("payload!=2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("2!=payload");
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("payload!=6L");
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Long>(4L),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4L),Boolean.class));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Long>(6L),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(6L),Boolean.class));
 
 		expression = parser.parseExpression("payload==2");
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("2==payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("payload==6L");
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Long>(4L),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(4L),Boolean.class));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Long>(6L),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(6L),Boolean.class));
 
 		expression = parser.parseExpression("2==payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("payload/2");
-		assertEquals(2,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(3,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper<>(6)));
 
 		expression = parser.parseExpression("100/payload");
-		assertEquals(25,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(25,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(10,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		assertEquals(10,expression.getValue(new GenericMessageTestHelper<>(10)));
 
 		expression = parser.parseExpression("payload+2");
-		assertEquals(6,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(6,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(8,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper<>(6)));
 
 		expression = parser.parseExpression("100+payload");
-		assertEquals(104,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(104,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(110,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		assertEquals(110,expression.getValue(new GenericMessageTestHelper<>(10)));
 
 		expression = parser.parseExpression("payload-2");
-		assertEquals(2,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(4,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		assertEquals(4,expression.getValue(new GenericMessageTestHelper<>(6)));
 
 		expression = parser.parseExpression("100-payload");
-		assertEquals(96,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(96,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(90,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		assertEquals(90,expression.getValue(new GenericMessageTestHelper<>(10)));
 
 		expression = parser.parseExpression("payload*2");
-		assertEquals(8,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(12,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		assertEquals(12,expression.getValue(new GenericMessageTestHelper<>(6)));
 
 		expression = parser.parseExpression("100*payload");
-		assertEquals(400,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(400,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(1000,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		assertEquals(1000,expression.getValue(new GenericMessageTestHelper<>(10)));
 
 		expression = parser.parseExpression("payload/2L");
-		assertEquals(2L,expression.getValue(new GenericMessageTestHelper<Long>(4L)));
+		assertEquals(2L,expression.getValue(new GenericMessageTestHelper<>(4L)));
 		assertCanCompile(expression);
-		assertEquals(3L,expression.getValue(new GenericMessageTestHelper<Long>(6L)));
+		assertEquals(3L,expression.getValue(new GenericMessageTestHelper<>(6L)));
 
 		expression = parser.parseExpression("100L/payload");
-		assertEquals(25L,expression.getValue(new GenericMessageTestHelper<Long>(4L)));
+		assertEquals(25L,expression.getValue(new GenericMessageTestHelper<>(4L)));
 		assertCanCompile(expression);
-		assertEquals(10L,expression.getValue(new GenericMessageTestHelper<Long>(10L)));
+		assertEquals(10L,expression.getValue(new GenericMessageTestHelper<>(10L)));
 
 		expression = parser.parseExpression("payload/2f");
-		assertEquals(2f,expression.getValue(new GenericMessageTestHelper<Float>(4f)));
+		assertEquals(2f,expression.getValue(new GenericMessageTestHelper<>(4f)));
 		assertCanCompile(expression);
-		assertEquals(3f,expression.getValue(new GenericMessageTestHelper<Float>(6f)));
+		assertEquals(3f,expression.getValue(new GenericMessageTestHelper<>(6f)));
 
 		expression = parser.parseExpression("100f/payload");
-		assertEquals(25f,expression.getValue(new GenericMessageTestHelper<Float>(4f)));
+		assertEquals(25f,expression.getValue(new GenericMessageTestHelper<>(4f)));
 		assertCanCompile(expression);
-		assertEquals(10f,expression.getValue(new GenericMessageTestHelper<Float>(10f)));
+		assertEquals(10f,expression.getValue(new GenericMessageTestHelper<>(10f)));
 
 		expression = parser.parseExpression("payload/2d");
-		assertEquals(2d,expression.getValue(new GenericMessageTestHelper<Double>(4d)));
+		assertEquals(2d,expression.getValue(new GenericMessageTestHelper<>(4d)));
 		assertCanCompile(expression);
-		assertEquals(3d,expression.getValue(new GenericMessageTestHelper<Double>(6d)));
+		assertEquals(3d,expression.getValue(new GenericMessageTestHelper<>(6d)));
 
 		expression = parser.parseExpression("100d/payload");
-		assertEquals(25d,expression.getValue(new GenericMessageTestHelper<Double>(4d)));
+		assertEquals(25d,expression.getValue(new GenericMessageTestHelper<>(4d)));
 		assertCanCompile(expression);
-		assertEquals(10d,expression.getValue(new GenericMessageTestHelper<Double>(10d)));
+		assertEquals(10d,expression.getValue(new GenericMessageTestHelper<>(10d)));
 	}
 
 	// The new helper class here uses an upper bound on the generic
 	@Test
 	public void compilerWithGenerics_12040_2() {
 		expression = parser.parseExpression("payload/2");
-		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<>(6)));
 
 		expression = parser.parseExpression("9/payload");
-		assertEquals(1,expression.getValue(new GenericMessageTestHelper2<Integer>(9)));
+		assertEquals(1,expression.getValue(new GenericMessageTestHelper2<>(9)));
 		assertCanCompile(expression);
-		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<Integer>(3)));
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<>(3)));
 
 		expression = parser.parseExpression("payload+2");
-		assertEquals(6,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(6,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<>(6)));
 
 		expression = parser.parseExpression("100+payload");
-		assertEquals(104,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(104,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(110,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+		assertEquals(110,expression.getValue(new GenericMessageTestHelper2<>(10)));
 
 		expression = parser.parseExpression("payload-2");
-		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(4,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		assertEquals(4,expression.getValue(new GenericMessageTestHelper2<>(6)));
 
 		expression = parser.parseExpression("100-payload");
-		assertEquals(96,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(96,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(90,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+		assertEquals(90,expression.getValue(new GenericMessageTestHelper2<>(10)));
 
 		expression = parser.parseExpression("payload*2");
-		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(12,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		assertEquals(12,expression.getValue(new GenericMessageTestHelper2<>(6)));
 
 		expression = parser.parseExpression("100*payload");
-		assertEquals(400,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(400,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(1000,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+		assertEquals(1000,expression.getValue(new GenericMessageTestHelper2<>(10)));
 	}
 
 	// The other numeric operators
 	@Test
 	public void compilerWithGenerics_12040_3() {
 		expression = parser.parseExpression("payload >= 2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(4),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(4),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 
 		expression = parser.parseExpression("2 >= payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(5),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(5),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 
 		expression = parser.parseExpression("payload > 2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(4),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(4),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 
 		expression = parser.parseExpression("2 > payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(5),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(5),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 
 		expression = parser.parseExpression("payload <=2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(6),Boolean.TYPE));
 
 		expression = parser.parseExpression("2 <= payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(6),Boolean.TYPE));
 
 		expression = parser.parseExpression("payload < 2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(6),Boolean.TYPE));
 
 		expression = parser.parseExpression("2 < payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(6),Boolean.TYPE));
 	}
 
 	@Test

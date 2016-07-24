@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 		this.path = pathToUse;
 	}
 
+
 	/**
 	 * Return the ServletContext for this resource.
 	 */
@@ -90,7 +91,6 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	public final String getPath() {
 		return this.path;
 	}
-
 
 	/**
 	 * This implementation checks {@code ServletContext.getResource}.
@@ -125,6 +125,22 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 			return true;
 		}
 		else {
+			return false;
+		}
+	}
+
+	@Override
+	public boolean isFile() {
+		try {
+			URL url = this.servletContext.getResource(this.path);
+			if (url != null && ResourceUtils.isFileURL(url)) {
+				return true;
+			}
+			else {
+				return (this.servletContext.getRealPath(this.path) != null);
+			}
+		}
+		catch (MalformedURLException ex) {
 			return false;
 		}
 	}

@@ -65,7 +65,7 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 	public ResponseBodyEmitterReturnValueHandler(List<HttpMessageConverter<?>> messageConverters) {
 		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
 		this.messageConverters = messageConverters;
-		this.adapterMap = new HashMap<Class<?>, ResponseBodyEmitterAdapter>(3);
+		this.adapterMap = new HashMap<>(3);
 		this.adapterMap.put(ResponseBodyEmitter.class, new SimpleResponseBodyEmitterAdapter());
 	}
 
@@ -137,6 +137,7 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 			returnValue = responseEntity.getBody();
 			if (returnValue == null) {
 				mavContainer.setRequestHandled(true);
+				outputMessage.flush();
 				return;
 			}
 		}
@@ -154,7 +155,7 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 		outputMessage.flush();
 		outputMessage = new StreamingServletServerHttpResponse(outputMessage);
 
-		DeferredResult<?> deferredResult = new DeferredResult<Object>(emitter.getTimeout());
+		DeferredResult<?> deferredResult = new DeferredResult<>(emitter.getTimeout());
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
 
 		HttpMessageConvertingHandler handler = new HttpMessageConvertingHandler(outputMessage, deferredResult);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ public class MockUOWManager implements UOWManager {
 
 	private int status = UOW_STATUS_NONE;
 
-	private final Map<Object, Object> resources = new HashMap<Object, Object>();
+	private final Map<Object, Object> resources = new HashMap<>();
 
-	private final List<Synchronization> synchronizations = new LinkedList<Synchronization>();
+	private final List<Synchronization> synchronizations = new LinkedList<>();
 
 
 	@Override

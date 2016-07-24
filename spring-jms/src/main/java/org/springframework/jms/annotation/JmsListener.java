@@ -114,7 +114,8 @@ public @interface JmsListener {
 	String selector() default "";
 
 	/**
-	 * The concurrency limits for the listener, if any.
+	 * The concurrency limits for the listener, if any. Overrides the value defined
+	 * by the container factory used to create the listener container.
 	 * <p>The concurrency limits can be a "lower-upper" String &mdash; for example,
 	 * "5-10" &mdash; or a simple upper limit String &mdash; for example, "10", in
 	 * which case the lower limit will be 1.

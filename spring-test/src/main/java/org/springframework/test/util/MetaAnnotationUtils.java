@@ -57,8 +57,8 @@ public abstract class MetaAnnotationUtils {
 
 	/**
 	 * Find the {@link AnnotationDescriptor} for the supplied {@code annotationType}
-	 * on the supplied {@link Class}, traversing its annotations and superclasses
-	 * if no annotation can be found on the given class itself.
+	 * on the supplied {@link Class}, traversing its annotations, interfaces, and
+	 * superclasses if no annotation can be found on the given class itself.
 	 * <p>This method explicitly handles class-level annotations which are not
 	 * declared as {@linkplain java.lang.annotation.Inherited inherited} <em>as
 	 * well as meta-annotations</em>.
@@ -67,14 +67,12 @@ public abstract class MetaAnnotationUtils {
 	 * <li>Search for the annotation on the given class and return a corresponding
 	 * {@code AnnotationDescriptor} if found.
 	 * <li>Recursively search through all annotations that the given class declares.
+	 * <li>Recursively search through all interfaces implemented by the given class.
 	 * <li>Recursively search through the superclass hierarchy of the given class.
 	 * </ol>
 	 * <p>In this context, the term <em>recursively</em> means that the search
-	 * process continues by returning to step #1 with the current annotation or
-	 * superclass as the class to look for annotations on.
-	 * <p>If the supplied {@code clazz} is an interface, only the interface
-	 * itself will be checked; the inheritance hierarchy for interfaces will not
-	 * be traversed.
+	 * process continues by returning to step #1 with the current annotation,
+	 * interface, or superclass as the class to look for annotations on.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationType the type of annotation to look for
 	 * @return the corresponding annotation descriptor if the annotation was found;
@@ -85,7 +83,7 @@ public abstract class MetaAnnotationUtils {
 	public static <T extends Annotation> AnnotationDescriptor<T> findAnnotationDescriptor(
 			Class<?> clazz, Class<T> annotationType) {
 
-		return findAnnotationDescriptor(clazz, new HashSet<Annotation>(), annotationType);
+		return findAnnotationDescriptor(clazz, new HashSet<>(), annotationType);
 	}
 
 	/**
@@ -108,7 +106,7 @@ public abstract class MetaAnnotationUtils {
 
 		// Declared locally?
 		if (AnnotationUtils.isAnnotationDeclaredLocally(annotationType, clazz)) {
-			return new AnnotationDescriptor<T>(clazz, clazz.getAnnotation(annotationType));
+			return new AnnotationDescriptor<>(clazz, clazz.getAnnotation(annotationType));
 		}
 
 		// Declared on a composed annotation (i.e., as a meta-annotation)?
@@ -117,9 +115,18 @@ public abstract class MetaAnnotationUtils {
 				AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(
 						composedAnnotation.annotationType(), visited, annotationType);
 				if (descriptor != null) {
-					return new AnnotationDescriptor<T>(
+					return new AnnotationDescriptor<>(
 							clazz, descriptor.getDeclaringClass(), composedAnnotation, descriptor.getAnnotation());
 				}
+			}
+		}
+
+		// Declared on interface?
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			AnnotationDescriptor<T> descriptor = findAnnotationDescriptor(ifc, visited, annotationType);
+			if (descriptor != null) {
+				return new AnnotationDescriptor<>(clazz, descriptor.getDeclaringClass(),
+						descriptor.getComposedAnnotation(), descriptor.getAnnotation());
 			}
 		}
 
@@ -132,8 +139,9 @@ public abstract class MetaAnnotationUtils {
 	 * in the inheritance hierarchy of the specified {@code clazz} (including
 	 * the specified {@code clazz} itself) which declares at least one of the
 	 * specified {@code annotationTypes}.
-	 * <p>This method traverses the annotations and superclasses of the specified
-	 * {@code clazz} if no annotation can be found on the given class itself.
+	 * <p>This method traverses the annotations, interfaces, and superclasses
+	 * of the specified {@code clazz} if no annotation can be found on the given
+	 * class itself.
 	 * <p>This method explicitly handles class-level annotations which are not
 	 * declared as {@linkplain java.lang.annotation.Inherited inherited} <em>as
 	 * well as meta-annotations</em>.
@@ -143,14 +151,12 @@ public abstract class MetaAnnotationUtils {
 	 * the given class and return a corresponding {@code UntypedAnnotationDescriptor}
 	 * if found.
 	 * <li>Recursively search through all annotations that the given class declares.
+	 * <li>Recursively search through all interfaces implemented by the given class.
 	 * <li>Recursively search through the superclass hierarchy of the given class.
 	 * </ol>
 	 * <p>In this context, the term <em>recursively</em> means that the search
-	 * process continues by returning to step #1 with the current annotation or
-	 * superclass as the class to look for annotations on.
-	 * <p>If the supplied {@code clazz} is an interface, only the interface
-	 * itself will be checked; the inheritance hierarchy for interfaces will not
-	 * be traversed.
+	 * process continues by returning to step #1 with the current annotation,
+	 * interface, or superclass as the class to look for annotations on.
 	 * @param clazz the class to look for annotations on
 	 * @param annotationTypes the types of annotations to look for
 	 * @return the corresponding annotation descriptor if one of the annotations
@@ -162,7 +168,7 @@ public abstract class MetaAnnotationUtils {
 	public static UntypedAnnotationDescriptor findAnnotationDescriptorForTypes(
 			Class<?> clazz, Class<? extends Annotation>... annotationTypes) {
 
-		return findAnnotationDescriptorForTypes(clazz, new HashSet<Annotation>(), annotationTypes);
+		return findAnnotationDescriptorForTypes(clazz, new HashSet<>(), annotationTypes);
 	}
 
 	/**
@@ -200,6 +206,15 @@ public abstract class MetaAnnotationUtils {
 					return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(), composedAnnotation,
 							descriptor.getAnnotation());
 				}
+			}
+		}
+
+		// Declared on interface?
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			UntypedAnnotationDescriptor descriptor = findAnnotationDescriptorForTypes(ifc, visited, annotationTypes);
+			if (descriptor != null) {
+				return new UntypedAnnotationDescriptor(clazz, descriptor.getDeclaringClass(),
+					descriptor.getComposedAnnotation(), descriptor.getAnnotation());
 			}
 		}
 

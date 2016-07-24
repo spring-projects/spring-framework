@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -32,7 +33,7 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -58,7 +59,7 @@ public class HttpHeadersTests {
 	public void accept() {
 		MediaType mediaType1 = new MediaType("text", "html");
 		MediaType mediaType2 = new MediaType("text", "plain");
-		List<MediaType> mediaTypes = new ArrayList<MediaType>(2);
+		List<MediaType> mediaTypes = new ArrayList<>(2);
 		mediaTypes.add(mediaType1);
 		mediaTypes.add(mediaType2);
 		headers.setAccept(mediaTypes);
@@ -67,18 +68,27 @@ public class HttpHeadersTests {
 	}
 
 	@Test  // SPR-9655
-	public void acceptIPlanet() {
+	public void acceptWithMultipleHeaderValues() {
 		headers.add("Accept", "text/html");
 		headers.add("Accept", "text/plain");
 		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "plain"));
 		assertEquals("Invalid Accept header", expected, headers.getAccept());
 	}
 
+	@Test  // SPR-14506
+	public void acceptWithMultipleCommaSeparatedHeaderValues() {
+		headers.add("Accept", "text/html,text/pdf");
+		headers.add("Accept", "text/plain,text/csv");
+		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "pdf"),
+				new MediaType("text", "plain"), new MediaType("text", "csv"));
+		assertEquals("Invalid Accept header", expected, headers.getAccept());
+	}
+
 	@Test
 	public void acceptCharsets() {
-		Charset charset1 = Charset.forName("UTF-8");
+		Charset charset1 = StandardCharsets.UTF_8;
 		Charset charset2 = Charset.forName("ISO-8859-1");
-		List<Charset> charsets = new ArrayList<Charset>(2);
+		List<Charset> charsets = new ArrayList<>(2);
 		charsets.add(charset1);
 		charsets.add(charset2);
 		headers.setAcceptCharset(charsets);
@@ -89,7 +99,7 @@ public class HttpHeadersTests {
 	@Test
 	public void acceptCharsetWildcard() {
 		headers.set("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-		assertEquals("Invalid Accept header", Arrays.asList(Charset.forName("ISO-8859-1"), Charset.forName("UTF-8")),
+		assertEquals("Invalid Accept header", Arrays.asList(Charset.forName("ISO-8859-1"), StandardCharsets.UTF_8),
 				headers.getAcceptCharset());
 	}
 
@@ -111,7 +121,7 @@ public class HttpHeadersTests {
 
 	@Test
 	public void contentType() {
-		MediaType contentType = new MediaType("text", "html", Charset.forName("UTF-8"));
+		MediaType contentType = new MediaType("text", "html", StandardCharsets.UTF_8);
 		headers.setContentType(contentType);
 		assertEquals("Invalid Content-Type header", contentType, headers.getContentType());
 		assertEquals("Invalid Content-Type header", "text/html;charset=UTF-8", headers.getFirst("Content-Type"));
@@ -184,7 +194,7 @@ public class HttpHeadersTests {
 	public void ifNoneMatchList() {
 		String ifNoneMatch1 = "\"v2.6\"";
 		String ifNoneMatch2 = "\"v2.7\", \"v2.8\"";
-		List<String> ifNoneMatchList = new ArrayList<String>(2);
+		List<String> ifNoneMatchList = new ArrayList<>(2);
 		ifNoneMatchList.add(ifNoneMatch1);
 		ifNoneMatchList.add(ifNoneMatch2);
 		headers.setIfNoneMatch(ifNoneMatchList);

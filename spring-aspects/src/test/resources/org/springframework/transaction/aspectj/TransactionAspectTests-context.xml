@@ -9,10 +9,4 @@
 		<property name="transactionManager" ref="transactionManager"/>
 	</bean>
 
-	<bean class="org.springframework.transaction.aspectj.TransactionalAnnotationOnlyOnClassWithNoInterface"/>
-
-	<bean class="org.springframework.transaction.aspectj.ClassWithProtectedAnnotatedMember"/>
-
-	<bean class="org.springframework.transaction.aspectj.ClassWithPrivateAnnotatedMember"/>
-
 </beans>

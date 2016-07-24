@@ -35,7 +35,7 @@ import org.springframework.util.ObjectUtils;
  */
 public abstract class AbstractResourceBasedMessageSource extends AbstractMessageSource {
 
-	private final Set<String> basenameSet = new LinkedHashSet<String>(4);
+	private final Set<String> basenameSet = new LinkedHashSet<>(4);
 
 	private String defaultEncoding;
 

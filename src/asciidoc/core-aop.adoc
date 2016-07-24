@@ -398,10 +398,10 @@ releases to support more of the AspectJ pointcut designators.
 Because Spring AOP limits matching to only method execution join points, the discussion
 of the pointcut designators above gives a narrower definition than you will find in the
 AspectJ programming guide. In addition, AspectJ itself has type-based semantics and at
-an execution join point both '++this++' and '++target++' refer to the same object - the
+an execution join point both `this` and `target` refer to the same object - the
 object executing the method. Spring AOP is a proxy-based system and differentiates
-between the proxy object itself (bound to '++this++') and the target object behind the
-proxy (bound to '++target++').
+between the proxy object itself (bound to `this`) and the target object behind the
+proxy (bound to `target`).
 
 [NOTE]
 ====
@@ -418,9 +418,9 @@ different characteristics, so be sure to make yourself familiar with weaving fir
 before making a decision.
 ====
 
-Spring AOP also supports an additional PCD named '++bean++'. This PCD allows you to limit
+Spring AOP also supports an additional PCD named `bean`. This PCD allows you to limit
 the matching of join points to a particular named Spring bean, or to a set of named
-Spring beans (when using wildcards). The '++bean++' PCD has the following form:
+Spring beans (when using wildcards). The `bean` PCD has the following form:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -428,19 +428,19 @@ Spring beans (when using wildcards). The '++bean++' PCD has the following form:
 	bean(idOrNameOfBean)
 ----
 
-The '++idOrNameOfBean++' token can be the name of any Spring bean: limited wildcard
-support using the '++*++' character is provided, so if you establish some naming
-conventions for your Spring beans you can quite easily write a '++bean++' PCD expression
-to pick them out. As is the case with other pointcut designators, the '++bean++' PCD can
+The `idOrNameOfBean` token can be the name of any Spring bean: limited wildcard
+support using the `*` character is provided, so if you establish some naming
+conventions for your Spring beans you can quite easily write a `bean` PCD expression
+to pick them out. As is the case with other pointcut designators, the `bean` PCD can
 be &&'ed, ||'ed, and ! (negated) too.
 
 [NOTE]
 ====
-Please note that the '++bean++' PCD is __only__ supported in Spring AOP - and __not__ in
+Please note that the `bean` PCD is __only__ supported in Spring AOP - and __not__ in
 native AspectJ weaving. It is a Spring-specific extension to the standard PCDs that
-AspectJ defines.
+AspectJ defines and therefore not available for aspects declared in the `@Aspect` model.
 
-The '++bean++' PCD operates at the __instance__ level (building on the Spring bean name
+The `bean` PCD operates at the __instance__ level (building on the Spring bean name
 concept) rather than at the type level only (which is what weaving-based AOP is limited
 to). Instance-based pointcut designators are a special capability of Spring's
 proxy-based AOP framework and its close integration with the Spring bean factory, where
@@ -769,7 +769,7 @@ how to make the annotation object(s) available in the advice body.
 ====
 
 * any join point (method execution only in Spring AOP) on a Spring bean named
-  '++tradeService++':
+  `tradeService`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -778,7 +778,7 @@ how to make the annotation object(s) available in the advice body.
 ----
 
 * any join point (method execution only in Spring AOP) on Spring beans having names that
-  match the wildcard expression '++*Service++':
+  match the wildcard expression `*Service`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2391,7 +2391,7 @@ In the XML style I can declare the first two pointcuts:
 ----
 
 The downside of the XML approach is that you cannot define the
-'++accountPropertyAccess++' pointcut by combining these definitions.
+`accountPropertyAccess` pointcut by combining these definitions.
 
 The @AspectJ style supports additional instantiation models, and richer pointcut
 composition. It has the advantage of keeping the aspect as a modular unit. It also has
@@ -2467,7 +2467,7 @@ at runtime, which applies the __strongest__ proxy settings that any of the
 This also applies to the `<tx:annotation-driven/>` and `<aop:aspectj-autoproxy/>`
 elements.
 
-To be clear: using '++proxy-target-class="true"++' on `<tx:annotation-driven/>`,
+To be clear: using `proxy-target-class="true"` on `<tx:annotation-driven/>`,
 `<aop:aspectj-autoproxy/>` or `<aop:config/>` elements will force the use of CGLIB
 proxies __for all three of them__.
 ====
@@ -2720,7 +2720,7 @@ Spring will now look for a bean definition named "account" and use that as the
 definition to configure new `Account` instances.
 
 You can also use autowiring to avoid having to specify a dedicated bean definition at
-all. To have Spring apply autowiring use the '++autowire++' property of the
+all. To have Spring apply autowiring use the `autowire` property of the
 `@Configurable` annotation: specify either `@Configurable(autowire=Autowire.BY_TYPE)` or
 `@Configurable(autowire=Autowire.BY_NAME` for autowiring by type or by name
 respectively. As an alternative, as of Spring 2.5 it is preferable to specify explicit,
@@ -2740,7 +2740,7 @@ the annotation. In essence the aspect says "after returning from the initializat
 new object of a type annotated with `@Configurable`, configure the newly created object
 using Spring in accordance with the properties of the annotation". In this context,
 __initialization__ refers to newly instantiated objects (e.g., objects instantiated with
-the '++new++' operator) as well as to `Serializable` objects that are undergoing
+the `new` operator) as well as to `Serializable` objects that are undergoing
 deserialization (e.g., via
 http://docs.oracle.com/javase/6/docs/api/java/io/Serializable.html[readResolve()]).
 
@@ -2884,10 +2884,9 @@ A `@Transactional` annotation on a class specifies the default transaction seman
 the execution of any __public__ operation in the class.
 
 A `@Transactional` annotation on a method within the class overrides the default
-transaction semantics given by the class annotation (if present). Methods with `public`,
-`protected`, and default visibility may all be annotated. Annotating `protected` and
-default visibility methods directly is the only way to get transaction demarcation for
-the execution of such methods.
+transaction semantics given by the class annotation (if present). Methods of any
+visibility may be annotated, including private methods. Annotating non-public methods
+directly is the only way to get transaction demarcation for the execution of such methods.
 
 [TIP]
 ====
@@ -2930,7 +2929,7 @@ fully-qualified class names:
 When using AspectJ aspects with Spring applications, it is natural to both want and
 expect to be able to configure such aspects using Spring. The AspectJ runtime itself is
 responsible for aspect creation, and the means of configuring the AspectJ created
-aspects via Spring depends on the AspectJ instantiation model (the '++per-xxx++' clause)
+aspects via Spring depends on the AspectJ instantiation model (the `per-xxx` clause)
 used by the aspect.
 
 The majority of AspectJ aspects are __singleton__ aspects. Configuration of these
@@ -3068,10 +3067,10 @@ profiler, using the @AspectJ-style of aspect declaration.
 	}
 ----
 
-We will also need to create an '++META-INF/aop.xml++' file, to inform the AspectJ weaver
+We will also need to create an `META-INF/aop.xml` file, to inform the AspectJ weaver
 that we want to weave our `ProfilingAspect` into our classes. This file convention,
 namely the presence of a file (or files) on the Java classpath called
-'++META-INF/aop.xml++' is standard AspectJ.
+`META-INF/aop.xml` is standard AspectJ.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -3095,7 +3094,7 @@ namely the presence of a file (or files) on the Java classpath called
 Now to the Spring-specific portion of the configuration. We need to configure a
 `LoadTimeWeaver` (all explained later, just take it on trust for now). This load-time
 weaver is the essential component responsible for weaving the aspect configuration in
-one or more '++META-INF/aop.xml++' files into the classes in your application. The good
+one or more `META-INF/aop.xml` files into the classes in your application. The good
 thing is that it does not require a lot of configuration, as can be seen below (there
 are some more options that you can specify, but these are detailed later).
 
@@ -3121,7 +3120,7 @@ are some more options that you can specify, but these are detailed later).
 	</beans>
 ----
 
-Now that all the required artifacts are in place - the aspect, the '++META-INF/aop.xml++'
+Now that all the required artifacts are in place - the aspect, the `META-INF/aop.xml`
 file, and the Spring configuration -, let us create a simple driver class with a
 `main(..)` method to demonstrate the LTW in action.
 
@@ -3158,7 +3157,7 @@ to switch on the LTW. This is the command line we will use to run the above `Mai
 java -javaagent:C:/projects/foo/lib/global/spring-instrument.jar foo.Main
 ----
 
-The '++-javaagent++' is a flag for specifying and enabling
+The `-javaagent` is a flag for specifying and enabling
 http://docs.oracle.com/javase/6/docs/api/java/lang/instrument/package-summary.html[agents
 to instrument programs running on the JVM]. The Spring Framework ships with such an
 agent, the `InstrumentationSavingAgent`, which is packaged in the
@@ -3236,13 +3235,13 @@ Furthermore, the compiled aspect classes need to be available on the classpath.
 [[aop-aj-ltw-aop_dot_xml]]
 ==== 'META-INF/aop.xml'
 
-The AspectJ LTW infrastructure is configured using one or more '++META-INF/aop.xml++'
+The AspectJ LTW infrastructure is configured using one or more `META-INF/aop.xml`
 files, that are on the Java classpath (either directly, or more typically in jar files).
 
 The structure and contents of this file is detailed in the main AspectJ reference
 documentation, and the interested reader is
 http://www.eclipse.org/aspectj/doc/released/devguide/ltw-configuration.html[referred to
-that resource]. (I appreciate that this section is brief, but the '++aop.xml++' file is
+that resource]. (I appreciate that this section is brief, but the `aop.xml` file is
 100% AspectJ - there is no Spring-specific information or semantics that apply to it,
 and so there is no extra value that I can contribute either as a result), so rather than
 rehash the quite satisfactory section that the AspectJ developers wrote, I am just
@@ -3302,7 +3301,7 @@ which typically is done using the `@EnableLoadTimeWeaving` annotation.
 
 Alternatively, if you prefer XML based configuration, use the
 `<context:load-time-weaver/>` element. Note that the element is defined in the
-'++context++' namespace.
+`context` namespace.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -3381,7 +3380,7 @@ To specify a specific `LoadTimeWeaver` with Java configuration implement the
 ----
 
 If you are using XML based configuration you can specify the fully-qualified classname
-as the value of the '++weaver-class++' attribute on the `<context:load-time-weaver/>`
+as the value of the `weaver-class` attribute on the `<context:load-time-weaver/>`
 element:
 
 [source,xml,indent=0]
@@ -3404,7 +3403,7 @@ element:
 ----
 
 The `LoadTimeWeaver` that is defined and registered by the configuration can be later
-retrieved from the Spring container using the well-known name '++loadTimeWeaver++'.
+retrieved from the Spring container using the well-known name `loadTimeWeaver`.
 Remember that the `LoadTimeWeaver` exists just as a mechanism for Spring's LTW
 infrastructure to add one or more `ClassFileTransformers`. The actual
 `ClassFileTransformer` that does the LTW is the `ClassPreProcessorAgentAdapter` (from
@@ -3413,10 +3412,10 @@ the `org.aspectj.weaver.loadtime` package) class. See the class-level javadocs o
 the weaving is actually effected is beyond the scope of this section.
 
 There is one final attribute of the configuration left to discuss: the
-'++aspectjWeaving++' attribute (or '++aspectj-weaving++' if you are using XML). This is a
+`aspectjWeaving` attribute (or `aspectj-weaving` if you are using XML). This is a
 simple attribute that controls whether LTW is enabled or not; it is as simple as that.
 It accepts one of three possible values, summarized below, with the default value being
-'++autodetect++' if the attribute is not present.
+`autodetect` if the attribute is not present.
 
 [[aop-aj-ltw-ltw-tag-attrs]]
 .AspectJ weaving attribute values
@@ -3433,7 +3432,7 @@ It accepts one of three possible values, summarized below, with the default valu
 
 | `AUTODETECT`
 | `autodetect`
-| If the Spring LTW infrastructure can find at least one '++META-INF/aop.xml++' file,
+| If the Spring LTW infrastructure can find at least one `META-INF/aop.xml` file,
   then AspectJ weaving is on, else it is off. This is the default value.
 |===
 

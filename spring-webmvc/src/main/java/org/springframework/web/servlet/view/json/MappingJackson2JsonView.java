@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 
 	private boolean extractValueFromSingleKeyModel = false;
 
-	private Set<String> jsonpParameterNames = new LinkedHashSet<String>(Arrays.asList("jsonp", "callback"));
+	private Set<String> jsonpParameterNames = new LinkedHashSet<>(Arrays.asList("jsonp", "callback"));
 
 
 	/**
@@ -213,7 +213,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 */
 	@Override
 	protected Object filterModel(Map<String, Object> model) {
-		Map<String, Object> result = new HashMap<String, Object>(model.size());
+		Map<String, Object> result = new HashMap<>(model.size());
 		Set<String> modelKeys = (!CollectionUtils.isEmpty(this.modelKeys) ? this.modelKeys : model.keySet());
 		for (Map.Entry<String, Object> entry : model.entrySet()) {
 			if (!(entry.getValue() instanceof BindingResult) && modelKeys.contains(entry.getKey()) &&

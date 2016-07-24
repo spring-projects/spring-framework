@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class WebUtilsTests {
 
 	@Test
 	public void findParameterValue() {
-		Map<String, Object> params = new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<>();
 		params.put("myKey1", "myValue1");
 		params.put("myKey2_myValue2", "xxx");
 		params.put("myKey3_myValue3.x", "xxx");
@@ -53,34 +53,6 @@ public class WebUtilsTests {
 		assertEquals("myValue2", WebUtils.findParameterValue(params, "myKey2"));
 		assertEquals("myValue3", WebUtils.findParameterValue(params, "myKey3"));
 		assertEquals("myValue4", WebUtils.findParameterValue(params, "myKey4"));
-	}
-
-	@Test
-	public void extractFilenameFromUrlPath() {
-		assertEquals("index", WebUtils.extractFilenameFromUrlPath("index.html"));
-		assertEquals("index", WebUtils.extractFilenameFromUrlPath("/index.html"));
-		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html"));
-		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=a"));
-		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=/path/a"));
-		assertEquals("view", WebUtils.extractFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
-	}
-
-	@Test
-	public void extractFullFilenameFromUrlPath() {
-		assertEquals("index.html", WebUtils.extractFullFilenameFromUrlPath("index.html"));
-		assertEquals("index.html", WebUtils.extractFullFilenameFromUrlPath("/index.html"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/path/a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html#/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a#/path/a"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products/view.html?param=/path/a.do#/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html?param=/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html;r=22?param=/path/a.do"));
-		assertEquals("view.html", WebUtils.extractFullFilenameFromUrlPath("/products;q=11/view.html;r=22;s=33?param=/path/a.do"));
 	}
 
 	@Test

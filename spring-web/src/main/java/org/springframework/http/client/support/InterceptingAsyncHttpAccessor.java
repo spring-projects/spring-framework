@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package org.springframework.http.client.support;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.http.client.AsyncClientHttpRequestFactory;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.http.client.InterceptingAsyncClientHttpRequestFactory;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * The HTTP accessor that extends the base {@link AsyncHttpAccessor} with request
- * intercepting functionality.
+ * The HTTP accessor that extends the base {@link AsyncHttpAccessor} with
+ * request intercepting functionality.
  *
  * @author Jakub Narloch
  * @author Rossen Stoyanchev
@@ -35,12 +35,11 @@ import java.util.List;
 public abstract class InterceptingAsyncHttpAccessor extends AsyncHttpAccessor {
 
     private List<AsyncClientHttpRequestInterceptor> interceptors =
-            new ArrayList<AsyncClientHttpRequestInterceptor>();
+			new ArrayList<>();
 
 
     /**
-     * Sets the request interceptors that this accessor should use.
-     *
+     * Set the request interceptors that this accessor should use.
      * @param interceptors the list of interceptors
      */
     public void setInterceptors(List<AsyncClientHttpRequestInterceptor> interceptors) {
@@ -53,6 +52,7 @@ public abstract class InterceptingAsyncHttpAccessor extends AsyncHttpAccessor {
     public List<AsyncClientHttpRequestInterceptor> getInterceptors() {
         return this.interceptors;
     }
+
 
     @Override
     public AsyncClientHttpRequestFactory getAsyncRequestFactory() {

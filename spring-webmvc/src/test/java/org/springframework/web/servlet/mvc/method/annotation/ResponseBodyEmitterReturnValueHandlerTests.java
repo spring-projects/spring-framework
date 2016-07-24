@@ -21,6 +21,7 @@ import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.*
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -147,7 +148,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals(200, this.response.getStatus());
-		assertEquals("text/event-stream", this.response.getContentType());
+		assertEquals("text/event-stream;charset=UTF-8", this.response.getContentType());
 
 		SimpleBean bean1 = new SimpleBean();
 		bean1.setId(1L);
@@ -177,18 +178,19 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals(200, this.response.getStatus());
-		assertEquals("text/event-stream", this.response.getContentType());
+		assertEquals("text/event-stream;charset=UTF-8", this.response.getContentType());
 		assertEquals("bar", this.response.getHeader("foo"));
 	}
 
 	@Test
 	public void responseEntitySseNoContent() throws Exception {
 		MethodParameter returnType = returnType("handleResponseEntitySse");
-		ResponseEntity<?> entity = ResponseEntity.noContent().build();
+		ResponseEntity<?> entity = ResponseEntity.noContent().header("foo", "bar").build();
 		handleReturnValue(entity, returnType);
 
 		assertFalse(this.request.isAsyncStarted());
 		assertEquals(204, this.response.getStatus());
+		assertEquals(Collections.singletonList("bar"), this.response.getHeaders("foo"));
 	}
 
 	private void handleReturnValue(Object returnValue, MethodParameter returnType) throws Exception {

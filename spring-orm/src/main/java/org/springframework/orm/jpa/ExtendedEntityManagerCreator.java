@@ -221,7 +221,7 @@ public abstract class ExtendedEntityManagerCreator {
 			boolean containerManaged, boolean synchronizedWithTransaction) {
 
 		Assert.notNull(rawEm, "EntityManager must not be null");
-		Set<Class<?>> ifcs = new LinkedHashSet<Class<?>>();
+		Set<Class<?>> ifcs = new LinkedHashSet<>();
 		if (emIfc != null) {
 			ifcs.add(emIfc);
 		}

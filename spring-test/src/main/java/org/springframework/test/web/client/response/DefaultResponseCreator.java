@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.response;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -56,6 +57,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 		this.statusCode = statusCode;
 	}
 
+
 	@Override
 	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
 		MockClientHttpResponse response;
@@ -74,13 +76,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 	 * Set the body as a UTF-8 String.
 	 */
 	public DefaultResponseCreator body(String content) {
-		try {
-			this.content = content.getBytes("UTF-8");
-		}
-		catch (UnsupportedEncodingException e) {
-			// should not happen, UTF-8 is always supported
-			throw new IllegalStateException(e);
-		}
+		this.content = content.getBytes(StandardCharsets.UTF_8);
 		return this;
 	}
 

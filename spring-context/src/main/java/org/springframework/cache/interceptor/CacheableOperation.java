@@ -28,14 +28,18 @@ public class CacheableOperation extends CacheOperation {
 
 	private final String unless;
 
-	private boolean sync;
+	private final boolean sync;
 
 
+	/**
+	 * @since 4.3
+	 */
 	public CacheableOperation(CacheableOperation.Builder b) {
 		super(b);
 		this.unless = b.unless;
 		this.sync = b.sync;
 	}
+
 
 	public String getUnless() {
 		return this.unless;
@@ -46,6 +50,9 @@ public class CacheableOperation extends CacheOperation {
 	}
 
 
+	/**
+	 * @since 4.3
+	 */
 	public static class Builder extends CacheOperation.Builder {
 
 		private String unless;

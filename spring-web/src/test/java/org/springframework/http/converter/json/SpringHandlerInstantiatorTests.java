@@ -47,7 +47,6 @@ import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -197,8 +196,7 @@ public class SpringHandlerInstantiatorTests {
 			return JsonTypeInfo.Id.CUSTOM;
 		}
 
-		@Override
-		@SuppressWarnings("deprecation")
+		// Only needed when compiling against Jackson 2.7; gone in 2.8
 		public JavaType typeFromId(String s) {
 			return TypeFactory.defaultInstance().constructFromCanonical(s);
 		}

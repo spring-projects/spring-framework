@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import java.io.IOException;
@@ -53,5 +54,10 @@ public interface RequestExpectationManager {
 	 * @throws AssertionError when some expectations were not met
 	 */
 	void verify();
+
+	/**
+	 * Reset the internal state removing all expectations and recorded requests.
+	 */
+	void reset();
 
 }

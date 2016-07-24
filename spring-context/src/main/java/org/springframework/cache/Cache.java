@@ -27,6 +27,7 @@ import java.util.concurrent.Callable;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public interface Cache {
@@ -144,6 +145,7 @@ public interface Cache {
 	/**
 	 * A (wrapper) object representing a cache value.
 	 */
+	@FunctionalInterface
 	interface ValueWrapper {
 
 		/**
@@ -164,7 +166,7 @@ public interface Cache {
 		private final Object key;
 
 		public ValueRetrievalException(Object key, Callable<?> loader, Throwable ex) {
-			super(String.format("Value for key '%s' could not " + "be loaded using '%s'", key, loader), ex);
+			super(String.format("Value for key '%s' could not be loaded using '%s'", key, loader), ex);
 			this.key = key;
 		}
 

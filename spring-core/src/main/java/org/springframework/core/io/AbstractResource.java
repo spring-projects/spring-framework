@@ -82,6 +82,14 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * This implementation always returns {@code false}.
+	 */
+	@Override
+	public boolean isFile() {
+		return false;
+	}
+
+	/**
 	 * This implementation throws a FileNotFoundException, assuming
 	 * that the resource cannot be resolved to a URL.
 	 */

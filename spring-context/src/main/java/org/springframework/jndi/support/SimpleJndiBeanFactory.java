@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,13 +60,13 @@ import org.springframework.jndi.TypeMismatchNamingException;
 public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFactory {
 
 	/** JNDI names of resources that are known to be shareable, i.e. can be cached */
-	private final Set<String> shareableResources = new HashSet<String>();
+	private final Set<String> shareableResources = new HashSet<>();
 
 	/** Cache of shareable singleton objects: bean name --> bean instance */
-	private final Map<String, Object> singletonObjects = new HashMap<String, Object>();
+	private final Map<String, Object> singletonObjects = new HashMap<>();
 
 	/** Cache of the types of nonshareable resources: bean name --> bean type */
-	private final Map<String, Class<?>> resourceTypes = new HashMap<String, Class<?>>();
+	private final Map<String, Class<?>> resourceTypes = new HashMap<>();
 
 
 	public SimpleJndiBeanFactory() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class MockMultipartHttpServletRequestTests {
 	}
 
 	private void doTestMultipartHttpServletRequest(MultipartHttpServletRequest request) throws IOException {
-		Set<String> fileNames = new HashSet<String>();
+		Set<String> fileNames = new HashSet<>();
 		Iterator<String> fileIter = request.getFileNames();
 		while (fileIter.hasNext()) {
 			fileNames.add(fileIter.next());
@@ -73,7 +73,7 @@ public class MockMultipartHttpServletRequestTests {
 		MultipartFile file1 = request.getFile("file1");
 		MultipartFile file2 = request.getFile("file2");
 		Map<String, MultipartFile> fileMap = request.getFileMap();
-		List<String> fileMapKeys = new LinkedList<String>(fileMap.keySet());
+		List<String> fileMapKeys = new LinkedList<>(fileMap.keySet());
 		assertEquals(2, fileMapKeys.size());
 		assertEquals(file1, fileMap.get("file1"));
 		assertEquals(file2, fileMap.get("file2"));

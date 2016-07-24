@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,12 +95,11 @@ public class SpringClassRule implements TestRule {
 	 * Cache of {@code TestContextManagers} keyed by test class.
 	 */
 	private static final Map<Class<?>, TestContextManager> testContextManagerCache =
-			new ConcurrentHashMap<Class<?>, TestContextManager>(64);
+			new ConcurrentHashMap<>(64);
 
 	static {
-		if (!ClassUtils.isPresent("org.junit.internal.Throwables", SpringClassRule.class.getClassLoader())) {
-			throw new IllegalStateException("SpringClassRule requires JUnit 4.12 or higher.");
-		}
+		Assert.state(ClassUtils.isPresent("org.junit.internal.Throwables", SpringClassRule.class.getClassLoader()),
+				"SpringClassRule requires JUnit 4.12 or higher.");
 	}
 
 
@@ -183,28 +182,26 @@ public class SpringClassRule implements TestRule {
 	 * annotated with {@code @Rule}.
 	 */
 	private static void validateSpringMethodRuleConfiguration(Class<?> testClass) {
-		Field ruleField = null;
+		Field ruleField = findSpringMethodRuleField(testClass);
 
+		Assert.state(ruleField != null, () -> String.format(
+					"Failed to find 'public SpringMethodRule' field in test class [%s]. " +
+					"Consult the javadoc for SpringClassRule for details.", testClass.getName()));
+
+		Assert.state(ruleField.isAnnotationPresent(Rule.class), () -> String.format(
+					"SpringMethodRule field [%s] must be annotated with JUnit's @Rule annotation. " +
+					"Consult the javadoc for SpringClassRule for details.", ruleField));
+	}
+
+	private static Field findSpringMethodRuleField(Class<?> testClass) {
 		for (Field field : testClass.getFields()) {
 			int modifiers = field.getModifiers();
 			if (!Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers) &&
 					SpringMethodRule.class.isAssignableFrom(field.getType())) {
-				ruleField = field;
-				break;
+				return field;
 			}
 		}
-
-		if (ruleField == null) {
-			throw new IllegalStateException(String.format(
-					"Failed to find 'public SpringMethodRule' field in test class [%s]. " +
-					"Consult the javadoc for SpringClassRule for details.", testClass.getName()));
-		}
-
-		if (!ruleField.isAnnotationPresent(Rule.class)) {
-			throw new IllegalStateException(String.format(
-					"SpringMethodRule field [%s] must be annotated with JUnit's @Rule annotation. " +
-					"Consult the javadoc for SpringClassRule for details.", ruleField));
-		}
+		return null;
 	}
 
 	/**

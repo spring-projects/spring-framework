@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ class WebSocketNamespaceUtils {
 	}
 
 	public static ManagedList<? super Object> parseBeanSubElements(Element parentElement, ParserContext context) {
-		ManagedList<? super Object> beans = new ManagedList<Object>();
+		ManagedList<? super Object> beans = new ManagedList<>();
 		if (parentElement != null) {
 			beans.setSource(context.extractSource(parentElement));
 			for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {

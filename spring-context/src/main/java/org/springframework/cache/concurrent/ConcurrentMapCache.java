@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * @param name the name of the cache
 	 */
 	public ConcurrentMapCache(String name) {
-		this(name, new ConcurrentHashMap<Object, Object>(256), true);
+		this(name, new ConcurrentHashMap<>(256), true);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * values for this cache
 	 */
 	public ConcurrentMapCache(String name, boolean allowNullValues) {
-		this(name, new ConcurrentHashMap<Object, Object>(256), allowNullValues);
+		this(name, new ConcurrentHashMap<>(256), allowNullValues);
 	}
 
 	/**
@@ -95,6 +95,7 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * (adapting them to an internal null holder value)
 	 * @param serialization the {@link SerializationDelegate} to use
 	 * to serialize cache entry or {@code null} to store the reference
+	 * @since 4.3
 	 */
 	protected ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store,
 			boolean allowNullValues, SerializationDelegate serialization) {
@@ -107,13 +108,15 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 		this.serialization = serialization;
 	}
 
+
 	/**
 	 * Return whether this cache stores a copy of each entry ({@code true}) or
 	 * a reference ({@code false}, default). If store by value is enabled, each
 	 * entry in the cache must be serializable.
+	 * @since 4.3
 	 */
 	public final boolean isStoreByValue() {
-		return this.serialization != null;
+		return (this.serialization != null);
 	}
 
 	@Override
@@ -138,20 +141,14 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 			return (T) get(key).get();
 		}
 		else {
-			synchronized (this.store) {
-				if (this.store.containsKey(key)) {
-					return (T) get(key).get();
-				}
-				T value;
+			return (T) fromStoreValue(this.store.computeIfAbsent(key, r -> {
 				try {
-					value = valueLoader.call();
+					return toStoreValue(valueLoader.call());
 				}
 				catch (Exception ex) {
 					throw new ValueRetrievalException(key, valueLoader, ex);
 				}
-				put(key, value);
-				return value;
-			}
+			}));
 		}
 	}
 

@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.condition;
 
 import java.util.Collections;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -85,6 +87,18 @@ public class RequestMethodsRequestConditionTests {
 		assertNotNull(new RequestMethodsRequestCondition().getMatchingCondition(request));
 		assertNotNull(new RequestMethodsRequestCondition(PUT).getMatchingCondition(request));
 		assertNull(new RequestMethodsRequestCondition(DELETE).getMatchingCondition(request));
+	}
+
+	@Test // SPR-14410
+	public void getMatchingConditionWithHttpOptionsInErrorDispatch() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/path");
+		request.setDispatcherType(DispatcherType.ERROR);
+
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition();
+		RequestMethodsRequestCondition result = condition.getMatchingCondition(request);
+
+		assertNotNull(result);
+		assertSame(condition, result);
 	}
 
 	@Test

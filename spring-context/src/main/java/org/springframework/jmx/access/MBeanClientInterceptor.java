@@ -122,7 +122,7 @@ public class MBeanClientInterceptor
 
 	private Map<MethodCacheKey, MBeanOperationInfo> allowedOperations;
 
-	private final Map<Method, String[]> signatureCache = new HashMap<Method, String[]>();
+	private final Map<Method, String[]> signatureCache = new HashMap<>();
 
 	private final Object preparationMonitor = new Object();
 
@@ -285,13 +285,13 @@ public class MBeanClientInterceptor
 			MBeanInfo info = this.serverToUse.getMBeanInfo(this.objectName);
 
 			MBeanAttributeInfo[] attributeInfo = info.getAttributes();
-			this.allowedAttributes = new HashMap<String, MBeanAttributeInfo>(attributeInfo.length);
+			this.allowedAttributes = new HashMap<>(attributeInfo.length);
 			for (MBeanAttributeInfo infoEle : attributeInfo) {
 				this.allowedAttributes.put(infoEle.getName(), infoEle);
 			}
 
 			MBeanOperationInfo[] operationInfo = info.getOperations();
-			this.allowedOperations = new HashMap<MethodCacheKey, MBeanOperationInfo>(operationInfo.length);
+			this.allowedOperations = new HashMap<>(operationInfo.length);
 			for (MBeanOperationInfo infoEle : operationInfo) {
 				Class<?>[] paramTypes = JmxUtils.parameterInfoToTypes(infoEle.getSignature(), this.beanClassLoader);
 				this.allowedOperations.put(new MethodCacheKey(infoEle.getName(), paramTypes), infoEle);

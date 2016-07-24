@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,21 @@
 
 package org.springframework.orm.jpa.support;
 
+import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.support.PersistenceInjectionTests.DefaultPublicPersistenceContextSetter;
 import org.springframework.orm.jpa.support.PersistenceInjectionTests.DefaultPublicPersistenceUnitSetterNamedPerson;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
-@SuppressWarnings("deprecation")
 public class PersistenceInjectionIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
-
-	// Enable support for @Autowired
-	{
-		setAutowireMode(AUTOWIRE_NO);
-		setDependencyCheck(false);
-	}
 
 	@Autowired
 	private DefaultPublicPersistenceContextSetter defaultSetterInjected;
@@ -42,10 +39,12 @@ public class PersistenceInjectionIntegrationTests extends AbstractEntityManagerF
 	private DefaultPublicPersistenceUnitSetterNamedPerson namedSetterInjected;
 
 
+	@Test
 	public void testDefaultPersistenceContextSetterInjection() {
 		assertNotNull(defaultSetterInjected.getEntityManager());
 	}
 
+	@Test
 	public void testSetterInjectionOfNamedPersistenceContext() {
 		assertNotNull(namedSetterInjected.getEntityManagerFactory());
 	}

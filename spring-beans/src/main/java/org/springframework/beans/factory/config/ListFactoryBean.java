@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class ListFactoryBean extends AbstractFactoryBean<List<Object>> {
 			result = BeanUtils.instantiateClass(this.targetListClass);
 		}
 		else {
-			result = new ArrayList<Object>(this.sourceList.size());
+			result = new ArrayList<>(this.sourceList.size());
 		}
 		Class<?> valueType = null;
 		if (this.targetListClass != null) {

@@ -238,6 +238,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void buildRequestInputStream() throws Exception {
 		String content = "some content that has length";
 		webRequest.setHttpMethod(HttpMethod.POST);

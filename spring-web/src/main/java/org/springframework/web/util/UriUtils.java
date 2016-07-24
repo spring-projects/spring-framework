@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * </ul>
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
  */
@@ -211,6 +212,30 @@ public abstract class UriUtils {
 			}
 		}
 		return (changed ? new String(bos.toByteArray(), encoding) : source);
+	}
+
+	/**
+	 * Extract the file extension from the given URI path.
+	 * @param path the URI path (e.g. "/products/index.html")
+	 * @return the extracted file extension (e.g. "html")
+	 * @since 4.3.2
+	 */
+	public static String extractFileExtension(String path) {
+		int end = path.indexOf('?');
+		if (end == -1) {
+			end = path.indexOf('#');
+			if (end == -1) {
+				end = path.length();
+			}
+		}
+		int begin = path.lastIndexOf('/', end) + 1;
+		int paramIndex = path.indexOf(';', begin);
+		end = (paramIndex != -1 && paramIndex < end ? paramIndex : end);
+		int extIndex = path.lastIndexOf('.', end);
+		if (extIndex != -1 && extIndex > begin) {
+			return path.substring(extIndex + 1, end);
+		}
+		return null;
 	}
 
 }

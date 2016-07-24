@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ abstract class ActiveProfilesUtils {
 	static String[] resolveActiveProfiles(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 
-		final List<String[]> profileArrays = new ArrayList<String[]>();
+		final List<String[]> profileArrays = new ArrayList<>();
 
 		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
 		AnnotationDescriptor<ActiveProfiles> descriptor = MetaAnnotationUtils.findAnnotationDescriptor(testClass,
@@ -130,7 +130,7 @@ abstract class ActiveProfilesUtils {
 		// Reverse the list so that we can traverse "down" the hierarchy.
 		Collections.reverse(profileArrays);
 
-		final Set<String> activeProfiles = new LinkedHashSet<String>();
+		final Set<String> activeProfiles = new LinkedHashSet<>();
 		for (String[] profiles : profileArrays) {
 			for (String profile : profiles) {
 				if (StringUtils.hasText(profile)) {

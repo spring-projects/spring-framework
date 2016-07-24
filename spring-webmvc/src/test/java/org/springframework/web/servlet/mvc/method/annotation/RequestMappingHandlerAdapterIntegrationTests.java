@@ -118,7 +118,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setValidator(new StubValidator());
 
-		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<>();
 		customResolvers.add(new ServletWebArgumentResolverAdapter(new ColorArgumentResolver()));
 
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
@@ -172,7 +172,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		request.setContextPath("/contextPath");
 		request.setServletPath("/main");
 		System.setProperty("systemHeader", "systemHeaderValue");
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("pathvar", "pathvarValue");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 		request.getSession().setAttribute("sessionAttribute", sessionAttribute);

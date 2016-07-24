@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.scripting.support;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -28,6 +29,7 @@ import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -150,15 +152,23 @@ public class StandardScriptFactory implements ScriptFactory, BeanClassLoaderAwar
 		if (script instanceof Class) {
 			Class<?> scriptClass = (Class<?>) script;
 			try {
-				return scriptClass.newInstance();
+				return ReflectionUtils.accessibleConstructor(scriptClass).newInstance();
+			}
+			catch (NoSuchMethodException ex) {
+				throw new ScriptCompilationException(
+						"No default constructor on script class: " + scriptClass.getName(), ex);
 			}
 			catch (InstantiationException ex) {
 				throw new ScriptCompilationException(
-						scriptSource, "Could not instantiate script class: " + scriptClass.getName(), ex);
+						scriptSource, "Unable to instantiate script class: " + scriptClass.getName(), ex);
 			}
 			catch (IllegalAccessException ex) {
 				throw new ScriptCompilationException(
 						scriptSource, "Could not access script constructor: " + scriptClass.getName(), ex);
+			}
+			catch (InvocationTargetException ex) {
+				throw new ScriptCompilationException(
+						"Failed to invoke script constructor: " + scriptClass.getName(), ex.getTargetException());
 			}
 		}
 

@@ -244,10 +244,10 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	 */
 	protected BlockingQueue<Runnable> createQueue(int queueCapacity) {
 		if (queueCapacity > 0) {
-			return new LinkedBlockingQueue<Runnable>(queueCapacity);
+			return new LinkedBlockingQueue<>(queueCapacity);
 		}
 		else {
-			return new SynchronousQueue<Runnable>();
+			return new SynchronousQueue<>();
 		}
 	}
 
@@ -328,7 +328,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	public ListenableFuture<?> submitListenable(Runnable task) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
-			ListenableFutureTask<Object> future = new ListenableFutureTask<Object>(task, null);
+			ListenableFutureTask<Object> future = new ListenableFutureTask<>(task, null);
 			executor.execute(future);
 			return future;
 		}
@@ -341,7 +341,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 	public <T> ListenableFuture<T> submitListenable(Callable<T> task) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
-			ListenableFutureTask<T> future = new ListenableFutureTask<T>(task);
+			ListenableFutureTask<T> future = new ListenableFutureTask<>(task);
 			executor.execute(future);
 			return future;
 		}

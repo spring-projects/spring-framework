@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class ConstructorReference extends SpelNodeImpl {
 	 */
 	private TypedValue createNewInstance(ExpressionState state) throws EvaluationException {
 		Object[] arguments = new Object[getChildCount() - 1];
-		List<TypeDescriptor> argumentTypes = new ArrayList<TypeDescriptor>(getChildCount() - 1);
+		List<TypeDescriptor> argumentTypes = new ArrayList<>(getChildCount() - 1);
 		for (int i = 0; i < arguments.length; i++) {
 			TypedValue childValue = this.children[i + 1].getValueInternal(state);
 			Object value = childValue.getValue();

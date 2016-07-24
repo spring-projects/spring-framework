@@ -16,10 +16,6 @@
 
 package org.springframework.util.xml;
 
-import java.io.StringReader;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -28,7 +24,13 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+
 
 /**
  * Unit tests for {@link DomContentHandler}.
@@ -73,7 +75,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_1)));
-		assertXMLEqual("Invalid result", expected, result);
+		assertThat("Invalid result", result, isSimilarTo(expected));
 	}
 
 	@Test
@@ -82,7 +84,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_1)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_1)));
-		assertXMLEqual("Invalid result", expected, result);
+		assertThat("Invalid result", result, isSimilarTo(expected));
 	}
 
 	@Test
@@ -93,7 +95,7 @@ public class DomContentHandlerTests {
 		expected = documentBuilder.parse(new InputSource(new StringReader(XML_2_EXPECTED)));
 		xmlReader.setContentHandler(handler);
 		xmlReader.parse(new InputSource(new StringReader(XML_2_SNIPPET)));
-		assertXMLEqual("Invalid result", expected, result);
+		assertThat("Invalid result", result, isSimilarTo(expected));
 
 	}
 

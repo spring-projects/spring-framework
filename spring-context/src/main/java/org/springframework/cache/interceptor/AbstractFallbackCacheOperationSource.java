@@ -71,7 +71,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
 	private final Map<Object, Collection<CacheOperation>> attributeCache =
-			new ConcurrentHashMap<Object, Collection<CacheOperation>>(1024);
+			new ConcurrentHashMap<>(1024);
 
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class CallableStatementCreatorFactory {
 	 */
 	public CallableStatementCreatorFactory(String callString) {
 		this.callString = callString;
-		this.declaredParameters = new LinkedList<SqlParameter>();
+		this.declaredParameters = new LinkedList<>();
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class CallableStatementCreatorFactory {
 	 * @param params list of parameters (may be {@code null})
 	 */
 	public CallableStatementCreator newCallableStatementCreator(Map<String, ?> params) {
-		return new CallableStatementCreatorImpl(params != null ? params : new HashMap<String, Object>());
+		return new CallableStatementCreatorImpl(params != null ? params : new HashMap<>());
 	}
 
 	/**

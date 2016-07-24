@@ -135,7 +135,7 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 		if (ann == null) {
 			return null;
 		}
-		T bean = BeanUtils.instantiate(beanClass);
+		T bean = BeanUtils.instantiateClass(beanClass);
 		AnnotationBeanUtils.copyPropertiesToBean(ann, bean);
 		return bean;
 	}

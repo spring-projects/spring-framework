@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -267,7 +267,7 @@ public class GenericBean<T> {
 	}
 
 	public void setCustomEnumSetMismatch(Set<String> customEnumSet) {
-		this.customEnumSet = new HashSet<CustomEnum>(customEnumSet.size());
+		this.customEnumSet = new HashSet<>(customEnumSet.size());
 		for (Iterator<String> iterator = customEnumSet.iterator(); iterator.hasNext(); ) {
 			this.customEnumSet.add(CustomEnum.valueOf(iterator.next()));
 		}

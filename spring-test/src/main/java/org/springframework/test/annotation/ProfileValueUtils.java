@@ -25,6 +25,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -87,7 +88,7 @@ public abstract class ProfileValueUtils {
 		}
 		else {
 			try {
-				profileValueSource = profileValueSourceType.newInstance();
+				profileValueSource = ReflectionUtils.accessibleConstructor(profileValueSourceType).newInstance();
 			}
 			catch (Exception ex) {
 				if (logger.isWarnEnabled()) {
@@ -184,10 +185,8 @@ public abstract class ProfileValueUtils {
 		String environmentValue = profileValueSource.get(ifProfileValue.name());
 		String[] annotatedValues = ifProfileValue.values();
 		if (StringUtils.hasLength(ifProfileValue.value())) {
-			if (annotatedValues.length > 0) {
-				throw new IllegalArgumentException("Setting both the 'value' and 'values' attributes " +
+			Assert.isTrue(annotatedValues.length == 0, () -> "Setting both the 'value' and 'values' attributes " +
 						"of @IfProfileValue is not allowed: choose one or the other.");
-			}
 			annotatedValues = new String[] { ifProfileValue.value() };
 		}
 

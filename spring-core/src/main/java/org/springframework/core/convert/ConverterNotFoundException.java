@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ package org.springframework.core.convert;
  * @since 3.0
  */
 @SuppressWarnings("serial")
-public final class ConverterNotFoundException extends ConversionException {
+public class ConverterNotFoundException extends ConversionException {
 
 	private final TypeDescriptor sourceType;
 
@@ -33,7 +33,7 @@ public final class ConverterNotFoundException extends ConversionException {
 
 
 	/**
-	 * Creates a new conversion executor not found exception.
+	 * Create a new conversion executor not found exception.
 	 * @param sourceType the source type requested to convert from
 	 * @param targetType the target type requested to convert to
 	 */

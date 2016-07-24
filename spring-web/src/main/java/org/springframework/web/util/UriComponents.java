@@ -19,6 +19,8 @@ package org.springframework.web.util;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -41,8 +43,6 @@ import org.springframework.util.MultiValueMap;
  */
 @SuppressWarnings("serial")
 public abstract class UriComponents implements Serializable {
-
-	private static final String DEFAULT_ENCODING = "UTF-8";
 
 	/** Captures URI template variable names. */
 	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
@@ -123,7 +123,7 @@ public abstract class UriComponents implements Serializable {
 	 */
 	public final UriComponents encode() {
 		try {
-			return encode(DEFAULT_ENCODING);
+			return encode(StandardCharsets.UTF_8);
 		}
 		catch (UnsupportedEncodingException ex) {
 			// should not occur
@@ -134,11 +134,11 @@ public abstract class UriComponents implements Serializable {
 	/**
 	 * Encode all URI components using their specific encoding rules, and
 	 * returns the result as a new {@code UriComponents} instance.
-	 * @param encoding the encoding of the values contained in this map
+	 * @param charset the encoding of the values contained in this map
 	 * @return the encoded URI components
 	 * @throws UnsupportedEncodingException if the given encoding is not supported
 	 */
-	public abstract UriComponents encode(String encoding) throws UnsupportedEncodingException;
+	public abstract UriComponents encode(Charset charset) throws UnsupportedEncodingException;
 
 	/**
 	 * Replace all URI template variables with the values from a given map.

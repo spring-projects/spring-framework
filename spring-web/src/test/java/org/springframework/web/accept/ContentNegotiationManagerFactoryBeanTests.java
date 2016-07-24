@@ -30,10 +30,11 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link ContentNegotiationManagerFactoryBean} tests.
+ *
  * @author Rossen Stoyanchev
  */
 public class ContentNegotiationManagerFactoryBeanTests {
@@ -119,9 +120,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		assertEquals(Collections.emptyList(), manager.resolveMediaTypes(this.webRequest));
 	}
 
-	// SPR-10170
-
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)
+	@Test(expected = HttpMediaTypeNotAcceptableException.class)  // SPR-10170
 	public void favorPathWithIgnoreUnknownPathExtensionTurnedOff() throws Exception {
 		this.factoryBean.setFavorPathExtension(true);
 		this.factoryBean.setIgnoreUnknownPathExtensions(false);
@@ -152,9 +151,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 				manager.resolveMediaTypes(this.webRequest));
 	}
 
-	// SPR-10170
-
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)
+	@Test(expected = HttpMediaTypeNotAcceptableException.class)  // SPR-10170
 	public void favorParameterWithUnknownMediaType() throws HttpMediaTypeNotAcceptableException {
 		this.factoryBean.setFavorParameter(true);
 		this.factoryBean.afterPropertiesSet();
@@ -188,16 +185,12 @@ public class ContentNegotiationManagerFactoryBeanTests {
 				manager.resolveMediaTypes(this.webRequest));
 
 		// SPR-10513
-
 		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
-
 		assertEquals(Collections.singletonList(MediaType.APPLICATION_JSON),
 				manager.resolveMediaTypes(this.webRequest));
 	}
 
-	// SPR-12286
-
-	@Test
+	@Test  // SPR-12286
 	public void setDefaultContentTypeWithStrategy() throws Exception {
 		this.factoryBean.setDefaultContentTypeStrategy(new FixedContentNegotiationStrategy(MediaType.APPLICATION_JSON));
 		this.factoryBean.afterPropertiesSet();
@@ -215,7 +208,6 @@ public class ContentNegotiationManagerFactoryBeanTests {
 	private static class TestServletContext extends MockServletContext {
 
 		private final Map<String, String> mimeTypes = new HashMap<>();
-
 
 		public Map<String, String> getMimeTypes() {
 			return this.mimeTypes;

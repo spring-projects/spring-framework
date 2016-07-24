@@ -63,7 +63,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Map<String, MessageListenerContainer> listenerContainers =
-			new ConcurrentHashMap<String, MessageListenerContainer>();
+			new ConcurrentHashMap<>();
 
 	private int phase = Integer.MAX_VALUE;
 

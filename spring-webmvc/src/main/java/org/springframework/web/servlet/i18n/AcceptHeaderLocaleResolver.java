@@ -40,7 +40,9 @@ import org.springframework.web.servlet.LocaleResolver;
  */
 public class AcceptHeaderLocaleResolver implements LocaleResolver {
 
-	private final List<Locale> supportedLocales = new ArrayList<Locale>();
+	private final List<Locale> supportedLocales = new ArrayList<>(4);
+
+	private Locale defaultLocale;
 
 
 	/**
@@ -65,9 +67,34 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 		return this.supportedLocales;
 	}
 
+	/**
+	 * Configure a fixed default locale to fall back on if the request does not
+	 * have an "Accept-Language" header.
+	 * <p>By default this is not set in which case when there is "Accept-Language"
+	 * header, the default locale for the server is used as defined in
+	 * {@link HttpServletRequest#getLocale()}.
+	 * @param defaultLocale the default locale to use
+	 * @since 4.3
+	 */
+	public void setDefaultLocale(Locale defaultLocale) {
+		this.defaultLocale = defaultLocale;
+	}
+
+	/**
+	 * The configured default locale, if any.
+	 * @since 4.3
+	 */
+	public Locale getDefaultLocale() {
+		return this.defaultLocale;
+	}
+
 
 	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
+		Locale defaultLocale = getDefaultLocale();
+		if (defaultLocale != null && request.getHeader("Accept-Language") == null) {
+			return defaultLocale;
+		}
 		Locale locale = request.getLocale();
 		if (!isSupportedLocale(locale)) {
 			locale = findSupportedLocale(request, locale);
@@ -76,7 +103,8 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 	}
 
 	private boolean isSupportedLocale(Locale locale) {
-		return (getSupportedLocales().isEmpty() || getSupportedLocales().contains(locale));
+		List<Locale> supportedLocales = getSupportedLocales();
+		return (supportedLocales.isEmpty() || supportedLocales.contains(locale));
 	}
 
 	private Locale findSupportedLocale(HttpServletRequest request, Locale fallback) {

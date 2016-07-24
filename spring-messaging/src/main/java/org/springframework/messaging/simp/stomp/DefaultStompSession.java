@@ -67,7 +67,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private static final Message<byte[]> HEARTBEAT;
 
-
 	static {
 		StompHeaderAccessor accessor = StompHeaderAccessor.createForHeartbeat();
 		HEARTBEAT = MessageBuilder.createMessage(StompDecoder.HEARTBEAT_PAYLOAD, accessor.getMessageHeaders());
@@ -80,7 +79,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final StompHeaders connectHeaders;
 
-	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<StompSession>();
+	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<>();
 
 	private MessageConverter converter = new SimpleMessageConverter();
 
@@ -93,13 +92,15 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private volatile TcpConnection<byte[]> connection;
 
+	private volatile String version;
+
 	private final AtomicInteger subscriptionIndex = new AtomicInteger();
 
-	private final Map<String, DefaultSubscription> subscriptions = new ConcurrentHashMap<String, DefaultSubscription>(4);
+	private final Map<String, DefaultSubscription> subscriptions = new ConcurrentHashMap<>(4);
 
 	private final AtomicInteger receiptIndex = new AtomicInteger();
 
-	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<String, ReceiptHandler>(4);
+	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<>(4);
 
 	/* Whether the client is willfully closing the connection */
 	private volatile boolean closing = false;
@@ -313,7 +314,12 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	@Override
 	public Receiptable acknowledge(String messageId, boolean consumed) {
 		StompHeaders stompHeaders = new StompHeaders();
-		stompHeaders.setId(messageId);
+		if ("1.1".equals(this.version)) {
+			stompHeaders.setMessageId(messageId);
+		}
+		else {
+			stompHeaders.setId(messageId);
+		}
 
 		String receiptId = checkOrAddReceipt(stompHeaders);
 		Receiptable receiptable = new ReceiptHandler(receiptId);
@@ -407,6 +413,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 				}
 				else if (StompCommand.CONNECTED.equals(command)) {
 					initHeartbeatTasks(stompHeaders);
+					this.version = stompHeaders.getFirst("version");
 					this.sessionFuture.set(this);
 					this.sessionHandler.afterConnected(this, stompHeaders);
 				}
@@ -496,9 +503,9 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 		private final String receiptId;
 
-		private final List<Runnable> receiptCallbacks = new ArrayList<Runnable>(2);
+		private final List<Runnable> receiptCallbacks = new ArrayList<>(2);
 
-		private final List<Runnable> receiptLostCallbacks = new ArrayList<Runnable>(2);
+		private final List<Runnable> receiptLostCallbacks = new ArrayList<>(2);
 
 		private ScheduledFuture<?> future;
 

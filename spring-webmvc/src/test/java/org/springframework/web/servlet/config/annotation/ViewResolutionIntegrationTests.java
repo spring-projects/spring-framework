@@ -39,7 +39,6 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
-import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 
 import static org.junit.Assert.*;
 
@@ -62,12 +61,6 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@Test
-	public void velocity() throws Exception {
-		MockHttpServletResponse response = runTest(VelocityWebConfig.class);
-		assertEquals("<html><body>Hello World!</body></html>", response.getContentAsString());
-	}
-
-	@Test
 	public void tiles() throws Exception {
 		MockHttpServletResponse response = runTest(TilesWebConfig.class);
 		assertEquals("/WEB-INF/index.jsp", response.getForwardedUrl());
@@ -83,12 +76,6 @@ public class ViewResolutionIntegrationTests {
 	public void freemarkerInvalidConfig() throws Exception {
 		this.thrown.expectMessage("In addition to a FreeMarker view resolver ");
 		runTest(InvalidFreeMarkerWebConfig.class);
-	}
-
-	@Test
-	public void velocityInvalidConfig() throws Exception {
-		this.thrown.expectMessage("In addition to a Velocity view resolver ");
-		runTest(InvalidVelocityWebConfig.class);
 	}
 
 	@Test
@@ -166,22 +153,6 @@ public class ViewResolutionIntegrationTests {
 	}
 
 	@Configuration
-	static class VelocityWebConfig extends AbstractWebConfig {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.velocity();
-		}
-
-		@Bean
-		public VelocityConfigurer velocityConfigurer() {
-			VelocityConfigurer configurer = new VelocityConfigurer();
-			configurer.setResourceLoaderPath("/WEB-INF/");
-			return configurer;
-		}
-	}
-
-	@Configuration
 	static class TilesWebConfig extends AbstractWebConfig {
 
 		@Override
@@ -219,15 +190,6 @@ public class ViewResolutionIntegrationTests {
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
-		}
-	}
-
-	@Configuration
-	static class InvalidVelocityWebConfig extends WebMvcConfigurationSupport {
-
-		@Override
-		public void configureViewResolvers(ViewResolverRegistry registry) {
-			registry.velocity();
 		}
 	}
 

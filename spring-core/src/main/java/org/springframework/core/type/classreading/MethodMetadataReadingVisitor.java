@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,10 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 
 	protected final Set<MethodMetadata> methodMetadataSet;
 
-	protected final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<String, Set<String>>(4);
+	protected final Map<String, Set<String>> metaAnnotationMap = new LinkedHashMap<>(4);
 
 	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap =
-			new LinkedMultiValueMap<String, AnnotationAttributes>(4);
+			new LinkedMultiValueMap<>(4);
 
 
 	public MethodMetadataReadingVisitor(String methodName, int access, String declaringClassName,
@@ -122,7 +122,8 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
 				this.attributesMap, this.metaAnnotationMap, annotationName);
-		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
+		return AnnotationReadingVisitorUtils.convertClassValues(
+				"method '" + getMethodName() + "'", this.classLoader, raw, classValuesAsString);
 	}
 
 	@Override
@@ -135,10 +136,11 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 		if (!this.attributesMap.containsKey(annotationName)) {
 			return null;
 		}
-		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<String, Object>();
+		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<>();
 		for (AnnotationAttributes annotationAttributes : this.attributesMap.get(annotationName)) {
-			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
-					this.classLoader, annotationAttributes, classValuesAsString).entrySet()) {
+			AnnotationAttributes convertedAttributes = AnnotationReadingVisitorUtils.convertClassValues(
+					"method '" + getMethodName() + "'", this.classLoader, annotationAttributes, classValuesAsString);
+			for (Map.Entry<String, Object> entry : convertedAttributes.entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());
 			}
 		}

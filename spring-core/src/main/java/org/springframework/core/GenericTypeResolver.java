@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public abstract class GenericTypeResolver {
 	/** Cache from Class to TypeVariable Map */
 	@SuppressWarnings("rawtypes")
 	private static final Map<Class<?>, Map<TypeVariable, Type>> typeVariableCache =
-			new ConcurrentReferenceHashMap<Class<?>, Map<TypeVariable, Type>>();
+			new ConcurrentReferenceHashMap<>();
 
 
 	/**
@@ -224,10 +224,9 @@ public abstract class GenericTypeResolver {
 	}
 
 	private static Class<?> getSingleGeneric(ResolvableType resolvableType) {
-		if (resolvableType.getGenerics().length > 1) {
-			throw new IllegalArgumentException("Expected 1 type argument on generic interface [" +
-					resolvableType + "] but found " + resolvableType.getGenerics().length);
-		}
+		Assert.isTrue(resolvableType.getGenerics().length == 1,
+				() -> "Expected 1 type argument on generic interface [" + resolvableType +
+				"] but found " + resolvableType.getGenerics().length);
 		return resolvableType.getGeneric().resolve();
 	}
 
@@ -273,7 +272,7 @@ public abstract class GenericTypeResolver {
 	public static Map<TypeVariable, Type> getTypeVariableMap(Class<?> clazz) {
 		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
 		if (typeVariableMap == null) {
-			typeVariableMap = new HashMap<TypeVariable, Type>();
+			typeVariableMap = new HashMap<>();
 			buildTypeVariableMap(ResolvableType.forClass(clazz), typeVariableMap);
 			typeVariableCache.put(clazz, Collections.unmodifiableMap(typeVariableMap));
 		}

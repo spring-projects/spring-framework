@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
@@ -50,6 +51,7 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 		this.mockMvc = mockMvc;
 	}
 
+
 	@Override
 	public ClientHttpRequest createRequest(final URI uri, final HttpMethod httpMethod) throws IOException {
 		return new MockClientHttpRequest(httpMethod, uri) {
@@ -73,7 +75,7 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 					return clientResponse;
 				}
 				catch (Exception ex) {
-					byte[] body = ex.toString().getBytes("UTF-8");
+					byte[] body = ex.toString().getBytes(StandardCharsets.UTF_8);
 					return new MockClientHttpResponse(body, HttpStatus.INTERNAL_SERVER_ERROR);
 				}
 			}

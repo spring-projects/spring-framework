@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,9 +83,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
-	private final List<TypeFilter> includeFilters = new LinkedList<TypeFilter>();
+	private final List<TypeFilter> includeFilters = new LinkedList<>();
 
-	private final List<TypeFilter> excludeFilters = new LinkedList<TypeFilter>();
+	private final List<TypeFilter> excludeFilters = new LinkedList<>();
 
 	private ConditionEvaluator conditionEvaluator;
 
@@ -263,7 +263,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @return a corresponding Set of autodetected bean definitions
 	 */
 	public Set<BeanDefinition> findCandidateComponents(String basePackage) {
-		Set<BeanDefinition> candidates = new LinkedHashSet<BeanDefinition>();
+		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + "/" + this.resourcePattern;

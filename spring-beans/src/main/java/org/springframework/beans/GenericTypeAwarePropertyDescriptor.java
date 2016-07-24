@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 			// covariant return type whereas the setter is defined for the concrete property type.
 			Method candidate = ClassUtils.getMethodIfAvailable(
 					this.beanClass, "set" + StringUtils.capitalize(getName()), (Class<?>[]) null);
-			if (candidate != null && candidate.getParameterTypes().length == 1) {
+			if (candidate != null && candidate.getParameterCount() == 1) {
 				writeMethodToUse = candidate;
 			}
 		}
@@ -87,11 +87,11 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 				// Write method not matched against read method: potentially ambiguous through
 				// several overloaded variants, in which case an arbitrary winner has been chosen
 				// by the JDK's JavaBeans Introspector...
-				Set<Method> ambiguousCandidates = new HashSet<Method>();
+				Set<Method> ambiguousCandidates = new HashSet<>();
 				for (Method method : beanClass.getMethods()) {
 					if (method.getName().equals(writeMethodToUse.getName()) &&
 							!method.equals(writeMethodToUse) && !method.isBridge() &&
-							method.getParameterTypes().length == writeMethodToUse.getParameterTypes().length) {
+							method.getParameterCount() == writeMethodToUse.getParameterCount()) {
 						ambiguousCandidates.add(method);
 					}
 				}

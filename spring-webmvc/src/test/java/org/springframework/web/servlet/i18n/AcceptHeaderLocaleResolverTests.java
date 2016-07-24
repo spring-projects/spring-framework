@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
 import static java.util.Locale.CANADA;
+import static java.util.Locale.JAPANESE;
 import static java.util.Locale.UK;
 import static java.util.Locale.US;
 import static org.junit.Assert.assertEquals;
@@ -54,6 +55,17 @@ public class AcceptHeaderLocaleResolverTests {
 	public void resolvePreferredNotSupported() throws Exception {
 		this.resolver.setSupportedLocales(Collections.singletonList(CANADA));
 		assertEquals(US, this.resolver.resolveLocale(request(US, UK)));
+	}
+
+	@Test
+	public void defaultLocale() throws Exception {
+		this.resolver.setDefaultLocale(JAPANESE);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		assertEquals(JAPANESE, this.resolver.resolveLocale(request));
+
+		request.addHeader("Accept-Language", US.toString());
+		request.setPreferredLocales(Collections.singletonList(US));
+		assertEquals(US, this.resolver.resolveLocale(request));
 	}
 
 

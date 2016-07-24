@@ -143,7 +143,7 @@ public abstract class StreamUtils {
 	 * @param end the position to end copying
 	 * @return the number of bytes copied
 	 * @throws IOException in case of I/O errors
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public static long copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
 		long skipped = in.skip(start);
@@ -175,7 +175,7 @@ public abstract class StreamUtils {
 	 * @param in the InputStream to drain
 	 * @return the number of bytes read
 	 * @throws IOException in case of I/O errors
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public static int drain(InputStream in) throws IOException {
 		Assert.notNull(in, "No InputStream specified");

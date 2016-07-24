@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
+import javax.persistence.SynchronizationType;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -168,11 +169,6 @@ public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
 
-	/* Check JPA 2.1 PersistenceContext.synchronization() attribute */
-	private static final Method synchronizationAttribute =
-			ClassUtils.getMethodIfAvailable(PersistenceContext.class, "synchronization");
-
-
 	private Object jndiEnvironment;
 
 	private boolean resourceRef = true;
@@ -190,10 +186,10 @@ public class PersistenceAnnotationBeanPostProcessor
 	private transient ListableBeanFactory beanFactory;
 
 	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(256);
+			new ConcurrentHashMap<>(256);
 
 	private final Map<Object, EntityManager> extendedEntityManagersToClose =
-			new ConcurrentHashMap<Object, EntityManager>(16);
+			new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -408,12 +404,12 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	private InjectionMetadata buildPersistenceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
 		Class<?> targetClass = clazz;
 
 		do {
 			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<InjectionMetadata.InjectedElement>();
+					new LinkedList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
 				@Override
@@ -441,7 +437,7 @@ public class PersistenceAnnotationBeanPostProcessor
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("Persistence annotations are not supported on static methods");
 						}
-						if (method.getParameterTypes().length != 1) {
+						if (method.getParameterCount() != 1) {
 							throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
 						}
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
@@ -662,8 +658,7 @@ public class PersistenceAnnotationBeanPostProcessor
 				}
 				this.unitName = pc.unitName();
 				this.type = pc.type();
-				this.synchronizedWithTransaction = (synchronizationAttribute == null ||
-						"SYNCHRONIZED".equals(ReflectionUtils.invokeMethod(synchronizationAttribute, pc).toString()));
+				this.synchronizedWithTransaction = SynchronizationType.SYNCHRONIZED.equals(pc.synchronization());
 				this.properties = properties;
 			}
 			else {

@@ -17,6 +17,7 @@
 package org.springframework.scripting.groovy;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
@@ -33,6 +34,7 @@ import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.scripting.ScriptFactory} implementation
@@ -40,7 +42,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Typically used in combination with a
  * {@link org.springframework.scripting.support.ScriptFactoryPostProcessor};
- * see the latter's javadoc} for a configuration example.
+ * see the latter's javadoc for a configuration example.
  *
  * <p>Note: Spring 4.0 supports Groovy 1.8 and higher.
  *
@@ -248,7 +250,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 */
 	protected Object executeScript(ScriptSource scriptSource, Class<?> scriptClass) throws ScriptCompilationException {
 		try {
-			GroovyObject goo = (GroovyObject) scriptClass.newInstance();
+			GroovyObject goo = (GroovyObject) ReflectionUtils.accessibleConstructor(scriptClass).newInstance();
 
 			if (this.groovyObjectCustomizer != null) {
 				// Allow metaclass and other customization.
@@ -264,13 +266,21 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 				return goo;
 			}
 		}
+		catch (NoSuchMethodException ex) {
+			throw new ScriptCompilationException(
+					"No default constructor on Groovy script class: " + scriptClass.getName(), ex);
+		}
 		catch (InstantiationException ex) {
 			throw new ScriptCompilationException(
-					scriptSource, "Could not instantiate Groovy script class: " + scriptClass.getName(), ex);
+					scriptSource, "Unable to instantiate Groovy script class: " + scriptClass.getName(), ex);
 		}
 		catch (IllegalAccessException ex) {
 			throw new ScriptCompilationException(
 					scriptSource, "Could not access Groovy script constructor: " + scriptClass.getName(), ex);
+		}
+		catch (InvocationTargetException ex) {
+			throw new ScriptCompilationException(
+					"Failed to invoke Groovy script constructor: " + scriptClass.getName(), ex.getTargetException());
 		}
 	}
 

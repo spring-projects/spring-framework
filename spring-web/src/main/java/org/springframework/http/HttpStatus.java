@@ -24,6 +24,7 @@ package org.springframework.http;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @since 3.0
  * @see HttpStatus.Series
  * @see <a href="http://www.iana.org/assignments/http-status-codes">HTTP Status Code Registry</a>
  * @see <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">List of HTTP status codes - Wikipedia</a>
@@ -325,7 +326,8 @@ public enum HttpStatus {
 	/**
 	 * {@code 451 Unavailable For Legal Reasons}.
 	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-legally-restricted-status-04">
-	 *     An HTTP Status Code to Report Legal Obstacles</a>
+	 * An HTTP Status Code to Report Legal Obstacles</a>
+	 * @since 4.3
 	 */
 	UNAVAILABLE_FOR_LEGAL_REASONS(451, "Unavailable For Legal Reasons"),
 

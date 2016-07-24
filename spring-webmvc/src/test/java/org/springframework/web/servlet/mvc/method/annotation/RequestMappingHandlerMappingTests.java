@@ -86,7 +86,7 @@ public class RequestMappingHandlerMappingTests {
 		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(fileExtensions);
 		ContentNegotiationManager manager = new ContentNegotiationManager(strategy);
 
-		final Set<String> extensions = new HashSet<String>();
+		final Set<String> extensions = new HashSet<>();
 
 		RequestMappingHandlerMapping hm = new RequestMappingHandlerMapping() {
 			@Override

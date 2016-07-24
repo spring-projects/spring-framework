@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.core.type.filter.AspectJTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -260,13 +261,13 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	private Object instantiateUserDefinedStrategy(String className, Class<?> strategyType, ClassLoader classLoader) {
 		Object result;
 		try {
-			result = classLoader.loadClass(className).newInstance();
+			result = ReflectionUtils.accessibleConstructor(classLoader.loadClass(className)).newInstance();
 		}
 		catch (ClassNotFoundException ex) {
 			throw new IllegalArgumentException("Class [" + className + "] for strategy [" +
 					strategyType.getName() + "] not found", ex);
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			throw new IllegalArgumentException("Unable to instantiate class [" + className + "] for strategy [" +
 					strategyType.getName() + "]: a zero-argument constructor is required", ex);
 		}

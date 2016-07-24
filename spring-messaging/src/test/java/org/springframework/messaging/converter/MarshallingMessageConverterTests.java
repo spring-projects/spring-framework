@@ -16,27 +16,28 @@
 
 package org.springframework.messaging.converter;
 
+import static org.junit.Assert.*;
+import static org.xmlunit.diff.ComparisonType.*;
+import static org.xmlunit.diff.DifferenceEvaluators.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
+
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.xmlunit.diff.DifferenceEvaluator;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.junit.Assert.*;
-
 /**
  * @author Arjen Poutsma
  */
 public class MarshallingMessageConverterTests {
-
-	private static Charset UTF_8 = Charset.forName("UTF-8");
-
 
 	private MarshallingMessageConverter converter;
 
@@ -50,10 +51,11 @@ public class MarshallingMessageConverterTests {
 		this.converter = new MarshallingMessageConverter(marshaller);
 	}
 
+
 	@Test
 	public void fromMessage() throws Exception {
 		String payload = "<myBean><name>Foo</name></myBean>";
-		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		MyBean actual = (MyBean) this.converter.fromMessage(message, MyBean.class);
 
 		assertNotNull(actual);
@@ -63,14 +65,14 @@ public class MarshallingMessageConverterTests {
 	@Test(expected = MessageConversionException.class)
 	public void fromMessageInvalidXml() throws Exception {
 		String payload = "<myBean><name>Foo</name><myBean>";
-		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		this.converter.fromMessage(message, MyBean.class);
 	}
 
 	@Test(expected = MessageConversionException.class)
 	public void fromMessageValidXmlWithUnknownProperty() throws IOException {
 		String payload = "<myBean><age>42</age><myBean>";
-		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
+		Message<?> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.UTF_8)).build();
 		this.converter.fromMessage(message, MyBean.class);
 	}
 
@@ -81,9 +83,10 @@ public class MarshallingMessageConverterTests {
 
 		Message<?> message = this.converter.toMessage(payload, null);
 		assertNotNull(message);
-		String actual = new String((byte[]) message.getPayload(), UTF_8);
+		String actual = new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
 
-		assertXMLEqual("<myBean><name>Foo</name></myBean>", actual);
+		DifferenceEvaluator ev = chain(Default, downgradeDifferencesToEqual(XML_STANDALONE));
+		assertThat(actual, isSimilarTo("<myBean><name>Foo</name></myBean>").withDifferenceEvaluator(ev));
 	}
 
 

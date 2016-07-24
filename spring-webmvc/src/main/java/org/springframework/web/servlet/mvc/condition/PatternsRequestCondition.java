@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	private final boolean useTrailingSlashMatch;
 
-	private final List<String> fileExtensions = new ArrayList<String>();
+	private final List<String> fileExtensions = new ArrayList<>();
 
 
 	/**
@@ -126,7 +126,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		if (patterns == null) {
 			return Collections.emptySet();
 		}
-		Set<String> result = new LinkedHashSet<String>(patterns.size());
+		Set<String> result = new LinkedHashSet<>(patterns.size());
 		for (String pattern : patterns) {
 			if (StringUtils.hasLength(pattern) && !pattern.startsWith("/")) {
 				pattern = "/" + pattern;
@@ -162,7 +162,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	@Override
 	public PatternsRequestCondition combine(PatternsRequestCondition other) {
-		Set<String> result = new LinkedHashSet<String>();
+		Set<String> result = new LinkedHashSet<>();
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
 			for (String pattern1 : this.patterns) {
 				for (String pattern2 : other.patterns) {
@@ -224,7 +224,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * @return a collection of matching patterns sorted with the closest match at the top
 	 */
 	public List<String> getMatchingPatterns(String lookupPath) {
-		List<String> matches = new ArrayList<String>();
+		List<String> matches = new ArrayList<>();
 		for (String pattern : this.patterns) {
 			String match = getMatchingPattern(pattern, lookupPath);
 			if (match != null) {

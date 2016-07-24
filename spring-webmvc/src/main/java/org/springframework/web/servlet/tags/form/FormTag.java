@@ -144,27 +144,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the name of the form attribute in the model.
-	 * <p>May be a runtime expression.
-	 * @see #setModelAttribute
-	 * @deprecated as of Spring 4.3, in favor of {@link #setModelAttribute}
-	 */
-	@Deprecated
-	public void setCommandName(String commandName) {
-		this.modelAttribute = commandName;
-	}
-
-	/**
-	 * Get the name of the form attribute in the model.
-	 * @see #getModelAttribute
-	 * @deprecated as of Spring 4.3, in favor of {@link #getModelAttribute}
-	 */
-	@Deprecated
-	protected String getCommandName() {
-		return this.modelAttribute;
-	}
-
-	/**
 	 * Set the value of the '{@code name}' attribute.
 	 * <p>May be a runtime expression.
 	 * <p>Name is not a valid attribute for form on XHTML 1.0. However,
@@ -331,18 +310,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * Get the name of the request param for non-browser supported HTTP methods.
 	 * @since 4.2.3
 	 */
-	@SuppressWarnings("deprecation")
 	protected String getMethodParam() {
-		return getMethodParameter();
-	}
-
-	/**
-	 * Get the name of the request param for non-browser supported HTTP methods.
-	 * @deprecated as of 4.2.3, in favor of {@link #getMethodParam()} which is
-	 * a proper pairing for {@link #setMethodParam(String)}
-	 */
-	@Deprecated
-	protected String getMethodParameter() {
 		return this.methodParam;
 	}
 
