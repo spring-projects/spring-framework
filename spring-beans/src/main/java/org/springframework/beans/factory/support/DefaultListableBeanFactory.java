@@ -52,6 +52,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InjectionPoint;
@@ -1053,7 +1054,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (descriptor.isRequired()) {
-					raiseNoSuchBeanDefinitionException(type, descriptor.getResolvableType().toString(), descriptor);
+					raiseNoMatchingBeanFound(type, descriptor.getResolvableType().toString(), descriptor);
 				}
 				return null;
 			}
@@ -1392,15 +1393,41 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Raise a NoSuchBeanDefinitionException for an unresolvable dependency.
+	 * Raise a NoSuchBeanDefinitionException or BeanNotOfRequiredTypeException
+	 * for an unresolvable dependency.
 	 */
-	private void raiseNoSuchBeanDefinitionException(
-			Class<?> type, String dependencyDescription, DependencyDescriptor descriptor)
-			throws NoSuchBeanDefinitionException {
+	private void raiseNoMatchingBeanFound(
+			Class<?> type, String dependencyDescription, DependencyDescriptor descriptor) throws BeansException {
+
+		checkBeanNotOfRequiredType(type, descriptor);
 
 		throw new NoSuchBeanDefinitionException(type, dependencyDescription,
 				"expected at least 1 bean which qualifies as autowire candidate for this dependency. " +
 				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
+	}
+
+	/**
+	 * Raise a BeanNotOfRequiredTypeException for an unresolvable dependency, if applicable,
+	 * i.e. if the target type of the bean would match but an exposed proxy doesn't.
+	 */
+	private void checkBeanNotOfRequiredType(Class<?> type, DependencyDescriptor descriptor) {
+		for (String beanName : this.beanDefinitionNames) {
+			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
+			Class<?> targetType = mbd.getTargetType();
+			if (targetType != null && type.isAssignableFrom(targetType) &&
+					isAutowireCandidate(beanName, mbd, descriptor, getAutowireCandidateResolver())) {
+				// Probably a poxy interfering with target type match -> throw meaningful exception.
+				Object beanInstance = getSingleton(beanName, false);
+				Class<?> beanType = (beanInstance != null ? beanInstance.getClass() : predictBeanType(beanName, mbd));
+				if (type != beanType) {
+					throw new BeanNotOfRequiredTypeException(beanName, type, beanType);
+				}
+			}
+		}
+
+		if (getParentBeanFactory() instanceof DefaultListableBeanFactory) {
+			((DefaultListableBeanFactory) getParentBeanFactory()).checkBeanNotOfRequiredType(type, descriptor);
+		}
 	}
 
 

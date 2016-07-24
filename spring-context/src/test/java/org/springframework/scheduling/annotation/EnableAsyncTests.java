@@ -33,6 +33,8 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
+import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -41,6 +43,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import static org.hamcrest.CoreMatchers.anyOf;
@@ -79,6 +82,36 @@ public class EnableAsyncTests {
 		AsyncBean asyncBean = asyncBeanUser.getAsyncBean();
 		assertThat(AopUtils.isAopProxy(asyncBean), is(true));
 		asyncBean.work();
+	}
+
+	@Test
+	public void properExceptionForExistingProxyDependencyMismatch() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(AsyncConfig.class, AsyncBeanWithInterface.class, AsyncBeanUser.class);
+
+		try {
+			ctx.refresh();
+			fail("Should have thrown UnsatisfiedDependencyException");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			ex.printStackTrace();
+			assertTrue(ex.getCause() instanceof BeanNotOfRequiredTypeException);
+		}
+	}
+
+	@Test
+	public void properExceptionForResolvedProxyDependencyMismatch() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(AsyncConfig.class, AsyncBeanUser.class, AsyncBeanWithInterface.class);
+
+		try {
+			ctx.refresh();
+			fail("Should have thrown UnsatisfiedDependencyException");
+		}
+		catch (UnsatisfiedDependencyException ex) {
+			ex.printStackTrace();
+			assertTrue(ex.getCause() instanceof BeanNotOfRequiredTypeException);
+		}
 	}
 
 	@Test
@@ -210,6 +243,15 @@ public class EnableAsyncTests {
 
 		public Thread getThreadOfExecution() {
 			return threadOfExecution;
+		}
+	}
+
+
+	@Component("asyncBean")
+	static class AsyncBeanWithInterface extends AsyncBean implements Runnable {
+
+		@Override
+		public void run() {
 		}
 	}
 
