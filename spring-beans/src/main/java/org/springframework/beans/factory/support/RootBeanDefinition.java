@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -59,7 +60,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	final Object constructorArgumentLock = new Object();
 
 	/** Package-visible field for caching the resolved constructor or factory method */
-	Object resolvedConstructorOrFactoryMethod;
+	Executable resolvedConstructorOrFactoryMethod;
 
 	/** Package-visible field for caching the return type of a generically typed factory method */
 	volatile Class<?> resolvedFactoryMethodReturnType;
@@ -250,7 +251,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public Method getResolvedFactoryMethod() {
 		synchronized (this.constructorArgumentLock) {
-			Object candidate = this.resolvedConstructorOrFactoryMethod;
+			Executable candidate = this.resolvedConstructorOrFactoryMethod;
 			return (candidate instanceof Method ? (Method) candidate : null);
 		}
 	}

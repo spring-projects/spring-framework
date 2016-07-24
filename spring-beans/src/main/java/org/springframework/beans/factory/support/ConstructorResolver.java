@@ -898,7 +898,7 @@ class ConstructorResolver {
 			return Integer.MAX_VALUE - 1024;
 		}
 
-		public void storeCache(RootBeanDefinition mbd, Object constructorOrFactoryMethod) {
+		public void storeCache(RootBeanDefinition mbd, Executable constructorOrFactoryMethod) {
 			synchronized (mbd.constructorArgumentLock) {
 				mbd.resolvedConstructorOrFactoryMethod = constructorOrFactoryMethod;
 				mbd.constructorArgumentsResolved = true;
