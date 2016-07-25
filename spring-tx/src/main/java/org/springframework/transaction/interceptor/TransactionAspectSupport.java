@@ -17,6 +17,7 @@
 package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -85,7 +86,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			new NamedThreadLocal<>("Current aspect-driven transaction");
 
 
-	private final ConcurrentHashMap<Object, PlatformTransactionManager> transactionManagerCache =
+	private final Map<Object, PlatformTransactionManager> transactionManagerCache =
 			new ConcurrentHashMap<>();
 
 	/**
@@ -243,7 +244,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	public void afterPropertiesSet() {
 		if (getTransactionManager() == null && this.beanFactory == null) {
 			throw new IllegalStateException(
-					"Setting the property 'transactionManager' or running in a ListableBeanFactory is required");
+					"Setting the property 'transactionManager' or running in a BeanFactory is required");
 		}
 		if (this.transactionAttributeSource == null) {
 			throw new IllegalStateException(
@@ -449,17 +450,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 		TransactionInfo txInfo = new TransactionInfo(tm, txAttr, joinpointIdentification);
 		if (txAttr != null) {
-			// We need a transaction for this method
+			// We need a transaction for this method...
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
-			// The transaction manager will flag an error if an incompatible tx already exists
+			// The transaction manager will flag an error if an incompatible tx already exists.
 			txInfo.newTransactionStatus(status);
 		}
 		else {
-			// The TransactionInfo.hasTransaction() method will return
-			// false. We created it only to preserve the integrity of
-			// the ThreadLocal stack maintained in this class.
+			// The TransactionInfo.hasTransaction() method will return false. We created it only
+			// to preserve the integrity of the ThreadLocal stack maintained in this class.
 			if (logger.isTraceEnabled())
 				logger.trace("Don't need to create transaction for [" + joinpointIdentification +
 						"]: This method isn't transactional.");
