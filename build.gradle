@@ -40,8 +40,8 @@ configure(allprojects) { project ->
 	ext.ehcacheVersion         = "2.10.2"
 	ext.ehcachejcacheVersion   = "1.0.1"
 	ext.ehcache3Version        = "3.1.1"
-	ext.elApiVersion           = "3.0.1-b04"
 	ext.ejbApiVersion          = "3.2"
+	ext.elApiVersion           = "3.0.1-b04"
 	ext.fileuploadVersion      = "1.3.2"
 	ext.freemarkerVersion      = "2.3.25-incubating"
 	ext.groovyVersion          = "2.4.7"
@@ -76,8 +76,9 @@ configure(allprojects) { project ->
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.0.BUILD-SNAPSHOT'
 	ext.reactorNettyVersion    = '0.5.0.BUILD-SNAPSHOT'
-	ext.rxjavaVersion          = '1.1.6'
 	ext.romeVersion            = "1.6.0"
+	ext.rxjavaVersion          = '1.1.8'
+	ext.rxnettyVersion         = '0.5.2-SNAPSHOT'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.21"
 	ext.snakeyamlVersion       = "1.17"
@@ -709,7 +710,7 @@ project("spring-web") {
 		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
 		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
 		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
-		optional("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
@@ -779,7 +780,7 @@ project("spring-web-reactive") {
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
 		testCompile("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
-		testCompile("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
 		testCompile("io.undertow:undertow-core:${undertowVersion}")
