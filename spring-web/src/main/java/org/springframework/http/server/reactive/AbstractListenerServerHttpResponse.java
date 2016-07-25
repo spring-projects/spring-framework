@@ -40,17 +40,7 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 
 	@Override
 	protected final Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
-		if (this.writeCalled.compareAndSet(false, true)) {
-			Processor<DataBuffer, Void> bodyProcessor = createBodyProcessor();
-			return Mono.from(subscriber -> {
-				body.subscribe(bodyProcessor);
-				bodyProcessor.subscribe(subscriber);
-			});
-
-		} else {
-			return Mono.error(new IllegalStateException(
-					"writeWith() or writeAndFlushWith() has already been called"));
-		}
+		return writeAndFlushWithInternal(Mono.just(body));
 	}
 
 	@Override
@@ -67,13 +57,6 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 					"writeWith() or writeAndFlushWith() has already been called"));
 		}
 	}
-
-	/**
-	 * Abstract template method to create a {@code Processor<DataBuffer, Void>} that
-	 * will write the response body to the underlying output. Called from
-	 * {@link #writeWithInternal(Publisher)}.
-	 */
-	protected abstract Processor<DataBuffer, Void> createBodyProcessor();
 
 	/**
 	 * Abstract template method to create a {@code Processor<Publisher<DataBuffer>, Void>}
