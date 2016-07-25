@@ -17,11 +17,10 @@
 package org.springframework.oxm.jibx;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Flights {
 
-	protected List<FlightType> flightList = new ArrayList<FlightType>();
+	protected ArrayList<FlightType> flightList = new ArrayList<FlightType>();
 
 	public void addFlight(FlightType flight) {
 		flightList.add(flight);
