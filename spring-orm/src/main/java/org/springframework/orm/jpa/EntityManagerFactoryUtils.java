@@ -16,7 +16,6 @@
 
 package org.springframework.orm.jpa;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -52,9 +51,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -395,7 +392,7 @@ public abstract class EntityManagerFactoryUtils {
 
 		// If we have another kind of PersistenceException, throw it.
 		if (ex instanceof PersistenceException) {
-			return new JpaSystemException((PersistenceException) ex);
+			return new JpaSystemException(ex);
 		}
 
 		// If we get here, we have an exception that resulted from user code,
