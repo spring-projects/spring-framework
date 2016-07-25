@@ -129,6 +129,21 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	}
 
 	/**
+	 * Dynamically register an additional Cache with this manager.
+	 * @param cache the Cache to register
+	 * @deprecated as of Spring 4.3, in favor of {@link #getMissingCache(String)}
+	 */
+	@Deprecated
+	protected final void addCache(Cache cache) {
+		String name = cache.getName();
+		synchronized (this.cacheMap) {
+			if (this.cacheMap.put(name, decorateCache(cache)) == null) {
+				updateCacheNames(name);
+			}
+		}
+	}
+
+	/**
 	 * Update the exposed {@link #cacheNames} set with the given name.
 	 * <p>This will always be called within a full {@link #cacheMap} lock
 	 * and effectively behaves like a {@code CopyOnWriteArraySet} with
