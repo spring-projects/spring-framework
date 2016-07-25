@@ -514,13 +514,6 @@ project("spring-oxm") {
 	description = "Spring Object/XML Marshalling"
 	apply from: "oxm.gradle"
 
-	compileTestJava {
-		// necessary to avoid java.lang.VerifyError on jibx compilation
-		// see http://jira.codehaus.org/browse/JIBX-465
-		sourceCompatibility = 1.8
-		targetCompatibility = 1.8
-	}
-
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
@@ -539,10 +532,8 @@ project("spring-oxm") {
 		testCompile("org.codehaus.jettison:jettison:1.3.7") {
 			exclude group: 'stax', module: 'stax-api'
 		}
-		if (compileTestJava.enabled) {
-			testCompile(files(genCastor.classesDir).builtBy(genCastor))
-			testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
-		}
+        testCompile(files(genCastor.classesDir).builtBy(genCastor))
+        testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
 		testRuntime("xerces:xercesImpl:2.11.0")  // for Castor
 		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")

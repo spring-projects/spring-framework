@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,11 @@ package org.springframework.oxm.jibx;
 import java.io.ByteArrayInputStream;
 import javax.xml.transform.stream.StreamSource;
 
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractUnmarshallerTests;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
@@ -41,9 +40,11 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshal
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
 					"<tns:flight><tns:airline>Air Libert\u00e9</tns:airline><tns:number>42</tns:number></tns:flight></tns:flights>";
 
+
 	@BeforeClass
 	public static void compilerAssumptions() {
-		Assume.group(TestGroup.CUSTOM_COMPILATION);
+		// JiBX compiler is currently not compatible with JDK 9
+		Assume.assumeTrue(System.getProperty("java.version").startsWith("1.8."));
 	}
 
 

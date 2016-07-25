@@ -38,6 +38,7 @@ public class TestGroupTests {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
+
 	@Test
 	public void parseNull() throws Exception {
 		assertThat(TestGroup.parse(null), equalTo(Collections.<TestGroup> emptySet()));
@@ -65,7 +66,7 @@ public class TestGroupTests {
 		thrown.expect(IllegalArgumentException.class);
 		thrown.expectMessage("Unable to find test group 'missing' when parsing " +
 				"testGroups value: 'performance, missing'. Available groups include: " +
-				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI,CUSTOM_COMPILATION]");
+				"[LONG_RUNNING,PERFORMANCE,JMXMP,CI]");
 		TestGroup.parse("performance, missing");
 	}
 
@@ -77,9 +78,8 @@ public class TestGroupTests {
 	@Test
 	public void parseAllExcept() throws Exception {
 		Set<TestGroup> expected = new HashSet<>(EnumSet.allOf(TestGroup.class));
-		expected.remove(TestGroup.CUSTOM_COMPILATION);
 		expected.remove(TestGroup.PERFORMANCE);
-		assertThat(TestGroup.parse("all-custom_compilation,performance"), equalTo(expected));
+		assertThat(TestGroup.parse("all-performance"), equalTo(expected));
 	}
 
 }
