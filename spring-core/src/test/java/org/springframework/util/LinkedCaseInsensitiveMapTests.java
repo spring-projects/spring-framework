@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -26,12 +25,8 @@ import static org.junit.Assert.*;
  */
 public class LinkedCaseInsensitiveMapTests {
 
-	private LinkedCaseInsensitiveMap<String> map;
+	private final LinkedCaseInsensitiveMap<String> map = new LinkedCaseInsensitiveMap<String>();
 
-	@Before
-	public void setUp() {
-		map = new LinkedCaseInsensitiveMap<String>();
-	}
 
 	@Test
 	public void putAndGet() {
@@ -53,6 +48,28 @@ public class LinkedCaseInsensitiveMapTests {
 		assertEquals("value3", map.get("key"));
 		assertEquals("value3", map.get("KEY"));
 		assertEquals("value3", map.get("Key"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void mapClone() {
+		map.put("key", "value1");
+		LinkedCaseInsensitiveMap<String> copy = (LinkedCaseInsensitiveMap<String>) map.clone();
+		assertEquals("value1", map.get("key"));
+		assertEquals("value1", map.get("KEY"));
+		assertEquals("value1", map.get("Key"));
+		assertEquals("value1", copy.get("key"));
+		assertEquals("value1", copy.get("KEY"));
+		assertEquals("value1", copy.get("Key"));
+		copy.put("Key", "value2");
+		assertEquals(1, map.size());
+		assertEquals(1, copy.size());
+		assertEquals("value1", map.get("key"));
+		assertEquals("value1", map.get("KEY"));
+		assertEquals("value1", map.get("Key"));
+		assertEquals("value2", copy.get("key"));
+		assertEquals("value2", copy.get("KEY"));
+		assertEquals("value2", copy.get("Key"));
 	}
 
 }
