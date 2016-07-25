@@ -43,6 +43,7 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		Assume.assumeTrue(System.getProperty("java.version").startsWith("1.8."));
 	}
 
+
 	@Override
 	protected JibxMarshaller createMarshaller() throws Exception {
 		JibxMarshaller marshaller = new JibxMarshaller();
@@ -59,6 +60,7 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		flights.addFlight(flight);
 		return flights;
 	}
+
 
 	@Test(expected = IllegalArgumentException.class)
 	public void afterPropertiesSetNoContextPath() throws Exception {

@@ -71,6 +71,7 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshal
 		assertEquals("Number is invalid", 42L, flight.getNumber());
 	}
 
+
 	@Test
 	@Override
 	public void unmarshalPartialStaxSourceXmlStreamReader() throws Exception {
