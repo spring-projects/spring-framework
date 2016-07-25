@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,14 +58,7 @@ public enum TestGroup {
 	/**
 	 * Tests that should only be run on the continuous integration server.
 	 */
-	CI,
-
-	/**
-	 * Tests that require custom compilation beyond that of the standard JDK. This helps to
-	 * allow running tests that will otherwise fail when using JDK >  1.8 b88. See
-	 * <a href="https://jira.spring.io/browse/SPR-10558">SPR-10558</a>
-	 */
-	CUSTOM_COMPILATION;
+	CI;
 
 
 	/**

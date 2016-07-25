@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <binding>
     <mapping name="flights" class="org.springframework.oxm.jibx.Flights">
-        <namespace uri="http://www.springframework.org/flight" default="elements"/>
+        <namespace uri="http://samples.springframework.org/flight" default="elements"/>
         <collection field="flightList">
             <structure map-as="org.springframework.oxm.jibx.FlightType"/>
         </collection>
     </mapping>
     <mapping name="flight" class="org.springframework.oxm.jibx.FlightType">
-        <namespace uri="http://www.springframework.org/flight" default="elements"/>
+        <namespace uri="http://samples.springframework.org/flight" default="elements"/>
         <value name="airline" field="airline" usage="optional"/>
         <value name="number" field="number" usage="required"/>
     </mapping>
