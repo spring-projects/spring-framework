@@ -114,6 +114,8 @@ configure(allprojects) { project ->
 		}
 	}
 
+	compileJava.options.encoding = 'UTF-8'
+
 	compileJava.options*.compilerArgs = [
 		"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
 		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
