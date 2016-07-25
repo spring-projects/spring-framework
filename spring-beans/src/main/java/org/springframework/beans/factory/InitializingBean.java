@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ package org.springframework.beans.factory;
  *
  * <p>An alternative to implementing InitializingBean is specifying a custom
  * init-method, for example in an XML bean definition.
- * For a list of all bean lifecycle methods, see the {@link BeanFactory BeanFactory javadocs}.
+ * For a list of all bean lifecycle methods, see the
+ * {@link BeanFactory BeanFactory javadocs}.
  *
  * @author Rod Johnson
  * @see BeanNameAware
