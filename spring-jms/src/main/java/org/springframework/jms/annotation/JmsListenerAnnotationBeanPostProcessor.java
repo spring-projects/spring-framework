@@ -99,14 +99,14 @@ public class JmsListenerAnnotationBeanPostProcessor
 
 	private StringValueResolver embeddedValueResolver;
 
-	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory = new MessageHandlerMethodFactoryAdapter();
+	private final MessageHandlerMethodFactoryAdapter messageHandlerMethodFactory =
+			new MessageHandlerMethodFactoryAdapter();
 
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
 	private final AtomicInteger counter = new AtomicInteger();
 
-	private final Set<Class<?>> nonAnnotatedClasses =
-			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
+	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 
 	@Override

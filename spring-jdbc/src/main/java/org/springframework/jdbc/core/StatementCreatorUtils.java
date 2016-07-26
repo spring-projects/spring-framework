@@ -82,7 +82,7 @@ public abstract class StatementCreatorUtils {
 	static final boolean shouldIgnoreGetParameterType = SpringProperties.getFlag(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
 
 	static final Set<String> driversWithNoSupportForGetParameterType =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(1));
+			Collections.newSetFromMap(new ConcurrentHashMap<>(1));
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 

@@ -93,8 +93,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	/**
 	 * Cache for validated bean names, skipping re-validation for the same bean
 	 */
-	private final Set<String> validatedBeanNames =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(64));
+	private final Set<String> validatedBeanNames = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
 
 	/**
