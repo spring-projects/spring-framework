@@ -74,11 +74,11 @@ configure(allprojects) { project ->
 	ext.protobufVersion        = "3.0.0-beta-4"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
-	ext.reactorCoreVersion     = '3.0.0.BUILD-SNAPSHOT'
-	ext.reactorNettyVersion    = '0.5.0.BUILD-SNAPSHOT'
+	ext.reactorCoreVersion     = '3.0.0.RC1'
+	ext.reactorNettyVersion    = '0.5.0.M2'
 	ext.romeVersion            = "1.6.0"
 	ext.rxjavaVersion          = '1.1.8'
-	ext.rxnettyVersion         = '0.5.2-SNAPSHOT'
+	ext.rxnettyVersion         = '0.5.2-rc.3'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.21"
 	ext.snakeyamlVersion       = "1.17"
@@ -159,8 +159,6 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
-		maven { url 'http://repo.spring.io/snapshot' }       // Reactor snapshots
-		maven { url 'https://oss.jfrog.org/libs-snapshot' }  // RxNetty 0.5.x snapshots
 	}
 
 	dependencies {
@@ -383,12 +381,12 @@ project("spring-core") {
 		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
 		optional "io.reactivex:rxjava:${rxjavaVersion}"
 		optional("io.netty:netty-buffer:${nettyVersion}")
+		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") {
 			exclude group: "stax", module: "stax-api"
 		}
-		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 	}
 
 	jar {
@@ -534,11 +532,11 @@ project("spring-oxm") {
 		}
 		optional("org.jibx:jibx-run:1.2.6")
 		testCompile(project(":spring-context"))
-		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("xpp3:xpp3:1.1.4c")
 		testCompile("org.codehaus.jettison:jettison:1.3.7") {
 			exclude group: 'stax', module: 'stax-api'
 		}
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
         testCompile(files(genCastor.classesDir).builtBy(genCastor))
         testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
 		testRuntime("xerces:xercesImpl:2.11.0")  // for Castor
@@ -583,11 +581,11 @@ project("spring-messaging") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testRuntime("javax.activation:activation:${activationApiVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 }
 
@@ -715,6 +713,7 @@ project("spring-web") {
 		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
+		optional("org.jboss.xnio:xnio-api:3.3.7.Final")
 		optional("io.netty:netty-buffer:${nettyVersion}") // Temporarily for JsonObjectDecoder
 	  	optional("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") { // woodstox before aalto
 			exclude group: "stax", module: "stax-api"
@@ -742,22 +741,24 @@ project("spring-web") {
 		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
-		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
-		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-		testCompile("com.squareup.okhttp3:mockwebserver:3.0.1")
+		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
+		testRuntime("org.jboss.xnio:xnio-nio:3.3.7.Final")
+		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 	}
 }
 
@@ -775,6 +776,7 @@ project("spring-web-reactive") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional "org.apache.httpcomponents:httpclient:4.5.1" // Needed to run Javadoc without error
+		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
@@ -783,15 +785,17 @@ project("spring-web-reactive") {
 		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
-		testCompile("io.undertow:undertow-core:${undertowVersion}")
 		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
+		testCompile("io.undertow:undertow-core:${undertowVersion}")
+		testCompile("org.jboss.xnio:xnio-api:3.3.7.Final")
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 		testRuntime("javax.activation:activation:${activationApiVersion}")
+		testRuntime("org.jboss.xnio:xnio-nio:3.3.7.Final")
+		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 	}
 }
 
@@ -1008,8 +1012,7 @@ project("spring-test") {
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("javax.cache:cache-api:1.0.0")
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-		// Java Util Logging for JUnit 5.
-		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
+		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")  // Java Util Logging for JUnit 5
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 		testRuntime("org.terracotta:management-model:2.0.0")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
