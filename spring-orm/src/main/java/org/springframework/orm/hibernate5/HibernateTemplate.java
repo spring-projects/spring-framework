@@ -1256,7 +1256,7 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 
 		@Override
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings({"rawtypes", "deprecation"})
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Session interface coming in...
 

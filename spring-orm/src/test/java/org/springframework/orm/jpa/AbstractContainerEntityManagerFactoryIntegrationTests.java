@@ -39,7 +39,6 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-@SuppressWarnings("deprecation")
 public abstract class AbstractContainerEntityManagerFactoryIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 
 	@Test

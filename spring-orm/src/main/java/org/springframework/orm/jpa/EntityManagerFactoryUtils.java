@@ -64,7 +64,6 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
-@SuppressWarnings("unchecked")
 public abstract class EntityManagerFactoryUtils {
 
 	/**
