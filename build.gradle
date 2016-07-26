@@ -55,7 +55,7 @@ configure(allprojects) { project ->
 	ext.jackson2Version      = "2.8.1"
 	ext.jasperreportsVersion = "6.2.1"  // our tests fail with JR-internal NPEs against 6.2.2 and higher
 	ext.javamailVersion      = "1.5.5"
-	ext.jettyVersion         = "9.3.10.v20160621"
+	ext.jettyVersion         = "9.3.11.v20160721"
 	ext.jodaVersion          = "2.9.4"
 	ext.jrubyVersion         = "1.7.25"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
@@ -199,7 +199,7 @@ configure(allprojects) { project ->
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/${ehcacheVersion}",
 		"http://ehcache.org/apidocs/${ehcache3Version}",
-		"http://quartz-scheduler.org/api/2.2.0/",
+		"http://quartz-scheduler.org/api/2.2.1/",
 		"http://fasterxml.github.io/jackson-core/javadoc/2.7/",
 		"http://fasterxml.github.io/jackson-databind/javadoc/2.7/",
 		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.7/",
