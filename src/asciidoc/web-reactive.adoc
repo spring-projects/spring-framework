@@ -12,17 +12,16 @@ This section provides basic information on the Spring Web Reactive support in Sp
 
 In plain terms reactive programming is about non-blocking applications that are asynchronous
 and event-driven and require a small number of threads to scale. A key aspect of that
-definition is the concept of backpressure which is a mechanism to ensures producers
+definition is the concept of backpressure which is a mechanism to ensure producers
 don't overwhelm consumers. For example in a pipeline of reactive components that extends
-from the database to the HTTP server when an HTTP connection slows down the data
-repository slows down as well or stops until capacity frees up.
+from the database to the HTTP socket when the HTTP client is slow the data
+repository slows down or stops until capacity frees up.
 
-Reactive programming involves a shift from imperative to declarative, async composition
-of logic. This is comparable to how `CompletableFuture` in Java 8 allows declaring
-follow-up actions in lambda expressions to be executed when the future completes.
+From a programming model perspective reactive programming involves a major shift from imperative style logic
+to a declarative composition of async logic. It is comparable to using `CompletableFuture` in Java 8
+and composing follow-up actions via lambda expressions.
 
-A proper introduction to Reactive programming is beyond scope of this documentation.
-For a more extended introduction check the excellent multi-part series
+For a more extended introduction to reactive programming check the excellent multi-part series
 https://spring.io/blog/2016/06/07/notes-on-reactive-programming-part-i-the-reactive-landscape["Notes on Reactive Programming"]
 by Dave Syer.
 
@@ -33,23 +32,23 @@ by Dave Syer.
 Spring Framework 5 embraces
 https://github.com/reactive-streams/reactive-streams-jvm#reactive-streams[Reactive Streams]
 as the contract for communicating backpressure across async components and
-libraries. Reactive Streams is the result of an industry collaboration and is also
-adopted in Java 9 as `java.util.concurrent.Flow`.
+libraries. Reactive Streams is a specification created through industry collaboration that
+has also been adopted in Java 9 as `java.util.concurrent.Flow`.
 
-For its own reactive support the Spring Framework relies on
-https://projectreactor.io/[Reactor] which implements Reactive Streams and extends
-the Reactive Streams `Publisher` contract with the `Flux` and `Mono` composable API
-types that provide declarative operations on data sequence of `0..N` and `0..1`.
+The Spring Framework uses https://projectreactor.io/[Reactor] internally for its own
+reactive support. Reactor is a Reactive Streams implementation that further extends the
+basic Reactive Streams `Publisher` contract with the `Flux` and `Mono` composable API
+types to provide declarative operations on data sequences of `0..N` and `0..1`.
 
-The Spring Framework exposes `Flux` and `Mono` in many of its reactive APIs.
-At the application level however as always Spring provides choice and fully supports
-the use of RxJava. For more on reactive types check the blog post
+The Spring Framework exposes `Flux` and `Mono` in many of its own reactive APIs.
+At the application level however, as always, Spring provides choice and fully supports
+the use of RxJava. For more on reactive types check the post
 https://spring.io/blog/2016/04/19/understanding-reactive-types["Understanding Reactive Types"]
 by Sebastien Deleuze.
 
 
 [[web-reactive-feature-overview]]
-== Spring Reactive Web Overview
+== Spring Web Reactive Overview
 
 
 [[web-reactive-module]]
@@ -57,45 +56,56 @@ by Sebastien Deleuze.
 
 
 Spring Framework 5 adds a new `spring-web-reactive` module that supports the same
-`@Controller` and `@RestController` programming model as Spring MVC but executed
-on a reactive and non-blocking foundation. The diagram below shows how Spring MVC
-and Spring Web Reactive side by side:
+`@Controller` programming model as Spring MVC but executed on a reactive,
+non-blocking engine. The diagram below shows how Spring MVC and Spring Web
+Reactive compare side by side:
 
 image::images/web-reactive-overview.png[width=720]
 
-Spring Web Reactive makes use of the Servlet 3.1 non-blocking I/O API and runs on
-Servlet 3.1 containers and also on other non-blocking runtimes such as Netty and Undertow.
+Spring Web Reactive makes use of Servlet 3.1 non-blocking I/O and runs on
+Servlet 3.1 containers. It also runs on non-Servlet runtimes such as Netty and Undertow.
 Each runtime is adapted to a set of shared, reactive `ServerHttpRequest` and
 `ServerHttpResponse` abstractions that expose the request and response body
 as `Flux<DataBuffer>` with full backpressure support on the read and the
 write side.
 
 The `spring-core` module provides reactive `Encoder` and `Decoder` contracts
-that enable the serialization of a `Flux` of bytes to and from typed objects
-along with some basic implementations.
+that enable the serialization of a `Flux` of bytes to and from typed objects.
+The `spring-web` module adds JSON (Jackson) and XML (JAXB) implementations for use in
+web applications as well as others for SSE streaming and zero-copy file transfer.
 
-The `spring-web` modules adds JSON and XML implementations for use in reactive
-web applications and also provides support for SSE streaming and zero-copy
-file transfer.
-
-The `spring-web-reactive` module defines many of the same contracts as
-Spring MVC such as `HandlerMapping` and `HandlerAdapter` among others.
-These reactive counterparts have asynchronous and non-blocking semantics and
-operate on the reactive HTTP request and response abstractions.
+The `spring-web-reactive` module contains the Spring Web Reactive framework that supports
+the `@Controller` programming model. It re-defines many of the Spring MVC contracts
+such as `HandlerMapping` and `HandlerAdapter` to be asynchronous and
+non-blocking and to operate on the reactive HTTP request and response. For this reason
+Spring MVC and Spring Web Reactive cannot share any code. However they do share
+many of the same algorithms.
 
 The end result is a programming model identical to today's Spring MVC but
-supporting reactive types and executing on a reactive, non-blocking foundation.
-For example a controller method can declare any of the following as a method argument:
+with support for reactive types and executed in a reactive manner.
+For example a controller method can declare the following as an
+`@RequestBody` method argument:
 
-* `@RequestBody Account account` -- the account is deserialized without
-blocking before the controller method is invoked.
-* `@RequestBody Mono<Account> account` -- the controller can use the `Mono`
-type to declare the logic execute when the account is deserialized.
-* `@RequestBody Single<Account> account` -- same but with RxJava
-* `@RequestBody Flux<Account>` accounts` -- streaming scenario.
-* `@RequestBody Observable<Account> accounts` -- streaming with RxJava.
+* `Account account` -- the account is deserialized without
+blocking before the controller is invoked.
+* `Mono<Account> account` -- the controller can use the `Mono`
+to declare logic to be executed after the account is deserialized.
+* `Single<Account> account` -- same as with `Mono` but using RxJava
+* `Flux<Account> accounts` -- input streaming scenario.
+* `Observable<Account> accounts` -- input streaming with RxJava.
 
-The same principle also applies on the side of return value handling.
+The above also applies to return value handling:
+
+* `Mono<Account>` -- serialize without blocking the given Account when the `Mono` completes.
+* `Singe<Account>` -- same but using RxJava.
+* `Flux<Account>` -- streaming scenario, possibly SSE depending on the requested content type.
+* `Flux<SseEvent>` -- SSE streaming.
+* `Observable<SseEvent>` -- same but using RxJava.
+* `Mono<Void>` -- request handling completes when the `Mono` completes.
+* `void` -- request handling completes when the method returns;
+implies a synchronous, non-blocking controller method.
+* `Account` -- serialize without blocking the given Account;
+implies a synchronous, non-blocking controller method.
 
 
 [[web-reactive-client]]
@@ -103,13 +113,13 @@ The same principle also applies on the side of return value handling.
 
 Spring Framework 5 adds a new reactive `WebClient` in addition to the existing `RestTemplate`.
 
-Much like on the server side each supported HTTP client is adapted to a set of shared,
+Each supported HTTP client (e.g. Reactor Netty) is adapted to a set of shared,
 reactive `ClientHttpRequest` and `ClientHttpResponse` abstractions that expose the request
 and response body as `Flux<DataBuffer>` with full backpressure support on the read and
-the write side. The `Encoder` and `Decoder` abstractions from `spring-core` also used on
-the client side for serialization of a `Flux` of bytes to and from typed objects.
+the write side. The `Encoder` and `Decoder` abstractions from `spring-core` are also used on
+the client side for the serialization of a `Flux` of bytes to and from typed objects.
 
-Below is an example:
+An example of using the `WebClient`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -122,10 +132,9 @@ Mono<Account> response = webClient
 		.extract(body(Account.class));
 ----
 
-The above example assumes the import of static methods from `ClientWebRequestBuilder`
-and `ResponseExtractors`. The enable a fluent syntax similar to that of the MockMvc API
-from Spring MVC Test. The same can also be done with RxJava. Simply replace with static
-imports from `RxJava1ClientWebRequestBuilder` and `RxJava1ResponseExtractors`:
+The above assumes static method imports from `ClientWebRequestBuilder` and `ResponseExtractors`
+that enable a fluent syntax. The same can also be done with RxJava using static imports from
+`RxJava1ClientWebRequestBuilder` and `RxJava1ResponseExtractors` instead:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -143,10 +152,10 @@ Single<Account> response = webClient
 [[web-reactive-getting-started-boot]]
 === Spring Boot Starter
 
-The quickest way to get started is through the experimental Spring Boot Web Reactive
-starter available on http://start.spring.io. It does all the work so you can simply start
-writing `@Controller` classes. By default the starter runs with Tomcat but you can change
-the dependencies and use one of the other supported HTTP runtimes.
+The experimental Spring Boot Web Reactive starter available via http://start.spring.io
+is the quickest way to get started. It does all the work so you can start
+writing `@Controller` classes. By default it runs on Tomcat but the dependencies can
+be changed as usual with Spring Boot to switch to a different runtime.
 
 
 [[web-reactive-getting-started-manual]]
@@ -173,24 +182,22 @@ server.afterPropertiesSet();
 server.start();
 ----
 
-The `WebReactiveConfiguration` at (1) is the Web Reactive Java config from the `spring-web-reactive`
+The `WebReactiveConfiguration` at (1) is the Java config from `spring-web-reactive`
 and is similar in purpose to the MVC Java config from `spring-webmvc`. It provides the
-the web framework configuration required to get started leaving you only to
-declare your own `@Controller' beans.
+web framework configuration required to get started leaving you only to
+declare your own `@Controller` beans.
 
 The `DispatcherHandler` at (2) is the equivalent of the `DispatcherServlet` in Spring MVC.
 
 The `HttpServer` at (3) is an abstraction from the
 https://github.com/spring-projects/spring-framework/tree/master/spring-web/src/test/java/org/springframework/http/server/reactive/bootstrap[test sources]
-of the `spring-web-reactive` module that's used for the framework's own integration tests.
-It comes with basic implementations of all supported runtimes.
+of `spring-web-reactive` used for Spring Framework's own integration tests.
+The abstraction comes with basic implementations for each supported runtime.
 
 
 [[web-reactive-getting-started-M1]]
-=== Extent of M1 Support
+=== Extent of Support in 5.0 M1
 
-For M1 the Spring Web Reactive module focuses on support for REST scenarios both
-client and server-side. Basic HTML rendering with Freemarker is also supported but
-limited to rendering, i.e. there is no support form submissions yet.
-
-On the client side for M1 the Reactor Netty HTTP client is supported.
+For M1 the Spring Web Reactive module focuses on REST scenarios for both
+client and server. Basic HTML rendering with Freemarker is also supported but
+limited to rendering but not form submissions.
