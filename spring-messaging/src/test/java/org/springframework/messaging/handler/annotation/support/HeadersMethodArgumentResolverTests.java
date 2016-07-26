@@ -89,7 +89,7 @@ public class HeadersMethodArgumentResolverTests {
 		assertEquals("bar", headers.get("foo"));
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void resolveArgumentAnnotatedNotMap() throws Exception {
 		this.resolver.resolveArgument(this.paramAnnotatedNotMap, this.message);
 	}

@@ -44,7 +44,7 @@ public class SQLStateSQLExceptionTranslatorTests {
 	private static final String SQL = "select count(0) from t_sheep where over_fence = ... yawn... 1";
 
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testTranslateNullException() throws Exception {
 		new SQLStateSQLExceptionTranslator().translate("", "", null);
 	}

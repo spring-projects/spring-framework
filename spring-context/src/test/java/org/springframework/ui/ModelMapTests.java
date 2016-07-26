@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class ModelMapTests {
+public class ModelMapTests {
 
 	@Test
 	public void testNoArgCtorYieldsEmptyModel() throws Exception {
@@ -96,7 +96,7 @@ public final class ModelMapTests {
 		assertEquals("bing", string);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testOneArgCtorWithNull() {
 		//Null model arguments added without a name being explicitly supplied are not allowed
 		new ModelMap(null);
@@ -120,7 +120,7 @@ public final class ModelMapTests {
 		assertEquals(0, model.size());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testAddObjectWithNull() throws Exception {
 		// Null model arguments added without a name being explicitly supplied are not allowed
 		ModelMap model = new ModelMap();
@@ -150,7 +150,7 @@ public final class ModelMapTests {
 		assertEquals(0, model.size());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testAddAllObjectsWithSparseArrayList() throws Exception {
 		// Null model arguments added without a name being explicitly supplied are not allowed
 		ModelMap model = new ModelMap();

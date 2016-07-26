@@ -586,7 +586,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		itb.getAge();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testDeclarePrecedenceNotSupported() {
 		TestBean target = new TestBean();
 		MetadataAwareAspectInstanceFactory aspectInstanceFactory = new SingletonMetadataAwareAspectInstanceFactory(

@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Arjen Poutsma
  */
-public final class MapSqlParameterSourceTests {
+public class MapSqlParameterSourceTests {
 
 	@Test
 	public void nullParameterValuesPassedToCtorIsOk() throws Exception {

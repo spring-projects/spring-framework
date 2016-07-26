@@ -75,7 +75,7 @@ public class MethodMessageHandlerTests {
 		this.messageHandler.registerHandler(this.testController);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void duplicateMapping() {
 		this.messageHandler.registerHandler(new DuplicateMappingsController());
 	}

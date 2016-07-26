@@ -159,7 +159,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	// SPR-9603
 
-	@Test(expected=HttpMediaTypeNotAcceptableException.class)
+	@Test(expected = HttpMediaTypeNotAcceptableException.class)
 	public void getHandlerRequestMethodMatchFalsePositive() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users");
 		request.addHeader("Accept", "application/xml");

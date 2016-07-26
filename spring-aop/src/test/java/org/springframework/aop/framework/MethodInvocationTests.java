@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 14.03.2003
  */
-public final class MethodInvocationTests {
+public class MethodInvocationTests {
 
 	@Test
 	public void testValidInvocation() throws Throwable {

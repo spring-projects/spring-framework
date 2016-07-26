@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public final class RefreshableTargetSourceTests {
+public class RefreshableTargetSourceTests {
 
 	/**
 	 * Test what happens when checking for refresh but not refreshing object.

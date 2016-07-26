@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class BeanNamePointcutTests {
+public class BeanNamePointcutTests {
 
 	private ITestBean testBean1;
 	private ITestBean testBean2;

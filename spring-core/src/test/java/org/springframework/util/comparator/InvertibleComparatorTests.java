@@ -35,12 +35,12 @@ public class InvertibleComparatorTests {
 
 	private Comparator<Integer> comparator = new ComparableComparator<>();
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldNeedComparator() throws Exception {
 		new InvertibleComparator<>(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldNeedComparatorWithAscending() throws Exception {
 		new InvertibleComparator<>(null, true);
 	}

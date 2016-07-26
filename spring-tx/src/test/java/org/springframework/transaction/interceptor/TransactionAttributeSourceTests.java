@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
  * @since 15.10.2003
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  */
-public final class TransactionAttributeSourceTests {
+public class TransactionAttributeSourceTests {
 
 	@Test
 	public void matchAlwaysTransactionAttributeSource() throws Exception {

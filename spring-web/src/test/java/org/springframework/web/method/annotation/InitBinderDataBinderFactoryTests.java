@@ -104,7 +104,7 @@ public class InitBinderDataBinderFactoryTests {
 		assertNull(dataBinder.getDisallowedFields());
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void returnValueNotExpected() throws Exception {
 		WebDataBinderFactory factory = createBinderFactory("initBinderReturnValue", WebDataBinder.class);
 		factory.createBinder(webRequest, null, "invalidName");

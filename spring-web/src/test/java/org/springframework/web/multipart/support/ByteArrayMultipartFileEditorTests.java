@@ -29,7 +29,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rick Evans
  * @author Sam Brannen
  */
-public final class ByteArrayMultipartFileEditorTests {
+public class ByteArrayMultipartFileEditorTests {
 
 	private final ByteArrayMultipartFileEditor editor = new ByteArrayMultipartFileEditor();
 

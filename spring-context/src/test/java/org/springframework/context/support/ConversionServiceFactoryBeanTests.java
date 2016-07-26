@@ -91,7 +91,7 @@ public class ConversionServiceFactoryBeanTests {
 		assertTrue(service.canConvert(String.class, Baz.class));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void createDefaultConversionServiceWithInvalidSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
 		Set<Object> converters = new HashSet<>();

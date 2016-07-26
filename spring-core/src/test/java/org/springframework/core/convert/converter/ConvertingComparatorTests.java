@@ -45,22 +45,22 @@ public class ConvertingComparatorTests {
 
 	private final TestComparator comparator = new TestComparator();
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowOnNullComparator() throws Exception {
 		new ConvertingComparator<>(null, this.converter);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowOnNullConverter() throws Exception {
 		new ConvertingComparator<String, Integer>(this.comparator, null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowOnNullConversionService() throws Exception {
 		new ConvertingComparator<String, Integer>(this.comparator, null, Integer.class);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowOnNullType() throws Exception {
 		new ConvertingComparator<String, Integer>(this.comparator,
 			this.conversionService, null);

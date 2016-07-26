@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
  * @author Rob Harrop
  * @author Chris Beams
  */
-public final class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandlerTests {
+public class AopNamespaceHandlerProxyTargetClassTests extends AopNamespaceHandlerTests {
 
 	@Test
 	public void testIsClassProxy() {

@@ -34,7 +34,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Chris Beams
  * @since 07.01.2005
  */
-public final class LazyInitTargetSourceTests {
+public class LazyInitTargetSourceTests {
 
 	private static final Class<?> CLASS = LazyInitTargetSourceTests.class;
 

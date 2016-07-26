@@ -239,7 +239,7 @@ public class ResourceTests {
 		assertThat(resource.contentLength(), is(3L));
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testContentLength_withNullInputStream() throws IOException {
 		AbstractResource resource = new AbstractResource() {
 			@Override

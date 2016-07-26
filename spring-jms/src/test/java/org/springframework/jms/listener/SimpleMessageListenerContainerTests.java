@@ -75,13 +75,13 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 				container.isPubSubNoLocal());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSettingConcurrentConsumersToZeroIsNotAllowed() throws Exception {
 		container.setConcurrentConsumers(0);
 		container.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSettingConcurrentConsumersToANegativeValueIsNotAllowed() throws Exception {
 		container.setConcurrentConsumers(-198);
 		container.afterPropertiesSet();

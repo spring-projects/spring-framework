@@ -53,7 +53,7 @@ import static org.junit.Assert.*;
  * @author Jeremy Grelle
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public final class OptionsTagTests extends AbstractHtmlElementTagTests {
+public class OptionsTagTests extends AbstractHtmlElementTagTests {
 
 	private static final String COMMAND_NAME = "testBean";
 

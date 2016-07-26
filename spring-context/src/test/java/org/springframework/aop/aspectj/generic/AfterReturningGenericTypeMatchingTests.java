@@ -40,7 +40,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @author Chris Beams
  */
-public final class AfterReturningGenericTypeMatchingTests {
+public class AfterReturningGenericTypeMatchingTests {
 
 	private GenericReturnTypeVariationClass testBean;
 

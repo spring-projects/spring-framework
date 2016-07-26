@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class BeanWrapperEnumTests {
+public class BeanWrapperEnumTests {
 
 	@Test
 	public void testCustomEnum() {

@@ -57,7 +57,7 @@ public class BeanCreatingHandlerProviderTests {
 		assertNotNull(provider.getHandler());
 	}
 
-	@Test(expected=BeanInstantiationException.class)
+	@Test(expected = BeanInstantiationException.class)
 	public void getHandlerNoBeanFactory() {
 
 		BeanCreatingHandlerProvider<EchoHandler> provider =

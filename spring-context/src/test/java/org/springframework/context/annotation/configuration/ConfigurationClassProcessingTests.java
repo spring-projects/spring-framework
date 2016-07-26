@@ -146,7 +146,7 @@ public class ConfigurationClassProcessingTests {
 		assertSame(ac.getBean("customName"), ConfigWithSetWithProviderImplementation.set);
 	}
 
-	@Test(expected=BeanDefinitionParsingException.class)
+	@Test(expected = BeanDefinitionParsingException.class)
 	public void testFinalBeanMethod() {
 		initBeanFactory(ConfigWithFinalBean.class);
 	}

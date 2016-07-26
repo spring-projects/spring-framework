@@ -112,7 +112,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		verifyNoMoreInteractions(responseBodyHandler);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void noSuitableReturnValueHandler() throws Exception {
 		this.handlers.handleReturnValue("value", this.stringType, null, null);
 	}
