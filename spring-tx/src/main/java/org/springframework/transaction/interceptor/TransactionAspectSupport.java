@@ -18,7 +18,6 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
@@ -35,6 +34,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -68,13 +68,14 @@ import org.springframework.util.StringUtils;
  */
 public abstract class TransactionAspectSupport implements BeanFactoryAware, InitializingBean {
 
+	// NOTE: This class must not implement Serializable because it serves as base
+	// class for AspectJ aspects (which are not allowed to implement Serializable)!
+
+
 	/**
 	 * Key to use to store the default transaction manager.
 	 */
-	private final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
-
-	// NOTE: This class must not implement Serializable because it serves as base
-	// class for AspectJ aspects (which are not allowed to implement Serializable)!
+	private static final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
 
 	/**
 	 * Holder to support the {@code currentTransactionStatus()} method,
@@ -85,9 +86,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	private static final ThreadLocal<TransactionInfo> transactionInfoHolder =
 			new NamedThreadLocal<>("Current aspect-driven transaction");
 
-
-	private final ConcurrentMap<Object, PlatformTransactionManager> transactionManagerCache =
-			new ConcurrentHashMap<>();
 
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.
@@ -128,14 +126,14 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Default transaction manager bean name.
-	 */
 	private String transactionManagerBeanName;
 
 	private TransactionAttributeSource transactionAttributeSource;
 
 	private BeanFactory beanFactory;
+
+	private final ConcurrentMap<Object, PlatformTransactionManager> transactionManagerCache =
+			new ConcurrentReferenceHashMap<>(4);
 
 
 	/**
