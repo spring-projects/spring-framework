@@ -106,6 +106,10 @@ abstract class AbstractResponseBodyFlushProcessor
 	 */
 	protected abstract void flush() throws IOException;
 
+	private void cancel() {
+		this.subscription.cancel();
+	}
+
 	private void writeComplete() {
 		if (logger.isTraceEnabled()) {
 			logger.trace(this.state + " writeComplete");
@@ -157,11 +161,12 @@ abstract class AbstractResponseBodyFlushProcessor
 				else {
 					try {
 						processor.flush();
+						processor.subscription.request(1);
 					}
 					catch (IOException ex) {
+						processor.cancel();
 						processor.onError(ex);
 					}
-					processor.subscription.request(1);
 				}
 			}
 		}, COMPLETED {
@@ -231,6 +236,7 @@ abstract class AbstractResponseBodyFlushProcessor
 
 			@Override
 			public void onError(Throwable t) {
+				processor.cancel();
 				processor.onError(t);
 			}
 

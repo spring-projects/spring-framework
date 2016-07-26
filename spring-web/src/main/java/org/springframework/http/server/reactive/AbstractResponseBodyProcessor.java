@@ -159,6 +159,10 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	 */
 	protected abstract boolean write(DataBuffer dataBuffer) throws IOException;
 
+	protected void cancel() {
+		this.subscription.cancel();
+	}
+
 	private boolean changeState(State oldState, State newState) {
 		return this.state.compareAndSet(oldState, newState);
 	}
@@ -220,7 +224,6 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 			@Override
 			void onComplete(AbstractResponseBodyProcessor processor) {
 				if (processor.changeState(this, COMPLETED)) {
-					processor.subscriberCompleted = true;
 					processor.publisherDelegate.publishComplete();
 				}
 			}
@@ -258,6 +261,7 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 						}
 					}
 					catch (IOException ex) {
+						processor.cancel();
 						processor.onError(ex);
 					}
 				}
