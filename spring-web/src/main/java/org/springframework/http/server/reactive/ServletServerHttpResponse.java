@@ -224,6 +224,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		@Override
 		public void onError(Throwable ex) {
 			if (bodyProcessor != null) {
+				bodyProcessor.cancel();
 				bodyProcessor.onError(ex);
 			}
 		}
