@@ -17,7 +17,6 @@
 package org.springframework.core.codec;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.ResolvableType;
@@ -32,7 +31,7 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractEncoder<T> implements Encoder<T> {
 
-	private List<MimeType> encodableMimeTypes = Collections.emptyList();
+	private final List<MimeType> encodableMimeTypes;
 
 
 	protected AbstractEncoder(MimeType... supportedMimeTypes) {
@@ -50,7 +49,7 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 		if (mimeType == null) {
 			return true;
 		}
-		return this.encodableMimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
+		return this.encodableMimeTypes.stream().anyMatch(candidate -> candidate.isCompatibleWith(mimeType));
 	}
 
 }

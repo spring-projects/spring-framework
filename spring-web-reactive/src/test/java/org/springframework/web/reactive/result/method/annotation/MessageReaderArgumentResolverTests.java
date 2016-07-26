@@ -46,9 +46,9 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.validation.Errors;
@@ -62,12 +62,8 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -75,7 +71,7 @@ import static org.springframework.core.ResolvableType.forClassWithGenerics;
  */
 public class MessageReaderArgumentResolverTests {
 
-	private AbstractMessageReaderArgumentResolver resolver = resolver(new JacksonJsonDecoder());
+	private AbstractMessageReaderArgumentResolver resolver = resolver(new Jackson2JsonDecoder());
 
 	private ServerWebExchange exchange;
 

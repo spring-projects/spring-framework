@@ -35,8 +35,8 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
@@ -50,7 +50,10 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 
 /**
@@ -59,7 +62,7 @@ import static org.junit.Assert.*;
  */
 public class HttpMessageWriterViewTests {
 
-	private HttpMessageWriterView view = new HttpMessageWriterView(new JacksonJsonEncoder());
+	private HttpMessageWriterView view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 
 	private HandlerResult result;
 
@@ -136,7 +139,7 @@ public class HttpMessageWriterViewTests {
 
 	@Test
 	public void extractObjectNotSupported() throws Exception {
-		HttpMessageWriterView view = new HttpMessageWriterView(new Jaxb2Encoder());
+		HttpMessageWriterView view = new HttpMessageWriterView(new Jaxb2XmlEncoder());
 		view.setModelKeys(new HashSet<>(Collections.singletonList("foo1")));
 		this.model.addAttribute("foo1", "bar1");
 

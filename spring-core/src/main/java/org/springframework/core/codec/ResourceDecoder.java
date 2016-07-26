@@ -27,7 +27,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -38,7 +38,6 @@ import org.springframework.util.MimeTypeUtils;
  * @since 5.0
  */
 public class ResourceDecoder extends AbstractDecoder<Resource> {
-
 
 	public ResourceDecoder() {
 		super(MimeTypeUtils.ALL);
@@ -79,4 +78,5 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 			return Flux.error(new IllegalStateException("Unsupported resource class: " + clazz));
 		}
 	}
+
 }

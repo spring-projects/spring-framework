@@ -30,7 +30,6 @@ import org.springframework.core.io.buffer.DataBuffer;
  */
 public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
-
 	@Test
 	public void decodeSingleChunkToJsonObject()  {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
@@ -81,6 +80,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
 							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
 	}
+
 
 	private static String toString(DataBuffer buffer) {
 		byte[] b = new byte[buffer.readableByteCount()];

@@ -45,7 +45,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.server.reactive.ZeroCopyIntegrationTests;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,10 +54,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.MediaType.APPLICATION_XML;
+import static java.util.Arrays.*;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 
 /**
@@ -286,7 +285,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		@GetMapping("/publisher")
 		public Publisher<ByteBuffer> getPublisher() {
 			DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
+			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 			return encoder.encode(Mono.just(new Person("Robert")), dataBufferFactory,
 					ResolvableType.forClass(Person.class), JSON).map(DataBuffer::asByteBuffer);
 		}

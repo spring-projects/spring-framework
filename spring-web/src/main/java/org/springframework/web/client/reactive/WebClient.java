@@ -38,15 +38,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.codec.json.JacksonJsonDecoder;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Decoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
+import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -106,8 +106,8 @@ public final class WebClient {
 	 * <ul>
 	 * <li>{@link ByteBufferEncoder} / {@link ByteBufferDecoder}</li>
 	 * <li>{@link CharSequenceEncoder} / {@link StringDecoder}</li>
-	 * <li>{@link Jaxb2Encoder} / {@link Jaxb2Decoder}</li>
-	 * <li>{@link JacksonJsonEncoder} / {@link JacksonJsonDecoder}</li>
+	 * <li>{@link Jaxb2XmlEncoder} / {@link Jaxb2XmlDecoder}</li>
+	 * <li>{@link Jackson2JsonEncoder} / {@link Jackson2JsonDecoder}</li>
 	 * </ul>
 	 *
 	 * @param clientHttpConnector the {@code ClientHttpRequestFactory} to use
@@ -126,10 +126,10 @@ public final class WebClient {
 		messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder(false)));
 		messageReaders.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
 		if (jaxb2Present) {
-			messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2Decoder()));
+			messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		}
 		if (jackson2Present) {
-			messageReaders.add(new DecoderHttpMessageReader<>(new JacksonJsonDecoder()));
+			messageReaders.add(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 		}
 	}
 
@@ -141,10 +141,10 @@ public final class WebClient {
 		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		messageWriters.add(new ResourceHttpMessageWriter());
 		if (jaxb2Present) {
-			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
+			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
 		if (jackson2Present) {
-			messageWriters.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
+			messageWriters.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
 		}
 	}
 

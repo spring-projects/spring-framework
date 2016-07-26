@@ -39,16 +39,16 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.JacksonJsonDecoder;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Decoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.SseEventHttpMessageWriter;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
+import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -249,10 +249,10 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 		readers.add(new DecoderHttpMessageReader<>(new ResourceDecoder()));
 		if (jaxb2Present) {
-			readers.add(new DecoderHttpMessageReader<>(new Jaxb2Decoder()));
+			readers.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		}
 		if (jackson2Present) {
-			readers.add(new DecoderHttpMessageReader<>(new JacksonJsonDecoder()));
+			readers.add(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 		}
 	}
 
@@ -371,10 +371,10 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		writers.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 		writers.add(new ResourceHttpMessageWriter());
 		if (jaxb2Present) {
-			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
+			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
 		if (jackson2Present) {
-			JacksonJsonEncoder jacksonEncoder = new JacksonJsonEncoder();
+			Jackson2JsonEncoder jacksonEncoder = new Jackson2JsonEncoder();
 			writers.add(new EncoderHttpMessageWriter<>(jacksonEncoder));
 			sseDataEncoders.add(jacksonEncoder);
 		}

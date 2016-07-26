@@ -44,11 +44,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -60,11 +60,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
-import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.web.reactive.HandlerMapping.*;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -177,8 +175,8 @@ public class MessageWriterResultHandlerTests {
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 			writerList.add(new ResourceHttpMessageWriter());
-			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
 		}
 		else {
 			writerList = Arrays.asList(writers);

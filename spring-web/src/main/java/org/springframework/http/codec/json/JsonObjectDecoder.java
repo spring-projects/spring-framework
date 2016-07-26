@@ -31,7 +31,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.MimeType;
 
 /**
@@ -109,17 +109,17 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 			Integer writerIndex;
 
 			@Override
-			public Publisher<? extends DataBuffer> apply(DataBuffer b) {
+			public Publisher<? extends DataBuffer> apply(DataBuffer buffer) {
 				List<DataBuffer> chunks = new ArrayList<>();
 				if (this.input == null) {
-					this.input = Unpooled.copiedBuffer(b.asByteBuffer());
-					DataBufferUtils.release(b);
+					this.input = Unpooled.copiedBuffer(buffer.asByteBuffer());
+					DataBufferUtils.release(buffer);
 					this.writerIndex = this.input.writerIndex();
 				}
 				else {
 					this.input = Unpooled.copiedBuffer(this.input,
-							Unpooled.copiedBuffer(b.asByteBuffer()));
-					DataBufferUtils.release(b);
+							Unpooled.copiedBuffer(buffer.asByteBuffer()));
+					DataBufferUtils.release(buffer);
 					this.writerIndex = this.input.writerIndex();
 				}
 				if (this.state == ST_CORRUPTED) {
@@ -133,7 +133,7 @@ class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 					return Flux.error(new IllegalStateException("object length exceeds " +
 							maxObjectLength + ": " + this.writerIndex + " bytes discarded"));
 				}
-				DataBufferFactory dataBufferFactory = b.factory();
+				DataBufferFactory dataBufferFactory = buffer.factory();
 				for (/* use current index */; this.index < this.writerIndex; this.index++) {
 					byte c = this.input.getByte(this.index);
 					if (this.state == ST_DECODING_NORMAL) {

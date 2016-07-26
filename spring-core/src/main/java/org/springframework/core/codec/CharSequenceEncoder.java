@@ -30,7 +30,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from a CharSequence stream to a bytes stream.
+ * Encode from a {@code CharSequence} stream to a bytes stream.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma

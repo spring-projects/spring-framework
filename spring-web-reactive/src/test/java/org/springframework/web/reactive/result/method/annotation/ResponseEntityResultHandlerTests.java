@@ -38,11 +38,11 @@ import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -55,11 +55,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
@@ -93,8 +90,8 @@ public class ResponseEntityResultHandlerTests {
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 			writerList.add(new ResourceHttpMessageWriter());
-			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
 		}
 		else {
 			writerList = Arrays.asList(writers);

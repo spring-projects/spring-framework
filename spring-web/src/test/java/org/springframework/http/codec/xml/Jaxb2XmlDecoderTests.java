@@ -36,14 +36,12 @@ import org.springframework.http.codec.xml.jaxb.XmlType;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithName;
 import org.springframework.http.codec.xml.jaxb.XmlTypeWithNameAndNamespace;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
  */
-public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
+public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private static final String POJO_ROOT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<pojo>" +
@@ -64,7 +62,8 @@ public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 					"</pojo>" +
 					"<root/>";
 
-	private final Jaxb2Decoder decoder = new Jaxb2Decoder();
+
+	private final Jaxb2XmlDecoder decoder = new Jaxb2XmlDecoder();
 
 	private final XmlEventDecoder xmlEventDecoder = new XmlEventDecoder();
 

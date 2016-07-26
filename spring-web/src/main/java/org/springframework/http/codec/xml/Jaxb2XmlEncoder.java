@@ -39,22 +39,24 @@ import org.springframework.util.MimeTypeUtils;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
- * @see Jaxb2Decoder
+ * @see Jaxb2XmlDecoder
  */
-public class Jaxb2Encoder extends AbstractSingleValueEncoder<Object> {
+public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 
 	private final JaxbContextContainer jaxbContexts = new JaxbContextContainer();
 
-	public Jaxb2Encoder() {
+
+	public Jaxb2XmlEncoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
+
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
 		if (super.canEncode(elementType, mimeType, hints)) {
 			Class<?> outputClass = elementType.getRawClass();
-			return outputClass.isAnnotationPresent(XmlRootElement.class) ||
-					outputClass.isAnnotationPresent(XmlType.class);
+			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
+					outputClass.isAnnotationPresent(XmlType.class));
 		}
 		else {
 			return false;
@@ -80,7 +82,4 @@ public class Jaxb2Encoder extends AbstractSingleValueEncoder<Object> {
 		}
 	}
 
-
-
 }
-

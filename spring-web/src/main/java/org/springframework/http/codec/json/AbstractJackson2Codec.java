@@ -28,12 +28,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
+ * Abstract base class for Jackson based decoder/encoder implementations.
+ *
  * @author Sebastien Deleuze
  */
-public class AbstractJacksonJsonCodec {
+public class AbstractJackson2Codec {
 
 	protected static final List<MimeType> JSON_MIME_TYPES = Arrays.asList(
 				new MimeType("application", "json", StandardCharsets.UTF_8),
@@ -42,9 +45,16 @@ public class AbstractJacksonJsonCodec {
 
 	protected final ObjectMapper mapper;
 
-	protected AbstractJacksonJsonCodec(ObjectMapper mapper) {
+
+	/**
+	 * Create a new Jackson codec for the given mapper.
+	 * @param mapper the Jackson ObjectMapper to use
+	 */
+	protected AbstractJackson2Codec(ObjectMapper mapper) {
+		Assert.notNull(mapper, "ObjectMapper must not be null");
 		this.mapper = mapper;
 	}
+
 
 	/**
 	 * Return the Jackson {@link JavaType} for the specified type and context class.

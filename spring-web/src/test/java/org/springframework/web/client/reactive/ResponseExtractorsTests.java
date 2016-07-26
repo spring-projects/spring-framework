@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.web.client.reactive;
 
 import java.io.UnsupportedEncodingException;
@@ -19,18 +35,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.codec.json.JacksonJsonDecoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -40,7 +52,7 @@ import static org.mockito.Mockito.mock;
  */
 public class ResponseExtractorsTests {
 
-	private HttpHeaders headers = new HttpHeaders();
+	private HttpHeaders headers;
 
 	private ClientHttpResponse response;
 
@@ -50,6 +62,7 @@ public class ResponseExtractorsTests {
 
 	private ResponseErrorHandler errorHandler;
 
+
 	@Before
 	public void setup() throws Exception {
 		this.headers = new HttpHeaders();
@@ -57,12 +70,13 @@ public class ResponseExtractorsTests {
 		given(this.response.getHeaders()).willReturn(headers);
 		this.messageReaders = Arrays.asList(
 				new DecoderHttpMessageReader<>(new StringDecoder()),
-				new DecoderHttpMessageReader<>(new JacksonJsonDecoder()));
+				new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
 		this.webClientConfig = mock(WebClientConfig.class);
 		this.errorHandler = mock(ResponseErrorHandler.class);
 		given(this.webClientConfig.getMessageReaders()).willReturn(this.messageReaders);
 		given(this.webClientConfig.getResponseErrorHandler()).willReturn(this.errorHandler);
 	}
+
 
 	@Test
 	public void shouldExtractResponseEntityMono() throws Exception {
@@ -189,7 +203,6 @@ public class ResponseExtractorsTests {
 
 
 	private Flux<DataBuffer> createFluxBody(String... items) throws Exception {
-
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		return Flux.just(items)
 				.map(item -> {
@@ -204,7 +217,9 @@ public class ResponseExtractorsTests {
 				});
 	}
 
+
 	protected class SomePojo {
+
 		public String foo;
 	}
 

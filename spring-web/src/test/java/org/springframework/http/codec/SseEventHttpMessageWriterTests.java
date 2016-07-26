@@ -28,10 +28,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.Pojo;
-import org.springframework.http.codec.SseEvent;
-import org.springframework.http.codec.SseEventHttpMessageWriter;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 
 import static org.junit.Assert.*;
@@ -39,11 +36,11 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class SseEventHttpMessageWriterTests
-		extends AbstractDataBufferAllocatingTestCase {
+public class SseEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTestCase {
 
 	private SseEventHttpMessageWriter converter = new SseEventHttpMessageWriter(
-			Collections.singletonList(new JacksonJsonEncoder()));
+			Collections.singletonList(new Jackson2JsonEncoder()));
+
 
 	@Test
 	public void nullMimeType() {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.buffer.support;
+package org.springframework.core.io.buffer;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -26,10 +26,7 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.TestSubscriber;
 
-import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
-import org.springframework.core.io.buffer.DataBuffer;
-
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -38,10 +35,8 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void readChannel() throws Exception {
-		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt")
-				.toURI();
+		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
-
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 3);
 
 		TestSubscriber
@@ -57,10 +52,8 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void readUnalignedChannel() throws Exception {
-		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt")
-				.toURI();
+		URI uri = DataBufferUtilsTests.class.getResource("DataBufferUtilsTests.txt").toURI();
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
-
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 5);
 
 		TestSubscriber
@@ -77,9 +70,7 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void readInputStream() {
-		InputStream is = DataBufferUtilsTests.class
-				.getResourceAsStream("DataBufferUtilsTests.txt");
-
+		InputStream is = DataBufferUtilsTests.class.getResourceAsStream("DataBufferUtilsTests.txt");
 		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.bufferFactory, 3);
 
 		TestSubscriber
@@ -97,7 +88,6 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		DataBuffer bar = stringBuffer("bar");
 		DataBuffer baz = stringBuffer("baz");
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
-
 		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
 
 		TestSubscriber

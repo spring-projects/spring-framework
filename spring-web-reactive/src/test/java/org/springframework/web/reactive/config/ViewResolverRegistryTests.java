@@ -19,18 +19,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.Ordered;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.reactive.result.view.HttpMessageWriterView;
 import org.springframework.web.reactive.result.view.UrlBasedViewResolver;
 import org.springframework.web.reactive.result.view.View;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ViewResolverRegistry}.
@@ -80,7 +76,7 @@ public class ViewResolverRegistryTests {
 
 	@Test
 	public void defaultViews() throws Exception {
-		View view = new HttpMessageWriterView(new JacksonJsonEncoder());
+		View view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 		this.registry.defaultViews(view);
 
 		assertEquals(1, this.registry.getDefaultViews().size());

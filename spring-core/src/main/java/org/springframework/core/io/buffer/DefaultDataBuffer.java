@@ -46,6 +46,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	private int writePosition;
 
+
 	/**
 	 * Create a new {@code DefaultDataBuffer} based on the given
 	 * {@code ByteBuffer}. Both reading and writing position of this buffer are
@@ -59,6 +60,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 	DefaultDataBuffer(ByteBuffer byteBuffer, int readPosition, int writePosition,
 			DefaultDataBufferFactory dataBufferFactory) {
+
 		Assert.notNull(byteBuffer, "'byteBuffer' must not be null");
 		Assert.isTrue(readPosition >= 0, "'readPosition' must be 0 or higher");
 		Assert.isTrue(writePosition >= 0, "'writePosition' must be 0 or higher");
@@ -72,10 +74,6 @@ public class DefaultDataBuffer implements DataBuffer {
 		this.dataBufferFactory = dataBufferFactory;
 	}
 
-	@Override
-	public DefaultDataBufferFactory factory() {
-		return this.dataBufferFactory;
-	}
 
 	/**
 	 * Directly exposes the native {@code ByteBuffer} that this buffer is based on.
@@ -83,6 +81,11 @@ public class DefaultDataBuffer implements DataBuffer {
 	 */
 	public ByteBuffer getNativeBuffer() {
 		return this.byteBuffer;
+	}
+
+	@Override
+	public DefaultDataBufferFactory factory() {
+		return this.dataBufferFactory;
 	}
 
 	@Override
@@ -130,18 +133,14 @@ public class DefaultDataBuffer implements DataBuffer {
 	@Override
 	public DefaultDataBuffer read(byte[] destination) {
 		Assert.notNull(destination, "'destination' must not be null");
-
 		readInternal(b -> b.get(destination));
-
 		return this;
 	}
 
 	@Override
 	public DefaultDataBuffer read(byte[] destination, int offset, int length) {
 		Assert.notNull(destination, "'destination' must not be null");
-
 		readInternal(b -> b.get(destination, offset, length));
-
 		return this;
 	}
 
@@ -163,14 +162,12 @@ public class DefaultDataBuffer implements DataBuffer {
 	public DefaultDataBuffer write(byte b) {
 		ensureExtraCapacity(1);
 		writeInternal(buffer -> buffer.put(b));
-
 		return this;
 	}
 
 	@Override
 	public DefaultDataBuffer write(byte[] source) {
 		Assert.notNull(source, "'source' must not be null");
-
 		ensureExtraCapacity(source.length);
 		writeInternal(buffer -> buffer.put(source));
 		return this;
@@ -179,7 +176,6 @@ public class DefaultDataBuffer implements DataBuffer {
 	@Override
 	public DefaultDataBuffer write(byte[] source, int offset, int length) {
 		Assert.notNull(source, "'source' must not be null");
-
 		ensureExtraCapacity(length);
 		writeInternal(buffer -> buffer.put(source, offset, length));
 		return this;
@@ -199,15 +195,10 @@ public class DefaultDataBuffer implements DataBuffer {
 	@Override
 	public DefaultDataBuffer write(ByteBuffer... byteBuffers) {
 		Assert.notEmpty(byteBuffers, "'byteBuffers' must not be empty");
-
-		int extraCapacity =
-				Arrays.stream(byteBuffers).mapToInt(ByteBuffer::remaining).sum();
-
+		int extraCapacity = Arrays.stream(byteBuffers).mapToInt(ByteBuffer::remaining).sum();
 		ensureExtraCapacity(extraCapacity);
-
 		Arrays.stream(byteBuffers)
 				.forEach(byteBuffer -> writeInternal(buffer -> buffer.put(byteBuffer)));
-
 		return this;
 	}
 
@@ -280,28 +271,29 @@ public class DefaultDataBuffer implements DataBuffer {
 
 
 	@Override
-	public int hashCode() {
-		return this.byteBuffer.hashCode();
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
-		else if (obj instanceof DefaultDataBuffer) {
-			DefaultDataBuffer other = (DefaultDataBuffer) obj;
-			return this.readPosition == other.readPosition &&
-					this.writePosition == other.writePosition &&
-					this.byteBuffer.equals(other.byteBuffer);
+		if (!(obj instanceof DefaultDataBuffer)) {
+			return false;
 		}
-		return false;
+		DefaultDataBuffer other = (DefaultDataBuffer) obj;
+		return (this.readPosition == other.readPosition &&
+				this.writePosition == other.writePosition &&
+				this.byteBuffer.equals(other.byteBuffer));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.byteBuffer.hashCode();
 	}
 
 	@Override
 	public String toString() {
 		return this.byteBuffer.toString();
 	}
+
 
 	private class DefaultDataBufferInputStream extends InputStream {
 
@@ -332,6 +324,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		}
 	}
 
+
 	private class DefaultDataBufferOutputStream extends OutputStream {
 
 		@Override
@@ -347,6 +340,7 @@ public class DefaultDataBuffer implements DataBuffer {
 		}
 	}
 
+
 	private static class SlicedDefaultDataBuffer extends DefaultDataBuffer {
 
 		SlicedDefaultDataBuffer(ByteBuffer byteBuffer, int readPosition,
@@ -360,4 +354,5 @@ public class DefaultDataBuffer implements DataBuffer {
 					"Growing the capacity of a sliced buffer is not supported");
 		}
 	}
+
 }

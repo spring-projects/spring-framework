@@ -19,7 +19,6 @@ package org.springframework.http.codec.json;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,21 +30,14 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze
  */
-public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCase {
+public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
-	private JacksonJsonEncoder encoder;
-
-
-	@Before
-	public void createEncoder() {
-		this.encoder = new JacksonJsonEncoder();
-	}
+	private final Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 
 
 	@Test
@@ -123,9 +115,11 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 	private static class Bar extends ParentClass {
 	}
 
+
 	private interface MyJacksonView1 {}
 
 	private interface MyJacksonView2 {}
+
 
 	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
@@ -162,6 +156,7 @@ public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCas
 			this.withoutView = withoutView;
 		}
 	}
+
 
 	private static class JacksonController {
 

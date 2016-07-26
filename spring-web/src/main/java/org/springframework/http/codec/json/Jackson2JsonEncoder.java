@@ -41,14 +41,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from an {@code Object} stream to a byte stream of JSON objects.
+ * Encode from an {@code Object} stream to a byte stream of JSON objects,
+ * using Jackson 2.6+.
  *
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
- * @see JacksonJsonDecoder
+ * @see Jackson2JsonDecoder
  */
-public class JacksonJsonEncoder extends AbstractJacksonJsonCodec implements Encoder<Object> {
+public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encoder<Object> {
 
 	private static final ByteBuffer START_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{'['});
 
@@ -57,13 +58,14 @@ public class JacksonJsonEncoder extends AbstractJacksonJsonCodec implements Enco
 	private static final ByteBuffer END_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{']'});
 
 
-	public JacksonJsonEncoder() {
+	public Jackson2JsonEncoder() {
 		super(Jackson2ObjectMapperBuilder.json().build());
 	}
 
-	public JacksonJsonEncoder(ObjectMapper mapper) {
+	public Jackson2JsonEncoder(ObjectMapper mapper) {
 		super(mapper);
 	}
+
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
@@ -105,38 +107,38 @@ public class JacksonJsonEncoder extends AbstractJacksonJsonCodec implements Enco
 	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType type) {
 		TypeFactory typeFactory = this.mapper.getTypeFactory();
 		JavaType javaType = typeFactory.constructType(type.getType());
-		MethodParameter returnType = (type.getSource() instanceof MethodParameter ?
-				(MethodParameter)type.getSource() : null);
+		MethodParameter returnType =
+				(type.getSource() instanceof MethodParameter ? (MethodParameter) type.getSource() : null);
 
-		if (type != null && value != null && type.isAssignableFrom(value.getClass())) {
+		if (type.isInstance(value)) {
 			javaType = getJavaType(type.getType(), null);
 		}
-		ObjectWriter writer;
 
-		if (returnType != null && returnType.getMethodAnnotation(JsonView.class) != null) {
-			JsonView annotation = returnType.getMethodAnnotation(JsonView.class);
-			Class<?>[] classes = annotation.value();
+		ObjectWriter writer;
+		JsonView jsonView = (returnType != null ? returnType.getMethodAnnotation(JsonView.class) : null);
+		if (jsonView != null) {
+			Class<?>[] classes = jsonView.value();
 			if (classes.length != 1) {
-				throw new IllegalArgumentException(
-						"@JsonView only supported for response body advice with exactly 1 class argument: " + returnType);
+				throw new IllegalArgumentException("@JsonView only supported for response body advice " +
+						"with exactly 1 class argument: " + returnType);
 			}
 			writer = this.mapper.writerWithView(classes[0]);
 		}
 		else {
 			writer = this.mapper.writer();
 		}
+
 		if (javaType != null && javaType.isContainerType()) {
 			writer = writer.forType(javaType);
 		}
 
 		DataBuffer buffer = bufferFactory.allocateBuffer();
 		OutputStream outputStream = buffer.asOutputStream();
-
 		try {
 			writer.writeValue(outputStream, value);
 		}
-		catch (IOException e) {
-			throw new CodecException("Error while writing the data", e);
+		catch (IOException ex) {
+			throw new CodecException("Error while writing the data", ex);
 		}
 
 		return buffer;

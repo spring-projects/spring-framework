@@ -32,15 +32,14 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
- * @param <T> the type of elements in the input stream
  * @since 5.0
+ * @param <T> the type of elements in the input stream
  */
 public interface Encoder<T> {
 
 	/**
 	 * Whether the encoder supports the given source element type and the MIME
 	 * type for the output stream.
-	 *
 	 * @param elementType the type of elements in the source stream
 	 * @param mimeType the MIME type for the output stream
 	 * @param hints additional information about how to do encode, optional
@@ -51,7 +50,6 @@ public interface Encoder<T> {
 	/**
 	 * Encode a stream of Objects of type {@code T} into a {@link DataBuffer}
 	 * output stream.
-	 *
 	 * @param inputStream the input stream of Objects to encode
 	 * @param bufferFactory for creating output stream {@code DataBuffer}'s
 	 * @param elementType the expected type of elements in the input stream;

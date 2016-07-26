@@ -40,9 +40,8 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
 
 	@Override
-	public final Flux<DataBuffer> encode(Publisher<? extends T> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType elementType, MimeType mimeType,
-			Object... hints) {
+	public final Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType elementType, MimeType mimeType, Object... hints) {
 
 		return Flux.from(inputStream).
 				take(1).
