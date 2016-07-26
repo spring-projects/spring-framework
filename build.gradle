@@ -193,7 +193,7 @@ configure(allprojects) { project ->
 		"http://aopalliance.sourceforge.net/doc/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/",
-		"http://quartz-scheduler.org/api/2.2.0/",
+		"http://quartz-scheduler.org/api/2.2.1/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
 		"http://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
 		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.3.0/",
