@@ -128,7 +128,7 @@ abstract class AbstractResponseBodyFlushProcessor
 			public void onSubscribe(AbstractResponseBodyFlushProcessor processor,
 					Subscription subscription) {
 				Objects.requireNonNull(subscription, "Subscription cannot be null");
-				if (processor.changeState(this, SUBSCRIBED)) {
+				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
 					subscription.request(1);
 				}
@@ -136,40 +136,55 @@ abstract class AbstractResponseBodyFlushProcessor
 					super.onSubscribe(processor, subscription);
 				}
 			}
-		}, SUBSCRIBED {
+		},
+		REQUESTED {
 			@Override
 			public void onNext(AbstractResponseBodyFlushProcessor processor,
 					Publisher<DataBuffer> chunk) {
-				Processor<DataBuffer, Void> chunkProcessor =
-						processor.createBodyProcessor();
-				chunk.subscribe(chunkProcessor);
-				chunkProcessor.subscribe(new WriteSubscriber(processor));
+				if (processor.changeState(this, RECEIVED)) {
+					Processor<DataBuffer, Void> chunkProcessor =
+							processor.createBodyProcessor();
+					chunk.subscribe(chunkProcessor);
+					chunkProcessor.subscribe(new WriteSubscriber(processor));
+				}
 			}
 
 			@Override
 			void onComplete(AbstractResponseBodyFlushProcessor processor) {
-				processor.subscriberCompleted = true;
+				if (processor.changeState(this, COMPLETED)) {
+					processor.publisherDelegate.publishComplete();
+				}
 			}
-
+		},
+		RECEIVED {
 			@Override
 			public void writeComplete(AbstractResponseBodyFlushProcessor processor) {
+				try {
+					processor.flush();
+				}
+				catch (IOException ex) {
+					processor.cancel();
+					processor.onError(ex);
+				}
+
 				if (processor.subscriberCompleted) {
 					if (processor.changeState(this, COMPLETED)) {
 						processor.publisherDelegate.publishComplete();
 					}
 				}
 				else {
-					try {
-						processor.flush();
+					if (processor.changeState(this, REQUESTED)) {
 						processor.subscription.request(1);
-					}
-					catch (IOException ex) {
-						processor.cancel();
-						processor.onError(ex);
 					}
 				}
 			}
-		}, COMPLETED {
+
+			@Override
+			void onComplete(AbstractResponseBodyFlushProcessor processor) {
+				processor.subscriberCompleted = true;
+			}
+		},
+		COMPLETED {
 			@Override
 			public void onNext(AbstractResponseBodyFlushProcessor processor,
 					Publisher<DataBuffer> publisher) {
@@ -184,11 +199,6 @@ abstract class AbstractResponseBodyFlushProcessor
 
 			@Override
 			void onComplete(AbstractResponseBodyFlushProcessor processor) {
-				// ignore
-			}
-
-			@Override
-			public void writeComplete(AbstractResponseBodyFlushProcessor processor) {
 				// ignore
 			}
 		};
@@ -214,7 +224,7 @@ abstract class AbstractResponseBodyFlushProcessor
 		}
 
 		public void writeComplete(AbstractResponseBodyFlushProcessor processor) {
-			throw new IllegalStateException(toString());
+			// ignore
 		}
 
 		private static class WriteSubscriber implements Subscriber<Void> {
