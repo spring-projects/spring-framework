@@ -139,7 +139,7 @@ class ConfigurationClassParser {
 
 	private final List<String> propertySourceNames = new ArrayList<>();
 
-	private final ImportStack importStack = new ImportStack();
+	private ImportStack importStack = new ImportStack();
 
 	private List<DeferredImportSelectorHolder> deferredImportSelectors;
 
@@ -276,7 +276,16 @@ class ConfigurationClassParser {
 				// Check the set of scanned definitions for any further config classes and parse recursively if necessary
 				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
-						parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+						// Provide isolated circular import detection for scanned classes,
+						// since the initial registration did not come explicitly.
+						ImportStack previousStack = this.importStack;
+						this.importStack = new ImportStack();
+						try {
+							parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+						}
+						finally {
+							this.importStack = previousStack;
+						}
 					}
 				}
 			}
