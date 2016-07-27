@@ -123,8 +123,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 		}
 	}
 
-	@Override
-	protected ResponseBodyProcessor createBodyProcessor() {
+	private ResponseBodyProcessor createBodyProcessor() {
 		if (this.responseChannel == null) {
 			this.responseChannel = this.exchange.getResponseChannel();
 		}
