@@ -143,7 +143,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 			return true;
 		}
 		Optional<Object> optional = result.getReturnValue();
-		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(clazz, optional);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(clazz, optional);
 		if (adapter != null) {
 			if (adapter.getDescriptor().isNoValue()) {
 				return true;
@@ -177,12 +177,11 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		ResolvableType elementType;
 		ResolvableType returnType = result.getReturnType();
 
-		Class<?> rawClass = returnType.getRawClass();
-		Optional<Object> optionalValue = result.getReturnValue();
-		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(rawClass, optionalValue);
+		Optional<Object> optional = result.getReturnValue();
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(returnType.getRawClass(), optional);
 		if (adapter != null) {
-			if (optionalValue.isPresent()) {
-				Mono<?> converted = adapter.toMono(optionalValue);
+			if (optional.isPresent()) {
+				Mono<?> converted = adapter.toMono(optional);
 				valueMono = converted.map(o -> o);
 			}
 			else {

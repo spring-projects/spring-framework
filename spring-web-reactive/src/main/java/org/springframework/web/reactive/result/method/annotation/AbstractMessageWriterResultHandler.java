@@ -91,7 +91,7 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 	protected Mono<Void> writeBody(Object body, MethodParameter bodyType, ServerWebExchange exchange) {
 
 		Class<?> bodyClass = bodyType.getParameterType();
-		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(bodyClass, body);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(bodyClass, body);
 
 		Publisher<?> publisher;
 		ResolvableType elementType;

@@ -103,8 +103,7 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 			return true;
 		}
 		else {
-			Optional<Object> optional = result.getReturnValue();
-			ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(rawClass, optional);
+			ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(rawClass, result.getReturnValue());
 			if (adapter != null && !adapter.getDescriptor().isNoValue()) {
 				ResolvableType genericType = result.getReturnType().getGeneric(0);
 				if (HttpEntity.class.isAssignableFrom(genericType.getRawClass())) {

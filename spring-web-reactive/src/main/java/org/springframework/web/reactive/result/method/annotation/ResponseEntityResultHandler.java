@@ -85,8 +85,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			return true;
 		}
 		else {
-			Optional<Object> optional = result.getReturnValue();
-			ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(returnType, optional);
+			ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(returnType, result.getReturnValue());
 			if (adapter != null &&
 					!adapter.getDescriptor().isMultiValue() &&
 					!adapter.getDescriptor().isNoValue()) {
@@ -113,7 +112,7 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 		Optional<Object> optionalValue = result.getReturnValue();
 
 		Class<?> rawClass = returnType.getRawClass();
-		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(rawClass, optionalValue);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(rawClass, optionalValue);
 
 		if (adapter != null) {
 			returnValueMono = adapter.toMono(optionalValue);
