@@ -55,12 +55,13 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 	private StreamSinkChannel responseChannel;
 
-	public UndertowServerHttpResponse(HttpServerExchange exchange,
-			DataBufferFactory dataBufferFactory) {
-		super(dataBufferFactory);
+
+	public UndertowServerHttpResponse(HttpServerExchange exchange, DataBufferFactory bufferFactory) {
+		super(bufferFactory);
 		Assert.notNull(exchange, "'exchange' is required.");
 		this.exchange = exchange;
 	}
+
 
 	public HttpServerExchange getUndertowExchange() {
 		return this.exchange;
@@ -78,10 +79,8 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	public Mono<Void> writeWith(File file, long position, long count) {
 		writeHeaders();
 		writeCookies();
-
 		try {
-			StreamSinkChannel responseChannel =
-					getUndertowExchange().getResponseChannel();
+			StreamSinkChannel responseChannel = getUndertowExchange().getResponseChannel();
 			@SuppressWarnings("resource")
 			FileChannel in = new FileInputStream(file).getChannel();
 			long result = responseChannel.transferFrom(in, position, count);
@@ -124,20 +123,19 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	protected ResponseBodyProcessor createBodyProcessor() {
+	protected AbstractResponseBodyFlushProcessor createBodyFlushProcessor() {
+		return new ResponseBodyFlushProcessor();
+	}
+
+	private ResponseBodyProcessor createBodyProcessor() {
 		if (this.responseChannel == null) {
 			this.responseChannel = this.exchange.getResponseChannel();
 		}
-		ResponseBodyProcessor bodyProcessor =
-				new ResponseBodyProcessor( this.responseChannel);
+		ResponseBodyProcessor bodyProcessor = new ResponseBodyProcessor( this.responseChannel);
 		bodyProcessor.registerListener();
 		return bodyProcessor;
 	}
 
-	@Override
-	protected AbstractResponseBodyFlushProcessor createBodyFlushProcessor() {
-		return new ResponseBodyFlushProcessor();
-	}
 
 	private static class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
 
@@ -147,10 +145,12 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 		private volatile ByteBuffer byteBuffer;
 
+
 		public ResponseBodyProcessor(StreamSinkChannel responseChannel) {
 			Assert.notNull(responseChannel, "'responseChannel' must not be null");
 			this.responseChannel = responseChannel;
 		}
+
 
 		public void registerListener() {
 			this.responseChannel.getWriteSetter().set(this.listener);
@@ -203,9 +203,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 			public void handleEvent(StreamSinkChannel channel) {
 				onWritePossible();
 			}
-
 		}
-
 	}
 
 	private class ResponseBodyFlushProcessor extends AbstractResponseBodyFlushProcessor {
@@ -224,6 +222,6 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 				UndertowServerHttpResponse.this.responseChannel.flush();
 			}
 		}
-
 	}
+
 }
