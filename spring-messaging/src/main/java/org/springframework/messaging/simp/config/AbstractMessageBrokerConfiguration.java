@@ -457,7 +457,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		@Override
 		public void handleMessage(Message<?> message) {
 		}
-
 	}
 
 
