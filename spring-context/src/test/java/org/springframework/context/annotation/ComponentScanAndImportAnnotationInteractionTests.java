@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.context.annotation;
 import org.junit.Test;
 
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.componentscan.importing.ImportingConfig;
 import org.springframework.context.annotation.componentscan.simple.SimpleComponent;
 
 /**
@@ -58,7 +59,7 @@ public class ComponentScanAndImportAnnotationInteractionTests {
 	@Test
 	public void componentScanViaImportUsingAsm() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.registerBeanDefinition("config4", new RootBeanDefinition(Config3.class.getName()));
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(Config3.class.getName()));
 		ctx.refresh();
 		ctx.getBean(SimpleComponent.class);
 	}
@@ -67,6 +68,14 @@ public class ComponentScanAndImportAnnotationInteractionTests {
 	public void componentScanViaImportUsingScan() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.scan("org.springframework.context.annotation.componentscan.importing");
+		ctx.refresh();
+		ctx.getBean(SimpleComponent.class);
+	}
+
+	@Test
+	public void circularImportViaComponentScan() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.registerBeanDefinition("config", new RootBeanDefinition(ImportingConfig.class.getName()));
 		ctx.refresh();
 		ctx.getBean(SimpleComponent.class);
 	}
@@ -87,7 +96,8 @@ public class ComponentScanAndImportAnnotationInteractionTests {
 	}
 
 
-	@ComponentScan("org.springframework.context.annotation.componentscan.simple")
+	@ComponentScan({"org.springframework.context.annotation.componentscan.simple",
+			"org.springframework.context.annotation.componentscan.importing"})
 	public static final class ImportedConfig {
 	}
 
