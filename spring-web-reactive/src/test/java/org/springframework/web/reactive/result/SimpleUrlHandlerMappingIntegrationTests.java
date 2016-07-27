@@ -143,11 +143,6 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		public SimpleHandlerAdapter handlerAdapter() {
 			return new SimpleHandlerAdapter();
 		}
-
-		@Bean
-		public SimpleResultHandler resultHandler() {
-			return new SimpleResultHandler();
-		}
 	}
 
 }

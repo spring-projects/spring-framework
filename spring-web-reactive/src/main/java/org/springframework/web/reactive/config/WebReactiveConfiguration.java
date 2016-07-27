@@ -55,7 +55,6 @@ import org.springframework.validation.Validator;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
-import org.springframework.web.reactive.result.SimpleResultHandler;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
@@ -319,11 +318,6 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	@Bean
 	public SimpleHandlerAdapter simpleHandlerAdapter() {
 		return new SimpleHandlerAdapter();
-	}
-
-	@Bean
-	public SimpleResultHandler simpleResultHandler() {
-		return new SimpleResultHandler();
 	}
 
 	@Bean
