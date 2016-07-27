@@ -97,7 +97,9 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 		ResolvableType elementType;
 		if (adapter != null) {
 			publisher = adapter.toPublisher(body);
-			elementType = ResolvableType.forMethodParameter(bodyType).getGeneric(0);
+			elementType = adapter.getDescriptor().isNoValue() ?
+					ResolvableType.forClass(Void.class) :
+					ResolvableType.forMethodParameter(bodyType).getGeneric(0);
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);

@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import rx.Completable;
 import rx.Observable;
 import rx.Single;
 
@@ -54,9 +55,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 
-import static java.util.Arrays.*;
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_XML;
 
 
 /**
@@ -231,6 +233,24 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
+	public void personCreateWithMono() throws Exception {
+		ResponseEntity<Void> entity = performPost(
+				"/person-create/mono", JSON, new Person("Robert"), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(1, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
+	public void personCreateWithSingle() throws Exception {
+		ResponseEntity<Void> entity = performPost(
+				"/person-create/single", JSON, new Person("Robert"), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(1, getApplicationContext().getBean(PersonCreateController.class).persons.size());
 	}
 
 	@Test
@@ -415,18 +435,28 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		final List<Person> persons = new ArrayList<>();
 
 		@PostMapping("/publisher")
-		public Publisher<Void> createWithPublisher(@RequestBody Publisher<Person> personStream) {
-			return Flux.from(personStream).doOnNext(persons::add).then();
+		public Publisher<Void> createWithPublisher(@RequestBody Publisher<Person> publisher) {
+			return Flux.from(publisher).doOnNext(persons::add).then();
+		}
+
+		@PostMapping("/mono")
+		public Mono<Void> createWithMono(@RequestBody Mono<Person> mono) {
+			return mono.doOnNext(persons::add).then();
+		}
+
+		@PostMapping("/single")
+		public Completable createWithSingle(@RequestBody Single<Person> single) {
+			return single.map(persons::add).toCompletable();
 		}
 
 		@PostMapping("/flux")
-		public Mono<Void> createWithFlux(@RequestBody Flux<Person> personStream) {
-			return personStream.doOnNext(persons::add).then();
+		public Mono<Void> createWithFlux(@RequestBody Flux<Person> flux) {
+			return flux.doOnNext(persons::add).then();
 		}
 
 		@PostMapping("/observable")
-		public Observable<Void> createWithObservable(@RequestBody Observable<Person> personStream) {
-			return personStream.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
+		public Observable<Void> createWithObservable(@RequestBody Observable<Person> observable) {
+			return observable.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
 		}
 	}
 

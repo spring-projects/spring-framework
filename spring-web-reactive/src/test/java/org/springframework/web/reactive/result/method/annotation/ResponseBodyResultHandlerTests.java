@@ -24,6 +24,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import rx.Completable;
+import rx.Single;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -50,7 +52,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 
 /**
@@ -106,6 +108,9 @@ public class ResponseBodyResultHandlerTests {
 
 		controller = new TestRestController();
 		testSupports(controller, "handleToString", true);
+		testSupports(controller, "handleToMonoString", true);
+		testSupports(controller, "handleToSingleString", true);
+		testSupports(controller, "handleToCompletable", true);
 		testSupports(controller, "handleToResponseEntity", false);
 		testSupports(controller, "handleToMonoResponseEntity", false);
 	}
@@ -131,6 +136,18 @@ public class ResponseBodyResultHandlerTests {
 	private static class TestRestController {
 
 		public String handleToString() {
+			return null;
+		}
+
+		public Mono<String> handleToMonoString() {
+			return null;
+		}
+
+		public Single<String> handleToSingleString() {
+			return null;
+		}
+
+		public Completable handleToCompletable() {
 			return null;
 		}
 

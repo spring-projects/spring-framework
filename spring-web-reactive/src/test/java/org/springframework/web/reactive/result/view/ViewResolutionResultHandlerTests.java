@@ -33,6 +33,7 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.TestSubscriber;
+import rx.Completable;
 import rx.Single;
 
 import org.springframework.core.MethodParameter;
@@ -98,6 +99,8 @@ public class ViewResolutionResultHandlerTests {
 		testSupports(ResolvableType.forClassWithGenerics(Mono.class, View.class), true);
 		testSupports(ResolvableType.forClassWithGenerics(Single.class, String.class), true);
 		testSupports(ResolvableType.forClassWithGenerics(Single.class, View.class), true);
+		testSupports(ResolvableType.forClassWithGenerics(Mono.class, Void.class), true);
+		testSupports(ResolvableType.forClass(Completable.class), true);
 		testSupports(ResolvableType.forClass(Model.class), true);
 		testSupports(ResolvableType.forClass(Map.class), true);
 		testSupports(ResolvableType.forClass(TestBean.class), true);
@@ -169,6 +172,8 @@ public class ViewResolutionResultHandlerTests {
 	public void defaultViewName() throws Exception {
 		testDefaultViewName(null, ResolvableType.forClass(String.class));
 		testDefaultViewName(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, String.class));
+		testDefaultViewName(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, Void.class));
+		testDefaultViewName(Completable.complete(), ResolvableType.forClass(Completable.class));
 	}
 
 	private void testDefaultViewName(Object returnValue, ResolvableType type)
@@ -387,9 +392,13 @@ public class ViewResolutionResultHandlerTests {
 
 		Mono<View> monoView() { return null; }
 
+		Mono<Void> monoVoid() { return null; }
+
 		Single<String> singleString() { return null; }
 
 		Single<View> singleView() { return null; }
+
+		Completable completable() { return null; }
 
 		Model model() { return null; }
 

@@ -142,12 +142,19 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		if (hasModelAttributeAnnotation(result)) {
 			return true;
 		}
-		if (isSupportedType(clazz)) {
-			return true;
+		Optional<Object> optional = result.getReturnValue();
+		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(clazz, optional);
+		if (adapter != null) {
+			if (adapter.getDescriptor().isNoValue()) {
+				return true;
+			}
+			else {
+				clazz = result.getReturnType().getGeneric(0).getRawClass();
+				return isSupportedType(clazz);
+			}
 		}
-		if (getReactiveAdapterRegistry().getAdapterFrom(clazz, result.getReturnValue()) != null) {
-			clazz = result.getReturnType().getGeneric(0).getRawClass();
-			return isSupportedType(clazz);
+		else if (isSupportedType(clazz)) {
+			return true;
 		}
 		return false;
 	}
@@ -181,7 +188,8 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 			else {
 				valueMono = Mono.empty();
 			}
-			elementType = returnType.getGeneric(0);
+			elementType = adapter.getDescriptor().isNoValue() ?
+					ResolvableType.forClass(Void.class) : returnType.getGeneric(0);
 		}
 		else {
 			valueMono = Mono.justOrEmpty(result.getReturnValue());

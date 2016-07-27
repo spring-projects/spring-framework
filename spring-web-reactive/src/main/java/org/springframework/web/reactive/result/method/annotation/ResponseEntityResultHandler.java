@@ -85,9 +85,12 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 			return true;
 		}
 		else {
-			Optional<Object> returnValue = result.getReturnValue();
-			ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(returnType, returnValue);
-			if (adapter != null && !adapter.getDescriptor().isMultiValue()) {
+			Optional<Object> optional = result.getReturnValue();
+			ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(returnType, optional);
+			if (adapter != null &&
+					!adapter.getDescriptor().isMultiValue() &&
+					!adapter.getDescriptor().isNoValue()) {
+
 				ResolvableType genericType = result.getReturnType().getGeneric(0);
 				return isSupportedType(genericType.getRawClass());
 			}

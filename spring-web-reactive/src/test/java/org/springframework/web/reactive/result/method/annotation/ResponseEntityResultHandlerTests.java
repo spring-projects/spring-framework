@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.TestSubscriber;
+import rx.Completable;
 import rx.Single;
 
 import org.springframework.core.MethodParameter;
@@ -117,7 +118,12 @@ public class ResponseEntityResultHandlerTests {
 		type = forClassWithGenerics(CompletableFuture.class, responseEntity(String.class));
 		assertTrue(this.resultHandler.supports(handlerResult(value, type)));
 
+		// False
+
 		type = ResolvableType.forClass(String.class);
+		assertFalse(this.resultHandler.supports(handlerResult(value, type)));
+
+		type = ResolvableType.forClass(Completable.class);
 		assertFalse(this.resultHandler.supports(handlerResult(value, type)));
 	}
 
@@ -212,6 +218,8 @@ public class ResponseEntityResultHandlerTests {
 		CompletableFuture<ResponseEntity<String>> completableFuture() { return null; }
 
 		String string() { return null; }
+
+		Completable completable() { return null; }
 	}
 
 }

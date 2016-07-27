@@ -34,6 +34,7 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.TestSubscriber;
+import rx.Completable;
 import rx.Observable;
 
 import org.springframework.core.MethodParameter;
@@ -110,6 +111,7 @@ public class MessageWriterResultHandlerTests {
 	public void voidReturnType() throws Exception {
 		testVoidReturnType(null, ResolvableType.forType(void.class));
 		testVoidReturnType(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, Void.class));
+		testVoidReturnType(Completable.complete(), ResolvableType.forClass(Completable.class));
 		testVoidReturnType(Flux.empty(), ResolvableType.forClassWithGenerics(Flux.class, Void.class));
 		testVoidReturnType(Observable.empty(), ResolvableType.forClassWithGenerics(Observable.class, Void.class));
 	}
@@ -268,6 +270,8 @@ public class MessageWriterResultHandlerTests {
 		void voidReturn() { }
 
 		Mono<Void> monoVoid() { return null; }
+
+		Completable completable() { return null; }
 
 		Flux<Void> fluxVoid() { return null; }
 
