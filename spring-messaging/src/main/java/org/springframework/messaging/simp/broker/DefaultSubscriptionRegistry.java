@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.util.PathMatcher;
  * in memory and uses a {@link org.springframework.util.PathMatcher PathMatcher}
  * for matching destinations.
  *
- * <p>As of 4.2 this class supports a {@link #setSelectorHeaderName selector}
+ * <p>As of 4.2, this class supports a {@link #setSelectorHeaderName selector}
  * header on subscription messages with Spring EL expressions evaluated against
  * the headers to filter out messages in addition to destination matching.
  *
@@ -65,10 +65,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	public static final int DEFAULT_CACHE_LIMIT = 1024;
 
 
-	/** The maximum number of entries in the cache */
-	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
-
 	private PathMatcher pathMatcher = new AntPathMatcher();
+
+	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
 	private String selectorHeaderName = "selector";
 
@@ -80,6 +79,20 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	private final SessionSubscriptionRegistry subscriptionRegistry = new SessionSubscriptionRegistry();
 
+
+	/**
+	 * Specify the {@link PathMatcher} to use.
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		this.pathMatcher = pathMatcher;
+	}
+
+	/**
+	 * Return the configured {@link PathMatcher}.
+	 */
+	public PathMatcher getPathMatcher() {
+		return this.pathMatcher;
+	}
 
 	/**
 	 * Specify the maximum number of entries for the resolved destination cache.
@@ -97,20 +110,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	}
 
 	/**
-	 * Specify the {@link PathMatcher} to use.
-	 */
-	public void setPathMatcher(PathMatcher pathMatcher) {
-		this.pathMatcher = pathMatcher;
-	}
-
-	/**
-	 * Return the configured {@link PathMatcher}.
-	 */
-	public PathMatcher getPathMatcher() {
-		return this.pathMatcher;
-	}
-
-	/**
 	 * Configure the name of a selector header that a subscription message can
 	 * have in order to filter messages based on their headers. The value of the
 	 * header can use Spring EL expressions against message headers.
@@ -123,12 +122,13 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	 * @since 4.2
 	 */
 	public void setSelectorHeaderName(String selectorHeaderName) {
-		Assert.notNull(selectorHeaderName);
+		Assert.notNull(selectorHeaderName, "'selectorHeaderName' must not be null");
 		this.selectorHeaderName = selectorHeaderName;
 	}
 
 	/**
 	 * Return the name for the selector header.
+	 * @since 4.2
 	 */
 	public String getSelectorHeaderName() {
 		return this.selectorHeaderName;

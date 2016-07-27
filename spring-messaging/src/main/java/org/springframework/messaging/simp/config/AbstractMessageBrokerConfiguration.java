@@ -143,7 +143,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	/**
-	 * A hook for sub-classes to customize the message channel for inbound messages
+	 * A hook for subclasses to customize the message channel for inbound messages
 	 * from WebSocket clients.
 	 */
 	protected void configureClientInboundChannel(ChannelRegistration registration) {
@@ -176,7 +176,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	/**
-	 * A hook for sub-classes to customize the message channel for messages from
+	 * A hook for subclasses to customize the message channel for messages from
 	 * the application or message broker to WebSocket clients.
 	 */
 	protected void configureClientOutboundChannel(ChannelRegistration registration) {
@@ -224,7 +224,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	/**
-	 * A hook for sub-classes to customize message broker configuration through the
+	 * A hook for subclasses to customize message broker configuration through the
 	 * provided {@link MessageBrokerRegistry} instance.
 	 */
 	protected void configureMessageBroker(MessageBrokerRegistry registry) {
@@ -253,7 +253,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		addReturnValueHandlers(returnValueHandlers);
 		handler.setCustomReturnValueHandlers(returnValueHandlers);
 
-		PathMatcher pathMatcher = this.getBrokerRegistry().getPathMatcher();
+		PathMatcher pathMatcher = getBrokerRegistry().getPathMatcher();
 		if (pathMatcher != null) {
 			handler.setPathMatcher(pathMatcher);
 		}
@@ -261,7 +261,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	/**
-	 * Protected method for plugging in a custom sub-class of
+	 * Protected method for plugging in a custom subclass of
 	 * {@link org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
 	 * SimpAnnotationMethodMessageHandler}.
 	 * @since 4.2
@@ -324,7 +324,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	// Expose alias for 4.1 compatibility
-
 	@Bean(name={"messageBrokerTaskScheduler", "messageBrokerSockJsTaskScheduler"})
 	public ThreadPoolTaskScheduler messageBrokerTaskScheduler() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
@@ -472,6 +471,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		}
 
 	}
+
 
 	private class NoOpBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
