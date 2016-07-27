@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.messaging.simp.config;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -70,6 +67,9 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link AbstractMessageBrokerConfiguration}.
@@ -435,6 +435,7 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+
 	static class BaseTestMessageBrokerConfig extends AbstractMessageBrokerConfiguration {
 
 		@Override
@@ -442,6 +443,7 @@ public class MessageBrokerConfigurationTests {
 			return mock(SimpUserRegistry.class);
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	@Configuration
@@ -471,6 +473,7 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+
 	@Configuration
 	static class BrokerRelayConfig extends SimpleBrokerConfig {
 
@@ -482,9 +485,11 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+
 	@Configuration
 	static class DefaultConfig extends BaseTestMessageBrokerConfig {
 	}
+
 
 	@Configuration
 	static class CustomConfig extends BaseTestMessageBrokerConfig {
@@ -534,6 +539,7 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+
 	private static class TestValidator implements Validator {
 
 		@Override
@@ -545,6 +551,7 @@ public class MessageBrokerConfigurationTests {
 		public void validate(Object target, Errors errors) {
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class CustomThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {

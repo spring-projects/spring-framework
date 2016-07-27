@@ -92,25 +92,28 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		initPathMatcherToUse();
 	}
 
-	private void initPathMatcherToUse() {
-		if (this.pathMatcher != null) {
-			if (this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
-				((DefaultSubscriptionRegistry) this.subscriptionRegistry).setPathMatcher(this.pathMatcher);
-			}
-		}
-	}
-
 	public SubscriptionRegistry getSubscriptionRegistry() {
 		return this.subscriptionRegistry;
 	}
 
 	/**
-	 * When configured, the given PathMatcher is passed down to the
+	 * When configured, the given PathMatcher is passed down to the underlying
 	 * SubscriptionRegistry to use for matching destination to subscriptions.
+	 * <p>Default is a standard {@link org.springframework.util.AntPathMatcher}.
+	 * @since 4.1
+	 * @see #setSubscriptionRegistry
+	 * @see DefaultSubscriptionRegistry#setPathMatcher
+	 * @see org.springframework.util.AntPathMatcher
 	 */
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
 		initPathMatcherToUse();
+	}
+
+	private void initPathMatcherToUse() {
+		if (this.pathMatcher != null && this.subscriptionRegistry instanceof DefaultSubscriptionRegistry) {
+			((DefaultSubscriptionRegistry) this.subscriptionRegistry).setPathMatcher(this.pathMatcher);
+		}
 	}
 
 	/**
@@ -130,6 +133,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	/**
 	 * Return the configured TaskScheduler.
+	 * @since 4.2
 	 */
 	public TaskScheduler getTaskScheduler() {
 		return this.taskScheduler;
@@ -151,6 +155,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	/**
 	 * The configured value for the heart-beat settings.
+	 * @since 4.2
 	 */
 	public long[] getHeartbeatValue() {
 		return this.heartbeatValue;
@@ -160,6 +165,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers
 	 * of all messages sent to the client outbound channel.
 	 * <p>By default this property is not set.
+	 * @since 4.1
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;
@@ -167,6 +173,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	/**
 	 * Return the configured header initializer.
+	 * @since 4.1
 	 */
 	public MessageHeaderInitializer getHeaderInitializer() {
 		return this.headerInitializer;

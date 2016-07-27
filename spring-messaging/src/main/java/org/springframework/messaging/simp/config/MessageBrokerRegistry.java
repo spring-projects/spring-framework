@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,16 @@ public class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
+	protected String getUserDestinationBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
+	}
+
+	protected String getUserRegistryBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
+	}
+
 	/**
 	 * Configure one or more prefixes to filter destinations targeting application
 	 * annotated methods. For example destinations prefixed with "/app" may be
@@ -137,16 +147,6 @@ public class MessageBrokerRegistry {
 		return this.userDestinationPrefix;
 	}
 
-	protected String getUserDestinationBroadcast() {
-		return (this.brokerRelayRegistration != null ?
-				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
-	}
-
-	protected String getUserRegistryBroadcast() {
-		return (this.brokerRelayRegistration != null ?
-				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
-	}
-
 	/**
 	 * Configure the PathMatcher to use to match the destinations of incoming
 	 * messages to {@code @MessageMapping} and {@code @SubscribeMapping} methods.
@@ -162,6 +162,7 @@ public class MessageBrokerRegistry {
 	 * <p>When the simple broker is enabled, the PathMatcher configured here is
 	 * also used to match message destinations when brokering messages.
 	 * @since 4.1
+	 * @see org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry#setPathMatcher
 	 */
 	public MessageBrokerRegistry setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
