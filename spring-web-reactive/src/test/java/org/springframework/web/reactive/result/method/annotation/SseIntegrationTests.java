@@ -32,7 +32,6 @@ import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.SseEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.WebClient;
@@ -40,7 +39,6 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assume.assumeFalse;
 import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
 import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
 
@@ -53,15 +51,13 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private WebClient webClient;
 
+
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-
-		// See https://github.com/eclipse/jetty.project/issues/730
-		assumeFalse(server instanceof JettyHttpServer);
-
 		this.webClient = new WebClient(new ReactorClientHttpConnector());
 	}
+
 
 	@Override
 	protected HttpHandler createHttpHandler() {
