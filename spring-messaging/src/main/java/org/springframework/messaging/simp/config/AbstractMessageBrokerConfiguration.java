@@ -399,9 +399,9 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	protected abstract SimpUserRegistry createLocalUserRegistry();
 
 	/**
-	 * As of 4.2, UserSessionRegistry is deprecated in favor of SimpUserRegistry
-	 * exposing information about all connected users. The MultiServerUserRegistry
-	 * implementation in combination with UserRegistryMessageHandler can be used
+	 * As of 4.2, {@code UserSessionRegistry} is deprecated in favor of {@link SimpUserRegistry}
+	 * exposing information about all connected users. The {@link MultiServerUserRegistry}
+	 * implementation in combination with {@link UserRegistryMessageHandler} can be used
 	 * to share user registries across multiple servers.
 	 */
 	@Deprecated
@@ -469,7 +469,6 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		@Override
 		public void handleMessage(Message<?> message) {
 		}
-
 	}
 
 
