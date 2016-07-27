@@ -134,7 +134,7 @@ class ConfigurationClassParser {
 
 	private final List<String> propertySourceNames = new ArrayList<String>();
 
-	private ImportStack importStack = new ImportStack();
+	private final ImportStack importStack = new ImportStack();
 
 	private List<DeferredImportSelectorHolder> deferredImportSelectors;
 
@@ -177,7 +177,7 @@ class ConfigurationClassParser {
 			catch (BeanDefinitionStoreException ex) {
 				throw ex;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new BeanDefinitionStoreException(
 						"Failed to parse configuration class [" + bd.getBeanClassName() + "]", ex);
 			}
@@ -269,16 +269,7 @@ class ConfigurationClassParser {
 			// Check the set of scanned definitions for any further config classes and parse recursively if necessary
 			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
 				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
-					// Provide isolated circular import detection for scanned classes,
-					// since the initial registration did not come explicitly.
-					ImportStack previousStack = this.importStack;
-					this.importStack = new ImportStack();
-					try {
-						parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
-					}
-					finally {
-						this.importStack = previousStack;
-					}
+					parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
 				}
 			}
 		}
@@ -472,7 +463,7 @@ class ConfigurationClassParser {
 			catch (BeanDefinitionStoreException ex) {
 				throw ex;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new BeanDefinitionStoreException("Failed to process import candidates for configuration class [" +
 						configClass.getMetadata().getClassName() + "]", ex);
 			}
@@ -486,7 +477,7 @@ class ConfigurationClassParser {
 			return;
 		}
 
-		if (checkForCircularImports && this.importStack.contains(configClass)) {
+		if (checkForCircularImports && isChainedImportOnStack(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
 		else {
@@ -529,7 +520,7 @@ class ConfigurationClassParser {
 			catch (BeanDefinitionStoreException ex) {
 				throw ex;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new BeanDefinitionStoreException("Failed to process import candidates for configuration class [" +
 						configClass.getMetadata().getClassName() + "]", ex);
 			}
@@ -537,6 +528,20 @@ class ConfigurationClassParser {
 				this.importStack.pop();
 			}
 		}
+	}
+
+	private boolean isChainedImportOnStack(ConfigurationClass configClass) {
+		if (this.importStack.contains(configClass)) {
+			String configClassName = configClass.getMetadata().getClassName();
+			AnnotationMetadata importingClass = this.importStack.getImportingClassFor(configClassName);
+			while (importingClass != null) {
+				if (configClassName.equals(importingClass.getClassName())) {
+					return true;
+				}
+				importingClass = this.importStack.getImportingClassFor(importingClass.getClassName());
+			}
+		}
+		return false;
 	}
 
 	/**
