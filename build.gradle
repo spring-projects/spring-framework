@@ -33,7 +33,7 @@ configure(allprojects) { project ->
 
 	ext.activationApiVersion   = "1.1.1"
 	ext.annotationApiVersion   = "1.2"
-	ext.aspectjVersion         = "1.9.0.BETA-4"
+	ext.aspectjVersion         = "1.9.0.BETA-5"
 	ext.beanvalVersion         = "1.1.0.Final"
 	ext.caffeineVersion        = "2.3.1"
 	ext.eclipselinkVersion     = "2.6.3"
