@@ -87,7 +87,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version          = "3.0.5"
 	ext.tomcatVersion          = "8.5.4"
 	ext.tyrusVersion           = "1.13"
-	ext.undertowVersion        = "1.4.0.CR3"
+	ext.undertowVersion        = "1.4.0.CR4"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.2"
 	ext.xmlunitVersion         = "2.2.1"
