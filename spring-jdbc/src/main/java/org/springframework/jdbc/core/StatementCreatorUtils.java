@@ -25,16 +25,12 @@ import java.sql.Clob;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,10 +75,7 @@ public abstract class StatementCreatorUtils {
 	public static final String IGNORE_GETPARAMETERTYPE_PROPERTY_NAME = "spring.jdbc.getParameterType.ignore";
 
 
-	static final boolean shouldIgnoreGetParameterType = SpringProperties.getFlag(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
-
-	static final Set<String> driversWithNoSupportForGetParameterType =
-			Collections.newSetFromMap(new ConcurrentHashMap<>(1));
+	static boolean shouldIgnoreGetParameterType = SpringProperties.getFlag(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
@@ -244,61 +237,25 @@ public abstract class StatementCreatorUtils {
 		if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
 			boolean useSetObject = false;
 			Integer sqlTypeToUse = null;
-			DatabaseMetaData dbmd = null;
-			String jdbcDriverName = null;
-			boolean checkGetParameterType = !shouldIgnoreGetParameterType;
-			if (checkGetParameterType && !driversWithNoSupportForGetParameterType.isEmpty()) {
-				try {
-					dbmd = ps.getConnection().getMetaData();
-					jdbcDriverName = dbmd.getDriverName();
-					checkGetParameterType = !driversWithNoSupportForGetParameterType.contains(jdbcDriverName);
-				}
-				catch (Throwable ex) {
-					logger.debug("Could not check connection metadata", ex);
-				}
-			}
-			if (checkGetParameterType) {
-				try {
-					sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
-				}
-				catch (Throwable ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("JDBC 3.0 getParameterType call not supported - using fallback method instead: " + ex);
-					}
-				}
+			if (!shouldIgnoreGetParameterType) {
+				sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
 			}
 			if (sqlTypeToUse == null) {
-				// JDBC driver not compliant with JDBC 3.0 -> proceed with database-specific checks
+				// Proceed with database-specific checks
 				sqlTypeToUse = Types.NULL;
-				try {
-					if (dbmd == null) {
-						dbmd = ps.getConnection().getMetaData();
-					}
-					if (jdbcDriverName == null) {
-						jdbcDriverName = dbmd.getDriverName();
-					}
-					if (checkGetParameterType &&
-							!(jdbcDriverName.startsWith("Oracle") && dbmd.getDriverMajorVersion() >= 12)) {
-						// Register JDBC driver with no support for getParameterType, except for the
-						// Oracle 12c driver where getParameterType fails for specific statements only
-						// (so an exception thrown above does not indicate general lack of support).
-						driversWithNoSupportForGetParameterType.add(jdbcDriverName);
-					}
-					String databaseProductName = dbmd.getDatabaseProductName();
-					if (databaseProductName.startsWith("Informix") ||
-							(jdbcDriverName.startsWith("Microsoft") && jdbcDriverName.contains("SQL Server"))) {
-							// "Microsoft SQL Server JDBC Driver 3.0" versus "Microsoft JDBC Driver 4.0 for SQL Server"
-						useSetObject = true;
-					}
-					else if (databaseProductName.startsWith("DB2") ||
-							jdbcDriverName.startsWith("jConnect") ||
-							jdbcDriverName.startsWith("SQLServer")||
-							jdbcDriverName.startsWith("Apache Derby")) {
-						sqlTypeToUse = Types.VARCHAR;
-					}
+				DatabaseMetaData dbmd = ps.getConnection().getMetaData();
+				String jdbcDriverName = dbmd.getDriverName();
+				String databaseProductName = dbmd.getDatabaseProductName();
+				if (databaseProductName.startsWith("Informix") ||
+						(jdbcDriverName.startsWith("Microsoft") && jdbcDriverName.contains("SQL Server"))) {
+						// "Microsoft SQL Server JDBC Driver 3.0" versus "Microsoft JDBC Driver 4.0 for SQL Server"
+					useSetObject = true;
 				}
-				catch (Throwable ex) {
-					logger.debug("Could not check connection metadata", ex);
+				else if (databaseProductName.startsWith("DB2") ||
+						jdbcDriverName.startsWith("jConnect") ||
+						jdbcDriverName.startsWith("SQLServer")||
+						jdbcDriverName.startsWith("Apache Derby")) {
+					sqlTypeToUse = Types.VARCHAR;
 				}
 			}
 			if (useSetObject) {
@@ -334,21 +291,13 @@ public abstract class StatementCreatorUtils {
 			if (strVal.length() > 4000) {
 				// Necessary for older Oracle drivers, in particular when running against an Oracle 10 database.
 				// Should also work fine against other drivers/databases since it uses standard JDBC 4.0 API.
-				try {
-					if (sqlType == Types.NCLOB) {
-						ps.setNClob(paramIndex, new StringReader(strVal), strVal.length());
-					}
-					else {
-						ps.setClob(paramIndex, new StringReader(strVal), strVal.length());
-					}
-					return;
+				if (sqlType == Types.NCLOB) {
+					ps.setNClob(paramIndex, new StringReader(strVal), strVal.length());
 				}
-				catch (AbstractMethodError err) {
-					logger.debug("JDBC driver does not implement JDBC 4.0 'setClob(int, Reader, long)' method", err);
+				else {
+					ps.setClob(paramIndex, new StringReader(strVal), strVal.length());
 				}
-				catch (SQLFeatureNotSupportedException ex) {
-					logger.debug("JDBC driver does not support JDBC 4.0 'setClob(int, Reader, long)' method", ex);
-				}
+				return;
 			}
 			// Fallback: regular setString binding
 			ps.setString(paramIndex, strVal);
