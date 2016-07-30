@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -141,6 +142,24 @@ public class HttpHeadersTests {
 		headers.setETag(eTag);
 		assertEquals("Invalid ETag header", eTag, headers.getETag());
 		assertEquals("Invalid ETag header", "\"v2.6\"", headers.getFirst("ETag"));
+	}
+
+	@Test
+	public void host() {
+		InetSocketAddress host = InetSocketAddress.createUnresolved("localhost", 8080);
+		headers.setHost(host);
+		assertEquals("Invalid Host header", host, headers.getHost());
+		assertEquals("Invalid Host header", "localhost:8080", headers.getFirst("Host"));
+
+	}
+
+	@Test
+	public void hostNoPort() {
+		InetSocketAddress host = InetSocketAddress.createUnresolved("localhost", 0);
+		headers.setHost(host);
+		assertEquals("Invalid Host header", host, headers.getHost());
+		assertEquals("Invalid Host header", "localhost", headers.getFirst("Host"));
+
 	}
 
 	@Test(expected = IllegalArgumentException.class)
