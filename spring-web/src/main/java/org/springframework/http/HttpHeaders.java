@@ -17,6 +17,7 @@
 package org.springframework.http;
 
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -799,6 +800,47 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public long getExpires() {
 		return getFirstDate(EXPIRES, false);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Host} header.
+	 * <p>If the given {@linkplain InetSocketAddress#getPort() port} is {@code 0}, the host header
+	 * will only contain the {@linkplain InetSocketAddress#getHostString() hostname}.
+	 */
+	public void setHost(InetSocketAddress host) {
+		String value =
+				host.getPort() != 0 ? String.format("%s:%d", host.getHostString(), host.getPort()) :
+						host.getHostString();
+		set(HOST, value);
+	}
+
+	/**
+	 * Return the value of the required {@code Host} header.
+	 * <p>If the header value does not contain a port, the returned
+	 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
+	 */
+	public InetSocketAddress getHost() {
+		String value = getFirst(HOST);
+		if (value == null) {
+			return null;
+		}
+		int idx = value.lastIndexOf(':');
+		String hostname = null;
+		int port = 0;
+		if (idx != -1 && idx < value.length() - 1) {
+			hostname = value.substring(0, idx);
+			String portString = value.substring(idx + 1);
+			try {
+				port = Integer.parseInt(portString);
+			}
+			catch (NumberFormatException ex) {
+				// ignored
+			}
+		}
+		if (hostname == null) {
+			hostname = value;
+		}
+		return InetSocketAddress.createUnresolved(hostname, port);
 	}
 
 	/**
