@@ -30,6 +30,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.HashSet;
 
 /**
  * Miscellaneous {@link String} utility methods.
@@ -810,8 +811,9 @@ public abstract class StringUtils {
 		}
 		List<String> result = new ArrayList<>();
 		result.addAll(Arrays.asList(array1));
+		Set<String> stringSet = new HashSet<>(result);
 		for (String str : array2) {
-			if (!result.contains(str)) {
+			if (!stringSet.contains(str)) {
 				result.add(str);
 			}
 		}
@@ -889,9 +891,7 @@ public abstract class StringUtils {
 			return array;
 		}
 		Set<String> set = new LinkedHashSet<>();
-		for (String element : array) {
-			set.add(element);
-		}
+		Collections.addAll(set, array);
 		return toStringArray(set);
 	}
 
@@ -1068,7 +1068,8 @@ public abstract class StringUtils {
 		List<String> result = new ArrayList<>();
 		if ("".equals(delimiter)) {
 			for (int i = 0; i < str.length(); i++) {
-				result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
+				if(isEmpty(charsToDelete) || charsToDelete.indexOf(str.charAt(i)) > -1)
+					result.add("" + str.charAt(i));
 			}
 		}
 		else {
