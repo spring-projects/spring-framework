@@ -71,7 +71,7 @@ configure(allprojects) { project ->
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.1"
 	ext.poiVersion             = "3.14"
-	ext.protobufVersion        = "3.0.0-beta-4"
+	ext.protobufVersion        = "3.0.0"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.0.RC1'
