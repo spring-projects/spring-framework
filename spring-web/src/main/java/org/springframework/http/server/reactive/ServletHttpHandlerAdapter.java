@@ -49,7 +49,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private static Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
 
-	private HttpHandler handler;
+	private final HttpHandler handler;
 
 	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
 	// (i.e. 'false' as constructor argument)
@@ -57,8 +57,11 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
-
-	public void setHandler(HttpHandler handler) {
+	/**
+	 * Create a new {@code ServletHttpHandlerAdapter} with the given HTTP handler.
+	 * @param handler the handler
+     */
+	public ServletHttpHandlerAdapter(HttpHandler handler) {
 		Assert.notNull(handler, "'handler' must not be null");
 		this.handler = handler;
 	}
