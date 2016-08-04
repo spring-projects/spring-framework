@@ -357,9 +357,13 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				return resolvedType;
 			}
 		}
-		resolvedType = resolveVariable(typeVariable, contextType.getSuperType());
-		if (resolvedType.resolve() != null) {
-			return resolvedType;
+
+		ResolvableType superType = contextType.getSuperType();
+		if (superType != ResolvableType.NONE) {
+			resolvedType = resolveVariable(typeVariable, superType);
+			if (resolvedType.resolve() != null) {
+				return resolvedType;
+			}
 		}
 		for (ResolvableType ifc : contextType.getInterfaces()) {
 			resolvedType = resolveVariable(typeVariable, ifc);
