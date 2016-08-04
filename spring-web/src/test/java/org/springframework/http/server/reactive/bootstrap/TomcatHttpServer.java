@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,11 @@ import org.apache.catalina.startup.Tomcat;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
-import org.springframework.util.Assert;
-
 
 /**
  * @author Rossen Stoyanchev
  */
-public class TomcatHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
+public class TomcatHttpServer extends HttpServerSupport implements HttpServer, InitializingBean {
 
 	private Tomcat tomcatServer;
 
@@ -48,13 +46,7 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 
 
 	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
-
-	@Override
 	public void afterPropertiesSet() throws Exception {
-
 		this.tomcatServer = new Tomcat();
 		if (this.baseDir != null) {
 			this.tomcatServer.setBaseDir(baseDir);
@@ -62,9 +54,7 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 		this.tomcatServer.setHostname(getHost());
 		this.tomcatServer.setPort(getPort());
 
-		Assert.notNull(getHttpHandler());
-		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter();
-		servlet.setHandler(getHttpHandler());
+		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(getHttpHandler());
 
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		Context rootContext = tomcatServer.addContext("", base.getAbsolutePath());
@@ -98,6 +88,11 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 				throw new IllegalStateException(ex);
 			}
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 }
