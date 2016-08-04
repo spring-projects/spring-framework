@@ -143,8 +143,22 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			getProperties().put(Environment.DATASOURCE, dataSource);
 		}
 
-		// Hibernate 5.2: manually enforce connection release mode ON_CLOSE (the former default)
-		getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+		// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
+		try {
+			// Try Hibernate 5.2
+			AvailableSettings.class.getField("CONNECTION_HANDLING");
+			getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+		}
+		catch (NoSuchFieldException ex) {
+			// Try Hibernate 5.1
+			try {
+				AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
+				getProperties().put("hibernate.connection.release_mode", "ON_CLOSE");
+			}
+			catch (NoSuchFieldException ex2) {
+				// on Hibernate 5.0.x or lower - no need to change the default there
+			}
+		}
 
 		getProperties().put(AvailableSettings.CLASSLOADERS, Collections.singleton(resourceLoader.getClassLoader()));
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
@@ -191,8 +205,22 @@ public class LocalSessionFactoryBuilder extends Configuration {
 					"Unknown transaction manager type: " + jtaTransactionManager.getClass().getName());
 		}
 
-		// Hibernate 5.2: manually enforce connection release mode AFTER_STATEMENT (the JTA default)
-		getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT");
+		// Hibernate 5.1/5.2: manually enforce connection release mode AFTER_STATEMENT (the JTA default)
+		try {
+			// Try Hibernate 5.2
+			AvailableSettings.class.getField("CONNECTION_HANDLING");
+			getProperties().put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_RELEASE_AFTER_STATEMENT");
+		}
+		catch (NoSuchFieldException ex) {
+			// Try Hibernate 5.1
+			try {
+				AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
+				getProperties().put("hibernate.connection.release_mode", "AFTER_STATEMENT");
+			}
+			catch (NoSuchFieldException ex2) {
+				// on Hibernate 5.0.x or lower - no need to change the default there
+			}
+		}
 
 		return this;
 	}

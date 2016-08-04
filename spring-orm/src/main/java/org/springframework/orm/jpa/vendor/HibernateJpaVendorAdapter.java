@@ -22,19 +22,23 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.DB2Dialect;
+import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.dialect.H2Dialect;
 import org.hibernate.dialect.HSQLDialect;
 import org.hibernate.dialect.InformixDialect;
-import org.hibernate.dialect.MySQLDialect;
-import org.hibernate.dialect.Oracle9iDialect;
-import org.hibernate.dialect.SQLServerDialect;
+import org.hibernate.dialect.MySQL5Dialect;
+import org.hibernate.dialect.Oracle12cDialect;
+import org.hibernate.dialect.PostgreSQL95Dialect;
+import org.hibernate.dialect.SQLServer2012Dialect;
+import org.hibernate.dialect.SybaseDialect;
 
 /**
  * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
  * EntityManager. Developed and tested against Hibernate 5.0, 5.1 and 5.2;
- * backwards-compatible with Hibernate 4.3 as well.
+ * backwards-compatible with Hibernate 4.3 at runtime on a best-effort basis.
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
  * and adapts {@link AbstractJpaVendorAdapter}'s common configuration settings.
@@ -121,8 +125,22 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 
 		if (this.jpaDialect.prepareConnection) {
-			// Hibernate 5.2: manually enforce connection release mode ON_CLOSE (the former default)
-			jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
+			try {
+				// Try Hibernate 5.2
+				AvailableSettings.class.getField("CONNECTION_HANDLING");
+				jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+			}
+			catch (NoSuchFieldException ex) {
+				// Try Hibernate 5.1
+				try {
+					AvailableSettings.class.getField("ACQUIRE_CONNECTIONS");
+					jpaProperties.put("hibernate.connection.release_mode", "ON_CLOSE");
+				}
+				catch (NoSuchFieldException ex2) {
+					// on Hibernate 5.0.x or lower - no need to change the default there
+				}
+			}
 		}
 
 		return jpaProperties;
@@ -133,19 +151,18 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	 * @param database the target database
 	 * @return the Hibernate database dialect class, or {@code null} if none found
 	 */
-	@SuppressWarnings("deprecation")
 	protected Class<?> determineDatabaseDialectClass(Database database) {
 		switch (database) {
 			case DB2: return DB2Dialect.class;
-			case DERBY: return org.hibernate.dialect.DerbyDialect.class;
+			case DERBY: return DerbyTenSevenDialect.class;
 			case H2: return H2Dialect.class;
 			case HSQL: return HSQLDialect.class;
 			case INFORMIX: return InformixDialect.class;
-			case MYSQL: return MySQLDialect.class;
-			case ORACLE: return Oracle9iDialect.class;
-			case POSTGRESQL: return org.hibernate.dialect.PostgreSQLDialect.class;
-			case SQL_SERVER: return SQLServerDialect.class;
-			case SYBASE: return org.hibernate.dialect.SybaseDialect.class;
+			case MYSQL: return MySQL5Dialect.class;
+			case ORACLE: return Oracle12cDialect.class;
+			case POSTGRESQL: return PostgreSQL95Dialect.class;
+			case SQL_SERVER: return SQLServer2012Dialect.class;
+			case SYBASE: return SybaseDialect.class;
 			default: return null;
 		}
 	}
