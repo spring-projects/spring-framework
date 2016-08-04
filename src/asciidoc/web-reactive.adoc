@@ -97,7 +97,7 @@ to declare logic to be executed after the account is deserialized.
 The above also applies to return value handling:
 
 * `Mono<Account>` -- serialize without blocking the given Account when the `Mono` completes.
-* `Singe<Account>` -- same but using RxJava.
+* `Single<Account>` -- same but using RxJava.
 * `Flux<Account>` -- streaming scenario, possibly SSE depending on the requested content type.
 * `Flux<SseEvent>` -- SSE streaming.
 * `Observable<SseEvent>` -- same but using RxJava.
