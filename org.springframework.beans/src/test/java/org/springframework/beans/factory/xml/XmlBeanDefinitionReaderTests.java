@@ -22,6 +22,8 @@ import junit.framework.TestCase;
 import org.xml.sax.InputSource;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
@@ -29,6 +31,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 
+import org.w3c.dom.Element;
 import test.beans.TestBean;
 
 /**
@@ -153,5 +156,25 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 		TestBean bean = (TestBean) factory.getBean("testBean");
 		assertNotNull(bean);
 	}
+  
+  public void testBaseURI() throws Exception {
+		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+		Resource resource = new ClassPathResource("testBaseUri.xml", getClass());
+    XmlBeanDefinitionReader definitionReader = new XmlBeanDefinitionReader(registry);
+    definitionReader.loadBeanDefinitions(resource);
+    BeanDefinition bd = registry.getBeanDefinition("test");
+    String value = (String)bd.getConstructorArgumentValues().getArgumentValue(0, String.class).getValue();
+    assertEquals(value, resource.getURI().toString());
+  }
+  
+  public static class TestBaseUriNamespaceHandler extends NamespaceHandlerSupport {
+    public void init() {
+      registerBeanDefinitionParser("test", new AbstractSingleBeanDefinitionParser() {
+        protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
+          builder.addConstructorArgValue(element.getBaseURI());
+        }
+      });            
+    }
+  }
 
 }

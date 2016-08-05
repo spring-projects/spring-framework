@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import javax.xml.parsers.ParserConfigurationException;
@@ -325,9 +326,20 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
 		try {
-			InputStream inputStream = encodedResource.getResource().getInputStream();
+      Resource r = encodedResource.getResource();
+			InputStream inputStream = r.getInputStream();
 			try {
 				InputSource inputSource = new InputSource(inputStream);
+        // Try to set the systemId of the input source.
+        // This will make the baseURL property of dom nodes available.
+        try {
+          URI resourceUri = r.getURI();
+          if (resourceUri != null) {
+            inputSource.setSystemId(resourceUri.toString());
+          }
+        } catch (IOException e) {
+          // ignore
+        }
 				if (encodedResource.getEncoding() != null) {
 					inputSource.setEncoding(encodedResource.getEncoding());
 				}
