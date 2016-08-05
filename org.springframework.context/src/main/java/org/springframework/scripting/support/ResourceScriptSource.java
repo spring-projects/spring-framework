@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,27 +24,27 @@ import java.io.Reader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
+import org.springframework.scripting.ReadableScriptSource;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.scripting.ScriptSource} implementation
- * based on Spring's {@link org.springframework.core.io.Resource}
- * abstraction. Loads the script text from the underlying Resource's
- * {@link org.springframework.core.io.Resource#getFile() File} or
- * {@link org.springframework.core.io.Resource#getInputStream() InputStream},
- * and tracks the last-modified timestamp of the file (if possible).
+ * {@link ScriptSource} implementation based on Spring's {@link Resource} abstraction.
+ * Loads the script text from the underlying {@code Resource}'s
+ * {@link Resource#getFile() File} or {@link Resource#getInputStream() InputStream}, and
+ * tracks the last-modified timestamp of the file (if possible).
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  * @see org.springframework.core.io.Resource#getInputStream()
  * @see org.springframework.core.io.Resource#getFile()
  * @see org.springframework.core.io.ResourceLoader
  */
-public class ResourceScriptSource implements ScriptSource {
+public class ResourceScriptSource implements ScriptSource, ReadableScriptSource {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -75,15 +75,7 @@ public class ResourceScriptSource implements ScriptSource {
 	}
 
 	public String getScriptAsString() throws IOException {
-		synchronized (this.lastModifiedMonitor) {
-			this.lastModified = retrieveLastModifiedTime();
-		}
-
-		InputStream stream = this.resource.getInputStream();
-		Reader reader = (StringUtils.hasText(encoding) ? new InputStreamReader(stream, encoding)
-				: new InputStreamReader(stream));
-
-		return FileCopyUtils.copyToString(reader);
+		return FileCopyUtils.copyToString(getScriptAsReader());
 	}
 
 	public boolean isModified() {
@@ -115,11 +107,25 @@ public class ResourceScriptSource implements ScriptSource {
 	/**
 	 * Sets the encoding used for reading the script resource. The default value is "UTF-8".
 	 * A null value, implies the platform default.
-	 * 
+	 *
 	 * @param encoding charset encoding used for reading the script.
 	 */
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
+	}
+
+	public Reader getScriptAsReader() throws IOException {
+		synchronized (this.lastModifiedMonitor) {
+			this.lastModified = retrieveLastModifiedTime();
+		}
+
+		InputStream stream = this.resource.getInputStream();
+		return (StringUtils.hasText(encoding) ?
+				new InputStreamReader(stream, encoding) : new InputStreamReader(stream));
+	}
+
+	public String suggestedScriptName() {
+		return getResource().getFilename();
 	}
 
 	@Override
