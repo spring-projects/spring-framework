@@ -94,6 +94,15 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		super(Jackson2ObjectMapperBuilder.json().build(), DEFAULT_CONTENT_TYPE);
 	}
 
+	/**
+	 * Construct a new {@code MappingJackson2JsonView} using the configuration
+	 * provided by the given ObjectMapper and setting the content type
+	 * to {@code application/json}.
+	 */
+	public MappingJackson2JsonView(ObjectMapper objectMapper) {
+		super(objectMapper, DEFAULT_CONTENT_TYPE);
+	}
+
 
 	/**
 	 * Specify a custom prefix to use for this view's JSON output.
