@@ -30,19 +30,23 @@ class BeanPropertyDescriptor extends AbstractDescriptor {
 
 	private final MethodParameter methodParameter;
 	
-	private final Annotation[] annotations;
+	private Annotation[] annotations;
 	
 
 	public BeanPropertyDescriptor(Property property) {
 		super(property.getType());
 		this.property = property;
 		this.methodParameter = property.getMethodParameter();
-		this.annotations = property.getAnnotations();
+//		this.annotations = property.getAnnotations();
 	}
 
 
 	@Override
 	public Annotation[] getAnnotations() {
+		if(this.annotations == null)
+		{
+			this.annotations = this.property.getAnnotations();
+		}
 		return this.annotations;
 	}
 	

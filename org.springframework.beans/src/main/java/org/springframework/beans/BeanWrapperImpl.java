@@ -16,6 +16,7 @@
 
 package org.springframework.beans;
 
+import java.beans.IntrospectionException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -117,6 +119,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Map with cached nested BeanWrappers: nested path -> BeanWrapper instance.
 	 */
 	private Map<String, BeanWrapperImpl> nestedBeanWrappers;
+	
+	private Map<String, Object> cachedCastInstances;
 
 	private boolean autoGrowNestedPaths = false;
 
@@ -551,7 +555,15 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			String nestedProperty = propertyPath.substring(0, pos);
 			String nestedPath = propertyPath.substring(pos + 1);
 			BeanWrapperImpl nestedBw = getNestedBeanWrapper(nestedProperty);
-			return nestedBw.getBeanWrapperForPropertyPath(nestedPath);
+			BeanWrapperImpl subNestedBw = nestedBw.getBeanWrapperForPropertyPath(nestedPath);
+			if (nestedBw.cachedCastInstances != null)
+			{
+				if (subNestedBw.cachedCastInstances == null)
+					subNestedBw.cachedCastInstances = nestedBw.cachedCastInstances;
+				else
+					subNestedBw.cachedCastInstances.putAll(nestedBw.cachedCastInstances);
+			}
+			return subNestedBw;
 		}
 		else {
 			return this;
@@ -573,13 +585,49 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		// Get value of bean property.
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
 		String canonicalName = tokens.canonicalName;
+		String castName = tokens.castName;
+		Class castClass = null;
+		
 		Object propertyValue = getPropertyValue(tokens);
+				
 		if (propertyValue == null) {
 			if (this.autoGrowNestedPaths) {
 				propertyValue = setDefaultValue(tokens);
 			}
 			else {
 				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);				
+			}
+		}
+		
+		if (!castName.isEmpty())
+		{
+			if (cachedCastInstances == null)
+			{
+				cachedCastInstances = new HashMap<String,Object>();
+			}
+			
+			try {
+				castClass = Class.forName(castName);
+				if (propertyValue != null && propertyValue.getClass().equals(castClass))
+				{
+					cachedCastInstances.put(nestedPath + nestedProperty, propertyValue);
+				}
+				else
+				{
+					if (cachedCastInstances.containsKey(nestedPath + nestedProperty))
+					{
+						propertyValue = cachedCastInstances.get(nestedPath + nestedProperty);
+					}
+					else
+					{
+						propertyValue = castClass.newInstance();
+						cachedCastInstances.put(nestedPath + nestedProperty, propertyValue);
+					}
+				}
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 
@@ -592,8 +640,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			nestedBw = newNestedBeanWrapper(propertyValue, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
 			// Inherit all type-specific PropertyEditors.
 			copyDefaultEditorsTo(nestedBw);
+			nestedBw.cachedCastInstances = this.cachedCastInstances;
 			copyCustomEditorsTo(nestedBw, canonicalName);
-			this.nestedBeanWrappers.put(canonicalName, nestedBw);
+			if (castName == null)
+				this.nestedBeanWrappers.put(canonicalName, nestedBw);
 		}
 		else {
 			if (logger.isTraceEnabled()) {
@@ -609,6 +659,14 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		tokens.canonicalName = propertyName;
 		return setDefaultValue(tokens);
 	}
+	
+	private Object setDefaultValue(String propertyName, String castClass) {
+		PropertyTokenHolder tokens = new PropertyTokenHolder();
+		tokens.actualName = propertyName;
+		tokens.canonicalName = propertyName;
+		tokens.castName = castClass;
+		return setDefaultValue(tokens);
+	}
 
 	private Object setDefaultValue(PropertyTokenHolder tokens) {
 		PropertyValue pv = createDefaultPropertyValue(tokens);
@@ -618,6 +676,14 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	private PropertyValue createDefaultPropertyValue(PropertyTokenHolder tokens) {
 		Class<?> type = getPropertyTypeDescriptor(tokens.canonicalName).getType();
+		if (tokens.castName != null && !tokens.castName.isEmpty())
+		{
+			try {
+				type = Class.forName(tokens.castName);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
 		if (type == null) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + tokens.canonicalName,
 					"Could not determine property type for auto-growing a default value");
@@ -698,7 +764,14 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			}
 		}
 		tokens.actualName = (actualName != null ? actualName : propertyName);
+		tokens.actualName = tokens.actualName.replaceAll("\\(.*\\)", "");
 		tokens.canonicalName = tokens.actualName;
+		
+		if (propertyName.matches("\\([^\\(]+\\)[^\\(\\)]+"))
+		{
+			tokens.castName = propertyName.split("[\\)\\(]")[1];
+		}
+		
 		if (!keys.isEmpty()) {
 			tokens.canonicalName +=
 					PROPERTY_KEY_PREFIX +
@@ -717,6 +790,15 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	@Override
 	public Object getPropertyValue(String propertyName) throws BeansException {
 		BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
+		if (this.cachedCastInstances == null)
+		{
+			this.cachedCastInstances = nestedBw.cachedCastInstances;
+		}
+		else
+		{
+			this.cachedCastInstances.putAll(nestedBw.cachedCastInstances);
+		}
+		
 		PropertyTokenHolder tokens = getPropertyNameTokens(getFinalPath(nestedBw, propertyName));
 		return nestedBw.getPropertyValue(tokens);
 	}
@@ -724,9 +806,27 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private Object getPropertyValue(PropertyTokenHolder tokens) throws BeansException {
 		String propertyName = tokens.canonicalName;
 		String actualName = tokens.actualName;
+		String castName = tokens.castName;
+		Class castClass = null;
+		
 		PropertyDescriptor pd = getCachedIntrospectionResults().getPropertyDescriptor(actualName);
 		if (pd == null || pd.getReadMethod() == null) {
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyName);
+		}
+		if (!castName.isEmpty()) {
+			// TODO: See if we can refactor this block to take advantage of
+			// caching with the new cast syntax
+			try {
+				castClass = Class.forName(castName);
+				pd = new GenericTypeAwarePropertyDescriptor(pd.getClass(),
+						castClass, pd.getName(),
+						pd.getReadMethod(), pd.getWriteMethod(),
+						castClass);
+			} catch (IntrospectionException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 		final Method readMethod = pd.getReadMethod();
 		try {
@@ -758,13 +858,27 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			else {
-                value = readMethod.invoke(object, (Object[]) null);
+
+				value = readMethod.invoke(object, (Object[]) null);
+				if (castClass != null && value != null && !value.getClass().equals(castClass) && !(value instanceof Collection))
+				{
+					if (cachedCastInstances == null)
+					{
+						cachedCastInstances = new HashMap<String,Object>();
+					}
+					
+					String nestedProperty = this.nestedPath + "(" + tokens.castName + ")" + tokens.actualName;
+					if (cachedCastInstances.containsKey(nestedProperty))
+					{
+						value = cachedCastInstances.get(nestedProperty);
+					}
+				}
 			}
 			
 			if (tokens.keys != null) {				
 				if (value == null) {
 					if (this.autoGrowNestedPaths) {
-						value = setDefaultValue(tokens.actualName);
+						value = setDefaultValue(tokens.actualName, tokens.castName);
 					}
 					else {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
@@ -879,9 +993,16 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		if (!this.autoGrowNestedPaths) {
 			return;
 		}
-		int size = collection.size();
-		if (index >= size && index < this.autoGrowCollectionLimit) {
-			Class elementType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(), nestingLevel);
+		if (index >= collection.size()) {
+			Class elementType;
+			if (pd instanceof GenericTypeAwarePropertyDescriptor && ((GenericTypeAwarePropertyDescriptor) pd).getCastType() != null)
+			{
+				elementType = ((GenericTypeAwarePropertyDescriptor) pd).getCastType();
+			}
+			else
+			{
+				elementType = GenericCollectionTypeResolver.getCollectionReturnType(pd.getReadMethod(), nestingLevel);
+			}
 			if (elementType != null) {
 				for (int i = collection.size(); i < index + 1; i++) {
 					collection.add(newValue(elementType, name));
@@ -1198,6 +1319,8 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		public String canonicalName;
 
 		public String actualName;
+		
+		public String castName = "";
 
 		public String[] keys;
 	}

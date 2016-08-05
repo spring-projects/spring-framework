@@ -53,6 +53,20 @@ public interface PropertyAccessor {
 	 */
 	String PROPERTY_KEY_SUFFIX = "]";
 	char PROPERTY_KEY_SUFFIX_CHAR = ']';
+	
+	/**
+	 * Marker that indicates the start of a property key for an
+	 * indexed or mapped property like "person.(PhysicalAddress)addresses[0]".
+	 */
+	String PROPERTY_CAST_PREFIX = "(";
+	char PROPERTY_CAST_PREFIX_CHAR = '(';
+ 
+	/**
+	 * Marker that indicates the end of a property cast for an
+	 * indexed or mapped property like "person.(PhysicalAddress)addresses[0]".
+	 */
+	String PROPERTY_CAST_SUFFIX = ")";
+	char PROPERTY_CAST_SUFFIX_CHAR = ')';
 
 
 	/**
