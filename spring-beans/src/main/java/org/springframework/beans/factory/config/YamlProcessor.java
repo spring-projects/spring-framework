@@ -300,6 +300,10 @@ public abstract class YamlProcessor {
 					buildFlattenedMap(result,
 							Collections.singletonMap("[" + (count++) + "]", object), key);
 				}
+
+				if (value instanceof List) {
+					result.put(key, (List) collection);
+				}
 			}
 			else {
 				result.put(key, value != null ? value : "");
