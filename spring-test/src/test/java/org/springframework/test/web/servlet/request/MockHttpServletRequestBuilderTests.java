@@ -23,12 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -434,6 +434,27 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals(user, request.getUserPrincipal());
 	}
 
+	// SPR-12945
+	@Test
+	public void mergeInvokesDefaultRequestPostProcessorFirst() {
+		final String ATTR = "ATTR";
+		final String EXEPCTED = "override";
+
+		MockHttpServletRequestBuilder defaultBuilder =
+				new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar")
+				.with(requestAttr(ATTR).value("default"));
+
+		builder
+				.with(requestAttr(ATTR).value(EXEPCTED));
+
+		builder.merge(defaultBuilder);
+
+		MockHttpServletRequest request = builder.buildRequest(servletContext);
+		request = builder.postProcessRequest(request);
+
+		assertEquals(EXEPCTED, request.getAttribute(ATTR));
+	}
+
 
 	private final class User implements Principal {
 
@@ -443,4 +464,29 @@ public class MockHttpServletRequestBuilderTests {
 		}
 	}
 
+	private static RequestAttributePostProcessor requestAttr(String attrName) {
+		return new RequestAttributePostProcessor().attr(attrName);
+	}
+
+	private static class RequestAttributePostProcessor implements RequestPostProcessor {
+
+		String attr;
+
+		String value;
+
+		public RequestAttributePostProcessor attr(String attr) {
+			this.attr = attr;
+			return this;
+		}
+
+		public RequestAttributePostProcessor value(String value) {
+			this.value = value;
+			return this;
+		}
+
+		public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+			request.setAttribute(attr, value);
+			return request;
+		}
+	}
 }

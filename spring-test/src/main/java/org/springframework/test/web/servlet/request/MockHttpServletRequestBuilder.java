@@ -537,7 +537,7 @@ public class MockHttpServletRequestBuilder
 			this.pathInfo = parentBuilder.pathInfo;
 		}
 
-		this.postProcessors.addAll(parentBuilder.postProcessors);
+		this.postProcessors.addAll(0, parentBuilder.postProcessors);
 
 		return this;
 	}
