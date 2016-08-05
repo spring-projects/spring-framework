@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 
 package org.springframework.scripting.support;
 
+import java.io.Reader;
+import java.io.StringReader;
+
+import org.springframework.scripting.ReadableScriptSource;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 
@@ -27,9 +31,10 @@ import org.springframework.util.Assert;
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Costin Leau
  * @since 2.0
  */
-public class StaticScriptSource implements ScriptSource {
+public class StaticScriptSource implements ScriptSource, ReadableScriptSource {
 
 	private String script;
 
@@ -37,13 +42,14 @@ public class StaticScriptSource implements ScriptSource {
 
 	private String className;
 
+	private String scriptName;
 
 	/**
 	 * Create a new StaticScriptSource for the given script.
 	 * @param script the script String
 	 */
 	public StaticScriptSource(String script) {
-		setScript(script);
+		this(script, null);
 	}
 
 	/**
@@ -53,8 +59,22 @@ public class StaticScriptSource implements ScriptSource {
 	 * (may be <code>null</code>)
 	 */
 	public StaticScriptSource(String script, String className) {
+		this(script, className, className);
+	}
+
+	/**
+	 * Create a new StaticScriptSource for the given script.
+	 * @param script the script String
+	 * @param className the suggested class name for the script
+	 * (may be <code>null</code>)
+	 * @param scriptName the suggested name for the script
+	 * (may be <code>null</code>)
+	 * 
+	 */
+	public StaticScriptSource(String script, String className, String scriptName) {
 		setScript(script);
 		this.className = className;
+		this.scriptName = scriptName;
 	}
 
 	/**
@@ -87,4 +107,11 @@ public class StaticScriptSource implements ScriptSource {
 		return "static script" + (this.className != null ? " [" + this.className + "]" : "");
 	}
 
+	public Reader getScriptAsReader() {
+		return new StringReader(getScriptAsString());
+	}
+
+	public String suggestedScriptName() {
+		return scriptName;
+	}
 }
