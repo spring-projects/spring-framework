@@ -780,7 +780,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return getModelAndView(mavContainer, modelFactory, webRequest);
 	}
 
-	private ServletInvocableHandlerMethod createRequestMappingMethod(
+	protected ServletInvocableHandlerMethod createRequestMappingMethod(
 			HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
 
 		ServletInvocableHandlerMethod requestMethod;
