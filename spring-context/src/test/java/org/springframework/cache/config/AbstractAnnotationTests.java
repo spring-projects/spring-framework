@@ -73,6 +73,17 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r1, r3);
 	}
 
+	public void testMethodSignatureInCacheKey(CacheableService<?> service) throws Exception {
+		Object o1 = new Object();
+
+		Object r1 = service.cache(o1);
+		Object r2 = service.cacheAnother(o1);
+		Object r3 = service.cache(o1);
+
+		assertNotSame(r1, r2);
+		assertSame(r1, r3);
+	}
+	
 	public void testEvict(CacheableService<?> service) throws Exception {
 		Object o1 = new Object();
 
@@ -439,6 +450,11 @@ public abstract class AbstractAnnotationTests {
 	@Test
 	public void testCacheable() throws Exception {
 		testCacheable(cs);
+	}
+	
+	@Test
+	public void testMethodSignatureInCacheKey() throws Exception {
+		testMethodSignatureInCacheKey(cs);
 	}
 
 	@Test
