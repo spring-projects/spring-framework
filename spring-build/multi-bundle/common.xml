@@ -48,6 +48,11 @@
 		<delete quiet="true" dir="${integration.repo.dir}"/>
 	</target>
 
+	<target name="resolve" 
+			description="Retrieves all external dependencies.">
+		<all-bundles target="resolve"/>
+	</target>
+
 	<target name="clean-ivy" depends="ivy.init"
 			description="Removes the ivy cache directory.">
 		<fail message="The 'ivy.cache.dir' property must be set on this project.">
