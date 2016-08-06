@@ -42,9 +42,9 @@ If you forget to do so, you'll be reminded when you submit a pull request.
 
 ### Branch from `master`
 
-Master currently represents work toward Spring Framework 4.0. Please submit
+Master currently represents work toward Spring Framework 5.0. Please submit
 all pull requests there, even bug fixes and minor improvements. Backports to
-`3.2.x` will be considered on a case-by-case basis.
+`4.3.x` will be considered on a case-by-case basis.
 
 
 ### Use short branch names
