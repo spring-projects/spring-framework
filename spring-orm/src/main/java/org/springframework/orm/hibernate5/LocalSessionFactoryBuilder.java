@@ -42,7 +42,6 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -138,9 +137,9 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
 		super(metadataSources);
 
-		getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
+		getProperties().put(AvailableSettings.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 		if (dataSource != null) {
-			getProperties().put(Environment.DATASOURCE, dataSource);
+			getProperties().put(AvailableSettings.DATASOURCE, dataSource);
 		}
 
 		// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)

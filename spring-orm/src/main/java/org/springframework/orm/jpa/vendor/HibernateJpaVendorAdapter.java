@@ -23,7 +23,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 
 import org.hibernate.cfg.AvailableSettings;
-import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.DB2Dialect;
 import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.dialect.H2Dialect;
@@ -108,20 +107,20 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		Map<String, Object> jpaProperties = new HashMap<>();
 
 		if (getDatabasePlatform() != null) {
-			jpaProperties.put(Environment.DIALECT, getDatabasePlatform());
+			jpaProperties.put(AvailableSettings.DIALECT, getDatabasePlatform());
 		}
 		else if (getDatabase() != null) {
 			Class<?> databaseDialectClass = determineDatabaseDialectClass(getDatabase());
 			if (databaseDialectClass != null) {
-				jpaProperties.put(Environment.DIALECT, databaseDialectClass.getName());
+				jpaProperties.put(AvailableSettings.DIALECT, databaseDialectClass.getName());
 			}
 		}
 
 		if (isGenerateDdl()) {
-			jpaProperties.put(Environment.HBM2DDL_AUTO, "update");
+			jpaProperties.put(AvailableSettings.HBM2DDL_AUTO, "update");
 		}
 		if (isShowSql()) {
-			jpaProperties.put(Environment.SHOW_SQL, "true");
+			jpaProperties.put(AvailableSettings.SHOW_SQL, "true");
 		}
 
 		if (this.jpaDialect.prepareConnection) {
