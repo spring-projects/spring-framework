@@ -74,8 +74,8 @@ configure(allprojects) { project ->
 	ext.protobufVersion        = "3.0.0"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
-	ext.reactorCoreVersion     = '3.0.0.RC1'
-	ext.reactorNettyVersion    = '0.5.0.M2'
+	ext.reactorCoreVersion     = '3.0.0.BUILD-SNAPSHOT'
+	ext.reactorNettyVersion    = '0.5.0.BUILD-SNAPSHOT'
 	ext.romeVersion            = "1.6.0"
 	ext.rxjavaVersion          = '1.1.8'
 	ext.rxnettyVersion         = '0.5.2-rc.3'
@@ -160,6 +160,7 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/snapshot" }	// Reactor 3 snapshots
 	}
 
 	dependencies {

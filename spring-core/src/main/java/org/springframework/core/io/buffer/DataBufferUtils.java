@@ -184,7 +184,7 @@ public abstract class DataBufferUtils {
 				}
 			}
 			catch (IOException ex) {
-				sub.fail(ex);
+				sub.error(ex);
 			}
 			return channel;
 		}
