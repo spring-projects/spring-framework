@@ -252,6 +252,10 @@ public abstract class AbstractSockJsSession implements SockJsSession {
 		if (isActive()) {
 			if (heartbeatLock.tryLock()) {
 				try {
+					if (this.heartbeatTask == null) {
+						// Cancelled while waiting to acquire the lock
+						return;
+					}
 					writeFrame(SockJsFrame.heartbeatFrame());
 					scheduleHeartbeat();
 				}
