@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ public class LookupAnnotationTests {
 		aabpp.setBeanFactory(beanFactory);
 		beanFactory.addBeanPostProcessor(aabpp);
 		beanFactory.registerBeanDefinition("abstractBean", new RootBeanDefinition(AbstractBean.class));
+		beanFactory.registerBeanDefinition("beanConsumer", new RootBeanDefinition(BeanConsumer.class));
 		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
 		tbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		beanFactory.registerBeanDefinition("testBean", tbd);
@@ -53,6 +54,7 @@ public class LookupAnnotationTests {
 		assertNotNull(bean);
 		Object expected = bean.get();
 		assertEquals(TestBean.class, expected.getClass());
+		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
 	}
 
 	@Test
@@ -62,6 +64,7 @@ public class LookupAnnotationTests {
 		TestBean expected = bean.get("haha");
 		assertEquals(TestBean.class, expected.getClass());
 		assertEquals("haha", expected.getName());
+		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
 	}
 
 	@Test
@@ -71,6 +74,7 @@ public class LookupAnnotationTests {
 		TestBean expected = bean.getOneArgument("haha");
 		assertEquals(TestBean.class, expected.getClass());
 		assertEquals("haha", expected.getName());
+		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
 	}
 
 	@Test
@@ -81,6 +85,7 @@ public class LookupAnnotationTests {
 		assertEquals(TestBean.class, expected.getClass());
 		assertEquals("haha", expected.getName());
 		assertEquals(72, expected.getAge());
+		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
 	}
 
 	@Test
@@ -93,6 +98,16 @@ public class LookupAnnotationTests {
 		}
 		catch (AbstractMethodError ex) {
 		}
+		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
+	}
+
+	@Test
+	public void testWithEarlyInjection() {
+		AbstractBean bean = beanFactory.getBean("beanConsumer", BeanConsumer.class).abstractBean;
+		assertNotNull(bean);
+		Object expected = bean.get();
+		assertEquals(TestBean.class, expected.getClass());
+		assertSame(bean, beanFactory.getBean(BeanConsumer.class).abstractBean);
 	}
 
 
@@ -111,6 +126,13 @@ public class LookupAnnotationTests {
 		public abstract TestBean getTwoArguments(String name, int age);
 
 		public abstract TestBean getThreeArguments(String name, int age, int anotherArg);
+	}
+
+
+	public static class BeanConsumer {
+
+		@Autowired
+		AbstractBean abstractBean;
 	}
 
 }
