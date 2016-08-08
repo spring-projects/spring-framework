@@ -154,8 +154,22 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		}
 
 		if (this.jpaDialect.prepareConnection) {
-			// Hibernate 5.2: manually enforce connection release mode ON_CLOSE (the former default)
-			jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+			// Hibernate 5.1/5.2: manually enforce connection release mode ON_CLOSE (the former default)
+			try {
+				// Try Hibernate 5.2
+				Environment.class.getField("CONNECTION_HANDLING");
+				jpaProperties.put("hibernate.connection.handling_mode", "DELAYED_ACQUISITION_AND_HOLD");
+			}
+			catch (NoSuchFieldException ex) {
+				// Try Hibernate 5.1
+				try {
+					Environment.class.getField("ACQUIRE_CONNECTIONS");
+					jpaProperties.put("hibernate.connection.release_mode", "ON_CLOSE");
+				}
+				catch (NoSuchFieldException ex2) {
+					// on Hibernate 5.0.x or lower - no need to change the default there
+				}
+			}
 		}
 
 		return jpaProperties;
