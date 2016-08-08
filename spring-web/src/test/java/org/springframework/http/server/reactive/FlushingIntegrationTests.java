@@ -21,10 +21,10 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.tests.TestSubscriber;
 import org.springframework.web.client.reactive.ClientWebRequestBuilders;
 import org.springframework.web.client.reactive.ResponseExtractors;
 import org.springframework.web.client.reactive.WebClient;

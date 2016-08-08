@@ -20,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
@@ -29,6 +28,7 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
+import org.springframework.tests.TestSubscriber;
 
 import static org.junit.Assert.*;
 import static org.xmlunit.matchers.CompareMatcher.*;

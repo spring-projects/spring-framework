@@ -20,9 +20,9 @@ import javax.xml.stream.events.XMLEvent;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.tests.TestSubscriber;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

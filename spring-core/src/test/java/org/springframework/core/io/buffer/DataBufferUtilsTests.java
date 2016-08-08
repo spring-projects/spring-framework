@@ -24,7 +24,7 @@ import java.nio.file.StandardOpenOption;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.TestSubscriber;
+import org.springframework.tests.TestSubscriber;
 
 import static org.junit.Assert.*;
 

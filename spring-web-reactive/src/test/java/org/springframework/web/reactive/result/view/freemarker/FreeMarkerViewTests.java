@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import reactor.test.TestSubscriber;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
@@ -36,6 +35,7 @@ import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
+import org.springframework.tests.TestSubscriber;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;

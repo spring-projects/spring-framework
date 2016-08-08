@@ -28,7 +28,6 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.test.TestSubscriber;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -39,6 +38,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.tests.TestSubscriber;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MimeType;
