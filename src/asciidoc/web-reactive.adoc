@@ -83,8 +83,8 @@ many of the same algorithms.
 
 The end result is a programming model identical to today's Spring MVC but
 with support for reactive types and executed in a reactive manner.
-For example a controller method can declare the following as an
-`@RequestBody` method argument:
+For example a controller method can declare a `@RequestBody` method argument
+in any one of the following ways:
 
 * `Account account` -- the account is deserialized without
 blocking before the controller is invoked.
@@ -94,7 +94,8 @@ to declare logic to be executed after the account is deserialized.
 * `Flux<Account> accounts` -- input streaming scenario.
 * `Observable<Account> accounts` -- input streaming with RxJava.
 
-The above also applies to return value handling:
+Similarly a controller can also an `@ResponseBody` return value
+in any one of the following ways:
 
 * `Mono<Account>` -- serialize without blocking the given Account when the `Mono` completes.
 * `Singe<Account>` -- same but using RxJava.
