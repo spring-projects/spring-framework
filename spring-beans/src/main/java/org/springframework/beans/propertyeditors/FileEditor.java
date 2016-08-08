@@ -84,8 +84,9 @@ public class FileEditor extends PropertyEditorSupport {
 
 		// Check whether we got an absolute file path without "file:" prefix.
 		// For backwards compatibility, we'll consider those as straight file path.
+		File file = null;
 		if (!ResourceUtils.isUrl(text)) {
-			File file = new File(text);
+			file = new File(text);
 			if (file.isAbsolute()) {
 				setValue(file);
 				return;
@@ -97,7 +98,7 @@ public class FileEditor extends PropertyEditorSupport {
 		Resource resource = (Resource) this.resourceEditor.getValue();
 
 		// If it's a URL or a path pointing to an existing resource, use it as-is.
-		if (ResourceUtils.isUrl(text) || resource.exists()) {
+		if (file == null || resource.exists()) {
 			try {
 				setValue(resource.getFile());
 			}
@@ -107,8 +108,8 @@ public class FileEditor extends PropertyEditorSupport {
 			}
 		}
 		else {
-			// Create a relative File reference and hope for the best.
-			setValue(new File(text));
+			// Set a relative File reference and hope for the best.
+			setValue(file);
 		}
 	}
 
