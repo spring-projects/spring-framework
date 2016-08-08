@@ -132,7 +132,7 @@ Mono<Account> response = webClient
 		.extract(body(Account.class));
 ----
 
-The above assumes static method imports from `ClientWebRequestBuilder` and `ResponseExtractors`
+The above assumes static method imports from `ClientWebRequestBuilders` and `ResponseExtractors`
 that enable a fluent syntax. The same can also be done with RxJava using static imports from
 `RxJava1ClientWebRequestBuilder` and `RxJava1ResponseExtractors` instead:
 

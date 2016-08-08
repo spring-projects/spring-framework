@@ -16,7 +16,6 @@
 
 package org.springframework.web.client.reactive;
 
-
 import org.springframework.http.HttpMethod;
 
 /**
@@ -30,8 +29,7 @@ public abstract class ClientWebRequestBuilders {
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for a GET request.
-	 *
-	 * @param urlTemplate  a URL template; the resulting URL will be encoded
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static DefaultClientWebRequestBuilder get(String urlTemplate, Object... urlVariables) {
@@ -40,8 +38,7 @@ public abstract class ClientWebRequestBuilders {
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for a POST request.
-	 *
-	 * @param urlTemplate  a URL template; the resulting URL will be encoded
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static DefaultClientWebRequestBuilder post(String urlTemplate, Object... urlVariables) {
@@ -50,8 +47,7 @@ public abstract class ClientWebRequestBuilders {
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for a PUT request.
-	 *
-	 * @param urlTemplate  a URL template; the resulting URL will be encoded
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static DefaultClientWebRequestBuilder put(String urlTemplate, Object... urlVariables) {
@@ -60,8 +56,7 @@ public abstract class ClientWebRequestBuilders {
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for a PATCH request.
-	 *
-	 * @param urlTemplate  a URL template; the resulting URL will be encoded
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static DefaultClientWebRequestBuilder patch(String urlTemplate, Object... urlVariables) {
@@ -70,8 +65,7 @@ public abstract class ClientWebRequestBuilders {
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for a DELETE request.
-	 *
-	 * @param urlTemplate  a URL template; the resulting URL will be encoded
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static DefaultClientWebRequestBuilder delete(String urlTemplate, Object... urlVariables) {
@@ -80,8 +74,7 @@ public abstract class ClientWebRequestBuilders {
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for an OPTIONS request.
-	 *
-	 * @param urlTemplate  a URL template; the resulting URL will be encoded
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static DefaultClientWebRequestBuilder options(String urlTemplate, Object... urlVariables) {
@@ -90,8 +83,7 @@ public abstract class ClientWebRequestBuilders {
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for a HEAD request.
-	 *
-	 * @param urlTemplate  a URL template; the resulting URL will be encoded
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static DefaultClientWebRequestBuilder head(String urlTemplate, Object... urlVariables) {
@@ -100,9 +92,8 @@ public abstract class ClientWebRequestBuilders {
 
 	/**
 	 * Create a {@link DefaultClientWebRequestBuilder} for a request with the given HTTP method.
-	 *
-	 * @param httpMethod   the HTTP method
-	 * @param urlTemplate  a URL template; the resulting URL will be encoded
+	 * @param httpMethod the HTTP method
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
 	public static DefaultClientWebRequestBuilder request(HttpMethod httpMethod, String urlTemplate, Object... urlVariables) {
