@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 /**
  * @author Thomas Risberg
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class FileEditorTests {
 
@@ -78,10 +79,7 @@ public class FileEditorTests {
 		assertTrue(value instanceof File);
 		File file = (File) value;
 		assertTrue(file.exists());
-		String absolutePath = file.getAbsolutePath();
-		if (File.separatorChar == '\\') {
-			absolutePath = absolutePath.replace('\\', '/');
-		}
+		String absolutePath = file.getAbsolutePath().replace('\\', '/');
 		assertTrue(absolutePath.endsWith(fileName));
 	}
 
@@ -95,10 +93,7 @@ public class FileEditorTests {
 		assertTrue(value instanceof File);
 		File file = (File) value;
 		assertFalse(file.exists());
-		String absolutePath = file.getAbsolutePath();
-		if (File.separatorChar == '\\') {
-			absolutePath = absolutePath.replace('\\', '/');
-		}
+		String absolutePath = file.getAbsolutePath().replace('\\', '/');
 		assertTrue(absolutePath.endsWith(fileName));
 	}
 
