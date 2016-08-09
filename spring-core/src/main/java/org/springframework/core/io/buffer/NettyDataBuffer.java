@@ -91,7 +91,7 @@ public class NettyDataBuffer implements PooledDataBuffer {
 			return -1;
 		}
 		fromIndex = Math.min(fromIndex, this.byteBuf.writerIndex() - 1);
-		return this.byteBuf.forEachByteDesc(0, fromIndex, predicate.negate()::test);
+		return this.byteBuf.forEachByteDesc(0, fromIndex + 1, predicate.negate()::test);
 	}
 
 	@Override
