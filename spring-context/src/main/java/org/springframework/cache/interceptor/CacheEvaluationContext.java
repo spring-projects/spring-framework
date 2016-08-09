@@ -17,8 +17,8 @@
 package org.springframework.cache.interceptor;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -38,25 +38,27 @@ import org.springframework.core.ParameterNameDiscoverer;
  *
  * @author Costin Leau
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 3.1
  */
 class CacheEvaluationContext extends MethodBasedEvaluationContext {
 
-	private final List<String> unavailableVariables;
+	private final Set<String> unavailableVariables = new HashSet<>(1);
 
-	CacheEvaluationContext(Object rootObject, Method method, Object[] args,
-			ParameterNameDiscoverer paramDiscoverer) {
 
-		super(rootObject, method, args, paramDiscoverer);
-		this.unavailableVariables = new ArrayList<>();
+	CacheEvaluationContext(Object rootObject, Method method, Object[] arguments,
+			ParameterNameDiscoverer parameterNameDiscoverer) {
+
+		super(rootObject, method, arguments, parameterNameDiscoverer);
 	}
 
+
 	/**
-	 * Add the specified variable name as unavailable for that context. Any expression trying
-	 * to access this variable should lead to an exception.
-	 * <p>This permits the validation of expressions that could potentially a variable even
-	 * when such variable isn't available yet. Any expression trying to use that variable should
-	 * therefore fail to evaluate.
+	 * Add the specified variable name as unavailable for that context.
+	 * Any expression trying to access this variable should lead to an exception.
+	 * <p>This permits the validation of expressions that could potentially a
+	 * variable even when such variable isn't available yet. Any expression
+	 * trying to use that variable should therefore fail to evaluate.
 	 */
 	public void addUnavailableVariable(String name) {
 		this.unavailableVariables.add(name);
