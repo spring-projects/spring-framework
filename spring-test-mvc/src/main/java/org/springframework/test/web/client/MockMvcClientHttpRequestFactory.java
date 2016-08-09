@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
@@ -33,6 +34,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.util.Assert;
 
 /**
  * A {@link ClientHttpRequestFactory} for requests executed via {@link MockMvc}.
@@ -46,29 +48,26 @@ public class MockMvcClientHttpRequestFactory implements ClientHttpRequestFactory
 
 
 	public MockMvcClientHttpRequestFactory(MockMvc mockMvc) {
+		Assert.notNull(mockMvc, "MockMvc must not be null");
 		this.mockMvc = mockMvc;
 	}
 
+
 	public ClientHttpRequest createRequest(final URI uri, final HttpMethod httpMethod) throws IOException {
 		return new MockClientHttpRequest(httpMethod, uri) {
-
 			@Override
 			public ClientHttpResponse executeInternal() throws IOException {
 				try {
 					MockHttpServletRequestBuilder requestBuilder = request(httpMethod, uri.toString());
 					requestBuilder.content(getBodyAsBytes());
 					requestBuilder.headers(getHeaders());
-
 					MvcResult mvcResult = MockMvcClientHttpRequestFactory.this.mockMvc.perform(requestBuilder).andReturn();
-
 					MockHttpServletResponse servletResponse = mvcResult.getResponse();
 					HttpStatus status = HttpStatus.valueOf(servletResponse.getStatus());
 					byte[] body = servletResponse.getContentAsByteArray();
 					HttpHeaders headers = getResponseHeaders(servletResponse);
-
 					MockClientHttpResponse clientResponse = new MockClientHttpResponse(body, status);
 					clientResponse.getHeaders().putAll(headers);
-
 					return clientResponse;
 				}
 				catch (Exception ex) {

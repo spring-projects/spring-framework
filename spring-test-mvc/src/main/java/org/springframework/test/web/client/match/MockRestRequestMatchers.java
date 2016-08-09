@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,13 +47,6 @@ import org.springframework.util.Assert;
  */
 public abstract class MockRestRequestMatchers {
 
-
-	/**
-	 * Private class constructor.
-	 */
-	private MockRestRequestMatchers() {
-	}
-
 	/**
 	 * Match to any request.
 	 */
@@ -66,7 +59,6 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert the request URI string with the given matcher.
-	 *
 	 * @param matcher String matcher for the expected URI
 	 * @return the request matcher
 	 */
@@ -81,7 +73,6 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert the request URI string.
-	 *
 	 * @param expectedUri the expected URI
 	 * @return the request matcher
 	 */
@@ -96,7 +87,6 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Assert the {@link HttpMethod} of the request.
-	 *
 	 * @param method the HTTP method
 	 * @return the request matcher
 	 */
@@ -111,7 +101,6 @@ public abstract class MockRestRequestMatchers {
 
 	/**
 	 * Expect a request to the given URI.
-	 *
 	 * @param uri the expected URI
 	 * @return the request matcher
 	 */
@@ -156,8 +145,8 @@ public abstract class MockRestRequestMatchers {
 	private static void assertHeaderValueCount(final String name, HttpHeaders headers, int expectedCount) {
 		List<String> actualValues = headers.get(name);
 		AssertionErrors.assertTrue("Expected header <" + name + ">", actualValues != null);
-		AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + expectedCount
-				+ "> values but found " + actualValues, expectedCount <= actualValues.size());
+		AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + expectedCount +
+				"> values but found " + actualValues, expectedCount <= actualValues.size());
 	}
 
 	/**
@@ -168,12 +157,11 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Access to request body matchers using a <a
-	 * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
+	 * Access to request body matchers using a
+	 * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
 	 * inspect a specific subset of the body. The JSON path expression can be a
 	 * parameterized string using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the JSON path optionally parameterized with arguments
 	 * @param args arguments to parameterize the JSON path expression with
 	 */
@@ -182,11 +170,10 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Access to request body matchers using a <a
-	 * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
+	 * Access to request body matchers using a
+	 * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
 	 * inspect a specific subset of the body and a Hamcrest match for asserting
 	 * the value found at the JSON path.
-	 *
 	 * @param expression the JSON path expression
 	 * @param matcher a matcher for the value expected at the JSON path
 	 */
@@ -199,7 +186,6 @@ public abstract class MockRestRequestMatchers {
 	 * subset of the body. The XPath expression can be a parameterized string
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the XPath optionally parameterized with arguments
 	 * @param args arguments to parameterize the XPath expression with
 	 */
@@ -212,7 +198,6 @@ public abstract class MockRestRequestMatchers {
 	 * subset of the body. The XPath expression can be a parameterized string
 	 * using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
-	 *
 	 * @param expression the XPath optionally parameterized with arguments
 	 * @param namespaces namespaces referenced in the XPath expression
 	 * @param args arguments to parameterize the XPath expression with

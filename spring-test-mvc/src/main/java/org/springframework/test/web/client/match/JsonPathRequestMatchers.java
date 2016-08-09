@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
 
 /**
- * Factory methods for request content {@code RequestMatcher}'s using a <a
- * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression.
+ * Factory methods for request content {@code RequestMatcher}'s using a
+ * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression.
  * An instance of this class is typically accessed via
  * {@code RequestMatchers.jsonPath(..)}.
  *
@@ -42,7 +42,6 @@ public class JsonPathRequestMatchers {
 	 * Class constructor, not for direct instantiation. Use
 	 * {@link MockRestRequestMatchers#jsonPath(String, Matcher)} or
 	 * {@link MockRestRequestMatchers#jsonPath(String, Object...)}.
-	 *
 	 * @param expression the JSONPath expression
 	 * @param args arguments to parameterize the JSONPath expression with using
 	 * the formatting specifiers defined in
@@ -123,12 +122,12 @@ public class JsonPathRequestMatchers {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				matchInternal(mockRequest);
 			}
-			catch (ParseException e) {
-				throw new AssertionError("Failed to parse JSON request content: " + e.getMessage());
+			catch (ParseException ex) {
+				throw new AssertionError("Failed to parse JSON request content: " + ex.getMessage());
 			}
 		}
 
 		protected abstract void matchInternal(MockClientHttpRequest request) throws IOException, ParseException;
-
 	}
+
 }

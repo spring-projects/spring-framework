@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ import org.springframework.mock.http.MockHttpOutputMessage;
  */
 public class MockClientHttpRequest extends MockHttpOutputMessage implements ClientHttpRequest {
 
-	private URI uri;
-
 	private HttpMethod httpMethod;
 
-	private boolean executed = false;
+	private URI uri;
 
 	private ClientHttpResponse clientHttpResponse;
+
+	private boolean executed = false;
 
 
 	/**
@@ -56,20 +56,21 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 		this.uri = uri;
 	}
 
-	public URI getURI() {
-		return this.uri;
-	}
 
-	public void setURI(URI uri) {
-		this.uri = uri;
+	public void setMethod(HttpMethod httpMethod) {
+		this.httpMethod = httpMethod;
 	}
 
 	public HttpMethod getMethod() {
 		return this.httpMethod;
 	}
 
-	public void setMethod(HttpMethod httpMethod) {
-		this.httpMethod = httpMethod;
+	public void setURI(URI uri) {
+		this.uri = uri;
+	}
+
+	public URI getURI() {
+		return this.uri;
 	}
 
 	public void setResponse(ClientHttpResponse clientHttpResponse) {
@@ -93,13 +94,13 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	/**
 	 * The default implementation returns the configured
 	 * {@link #setResponse(ClientHttpResponse) response}.
-	 *
 	 * <p>Override this method to execute the request and provide a response,
 	 * potentially different than the configured response.
 	 */
 	protected ClientHttpResponse executeInternal() throws IOException {
 		return this.clientHttpResponse;
 	}
+
 
 	@Override
 	public String toString() {
@@ -111,7 +112,7 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 			sb.append(" ").append(this.uri);
 		}
 		if (!getHeaders().isEmpty()) {
-			sb.append(", headers : ").append(getHeaders());
+			sb.append(", headers: ").append(getHeaders());
 		}
 		if (sb.length() == 0) {
 			sb.append("Not yet initialized");
