@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ package org.springframework.test.web.client.match;
 import java.io.IOException;
 import java.text.ParseException;
 
+import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
-
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Factory for assertions on the request content using
@@ -235,8 +234,8 @@ public class JsonPathRequestMatchers {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				matchInternal(mockRequest);
 			}
-			catch (ParseException e) {
-				throw new AssertionError("Failed to parse JSON request content: " + e.getMessage());
+			catch (ParseException ex) {
+				throw new AssertionError("Failed to parse JSON request content: " + ex.getMessage());
 			}
 		}
 
