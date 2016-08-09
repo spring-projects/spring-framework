@@ -44,9 +44,11 @@ public class HeaderRequestMatchersIntegrationTests {
 
 	private static final String RESPONSE_BODY = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
 
+
 	private MockRestServiceServer mockServer;
 
 	private RestTemplate restTemplate;
+
 
 	@Before
 	public void setup() {
@@ -60,9 +62,9 @@ public class HeaderRequestMatchersIntegrationTests {
 		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
 	}
 
+
 	@Test
 	public void testString() throws Exception {
-
 		this.mockServer.expect(requestTo("/person/1"))
 			.andExpect(header("Accept", "application/json, application/*+json"))
 			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));
@@ -73,7 +75,6 @@ public class HeaderRequestMatchersIntegrationTests {
 
 	@Test
 	public void testStringContains() throws Exception {
-
 		this.mockServer.expect(requestTo("/person/1"))
 			.andExpect(header("Accept", containsString("json")))
 			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));

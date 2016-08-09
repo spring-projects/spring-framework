@@ -57,6 +57,7 @@ public class XmlContentRequestMatchersIntegrationTests {
 			"<composer><name>Robert Schumann</name><someBoolean>false</someBoolean><someDouble>NaN</someDouble></composer>" +
 			"</composers></people>";
 
+
 	private MockRestServiceServer mockServer;
 
 	private RestTemplate restTemplate;
@@ -66,7 +67,6 @@ public class XmlContentRequestMatchersIntegrationTests {
 
 	@Before
 	public void setup() {
-
 		List<Person> composers = Arrays.asList(
 				new Person("Johann Sebastian Bach").setSomeDouble(21),
 				new Person("Johannes Brahms").setSomeDouble(.0025),
@@ -97,7 +97,6 @@ public class XmlContentRequestMatchersIntegrationTests {
 
 	@Test
 	public void testHamcrestNodeMatcher() throws Exception {
-
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/xml"))
 			.andExpect(content().node(hasXPath("/people/composers/composer[1]")))
@@ -128,4 +127,5 @@ public class XmlContentRequestMatchersIntegrationTests {
 			return this.composers;
 		}
 	}
+
 }
