@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 
 
 	/** Logger available to subclasses; static to optimize serialization */
-	protected final static Log logger = LogFactory.getLog(CglibAopProxy.class);
+	protected static final Log logger = LogFactory.getLog(CglibAopProxy.class);
 
 	/** Keeps track of the Classes that we have validated for final methods */
 	private static final Map<Class<?>, Boolean> validatedClasses = new WeakHashMap<Class<?>, Boolean>();
@@ -294,13 +294,13 @@ final class CglibAopProxy implements AopProxy, Serializable {
 		Callback targetDispatcher = isStatic ?
 				new StaticDispatcher(this.advised.getTargetSource().getTarget()) : new SerializableNoOp();
 
-		Callback[] mainCallbacks = new Callback[]{
-			aopInterceptor, // for normal advice
-			targetInterceptor, // invoke target without considering advice, if optimized
-			new SerializableNoOp(), // no override for methods mapped to this
-			targetDispatcher, this.advisedDispatcher,
-			new EqualsInterceptor(this.advised),
-			new HashCodeInterceptor(this.advised)
+		Callback[] mainCallbacks = new Callback[] {
+				aopInterceptor,  // for normal advice
+				targetInterceptor,  // invoke target without considering advice, if optimized
+				new SerializableNoOp(),  // no override for methods mapped to this
+				targetDispatcher, this.advisedDispatcher,
+				new EqualsInterceptor(this.advised),
+				new HashCodeInterceptor(this.advised)
 		};
 
 		Callback[] callbacks;
@@ -678,10 +678,11 @@ final class CglibAopProxy implements AopProxy, Serializable {
 
 		private final MethodProxy methodProxy;
 
-		private boolean protectedMethod;
+		private final boolean protectedMethod;
 
 		public CglibMethodInvocation(Object proxy, Object target, Method method, Object[] arguments,
 				Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers, MethodProxy methodProxy) {
+
 			super(proxy, target, method, arguments, targetClass, interceptorsAndDynamicMethodMatchers);
 			this.methodProxy = methodProxy;
 			this.protectedMethod = Modifier.isProtected(method.getModifiers());
@@ -800,8 +801,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Method has advice and optimisations are enabled: " + method);
 					}
-					// We know that we are optimising so we can use the
-					// FixedStaticChainInterceptors.
+					// We know that we are optimising so we can use the FixedStaticChainInterceptors.
 					int index = this.fixedInterceptorMap.get(key);
 					return (index + this.fixedInterceptorOffset);
 				}

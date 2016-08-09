@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.test.web.client.match;
 
 import java.io.IOException;
 import java.util.Map;
-
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
+import org.w3c.dom.Node;
+
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
-import org.w3c.dom.Node;
 
 /**
  * Factory methods for request content {@code RequestMatcher}'s using an XPath
@@ -196,7 +195,6 @@ public class XpathRequestMatchers {
 		}
 
 		protected abstract void matchInternal(MockClientHttpRequest request) throws Exception;
-
 	}
 
 }

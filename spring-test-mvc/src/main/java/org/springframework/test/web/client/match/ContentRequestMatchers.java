@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.match;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-
 import java.io.IOException;
-
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
+import org.w3c.dom.Node;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
-import org.w3c.dom.Node;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * Factory for request content {@code RequestMatcher}'s. An instance of this
@@ -185,8 +185,8 @@ public class ContentRequestMatchers {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				matchInternal(mockRequest);
 			}
-			catch (Exception e) {
-				throw new AssertionError("Failed to parse expected or actual XML request content: " + e.getMessage());
+			catch (Exception ex) {
+				throw new AssertionError("Failed to parse expected or actual XML request content: " + ex.getMessage());
 			}
 		}
 
