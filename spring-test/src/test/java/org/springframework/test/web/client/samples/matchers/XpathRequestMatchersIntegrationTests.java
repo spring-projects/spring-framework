@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,15 +53,16 @@ public class XpathRequestMatchersIntegrationTests {
 	private static final Map<String, String> NS =
 			Collections.singletonMap("ns", "http://example.org/music/people");
 
+
 	private MockRestServiceServer mockServer;
 
 	private RestTemplate restTemplate;
 
 	private PeopleWrapper people;
 
+
 	@Before
 	public void setup() {
-
 		List<Person> composers = Arrays.asList(
 				new Person("Johann Sebastian Bach").setSomeDouble(21),
 				new Person("Johannes Brahms").setSomeDouble(.0025),
@@ -74,7 +75,7 @@ public class XpathRequestMatchersIntegrationTests {
 
 		this.people = new PeopleWrapper(composers, performers);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new Jaxb2RootElementHttpMessageConverter());
 
 		this.restTemplate = new RestTemplate();
@@ -83,9 +84,9 @@ public class XpathRequestMatchersIntegrationTests {
 		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
 	}
 
+
 	@Test
 	public void testExists() throws Exception {
-
 		String composer = "/ns:people/composers/composer[%s]";
 		String performer = "/ns:people/performers/performer[%s]";
 
@@ -105,7 +106,6 @@ public class XpathRequestMatchersIntegrationTests {
 
 	@Test
 	public void testDoesNotExist() throws Exception {
-
 		String composer = "/ns:people/composers/composer[%s]";
 		String performer = "/ns:people/performers/performer[%s]";
 
@@ -123,7 +123,6 @@ public class XpathRequestMatchersIntegrationTests {
 
 	@Test
 	public void testString() throws Exception {
-
 		String composerName = "/ns:people/composers/composer[%s]/name";
 		String performerName = "/ns:people/performers/performer[%s]/name";
 
@@ -146,7 +145,6 @@ public class XpathRequestMatchersIntegrationTests {
 
 	@Test
 	public void testNumber() throws Exception {
-
 		String composerDouble = "/ns:people/composers/composer[%s]/someDouble";
 
 		this.mockServer.expect(requestTo("/composers"))
@@ -180,7 +178,6 @@ public class XpathRequestMatchersIntegrationTests {
 
 	@Test
 	public void testNodeCount() throws Exception {
-
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(4))
@@ -223,4 +220,5 @@ public class XpathRequestMatchersIntegrationTests {
 			return this.performers;
 		}
 	}
+
 }

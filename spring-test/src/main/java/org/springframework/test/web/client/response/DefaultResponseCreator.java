@@ -52,14 +52,14 @@ public class DefaultResponseCreator implements ResponseCreator {
 	 * Use static factory methods in {@link MockRestResponseCreators}.
 	 */
 	protected DefaultResponseCreator(HttpStatus statusCode) {
-		Assert.notNull(statusCode);
+		Assert.notNull(statusCode, "HttpStatus must not be null");
 		this.statusCode = statusCode;
 	}
 
 	@Override
 	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
 		MockClientHttpResponse response;
-		if (this.contentResource != null ){
+		if (this.contentResource != null) {
 			InputStream stream = this.contentResource.getInputStream();
 			response = new MockClientHttpResponse(stream, this.statusCode);
 		}
