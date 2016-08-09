@@ -58,6 +58,7 @@ public class ContentRequestMatchers {
 		this.xmlHelper = new XmlExpectationsHelper();
 	}
 
+
 	/**
 	 * Assert the request content type as a String.
 	 */

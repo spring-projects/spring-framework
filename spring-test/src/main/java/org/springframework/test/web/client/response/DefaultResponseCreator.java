@@ -39,13 +39,13 @@ import org.springframework.util.Assert;
  */
 public class DefaultResponseCreator implements ResponseCreator {
 
+	private HttpStatus statusCode;
+
 	private byte[] content;
 
 	private Resource contentResource;
 
 	private final HttpHeaders headers = new HttpHeaders();
-
-	private HttpStatus statusCode;
 
 
 	/**
@@ -57,20 +57,6 @@ public class DefaultResponseCreator implements ResponseCreator {
 		this.statusCode = statusCode;
 	}
 
-
-	@Override
-	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
-		MockClientHttpResponse response;
-		if (this.contentResource != null) {
-			InputStream stream = this.contentResource.getInputStream();
-			response = new MockClientHttpResponse(stream, this.statusCode);
-		}
-		else {
-			response = new MockClientHttpResponse(this.content, this.statusCode);
-		}
-		response.getHeaders().putAll(this.headers);
-		return response;
-	}
 
 	/**
 	 * Set the body as a UTF-8 String.
@@ -124,6 +110,21 @@ public class DefaultResponseCreator implements ResponseCreator {
 			}
 		}
 		return this;
+	}
+
+
+	@Override
+	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
+		MockClientHttpResponse response;
+		if (this.contentResource != null) {
+			InputStream stream = this.contentResource.getInputStream();
+			response = new MockClientHttpResponse(stream, this.statusCode);
+		}
+		else {
+			response = new MockClientHttpResponse(this.content, this.statusCode);
+		}
+		response.getHeaders().putAll(this.headers);
+		return response;
 	}
 
 }
