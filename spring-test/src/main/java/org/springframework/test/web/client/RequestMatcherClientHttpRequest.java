@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,12 +65,10 @@ class RequestMatcherClientHttpRequest extends MockAsyncClientHttpRequest impleme
 		if (this.requestMatchers.isEmpty()) {
 			throw new AssertionError("No request expectations to execute");
 		}
-
 		if (this.responseCreator == null) {
 			throw new AssertionError("No ResponseCreator was set up. Add it after request expectations, " +
 					"e.g. MockRestServiceServer.expect(requestTo(\"/foo\")).andRespond(withSuccess())");
 		}
-
 		for (RequestMatcher requestMatcher : this.requestMatchers) {
 			requestMatcher.match(this);
 		}

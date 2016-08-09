@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.response;
 
 import java.io.IOException;
@@ -38,13 +39,13 @@ import org.springframework.util.Assert;
  */
 public class DefaultResponseCreator implements ResponseCreator {
 
+	private HttpStatus statusCode;
+
 	private byte[] content;
 
 	private Resource contentResource;
 
 	private final HttpHeaders headers = new HttpHeaders();
-
-	private HttpStatus statusCode;
 
 
 	/**
@@ -56,19 +57,6 @@ public class DefaultResponseCreator implements ResponseCreator {
 		this.statusCode = statusCode;
 	}
 
-	@Override
-	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
-		MockClientHttpResponse response;
-		if (this.contentResource != null) {
-			InputStream stream = this.contentResource.getInputStream();
-			response = new MockClientHttpResponse(stream, this.statusCode);
-		}
-		else {
-			response = new MockClientHttpResponse(this.content, this.statusCode);
-		}
-		response.getHeaders().putAll(this.headers);
-		return response;
-	}
 
 	/**
 	 * Set the body as a UTF-8 String.
@@ -77,9 +65,9 @@ public class DefaultResponseCreator implements ResponseCreator {
 		try {
 			this.content = content.getBytes("UTF-8");
 		}
-		catch (UnsupportedEncodingException e) {
+		catch (UnsupportedEncodingException ex) {
 			// should not happen, UTF-8 is always supported
-			throw new IllegalStateException(e);
+			throw new IllegalStateException(ex);
 		}
 		return this;
 	}
@@ -128,6 +116,21 @@ public class DefaultResponseCreator implements ResponseCreator {
 			}
 		}
 		return this;
+	}
+
+
+	@Override
+	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
+		MockClientHttpResponse response;
+		if (this.contentResource != null) {
+			InputStream stream = this.contentResource.getInputStream();
+			response = new MockClientHttpResponse(stream, this.statusCode);
+		}
+		else {
+			response = new MockClientHttpResponse(this.content, this.statusCode);
+		}
+		response.getHeaders().putAll(this.headers);
+		return response;
 	}
 
 }
