@@ -32,8 +32,19 @@ import org.springframework.web.socket.sockjs.SockJsMessageDeliveryException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.reset;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
+import static org.mockito.BDDMockito.when;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.BDDMockito.willThrow;
 
 /**
  * Test fixture for {@link AbstractSockJsSession}.
@@ -247,15 +258,22 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void sendHeartbeat() throws Exception {
 		this.session.setActive(true);
+
+		ScheduledFuture task = mock(ScheduledFuture.class);
+		when(this.taskScheduler.schedule(any(Runnable.class), any(java.util.Date.class))).thenReturn(task);
+		this.session.scheduleHeartbeat();
+		reset(this.taskScheduler);
+
 		this.session.sendHeartbeat();
 
 		assertEquals(1, this.session.getSockJsFramesWritten().size());
 		assertEquals(SockJsFrame.heartbeatFrame(), this.session.getSockJsFramesWritten().get(0));
 
-		verify(this.taskScheduler).schedule(any(Runnable.class), any(Date.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(java.util.Date.class));
 		verifyNoMoreInteractions(this.taskScheduler);
 	}
 
