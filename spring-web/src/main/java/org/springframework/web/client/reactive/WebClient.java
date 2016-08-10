@@ -58,7 +58,7 @@ import org.springframework.util.ClassUtils;
  * static imports: ClientWebRequestBuilder.*, ResponseExtractors.*
  *
  * // should be shared between HTTP calls
- * WebClient client = new WebClient(new ReactorHttpClient());
+ * WebClient client = new WebClient(new ReactorClientHttpConnector());
  *
  * Mono&lt;String&gt; result = client
  * 		.perform(get("http://example.org/resource").accept(MediaType.TEXT_PLAIN))
