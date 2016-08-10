@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ abstract class ActiveProfilesUtils {
 			ActiveProfiles annotation = descriptor.synthesizeAnnotation();
 
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].",
+				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s]",
 						annotation, declaringClass.getName()));
 			}
 
@@ -101,7 +101,7 @@ abstract class ActiveProfilesUtils {
 			}
 			catch (Exception ex) {
 				String msg = String.format("Could not instantiate ActiveProfilesResolver of type [%s] " +
-						"for test class [%s].", resolverClass.getName(), rootDeclaringClass.getName());
+						"for test class [%s]", resolverClass.getName(), rootDeclaringClass.getName());
 				logger.error(msg);
 				throw new IllegalStateException(msg, ex);
 			}
@@ -109,7 +109,7 @@ abstract class ActiveProfilesUtils {
 			String[] profiles = resolver.resolve(rootDeclaringClass);
 			if (profiles == null) {
 				String msg = String.format(
-						"ActiveProfilesResolver [%s] returned a null array of bean definition profiles.",
+						"ActiveProfilesResolver [%s] returned a null array of bean definition profiles",
 						resolverClass.getName());
 				logger.error(msg);
 				throw new IllegalStateException(msg);

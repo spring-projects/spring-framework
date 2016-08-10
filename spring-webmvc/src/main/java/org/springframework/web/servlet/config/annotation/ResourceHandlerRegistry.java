@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,10 +62,22 @@ public class ResourceHandlerRegistry {
 	private int order = Integer.MAX_VALUE -1;
 
 
+	/**
+	 * Create a new resource handler registry for the given application context.
+	 * @param applicationContext the Spring application context
+	 * @param servletContext the corresponding Servlet context
+	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
 		this(applicationContext, servletContext, null);
 	}
 
+	/**
+	 * Create a new resource handler registry for the given application context.
+	 * @param applicationContext the Spring application context
+	 * @param servletContext the corresponding Servlet context
+	 * @param contentNegotiationManager the content negotiation manager to use
+	 * @since 4.3
+	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
 			ContentNegotiationManager contentNegotiationManager) {
 

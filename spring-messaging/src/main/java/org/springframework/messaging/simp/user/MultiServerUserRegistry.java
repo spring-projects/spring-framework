@@ -174,7 +174,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 	@Override
 	public String toString() {
-		return "local=[" + this.localRegistry +	"], remote=" + this.remoteRegistries + "]";
+		return "local=[" + this.localRegistry +	"], remote=" + this.remoteRegistries;
 	}
 
 
@@ -260,7 +260,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	/**
 	 * SimpUser that can be (de)serialized and broadcast to other servers.
 	 */
-	@SuppressWarnings("unused")
 	private static class TransferSimpUser implements SimpUser {
 
 		private String name;
@@ -274,6 +273,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		/**
 		 * Default constructor for JSON deserialization.
 		 */
+		@SuppressWarnings("unused")
 		public TransferSimpUser() {
 			this.sessions = new HashSet<TransferSimpSession>(1);
 		}
@@ -368,7 +368,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	/**
 	 * SimpSession that can be (de)serialized and broadcast to other servers.
 	 */
-	@SuppressWarnings("unused")
 	private static class TransferSimpSession implements SimpSession {
 
 		private String id;
@@ -380,6 +379,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		/**
 		 * Default constructor for JSON deserialization.
 		 */
+		@SuppressWarnings("unused")
 		public TransferSimpSession() {
 			this.subscriptions = new HashSet<TransferSimpSubscription>(4);
 		}

@@ -243,7 +243,7 @@ public class MockHttpServletRequestBuilder
 	 * @param mediaTypes one or more media types
 	 */
 	public MockHttpServletRequestBuilder accept(MediaType... mediaTypes) {
-		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
+		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
 		this.headers.set("Accept", MediaType.toString(Arrays.asList(mediaTypes)));
 		return this;
 	}
@@ -253,7 +253,7 @@ public class MockHttpServletRequestBuilder
 	 * @param mediaTypes one or more media types
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
-		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
+		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
 		List<MediaType> result = new ArrayList<MediaType>(mediaTypes.length);
 		for (String mediaType : mediaTypes) {
 			result.add(MediaType.parseMediaType(mediaType));
@@ -285,7 +285,6 @@ public class MockHttpServletRequestBuilder
 	 * @param cookies the cookies to add
 	 */
 	public MockHttpServletRequestBuilder cookie(Cookie... cookies) {
-		Assert.notNull(cookies, "'cookies' must not be null");
 		Assert.notEmpty(cookies, "'cookies' must not be empty");
 		this.cookies.addAll(Arrays.asList(cookies));
 		return this;

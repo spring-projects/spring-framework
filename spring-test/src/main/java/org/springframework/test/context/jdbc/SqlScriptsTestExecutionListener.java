@@ -146,15 +146,12 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	/**
 	 * Execute the SQL scripts configured via the supplied {@link Sql @Sql}
 	 * annotation for the given {@link ExecutionPhase} and {@link TestContext}.
-	 *
 	 * <p>Special care must be taken in order to properly support the configured
 	 * {@link SqlConfig#transactionMode}.
-	 *
 	 * @param sql the {@code @Sql} annotation to parse
 	 * @param executionPhase the current execution phase
 	 * @param testContext the current {@code TestContext}
-	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the
-	 * class level
+	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the class level
 	 */
 	private void executeSqlScripts(Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel)
 			throws Exception {

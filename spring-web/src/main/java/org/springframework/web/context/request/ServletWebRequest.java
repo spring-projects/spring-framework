@@ -288,7 +288,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			}
 			return HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException ex) {
 			return true;
 		}
 	}
