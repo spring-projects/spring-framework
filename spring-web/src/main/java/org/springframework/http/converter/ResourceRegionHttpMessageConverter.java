@@ -111,7 +111,7 @@ public class ResourceRegionHttpMessageConverter extends AbstractGenericHttpMessa
 		}
 		else {
 			Collection<ResourceRegion> regions = (Collection<ResourceRegion>) object;
-			if(regions.size() == 1) {
+			if (regions.size() == 1) {
 				writeResourceRegion(regions.iterator().next(), outputMessage);
 			}
 			else {

@@ -275,7 +275,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
 		}
-		if(this.resourceRegionHttpMessageConverter == null) {
+		if (this.resourceRegionHttpMessageConverter == null) {
 			this.resourceRegionHttpMessageConverter = new ResourceRegionHttpMessageConverter();
 		}
 	}
@@ -372,7 +372,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			try {
 				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
 				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-				if(httpRanges.size() == 1) {
+				if (httpRanges.size() == 1) {
 					ResourceRegion resourceRegion = httpRanges.get(0).toResourceRegion(resource);
 					this.resourceRegionHttpMessageConverter.write(resourceRegion, mediaType, outputMessage);
 				}

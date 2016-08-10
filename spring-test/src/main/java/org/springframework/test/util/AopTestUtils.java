@@ -42,7 +42,6 @@ public class AopTestUtils {
 	 * {@linkplain AopUtils#isAopProxy proxy}, the target of the proxy will
 	 * be returned; otherwise, the {@code candidate} will be returned
 	 * <em>as is</em>.
-	 *
 	 * @param candidate the instance to check (potentially a Spring AOP proxy);
 	 * never {@code null}
 	 * @return the target object or the {@code candidate}; never {@code null}
@@ -58,8 +57,8 @@ public class AopTestUtils {
 				return (T) ((Advised) candidate).getTargetSource().getTarget();
 			}
 		}
-		catch (Exception e) {
-			throw new IllegalStateException("Failed to unwrap proxied object.", e);
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
 		}
 		return (T) candidate;
 	}
@@ -72,7 +71,6 @@ public class AopTestUtils {
 	 * {@linkplain AopUtils#isAopProxy proxy}, the ultimate target of all
 	 * nested proxies will be returned; otherwise, the {@code candidate}
 	 * will be returned <em>as is</em>.
-	 *
 	 * @param candidate the instance to check (potentially a Spring AOP proxy);
 	 * never {@code null}
 	 * @return the ultimate target object or the {@code candidate}; never
@@ -89,8 +87,8 @@ public class AopTestUtils {
 				return (T) getUltimateTargetObject(((Advised) candidate).getTargetSource().getTarget());
 			}
 		}
-		catch (Exception e) {
-			throw new IllegalStateException("Failed to unwrap proxied object.", e);
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
 		}
 		return (T) candidate;
 	}

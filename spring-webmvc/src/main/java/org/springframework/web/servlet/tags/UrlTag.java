@@ -181,8 +181,8 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 			try {
 				pageContext.getOut().print(url);
 			}
-			catch (IOException e) {
-				throw new JspException(e);
+			catch (IOException ex) {
+				throw new JspException(ex);
 			}
 		}
 		else {

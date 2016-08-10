@@ -93,7 +93,9 @@ final class SimpleClientHttpResponse extends AbstractClientHttpResponse {
 				StreamUtils.drain(this.responseStream);
 				this.responseStream.close();
 			}
-			catch (IOException e) { }
+			catch (IOException ex) {
+				// ignore
+			}
 		}
 	}
 

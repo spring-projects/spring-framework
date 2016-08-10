@@ -126,8 +126,8 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		try {
 			outputStream().setWriteListener(writeListener);
 		}
-		catch (IOException e) {
-			throw new UncheckedIOException(e);
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
 		}
 	}
 

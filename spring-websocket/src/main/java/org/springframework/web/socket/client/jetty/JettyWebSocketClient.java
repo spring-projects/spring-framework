@@ -117,8 +117,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 					}
 					this.client.start();
 				}
-				catch (Exception e) {
-					throw new IllegalStateException("Failed to start Jetty client", e);
+				catch (Exception ex) {
+					throw new IllegalStateException("Failed to start Jetty client", ex);
 				}
 			}
 		}
@@ -134,8 +134,8 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 					}
 					this.client.stop();
 				}
-				catch (Exception e) {
-					logger.error("Error stopping Jetty WebSocketClient", e);
+				catch (Exception ex) {
+					logger.error("Error stopping Jetty WebSocketClient", ex);
 				}
 			}
 		}
