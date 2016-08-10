@@ -82,8 +82,8 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 				this.httpClient.start();
 			}
 		}
-		catch (Exception e) {
-			throw new SockJsException("Failed to start " + this, e);
+		catch (Exception ex) {
+			throw new SockJsException("Failed to start " + this, ex);
 		}
 	}
 
@@ -94,8 +94,8 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 				this.httpClient.stop();
 			}
 		}
-		catch (Exception e) {
-			throw new SockJsException("Failed to stop " + this, e);
+		catch (Exception ex) {
+			throw new SockJsException("Failed to stop " + this, ex);
 		}
 	}
 
@@ -154,6 +154,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			new ResponseEntity<String>(responseHeaders, status));
 	}
 
+
 	private static void addHttpHeaders(Request request, HttpHeaders headers) {
 		for (String name : headers.keySet()) {
 			for (String value : headers.get(name)) {
@@ -194,7 +195,6 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-
 		public SockJsResponseListener(URI url, HttpHeaders headers,	XhrClientSockJsSession sockJsSession,
 				SettableListenableFuture<WebSocketSession> connectFuture) {
 
@@ -203,7 +203,6 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 			this.connectFuture = connectFuture;
 			this.sockJsSession = sockJsSession;
 		}
-
 
 		@Override
 		public void onBegin(Response response) {

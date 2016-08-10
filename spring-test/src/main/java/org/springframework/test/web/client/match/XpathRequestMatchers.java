@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.match;
 
 import java.io.IOException;
@@ -192,8 +193,8 @@ public class XpathRequestMatchers {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				matchInternal(mockRequest);
 			}
-			catch (Exception e) {
-				throw new AssertionError("Failed to parse XML request content: " + e.getMessage());
+			catch (Exception ex) {
+				throw new AssertionError("Failed to parse XML request content: " + ex.getMessage());
 			}
 		}
 

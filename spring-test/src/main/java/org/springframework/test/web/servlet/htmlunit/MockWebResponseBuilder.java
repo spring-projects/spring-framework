@@ -126,7 +126,7 @@ final class MockWebResponseBuilder {
 		result.setExpiryDate(expires);
 		result.setPath(cookie.getPath());
 		result.setSecure(cookie.getSecure());
-		if(cookie.isHttpOnly()) {
+		if (cookie.isHttpOnly()) {
 			result.setAttribute("httponly", "true");
 		}
 		return new com.gargoylesoftware.htmlunit.util.Cookie(result);

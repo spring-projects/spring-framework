@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,13 +98,13 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		super.setDestinationResolver(new BeanFactoryMessageChannelDestinationResolver(beanFactory));
+		setDestinationResolver(new BeanFactoryMessageChannelDestinationResolver(beanFactory));
 	}
 
 
 	@Override
 	protected final void doSend(MessageChannel channel, Message<?> message) {
-		Assert.notNull(channel, "'channel' is required");
+		Assert.notNull(channel, "MessageChannel is required");
 
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
 		if (accessor != null && accessor.isMutable()) {
@@ -116,13 +116,13 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 
 		if (!sent) {
 			throw new MessageDeliveryException(message,
-					"failed to send message to channel '" + channel + "' within timeout: " + timeout);
+					"Failed to send message to channel '" + channel + "' within timeout: " + timeout);
 		}
 	}
 
 	@Override
 	protected final Message<?> doReceive(MessageChannel channel) {
-		Assert.notNull(channel, "'channel' is required");
+		Assert.notNull(channel, "MessageChannel is required");
 		Assert.state(channel instanceof PollableChannel, "A PollableChannel is required to receive messages");
 
 		long timeout = this.receiveTimeout;
@@ -208,7 +208,7 @@ public class GenericMessagingTemplate extends AbstractDestinationResolvingMessag
 					}
 				}
 			}
-			catch (InterruptedException e) {
+			catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
 			return this.replyMessage;

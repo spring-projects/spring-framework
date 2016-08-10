@@ -19,7 +19,6 @@ package org.springframework.test.context.jdbc;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -221,10 +220,10 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			DataSource dataSourceFromTxMgr = getDataSourceFromTransactionManager(transactionManager);
 
 			// Ensure user configured an appropriate DataSource/TransactionManager pair.
-			if ((dataSource != null) && (dataSourceFromTxMgr != null) && !dataSource.equals(dataSourceFromTxMgr)) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "the configured DataSource [%s] (named '%s') is not the one associated "
-						+ "with transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
+			if (dataSource != null && dataSourceFromTxMgr != null && !dataSource.equals(dataSourceFromTxMgr)) {
+				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: " +
+						"the configured DataSource [%s] (named '%s') is not the one associated with " +
+						"transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
 					dsName, transactionManager.getClass().getName(), tmName));
 			}
 
@@ -238,8 +237,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			}
 
 			final DataSource finalDataSource = dataSource;
-			int propagation = newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
-					: TransactionDefinition.PROPAGATION_REQUIRED;
+			int propagation = (newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW :
+					TransactionDefinition.PROPAGATION_REQUIRED);
 
 			TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
 				testContext, new DefaultTransactionAttribute(propagation));
@@ -262,8 +261,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 				return (DataSource) obj;
 			}
 		}
-		catch (Exception e) {
-			/* ignore */
+		catch (Exception ex) {
+			// ignore
 		}
 		return null;
 	}
@@ -303,9 +302,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			return prefixedResourcePath;
 		}
 		else {
-			String msg = String.format("Could not detect default SQL script for test %s [%s]: "
-					+ "%s does not exist. Either declare statements or scripts via @Sql or make the "
-					+ "default SQL script available.", elementType, elementName, classPathResource);
+			String msg = String.format("Could not detect default SQL script for test %s [%s]: " +
+					"%s does not exist. Either declare statements or scripts via @Sql or make the " +
+					"default SQL script available.", elementType, elementName, classPathResource);
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}
