@@ -62,10 +62,22 @@ public class ResourceHandlerRegistry {
 	private int order = Integer.MAX_VALUE -1;
 
 
+	/**
+	 * Create a new resource handler registry for the given application context.
+	 * @param applicationContext the Spring application context
+	 * @param servletContext the corresponding Servlet context
+	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
 		this(applicationContext, servletContext, null);
 	}
 
+	/**
+	 * Create a new resource handler registry for the given application context.
+	 * @param applicationContext the Spring application context
+	 * @param servletContext the corresponding Servlet context
+	 * @param contentNegotiationManager the content negotiation manager to use
+	 * @since 4.3
+	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
 			ContentNegotiationManager contentNegotiationManager) {
 
