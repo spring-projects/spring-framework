@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.context.jdbc;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
-
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -147,17 +146,13 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	/**
 	 * Execute the SQL scripts configured via the supplied {@link Sql @Sql}
 	 * annotation for the given {@link ExecutionPhase} and {@link TestContext}.
-	 *
 	 * <p>Special care must be taken in order to properly support the configured
 	 * {@link SqlConfig#transactionMode}.
-	 *
 	 * @param sql the {@code @Sql} annotation to parse
 	 * @param executionPhase the current execution phase
 	 * @param testContext the current {@code TestContext}
-	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the
-	 * class level
+	 * @param classLevel {@code true} if {@link Sql @Sql} was declared at the class level
 	 */
-	@SuppressWarnings("serial")
 	private void executeSqlScripts(Sql sql, ExecutionPhase executionPhase, TestContext testContext, boolean classLevel)
 			throws Exception {
 		if (executionPhase != sql.executionPhase()) {
@@ -222,10 +217,10 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			DataSource dataSourceFromTxMgr = getDataSourceFromTransactionManager(transactionManager);
 
 			// Ensure user configured an appropriate DataSource/TransactionManager pair.
-			if ((dataSource != null) && (dataSourceFromTxMgr != null) && !dataSource.equals(dataSourceFromTxMgr)) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "the configured DataSource [%s] (named '%s') is not the one associated "
-						+ "with transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
+			if (dataSource != null && dataSourceFromTxMgr != null && !dataSource.equals(dataSourceFromTxMgr)) {
+				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: " +
+						"the configured DataSource [%s] (named '%s') is not the one associated with " +
+						"transaction manager [%s] (named '%s').", testContext, dataSource.getClass().getName(),
 					dsName, transactionManager.getClass().getName(), tmName));
 			}
 
@@ -239,8 +234,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			}
 
 			final DataSource finalDataSource = dataSource;
-			int propagation = newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW
-					: TransactionDefinition.PROPAGATION_REQUIRED;
+			int propagation = (newTxRequired ? TransactionDefinition.PROPAGATION_REQUIRES_NEW :
+					TransactionDefinition.PROPAGATION_REQUIRED);
 
 			TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
 				testContext, new DefaultTransactionAttribute(propagation));
@@ -263,8 +258,8 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 				return (DataSource) obj;
 			}
 		}
-		catch (Exception e) {
-			/* ignore */
+		catch (Exception ex) {
+			// ignore
 		}
 		return null;
 	}
@@ -304,9 +299,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			return prefixedResourcePath;
 		}
 		else {
-			String msg = String.format("Could not detect default SQL script for test %s [%s]: "
-					+ "%s does not exist. Either declare statements or scripts via @Sql or make the "
-					+ "default SQL script available.", elementType, elementName, classPathResource);
+			String msg = String.format("Could not detect default SQL script for test %s [%s]: " +
+					"%s does not exist. Either declare statements or scripts via @Sql or make the " +
+					"default SQL script available.", elementType, elementName, classPathResource);
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,18 +52,12 @@ abstract class ActiveProfilesUtils {
 	private static final Log logger = LogFactory.getLog(ActiveProfilesUtils.class);
 
 
-	private ActiveProfilesUtils() {
-		/* no-op */
-	}
-
 	/**
 	 * Resolve <em>active bean definition profiles</em> for the supplied {@link Class}.
-	 *
 	 * <p>Note that the {@link ActiveProfiles#inheritProfiles inheritProfiles} flag of
 	 * {@link ActiveProfiles @ActiveProfiles} will be taken into consideration.
 	 * Specifically, if the {@code inheritProfiles} flag is set to {@code true}, profiles
 	 * defined in the test class will be merged with those defined in superclasses.
-	 *
 	 * @param testClass the class for which to resolve the active profiles (must not be
 	 * {@code null})
 	 * @return the set of active profiles for the specified class, including active
@@ -78,12 +72,12 @@ abstract class ActiveProfilesUtils {
 		final List<String[]> profileArrays = new ArrayList<String[]>();
 
 		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
-		AnnotationDescriptor<ActiveProfiles> descriptor = MetaAnnotationUtils.findAnnotationDescriptor(testClass,
-			annotationType);
+		AnnotationDescriptor<ActiveProfiles> descriptor =
+				MetaAnnotationUtils.findAnnotationDescriptor(testClass, annotationType);
 		if (descriptor == null && logger.isDebugEnabled()) {
 			logger.debug(String.format(
-				"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-				annotationType.getName(), testClass.getName()));
+					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
+					annotationType.getName(), testClass.getName()));
 		}
 
 		while (descriptor != null) {
@@ -92,8 +86,8 @@ abstract class ActiveProfilesUtils {
 			ActiveProfiles annotation = descriptor.synthesizeAnnotation();
 
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
-					declaringClass.getName()));
+				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s]",
+						annotation, declaringClass.getName()));
 			}
 
 			Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
@@ -101,22 +95,22 @@ abstract class ActiveProfilesUtils {
 				resolverClass = DefaultActiveProfilesResolver.class;
 			}
 
-			ActiveProfilesResolver resolver = null;
+			ActiveProfilesResolver resolver;
 			try {
 				resolver = BeanUtils.instantiateClass(resolverClass, ActiveProfilesResolver.class);
 			}
-			catch (Exception e) {
-				String msg = String.format("Could not instantiate ActiveProfilesResolver of "
-						+ "type [%s] for test class [%s].", resolverClass.getName(), rootDeclaringClass.getName());
+			catch (Exception ex) {
+				String msg = String.format("Could not instantiate ActiveProfilesResolver of type [%s] " +
+						"for test class [%s]", resolverClass.getName(), rootDeclaringClass.getName());
 				logger.error(msg);
-				throw new IllegalStateException(msg, e);
+				throw new IllegalStateException(msg, ex);
 			}
 
 			String[] profiles = resolver.resolve(rootDeclaringClass);
 			if (profiles == null) {
 				String msg = String.format(
-					"ActiveProfilesResolver [%s] returned a null array of bean definition profiles.",
-					resolverClass.getName());
+						"ActiveProfilesResolver [%s] returned a null array of bean definition profiles",
+						resolverClass.getName());
 				logger.error(msg);
 				throw new IllegalStateException(msg);
 			}
@@ -124,7 +118,7 @@ abstract class ActiveProfilesUtils {
 			profileArrays.add(profiles);
 
 			descriptor = (annotation.inheritProfiles() ? MetaAnnotationUtils.findAnnotationDescriptor(
-				rootDeclaringClass.getSuperclass(), annotationType) : null);
+					rootDeclaringClass.getSuperclass(), annotationType) : null);
 		}
 
 		// Reverse the list so that we can traverse "down" the hierarchy.

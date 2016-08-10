@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,13 +76,10 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  */
 public abstract class CacheAspectSupport extends AbstractCacheInvoker
-		implements InitializingBean, SmartInitializingSingleton, ApplicationContextAware {
+		implements ApplicationContextAware, InitializingBean, SmartInitializingSingleton {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Cache of CacheOperationMetadata, keyed by {@link CacheOperationCacheKey}.
-	 */
 	private final Map<CacheOperationCacheKey, CacheOperationMetadata> metadataCache =
 			new ConcurrentHashMap<CacheOperationCacheKey, CacheOperationMetadata>(1024);
 
@@ -273,7 +270,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * Return a bean with the specified name and type. Used to resolve services that
 	 * are referenced by name in a {@link CacheOperation}.
 	 * @param beanName the name of the bean, as defined by the operation
-	 * @param expectedType type type for the bean
+	 * @param expectedType type for the bean
 	 * @return the bean matching that name
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if such bean does not exist
 	 * @see CacheOperation#keyGenerator
@@ -293,8 +290,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
-		// check whether aspect is enabled
-		// to cope with cases where the AJ is pulled in automatically
+		// Check whether aspect is enabled (to cope with cases where the AJ is pulled in automatically)
 		if (this.initialized) {
 			Class<?> targetClass = getTargetClass(target);
 			Collection<CacheOperation> operations = getCacheOperationSource().getCacheOperations(method, targetClass);
@@ -377,7 +373,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					excluded.add(context);
 				}
 			}
-			catch (VariableNotAvailableException e) {
+			catch (VariableNotAvailableException ex) {
 				// Ignoring failure due to missing result, consider the cache put has to proceed
 			}
 		}

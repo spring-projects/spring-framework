@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * @since 4.2
  * @see org.springframework.aop.support.AopUtils
  * @see org.springframework.aop.framework.AopProxyUtils
+ * @see ReflectionTestUtils
  */
 public class AopTestUtils {
 
@@ -41,7 +42,6 @@ public class AopTestUtils {
 	 * {@linkplain AopUtils#isAopProxy proxy}, the target of the proxy will
 	 * be returned; otherwise, the {@code candidate} will be returned
 	 * <em>as is</em>.
-	 *
 	 * @param candidate the instance to check (potentially a Spring AOP proxy);
 	 * never {@code null}
 	 * @return the target object or the {@code candidate}; never {@code null}
@@ -57,8 +57,8 @@ public class AopTestUtils {
 				return (T) ((Advised) candidate).getTargetSource().getTarget();
 			}
 		}
-		catch (Exception e) {
-			throw new IllegalStateException("Failed to unwrap proxied object.", e);
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
 		}
 		return (T) candidate;
 	}
@@ -71,7 +71,6 @@ public class AopTestUtils {
 	 * {@linkplain AopUtils#isAopProxy proxy}, the ultimate target of all
 	 * nested proxies will be returned; otherwise, the {@code candidate}
 	 * will be returned <em>as is</em>.
-	 *
 	 * @param candidate the instance to check (potentially a Spring AOP proxy);
 	 * never {@code null}
 	 * @return the ultimate target object or the {@code candidate}; never
@@ -88,8 +87,8 @@ public class AopTestUtils {
 				return (T) getUltimateTargetObject(((Advised) candidate).getTargetSource().getTarget());
 			}
 		}
-		catch (Exception e) {
-			throw new IllegalStateException("Failed to unwrap proxied object.", e);
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
 		}
 		return (T) candidate;
 	}

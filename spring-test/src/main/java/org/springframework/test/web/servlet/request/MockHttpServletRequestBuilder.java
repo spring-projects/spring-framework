@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,8 +133,8 @@ public class MockHttpServletRequestBuilder
 	 * @since 4.0.3
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
-		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(url, "url is required");
+		Assert.notNull(httpMethod, "'httpMethod' is required");
+		Assert.notNull(url, "'url' is required");
 		this.method = httpMethod;
 		this.url = url;
 	}
@@ -224,7 +224,7 @@ public class MockHttpServletRequestBuilder
 	 * @param mediaTypes one or more media types
 	 */
 	public MockHttpServletRequestBuilder accept(MediaType... mediaTypes) {
-		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
+		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
 		this.headers.set("Accept", MediaType.toString(Arrays.asList(mediaTypes)));
 		return this;
 	}
@@ -234,7 +234,7 @@ public class MockHttpServletRequestBuilder
 	 * @param mediaTypes one or more media types
 	 */
 	public MockHttpServletRequestBuilder accept(String... mediaTypes) {
-		Assert.notEmpty(mediaTypes, "No 'Accept' media types");
+		Assert.notEmpty(mediaTypes, "'mediaTypes' must not be empty");
 		List<MediaType> result = new ArrayList<MediaType>(mediaTypes.length);
 		for (String mediaType : mediaTypes) {
 			result.add(MediaType.parseMediaType(mediaType));
@@ -260,7 +260,7 @@ public class MockHttpServletRequestBuilder
 		try {
 			this.content = content.getBytes("UTF-8");
 		}
-		catch (UnsupportedEncodingException e) {
+		catch (UnsupportedEncodingException ex) {
 			// should never happen
 		}
 		return this;
@@ -271,7 +271,6 @@ public class MockHttpServletRequestBuilder
 	 * @param cookies the cookies to add
 	 */
 	public MockHttpServletRequestBuilder cookie(Cookie... cookies) {
-		Assert.notNull(cookies, "'cookies' must not be null");
 		Assert.notEmpty(cookies, "'cookies' must not be empty");
 		this.cookies.addAll(Arrays.asList(cookies));
 		return this;
@@ -320,7 +319,7 @@ public class MockHttpServletRequestBuilder
 	 * @param sessionAttributes the session attributes
 	 */
 	public MockHttpServletRequestBuilder sessionAttrs(Map<String, Object> sessionAttributes) {
-		Assert.notEmpty(sessionAttributes, "'sessionAttrs' must not be empty");
+		Assert.notEmpty(sessionAttributes, "'sessionAttributes' must not be empty");
 		for (String name : sessionAttributes.keySet()) {
 			sessionAttr(name, sessionAttributes.get(name));
 		}
@@ -342,7 +341,7 @@ public class MockHttpServletRequestBuilder
 	 * @param flashAttributes the flash attributes
 	 */
 	public MockHttpServletRequestBuilder flashAttrs(Map<String, Object> flashAttributes) {
-		Assert.notEmpty(flashAttributes, "'flashAttrs' must not be empty");
+		Assert.notEmpty(flashAttributes, "'flashAttributes' must not be empty");
 		for (String name : flashAttributes.keySet()) {
 			flashAttr(name, flashAttributes.get(name));
 		}

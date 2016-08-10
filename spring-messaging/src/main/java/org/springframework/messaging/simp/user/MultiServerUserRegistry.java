@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,10 +61,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	 */
 	public MultiServerUserRegistry(SimpUserRegistry localRegistry) {
 		Assert.notNull(localRegistry, "'localRegistry' is required.");
+		this.id = generateId();
 		this.localRegistry = localRegistry;
 		this.listener = (this.localRegistry instanceof SmartApplicationListener ?
 				(SmartApplicationListener) this.localRegistry : new NoOpSmartApplicationListener());
-		this.id = generateId();
 	}
 
 
@@ -73,7 +73,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		try {
 			host = InetAddress.getLocalHost().getHostAddress();
 		}
-		catch (UnknownHostException e) {
+		catch (UnknownHostException ex) {
 			host = "unknown";
 		}
 		return host + "-" + UUID.randomUUID();
@@ -160,11 +160,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 	@Override
 	public String toString() {
-		return "local=[" + this.localRegistry +	"], remote=" + this.remoteRegistries + "]";
+		return "local=[" + this.localRegistry +	"], remote=" + this.remoteRegistries;
 	}
 
 
-	@SuppressWarnings("unused")
 	private static class UserRegistryDto {
 
 		private String id;
@@ -173,6 +172,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private long expirationTime;
 
+		/**
+		 * Default constructor for JSON deserialization.
+		 */
+		@SuppressWarnings("unused")
 		public UserRegistryDto() {
 		}
 
@@ -235,13 +238,16 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	}
 
 
-	@SuppressWarnings("unused")
 	private static class SimpUserDto implements SimpUser {
 
 		private String name;
 
 		private Set<SimpSessionDto> sessions;
 
+		/**
+		 * Default constructor for JSON deserialization.
+		 */
+		@SuppressWarnings("unused")
 		public SimpUserDto() {
 			this.sessions = new HashSet<SimpSessionDto>(1);
 		}
@@ -312,7 +318,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	}
 
 
-	@SuppressWarnings("unused")
 	private static class SimpSessionDto implements SimpSession {
 
 		private String id;
@@ -321,6 +326,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private final Set<SimpSubscriptionDto> subscriptions;
 
+		/**
+		 * Default constructor for JSON deserialization.
+		 */
+		@SuppressWarnings("unused")
 		public SimpSessionDto() {
 			this.subscriptions = new HashSet<SimpSubscriptionDto>(4);
 		}
@@ -384,7 +393,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	}
 
 
-	@SuppressWarnings("unused")
 	private static class SimpSubscriptionDto implements SimpSubscription {
 
 		private String id;
@@ -393,6 +401,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private String destination;
 
+		/**
+		 * Default constructor for JSON deserialization.
+		 */
+		@SuppressWarnings("unused")
 		public SimpSubscriptionDto() {
 		}
 
