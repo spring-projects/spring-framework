@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -366,17 +366,17 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 		@Override
 		public <T> T createBean(Class<T> beanClass) {
-			return BeanUtils.instantiate(beanClass);
+			return BeanUtils.instantiateClass(beanClass);
 		}
 
 		@Override
 		public Object createBean(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
-			return BeanUtils.instantiate(beanClass);
+			return BeanUtils.instantiateClass(beanClass);
 		}
 
 		@Override
 		public Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
-			return BeanUtils.instantiate(beanClass);
+			return BeanUtils.instantiateClass(beanClass);
 		}
 
 		@Override
@@ -393,12 +393,12 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String beanName) {
+		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
 				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}

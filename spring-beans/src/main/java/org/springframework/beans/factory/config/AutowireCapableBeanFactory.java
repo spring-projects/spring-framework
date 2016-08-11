@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Set;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 
 /**
  * Extension of the {@link org.springframework.beans.factory.BeanFactory}
@@ -114,9 +116,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * <p>Performs full initialization of the bean, including all applicable
 	 * {@link BeanPostProcessor BeanPostProcessors}.
 	 * <p>Note: This is intended for creating a fresh instance, populating annotated
-	 * fields and methods as well as applying all standard bean initialiation callbacks.
+	 * fields and methods as well as applying all standard bean initialization callbacks.
 	 * It does <i>not</> imply traditional by-name or by-type autowiring of properties;
-	 * use {@link #createBean(Class, int, boolean)} for that purposes.
+	 * use {@link #createBean(Class, int, boolean)} for those purposes.
 	 * @param beanClass the class of the bean to create
 	 * @return the new bean instance
 	 * @throws BeansException if instantiation or wiring failed
@@ -129,7 +131,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * <p>Note: This is essentially intended for (re-)populating annotated fields and
 	 * methods, either for new instances or for deserialized instances. It does
 	 * <i>not</i> imply traditional by-name or by-type autowiring of properties;
-	 * use {@link #autowireBeanProperties} for that purposes.
+	 * use {@link #autowireBeanProperties} for those purposes.
 	 * @param existingBean the existing bean instance
 	 * @throws BeansException if wiring failed
 	 */
@@ -153,15 +155,6 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #initializeBean
 	 */
 	Object configureBean(Object existingBean, String beanName) throws BeansException;
-
-	/**
-	 * Resolve the specified dependency against the beans defined in this factory.
-	 * @param descriptor the descriptor for the dependency
-	 * @param beanName the name of the bean which declares the present dependency
-	 * @return the resolved object, or {@code null} if none found
-	 * @throws BeansException in dependency resolution failed
-	 */
-	Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException;
 
 
 	//-------------------------------------------------------------------------
@@ -312,18 +305,39 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 */
 	void destroyBean(Object existingBean);
 
+
+	//-------------------------------------------------------------------------
+	// Delegate methods for resolving injection points
+	//-------------------------------------------------------------------------
+
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.
-	 * @param descriptor the descriptor for the dependency
-	 * @param beanName the name of the bean which declares the present dependency
-	 * @param autowiredBeanNames a Set that all names of autowired beans (used for
-	 * resolving the present dependency) are supposed to be added to
-	 * @param typeConverter the TypeConverter to use for populating arrays and
-	 * collections
+	 * @param descriptor the descriptor for the dependency (field/method/constructor)
+	 * @param requestingBeanName the name of the bean which declares the given dependency
 	 * @return the resolved object, or {@code null} if none found
-	 * @throws BeansException in dependency resolution failed
+	 * @throws NoSuchBeanDefinitionException if no matching bean was found
+	 * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
+	 * @throws BeansException if dependency resolution failed for any other reason
+	 * @since 2.5
+	 * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)
 	 */
-	Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+	Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) throws BeansException;
+
+	/**
+	 * Resolve the specified dependency against the beans defined in this factory.
+	 * @param descriptor the descriptor for the dependency (field/method/constructor)
+	 * @param requestingBeanName the name of the bean which declares the given dependency
+	 * @param autowiredBeanNames a Set that all names of autowired beans (used for
+	 * resolving the given dependency) are supposed to be added to
+	 * @param typeConverter the TypeConverter to use for populating arrays and collections
+	 * @return the resolved object, or {@code null} if none found
+	 * @throws NoSuchBeanDefinitionException if no matching bean was found
+	 * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
+	 * @throws BeansException if dependency resolution failed for any other reason
+	 * @since 2.5
+	 * @see DependencyDescriptor
+	 */
+	Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException;
 
 }
