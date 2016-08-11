@@ -979,6 +979,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType, Object... args) throws BeansException {
 		Assert.notNull(requiredType, "Required type must not be null");
 		String[] beanNames = getBeanNamesForType(requiredType);
+
 		if (beanNames.length > 1) {
 			ArrayList<String> autowireCandidates = new ArrayList<>();
 			for (String beanName : beanNames) {
@@ -990,6 +991,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				beanNames = autowireCandidates.toArray(new String[autowireCandidates.size()]);
 			}
 		}
+
 		if (beanNames.length == 1) {
 			String beanName = beanNames[0];
 			return new NamedBeanHolder<>(beanName, getBean(beanName, requiredType, args));
@@ -1009,6 +1011,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
 		}
+
 		return null;
 	}
 
