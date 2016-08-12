@@ -74,7 +74,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		try {
 			host = InetAddress.getLocalHost().getHostAddress();
 		}
-		catch (UnknownHostException e) {
+		catch (UnknownHostException ex) {
 			host = "unknown";
 		}
 		return host + "-" + UUID.randomUUID();
@@ -86,6 +86,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		return (this.delegateApplicationEvents ?
 				((SmartApplicationListener) this.localRegistry).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}
+
 
 	// SmartApplicationListener methods
 
@@ -107,6 +108,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			((SmartApplicationListener) this.localRegistry).onApplicationEvent(event);
 		}
 	}
+
 
 	// SimpUserRegistry methods
 
@@ -143,6 +145,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		return result;
 	}
 
+
 	// Internal methods for UserRegistryMessageHandler to manage broadcasts
 
 	Object getLocalRegistryDto() {
@@ -171,7 +174,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 	@Override
 	public String toString() {
-		return "local=[" + this.localRegistry +	"], remote=" + this.remoteRegistries + "]";
+		return "local=[" + this.localRegistry +	"], remote=" + this.remoteRegistries;
 	}
 
 
@@ -179,7 +182,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	 * Holds a copy of a SimpUserRegistry for the purpose of broadcasting to and
 	 * receiving broadcasts from other application servers.
 	 */
-	@SuppressWarnings("unused")
 	private static class UserRegistrySnapshot {
 
 		private String id;
@@ -188,10 +190,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private long expirationTime;
 
-
 		/**
 		 * Default constructor for JSON deserialization.
 		 */
+		@SuppressWarnings("unused")
 		public UserRegistrySnapshot() {
 		}
 
@@ -206,7 +208,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 				this.users.put(user.getName(), new TransferSimpUser(user));
 			}
 		}
-
 
 		public void setId(String id) {
 			this.id = id;
@@ -228,14 +229,12 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			return (now > this.expirationTime);
 		}
 
-
 		public void init(long expirationPeriod, SessionLookup sessionLookup) {
 			this.expirationTime = System.currentTimeMillis() + expirationPeriod;
 			for (TransferSimpUser user : this.users.values()) {
 				user.afterDeserialization(sessionLookup);
 			}
 		}
-
 
 		public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) {
 			Set<SimpSubscription> result = new HashSet<>();
@@ -251,19 +250,16 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			return result;
 		}
 
-
 		@Override
 		public String toString() {
 			return "id=" + this.id + ", users=" + this.users;
 		}
-
 	}
 
 
 	/**
 	 * SimpUser that can be (de)serialized and broadcast to other servers.
 	 */
-	@SuppressWarnings("unused")
 	private static class TransferSimpUser implements SimpUser {
 
 		private String name;
@@ -274,10 +270,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		/* Cross-server session lookup (e.g. user connected to multiple servers) */
 		private SessionLookup sessionLookup;
 
-
 		/**
 		 * Default constructor for JSON deserialization.
 		 */
+		@SuppressWarnings("unused")
 		public TransferSimpUser() {
 			this.sessions = new HashSet<>(1);
 		}
@@ -293,7 +289,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 				this.sessions.add(new TransferSimpSession(session));
 			}
 		}
-
 
 		public void setName(String name) {
 			this.name = name;
@@ -369,10 +364,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 	}
 
+
 	/**
 	 * SimpSession that can be (de)serialized and broadcast to other servers.
 	 */
-	@SuppressWarnings("unused")
 	private static class TransferSimpSession implements SimpSession {
 
 		private String id;
@@ -381,10 +376,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private final Set<TransferSimpSubscription> subscriptions;
 
-
 		/**
 		 * Default constructor for JSON deserialization.
 		 */
+		@SuppressWarnings("unused")
 		public TransferSimpSession() {
 			this.subscriptions = new HashSet<>(4);
 		}
@@ -450,10 +445,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 	}
 
+
 	/**
 	 * SimpSubscription that can be (de)serialized and broadcast to other servers.
 	 */
-	@SuppressWarnings("unused")
 	private static class TransferSimpSubscription implements SimpSubscription {
 
 		private String id;
@@ -462,10 +457,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private String destination;
 
-
 		/**
 		 * Default constructor for JSON deserialization.
 		 */
+		@SuppressWarnings("unused")
 		public TransferSimpSubscription() {
 		}
 
@@ -476,7 +471,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			this.id = subscription.getId();
 			this.destination = subscription.getDestination();
 		}
-
 
 		public void setId(String id) {
 			this.id = id;

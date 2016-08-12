@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import rx.Completable;
 import rx.Observable;
 import rx.Single;
 
@@ -45,7 +46,7 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.server.reactive.ZeroCopyIntegrationTests;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -235,6 +236,24 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@Test
+	public void personCreateWithMono() throws Exception {
+		ResponseEntity<Void> entity = performPost(
+				"/person-create/mono", JSON, new Person("Robert"), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(1, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
+	public void personCreateWithSingle() throws Exception {
+		ResponseEntity<Void> entity = performPost(
+				"/person-create/single", JSON, new Person("Robert"), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(1, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
 	public void personCreateWithFluxJson() throws Exception {
 		ResponseEntity<Void> entity = performPost("/person-create/flux", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
@@ -286,7 +305,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		@GetMapping("/publisher")
 		public Publisher<ByteBuffer> getPublisher() {
 			DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
+			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 			return encoder.encode(Mono.just(new Person("Robert")), dataBufferFactory,
 					ResolvableType.forClass(Person.class), JSON).map(DataBuffer::asByteBuffer);
 		}
@@ -416,18 +435,28 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		final List<Person> persons = new ArrayList<>();
 
 		@PostMapping("/publisher")
-		public Publisher<Void> createWithPublisher(@RequestBody Publisher<Person> personStream) {
-			return Flux.from(personStream).doOnNext(persons::add).then();
+		public Publisher<Void> createWithPublisher(@RequestBody Publisher<Person> publisher) {
+			return Flux.from(publisher).doOnNext(persons::add).then();
+		}
+
+		@PostMapping("/mono")
+		public Mono<Void> createWithMono(@RequestBody Mono<Person> mono) {
+			return mono.doOnNext(persons::add).then();
+		}
+
+		@PostMapping("/single")
+		public Completable createWithSingle(@RequestBody Single<Person> single) {
+			return single.map(persons::add).toCompletable();
 		}
 
 		@PostMapping("/flux")
-		public Mono<Void> createWithFlux(@RequestBody Flux<Person> personStream) {
-			return personStream.doOnNext(persons::add).then();
+		public Mono<Void> createWithFlux(@RequestBody Flux<Person> flux) {
+			return flux.doOnNext(persons::add).then();
 		}
 
 		@PostMapping("/observable")
-		public Observable<Void> createWithObservable(@RequestBody Observable<Person> personStream) {
-			return personStream.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
+		public Observable<Void> createWithObservable(@RequestBody Observable<Person> observable) {
+			return observable.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
 		}
 	}
 

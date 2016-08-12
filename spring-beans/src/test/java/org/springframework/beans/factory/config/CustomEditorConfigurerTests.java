@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 31.07.2004
  */
-public final class CustomEditorConfigurerTests {
+public class CustomEditorConfigurerTests {
 
 	@Test
 	public void testCustomEditorConfigurerWithPropertyEditorRegistrar() throws ParseException {

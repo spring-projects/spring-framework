@@ -24,7 +24,7 @@ package org.springframework.beans.factory;
  *
  * <p><b>NB: A bean that implements this interface cannot be used as a
  * normal bean.</b> A FactoryBean is defined in a bean style, but the
- * object exposed for bean references ({@link #getObject()} is always
+ * object exposed for bean references ({@link #getObject()}) is always
  * the object that it creates.
  *
  * <p>FactoryBeans can support singletons and prototypes, and can

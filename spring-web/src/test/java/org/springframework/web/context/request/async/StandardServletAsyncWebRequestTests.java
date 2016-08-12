@@ -128,7 +128,7 @@ public class StandardServletAsyncWebRequestTests {
 		verify(timeoutHandler).run();
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void setTimeoutDuringConcurrentHandling() {
 		this.asyncRequest.startAsync();
 		this.asyncRequest.setTimeout(25L);

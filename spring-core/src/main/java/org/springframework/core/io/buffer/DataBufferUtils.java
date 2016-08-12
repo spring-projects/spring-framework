@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core.io.buffer.support;
+package org.springframework.core.io.buffer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,9 +29,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.SynchronousSink;
 
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.util.Assert;
 
 /**i
@@ -48,12 +45,13 @@ public abstract class DataBufferUtils {
 				channel.close();
 			}
 		}
-		catch (IOException ignored) {
+		catch (IOException ex) {
 		}
 	};
 
+
 	/**
-	 * Reads the given {@code InputStream} into a {@code Flux} of
+	 * Read the given {@code InputStream} into a {@code Flux} of
 	 * {@code DataBuffer}s. Closes the input stream when the flux is terminated.
 	 * @param inputStream the input stream to read from
 	 * @param dataBufferFactory the factory to create data buffers with
@@ -62,15 +60,16 @@ public abstract class DataBufferUtils {
 	 */
 	public static Flux<DataBuffer> read(InputStream inputStream,
 			DataBufferFactory dataBufferFactory, int bufferSize) {
-		Assert.notNull(inputStream, "'inputStream' must not be null");
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+
+		Assert.notNull(inputStream, "InputStream must not be null");
+		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 
 		ReadableByteChannel channel = Channels.newChannel(inputStream);
 		return read(channel, dataBufferFactory, bufferSize);
 	}
 
 	/**
-	 * Reads the given {@code ReadableByteChannel} into a {@code Flux} of
+	 * Read the given {@code ReadableByteChannel} into a {@code Flux} of
 	 * {@code DataBuffer}s. Closes the channel when the flux is terminated.
 	 * @param channel the channel to read from
 	 * @param dataBufferFactory the factory to create data buffers with
@@ -79,8 +78,9 @@ public abstract class DataBufferUtils {
 	 */
 	public static Flux<DataBuffer> read(ReadableByteChannel channel,
 			DataBufferFactory dataBufferFactory, int bufferSize) {
-		Assert.notNull(channel, "'channel' must not be null");
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+
+		Assert.notNull(channel, "ReadableByteChannel must not be null");
+		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 
 		return Flux.generate(() -> channel,
 				new ReadableByteChannelGenerator(dataBufferFactory, bufferSize),
@@ -88,18 +88,16 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Relays buffers from the given {@link Publisher} until the total
-	 * {@linkplain DataBuffer#readableByteCount() byte count} reaches the given
-	 * maximum byte count, or until the publisher is complete.
+	 * Relay buffers from the given {@link Publisher} until the total
+	 * {@linkplain DataBuffer#readableByteCount() byte count} reaches
+	 * the given maximum byte count, or until the publisher is complete.
 	 * @param publisher the publisher to filter
 	 * @param maxByteCount the maximum byte count
 	 * @return a flux whose maximum byte count is {@code maxByteCount}
 	 */
-	public static Flux<DataBuffer> takeUntilByteCount(Publisher<DataBuffer> publisher,
-			long maxByteCount) {
-		Assert.notNull(publisher, "'publisher' must not be null");
+	public static Flux<DataBuffer> takeUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
+		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
-
 		AtomicLong byteCountDown = new AtomicLong(maxByteCount);
 
 		return Flux.from(publisher).
@@ -122,7 +120,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Retains the given data buffer, it it is a {@link PooledDataBuffer}.
+	 * Retain the given data buffer, it it is a {@link PooledDataBuffer}.
 	 * @param dataBuffer the data buffer to retain
 	 * @return the retained buffer
 	 */
@@ -137,7 +135,7 @@ public abstract class DataBufferUtils {
 	}
 
 	/**
-	 * Releases the given data buffer, if it is a {@link PooledDataBuffer}.
+	 * Release the given data buffer, if it is a {@link PooledDataBuffer}.
 	 * @param dataBuffer the data buffer to release
 	 * @return {@code true} if the buffer was released; {@code false} otherwise.
 	 */
@@ -148,23 +146,21 @@ public abstract class DataBufferUtils {
 		return false;
 	}
 
+
 	private static class ReadableByteChannelGenerator
-			implements BiFunction<ReadableByteChannel, SynchronousSink<DataBuffer>,
-						ReadableByteChannel> {
+			implements BiFunction<ReadableByteChannel, SynchronousSink<DataBuffer>, ReadableByteChannel> {
 
 		private final DataBufferFactory dataBufferFactory;
 
 		private final int chunkSize;
 
-		public ReadableByteChannelGenerator(DataBufferFactory dataBufferFactory,
-				int chunkSize) {
+		public ReadableByteChannelGenerator(DataBufferFactory dataBufferFactory, int chunkSize) {
 			this.dataBufferFactory = dataBufferFactory;
 			this.chunkSize = chunkSize;
 		}
 
 		@Override
-		public ReadableByteChannel apply(ReadableByteChannel
-				channel, SynchronousSink<DataBuffer>	sub) {
+		public ReadableByteChannel apply(ReadableByteChannel channel, SynchronousSink<DataBuffer> sub) {
 			try {
 				ByteBuffer byteBuffer = ByteBuffer.allocate(chunkSize);
 				int read;
@@ -188,7 +184,7 @@ public abstract class DataBufferUtils {
 				}
 			}
 			catch (IOException ex) {
-				sub.fail(ex);
+				sub.error(ex);
 			}
 			return channel;
 		}

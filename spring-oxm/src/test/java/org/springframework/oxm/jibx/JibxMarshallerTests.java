@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,17 @@
 
 package org.springframework.oxm.jibx;
 
+import java.io.StringWriter;
+import javax.xml.transform.stream.StreamResult;
+
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.springframework.oxm.AbstractMarshallerTests;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import static org.junit.Assert.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does not occur by
@@ -41,8 +39,10 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 
 	@BeforeClass
 	public static void compilerAssumptions() {
-		Assume.group(TestGroup.CUSTOM_COMPILATION);
+		// JiBX compiler is currently not compatible with JDK 9
+		Assume.assumeTrue(System.getProperty("java.version").startsWith("1.8."));
 	}
+
 
 	@Override
 	protected JibxMarshaller createMarshaller() throws Exception {
@@ -60,6 +60,7 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		flights.addFlight(flight);
 		return flights;
 	}
+
 
 	@Test(expected = IllegalArgumentException.class)
 	public void afterPropertiesSetNoContextPath() throws Exception {

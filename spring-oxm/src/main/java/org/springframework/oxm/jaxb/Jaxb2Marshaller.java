@@ -941,7 +941,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			try {
 				contentId = URLEncoder.encode(contentId, "UTF-8");
 			}
-			catch (UnsupportedEncodingException e) {
+			catch (UnsupportedEncodingException ex) {
 				// ignore
 			}
 			return CID + contentId;
@@ -952,7 +952,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				URI uri = new URI(elementNamespace);
 				return uri.getHost();
 			}
-			catch (URISyntaxException e) {
+			catch (URISyntaxException ex) {
 				// ignore
 			}
 			return dataHandler.getName();
@@ -998,7 +998,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				try {
 					contentId = URLDecoder.decode(contentId, "UTF-8");
 				}
-				catch (UnsupportedEncodingException e) {
+				catch (UnsupportedEncodingException ex) {
 					// ignore
 				}
 				contentId = '<' + contentId + '>';

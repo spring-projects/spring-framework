@@ -50,9 +50,9 @@ import org.springframework.util.xml.StaxUtils;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0
- * @see Jaxb2Encoder
+ * @see Jaxb2XmlEncoder
  */
-public class Jaxb2Decoder extends AbstractDecoder<Object> {
+public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	/**
 	 * The default value for JAXB annotations.
@@ -61,14 +61,15 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 	 * @see XmlType#name()
 	 * @see XmlType#namespace()
 	 */
-	private final static String JAXB_DEFAULT_ANNOTATION_VALUE = "##default";
+	private static final String JAXB_DEFAULT_ANNOTATION_VALUE = "##default";
+
 
 	private final XmlEventDecoder xmlEventDecoder = new XmlEventDecoder();
 
 	private final JaxbContextContainer jaxbContexts = new JaxbContextContainer();
 
 
-	public Jaxb2Decoder() {
+	public Jaxb2XmlDecoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
 

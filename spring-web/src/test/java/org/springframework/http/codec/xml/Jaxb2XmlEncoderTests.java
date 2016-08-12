@@ -18,36 +18,29 @@ package org.springframework.http.codec.xml;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
+import org.springframework.tests.TestSubscriber;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
+import static org.junit.Assert.*;
+import static org.xmlunit.matchers.CompareMatcher.*;
 
 /**
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  */
-public class Jaxb2EncoderTests extends AbstractDataBufferAllocatingTestCase {
+public class Jaxb2XmlEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
-	private Jaxb2Encoder encoder;
+	private final Jaxb2XmlEncoder encoder = new Jaxb2XmlEncoder();
 
-	@Before
-	public void createEncoder() {
-		this.encoder = new Jaxb2Encoder();
-	}
 
 	@Test
 	public void canEncode() {
@@ -59,7 +52,7 @@ public class Jaxb2EncoderTests extends AbstractDataBufferAllocatingTestCase {
 				MediaType.APPLICATION_JSON));
 
 		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(Jaxb2DecoderTests.TypePojo.class),
+				ResolvableType.forClass(Jaxb2XmlDecoderTests.TypePojo.class),
 				MediaType.APPLICATION_XML));
 
 		assertFalse(this.encoder.canEncode(ResolvableType.forClass(getClass()),

@@ -58,7 +58,7 @@ public abstract class BeanUtils {
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
 
 	private static final Set<Class<?>> unknownEditorTypes =
-			Collections.newSetFromMap(new ConcurrentReferenceHashMap<Class<?>, Boolean>(64));
+			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
 
 	/**

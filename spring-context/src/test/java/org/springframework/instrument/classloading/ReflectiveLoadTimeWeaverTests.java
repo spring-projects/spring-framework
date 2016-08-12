@@ -29,14 +29,14 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class ReflectiveLoadTimeWeaverTests {
+public class ReflectiveLoadTimeWeaverTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorWithNullClassLoader() {
 		new ReflectiveLoadTimeWeaver(null);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testCtorWithClassLoaderThatDoesNotExposeAnAddTransformerMethod() {
 		new ReflectiveLoadTimeWeaver(getClass().getClassLoader());
 	}
@@ -54,7 +54,7 @@ public final class ReflectiveLoadTimeWeaverTests {
 		assertEquals(1, classLoader.getNumTimesGetThrowawayClassLoaderCalled());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testAddTransformerWithNullTransformer() {
 		new ReflectiveLoadTimeWeaver(new JustAddTransformerClassLoader()).addTransformer(null);
 	}

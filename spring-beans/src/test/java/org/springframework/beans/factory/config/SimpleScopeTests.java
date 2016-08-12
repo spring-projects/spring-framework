@@ -38,7 +38,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class SimpleScopeTests {
+public class SimpleScopeTests {
 
 	private static final Resource CONTEXT = qualifiedResource(SimpleScopeTests.class, "context.xml");
 

@@ -38,7 +38,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.AbstractDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -65,30 +65,32 @@ import org.springframework.util.MimeTypeUtils;
  * <li>{@link javax.xml.stream.events.EndElement} {@code root}</li>
  * </ol>
  *
- * Note that this decoder is not registered by default, but used internally by other
- * decoders who are.
+ * Note that this decoder is not registered by default but used internally
+ * by other decoders who are there by default.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
 public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
-	private static final boolean aaltoPresent = ClassUtils
-			.isPresent("com.fasterxml.aalto.AsyncXMLStreamReader",
-					XmlEventDecoder.class.getClassLoader());
+	private static final boolean aaltoPresent = ClassUtils.isPresent(
+			"com.fasterxml.aalto.AsyncXMLStreamReader", XmlEventDecoder.class.getClassLoader());
 
 	private static final XMLInputFactory inputFactory = XMLInputFactory.newFactory();
 
 	boolean useAalto = true;
 
+
 	public XmlEventDecoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
+
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
 			MimeType mimeType, Object... hints) {
+
 		Flux<DataBuffer> flux = Flux.from(inputStream);
 		if (useAalto && aaltoPresent) {
 			return flux.flatMap(new AaltoDataBufferToXmlEvent());
@@ -112,11 +114,11 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 		}
 	}
 
+
 	/*
 	 * Separate static class to isolate Aalto dependency.
 	 */
-	private static class AaltoDataBufferToXmlEvent
-			implements Function<DataBuffer, Publisher<? extends XMLEvent>> {
+	private static class AaltoDataBufferToXmlEvent implements Function<DataBuffer, Publisher<? extends XMLEvent>> {
 
 		private static final AsyncXMLInputFactory inputFactory = new InputFactoryImpl();
 
@@ -154,4 +156,5 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 			}
 		}
 	}
+
 }

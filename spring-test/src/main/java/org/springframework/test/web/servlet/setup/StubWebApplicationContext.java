@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.DependencyDescriptor;
+import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -393,12 +394,17 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String beanName) {
+		public <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType) throws BeansException {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
-		public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) {
+			throw new UnsupportedOperationException("Dependency resolution not supported");
+		}
+
+		@Override
+		public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
 				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}

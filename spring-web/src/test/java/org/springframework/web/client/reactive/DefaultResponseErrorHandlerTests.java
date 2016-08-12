@@ -6,7 +6,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.TestSubscriber;
 
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -17,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.tests.TestSubscriber;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

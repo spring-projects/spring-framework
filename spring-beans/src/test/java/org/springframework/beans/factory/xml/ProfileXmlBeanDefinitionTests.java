@@ -61,7 +61,7 @@ public class ProfileXmlBeanDefinitionTests {
 
 	private static final String TARGET_BEAN = "foo";
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testProfileValidation() {
 		beanFactoryFor(PROD_ELIGIBLE_XML, NULL_ACTIVE);
 	}

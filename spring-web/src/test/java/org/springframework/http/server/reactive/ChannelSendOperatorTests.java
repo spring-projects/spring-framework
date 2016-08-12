@@ -114,7 +114,7 @@ public class ChannelSendOperatorTests {
 			int i = ++idx;
 			subscriber.next(String.valueOf(i));
 			if (i == 3) {
-				subscriber.fail(error);
+				subscriber.error(error);
 			}
 			return i;
 		});

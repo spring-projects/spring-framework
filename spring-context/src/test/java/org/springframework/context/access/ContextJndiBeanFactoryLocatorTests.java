@@ -34,7 +34,7 @@ import static org.junit.Assert.*;
  * @author Colin Sampaleanu
  * @author Chris Beams
  */
-public final class ContextJndiBeanFactoryLocatorTests {
+public class ContextJndiBeanFactoryLocatorTests {
 
 	private static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
 

@@ -41,13 +41,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Decoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
+import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.util.MimeType;
@@ -305,12 +305,12 @@ public class WebReactiveConfigurationTests {
 
 		@Override
 		protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
-			messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2Decoder()));
+			messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		}
 
 		@Override
 		protected void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
-			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
+			messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
 	}
 
@@ -320,7 +320,7 @@ public class WebReactiveConfigurationTests {
 		@Override
 		protected void configureViewResolvers(ViewResolverRegistry registry) {
 			registry.freeMarker();
-			registry.defaultViews(new HttpMessageWriterView(new JacksonJsonEncoder()));
+			registry.defaultViews(new HttpMessageWriterView(new Jackson2JsonEncoder()));
 		}
 
 		@Bean

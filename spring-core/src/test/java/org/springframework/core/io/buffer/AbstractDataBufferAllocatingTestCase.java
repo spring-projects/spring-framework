@@ -26,9 +26,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

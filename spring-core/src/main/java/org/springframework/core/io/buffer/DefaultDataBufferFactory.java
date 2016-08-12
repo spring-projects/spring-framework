@@ -70,8 +70,7 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 	 * {@code false} otherwise
 	 */
 	public DefaultDataBufferFactory(boolean preferDirect, int defaultInitialCapacity) {
-		Assert.isTrue(defaultInitialCapacity > 0,
-				"'defaultInitialCapacity' should be larger than 0");
+		Assert.isTrue(defaultInitialCapacity > 0, "'defaultInitialCapacity' should be larger than 0");
 		this.preferDirect = preferDirect;
 		this.defaultInitialCapacity = defaultInitialCapacity;
 	}
@@ -84,9 +83,9 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 
 	@Override
 	public DefaultDataBuffer allocateBuffer(int initialCapacity) {
-		return this.preferDirect ?
+		return (this.preferDirect ?
 				new DefaultDataBuffer(ByteBuffer.allocateDirect(initialCapacity), this) :
-				new DefaultDataBuffer(ByteBuffer.allocate(initialCapacity), this);
+				new DefaultDataBuffer(ByteBuffer.allocate(initialCapacity), this));
 	}
 
 	@Override
@@ -97,7 +96,7 @@ public class DefaultDataBufferFactory implements DataBufferFactory {
 
 	@Override
 	public String toString() {
-		return "DefaultDataBufferFactory - preferDirect: " + this.preferDirect;
+		return "DefaultDataBufferFactory (preferDirect=" + this.preferDirect + ")";
 	}
 
 }

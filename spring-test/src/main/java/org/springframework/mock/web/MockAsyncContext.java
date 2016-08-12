@@ -112,8 +112,8 @@ public class MockAsyncContext implements AsyncContext {
 			try {
 				listener.onComplete(new AsyncEvent(this, this.request, this.response));
 			}
-			catch (IOException e) {
-				throw new IllegalStateException("AsyncListener failure", e);
+			catch (IOException ex) {
+				throw new IllegalStateException("AsyncListener failure", ex);
 			}
 		}
 	}

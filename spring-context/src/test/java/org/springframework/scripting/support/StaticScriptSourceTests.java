@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Sam Brannen
  */
-public final class StaticScriptSourceTests {
+public class StaticScriptSourceTests {
 
 	private static final String SCRIPT_TEXT = "print($hello) if $true;";
 

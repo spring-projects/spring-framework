@@ -25,7 +25,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -40,7 +40,6 @@ import org.springframework.util.StreamUtils;
 public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 	public static final int DEFAULT_BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
-
 
 	private final int bufferSize;
 

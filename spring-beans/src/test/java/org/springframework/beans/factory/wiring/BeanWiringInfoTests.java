@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Sam Brannen
  */
-public final class BeanWiringInfoTests {
+public class BeanWiringInfoTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void ctorWithNullBeanName() throws Exception {

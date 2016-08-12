@@ -35,7 +35,6 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 
-
 	public ByteBufferEncoder() {
 		super(MimeTypeUtils.ALL);
 	}

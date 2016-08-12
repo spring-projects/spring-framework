@@ -106,7 +106,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 	/**
 	 * Return the configured {@link ReactiveAdapterRegistry}.
 	 */
-	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+	public ReactiveAdapterRegistry getAdapterRegistry() {
 		return this.adapterRegistry;
 	}
 
@@ -115,7 +115,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 			ServerWebExchange exchange) {
 
 		Class<?> bodyType = ResolvableType.forMethodParameter(bodyParameter).resolve();
-		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterTo(bodyType);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterTo(bodyType);
 
 		ResolvableType elementType = ResolvableType.forMethodParameter(bodyParameter);
 		if (adapter != null) {

@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public final class DefaultRequestToViewNameTranslatorTests {
+public class DefaultRequestToViewNameTranslatorTests {
 
 	private static final String VIEW_NAME = "apple";
 	private static final String EXTENSION = ".html";

@@ -32,34 +32,34 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
-
 /**
- * Decode a byte stream into JSON and convert to Object's with Jackson.
+ * Decode a byte stream into JSON and convert to Object's with Jackson 2.6+.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 5.0
- * @see JacksonJsonEncoder
+ * @see Jackson2JsonEncoder
  */
-public class JacksonJsonDecoder extends AbstractJacksonJsonCodec implements Decoder<Object> {
+public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decoder<Object> {
 
 	private final JsonObjectDecoder fluxObjectDecoder = new JsonObjectDecoder(true);
 
 	private final JsonObjectDecoder monoObjectDecoder = new JsonObjectDecoder(false);
 
 
-	public JacksonJsonDecoder() {
+	public Jackson2JsonDecoder() {
 		super(Jackson2ObjectMapperBuilder.json().build());
 	}
 
-	public JacksonJsonDecoder(ObjectMapper mapper) {
+	public Jackson2JsonDecoder(ObjectMapper mapper) {
 		super(mapper);
 	}
+
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
@@ -96,23 +96,23 @@ public class JacksonJsonDecoder extends AbstractJacksonJsonCodec implements Deco
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
-		MethodParameter methodParameter = (elementType.getSource() instanceof MethodParameter ?
-				(MethodParameter)elementType.getSource() : null);
-		Class<?> contextClass = (methodParameter != null ? methodParameter.getContainingClass() : null);
+		MethodParameter methodParam = (elementType.getSource() instanceof MethodParameter ?
+				(MethodParameter) elementType.getSource() : null);
+		Class<?> contextClass = (methodParam != null ? methodParam.getContainingClass() : null);
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
-		ObjectReader reader;
 
-		if (methodParameter != null && methodParameter.getParameter().getAnnotation(JsonView.class) != null) {
-			JsonView annotation = methodParameter.getParameter().getAnnotation(JsonView.class);
-			Class<?>[] classes = annotation.value();
+		ObjectReader reader;
+		JsonView jsonView = (methodParam != null ? methodParam.getParameterAnnotation(JsonView.class) : null);
+		if (jsonView != null) {
+			Class<?>[] classes = jsonView.value();
 			if (classes.length != 1) {
-				throw new IllegalArgumentException(
-						"@JsonView only supported for response body advice with exactly 1 class argument: " + methodParameter);
+				throw new IllegalArgumentException("@JsonView only supported for response body advice " +
+						"with exactly 1 class argument: " + methodParam);
 			}
-			reader = mapper.readerWithView(classes[0]).forType(javaType);
+			reader = this.mapper.readerWithView(classes[0]).forType(javaType);
 		}
 		else {
-			reader = mapper.readerFor(javaType);
+			reader = this.mapper.readerFor(javaType);
 		}
 
 		return objectDecoder.decode(inputStream, elementType, mimeType, hints)
@@ -122,8 +122,8 @@ public class JacksonJsonDecoder extends AbstractJacksonJsonCodec implements Deco
 						DataBufferUtils.release(dataBuffer);
 						return value;
 					}
-					catch (IOException e) {
-						return Flux.error(new CodecException("Error while reading the data", e));
+					catch (IOException ex) {
+						return Flux.error(new CodecException("Error while reading the data", ex));
 					}
 				});
 	}

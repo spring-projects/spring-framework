@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class MapDataSourceLookupTests {
+public class MapDataSourceLookupTests {
 
 	private static final String DATA_SOURCE_NAME = "dataSource";
 

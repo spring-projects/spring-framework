@@ -138,8 +138,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					})
 					.collect(Collectors.toList());
 
-			return Mono.when(monos).log("reactor.unresolved").map(args ->
-					Stream.of(args).map(o -> o != NO_VALUE ? o : null).toArray());
+			// Create Mono with array of resolved values...
+			return Mono.when(monos,
+					args -> Stream.of(args).map(o -> o != NO_VALUE ? o : null).toArray());
 		}
 		catch (Throwable ex) {
 			return Mono.error(ex);

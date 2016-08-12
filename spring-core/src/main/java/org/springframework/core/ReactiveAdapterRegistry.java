@@ -38,7 +38,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>By default there are adapters for {@link CompletableFuture}, RxJava 1, and
  * also for a any Reactive Streams {@link Publisher}. Additional adapters can be
- * registered via {@link #registerFluxAdapter) and {@link #registerMonoAdapter}.
+ * registered via {@link #registerFluxAdapter} and {@link #registerMonoAdapter}.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
@@ -76,9 +76,9 @@ public class ReactiveAdapterRegistry {
 
 
 	/**
-	 * Register an adapter for adapting to and from a {@link Mono}. The provided
-	 * functions can assume that input will never be {@code null} and also that
-	 * any {@link Optional} wrapper is unwrapped.
+	 * Register an adapter for adapting to and from a {@link Mono}.
+	 * <p>The provided functions can assume that input will never be {@code null}
+	 * and also that any {@link Optional} wrapper is unwrapped.
 	 */
 	public void registerMonoAdapter(Class<?> adapteeType, Function<Object, Mono<?>> toAdapter,
 			Function<Mono<?>, Object> fromAdapter, ReactiveAdapter.Descriptor descriptor) {
@@ -87,9 +87,9 @@ public class ReactiveAdapterRegistry {
 	}
 
 	/**
-	 * Register an adapter for adapting to and from a {@link Flux}. The provided
-	 * functions can assume that input will never be {@code null} and also that
-	 * any {@link Optional} wrapper is unwrapped.
+	 * Register an adapter for adapting to and from a {@link Flux}.
+	 * <p>The provided functions can assume that input will never be {@code null}
+	 * and also that any {@link Optional} wrapper is unwrapped.
 	 */
 	public void registerFluxAdapter(Class<?> adapteeType, Function<Object, Flux<?>> toAdapter,
 			Function<Flux<?>, Object> fromAdapter) {

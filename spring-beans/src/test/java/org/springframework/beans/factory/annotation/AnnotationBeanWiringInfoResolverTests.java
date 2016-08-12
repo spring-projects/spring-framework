@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class AnnotationBeanWiringInfoResolverTests {
+public class AnnotationBeanWiringInfoResolverTests {
 
 	@Test
 	public void testResolveWiringInfo() throws Exception {

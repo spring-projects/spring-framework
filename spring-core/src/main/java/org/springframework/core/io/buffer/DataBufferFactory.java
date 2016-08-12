@@ -23,8 +23,8 @@ import java.nio.ByteBuffer;
  * data buffers.
  *
  * @author Arjen Poutsma
- * @see DataBuffer
  * @since 5.0
+ * @see DataBuffer
  */
 public interface DataBufferFactory {
 

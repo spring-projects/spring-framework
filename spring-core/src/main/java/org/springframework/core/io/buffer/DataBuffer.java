@@ -30,13 +30,13 @@ import java.util.function.IntPredicate;
 public interface DataBuffer {
 
 	/**
-	 * Returns the {@link DataBufferFactory} that created this buffer.
+	 * Return the {@link DataBufferFactory} that created this buffer.
 	 * @return the creating buffer factory
 	 */
 	DataBufferFactory factory();
 
 	/**
-	 * Returns the index of the first byte in this buffer that matches the given
+	 * Return the index of the first byte in this buffer that matches the given
 	 * predicate.
 	 * @param predicate the predicate to match
 	 * @param fromIndex the index to start the search from
@@ -46,7 +46,7 @@ public interface DataBuffer {
 	int indexOf(IntPredicate predicate, int fromIndex);
 
 	/**
-	 * Returns the index of the last byte in this buffer that matches the given
+	 * Return the index of the last byte in this buffer that matches the given
 	 * predicate.
 	 * @param predicate the predicate to match
 	 * @param fromIndex the index to start the search from
@@ -56,28 +56,27 @@ public interface DataBuffer {
 	int lastIndexOf(IntPredicate predicate, int fromIndex);
 
 	/**
-	 * Returns the number of bytes that can be read from this data buffer.
+	 * Return the number of bytes that can be read from this data buffer.
 	 * @return the readable byte count
 	 */
 	int readableByteCount();
 
 	/**
-	 * Reads a single byte from the current reading position of this data buffer.
+	 * Read a single byte from the current reading position of this data buffer.
 	 * @return the byte at this buffer's current reading position
 	 */
 	byte read();
 
 	/**
-	 * Reads this buffer's data into the specified destination, starting at the current
+	 * Read this buffer's data into the specified destination, starting at the current
 	 * reading position of this buffer.
-	 *
 	 * @param destination the array into which the bytes are to be written
 	 * @return this buffer
 	 */
 	DataBuffer read(byte[] destination);
 
 	/**
-	 * Reads at most {@code length} bytes of this buffer into the specified destination,
+	 * Read at most {@code length} bytes of this buffer into the specified destination,
 	 * starting at the current reading position of this buffer.
 	 * @param destination the array into which the bytes are to be written
 	 * @param offset the index within {@code destination} of the first byte to be written
@@ -94,7 +93,7 @@ public interface DataBuffer {
 	DataBuffer write(byte b);
 
 	/**
-	 * Writes the given source into this buffer, startin at the current writing position
+	 * Write the given source into this buffer, startin at the current writing position
 	 * of this buffer.
 	 * @param source the bytes to be written into this buffer
 	 * @return this buffer
@@ -102,7 +101,7 @@ public interface DataBuffer {
 	DataBuffer write(byte[] source);
 
 	/**
-	 * Writes at most {@code length} bytes of the given source into this buffer, starting
+	 * Write at most {@code length} bytes of the given source into this buffer, starting
 	 * at the current writing position of this buffer.
 	 * @param source the bytes to be written into this buffer
 	 * @param offset the index withing {@code source} to start writing from
@@ -112,7 +111,7 @@ public interface DataBuffer {
 	DataBuffer write(byte[] source, int offset, int length);
 
 	/**
-	 * Writes one or more {@code DataBuffer}s to this buffer, starting at the current
+	 * Write one or more {@code DataBuffer}s to this buffer, starting at the current
 	 * writing position.
 	 * @param buffers the byte buffers to write into this buffer
 	 * @return this buffer
@@ -120,7 +119,7 @@ public interface DataBuffer {
 	DataBuffer write(DataBuffer... buffers);
 
 	/**
-	 * Writes one or more {@link ByteBuffer} to this buffer, starting at the current
+	 * Write one or more {@link ByteBuffer} to this buffer, starting at the current
 	 * writing position.
 	 * @param buffers the byte buffers to write into this buffer
 	 * @return this buffer
@@ -128,7 +127,7 @@ public interface DataBuffer {
 	DataBuffer write(ByteBuffer... buffers);
 
 	/**
-	 * Creates a new {@code DataBuffer} whose contents is a shared subsequence of this
+	 * Create a new {@code DataBuffer} whose contents is a shared subsequence of this
 	 * data buffer's content.  Data between this data buffer and the returned buffer is
 	 * shared; though changes in the returned buffer's position will not be reflected
 	 * in the reading nor writing position of this data buffer.
@@ -139,23 +138,23 @@ public interface DataBuffer {
 	DataBuffer slice(int index, int length);
 
 	/**
-	 * Exposes this buffer's bytes as a {@link ByteBuffer}. Data between this {@code
-	 * DataBuffer} and the returned {@code ByteBuffer} is shared; though changes in the
-	 * returned buffer's {@linkplain ByteBuffer#position() position} will not be reflected
-	 * in the reading nor writing position of this data buffer.
+	 * Expose this buffer's bytes as a {@link ByteBuffer}. Data between this
+	 * {@code DataBuffer} and the returned {@code ByteBuffer} is shared; though
+	 * changes in the returned buffer's {@linkplain ByteBuffer#position() position}
+	 * will not be reflected in the reading nor writing position of this data buffer.
 	 * @return this data buffer as a byte buffer
 	 */
 	ByteBuffer asByteBuffer();
 
 	/**
-	 * Exposes this buffer's data as an {@link InputStream}. Both data and position are
+	 * Expose this buffer's data as an {@link InputStream}. Both data and position are
 	 * shared between the returned stream and this data buffer.
 	 * @return this data buffer as an input stream
 	 */
 	InputStream asInputStream();
 
 	/**
-	 * Exposes this buffer's data as an {@link OutputStream}. Both data and position are
+	 * Expose this buffer's data as an {@link OutputStream}. Both data and position are
 	 * shared between the returned stream and this data buffer.
 	 * @return this data buffer as an output stream
 	 */

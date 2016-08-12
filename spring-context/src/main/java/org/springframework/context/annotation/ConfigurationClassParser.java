@@ -182,7 +182,7 @@ class ConfigurationClassParser {
 			catch (BeanDefinitionStoreException ex) {
 				throw ex;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new BeanDefinitionStoreException(
 						"Failed to parse configuration class [" + bd.getBeanClassName() + "]", ex);
 			}
@@ -484,7 +484,7 @@ class ConfigurationClassParser {
 			catch (BeanDefinitionStoreException ex) {
 				throw ex;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new BeanDefinitionStoreException("Failed to process import candidates for configuration class [" +
 						configClass.getMetadata().getClassName() + "]", ex);
 			}
@@ -498,7 +498,7 @@ class ConfigurationClassParser {
 			return;
 		}
 
-		if (checkForCircularImports && this.importStack.contains(configClass)) {
+		if (checkForCircularImports && isChainedImportOnStack(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
 		else {
@@ -541,7 +541,7 @@ class ConfigurationClassParser {
 			catch (BeanDefinitionStoreException ex) {
 				throw ex;
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new BeanDefinitionStoreException("Failed to process import candidates for configuration class [" +
 						configClass.getMetadata().getClassName() + "]", ex);
 			}
@@ -549,6 +549,20 @@ class ConfigurationClassParser {
 				this.importStack.pop();
 			}
 		}
+	}
+
+	private boolean isChainedImportOnStack(ConfigurationClass configClass) {
+		if (this.importStack.contains(configClass)) {
+			String configClassName = configClass.getMetadata().getClassName();
+			AnnotationMetadata importingClass = this.importStack.getImportingClassFor(configClassName);
+			while (importingClass != null) {
+				if (configClassName.equals(importingClass.getClassName())) {
+					return true;
+				}
+				importingClass = this.importStack.getImportingClassFor(importingClass.getClassName());
+			}
+		}
+		return false;
 	}
 
 	/**

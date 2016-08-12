@@ -60,7 +60,7 @@ public class SimpleHandlerAdapter implements HandlerAdapter {
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		WebHandler webHandler = (WebHandler) handler;
 		Mono<Void> mono = webHandler.handle(exchange);
-		return Mono.just(new HandlerResult(webHandler, mono, RETURN_TYPE));
+		return mono.then(aVoid -> Mono.empty());
 	}
 
 }

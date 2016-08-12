@@ -21,6 +21,8 @@ import java.util.Set;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 
 /**
  * Extension of the {@link org.springframework.beans.factory.BeanFactory}
@@ -153,15 +155,6 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #initializeBean
 	 */
 	Object configureBean(Object existingBean, String beanName) throws BeansException;
-
-	/**
-	 * Resolve the specified dependency against the beans defined in this factory.
-	 * @param descriptor the descriptor for the dependency
-	 * @param beanName the name of the bean which declares the present dependency
-	 * @return the resolved object, or {@code null} if none found
-	 * @throws BeansException if dependency resolution failed
-	 */
-	Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException;
 
 
 	//-------------------------------------------------------------------------
@@ -312,18 +305,55 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 */
 	void destroyBean(Object existingBean);
 
+
+	//-------------------------------------------------------------------------
+	// Delegate methods for resolving injection points
+	//-------------------------------------------------------------------------
+
+	/**
+	 * Resolve the bean instance that uniquely matches the given object type, if any,
+	 * including its bean name.
+	 * <p>This is effectively a variant of {@link #getBean(Class)} which preserves the
+	 * bean name of the matching instance.
+	 * @param requiredType type the bean must match; can be an interface or superclass.
+	 * {@code null} is disallowed.
+	 * @return the bean name plus bean instance
+	 * @throws NoSuchBeanDefinitionException if no matching bean was found
+	 * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
+	 * @throws BeansException if the bean could not be created
+	 * @since 4.3.3
+	 * @see #getBean(Class)
+	 */
+	<T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType) throws BeansException;
+
 	/**
 	 * Resolve the specified dependency against the beans defined in this factory.
-	 * @param descriptor the descriptor for the dependency
-	 * @param beanName the name of the bean which declares the present dependency
-	 * @param autowiredBeanNames a Set that all names of autowired beans (used for
-	 * resolving the present dependency) are supposed to be added to
-	 * @param typeConverter the TypeConverter to use for populating arrays and
-	 * collections
+	 * @param descriptor the descriptor for the dependency (field/method/constructor)
+	 * @param requestingBeanName the name of the bean which declares the given dependency
 	 * @return the resolved object, or {@code null} if none found
-	 * @throws BeansException if dependency resolution failed
+	 * @throws NoSuchBeanDefinitionException if no matching bean was found
+	 * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
+	 * @throws BeansException if dependency resolution failed for any other reason
+	 * @since 2.5
+	 * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)
 	 */
-	Object resolveDependency(DependencyDescriptor descriptor, String beanName,
+	Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) throws BeansException;
+
+	/**
+	 * Resolve the specified dependency against the beans defined in this factory.
+	 * @param descriptor the descriptor for the dependency (field/method/constructor)
+	 * @param requestingBeanName the name of the bean which declares the given dependency
+	 * @param autowiredBeanNames a Set that all names of autowired beans (used for
+	 * resolving the given dependency) are supposed to be added to
+	 * @param typeConverter the TypeConverter to use for populating arrays and collections
+	 * @return the resolved object, or {@code null} if none found
+	 * @throws NoSuchBeanDefinitionException if no matching bean was found
+	 * @throws NoUniqueBeanDefinitionException if more than one matching bean was found
+	 * @throws BeansException if dependency resolution failed for any other reason
+	 * @since 2.5
+	 * @see DependencyDescriptor
+	 */
+	Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException;
 
 }

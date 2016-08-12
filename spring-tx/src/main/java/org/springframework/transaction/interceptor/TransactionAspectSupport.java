@@ -18,7 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +34,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -67,13 +68,14 @@ import org.springframework.util.StringUtils;
  */
 public abstract class TransactionAspectSupport implements BeanFactoryAware, InitializingBean {
 
+	// NOTE: This class must not implement Serializable because it serves as base
+	// class for AspectJ aspects (which are not allowed to implement Serializable)!
+
+
 	/**
 	 * Key to use to store the default transaction manager.
 	 */
-	private final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
-
-	// NOTE: This class must not implement Serializable because it serves as base
-	// class for AspectJ aspects (which are not allowed to implement Serializable)!
+	private static final Object DEFAULT_TRANSACTION_MANAGER_KEY = new Object();
 
 	/**
 	 * Holder to support the {@code currentTransactionStatus()} method,
@@ -84,9 +86,6 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	private static final ThreadLocal<TransactionInfo> transactionInfoHolder =
 			new NamedThreadLocal<>("Current aspect-driven transaction");
 
-
-	private final ConcurrentHashMap<Object, PlatformTransactionManager> transactionManagerCache =
-			new ConcurrentHashMap<>();
 
 	/**
 	 * Subclasses can use this to return the current TransactionInfo.
@@ -127,14 +126,14 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/**
-	 * Default transaction manager bean name.
-	 */
 	private String transactionManagerBeanName;
 
 	private TransactionAttributeSource transactionAttributeSource;
 
 	private BeanFactory beanFactory;
+
+	private final ConcurrentMap<Object, PlatformTransactionManager> transactionManagerCache =
+			new ConcurrentReferenceHashMap<>(4);
 
 
 	/**
@@ -243,7 +242,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	public void afterPropertiesSet() {
 		if (getTransactionManager() == null && this.beanFactory == null) {
 			throw new IllegalStateException(
-					"Setting the property 'transactionManager' or running in a ListableBeanFactory is required");
+					"Setting the property 'transactionManager' or running in a BeanFactory is required");
 		}
 		if (this.transactionAttributeSource == null) {
 			throw new IllegalStateException(
@@ -449,17 +448,16 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 		TransactionInfo txInfo = new TransactionInfo(tm, txAttr, joinpointIdentification);
 		if (txAttr != null) {
-			// We need a transaction for this method
+			// We need a transaction for this method...
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
-			// The transaction manager will flag an error if an incompatible tx already exists
+			// The transaction manager will flag an error if an incompatible tx already exists.
 			txInfo.newTransactionStatus(status);
 		}
 		else {
-			// The TransactionInfo.hasTransaction() method will return
-			// false. We created it only to preserve the integrity of
-			// the ThreadLocal stack maintained in this class.
+			// The TransactionInfo.hasTransaction() method will return false. We created it only
+			// to preserve the integrity of the ThreadLocal stack maintained in this class.
 			if (logger.isTraceEnabled())
 				logger.trace("Don't need to create transaction for [" + joinpointIdentification +
 						"]: This method isn't transactional.");

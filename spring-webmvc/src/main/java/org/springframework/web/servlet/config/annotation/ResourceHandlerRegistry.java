@@ -47,14 +47,13 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
- *
  * @see DefaultServletHandlerConfigurer
  */
 public class ResourceHandlerRegistry {
 
 	private final ServletContext servletContext;
 
-	private final ApplicationContext appContext;
+	private final ApplicationContext applicationContext;
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
@@ -63,32 +62,48 @@ public class ResourceHandlerRegistry {
 	private int order = Integer.MAX_VALUE -1;
 
 
+	/**
+	 * Create a new resource handler registry for the given application context.
+	 * @param applicationContext the Spring application context
+	 * @param servletContext the corresponding Servlet context
+	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
 		this(applicationContext, servletContext, null);
 	}
 
+	/**
+	 * Create a new resource handler registry for the given application context.
+	 * @param applicationContext the Spring application context
+	 * @param servletContext the corresponding Servlet context
+	 * @param contentNegotiationManager the content negotiation manager to use
+	 * @since 4.3
+	 */
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
 			ContentNegotiationManager contentNegotiationManager) {
+
 		Assert.notNull(applicationContext, "ApplicationContext is required");
-		this.appContext = applicationContext;
+		this.applicationContext = applicationContext;
 		this.servletContext = servletContext;
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
 
 	/**
-	 * Add a resource handler for serving static resources based on the specified URL path patterns.
-	 * The handler will be invoked for every incoming request that matches to one of the specified path patterns.
-	 * @return A {@link ResourceHandlerRegistration} to use to further configure the registered resource handler.
+	 * Add a resource handler for serving static resources based on the specified URL path
+	 * patterns. The handler will be invoked for every incoming request that matches to
+	 * one of the specified path patterns.
+	 * @return A {@link ResourceHandlerRegistration} to use to further configure the
+	 * registered resource handler
 	 */
 	public ResourceHandlerRegistration addResourceHandler(String... pathPatterns) {
-		ResourceHandlerRegistration registration = new ResourceHandlerRegistration(this.appContext, pathPatterns);
+		ResourceHandlerRegistration registration =
+				new ResourceHandlerRegistration(this.applicationContext, pathPatterns);
 		this.registrations.add(registration);
 		return registration;
 	}
 
 	/**
-	 * Whether a resource handler has already been registered for the given pathPattern.
+	 * Whether a resource handler has already been registered for the given path pattern.
 	 */
 	public boolean hasMappingForPattern(String pathPattern) {
 		for (ResourceHandlerRegistration registration : this.registrations) {
@@ -100,8 +115,9 @@ public class ResourceHandlerRegistry {
 	}
 
 	/**
-	 * Specify the order to use for resource handling relative to other {@link HandlerMapping}s configured in
-	 * the Spring MVC application context. The default value used is {@code Integer.MAX_VALUE-1}.
+	 * Specify the order to use for resource handling relative to other {@link HandlerMapping}s
+	 * configured in the Spring MVC application context.
+	 * <p>The default value used is {@code Integer.MAX_VALUE-1}.
 	 */
 	public ResourceHandlerRegistry setOrder(int order) {
 		this.order = order;
@@ -109,10 +125,11 @@ public class ResourceHandlerRegistry {
 	}
 
 	/**
-	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case of no registrations.
+	 * Return a handler mapping with the mapped resource handlers; or {@code null} in case
+	 * of no registrations.
 	 */
 	protected AbstractHandlerMapping getHandlerMapping() {
-		if (registrations.isEmpty()) {
+		if (this.registrations.isEmpty()) {
 			return null;
 		}
 
@@ -121,13 +138,13 @@ public class ResourceHandlerRegistry {
 			for (String pathPattern : registration.getPathPatterns()) {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
 				handler.setServletContext(this.servletContext);
-				handler.setApplicationContext(this.appContext);
+				handler.setApplicationContext(this.applicationContext);
 				handler.setContentNegotiationManager(this.contentNegotiationManager);
 				try {
 					handler.afterPropertiesSet();
 				}
-				catch (Exception e) {
-					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", e);
+				catch (Exception ex) {
+					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", ex);
 				}
 				urlMap.put(pathPattern, handler);
 			}

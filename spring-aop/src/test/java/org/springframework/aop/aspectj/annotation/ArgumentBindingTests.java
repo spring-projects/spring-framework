@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
  */
 public class ArgumentBindingTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testBindingInPointcutUsedByAdvice() {
 		TestBean tb = new TestBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
@@ -49,7 +49,7 @@ public class ArgumentBindingTests {
 		proxiedTestBean.setName("Supercalifragalisticexpialidocious");
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testAnnotationArgumentNameBinding() {
 		TransactionalBean tb = new TransactionalBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);

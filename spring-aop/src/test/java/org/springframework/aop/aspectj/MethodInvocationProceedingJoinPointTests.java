@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @since 2.0
  */
-public final class MethodInvocationProceedingJoinPointTests {
+public class MethodInvocationProceedingJoinPointTests {
 
 	@Test
 	public void testingBindingWithJoinPoint() {

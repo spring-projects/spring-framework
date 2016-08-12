@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.io.Closeable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -67,18 +66,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private static final String SHUTDOWN_METHOD_NAME = "shutdown";
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
-
-	private static Class<?> closeableInterface;
-
-	static {
-		try {
-			closeableInterface = ClassUtils.forName("java.lang.AutoCloseable",
-					DisposableBeanAdapter.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			closeableInterface = Closeable.class;
-		}
-	}
 
 
 	private final Object bean;
@@ -191,7 +178,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private String inferDestroyMethodIfNecessary(Object bean, RootBeanDefinition beanDefinition) {
 		String destroyMethodName = beanDefinition.getDestroyMethodName();
 		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
-				(destroyMethodName == null && closeableInterface.isInstance(bean))) {
+				(destroyMethodName == null && bean instanceof AutoCloseable)) {
 			// Only perform destroy method inference or Closeable detection
 			// in case of the bean not explicitly implementing DisposableBean
 			if (!(bean instanceof DisposableBean)) {
@@ -406,7 +393,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param beanDefinition the corresponding bean definition
 	 */
 	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
-		if (bean instanceof DisposableBean || closeableInterface.isInstance(bean)) {
+		if (bean instanceof DisposableBean || bean instanceof AutoCloseable) {
 			return true;
 		}
 		String destroyMethodName = beanDefinition.getDestroyMethodName();

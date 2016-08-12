@@ -27,6 +27,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -170,11 +171,11 @@ public abstract class HttpRange {
 	 * @return the list of regions for the given resource
 	 */
 	public static List<ResourceRegion> toResourceRegions(List<HttpRange> ranges, Resource resource) {
-		if(ranges == null || ranges.size() == 0) {
+		if (CollectionUtils.isEmpty(ranges)) {
 			return Collections.emptyList();
 		}
 		List<ResourceRegion> regions = new ArrayList<>(ranges.size());
-		for(HttpRange range : ranges) {
+		for (HttpRange range : ranges) {
 			regions.add(range.toResourceRegion(resource));
 		}
 		return regions;

@@ -34,7 +34,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class CustomScopeConfigurerTests {
+public class CustomScopeConfigurerTests {
 
 	private static final String FOO_SCOPE = "fooScope";
 	private ConfigurableListableBeanFactory factory;
@@ -81,7 +81,7 @@ public final class CustomScopeConfigurerTests {
 		assertTrue(factory.getRegisteredScope(FOO_SCOPE) instanceof NoOpScope);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWhereScopeMapHasNullScopeValueInEntrySet() throws Exception {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, null);
@@ -90,7 +90,7 @@ public final class CustomScopeConfigurerTests {
 		figurer.postProcessBeanFactory(factory);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWhereScopeMapHasNonScopeInstanceInEntrySet() throws Exception {
 		Map<String, Object> scopes = new HashMap<>();
 		scopes.put(FOO_SCOPE, this); // <-- not a valid value...
@@ -100,7 +100,7 @@ public final class CustomScopeConfigurerTests {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test(expected=ClassCastException.class)
+	@Test(expected = ClassCastException.class)
 	public void testWhereScopeMapHasNonStringTypedScopeNameInKeySet() throws Exception {
 		Map scopes = new HashMap();
 		scopes.put(this, new NoOpScope()); // <-- not a valid value (the key)...

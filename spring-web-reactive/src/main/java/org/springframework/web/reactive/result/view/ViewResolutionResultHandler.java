@@ -142,12 +142,19 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		if (hasModelAttributeAnnotation(result)) {
 			return true;
 		}
-		if (isSupportedType(clazz)) {
-			return true;
+		Optional<Object> optional = result.getReturnValue();
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(clazz, optional);
+		if (adapter != null) {
+			if (adapter.getDescriptor().isNoValue()) {
+				return true;
+			}
+			else {
+				clazz = result.getReturnType().getGeneric(0).getRawClass();
+				return isSupportedType(clazz);
+			}
 		}
-		if (getReactiveAdapterRegistry().getAdapterFrom(clazz, result.getReturnValue()) != null) {
-			clazz = result.getReturnType().getGeneric(0).getRawClass();
-			return isSupportedType(clazz);
+		else if (isSupportedType(clazz)) {
+			return true;
 		}
 		return false;
 	}
@@ -170,18 +177,18 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 		ResolvableType elementType;
 		ResolvableType returnType = result.getReturnType();
 
-		Class<?> rawClass = returnType.getRawClass();
-		Optional<Object> optionalValue = result.getReturnValue();
-		ReactiveAdapter adapter = getReactiveAdapterRegistry().getAdapterFrom(rawClass, optionalValue);
+		Optional<Object> optional = result.getReturnValue();
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(returnType.getRawClass(), optional);
 		if (adapter != null) {
-			if (optionalValue.isPresent()) {
-				Mono<?> converted = adapter.toMono(optionalValue);
+			if (optional.isPresent()) {
+				Mono<?> converted = adapter.toMono(optional);
 				valueMono = converted.map(o -> o);
 			}
 			else {
 				valueMono = Mono.empty();
 			}
-			elementType = returnType.getGeneric(0);
+			elementType = adapter.getDescriptor().isNoValue() ?
+					ResolvableType.forClass(Void.class) : returnType.getGeneric(0);
 		}
 		else {
 			valueMono = Mono.justOrEmpty(result.getReturnValue());

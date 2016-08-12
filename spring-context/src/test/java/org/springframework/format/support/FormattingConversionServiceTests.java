@@ -263,13 +263,13 @@ public class FormattingConversionServiceTests {
 		assertNull(formattingService.convert("     ", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void testParseParserReturnsNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Integer.class, new NullReturningFormatter());
 		assertNull(formattingService.convert("1", TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class)));
 	}
 
-	@Test(expected=ConversionFailedException.class)
+	@Test(expected = ConversionFailedException.class)
 	public void testParseNullPrimitiveProperty() throws ParseException {
 		formattingService.addFormatterForFieldType(Integer.class, new NumberStyleFormatter());
 		assertNull(formattingService.convert(null, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(int.class)));

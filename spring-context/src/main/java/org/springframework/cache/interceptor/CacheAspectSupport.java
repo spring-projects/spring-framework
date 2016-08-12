@@ -418,7 +418,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					excluded.add(context);
 				}
 			}
-			catch (VariableNotAvailableException e) {
+			catch (VariableNotAvailableException ex) {
 				// Ignoring failure due to missing result, consider the cache put has to proceed
 			}
 		}

@@ -17,10 +17,12 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.List;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -101,7 +103,8 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 			return true;
 		}
 		else {
-			if (getReactiveAdapterRegistry().getAdapterFrom(rawClass, result.getReturnValue()) != null) {
+			ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(rawClass, result.getReturnValue());
+			if (adapter != null && !adapter.getDescriptor().isNoValue()) {
 				ResolvableType genericType = result.getReturnType().getGeneric(0);
 				if (HttpEntity.class.isAssignableFrom(genericType.getRawClass())) {
 					return true;

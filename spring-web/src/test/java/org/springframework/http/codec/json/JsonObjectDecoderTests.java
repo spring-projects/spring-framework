@@ -20,16 +20,15 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.tests.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
  */
 public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase {
-
 
 	@Test
 	public void decodeSingleChunkToJsonObject()  {
@@ -81,6 +80,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
 							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
 	}
+
 
 	private static String toString(DataBuffer buffer) {
 		byte[] b = new byte[buffer.readableByteCount()];

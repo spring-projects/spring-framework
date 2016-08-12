@@ -52,7 +52,7 @@ import static org.junit.Assert.*;
  * @author Jeremy Grelle
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public final class RadioButtonsTagTests extends AbstractFormTagTests {
+public class RadioButtonsTagTests extends AbstractFormTagTests {
 
 	private RadioButtonsTag tag;
 

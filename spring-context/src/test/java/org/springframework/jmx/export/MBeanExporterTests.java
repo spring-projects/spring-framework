@@ -69,7 +69,7 @@ import static org.junit.Assert.*;
  * @author Stephane Nicoll
  */
 @SuppressWarnings("deprecation")
-public final class MBeanExporterTests extends AbstractMBeanServerTests {
+public class MBeanExporterTests extends AbstractMBeanServerTests {
 
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();

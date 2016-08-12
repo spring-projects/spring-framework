@@ -6,6 +6,7 @@ configurations {
 dependencies {
 	castor "org.codehaus.castor:castor-anttasks:1.4.1"
 	jibx "org.jibx:jibx-bind:1.2.6"
+	jibx "org.apache.bcel:bcel:6.0"
 	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.11'
 	xjc 'javax.xml.bind:jaxb-api:2.2.11'
 	xjc 'com.sun.xml.bind:jaxb-core:2.2.11'
@@ -91,10 +92,8 @@ task genJaxb {
 	}
 }
 
-// add jibx binding to the normal test compilation process
-// INCOMPATIBLE WITH OPENJDK 8 b89+
-def jibxEnabled = project.properties.get("testGroups")?.toLowerCase()?.split(",")?.contains("custom_compilation")
-if (jibxEnabled) {
+// JiBX compiler is currently not compatible with JDK 9
+if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
 	compileTestJava {
 		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
 

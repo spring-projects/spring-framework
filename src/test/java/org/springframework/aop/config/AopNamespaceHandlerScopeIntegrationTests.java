@@ -47,7 +47,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class AopNamespaceHandlerScopeIntegrationTests {
+public class AopNamespaceHandlerScopeIntegrationTests {
 
 	private static final String CLASSNAME = AopNamespaceHandlerScopeIntegrationTests.class.getName();
 	private static final String CONTEXT = format("classpath:%s-context.xml", ClassUtils.convertClassNameToResourcePath(CLASSNAME));

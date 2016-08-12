@@ -67,7 +67,7 @@ public abstract class ContentNegotiatingResultHandlerSupport implements Ordered 
 	/**
 	 * Return the configured {@link ReactiveAdapterRegistry}.
 	 */
-	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+	public ReactiveAdapterRegistry getAdapterRegistry() {
 		return this.adapterRegistry;
 	}
 

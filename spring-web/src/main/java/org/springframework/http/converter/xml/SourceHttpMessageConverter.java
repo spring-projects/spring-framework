@@ -187,6 +187,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		}
 	}
 
+	@SuppressWarnings("deprecation")  // on JDK 9
 	private SAXSource readSAXSource(InputStream body) throws IOException {
 		try {
 			XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();

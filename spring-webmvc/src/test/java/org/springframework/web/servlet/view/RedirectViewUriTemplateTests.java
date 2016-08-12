@@ -113,7 +113,7 @@ public class RedirectViewUriTemplateTests {
 		assertEquals(url + "/value1/v1/value2?key3=value3", this.response.getRedirectedUrl());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void uriTemplateNullValue() throws Exception {
 		new RedirectView("/{foo}").renderMergedOutputModel(new ModelMap(), this.request, this.response);
 	}

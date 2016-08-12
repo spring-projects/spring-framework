@@ -109,11 +109,9 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
 
-	private final Set<Class<?>> nonAnnotatedClasses =
-			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
+	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
-	private final Map<Object, Set<ScheduledTask>> scheduledTasks =
-			new ConcurrentHashMap<>(16);
+	private final Map<Object, Set<ScheduledTask>> scheduledTasks = new ConcurrentHashMap<>(16);
 
 
 	@Override

@@ -221,7 +221,7 @@ public class PropertySourcesPropertyResolverTests {
 				equalTo("Replace this value plus defaultValue"));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void resolvePlaceholders_withNullInput() {
 		new PropertySourcesPropertyResolver(new MutablePropertySources()).resolvePlaceholders(null);
 	}
@@ -234,7 +234,7 @@ public class PropertySourcesPropertyResolverTests {
 		assertThat(resolver.resolveRequiredPlaceholders("Replace this ${key}"), equalTo("Replace this value"));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void resolveRequiredPlaceholders_withUnresolvable() {
 		MutablePropertySources propertySources = new MutablePropertySources();
 		propertySources.addFirst(new MockPropertySource().withProperty("key", "value"));
@@ -251,7 +251,7 @@ public class PropertySourcesPropertyResolverTests {
 				equalTo("Replace this value plus defaultValue"));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void resolveRequiredPlaceholders_withNullInput() {
 		new PropertySourcesPropertyResolver(new MutablePropertySources()).resolveRequiredPlaceholders(null);
 	}

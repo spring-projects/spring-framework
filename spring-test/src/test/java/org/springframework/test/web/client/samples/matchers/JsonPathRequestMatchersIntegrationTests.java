@@ -19,6 +19,7 @@ package org.springframework.test.web.client.samples.matchers;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.After;
 import org.junit.Test;
@@ -56,7 +57,9 @@ public class JsonPathRequestMatchersIntegrationTests {
 		people.add("performers", new Person("Yehudi Menuhin"));
 	}
 
-	private final RestTemplate restTemplate = new RestTemplate(Arrays.asList(new MappingJackson2HttpMessageConverter()));
+
+	private final RestTemplate restTemplate =
+			new RestTemplate(Collections.singletonList(new MappingJackson2HttpMessageConverter()));
 
 	private final MockRestServiceServer mockServer = MockRestServiceServer.createServer(this.restTemplate);
 

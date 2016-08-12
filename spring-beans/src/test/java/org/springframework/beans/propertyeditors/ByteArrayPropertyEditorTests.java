@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  *
  * @author Rick Evans
  */
-public final class ByteArrayPropertyEditorTests {
+public class ByteArrayPropertyEditorTests {
 
 	private final PropertyEditor byteEditor = new ByteArrayPropertyEditor();
 

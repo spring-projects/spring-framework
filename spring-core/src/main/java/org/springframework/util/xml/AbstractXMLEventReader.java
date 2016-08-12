@@ -27,12 +27,14 @@ import org.springframework.util.ClassUtils;
 
 /**
  * Abstract base class for {@code XMLEventReader}s.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
 abstract class AbstractXMLEventReader implements XMLEventReader {
 
 	private boolean closed;
+
 
 	@Override
 	public Object next() {
@@ -113,12 +115,17 @@ abstract class AbstractXMLEventReader implements XMLEventReader {
 		throw new IllegalArgumentException("Property not supported: [" + name + "]");
 	}
 
+	@Override
+	public void close() {
+		this.closed = true;
+	}
+
 	/**
 	 * Returns {@code true} if closed; {@code false} otherwise.
 	 * @see #close()
 	 */
 	protected boolean isClosed() {
-		return closed;
+		return this.closed;
 	}
 
 	/**
@@ -133,8 +140,4 @@ abstract class AbstractXMLEventReader implements XMLEventReader {
 		}
 	}
 
-	@Override
-	public void close() {
-		closed = true;
-	}
 }

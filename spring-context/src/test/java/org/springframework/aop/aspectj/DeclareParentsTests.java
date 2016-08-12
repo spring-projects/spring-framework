@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Chris Beams
  */
-public final class DeclareParentsTests {
+public class DeclareParentsTests {
 
 	private ITestBean testBeanProxy;
 

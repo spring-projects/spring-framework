@@ -30,7 +30,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -48,17 +48,16 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final ResponseBodyWriteResultPublisher publisherDelegate =
-			new ResponseBodyWriteResultPublisher();
+	private final ResponseBodyWriteResultPublisher resultPublisher = new ResponseBodyWriteResultPublisher();
 
-	private final AtomicReference<State> state =
-			new AtomicReference<>(State.UNSUBSCRIBED);
+	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
 	private volatile DataBuffer currentBuffer;
 
 	private volatile boolean subscriberCompleted;
 
 	private Subscription subscription;
+
 
 	// Subscriber
 
@@ -94,12 +93,14 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		this.state.get().onComplete(this);
 	}
 
+
 	// Publisher
 
 	@Override
 	public final void subscribe(Subscriber<? super Void> subscriber) {
-		this.publisherDelegate.subscribe(subscriber);
+		this.resultPublisher.subscribe(subscriber);
 	}
+
 
 	// listener methods
 
@@ -159,9 +160,14 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 	 */
 	protected abstract boolean write(DataBuffer dataBuffer) throws IOException;
 
+	protected void cancel() {
+		this.subscription.cancel();
+	}
+
 	private boolean changeState(State oldState, State newState) {
 		return this.state.compareAndSet(oldState, newState);
 	}
+
 
 	/**
 	 * Represents a state for the {@link Subscriber} to be in. The following figure
@@ -189,9 +195,9 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		 * #REQUESTED}.
 		 */
 		UNSUBSCRIBED {
+
 			@Override
-			void onSubscribe(AbstractResponseBodyProcessor processor,
-					Subscription subscription) {
+			public void onSubscribe(AbstractResponseBodyProcessor processor, Subscription subscription) {
 				Objects.requireNonNull(subscription, "Subscription cannot be null");
 				if (processor.changeState(this, REQUESTED)) {
 					processor.subscription = subscription;
@@ -209,8 +215,9 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		 * changing state to {@link #COMPLETED}.
 		 */
 		REQUESTED {
+
 			@Override
-			void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
+			public void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
 				if (processor.changeState(this, RECEIVED)) {
 					processor.receiveBuffer(dataBuffer);
 					processor.writeIfPossible();
@@ -218,10 +225,9 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 			}
 
 			@Override
-			void onComplete(AbstractResponseBodyProcessor processor) {
+			public void onComplete(AbstractResponseBodyProcessor processor) {
 				if (processor.changeState(this, COMPLETED)) {
-					processor.subscriberCompleted = true;
-					processor.publisherDelegate.publishComplete();
+					processor.resultPublisher.publishComplete();
 				}
 			}
 		},
@@ -235,8 +241,9 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		 * be written completely the state will be changed to {@link #RECEIVED}.
 		 */
 		RECEIVED {
+
 			@Override
-			void onWritePossible(AbstractResponseBodyProcessor processor) {
+			public void onWritePossible(AbstractResponseBodyProcessor processor) {
 				if (processor.changeState(this, WRITING)) {
 					DataBuffer dataBuffer = processor.currentBuffer;
 					try {
@@ -249,7 +256,7 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 							}
 							else {
 								processor.changeState(WRITING, COMPLETED);
-								processor.publisherDelegate.publishComplete();
+								processor.resultPublisher.publishComplete();
 							}
 						}
 						else {
@@ -258,13 +265,14 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 						}
 					}
 					catch (IOException ex) {
+						processor.cancel();
 						processor.onError(ex);
 					}
 				}
 			}
 
 			@Override
-			void onComplete(AbstractResponseBodyProcessor processor) {
+			public void onComplete(AbstractResponseBodyProcessor processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
@@ -273,8 +281,9 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		 * {@code onWritePossible started}.
 		 */
 		WRITING {
+
 			@Override
-			void onComplete(AbstractResponseBodyProcessor processor) {
+			public void onComplete(AbstractResponseBodyProcessor processor) {
 				processor.subscriberCompleted = true;
 			}
 		},
@@ -282,43 +291,44 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 		 * The terminal completed state. Does not respond to any events.
 		 */
 		COMPLETED {
+
 			@Override
-			void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
+			public void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
 				// ignore
 			}
 
 			@Override
-			void onError(AbstractResponseBodyProcessor processor, Throwable t) {
+			public void onError(AbstractResponseBodyProcessor processor, Throwable ex) {
 				// ignore
 			}
 
 			@Override
-			void onComplete(AbstractResponseBodyProcessor processor) {
+			public void onComplete(AbstractResponseBodyProcessor processor) {
 				// ignore
 			}
 		};
 
-		void onSubscribe(AbstractResponseBodyProcessor processor, Subscription s) {
-			s.cancel();
+		public void onSubscribe(AbstractResponseBodyProcessor processor, Subscription subscription) {
+			subscription.cancel();
 		}
 
-		void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
+		public void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
 			throw new IllegalStateException(toString());
 		}
 
-		void onError(AbstractResponseBodyProcessor processor, Throwable t) {
+		public void onError(AbstractResponseBodyProcessor processor, Throwable ex) {
 			if (processor.changeState(this, COMPLETED)) {
-				processor.publisherDelegate.publishError(t);
+				processor.resultPublisher.publishError(ex);
 			}
 		}
 
-		void onComplete(AbstractResponseBodyProcessor processor) {
+		public void onComplete(AbstractResponseBodyProcessor processor) {
 			throw new IllegalStateException(toString());
 		}
-		void onWritePossible(AbstractResponseBodyProcessor processor) {
+
+		public void onWritePossible(AbstractResponseBodyProcessor processor) {
 			// ignore
 		}
-
 	}
 
 }

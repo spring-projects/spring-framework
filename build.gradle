@@ -32,21 +32,22 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.activationApiVersion   = "1.1.1"
-	ext.aspectjVersion         = "1.9.0.BETA-4"
+	ext.annotationApiVersion   = "1.2"
+	ext.aspectjVersion         = "1.9.0.BETA-5"
 	ext.beanvalVersion         = "1.1.0.Final"
 	ext.caffeineVersion        = "2.3.1"
 	ext.eclipselinkVersion     = "2.6.3"
 	ext.ehcacheVersion         = "2.10.2"
 	ext.ehcachejcacheVersion   = "1.0.1"
 	ext.ehcache3Version        = "3.1.1"
-	ext.elApiVersion           = "3.0.1-b04"
 	ext.ejbApiVersion          = "3.2"
+	ext.elApiVersion           = "3.0.1-b04"
 	ext.fileuploadVersion      = "1.3.2"
 	ext.freemarkerVersion      = "2.3.25-incubating"
 	ext.groovyVersion          = "2.4.7"
 	ext.gsonVersion            = "2.7"
 	ext.hamcrestVersion        = "1.3"
-	ext.hibernate5Version      = "5.2.1.Final"
+	ext.hibernate5Version      = "5.2.2.Final"
 	ext.hibval5Version         = "5.2.4.Final"
 	ext.hsqldbVersion          = "2.3.4"
 	ext.httpasyncVersion       = "4.1.2"
@@ -55,27 +56,29 @@ configure(allprojects) { project ->
 	ext.jackson2Version        = "2.8.1"
 	ext.javamailVersion        = "1.5.5"
 	ext.jaxbVersion            = "2.2.11"
+	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.3.10.v20160621"
+	ext.jettyVersion           = "9.3.11.v20160721"
 	ext.jodaVersion            = "2.9.4"
 	ext.jpaVersion             = "2.1.1"
 	ext.jspVersion             = "2.3.2-b02"
 	ext.jtaVersion             = "1.2"
 	ext.junitVersion           = "4.12"
-	ext.junitJupiterVersion    = '5.0.0-M1'
-	ext.junitPlatformVersion   = '1.0.0-M1'
+	ext.junitJupiterVersion    = '5.0.0-M2'
+	ext.junitPlatformVersion   = '1.0.0-M2'
 	ext.log4jVersion           = '2.6.2'
-	ext.nettyVersion           = "4.1.3.Final"
+	ext.nettyVersion           = "4.1.4.Final"
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.1"
 	ext.poiVersion             = "3.14"
-	ext.protobufVersion        = "3.0.0-beta-4"
+	ext.protobufVersion        = "3.0.0"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.0.BUILD-SNAPSHOT'
 	ext.reactorNettyVersion    = '0.5.0.BUILD-SNAPSHOT'
-	ext.rxjavaVersion          = '1.1.6'
 	ext.romeVersion            = "1.6.0"
+	ext.rxjavaVersion          = '1.1.8'
+	ext.rxnettyVersion         = '0.5.2-rc.3'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.21"
 	ext.snakeyamlVersion       = "1.17"
@@ -84,10 +87,11 @@ configure(allprojects) { project ->
 	ext.tiles3Version          = "3.0.5"
 	ext.tomcatVersion          = "8.5.4"
 	ext.tyrusVersion           = "1.13"
-	ext.undertowVersion        = "1.4.0.CR3"
+	ext.undertowVersion        = "1.4.0.Final"
 	ext.websocketVersion       = "1.1"
 	ext.woodstoxVersion        = "5.0.2"
 	ext.xmlunitVersion         = "2.2.1"
+	ext.xnioVersion            = "3.4.0.Final"
 	ext.xstreamVersion         = "1.4.9"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
@@ -113,6 +117,8 @@ configure(allprojects) { project ->
 			}
 		}
 	}
+
+	compileJava.options.encoding = 'UTF-8'
 
 	compileJava.options*.compilerArgs = [
 		"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
@@ -154,8 +160,7 @@ configure(allprojects) { project ->
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
-		maven { url 'http://repo.spring.io/snapshot' }       // Reactor snapshots
-		maven { url 'https://oss.jfrog.org/libs-snapshot' }  // RxNetty 0.5.x snapshots
+		maven { url "https://repo.spring.io/snapshot" }	// Reactor 3 snapshots
 	}
 
 	dependencies {
@@ -198,14 +203,13 @@ configure(allprojects) { project ->
 				classpath: configurations.sniffer.asPath
 			)
 
-			ant.animalSniffer(
-					signature: "$buildDir/javaApiSignature/javaApi.signature",
-					classpath: sourceSets.main.compileClasspath.asPath) {
-				path(path: sourceSets.main.output.classesDir)
-				annotation(className: "org.springframework.lang.UsesJava7")
-				annotation(className: "org.springframework.lang.UsesJava8")
-				annotation(className: "org.springframework.lang.UsesSunHttpServer")
-			}
+			// TODO: Animal Sniffer currently chokes on optional JDK 9 bytecode in AspectJ 1.9 beta 5
+			// ant.animalSniffer(
+			// 		signature: "$buildDir/javaApiSignature/javaApi.signature",
+			// 		classpath: sourceSets.main.compileClasspath.asPath) {
+			// 	path(path: sourceSets.main.output.classesDir)
+			// 	annotation(className: "org.springframework.lang.UsesSunHttpServer")
+			// }
 		}
 	}
 
@@ -378,12 +382,12 @@ project("spring-core") {
 		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
 		optional "io.reactivex:rxjava:${rxjavaVersion}"
 		optional("io.netty:netty-buffer:${nettyVersion}")
+		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") {
 			exclude group: "stax", module: "stax-api"
 		}
-		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 	}
 
 	jar {
@@ -487,6 +491,8 @@ project("spring-context") {
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional(project(":spring-instrument"))
 		optional("javax.inject:javax.inject:1")
+		optional("javax.annotation:javax.annotation-api:${annotationApiVersion}")
+		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.ejb:javax.ejb-api:${ejbApiVersion}")
 		optional("javax.interceptor:javax.interceptor-api:${interceptorApiVersion}")
 		optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api:1.0")
@@ -512,16 +518,11 @@ project("spring-oxm") {
 	description = "Spring Object/XML Marshalling"
 	apply from: "oxm.gradle"
 
-	compileTestJava {
-		// necessary to avoid java.lang.VerifyError on jibx compilation
-		// see http://jira.codehaus.org/browse/JIBX-465
-		sourceCompatibility = 1.8
-		targetCompatibility = 1.8
-	}
-
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
+		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
+		optional("javax.activation:activation:${activationApiVersion}")
 		optional("org.codehaus.castor:castor-xml:1.4.1")  {
 			exclude group: 'stax', module: 'stax-api'
 			exclude group: "org.springframework", module: "spring-context"
@@ -532,20 +533,16 @@ project("spring-oxm") {
 		}
 		optional("org.jibx:jibx-run:1.2.6")
 		testCompile(project(":spring-context"))
-		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
 		testCompile("xpp3:xpp3:1.1.4c")
 		testCompile("org.codehaus.jettison:jettison:1.3.7") {
 			exclude group: 'stax', module: 'stax-api'
 		}
-		if (compileTestJava.enabled) {
-			testCompile(files(genCastor.classesDir).builtBy(genCastor))
-			testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
-		}
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
+        testCompile(files(genCastor.classesDir).builtBy(genCastor))
+        testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
 		testRuntime("xerces:xercesImpl:2.11.0")  // for Castor
-		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 }
 
@@ -569,6 +566,7 @@ project("spring-messaging") {
 		}
 		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("javax.servlet:javax.servlet-api:${servletVersion}")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
@@ -584,12 +582,11 @@ project("spring-messaging") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testRuntime("javax.activation:activation:${activationApiVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 }
 
@@ -657,6 +654,7 @@ project("spring-context-support") {
 		compile(project(":spring-context"))
 		optional(project(":spring-jdbc"))  // for Quartz support
 		optional(project(":spring-tx"))  // for Quartz support
+		optional("javax.activation:activation:${activationApiVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		optional("javax.cache:cache-api:1.0.0")
 		optional("com.github.ben-manes.caffeine:caffeine:${caffeineVersion}")
@@ -704,17 +702,19 @@ project("spring-web") {
 		optional("javax.el:javax.el-api:${elApiVersion}")
 		optional("javax.faces:javax.faces-api:2.2")
 		optional("javax.validation:validation-api:${beanvalVersion}")
+		optional("javax.activation:activation:${activationApiVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
 		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
 		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
 		optional("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
-		optional("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+		optional("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
 		optional("io.undertow:undertow-core:${undertowVersion}")
+		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("io.netty:netty-buffer:${nettyVersion}") // Temporarily for JsonObjectDecoder
 	  	optional("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") { // woodstox before aalto
 			exclude group: "stax", module: "stax-api"
@@ -738,27 +738,28 @@ project("spring-web") {
 		optional("com.google.protobuf:protobuf-java:${protobufVersion}")
 		optional("com.google.protobuf:protobuf-java-util:${protobufVersion}")
 		optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
+		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
+		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
-		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
-		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
-		testCompile("com.squareup.okhttp3:mockwebserver:3.0.1")
-		testRuntime("javax.xml.ws:jaxws-api:2.2.11")
-		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
+		testCompile("com.squareup.okhttp3:mockwebserver:${okhttp3Version}")
+		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
+		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
+		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 	}
 }
 
@@ -772,27 +773,30 @@ project("spring-web-reactive") {
 		compile "io.projectreactor:reactor-core:${reactorCoreVersion}"
 		optional(project(":spring-context-support"))  // for FreeMarker support
 		provided "javax.servlet:javax.servlet-api:${servletVersion}"
+		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
-		optional "org.apache.httpcomponents:httpclient:4.5.1" // Needed to run Javadoc without error
+		optional "org.apache.httpcomponents:httpclient:${httpclientVersion}"
+		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.eclipse.jetty:jetty-server:${jettyVersion}")
 		testCompile("org.eclipse.jetty:jetty-servlet:${jettyVersion}")
 		testCompile("io.projectreactor.ipc:reactor-netty:${reactorNettyVersion}")
-		testCompile("io.reactivex:rxnetty-http:0.5.2-SNAPSHOT") {
+		testCompile("io.reactivex:rxnetty-http:${rxnettyVersion}") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
-		testCompile("io.undertow:undertow-core:${undertowVersion}")
 		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
+		testCompile("io.undertow:undertow-core:${undertowVersion}")
+		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
 		testCompile("com.fasterxml:aalto-xml:1.0.0")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
-		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 		testRuntime("javax.activation:activation:${activationApiVersion}")
+		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
+		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 	}
 }
 
@@ -837,6 +841,7 @@ project("spring-webmvc") {
 		optional(project(":spring-oxm"))  // for MarshallingView
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
+		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("org.apache.poi:poi:${poiVersion}")
 		optional("org.apache.poi:poi-ooxml:${poiVersion}")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
@@ -890,7 +895,6 @@ project("spring-webmvc") {
 		testRuntime("org.jruby:jruby:9.1.2.0")
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.webjars:underscorejs:1.8.3")
-		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 		testRuntime("javax.activation:activation:${activationApiVersion}")
@@ -932,7 +936,7 @@ project("spring-websocket") {
 		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
 			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
 		}
-		optional("org.jboss.xnio:xnio-api:3.3.7.Final")
+		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
@@ -942,7 +946,7 @@ project("spring-websocket") {
 		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
 		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-		testRuntime("org.jboss.xnio:xnio-nio:3.3.7.Final")
+		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 	}
 }
@@ -972,6 +976,8 @@ project("spring-test") {
 		}
 		optional("javax.el:javax.el-api:${elApiVersion}")
 		optional("javax.websocket:javax.websocket-api:${websocketVersion}")
+		optional("javax.activation:activation:${activationApiVersion}")
+		optional("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
@@ -1007,14 +1013,11 @@ project("spring-test") {
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("javax.cache:cache-api:1.0.0")
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
-		// Java Util Logging for JUnit 5.
-		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")
+		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")  // Java Util Logging for JUnit 5
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 		testRuntime("org.terracotta:management-model:2.0.0")
-		testRuntime("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
-		testRuntime("javax.activation:activation:${activationApiVersion}")
 	}
 
 	task testNG(type: Test) {

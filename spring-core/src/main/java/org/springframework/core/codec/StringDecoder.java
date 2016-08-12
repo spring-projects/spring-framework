@@ -29,16 +29,16 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Decode from a bytes stream to a String stream.
+ * Decode from a bytes stream to a {@code String} stream.
  *
- * <p>By default, this decoder will split the received {@link DataBuffer}s along newline
- * characters ({@code \r\n}), but this can be changed by passing {@code false} as
- * constructor argument.
+ * <p>By default, this decoder will split the received {@link DataBuffer}s
+ * along newline characters ({@code \r\n}), but this can be changed by
+ * passing {@code false} as a constructor argument.
  *
  * @author Sebastien Deleuze
  * @author Brian Clozel
@@ -59,7 +59,6 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
-	 *
 	 * <p>By default, this decoder will split along new lines.
 	 */
 	public StringDecoder() {
@@ -68,7 +67,6 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	/**
 	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
-	 *
 	 * @param splitOnNewline whether this decoder should split the received data buffers
 	 * along newline characters
 	 */
@@ -80,8 +78,8 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
-		return super.canDecode(elementType, mimeType, hints) &&
-				String.class.equals(elementType.getRawClass());
+		return (super.canDecode(elementType, mimeType, hints) &&
+				String.class.equals(elementType.getRawClass()));
 	}
 
 	@Override

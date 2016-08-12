@@ -16,9 +16,6 @@
 
 package org.springframework.messaging.simp.config;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -72,6 +69,9 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test fixture for {@link AbstractMessageBrokerConfiguration}.
@@ -393,6 +393,13 @@ public class MessageBrokerConfigurationTests {
 	}
 
 	@Test
+	public void customCacheLimit() {
+		SimpleBrokerMessageHandler broker = this.customContext.getBean(SimpleBrokerMessageHandler.class);
+		DefaultSubscriptionRegistry registry = (DefaultSubscriptionRegistry) broker.getSubscriptionRegistry();
+		assertEquals(8192, registry.getCacheLimit());
+	}
+
+	@Test
 	public void userBroadcasts() throws Exception {
 		SimpUserRegistry userRegistry = this.brokerRelayContext.getBean(SimpUserRegistry.class);
 		assertEquals(MultiServerUserRegistry.class, userRegistry.getClass());
@@ -441,6 +448,7 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+
 	static class BaseTestMessageBrokerConfig extends AbstractMessageBrokerConfiguration {
 
 		@Override
@@ -448,6 +456,7 @@ public class MessageBrokerConfigurationTests {
 			return mock(SimpUserRegistry.class);
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	@Configuration
@@ -477,6 +486,7 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+
 	@Configuration
 	static class BrokerRelayConfig extends SimpleBrokerConfig {
 
@@ -488,9 +498,11 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+
 	@Configuration
 	static class DefaultConfig extends BaseTestMessageBrokerConfig {
 	}
+
 
 	@Configuration
 	static class CustomConfig extends BaseTestMessageBrokerConfig {
@@ -525,6 +537,7 @@ public class MessageBrokerConfigurationTests {
 			registry.configureBrokerChannel().setInterceptors(this.interceptor, this.interceptor, this.interceptor);
 			registry.configureBrokerChannel().taskExecutor().corePoolSize(31).maxPoolSize(32).keepAliveSeconds(33).queueCapacity(34);
 			registry.setPathMatcher(new AntPathMatcher(".")).enableSimpleBroker("/topic", "/queue");
+			registry.setCacheLimit(8192);
 		}
 	}
 
@@ -540,6 +553,7 @@ public class MessageBrokerConfigurationTests {
 		}
 	}
 
+
 	private static class TestValidator implements Validator {
 
 		@Override
@@ -551,6 +565,7 @@ public class MessageBrokerConfigurationTests {
 		public void validate(Object target, Errors errors) {
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class CustomThreadPoolTaskExecutor extends ThreadPoolTaskExecutor {

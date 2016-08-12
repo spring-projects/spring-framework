@@ -83,7 +83,7 @@ public class StandardWebSocketClientTests {
 		assertEquals(443, session.getLocalAddress().getPort());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testGetLocalAddressNoScheme() throws Exception {
 		URI uri = new URI("localhost/abc");
 		this.wsClient.doHandshake(this.wsHandler, this.headers, uri);

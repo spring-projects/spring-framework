@@ -32,15 +32,14 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
- * @param <T> the type of elements in the output stream
  * @since 5.0
+ * @param <T> the type of elements in the output stream
  */
 public interface Decoder<T> {
 
 	/**
 	 * Whether the decoder supports the given target element type and the MIME
 	 * type of the source stream.
-	 *
 	 * @param elementType the target element type for the output stream
 	 * @param mimeType the mime type associated with the stream to decode
 	 * @param hints additional information about how to do decode, optional
@@ -50,7 +49,6 @@ public interface Decoder<T> {
 
 	/**
 	 * Decode a {@link DataBuffer} input stream into a Flux of {@code T}.
-	 *
 	 * @param inputStream the {@code DataBuffer} input stream to decode
 	 * @param elementType the expected type of elements in the output stream;
 	 * this type must have been previously passed to the {@link #canDecode}
@@ -64,7 +62,6 @@ public interface Decoder<T> {
 
 	/**
 	 * Decode a {@link DataBuffer} input stream into a Mono of {@code T}.
-	 *
 	 * @param inputStream the {@code DataBuffer} input stream to decode
 	 * @param elementType the expected type of elements in the output stream;
 	 * this type must have been previously passed to the {@link #canDecode}

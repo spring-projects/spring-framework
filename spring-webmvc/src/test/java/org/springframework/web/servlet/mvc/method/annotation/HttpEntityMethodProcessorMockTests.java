@@ -310,7 +310,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 	// SPR-9142
 
-	@Test(expected=HttpMediaTypeNotAcceptableException.class)
+	@Test(expected = HttpMediaTypeNotAcceptableException.class)
 	public void handleReturnValueNotAcceptableParseError() throws Exception {
 		ResponseEntity<String> returnValue = new ResponseEntity<>("Body", HttpStatus.ACCEPTED);
 		servletRequest.addHeader("Accept", "01");

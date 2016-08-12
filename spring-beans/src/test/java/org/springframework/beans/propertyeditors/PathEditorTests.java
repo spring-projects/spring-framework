@@ -60,6 +60,16 @@ public class PathEditorTests {
 	}
 
 	@Test
+	public void testAbsolutePath() throws Exception {
+		PropertyEditor pathEditor = new PathEditor();
+		pathEditor.setAsText("/no_way_this_file_is_found.doc");
+		Object value = pathEditor.getValue();
+		assertTrue(value instanceof Path);
+		Path path = (Path) value;
+		assertTrue(!path.toFile().exists());
+	}
+
+	@Test
 	public void testUnqualifiedPathNameFound() throws Exception {
 		PropertyEditor pathEditor = new PathEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
@@ -70,6 +80,24 @@ public class PathEditorTests {
 		Path path = (Path) value;
 		File file = path.toFile();
 		assertTrue(file.exists());
+		String absolutePath = file.getAbsolutePath();
+		if (File.separatorChar == '\\') {
+			absolutePath = absolutePath.replace('\\', '/');
+		}
+		assertTrue(absolutePath.endsWith(fileName));
+	}
+
+	@Test
+	public void testUnqualifiedPathNameNotFound() throws Exception {
+		PropertyEditor pathEditor = new PathEditor();
+		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
+				ClassUtils.getShortName(getClass()) + ".clazz";
+		pathEditor.setAsText(fileName);
+		Object value = pathEditor.getValue();
+		assertTrue(value instanceof Path);
+		Path path = (Path) value;
+		File file = path.toFile();
+		assertFalse(file.exists());
 		String absolutePath = file.getAbsolutePath();
 		if (File.separatorChar == '\\') {
 			absolutePath = absolutePath.replace('\\', '/');

@@ -21,31 +21,30 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
+import org.springframework.tests.TestSubscriber;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link JacksonJsonDecoder}.
+ * Unit tests for {@link Jackson2JsonDecoder}.
+ *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCase {
+public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canDecode() {
-		JacksonJsonDecoder decoder = new JacksonJsonDecoder();
+		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
 
 		assertTrue(decoder.canDecode(null, MediaType.APPLICATION_JSON));
 		assertFalse(decoder.canDecode(null, MediaType.APPLICATION_XML));
@@ -55,7 +54,7 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 	public void decodePojo() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
-		Flux<Object> flux = new JacksonJsonDecoder().decode(source, elementType, null);
+		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null);
 
 		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
 				assertValues(new Pojo("foofoo", "barbar"));
@@ -68,7 +67,7 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 
 		Method method = getClass().getDeclaredMethod("handle", List.class);
 		ResolvableType elementType = ResolvableType.forMethodParameter(method, 0);
-		Mono<Object> mono = new JacksonJsonDecoder().decodeToMono(source, elementType, null);
+		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType, null);
 
 		TestSubscriber.subscribe(mono).assertNoError().assertComplete().
 				assertValues(Arrays.asList(new Pojo("f1", "b1"), new Pojo("f2", "b2")));
@@ -80,7 +79,7 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
 
 		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
-		Flux<Object> flux = new JacksonJsonDecoder().decode(source, elementType, null);
+		Flux<Object> flux = new Jackson2JsonDecoder().decode(source, elementType, null);
 
 		TestSubscriber.subscribe(flux).assertNoError().assertComplete().
 				assertValues(new Pojo("f1", "b1"), new Pojo("f2", "b2"));
@@ -92,7 +91,7 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 				stringBuffer("{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}"));
 		ResolvableType elementType =  ResolvableType
 				.forMethodParameter(JacksonController.class.getMethod("foo", JacksonViewBean.class), 0);
-		Flux<JacksonViewBean> flux = new JacksonJsonDecoder()
+		Flux<JacksonViewBean> flux = new Jackson2JsonDecoder()
 				.decode(source, elementType, null).cast(JacksonViewBean.class);
 
 		TestSubscriber
@@ -106,12 +105,15 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 				});
 	}
 
+
 	void handle(List<Pojo> list) {
 	}
+
 
 	private interface MyJacksonView1 {}
 
 	private interface MyJacksonView2 {}
+
 
 	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
@@ -148,6 +150,7 @@ public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCas
 			this.withoutView = withoutView;
 		}
 	}
+
 
 	private static class JacksonController {
 

@@ -87,7 +87,7 @@ public class WebAsyncManagerTests {
 		assertTrue(this.asyncManager.isConcurrentHandlingStarted());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void setAsyncWebRequestAfterAsyncStarted() {
 		this.asyncWebRequest.startAsync();
 		this.asyncManager.setAsyncWebRequest(null);

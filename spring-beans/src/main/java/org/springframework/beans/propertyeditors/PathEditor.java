@@ -36,13 +36,10 @@ import org.springframework.util.Assert;
  * <p>Based on {@link Paths#get(URI)}'s resolution algorithm, checking
  * registered NIO file system providers, including the default file system
  * for "file:..." paths. Also supports Spring-style URL notation: any fully
- * qualified standard URL and Spring's special "classpath:" pseudo-URL,
- * as well as Spring's context-specific relative file paths.
- *
- * <p>Note that, in contrast to {@link FileEditor}, relative paths are only
- * supported by Spring's resource abstraction here. Direct {@code Paths.get}
- * resolution in a file system always has to go through the corresponding
- * file system provider's scheme, i.e. "file" for the default file system.
+ * qualified standard URL and Spring's special "classpath:" pseudo-URL, as
+ * well as Spring's context-specific relative file paths. As a fallback, a
+ * path will be resolved in the file system via {@code Paths#get(String)}
+ * if no existing context-relative resource could be found.
  *
  * @author Juergen Hoeller
  * @since 4.3.2
@@ -77,10 +74,12 @@ public class PathEditor extends PropertyEditorSupport {
 
 	@Override
 	public void setAsText(String text) throws IllegalArgumentException {
-		if (!text.startsWith("/") && !text.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX)) {
+		boolean nioPathCandidate = !text.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX);
+		if (nioPathCandidate && !text.startsWith("/")) {
 			try {
 				URI uri = new URI(text);
 				if (uri.getScheme() != null) {
+					nioPathCandidate = false;
 					// Let's try NIO file system providers via Paths.get(URI)
 					setValue(Paths.get(uri).normalize());
 					return;
@@ -97,11 +96,19 @@ public class PathEditor extends PropertyEditorSupport {
 
 		this.resourceEditor.setAsText(text);
 		Resource resource = (Resource) this.resourceEditor.getValue();
-		try {
-			setValue(resource != null ? resource.getFile().toPath() : null);
+		if (resource == null) {
+			setValue(null);
 		}
-		catch (IOException ex) {
-			throw new IllegalArgumentException("Failed to retrieve file for " + resource, ex);
+		else if (!resource.exists() && nioPathCandidate) {
+			setValue(Paths.get(text).normalize());
+		}
+		else {
+			try {
+				setValue(resource.getFile().toPath());
+			}
+			catch (IOException ex) {
+				throw new IllegalArgumentException("Failed to retrieve file for " + resource, ex);
+			}
 		}
 	}
 

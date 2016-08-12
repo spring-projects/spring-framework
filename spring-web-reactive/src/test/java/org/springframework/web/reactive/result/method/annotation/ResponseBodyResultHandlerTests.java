@@ -24,16 +24,18 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import rx.Completable;
+import rx.Single;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.json.JacksonJsonEncoder;
-import org.springframework.http.codec.xml.Jaxb2Encoder;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -88,8 +90,8 @@ public class ResponseBodyResultHandlerTests {
 			writerList.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 			writerList.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
 			writerList.add(new ResourceHttpMessageWriter());
-			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2Encoder()));
-			writerList.add(new EncoderHttpMessageWriter<>(new JacksonJsonEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+			writerList.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
 		}
 		else {
 			writerList = Arrays.asList(writers);
@@ -106,6 +108,9 @@ public class ResponseBodyResultHandlerTests {
 
 		controller = new TestRestController();
 		testSupports(controller, "handleToString", true);
+		testSupports(controller, "handleToMonoString", true);
+		testSupports(controller, "handleToSingleString", true);
+		testSupports(controller, "handleToCompletable", true);
 		testSupports(controller, "handleToResponseEntity", false);
 		testSupports(controller, "handleToMonoResponseEntity", false);
 	}
@@ -131,6 +136,18 @@ public class ResponseBodyResultHandlerTests {
 	private static class TestRestController {
 
 		public String handleToString() {
+			return null;
+		}
+
+		public Mono<String> handleToMonoString() {
+			return null;
+		}
+
+		public Single<String> handleToSingleString() {
+			return null;
+		}
+
+		public Completable handleToCompletable() {
 			return null;
 		}
 

@@ -35,20 +35,22 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 
 	private int cursor = 0;
 
+
 	public ListBasedXMLEventReader(List<XMLEvent> events) {
 		Assert.notNull(events, "'events' must not be null");
 		this.events = Collections.unmodifiableList(events);
 	}
 
+
 	@Override
 	public boolean hasNext() {
-		return cursor != events.size();
+		return (this.cursor != this.events.size());
 	}
 
 	@Override
 	public XMLEvent nextEvent() {
-		if (cursor < events.size()) {
-			return events.get(cursor++);
+		if (this.cursor < this.events.size()) {
+			return this.events.get(this.cursor++);
 		}
 		else {
 			throw new NoSuchElementException();
@@ -57,8 +59,8 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 
 	@Override
 	public XMLEvent peek() {
-		if (cursor < events.size()) {
-			return events.get(cursor);
+		if (this.cursor < this.events.size()) {
+			return this.events.get(this.cursor);
 		}
 		else {
 			return null;
@@ -70,4 +72,5 @@ class ListBasedXMLEventReader extends AbstractXMLEventReader {
 		super.close();
 		this.events.clear();
 	}
+
 }

@@ -28,7 +28,6 @@ import org.junit.Test;
 import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.TestSubscriber;
 import rx.Observable;
 import rx.Single;
 
@@ -46,6 +45,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
+import org.springframework.tests.TestSubscriber;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;

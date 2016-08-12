@@ -35,7 +35,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Chris Beams
  * @since 2.0
  */
-public final class CustomProblemReporterTests {
+public class CustomProblemReporterTests {
 
 	private static final Resource CONTEXT = qualifiedResource(CustomProblemReporterTests.class, "context.xml");
 

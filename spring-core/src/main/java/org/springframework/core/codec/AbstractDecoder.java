@@ -17,7 +17,6 @@
 package org.springframework.core.codec;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
@@ -36,7 +35,7 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractDecoder<T> implements Decoder<T> {
 
-	private List<MimeType> decodableMimeTypes = Collections.emptyList();
+	private final List<MimeType> decodableMimeTypes;
 
 
 	protected AbstractDecoder(MimeType... supportedMimeTypes) {
@@ -54,7 +53,7 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 		if (mimeType == null) {
 			return true;
 		}
-		return this.decodableMimeTypes.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
+		return this.decodableMimeTypes.stream().anyMatch(candidate -> candidate.isCompatibleWith(mimeType));
 	}
 
 	@Override

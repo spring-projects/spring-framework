@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @since 10.09.2003
  */
-public final class SimpleMailMessageTests {
+public class SimpleMailMessageTests {
 
 	@Test
 	public void testSimpleMessageCopyCtor() {
@@ -155,12 +155,12 @@ public final class SimpleMailMessageTests {
 		assertTrue(message1.equals(message2));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCopyCtorChokesOnNullOriginalMessage() throws Exception {
 		new SimpleMailMessage(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCopyToChokesOnNullTargetMessage() throws Exception {
 		new SimpleMailMessage().copyTo(null);
 	}

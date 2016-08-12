@@ -63,7 +63,7 @@ public class HeaderContentTypeResolverTests {
 		assertEquals("text/plain;q=0.5", mediaTypes.get(3).toString());
 	}
 
-	@Test(expected=NotAcceptableStatusException.class)
+	@Test(expected = NotAcceptableStatusException.class)
 	public void resolveMediaTypesParseError() throws Exception {
 		ServerWebExchange exchange = createExchange("textplain; q=0.5");
 		this.resolver.resolveMediaTypes(exchange);

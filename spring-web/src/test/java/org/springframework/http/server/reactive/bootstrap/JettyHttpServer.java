@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 /**
  * @author Rossen Stoyanchev
  */
-public class JettyHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
+public class JettyHttpServer extends HttpServerSupport implements HttpServer, InitializingBean {
 
 	private Server jettyServer;
 
@@ -36,18 +36,10 @@ public class JettyHttpServer extends HttpServerSupport implements InitializingBe
 
 
 	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
-
-	@Override
 	public void afterPropertiesSet() throws Exception {
-
 		this.jettyServer = new Server();
 
-		Assert.notNull(getHttpHandler());
-		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter();
-		servlet.setHandler(getHttpHandler());
+		ServletHttpHandlerAdapter servlet = new ServletHttpHandlerAdapter(getHttpHandler());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 
 		ServletContextHandler contextHandler = new ServletContextHandler(this.jettyServer, "", false, false);
@@ -84,6 +76,11 @@ public class JettyHttpServer extends HttpServerSupport implements InitializingBe
 				throw new IllegalStateException(ex);
 			}
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 }

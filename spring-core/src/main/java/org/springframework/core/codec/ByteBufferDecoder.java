@@ -23,7 +23,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.support.DataBufferUtils;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -35,7 +35,6 @@ import org.springframework.util.MimeTypeUtils;
  * @since 5.0
  */
 public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
-
 
 	public ByteBufferDecoder() {
 		super(MimeTypeUtils.ALL);

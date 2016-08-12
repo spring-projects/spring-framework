@@ -38,11 +38,9 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 	}
 
 
-	private final Set<String> excludedPackages =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(8));
+	private final Set<String> excludedPackages = Collections.newSetFromMap(new ConcurrentHashMap<>(8));
 
-	private final Set<String> excludedClasses =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(8));
+	private final Set<String> excludedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(8));
 
 
 	/**

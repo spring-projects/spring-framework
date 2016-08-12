@@ -26,7 +26,9 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 
 /**
- * Abstract base class for listener-based server responses, i.e. Servlet 3.1 and Undertow.
+ * Abstract base class for listener-based server responses, e.g. Servlet 3.1
+ * and Undertow.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
@@ -34,46 +36,31 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 
 	private final AtomicBoolean writeCalled = new AtomicBoolean();
 
+
 	public AbstractListenerServerHttpResponse(DataBufferFactory dataBufferFactory) {
 		super(dataBufferFactory);
 	}
 
+
 	@Override
 	protected final Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
-		if (this.writeCalled.compareAndSet(false, true)) {
-			Processor<DataBuffer, Void> bodyProcessor = createBodyProcessor();
-			return Mono.from(subscriber -> {
-				body.subscribe(bodyProcessor);
-				bodyProcessor.subscribe(subscriber);
-			});
-
-		} else {
-			return Mono.error(new IllegalStateException(
-					"writeWith() or writeAndFlushWith() has already been called"));
-		}
+		return writeAndFlushWithInternal(Mono.just(body));
 	}
 
 	@Override
 	protected final Mono<Void> writeAndFlushWithInternal(Publisher<Publisher<DataBuffer>> body) {
 		if (this.writeCalled.compareAndSet(false, true)) {
-			Processor<Publisher<DataBuffer>, Void> bodyProcessor =
-					createBodyFlushProcessor();
+			Processor<Publisher<DataBuffer>, Void> bodyProcessor = createBodyFlushProcessor();
 			return Mono.from(subscriber -> {
 				body.subscribe(bodyProcessor);
 				bodyProcessor.subscribe(subscriber);
 			});
-		} else {
+		}
+		else {
 			return Mono.error(new IllegalStateException(
 					"writeWith() or writeAndFlushWith() has already been called"));
 		}
 	}
-
-	/**
-	 * Abstract template method to create a {@code Processor<DataBuffer, Void>} that
-	 * will write the response body to the underlying output. Called from
-	 * {@link #writeWithInternal(Publisher)}.
-	 */
-	protected abstract Processor<DataBuffer, Void> createBodyProcessor();
 
 	/**
 	 * Abstract template method to create a {@code Processor<Publisher<DataBuffer>, Void>}
@@ -81,4 +68,5 @@ public abstract class AbstractListenerServerHttpResponse extends AbstractServerH
 	 * {@link #writeAndFlushWithInternal(Publisher)}.
 	 */
 	protected abstract Processor<Publisher<DataBuffer>, Void> createBodyFlushProcessor();
+
 }

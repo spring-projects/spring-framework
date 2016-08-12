@@ -35,9 +35,9 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class TypePatternClassFilterTests {
+public class TypePatternClassFilterTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testInvalidPattern() {
 		// should throw - pattern must be recognized as invalid
 		new TypePatternClassFilter("-");
@@ -78,12 +78,12 @@ public final class TypePatternClassFilterTests {
 		assertTrue("matches Double",tpcf.matches(Double.class));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetTypePatternWithNullArgument() throws Exception {
 		new TypePatternClassFilter(null);
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testInvocationOfMatchesMethodBlowsUpWhenNoTypePatternHasBeenSet() throws Exception {
 		new TypePatternClassFilter().matches(String.class);
 	}

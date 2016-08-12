@@ -111,7 +111,7 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		assertEquals("2013", resolver.resolveArgument(this.paramYear, this.mavContainer, this.webRequest, null));
 	}
 
-	@Test(expected=ServletRequestBindingException.class)
+	@Test(expected = ServletRequestBindingException.class)
 	public void resolveArgumentMultipleMatches() throws Exception {
 
 		getMatrixVariables("var1").add("colors", "red");
@@ -120,7 +120,7 @@ public class MatrixVariablesMethodArgumentResolverTests {
 		this.resolver.resolveArgument(this.paramColors, this.mavContainer, this.webRequest, null);
 	}
 
-	@Test(expected=ServletRequestBindingException.class)
+	@Test(expected = ServletRequestBindingException.class)
 	public void resolveArgumentRequired() throws Exception {
 		resolver.resolveArgument(this.paramColors, this.mavContainer, this.webRequest, null);
 	}

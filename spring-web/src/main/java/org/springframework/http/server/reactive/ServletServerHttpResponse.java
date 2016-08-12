@@ -22,13 +22,13 @@ import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Processor;
+import org.reactivestreams.Publisher;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
  */
 public class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 
-	private final AtomicBoolean listenerRegistered = new AtomicBoolean();
+	private final ResponseBodyWriteListener writeListener = new ResponseBodyWriteListener();
 
 	private volatile ResponseBodyProcessor bodyProcessor;
 
@@ -54,8 +54,10 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 	private volatile boolean flushOnNext;
 
+
 	public ServletServerHttpResponse(HttpServletResponse response,
 			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
+
 		super(dataBufferFactory);
 		Assert.notNull(response, "'response' must not be null");
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
@@ -64,6 +66,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		this.response = response;
 		this.bufferSize = bufferSize;
 	}
+
 
 	public HttpServletResponse getServletResponse() {
 		return this.response;
@@ -112,15 +115,28 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 	}
 
-	private void registerListener() throws IOException {
-		if (this.listenerRegistered.compareAndSet(false, true)) {
-			ResponseBodyWriteListener writeListener = new ResponseBodyWriteListener();
-			this.response.getOutputStream().setWriteListener(writeListener);
+	@Override
+	protected Processor<Publisher<DataBuffer>, Void> createBodyFlushProcessor() {
+		Processor<Publisher<DataBuffer>, Void> processor = new ResponseBodyFlushProcessor();
+		registerListener();
+		return processor;
+	}
+
+	private void registerListener() {
+		try {
+			outputStream().setWriteListener(writeListener);
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
 		}
 	}
 
+	private ServletOutputStream outputStream() throws IOException {
+		return this.response.getOutputStream();
+	}
+
 	private void flush() throws IOException {
-		ServletOutputStream outputStream = this.response.getOutputStream();
+		ServletOutputStream outputStream = outputStream();
 		if (outputStream.isReady()) {
 			try {
 				outputStream.flush();
@@ -136,23 +152,6 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 	}
 
-	@Override
-	protected ResponseBodyProcessor createBodyProcessor() {
-		try {
-			registerListener();
-			this.bodyProcessor = new ResponseBodyProcessor(this.response.getOutputStream(),
-					this.bufferSize);
-			return this.bodyProcessor;
-		}
-		catch (IOException ex) {
-			throw new UncheckedIOException(ex);
-		}
-	}
-
-	@Override
-	protected AbstractResponseBodyFlushProcessor createBodyFlushProcessor() {
-		return new ResponseBodyFlushProcessor();
-	}
 
 	private class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
 
@@ -160,10 +159,12 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 		private final int bufferSize;
 
+
 		public ResponseBodyProcessor(ServletOutputStream outputStream, int bufferSize) {
 			this.outputStream = outputStream;
 			this.bufferSize = bufferSize;
 		}
+
 
 		@Override
 		protected boolean isWritePossible() {
@@ -206,8 +207,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			byte[] buffer = new byte[this.bufferSize];
 			int bytesRead = -1;
 
-			while (this.outputStream.isReady() &&
-					(bytesRead = input.read(buffer)) != -1) {
+			while (this.outputStream.isReady() && (bytesRead = input.read(buffer)) != -1) {
 				this.outputStream.write(buffer, 0, bytesRead);
 				bytesWritten += bytesRead;
 			}
@@ -229,6 +229,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		@Override
 		public void onError(Throwable ex) {
 			if (bodyProcessor != null) {
+				bodyProcessor.cancel();
 				bodyProcessor.onError(ex);
 			}
 		}
@@ -238,7 +239,13 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 		@Override
 		protected Processor<DataBuffer, Void> createBodyProcessor() {
-			return ServletServerHttpResponse.this.createBodyProcessor();
+			try {
+				bodyProcessor = new ResponseBodyProcessor(outputStream(), bufferSize);
+				return bodyProcessor;
+			}
+			catch (IOException ex) {
+				throw new UncheckedIOException(ex);
+			}
 		}
 
 		@Override

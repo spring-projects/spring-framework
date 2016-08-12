@@ -233,7 +233,7 @@ final class ConfigurationClass {
 
 	@Override
 	public String toString() {
-		return "ConfigurationClass:beanName=" + this.beanName + ",resource=" + this.resource;
+		return "ConfigurationClass: beanName '" + this.beanName + "', " + this.resource;
 	}
 
 

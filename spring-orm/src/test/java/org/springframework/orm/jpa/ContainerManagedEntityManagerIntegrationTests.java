@@ -39,7 +39,6 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @since 2.0
  */
-@SuppressWarnings("deprecation")
 public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntityManagerFactoryIntegrationTests {
 
 	@Autowired
