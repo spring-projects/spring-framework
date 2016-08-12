@@ -161,7 +161,7 @@ public class AnnotationMetadataTests {
 		assertThat(metadata.hasAnnotation(Documented.class.getName()), is(true));
 		assertThat(metadata.hasAnnotation(Scope.class.getName()), is(false));
 		assertThat(metadata.hasAnnotation(SpecialAttr.class.getName()), is(false));
-		assertThat(metadata.getAnnotationTypes().size(), is(3));
+		assertThat(metadata.getAnnotationTypes().size(), is(4));
 	}
 
 	/**

@@ -39,6 +39,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebController;
 import org.springframework.core.annotation.AnnotationUtilsTests.WebMapping;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Indexed;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
@@ -76,19 +77,19 @@ public class AnnotatedElementUtilsTests {
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth1() {
 		Set<String> names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class);
-		assertEquals(names(Transactional.class, Component.class), names);
+		assertEquals(names(Transactional.class, Component.class, Indexed.class), names);
 
 		names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class.getName());
-		assertEquals(names(Transactional.class, Component.class), names);
+		assertEquals(names(Transactional.class, Component.class, Indexed.class), names);
 	}
 
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth2() {
 		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class);
-		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class), names);
+		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class), names);
 
 		names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName());
-		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class), names);
+		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class), names);
 	}
 
 	@Test

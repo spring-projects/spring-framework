@@ -682,6 +682,17 @@ project("spring-context-support") {
 	}
 }
 
+project("spring-context-indexer") {
+	description = "Spring Context Indexer"
+
+	dependencies {
+		testCompile(project(":spring-context"))
+		testCompile("javax.inject:javax.inject:1")
+		testCompile("javax.annotation:javax.annotation-api:${annotationApiVersion}")
+		testCompile("org.eclipse.persistence:javax.persistence:${jpaVersion}")
+	}
+}
+
 project("spring-web") {
 	description = "Spring Web"
 	apply plugin: "groovy"
