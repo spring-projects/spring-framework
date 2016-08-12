@@ -25,6 +25,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 
 /**
@@ -53,6 +54,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	private BeanDefinitionHolder decoratedDefinition;
 
 	private volatile Class<?> targetType;
+
+	private volatile ResolvableType targetResolvableType;
+
 
 	boolean isFactoryMethodUnique = false;
 
@@ -174,6 +178,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.allowCaching = original.allowCaching;
 		this.decoratedDefinition = original.decoratedDefinition;
 		this.targetType = original.targetType;
+		this.targetResolvableType = original.targetResolvableType;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
 	}
 
@@ -215,17 +220,36 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Specify the target type of this bean definition, if known in advance.
+	 * @see #setTargetResolvableType(ResolvableType)
 	 */
 	public void setTargetType(Class<?> targetType) {
 		this.targetType = targetType;
+		this.targetResolvableType = null;
 	}
 
 	/**
 	 * Return the target type of this bean definition, if known
 	 * (either specified in advance or resolved on first instantiation).
+	 * @see #getTargetResolvableType()
 	 */
 	public Class<?> getTargetType() {
 		return this.targetType;
+	}
+
+	/**
+	 * Specify the target resolvable type of this bean definition, if known in advance.
+	 */
+	public void setTargetResolvableType(ResolvableType resolvableTargetType) {
+		this.targetType = (resolvableTargetType == null ? null : resolvableTargetType.resolve());
+		this.targetResolvableType = resolvableTargetType;
+	}
+
+	/**
+	 * Return the target resolvable type of this bean definition, if known
+	 * (either specified in advance or resolved on first instantiation).
+	 */
+	public ResolvableType getTargetResolvableType() {
+		return this.targetResolvableType;
 	}
 
 	/**

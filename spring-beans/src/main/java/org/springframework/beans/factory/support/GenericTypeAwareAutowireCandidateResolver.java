@@ -80,12 +80,16 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 			rbd = (RootBeanDefinition) bdHolder.getBeanDefinition();
 		}
 		if (rbd != null) {
-			// First, check factory method return type, if applicable
-			targetType = getReturnTypeForFactoryMethod(rbd, descriptor);
+			// First try any defined target type
+			targetType = rbd.getTargetResolvableType();
 			if (targetType == null) {
-				RootBeanDefinition dbd = getResolvedDecoratedDefinition(rbd);
-				if (dbd != null) {
-					targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
+				// Check factory method return type, if applicable
+				targetType = getReturnTypeForFactoryMethod(rbd, descriptor);
+				if (targetType == null) {
+					RootBeanDefinition dbd = getResolvedDecoratedDefinition(rbd);
+					if (dbd != null) {
+						targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
+					}
 				}
 			}
 		}
