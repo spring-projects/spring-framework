@@ -45,6 +45,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.SmartRequestBuilder;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -440,7 +442,11 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 		if (parent == null) {
 			return this;
 		}
-		if (parent instanceof RequestBuilder) {
+		if (parent instanceof MockHttpServletRequestBuilder) {
+			MockHttpServletRequestBuilder copiedParent = MockMvcRequestBuilders.get("/");
+			copiedParent.merge(parent);
+			this.parentBuilder = copiedParent;
+		} else if (parent instanceof RequestBuilder) {
 			this.parentBuilder = (RequestBuilder) parent;
 		}
 		if (parent instanceof SmartRequestBuilder) {
