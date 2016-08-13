@@ -895,6 +895,20 @@ public class HtmlUnitRequestBuilderTests {
 		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getAttribute(attrName), equalTo(attrValue));
 	}
 
+	@Test // SPR-14584
+	public void mergeDoesNotCorruptPathInfoOnParent() throws Exception {
+		String pathInfo = "/foo/bar";
+		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new HelloController())
+				.defaultRequest(get("/"))
+				.build();
+
+		assertThat(mockMvc.perform(get(pathInfo)).andReturn().getRequest().getPathInfo(), equalTo(pathInfo));
+
+		mockMvc.perform(requestBuilder);
+
+		assertThat(mockMvc.perform(get(pathInfo)).andReturn().getRequest().getPathInfo(), equalTo(pathInfo));
+	}
+
 
 	private void assertSingleSessionCookie(String expected) {
 		com.gargoylesoftware.htmlunit.util.Cookie jsessionidCookie = webClient.getCookieManager().getCookie("JSESSIONID");
