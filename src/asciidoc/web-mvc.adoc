@@ -793,7 +793,7 @@ to the value of a URI template variable:
 	}
 ----
 
-The URI Template " `/owners/{ownerId}`" specifies the variable name `ownerId`. When the
+The URI Template ++"/owners/{ownerId}"++ specifies the variable name `ownerId`. When the
 controller handles this request, the value of `ownerId` is set to the value found in the
 appropriate part of the URI. For example, when a request comes in for `/owners/fred`,
 the value of `ownerId` is `fred`.
