@@ -116,7 +116,7 @@ public class CronSequenceGenerator {
 		/*
 		The plan:
 
-		1 Round up to the next whole second
+		1 Start with whole second (rounding up if necessary)
 
 		2 If seconds match move on, otherwise find the next match:
 		2.1 If next match is in the next minute then roll forwards
@@ -128,8 +128,6 @@ public class CronSequenceGenerator {
 		4 If hour matches move on, otherwise find the next match
 		4.1 If next match is in the next day then roll forwards,
 		4.2 Reset the minutes and seconds and go to 2
-
-		...
 		*/
 
 		Calendar calendar = new GregorianCalendar();
@@ -428,7 +426,7 @@ public class CronSequenceGenerator {
 
 	@Override
 	public String toString() {
-		return (getClass().getSimpleName() + ": " + this.expression);
+		return getClass().getSimpleName() + ": " + this.expression;
 	}
 
 }
