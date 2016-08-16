@@ -24,6 +24,8 @@ import groovy.lang.GroovyObject;
 import groovy.lang.MetaClass;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.CompilationCustomizer;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -57,7 +59,9 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 	private final String scriptSourceLocator;
 
-	private final GroovyObjectCustomizer groovyObjectCustomizer;
+	private GroovyObjectCustomizer groovyObjectCustomizer;
+
+	private CompilerConfiguration compilerConfiguration;
 
 	private GroovyClassLoader groovyClassLoader;
 
@@ -80,25 +84,44 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * Interpreted by the post-processor that actually creates the script.
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator) {
-		this(scriptSourceLocator, null);
+		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
+		this.scriptSourceLocator = scriptSourceLocator;
 	}
 
 	/**
 	 * Create a new GroovyScriptFactory for the given script source,
 	 * specifying a strategy interface that can create a custom MetaClass
 	 * to supply missing methods and otherwise change the behavior of the object.
-	 * <p>We don't need to specify script interfaces here, since
-	 * a Groovy script defines its Java interfaces itself.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
 	 * @param groovyObjectCustomizer a customizer that can set a custom metaclass
 	 * or make other changes to the GroovyObject created by this factory
 	 * (may be {@code null})
+	 * @see GroovyObjectCustomizer#customize
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator, GroovyObjectCustomizer groovyObjectCustomizer) {
-		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
-		this.scriptSourceLocator = scriptSourceLocator;
+		this(scriptSourceLocator);
 		this.groovyObjectCustomizer = groovyObjectCustomizer;
+	}
+
+	/**
+	 * Create a new GroovyScriptFactory for the given script source,
+	 * specifying a strategy interface that can customize Groovy's compilation
+	 * process within the underlying GroovyClassLoader.
+	 * @param scriptSourceLocator a locator that points to the source of the script.
+	 * Interpreted by the post-processor that actually creates the script.
+	 * @param compilationCustomizer a customizer to be applied to the GroovyClassLoader
+	 * compiler configuration (may be {@code null})
+	 * @since 4.3.3
+	 * @see CompilerConfiguration#addCompilationCustomizers
+	 * @see org.codehaus.groovy.control.customizers.ImportCustomizer
+	 */
+	public GroovyScriptFactory(String scriptSourceLocator, CompilationCustomizer compilationCustomizer) {
+		this(scriptSourceLocator);
+		if (compilationCustomizer != null) {
+			this.compilerConfiguration = new CompilerConfiguration();
+			this.compilerConfiguration.addCompilationCustomizers(compilationCustomizer);
+		}
 	}
 
 
@@ -111,7 +134,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.groovyClassLoader = new GroovyClassLoader(classLoader);
+		this.groovyClassLoader = buildGroovyClassLoader(classLoader);
 	}
 
 	/**
@@ -120,10 +143,20 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	public GroovyClassLoader getGroovyClassLoader() {
 		synchronized (this.scriptClassMonitor) {
 			if (this.groovyClassLoader == null) {
-				this.groovyClassLoader = new GroovyClassLoader(ClassUtils.getDefaultClassLoader());
+				this.groovyClassLoader = buildGroovyClassLoader(ClassUtils.getDefaultClassLoader());
 			}
 			return this.groovyClassLoader;
 		}
+	}
+
+	/**
+	 * Build a {@link GroovyClassLoader} for the given {@code ClassLoader}.
+	 * @param classLoader the ClassLoader to build a GroovyClassLoader for
+	 * @since 4.3.3
+	 */
+	protected GroovyClassLoader buildGroovyClassLoader(ClassLoader classLoader) {
+		return (this.compilerConfiguration != null ?
+				new GroovyClassLoader(classLoader, this.compilerConfiguration) : new GroovyClassLoader(classLoader));
 	}
 
 

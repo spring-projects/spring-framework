@@ -7639,7 +7639,6 @@ set some default property values, or specify a custom `MetaClass`.
 	public interface GroovyObjectCustomizer {
 
 		void customize(GroovyObject goo);
-
 	}
 ----
 
@@ -7678,12 +7677,12 @@ of a `GroovyObjectCustomizer` is easy if you are using the Spring namespace supp
 [subs="verbatim,quotes"]
 ----
 	<!-- define the GroovyObjectCustomizer just like any other bean -->
-	<bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer" />
+	<bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer"/>
 
 		<!-- ... and plug it into the desired Groovy bean via the 'customizer-ref' attribute -->
 		<lang:groovy id="calculator"
 			script-source="classpath:org/springframework/scripting/groovy/Calculator.groovy"
-			customizer-ref="tracingCustomizer" />
+			customizer-ref="tracingCustomizer"/>
 ----
 
 If you are not using the Spring namespace support, you can still use the
@@ -7696,12 +7695,18 @@ If you are not using the Spring namespace support, you can still use the
 		<constructor-arg value="classpath:org/springframework/scripting/groovy/Calculator.groovy"/>
 		<!-- define the GroovyObjectCustomizer (as an inner bean) -->
 		<constructor-arg>
-			<bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer" />
+			<bean id="tracingCustomizer" class="example.SimpleMethodTracingCustomizer"/>
 		</constructor-arg>
 	</bean>
 
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 ----
+
+[NOTE]
+====
+As of Spring Framework 4.3.3, you may also specify a Groovy `CompilationCustomizer` type
+such as an `ImportCustomizer` in the same place as Spring's `GroovyObjectCustomizer`.
+====
 
 
 
