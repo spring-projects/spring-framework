@@ -8175,11 +8175,11 @@ materialized by the `org.springframework.cache.Cache` and
 
 There are <<cache-store-configuration,a few implementations>> of that abstraction
 available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
-http://ehcache.org/[EhCache], Gemfire cache,
+http://ehcache.org/[Ehcache 2.x], Gemfire cache,
 https://github.com/ben-manes/caffeine/wiki[Caffeine],
 https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
-JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
-other cache stores/providers.
+JSR-107 compliant caches (e.g. Ehcache 3.x). See <<cache-plug>> for more information
+on plugging in other cache stores/providers.
 
 [IMPORTANT]
 ====
@@ -9089,9 +9089,11 @@ eviction contracts.
 
 
 [[cache-store-configuration-ehcache]]
-==== EhCache-based Cache
+==== Ehcache-based Cache
 
-The EhCache implementation is located under `org.springframework.cache.ehcache` package.
+NOTE: Ehcache 3.x is fully JSR-107 compliant and no dedicated support is required for it.
+
+The Ehcache 2.x implementation is located under `org.springframework.cache.ehcache` package.
 Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 
 [source,xml,indent=0]
