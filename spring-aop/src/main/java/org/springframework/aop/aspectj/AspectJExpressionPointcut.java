@@ -55,6 +55,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -215,7 +216,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		PointcutParser parser = PointcutParser
 				.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
 						SUPPORTED_PRIMITIVES, cl);
-		parser.registerPointcutDesignatorHandler(new BeanNamePointcutDesignatorHandler());
+		parser.registerPointcutDesignatorHandler(new BeanPointcutDesignatorHandler());
 		return parser;
 	}
 
@@ -521,7 +522,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 * automatically by examining a thread local variable and therefore a matching
 	 * context need not be set on the pointcut.
 	 */
-	private class BeanNamePointcutDesignatorHandler implements PointcutDesignatorHandler {
+	private class BeanPointcutDesignatorHandler implements PointcutDesignatorHandler {
 
 		private static final String BEAN_DESIGNATOR_NAME = "bean";
 
@@ -532,7 +533,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 		@Override
 		public ContextBasedMatcher parse(String expression) {
-			return new BeanNameContextMatcher(expression);
+			return new BeanContextMatcher(expression);
 		}
 	}
 
@@ -544,11 +545,11 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	 * For static match tests, this matcher abstains to allow the overall
 	 * pointcut to match even when negation is used with the bean() pointcut.
 	 */
-	private class BeanNameContextMatcher implements ContextBasedMatcher {
+	private class BeanContextMatcher implements ContextBasedMatcher {
 
 		private final NamePattern expressionPattern;
 
-		public BeanNameContextMatcher(String expression) {
+		public BeanContextMatcher(String expression) {
 			this.expressionPattern = new NamePattern(expression);
 		}
 
@@ -593,27 +594,16 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			if (targetType != null) {
 				boolean isFactory = FactoryBean.class.isAssignableFrom(targetType);
 				return FuzzyBoolean.fromBoolean(
-						matchesBeanName(isFactory ? BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName : advisedBeanName));
+						matchesBean(isFactory ? BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName : advisedBeanName));
 			}
 			else {
-				return FuzzyBoolean.fromBoolean(matchesBeanName(advisedBeanName) ||
-						matchesBeanName(BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName));
+				return FuzzyBoolean.fromBoolean(matchesBean(advisedBeanName) ||
+						matchesBean(BeanFactory.FACTORY_BEAN_PREFIX + advisedBeanName));
 			}
 		}
 
-		private boolean matchesBeanName(String advisedBeanName) {
-			if (this.expressionPattern.matches(advisedBeanName)) {
-				return true;
-			}
-			if (beanFactory != null) {
-				String[] aliases = beanFactory.getAliases(advisedBeanName);
-				for (String alias : aliases) {
-					if (this.expressionPattern.matches(alias)) {
-						return true;
-					}
-				}
-			}
-			return false;
+		private boolean matchesBean(String advisedBeanName) {
+			return BeanFactoryAnnotationUtils.isQualifierMatch(this.expressionPattern::matches, advisedBeanName, beanFactory);
 		}
 	}
 
