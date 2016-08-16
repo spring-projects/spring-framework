@@ -8459,6 +8459,18 @@ only want to cache paperback books:
 	public Book findBook(String name)
 ----
 
+The cache abstraction supports `java.util.Optional`, using its content as cached value
+only if it present. `#result` always refers to the business entity and never on a
+supported wrapper so the previous example can be rewritten as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Cacheable(cacheNames="book", condition="#name.length < 32", **unless="#result.hardback"**)
+	public Optional<Book> findBook(String name)
+----
+
+Note that `result` still refers to `Book` and not `Optional`.
 
 [[cache-spel-context]]
 ===== Available caching SpEL evaluation context
@@ -8515,7 +8527,8 @@ conditional computations:
 | evaluation context
 | The result of the method call (the value to be cached). Only available in `unless`
   expressions, `cache put` expressions (to compute the `key`), or `cache evict`
-  expressions (when `beforeInvocation` is `false`).
+  expressions (when `beforeInvocation` is `false`). For supported wrappers such as
+  `Optional`, `#result` refers to the actual object, not the wrapper.
 | `#result`
 |===
 
