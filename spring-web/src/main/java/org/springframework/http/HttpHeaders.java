@@ -442,10 +442,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Allow-Credentials} response header.
+	 * Return the value of the {@code Access-Control-Allow-Credentials} response header.
 	 */
 	public boolean getAccessControlAllowCredentials() {
-		return new Boolean(getFirst(ACCESS_CONTROL_ALLOW_CREDENTIALS));
+		return Boolean.parseBoolean(getFirst(ACCESS_CONTROL_ALLOW_CREDENTIALS));
 	}
 
 	/**
@@ -456,7 +456,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Allow-Headers} response header.
+	 * Return the value of the {@code Access-Control-Allow-Headers} response header.
 	 */
 	public List<String> getAccessControlAllowHeaders() {
 		return getFirstValueAsList(ACCESS_CONTROL_ALLOW_HEADERS);
@@ -509,7 +509,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Expose-Headers} response header.
+	 * Return the value of the {@code Access-Control-Expose-Headers} response header.
 	 */
 	public List<String> getAccessControlExposeHeaders() {
 		return getFirstValueAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
@@ -523,7 +523,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Max-Age} response header.
+	 * Return the value of the {@code Access-Control-Max-Age} response header.
 	 * <p>Returns -1 when the max age is unknown.
 	 */
 	public long getAccessControlMaxAge() {
@@ -539,7 +539,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Request-Headers} request header.
+	 * Return the value of the {@code Access-Control-Request-Headers} request header.
 	 */
 	public List<String> getAccessControlRequestHeaders() {
 		return getFirstValueAsList(ACCESS_CONTROL_REQUEST_HEADERS);
