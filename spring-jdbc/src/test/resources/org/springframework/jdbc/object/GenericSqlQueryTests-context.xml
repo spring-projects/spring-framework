@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.TestDataSourceWrapper"/>
 
-	<bean id="queryWithPlaceHolders" class="org.springframework.jdbc.object.GenericSqlQuery">
+	<bean id="queryWithPlaceholders" class="org.springframework.jdbc.object.GenericSqlQuery">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="sql" value="select id, forename from custmr where id = ? and country = ?"/>
 		<property name="parameters">
@@ -47,7 +47,7 @@
 				</bean>
 			</list>
 		</property>
-    <property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
+        <property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
 	</bean>
 
 </beans>
