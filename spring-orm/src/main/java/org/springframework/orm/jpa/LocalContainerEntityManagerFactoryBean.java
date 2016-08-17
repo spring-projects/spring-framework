@@ -144,6 +144,18 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
+	 * Set the default persistence unit root location, to be applied
+	 * if no unit-specific persistence unit root could be determined.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * <p>Default is "classpath:", that is, the root of the current classpath
+	 * (nearest root directory). To be overridden if unit-specific resolution
+	 * does not work and the classpath root is not appropriate either.
+	 */
+	public void setDefaultPersistenceUnitRootLocation(String defaultPersistenceUnitRootLocation) {
+		this.internalPersistenceUnitManager.setDefaultPersistenceUnitRootLocation(defaultPersistenceUnitRootLocation);
+	}
+
+	/**
 	 * Set whether to use Spring-based scanning for entity classes in the classpath
 	 * instead of using JPA's standard scanning of jar files with {@code persistence.xml}
 	 * markers in them. In case of Spring-based scanning, no {@code persistence.xml}
