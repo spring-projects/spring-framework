@@ -97,6 +97,19 @@ public class ResponseExtractorsTests {
 	}
 
 	@Test
+	public void shouldGetErrorWhenBadResponseCodeInResponseEntity() throws Exception {
+		this.headers.setContentType(MediaType.TEXT_PLAIN);
+		given(this.response.getStatusCode()).willReturn(HttpStatus.FORBIDDEN);
+		given(this.webClientConfig.getResponseErrorHandler()).willReturn(new DefaultResponseErrorHandler());
+
+		Mono<ResponseEntity<String>> result = ResponseExtractors.response(String.class)
+				.extract(Mono.just(this.response), this.webClientConfig);
+
+		TestSubscriber.subscribe(result)
+				.assertError(WebClientErrorException.class);
+	}
+
+	@Test
 	public void shouldExtractResponseEntityFlux() throws Exception {
 		this.headers.setContentType(MediaType.TEXT_PLAIN);
 		given(this.response.getStatusCode()).willReturn(HttpStatus.OK);

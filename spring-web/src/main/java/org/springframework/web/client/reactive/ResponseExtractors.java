@@ -123,8 +123,10 @@ public class ResponseExtractors {
 	@SuppressWarnings("unchecked")
 	public static <T> ResponseExtractor<Mono<ResponseEntity<T>>> response(ResolvableType bodyType) {
 
-		return (clientResponse, webClientConfig) -> clientResponse.then(response ->
-				Mono.when(
+		return (clientResponse, webClientConfig) -> clientResponse.doOnNext(response ->
+				webClientConfig.getResponseErrorHandler()
+							   .handleError(response, webClientConfig.getMessageReaders()))
+				.then(response -> Mono.when(
 						decodeResponseBodyAsMono(response, bodyType,
 								webClientConfig.getMessageReaders()).defaultIfEmpty(EMPTY_BODY),
 						Mono.just(response.getHeaders()),
