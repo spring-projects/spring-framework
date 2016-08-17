@@ -7829,8 +7829,9 @@ If you are not using the Spring namespace support, you can still use the
 
 [NOTE]
 ====
-As of Spring Framework 4.3.3, you may also specify a Groovy `CompilationCustomizer` type
-such as an `ImportCustomizer` in the same place as Spring's `GroovyObjectCustomizer`.
+As of Spring Framework 4.3.3, you may also specify a Groovy `CompilationCustomizer`
+(such as an `ImportCustomizer`) or even a full Groovy `CompilerConfiguration` object
+in the same place as Spring's `GroovyObjectCustomizer`.
 ====
 
 
