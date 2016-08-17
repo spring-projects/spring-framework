@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,21 +74,31 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 			// No generic type -> we know it's a Class type-match, so no need to check again.
 			return true;
 		}
+
 		ResolvableType targetType = null;
+		boolean cacheType = false;
 		RootBeanDefinition rbd = null;
 		if (bdHolder.getBeanDefinition() instanceof RootBeanDefinition) {
 			rbd = (RootBeanDefinition) bdHolder.getBeanDefinition();
 		}
 		if (rbd != null) {
-			// First, check factory method return type, if applicable
-			targetType = getReturnTypeForFactoryMethod(rbd, descriptor);
+			targetType = rbd.targetType;
 			if (targetType == null) {
-				RootBeanDefinition dbd = getResolvedDecoratedDefinition(rbd);
-				if (dbd != null) {
-					targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
+				cacheType = true;
+				// First, check factory method return type, if applicable
+				targetType = getReturnTypeForFactoryMethod(rbd, descriptor);
+				if (targetType == null) {
+					RootBeanDefinition dbd = getResolvedDecoratedDefinition(rbd);
+					if (dbd != null) {
+						targetType = dbd.targetType;
+						if (targetType == null) {
+							targetType = getReturnTypeForFactoryMethod(dbd, descriptor);
+						}
+					}
 				}
 			}
 		}
+
 		if (targetType == null) {
 			// Regular case: straight bean instance, with BeanFactory available.
 			if (this.beanFactory != null) {
@@ -106,7 +116,14 @@ public class GenericTypeAwareAutowireCandidateResolver implements AutowireCandid
 				}
 			}
 		}
-		if (targetType == null || (descriptor.fallbackMatchAllowed() && targetType.hasUnresolvableGenerics())) {
+
+		if (targetType == null) {
+			return true;
+		}
+		if (cacheType) {
+			rbd.targetType = targetType;
+		}
+		if (descriptor.fallbackMatchAllowed() && targetType.hasUnresolvableGenerics()) {
 			return true;
 		}
 		// Full check for complex generic type match...
