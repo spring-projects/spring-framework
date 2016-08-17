@@ -124,6 +124,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		SimpleInterface asyncTest = context.getBean("asyncTest", SimpleInterface.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);

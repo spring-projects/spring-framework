@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.TestDataSourceWrapper"/>
@@ -47,7 +47,7 @@
 				</bean>
 			</list>
 		</property>
-    <property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
+        <property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
 	</bean>
 
 	<bean id="queryWithRowMapperBean" class="org.springframework.jdbc.object.GenericSqlQuery">
