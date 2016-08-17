@@ -22,6 +22,7 @@ import java.util.function.Function;
 import org.springframework.http.HttpMethod;
 
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.config.ClientOptions;
 import reactor.ipc.netty.http.HttpException;
 import reactor.ipc.netty.http.HttpInbound;
 
@@ -34,11 +35,28 @@ import reactor.ipc.netty.http.HttpInbound;
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
 
+	private final ClientOptions clientOptions;
+
+	/**
+	 * Create a Reactor Netty {@link ClientHttpConnector} with default {@link ClientOptions}
+	 * and SSL support enabled.
+	 */
+	public ReactorClientHttpConnector() {
+		this(ClientOptions.create().sslSupport());
+	}
+
+	/**
+	 * Create a Reactor Netty {@link ClientHttpConnector} with the given {@link ClientOptions}
+	 */
+	public ReactorClientHttpConnector(ClientOptions clientOptions) {
+		this.clientOptions = clientOptions;
+	}
+
 	@Override
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		return reactor.ipc.netty.http.HttpClient.create(uri.toString())
+		return reactor.ipc.netty.http.HttpClient.create(this.clientOptions)
 				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()),
 						uri.toString(),
 						httpClientRequest -> requestCallback
