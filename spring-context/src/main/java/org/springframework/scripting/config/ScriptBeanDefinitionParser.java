@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,13 @@ import org.springframework.util.xml.DomUtils;
  * Allows for objects written using dynamic languages to be easily exposed with
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *
- * <p>The script for each object can be specified either as a reference to the Resource
- * containing it (using the '{@code script-source}' attribute) or inline in the XML configuration
- * itself (using the '{@code inline-script}' attribute.
+ * <p>The script for each object can be specified either as a reference to the
+ * resource containing it (using the '{@code script-source}' attribute) or inline
+ * in the XML configuration itself (using the '{@code inline-script}' attribute.
  *
- * <p>By default, dynamic objects created with these tags are <strong>not</strong> refreshable.
- * To enable refreshing, specify the refresh check delay for each object (in milliseconds) using the
- * '{@code refresh-check-delay}' attribute.
+ * <p>By default, dynamic objects created with these tags are <strong>not</strong>
+ * refreshable. To enable refreshing, specify the refresh check delay for each
+ * object (in milliseconds) using the '{@code refresh-check-delay}' attribute.
  *
  * @author Rob Harrop
  * @author Rod Johnson
@@ -171,14 +171,13 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		// Attach any refresh metadata.
 		String refreshCheckDelay = element.getAttribute(REFRESH_CHECK_DELAY_ATTRIBUTE);
 		if (StringUtils.hasText(refreshCheckDelay)) {
-			bd.setAttribute(ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, new Long(refreshCheckDelay));
+			bd.setAttribute(ScriptFactoryPostProcessor.REFRESH_CHECK_DELAY_ATTRIBUTE, Long.valueOf(refreshCheckDelay));
 		}
 
 		// Attach any proxy target class metadata.
 		String proxyTargetClass = element.getAttribute(PROXY_TARGET_CLASS_ATTRIBUTE);
 		if (StringUtils.hasText(proxyTargetClass)) {
-			Boolean flag = new Boolean(proxyTargetClass);
-			bd.setAttribute(ScriptFactoryPostProcessor.PROXY_TARGET_CLASS_ATTRIBUTE, flag);
+			bd.setAttribute(ScriptFactoryPostProcessor.PROXY_TARGET_CLASS_ATTRIBUTE, Boolean.valueOf(proxyTargetClass));
 		}
 
 		// Add constructor arguments.
@@ -213,7 +212,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 */
 	private String resolveScriptSource(Element element, XmlReaderContext readerContext) {
 		boolean hasScriptSource = element.hasAttribute(SCRIPT_SOURCE_ATTRIBUTE);
-		List elements = DomUtils.getChildElementsByTagName(element, INLINE_SCRIPT_ELEMENT);
+		List<Element> elements = DomUtils.getChildElementsByTagName(element, INLINE_SCRIPT_ELEMENT);
 		if (hasScriptSource && !elements.isEmpty()) {
 			readerContext.error("Only one of 'script-source' and 'inline-script' should be specified.", element);
 			return null;
@@ -222,7 +221,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 			return element.getAttribute(SCRIPT_SOURCE_ATTRIBUTE);
 		}
 		else if (!elements.isEmpty()) {
-			Element inlineElement = (Element) elements.get(0);
+			Element inlineElement = elements.get(0);
 			return "inline:" + DomUtils.getTextValue(inlineElement);
 		}
 		else {
