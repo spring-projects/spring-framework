@@ -38,7 +38,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		return reactor.ipc.netty.http.HttpClient.create(uri.toString())
+		return reactor.ipc.netty.http.HttpClient.create()
 				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()),
 						uri.toString(),
 						httpClientRequest -> requestCallback
