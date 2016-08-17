@@ -3991,7 +3991,8 @@ config). Listed below are some of the exceptions handled by this resolver and th
 corresponding status codes:
 
 |===
-| Exception| HTTP Status Code
+| Exception
+| HTTP Status Code
 
 | `BindException`
 | 400 (Bad Request)
@@ -4017,6 +4018,9 @@ corresponding status codes:
 | `MethodArgumentNotValidException`
 | 400 (Bad Request)
 
+| `MissingPathVariableException`
+| 500 (Internal Server Error)
+
 | `MissingServletRequestParameterException`
 | 400 (Bad Request)
 
@@ -4031,12 +4035,6 @@ corresponding status codes:
 
 | `TypeMismatchException`
 | 400 (Bad Request)
-
-| `MissingPathVariableException`
-| 500 (Internal Server Error)
-
-| `NoHandlerFoundException`
-| 404 (Not Found)
 |===
 
 The `DefaultHandlerExceptionResolver` works transparently by setting the status of the
