@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -390,7 +390,7 @@ public abstract class AbstractJasperReportsView extends AbstractUrlBasedView {
 			else if (str.length() > 0 && Character.isDigit(str.charAt(0))) {
 				// Looks like a number... let's try.
 				try {
-					return new Integer(str);
+					return Integer.valueOf(str);
 				}
 				catch (NumberFormatException ex) {
 					// OK, then let's keep it as a String value.
