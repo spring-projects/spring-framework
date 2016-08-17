@@ -144,14 +144,15 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
-	 * Set the default persistence unit root location, to be applied
-	 * if no unit-specific persistence unit root could be determined.
-	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * Set a persistence unit root location for the default persistence unit.
 	 * <p>Default is "classpath:", that is, the root of the current classpath
 	 * (nearest root directory). To be overridden if unit-specific resolution
 	 * does not work and the classpath root is not appropriate either.
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @since 4.3.3
+	 * @see DefaultPersistenceUnitManager#setDefaultPersistenceUnitRootLocation
 	 */
-	public void setDefaultPersistenceUnitRootLocation(String defaultPersistenceUnitRootLocation) {
+	public void setPersistenceUnitRootLocation(String defaultPersistenceUnitRootLocation) {
 		this.internalPersistenceUnitManager.setDefaultPersistenceUnitRootLocation(defaultPersistenceUnitRootLocation);
 	}
 
@@ -214,6 +215,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Specify the JPA 2.0 shared cache mode for this persistence unit,
 	 * overriding a value in {@code persistence.xml} if set.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @since 4.0
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
 	 * @see #setPersistenceUnitManager
 	 */
@@ -225,6 +227,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Specify the JPA 2.0 validation mode for this persistence unit,
 	 * overriding a value in {@code persistence.xml} if set.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @since 4.0
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
 	 * @see #setPersistenceUnitManager
 	 */
