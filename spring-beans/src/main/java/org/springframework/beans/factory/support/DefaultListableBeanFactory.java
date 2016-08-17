@@ -1430,7 +1430,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		checkBeanNotOfRequiredType(type, descriptor);
 
 		throw new NoSuchBeanDefinitionException(type, dependencyDescription,
-				"expected at least 1 bean which qualifies as autowire candidate for this dependency. " +
+				"expected at least 1 bean which qualifies as autowire candidate. " +
 				"Dependency annotations: " + ObjectUtils.nullSafeToString(descriptor.getAnnotations()));
 	}
 
@@ -1682,7 +1682,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				sources.add(factoryMethod);
 			}
 			Class<?> targetType = beanDefinition.getTargetType();
-			if (targetType != null && !targetType.equals(obj.getClass())) {
+			if (targetType != null && targetType != obj.getClass()) {
 				sources.add(targetType);
 			}
 			return sources.toArray(new Object[sources.size()]);
