@@ -34,16 +34,6 @@ public class SerializablePerson implements Person, Serializable {
 
 
 	@Override
-	public int getAge() {
-		return age;
-	}
-
-	@Override
-	public void setAge(int age) {
-		this.age = age;
-	}
-
-	@Override
 	public String getName() {
 		return name;
 	}
@@ -51,6 +41,16 @@ public class SerializablePerson implements Person, Serializable {
 	@Override
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public int getAge() {
+		return age;
+	}
+
+	@Override
+	public void setAge(int age) {
+		this.age = age;
 	}
 
 	@Override
@@ -62,6 +62,7 @@ public class SerializablePerson implements Person, Serializable {
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (!(other instanceof SerializablePerson)) {
 			return false;

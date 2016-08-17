@@ -35,12 +35,12 @@ public class NopInterceptor implements MethodInterceptor {
 		return invocation.proceed();
 	}
 
-	public int getCount() {
-		return this.count;
+	protected void increment() {
+		this.count++;
 	}
 
-	protected void increment() {
-		++count;
+	public int getCount() {
+		return this.count;
 	}
 
 
