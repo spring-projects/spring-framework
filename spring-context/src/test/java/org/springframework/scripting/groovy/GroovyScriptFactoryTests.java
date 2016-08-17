@@ -470,6 +470,8 @@ public class GroovyScriptFactoryTests {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Map<?, Messenger> beans = ctx.getBeansOfType(Messenger.class);
 		assertEquals(4, beans.size());
+		assertTrue(ctx.getBean(MyBytecodeProcessor.class).processed.contains(
+				"org.springframework.scripting.groovy.GroovyMessenger2"));
 	}
 
 	@Test

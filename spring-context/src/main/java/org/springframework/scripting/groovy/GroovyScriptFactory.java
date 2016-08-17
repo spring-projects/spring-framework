@@ -36,6 +36,7 @@ import org.springframework.scripting.ScriptFactory;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -106,21 +107,37 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 
 	/**
 	 * Create a new GroovyScriptFactory for the given script source,
+	 * specifying a strategy interface that can create a custom MetaClass
+	 * to supply missing methods and otherwise change the behavior of the object.
+	 * @param scriptSourceLocator a locator that points to the source of the script.
+	 * Interpreted by the post-processor that actually creates the script.
+	 * @param compilerConfiguration a custom compiler configuration to be applied
+	 * to the GroovyClassLoader (may be {@code null})
+	 * @since 4.3.3
+	 * @see GroovyClassLoader#GroovyClassLoader(ClassLoader, CompilerConfiguration)
+	 */
+	public GroovyScriptFactory(String scriptSourceLocator, CompilerConfiguration compilerConfiguration) {
+		this(scriptSourceLocator);
+		this.compilerConfiguration = compilerConfiguration;
+	}
+
+	/**
+	 * Create a new GroovyScriptFactory for the given script source,
 	 * specifying a strategy interface that can customize Groovy's compilation
 	 * process within the underlying GroovyClassLoader.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
-	 * @param compilationCustomizer a customizer to be applied to the GroovyClassLoader
-	 * compiler configuration (may be {@code null})
+	 * @param compilationCustomizers one or more customizers to be applied to the
+	 * GroovyClassLoader compiler configuration
 	 * @since 4.3.3
 	 * @see CompilerConfiguration#addCompilationCustomizers
 	 * @see org.codehaus.groovy.control.customizers.ImportCustomizer
 	 */
-	public GroovyScriptFactory(String scriptSourceLocator, CompilationCustomizer compilationCustomizer) {
+	public GroovyScriptFactory(String scriptSourceLocator, CompilationCustomizer... compilationCustomizers) {
 		this(scriptSourceLocator);
-		if (compilationCustomizer != null) {
+		if (!ObjectUtils.isEmpty(compilationCustomizers)) {
 			this.compilerConfiguration = new CompilerConfiguration();
-			this.compilerConfiguration.addCompilationCustomizers(compilationCustomizer);
+			this.compilerConfiguration.addCompilationCustomizers(compilationCustomizers);
 		}
 	}
 

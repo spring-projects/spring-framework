@@ -39,8 +39,8 @@ class GroovyCalculator implements Calculator {
 	<lang:groovy id="groovyObjectCustomizer" customizer-ref="importCustomizer">
 		<lang:inline-script><![CDATA[
 public class TestCustomizer implements GroovyObjectCustomizer {
-	public void customize(GroovyObject o) {
-		println "customizing ${o}.."
+	public void customize(GroovyObject go) {
+		println "customizing ${go}..."
 	}
 }]]>
 		</lang:inline-script>
@@ -53,8 +53,15 @@ public class TestCustomizer implements GroovyObjectCustomizer {
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
 
-	<lang:groovy script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
+	<lang:groovy script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy"
+			customizer-ref="compilerConfiguration">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
+
+	<bean id="compilerConfiguration" class="org.codehaus.groovy.control.CompilerConfiguration">
+		<property name="bytecodePostprocessor" ref="bytecodeProcessor"/>
+	</bean>
+
+	<bean id="bytecodeProcessor" class="org.springframework.scripting.groovy.MyBytecodeProcessor"/>
 
 </beans>

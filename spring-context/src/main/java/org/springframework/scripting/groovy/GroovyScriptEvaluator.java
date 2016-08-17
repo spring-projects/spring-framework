@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.Map;
 import groovy.lang.Binding;
 import groovy.lang.GroovyRuntimeException;
 import groovy.lang.GroovyShell;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.CompilationCustomizer;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.scripting.ScriptCompilationException;
@@ -40,6 +42,8 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 
 	private ClassLoader classLoader;
 
+	private CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
+
 
 	/**
 	 * Construct a new GroovyScriptEvaluator.
@@ -56,6 +60,35 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 	}
 
 
+	/**
+	 * Set a custom compiler configuration for this evaluator.
+	 * @since 4.3.3
+	 * @see #setCompilationCustomizers
+	 */
+	public void setCompilerConfiguration(CompilerConfiguration compilerConfiguration) {
+		this.compilerConfiguration =
+				(compilerConfiguration != null ? compilerConfiguration : new CompilerConfiguration());
+	}
+
+	/**
+	 * Return this evaluator's compiler configuration (never {@code null}).
+	 * @since 4.3.3
+	 * @see #setCompilerConfiguration
+	 */
+	public CompilerConfiguration getCompilerConfiguration() {
+		return this.compilerConfiguration;
+	}
+
+	/**
+	 * Set one or more customizers to be applied to this evaluator's compiler configuration.
+	 * <p>Note that this modifies the shared compiler configuration held by this evaluator.
+	 * @since 4.3.3
+	 * @see #setCompilerConfiguration
+	 */
+	public void setCompilationCustomizers(CompilationCustomizer... compilationCustomizers) {
+		this.compilerConfiguration.addCompilationCustomizers(compilationCustomizers);
+	}
+
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -69,7 +102,8 @@ public class GroovyScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAw
 
 	@Override
 	public Object evaluate(ScriptSource script, Map<String, Object> arguments) {
-		GroovyShell groovyShell = new GroovyShell(this.classLoader, new Binding(arguments));
+		GroovyShell groovyShell = new GroovyShell(
+				this.classLoader, new Binding(arguments), this.compilerConfiguration);
 		try {
 			String filename = (script instanceof ResourceScriptSource ?
 					((ResourceScriptSource) script).getResource().getFilename() : null);
