@@ -17,6 +17,7 @@ package org.springframework.cache.interceptor;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import rx.Observable;
 import rx.functions.Action0;
 import rx.functions.Action1;
@@ -34,20 +35,11 @@ public class CacheResultWrapperManager {
 		unwrapperByClass = new HashMap<Class<?>, CacheResultWrapper>();
 
 		List<CacheResultWrapper> unwrapperList = new ArrayList<CacheResultWrapper>();
-		try {
-			ClassUtils.forName("java.util.Optional", CacheAspectSupport.class.getClassLoader());
-			unwrapperList.add(new OptionalUnWrapper());
-		}
-		catch (ClassNotFoundException ex) {
-			// Java 8 not available - Optional references simply not supported then.
-		}
 
-		try {
-			ClassUtils.forName("rx.Observable", CacheAspectSupport.class.getClassLoader());
+		unwrapperList.add(new OptionalUnWrapper());
+
+		if(ClassUtils.isPresent("rx.Observable", CacheAspectSupport.class.getClassLoader())) {
 			unwrapperList.add(new ObservableWrapper());
-		}
-		catch (ClassNotFoundException ex) {
-			// RxJava not available
 		}
 
 		for(CacheResultWrapper unwrapper: unwrapperList) {
@@ -102,14 +94,11 @@ public class CacheResultWrapperManager {
 		@Override
 		public Object unwrap(Object optionalObject, AsyncWrapResult asyncResult) {
 			Optional<?> optional = (Optional<?>) optionalObject;
-			if (!optional.isPresent()) {
-				asyncResult.complete(null);
-			}
-			else {
-				Object result = optional.get();
-				Assert.isTrue(!(result instanceof Optional), "Multi-level Optional usage not supported");
-				asyncResult.complete(result);
-			}
+
+			Object value = ObjectUtils.unwrapOptional(optional);
+
+			asyncResult.complete(value);
+
 			return optionalObject;
 		}
 
