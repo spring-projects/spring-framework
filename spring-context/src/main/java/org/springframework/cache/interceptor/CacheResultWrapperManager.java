@@ -15,14 +15,17 @@
  */
 package org.springframework.cache.interceptor;
 
-import org.springframework.util.Assert;
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import rx.Observable;
-import rx.functions.Action0;
-import rx.functions.Action1;
+import reactor.core.publisher.Mono;
+import rx.Single;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Manages the {@link CacheResultWrapper} instances to apply only the appropriate.
@@ -32,29 +35,41 @@ public class CacheResultWrapperManager {
 	private Map<Class<?>, CacheResultWrapper> unwrapperByClass;
 
 	public CacheResultWrapperManager() {
-		unwrapperByClass = new HashMap<Class<?>, CacheResultWrapper>();
+		unwrapperByClass = new HashMap<>();
 
-		List<CacheResultWrapper> unwrapperList = new ArrayList<CacheResultWrapper>();
+		unwrapperByClass.put(Optional.class, new OptionalUnWrapper());
+		registerReactiveWrappers();
+	}
 
-		unwrapperList.add(new OptionalUnWrapper());
+	private void registerReactiveWrappers() {
+		if(tryRegisterResultWrapper("reactor.core.publisher.Mono", MonoReactiveWrapper::new)) {
+			ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
 
-		if(ClassUtils.isPresent("rx.Observable", CacheAspectSupport.class.getClassLoader())) {
-			unwrapperList.add(new ObservableWrapper());
+			tryRegisterResultWrapper("rx.Single", () -> new SingleReactiveWrapper(adapterRegistry));
 		}
+	}
 
-		for(CacheResultWrapper unwrapper: unwrapperList) {
-			unwrapperByClass.put(unwrapper.getWrapClass(), unwrapper);
+	private boolean tryRegisterResultWrapper(String className, Supplier<CacheResultWrapper> cacheResultWrapperSupplier) {
+		try {
+			Class<?> clazz = ClassUtils.forName(className, CacheAspectSupport.class.getClassLoader());
+			CacheResultWrapper cacheResultWrapper = cacheResultWrapperSupplier.get();
+			unwrapperByClass.put(clazz, cacheResultWrapper);
+			return true;
+		} catch (ClassNotFoundException e) {
+			// Cannot register wrapper
+			return false;
 		}
 	}
 
 	/**
 	 * Wraps a value
+	 *
 	 * @param clazz the target class wanted
 	 * @param value the value to be wrapped
 	 * @return the value wrapped if it can, or the same value if it cannot handle it
 	 */
 	public Object wrap(Class<?> clazz, Object value) {
-		if(value != null) {
+		if (value != null) {
 			CacheResultWrapper unwrapper = unwrapperByClass.get(clazz);
 
 			if (unwrapper != null) {
@@ -67,16 +82,17 @@ public class CacheResultWrapperManager {
 
 	/**
 	 * Unwraps the value asynchronously
+	 *
 	 * @param valueWrapped the value wrapped to be unwrapped
-	 * @param asyncResult where the result will be notified
+	 * @param asyncResult  where the result will be notified
 	 * @return the same value wrapped or decorated in order to notify when it finish.
 	 */
-	public Object asyncUnwrap(Object valueWrapped, AsyncWrapResult asyncResult) {
-		if(valueWrapped != null) {
-			CacheResultWrapper unwrapper = unwrapperByClass.get(valueWrapped.getClass());
+	public Object asyncUnwrap(Object valueWrapped, Class<?> classWrapped, AsyncWrapResult asyncResult) {
+		if (valueWrapped != null) {
+			CacheResultWrapper unwrapper = unwrapperByClass.get(classWrapped);
 
 			if (unwrapper != null) {
-				return unwrapper.unwrap(valueWrapped, asyncResult);
+				return unwrapper.notifyResult(valueWrapped, asyncResult);
 			}
 		}
 
@@ -85,77 +101,73 @@ public class CacheResultWrapperManager {
 		return valueWrapped;
 	}
 
+	private class SingleReactiveWrapper extends MonoReactiveAdapterWrapper {
+		public SingleReactiveWrapper(ReactiveAdapterRegistry registry) {
+			super(registry, Single.class);
+		}
+	}
 
-  /**
-   * Inner class to avoid a hard dependency on Java 8.
-   */
-  private class OptionalUnWrapper implements CacheResultWrapper {
+	private class MonoReactiveWrapper implements CacheResultWrapper {
+		@Override
+		public Mono<?> wrap(Object value) {
+			return Mono.justOrEmpty(value);
+		}
 
 		@Override
-		public Object unwrap(Object optionalObject, AsyncWrapResult asyncResult) {
+		public Mono<?> notifyResult(Object objectWrapped, AsyncWrapResult asyncResult) {
+			Mono<?> monoWrapped = (Mono<?>) objectWrapped;
+
+			return monoWrapped
+					.doOnSuccess(asyncResult::complete)
+					.doOnError(asyncResult::error);
+		}
+	}
+
+
+	private abstract class MonoReactiveAdapterWrapper implements CacheResultWrapper {
+		private ReactiveAdapter adapter;
+		private MonoReactiveWrapper monoReactiveWrapper;
+
+		MonoReactiveAdapterWrapper(ReactiveAdapterRegistry registry, Class<?> wrapperClass) {
+			this.adapter = registry.getAdapterFrom(wrapperClass);
+			this.monoReactiveWrapper = new MonoReactiveWrapper();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object wrap(Object value) {
+			return adapter.fromPublisher(monoReactiveWrapper.wrap(value));
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object notifyResult(Object valueWrapped, AsyncWrapResult asyncResult) {
+			Mono<?> monoWrapped = adapter.toMono(valueWrapped);
+			Mono<?> monoCacheWrapped = monoReactiveWrapper.notifyResult(monoWrapped, asyncResult);
+
+			return adapter.fromPublisher(monoCacheWrapped);
+		}
+	}
+
+	/**
+	 * Inner class to avoid a hard dependency on Java 8.
+	 */
+	private class OptionalUnWrapper implements CacheResultWrapper {
+
+		@Override
+		public Optional<?> notifyResult(Object optionalObject, AsyncWrapResult asyncResult) {
 			Optional<?> optional = (Optional<?>) optionalObject;
 
 			Object value = ObjectUtils.unwrapOptional(optional);
 
 			asyncResult.complete(value);
 
-			return optionalObject;
+			return optional;
 		}
 
 		@Override
-		public Class<?> getWrapClass() {
-			return Optional.class;
-		}
-
-		@Override
-		public Object wrap(Object value) {
+		public Optional<?> wrap(Object value) {
 			return Optional.ofNullable(value);
-		}
-	}
-
-  private class ObservableWrapper implements CacheResultWrapper {
-
-		@Override
-		public Object wrap(Object value) {
-			if(value instanceof Iterable) {
-				return Observable.from((Iterable<?>) value);
-			}
-			else {
-				// Not sure if it's a good idea... At least a warning maybe be a good idea
-				return Observable.just(value);
-			}
-		}
-
-		@Override
-		public Object unwrap(Object valueWrapped, final AsyncWrapResult asyncResult) {
-			Observable<?> valueObservable = (Observable<?>) valueWrapped;
-
-			final List<Object> values = new ArrayList<Object>();
-
-			return valueObservable
-					.doOnNext(new Action1<Object>() {
-						@Override
-						public void call(Object o) {
-							values.add(o);
-						}
-					})
-					.doOnCompleted(new Action0() {
-						@Override
-						public void call() {
-							asyncResult.complete(values);
-						}
-					})
-					.doOnError(new Action1<Throwable>() {
-						@Override
-						public void call(Throwable throwable) {
-							asyncResult.error(throwable);
-						}
-					});
-		}
-
-		@Override
-		public Class<?> getWrapClass() {
-			return Observable.class;
 		}
 	}
 }

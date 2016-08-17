@@ -384,12 +384,10 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			updateCache(cacheValue, contexts, cachePutRequests);
 		}
 		else {
-			// TODO: cacheValue = ObjectUtils.unwrapOptional(returnValue); use this to wrap/unwrap
-
 			// Invoke the method if we don't have a cache hit
 			Object originalReturnValue = invokeOperation(invoker);
 
-			returnValue = cacheResultWrapperManager.asyncUnwrap(originalReturnValue, new AsyncWrapResult(new AsyncWrapResult.CallBack() {
+			returnValue = cacheResultWrapperManager.asyncUnwrap(originalReturnValue, method.getReturnType(), new AsyncWrapResult(new AsyncWrapResult.CallBack() {
 				@Override
 				public void onValue(Object cacheValue) {
 					updateCache(cacheValue, contexts, cachePutRequests);

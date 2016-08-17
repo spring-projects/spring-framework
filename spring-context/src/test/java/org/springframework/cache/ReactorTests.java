@@ -17,7 +17,6 @@
 package org.springframework.cache;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
@@ -26,11 +25,8 @@ import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import rx.Observable;
-import rx.Single;
-import rx.observers.TestSubscriber;
-
-import java.util.List;
+import org.springframework.tests.TestSubscriber;
+import reactor.core.publisher.Mono;
 
 import static org.junit.Assert.*;
 
@@ -39,7 +35,7 @@ import static org.junit.Assert.*;
  *
  * @author Pablo Diaz-Lopez
  */
-public class CacheRxJavaTests {
+public class ReactorTests {
 	private AnnotationConfigApplicationContext context;
 	private TestService bean;
 
@@ -52,11 +48,11 @@ public class CacheRxJavaTests {
 	@Test
 	public void single() {
 		Cache cache = context.getBean(CacheManager.class).getCache("single");
-		Single<Object> single = bean.single();
+		Mono<Object> single = bean.single();
 		TestSubscriber<Object> testSubscriber = TestSubscriber.create();
 
 		single.subscribe(testSubscriber);
-		testSubscriber.awaitTerminalEvent();
+		testSubscriber.await();
 
 		Object cachedValues = cache.get(SimpleKey.EMPTY).get();
 
@@ -65,34 +61,47 @@ public class CacheRxJavaTests {
 	}
 
 	@Test
-	@Ignore("I think there is a problem with Single->Mono and/or Mono->Single")
-	public void nullValue() {
-		Cache cache = context.getBean(CacheManager.class).getCache("nullValue");
-		Single<Object> nullValue = bean.nullValue();
+	public void empty() {
+		Cache cache = context.getBean(CacheManager.class).getCache("empty");
+		Mono<Object> empty = bean.empty();
 		TestSubscriber<Object> testSubscriber = TestSubscriber.create();
 
-		nullValue.subscribe(testSubscriber);
-		testSubscriber.awaitTerminalEvent();
+		empty.subscribe(testSubscriber);
+		testSubscriber.await();
 
 		Object cachedValues = cache.get(SimpleKey.EMPTY).get();
 
 		assertNull("Null should be cached", cachedValues);
-		testSubscriber.assertValue(null);
+		testSubscriber.assertNoValues();
+	}
+
+	@Test
+	public void nullValue() {
+		Cache cache = context.getBean(CacheManager.class).getCache("nullValue");
+		Mono<Object> nullValue = bean.nullValue();
+		TestSubscriber<Object> testSubscriber = TestSubscriber.create();
+
+		nullValue.subscribe(testSubscriber);
+		testSubscriber.await();
+
+		// Mono values cannot be null
+		testSubscriber.assertError();
 	}
 
 	@Test
 	public void throwable() {
 		Cache cache = context.getBean(CacheManager.class).getCache("throwable");
-		Single<Object> throwable = bean.nullValue();
+		Mono<Object> throwable = bean.nullValue();
 		TestSubscriber<Object> testSubscriber = TestSubscriber.create();
 
 		throwable.subscribe(testSubscriber);
-		testSubscriber.awaitTerminalEvent();
+		testSubscriber.await();
 
 		Cache.ValueWrapper valueWrapper = cache.get(SimpleKey.EMPTY);
 
-		assertNull(valueWrapper);
-		testSubscriber.assertError(RuntimeException.class);
+		assertNull("No value should be cached", valueWrapper);
+
+		testSubscriber.assertError();
 	}
 
 	@Test(timeout = 1000L)
@@ -102,6 +111,7 @@ public class CacheRxJavaTests {
 
 		Cache.ValueWrapper valueWrapper = cache.get(SimpleKey.EMPTY);
 
+		// No value is cached because nobody subscribed to Mono
 		assertNull(valueWrapper);
 	}
 
@@ -122,45 +132,54 @@ public class CacheRxJavaTests {
 
 
 	public interface TestService {
-		Single<Object> single();
+		Mono<Object> single();
 
-		Single<Object> nullValue();
+		Mono<Object> empty();
 
-		Single<Object> throwable();
+		Mono<Object> nullValue();
 
-		Single<Object> neverFinish();
+		Mono<Object> throwable();
+
+		Mono<Object> neverFinish();
+
 	}
 
 
 	public static class TestServiceImpl implements TestService {
 		@Cacheable("single")
 		@Override
-		public Single<Object> single() {
-			return createObservable(new TestBean(1));
+		public Mono<Object> single() {
+			return createMono(new TestBean(1));
+		}
+
+		@Cacheable("empty")
+		@Override
+		public Mono<Object> empty() {
+			return Mono.empty();
 		}
 
 		@Cacheable("nullValue")
 		@Override
-		public Single<Object> nullValue() {
-			return createObservable((Object)null);
+		public Mono<Object> nullValue() {
+			return createMono(null);
 		}
 
 		@Cacheable("throwable")
 		@Override
-		public Single<Object> throwable() {
-			return Single.fromCallable(() -> {
-                throw new RuntimeException();
-            });
+		public Mono<Object> throwable() {
+			return Mono.fromCallable(() -> {
+				throw new RuntimeException();
+			});
 		}
 
 		@Cacheable("neverFinish")
 		@Override
-		public Single<Object> neverFinish() {
-			return Observable.never().toSingle();
+		public Mono<Object> neverFinish() {
+			return Mono.never();
 		}
 
-		private Single<Object> createObservable(Object value) {
-			return Single.defer(() -> Single.just(value));
+		private Mono<Object> createMono(Object value) {
+			return Mono.fromCallable(() -> value);
 		}
 	}
 

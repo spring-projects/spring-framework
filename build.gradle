@@ -515,6 +515,7 @@ project("spring-context") {
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
+		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("javax.el:javax.el-api:${elApiVersion}")
 		testCompile("org.glassfish:javax.el:3.0.1-b08")

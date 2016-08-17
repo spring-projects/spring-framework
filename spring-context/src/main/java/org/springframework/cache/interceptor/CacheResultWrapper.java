@@ -16,7 +16,7 @@
 package org.springframework.cache.interceptor;
 
 /**
- * Wrapper/Unwrapper, it allows to unwrap values to be cached and wraps it back
+ * Wrapper/Unwrapper, it allows to notifyResult values to be cached and wraps it back
  * in order to be consumed.
  * @author Pablo Diaz-Lopez
  */
@@ -36,10 +36,6 @@ interface CacheResultWrapper {
 	 * @param asyncResult it will call it when the value it's available
 	 * @return the same value wrapped or a version decorated.
 	 */
-	Object unwrap(Object valueWrapped, AsyncWrapResult asyncResult);
+	Object notifyResult(Object valueWrapped, AsyncWrapResult asyncResult);
 
-	/**
-	 * @return The target class the Wrapper can handle
-	 */
-	Class<?> getWrapClass();
 }
