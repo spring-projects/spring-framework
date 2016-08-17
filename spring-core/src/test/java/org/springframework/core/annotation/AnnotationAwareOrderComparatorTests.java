@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class AnnotationAwareOrderComparatorTests {
 
 	@Test
 	public void sortInstances() {
-		List<Object> list = new ArrayList<>();
+		List<Object> list = new ArrayList<Object>();
 		list.add(new B());
 		list.add(new A());
 		AnnotationAwareOrderComparator.sort(list);
@@ -47,7 +47,7 @@ public class AnnotationAwareOrderComparatorTests {
 
 	@Test
 	public void sortInstancesWithSubclass() {
-		List<Object> list = new ArrayList<>();
+		List<Object> list = new ArrayList<Object>();
 		list.add(new B());
 		list.add(new C());
 		AnnotationAwareOrderComparator.sort(list);
@@ -57,7 +57,7 @@ public class AnnotationAwareOrderComparatorTests {
 
 	@Test
 	public void sortClasses() {
-		List<Object> list = new ArrayList<>();
+		List<Object> list = new ArrayList<Object>();
 		list.add(B.class);
 		list.add(A.class);
 		AnnotationAwareOrderComparator.sort(list);
@@ -67,7 +67,7 @@ public class AnnotationAwareOrderComparatorTests {
 
 	@Test
 	public void sortClassesWithSubclass() {
-		List<Object> list = new ArrayList<>();
+		List<Object> list = new ArrayList<Object>();
 		list.add(B.class);
 		list.add(C.class);
 		AnnotationAwareOrderComparator.sort(list);

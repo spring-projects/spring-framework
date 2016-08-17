@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		AsyncMethodBean asyncTest = context.getBean("asyncTest", AsyncMethodBean.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
@@ -73,6 +74,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		SimpleInterface asyncTest = context.getBean("asyncTest", SimpleInterface.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
@@ -91,6 +93,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("e1", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
 		context.registerBeanDefinition("e2", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
 		context.refresh();
+
 		AsyncMethodWithQualifierBean asyncTest = context.getBean("asyncTest", AsyncMethodWithQualifierBean.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
@@ -111,6 +114,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("e1", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
 		context.registerBeanDefinition("e2", new RootBeanDefinition(ThreadPoolTaskExecutor.class));
 		context.refresh();
+
 		SimpleInterface asyncTest = context.getBean("asyncTest", SimpleInterface.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
@@ -128,6 +132,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		AsyncClassBean asyncTest = context.getBean("asyncTest", AsyncClassBean.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -141,6 +146,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 		context.refresh();
+
 		AsyncClassBean asyncTest = context.getBean("asyncTest", AsyncClassBean.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -155,6 +161,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		RegularInterface asyncTest = context.getBean("asyncTest", RegularInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -168,6 +175,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncClassBeanWithInterface.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 		context.refresh();
+
 		RegularInterface asyncTest = context.getBean("asyncTest", RegularInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -182,6 +190,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		AsyncInterface asyncTest = context.getBean("asyncTest", AsyncInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -195,6 +204,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncInterfaceBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 		context.refresh();
+
 		AsyncInterface asyncTest = context.getBean("asyncTest", AsyncInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -209,6 +219,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		AsyncInterface asyncTest = context.getBean("asyncTest", AsyncInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -222,6 +233,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(DynamicAsyncInterfaceBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 		context.refresh();
+
 		AsyncInterface asyncTest = context.getBean("asyncTest", AsyncInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -236,6 +248,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("autoProxyCreator", new RootBeanDefinition(DefaultAdvisorAutoProxyCreator.class));
 		context.registerBeanDefinition("asyncAdvisor", new RootBeanDefinition(AsyncAnnotationAdvisor.class));
 		context.refresh();
+
 		AsyncMethodsInterface asyncTest = context.getBean("asyncTest", AsyncMethodsInterface.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
@@ -250,6 +263,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(AsyncMethodsInterfaceBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 		context.refresh();
+
 		AsyncMethodsInterface asyncTest = context.getBean("asyncTest", AsyncMethodsInterface.class);
 		asyncTest.doNothing(5);
 		asyncTest.doSomething(10);
@@ -264,6 +278,7 @@ public class AsyncExecutionTests {
 		context.registerBeanDefinition("asyncTest", new RootBeanDefinition(DynamicAsyncMethodsInterfaceBean.class));
 		context.registerBeanDefinition("asyncProcessor", new RootBeanDefinition(AsyncAnnotationBeanPostProcessor.class));
 		context.refresh();
+
 		AsyncMethodsInterface asyncTest = context.getBean("asyncTest", AsyncMethodsInterface.class);
 		asyncTest.doSomething(10);
 		Future<String> future = asyncTest.returnSomething(20);
@@ -461,7 +476,7 @@ public class AsyncExecutionTests {
 		private final AsyncInterface proxy;
 
 		public DynamicAsyncInterfaceBean() {
-			ProxyFactory pf = new ProxyFactory(new HashMap<>());
+			ProxyFactory pf = new ProxyFactory(new HashMap<String, String>());
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(new MethodInterceptor() {
 				@Override
 				public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -531,7 +546,7 @@ public class AsyncExecutionTests {
 		private final AsyncMethodsInterface proxy;
 
 		public DynamicAsyncMethodsInterfaceBean() {
-			ProxyFactory pf = new ProxyFactory(new HashMap<>());
+			ProxyFactory pf = new ProxyFactory(new HashMap<String, String>());
 			DefaultIntroductionAdvisor advisor = new DefaultIntroductionAdvisor(new MethodInterceptor() {
 				@Override
 				public Object invoke(MethodInvocation invocation) throws Throwable {

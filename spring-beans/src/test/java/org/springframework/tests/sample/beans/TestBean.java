@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,13 +76,13 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Float myFloat = new Float(0.0);
 
-	private Collection<? super Object> friends = new LinkedList<>();
+	private Collection<? super Object> friends = new LinkedList<Object>();
 
-	private Set<?> someSet = new HashSet<>();
+	private Set<?> someSet = new HashSet<Object>();
 
-	private Map<?, ?> someMap = new HashMap<>();
+	private Map<?, ?> someMap = new HashMap<Object, Object>();
 
-	private List<?> someList = new ArrayList<>();
+	private List<?> someList = new ArrayList<Object>();
 
 	private Properties someProperties = new Properties();
 
@@ -255,10 +255,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.stringArray = stringArray;
 	}
 
+	@Override
 	public Integer[] getSomeIntegerArray() {
 		return someIntegerArray;
 	}
 
+	@Override
 	public void setSomeIntegerArray(Integer[] someIntegerArray) {
 		this.someIntegerArray = someIntegerArray;
 	}
@@ -461,6 +463,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 
+	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
@@ -472,6 +475,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return (ObjectUtils.nullSafeEquals(this.name, tb2.name) && this.age == tb2.age);
 	}
 
+	@Override
 	public int hashCode() {
 		return this.age;
 	}
@@ -486,6 +490,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		}
 	}
 
+	@Override
 	public String toString() {
 		return this.name;
 	}

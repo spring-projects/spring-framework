@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 
 	@Before
 	public void setUp() {
-		converter = new Jaxb2CollectionHttpMessageConverter<>();
+		converter = new Jaxb2CollectionHttpMessageConverter<Collection<Object>>();
 		rootElementListType = new ParameterizedTypeReference<List<RootElement>>() {}.getType();
 		rootElementSetType = new ParameterizedTypeReference<Set<RootElement>>() {}.getType();
 		typeListType = new ParameterizedTypeReference<List<TestType>>() {}.getType();
@@ -157,7 +157,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 			assertEquals("", result.iterator().next().external);
 		}
 		catch (HttpMessageNotReadableException ex) {
-			// Some parsers raise exception by default
+			// Some parsers raise an exception
 		}
 	}
 
@@ -212,7 +212,6 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	@XmlRootElement
 	public static class RootElement {
 
@@ -246,6 +245,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 			return type.hashCode();
 		}
 	}
+
 
 	@XmlType
 	public static class TestType {

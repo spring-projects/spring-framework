@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,15 @@ import org.springframework.beans.factory.parsing.ReaderEventListener;
  */
 public class CollectingReaderEventListener implements ReaderEventListener {
 
-	private final List defaults = new LinkedList();
+	private final List<DefaultsDefinition> defaults = new LinkedList<DefaultsDefinition>();
 
-	private final Map componentDefinitions = new LinkedHashMap<>(8);
+	private final Map<String, ComponentDefinition> componentDefinitions =
+			new LinkedHashMap<String, ComponentDefinition>(8);
 
-	private final Map aliasMap = new LinkedHashMap<>(8);
+	private final Map<String, List<AliasDefinition>> aliasMap =
+			new LinkedHashMap<String, List<AliasDefinition>>(8);
 
-	private final List imports = new LinkedList();
+	private final List<ImportDefinition> imports = new LinkedList<ImportDefinition>();
 
 
 	@Override
@@ -50,7 +52,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		this.defaults.add(defaultsDefinition);
 	}
 
-	public List getDefaults() {
+	public List<DefaultsDefinition> getDefaults() {
 		return Collections.unmodifiableList(this.defaults);
 	}
 
@@ -60,27 +62,27 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 	}
 
 	public ComponentDefinition getComponentDefinition(String name) {
-		return (ComponentDefinition) this.componentDefinitions.get(name);
+		return this.componentDefinitions.get(name);
 	}
 
 	public ComponentDefinition[] getComponentDefinitions() {
-		Collection collection = this.componentDefinitions.values();
-		return (ComponentDefinition[]) collection.toArray(new ComponentDefinition[collection.size()]);
+		Collection<ComponentDefinition> collection = this.componentDefinitions.values();
+		return collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
 	@Override
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
-		List aliases = (List) this.aliasMap.get(aliasDefinition.getBeanName());
-		if(aliases == null) {
-			aliases = new ArrayList();
+		List<AliasDefinition> aliases = this.aliasMap.get(aliasDefinition.getBeanName());
+		if (aliases == null) {
+			aliases = new ArrayList<AliasDefinition>();
 			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
 		}
 		aliases.add(aliasDefinition);
 	}
 
-	public List getAliases(String beanName) {
-		List aliases = (List) this.aliasMap.get(beanName);
-		return aliases == null ? null : Collections.unmodifiableList(aliases);
+	public List<AliasDefinition> getAliases(String beanName) {
+		List<AliasDefinition> aliases = this.aliasMap.get(beanName);
+		return (aliases != null ? Collections.unmodifiableList(aliases) : null);
 	}
 
 	@Override
@@ -88,7 +90,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		this.imports.add(importDefinition);
 	}
 
-	public List getImports() {
+	public List<ImportDefinition> getImports() {
 		return Collections.unmodifiableList(this.imports);
 	}
 
