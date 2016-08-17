@@ -29,8 +29,6 @@ import javax.sql.DataSource;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
@@ -44,12 +42,12 @@ import static org.mockito.BDDMockito.*;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class GenericSqlQueryTests  {
+public class GenericSqlQueryTests {
 
 	private static final String SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED =
 			"select id, forename from custmr where id = ? and country = ?";
 
-	private BeanFactory beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 
 	private Connection connection;
 
@@ -61,7 +59,7 @@ public class GenericSqlQueryTests  {
 	@Before
 	public void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.beanFactory).loadBeanDefinitions(
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
 				new ClassPathResource("org/springframework/jdbc/object/GenericSqlQueryTests-context.xml"));
 		DataSource dataSource = mock(DataSource.class);
 		this.connection = mock(Connection.class);
