@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ import org.springframework.util.ClassUtils;
  * up a shared JPA EntityManagerFactory in a Spring application context;
  * the EntityManagerFactory can then be passed to JPA-based DAOs via
  * dependency injection. Note that switching to a JNDI lookup or to a
- * {@link LocalEntityManagerFactoryBean}
- * definition is just a matter of configuration!
+ * {@link LocalEntityManagerFactoryBean} definition is just a matter of
+ * configuration!
  *
  * <p>As with {@link LocalEntityManagerFactoryBean}, configuration settings
  * are usually read in from a {@code META-INF/persistence.xml} config file,
@@ -202,6 +202,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Specify the JPA 2.0 shared cache mode for this persistence unit,
 	 * overriding a value in {@code persistence.xml} if set.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @since 4.0
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
 	 * @see #setPersistenceUnitManager
 	 */
@@ -213,6 +214,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Specify the JPA 2.0 validation mode for this persistence unit,
 	 * overriding a value in {@code persistence.xml} if set.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @since 4.0
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
 	 * @see #setPersistenceUnitManager
 	 */
@@ -328,11 +330,6 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 			}
 			Class<?> providerClass = ClassUtils.resolveClassName(providerClassName, getBeanClassLoader());
 			provider = (PersistenceProvider) BeanUtils.instantiateClass(providerClass);
-		}
-		if (provider == null) {
-			throw new IllegalStateException("Unable to determine persistence provider. " +
-					"Please check configuration of " + getClass().getName() + "; " +
-					"ideally specify the appropriate JpaVendorAdapter class for this provider.");
 		}
 
 		if (logger.isInfoEnabled()) {
