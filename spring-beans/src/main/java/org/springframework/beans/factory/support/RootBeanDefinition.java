@@ -26,6 +26,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 
 /**
@@ -49,21 +50,25 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
-	boolean allowCaching = true;
-
 	private BeanDefinitionHolder decoratedDefinition;
 
-	private volatile Class<?> targetType;
+	boolean allowCaching = true;
+
+	volatile ResolvableType targetType;
 
 	boolean isFactoryMethodUnique = false;
 
+	/** Package-visible field for caching the determined Class of a given bean definition */
+	volatile Class<?> resolvedTargetType;
+
+	/** Package-visible field for caching the return type of a generically typed factory method */
+	volatile Class<?> resolvedFactoryMethodReturnType;
+
+	/** Common lock for the four constructor fields below */
 	final Object constructorArgumentLock = new Object();
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	Executable resolvedConstructorOrFactoryMethod;
-
-	/** Package-visible field for caching the return type of a generically typed factory method */
-	volatile Class<?> resolvedFactoryMethodReturnType;
 
 	/** Package-visible field that marks the constructor arguments as resolved */
 	boolean constructorArgumentsResolved = false;
@@ -74,6 +79,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Package-visible field for caching partly prepared constructor arguments */
 	Object[] preparedConstructorArguments;
 
+	/** Common lock for the two post-processing fields below */
 	final Object postProcessingLock = new Object();
 
 	/** Package-visible field that indicates MergedBeanDefinitionPostProcessor having been applied */
@@ -172,8 +178,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public RootBeanDefinition(RootBeanDefinition original) {
 		super(original);
-		this.allowCaching = original.allowCaching;
 		this.decoratedDefinition = original.decoratedDefinition;
+		this.allowCaching = original.allowCaching;
 		this.targetType = original.targetType;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
 	}
@@ -215,18 +221,31 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Specify a generics-containing target type of this bean definition, if known in advance.
+	 * @since 4.3.3
+	 */
+	public void setTargetType(ResolvableType targetType) {
+		this.targetType = targetType;
+	}
+
+	/**
 	 * Specify the target type of this bean definition, if known in advance.
+	 * @since 3.2.2
 	 */
 	public void setTargetType(Class<?> targetType) {
-		this.targetType = targetType;
+		this.targetType = (targetType != null ? ResolvableType.forClass(targetType) : null);
 	}
 
 	/**
 	 * Return the target type of this bean definition, if known
 	 * (either specified in advance or resolved on first instantiation).
+	 * @since 3.2.2
 	 */
 	public Class<?> getTargetType() {
-		return this.targetType;
+		if (this.resolvedTargetType != null) {
+			return this.resolvedTargetType;
+		}
+		return (this.targetType != null ? this.targetType.resolve() : null);
 	}
 
 	/**
