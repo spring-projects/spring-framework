@@ -35,7 +35,7 @@ configure(allprojects) { project ->
 	ext.annotationApiVersion   = "1.2"
 	ext.aspectjVersion         = "1.9.0.BETA-5"
 	ext.beanvalVersion         = "1.1.0.Final"
-	ext.caffeineVersion        = "2.3.1"
+	ext.caffeineVersion        = "2.3.2"
 	ext.eclipselinkVersion     = "2.6.3"
 	ext.ehcacheVersion         = "2.10.2"
 	ext.ehcachejcacheVersion   = "1.0.1"
@@ -58,7 +58,7 @@ configure(allprojects) { project ->
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
-	ext.jettyVersion           = "9.3.11.v20160721"
+	ext.jettyVersion           = "9.4.0.M1"
 	ext.jodaVersion            = "2.9.4"
 	ext.jpaVersion             = "2.1.1"
 	ext.jspVersion             = "2.3.2-b02"
@@ -77,7 +77,7 @@ configure(allprojects) { project ->
 	ext.reactorCoreVersion     = '3.0.0.BUILD-SNAPSHOT'
 	ext.reactorNettyVersion    = '0.5.0.BUILD-SNAPSHOT'
 	ext.romeVersion            = "1.6.0"
-	ext.rxjavaVersion          = '1.1.8'
+	ext.rxjavaVersion          = '1.1.9'
 	ext.rxnettyVersion         = '0.5.2-rc.3'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.21"
