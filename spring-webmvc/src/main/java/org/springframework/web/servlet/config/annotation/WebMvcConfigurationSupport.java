@@ -315,7 +315,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see PathMatchConfigurer
 	 * @since 4.0.3
 	 */
-	public void configurePathMatch(PathMatchConfigurer configurer) {
+	protected void configurePathMatch(PathMatchConfigurer configurer) {
 	}
 
 	/**
@@ -532,6 +532,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Override this method to configure asynchronous request processing options.
+	 * @see AsyncSupportConfigurer
+	 */
+	protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
+
+	/**
 	 * Return a {@link FormattingConversionService} for use with annotated
 	 * controller methods and the {@code spring:eval} JSP tag.
 	 * Also see {@link #addFormatters} as an alternative to overriding this method.
@@ -541,6 +548,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		FormattingConversionService conversionService = new DefaultFormattingConversionService();
 		addFormatters(conversionService);
 		return conversionService;
+	}
+
+	/**
+	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
+	 */
+	protected void addFormatters(FormatterRegistry registry) {
 	}
 
 	/**
@@ -760,19 +773,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		else if (gsonPresent) {
 			messageConverters.add(new GsonHttpMessageConverter());
 		}
-	}
-
-	/**
-	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
-	 */
-	protected void addFormatters(FormatterRegistry registry) {
-	}
-
-	/**
-	 * Override this method to configure asynchronous request processing options.
-	 * @see AsyncSupportConfigurer
-	 */
-	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 	}
 
 	/**
