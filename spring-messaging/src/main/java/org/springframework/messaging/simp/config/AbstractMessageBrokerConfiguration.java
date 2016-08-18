@@ -438,7 +438,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 				catch (Throwable ex) {
 					throw new BeanInitializationException("Could not find default validator class", ex);
 				}
-				validator = (Validator) BeanUtils.instantiate(clazz);
+				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new Validator() {
