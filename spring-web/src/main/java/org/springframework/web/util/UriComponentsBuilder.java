@@ -124,6 +124,7 @@ public class UriComponentsBuilder implements Cloneable {
 	/**
 	 * Create a deep copy of the given UriComponentsBuilder.
 	 * @param other the other builder to copy from
+	 * @since 4.1.3
 	 */
 	protected UriComponentsBuilder(UriComponentsBuilder other) {
 		this.scheme = other.scheme;
@@ -603,6 +604,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * Add the given query parameters.
 	 * @param params the params
 	 * @return this UriComponentsBuilder
+	 * @since 4.0
 	 */
 	public UriComponentsBuilder queryParams(MultiValueMap<String, String> params) {
 		if (params != null) {
@@ -632,6 +634,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * Set the query parameter values overriding all existing query values.
 	 * @param params the query parameter name
 	 * @return this UriComponentsBuilder
+	 * @since 4.2
 	 */
 	public UriComponentsBuilder replaceQueryParams(MultiValueMap<String, String> params) {
 		this.queryParams.clear();
