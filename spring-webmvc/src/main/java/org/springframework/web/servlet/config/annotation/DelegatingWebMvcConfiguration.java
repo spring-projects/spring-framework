@@ -53,8 +53,8 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 
 	@Override
-	protected void addInterceptors(InterceptorRegistry registry) {
-		this.configurers.addInterceptors(registry);
+	protected void configurePathMatch(PathMatchConfigurer configurer) {
+		this.configurers.configurePathMatch(configurer);
 	}
 
 	@Override
@@ -63,13 +63,33 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 		this.configurers.configureAsyncSupport(configurer);
 	}
 
 	@Override
-	public void configurePathMatch(PathMatchConfigurer configurer) {
-		this.configurers.configurePathMatch(configurer);
+	protected void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+		this.configurers.configureDefaultServletHandling(configurer);
+	}
+
+	@Override
+	protected void addFormatters(FormatterRegistry registry) {
+		this.configurers.addFormatters(registry);
+	}
+
+	@Override
+	protected void addInterceptors(InterceptorRegistry registry) {
+		this.configurers.addInterceptors(registry);
+	}
+
+	@Override
+	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+		this.configurers.addResourceHandlers(registry);
+	}
+
+	@Override
+	protected void addCorsMappings(CorsRegistry registry) {
+		this.configurers.addCorsMappings(registry);
 	}
 
 	@Override
@@ -80,16 +100,6 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	@Override
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
 		this.configurers.configureViewResolvers(registry);
-	}
-
-	@Override
-	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-		this.configurers.addResourceHandlers(registry);
-	}
-
-	@Override
-	protected void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
-		this.configurers.configureDefaultServletHandling(configurer);
 	}
 
 	@Override
@@ -113,21 +123,6 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected void addFormatters(FormatterRegistry registry) {
-		this.configurers.addFormatters(registry);
-	}
-
-	@Override
-	protected Validator getValidator() {
-		return this.configurers.getValidator();
-	}
-
-	@Override
-	protected MessageCodesResolver getMessageCodesResolver() {
-		return this.configurers.getMessageCodesResolver();
-	}
-
-	@Override
 	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		this.configurers.configureHandlerExceptionResolvers(exceptionResolvers);
 	}
@@ -138,8 +133,13 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected void addCorsMappings(CorsRegistry registry) {
-		this.configurers.addCorsMappings(registry);
+	protected Validator getValidator() {
+		return this.configurers.getValidator();
+	}
+
+	@Override
+	protected MessageCodesResolver getMessageCodesResolver() {
+		return this.configurers.getMessageCodesResolver();
 	}
 
 }

@@ -47,10 +47,102 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 public interface WebMvcConfigurer {
 
 	/**
+	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
+	 * suffix registration, path matcher and path helper.
+	 * Configured path matcher and path helper instances are shared for:
+	 * <ul>
+	 * <li>RequestMappings</li>
+	 * <li>ViewControllerMappings</li>
+	 * <li>ResourcesMappings</li>
+	 * </ul>
+	 * @since 4.0.3
+	 */
+	void configurePathMatch(PathMatchConfigurer configurer);
+
+	/**
+	 * Configure content negotiation options.
+	 */
+	void configureContentNegotiation(ContentNegotiationConfigurer configurer);
+
+	/**
+	 * Configure asynchronous request handling options.
+	 */
+	void configureAsyncSupport(AsyncSupportConfigurer configurer);
+
+	/**
+	 * Configure a handler to delegate unhandled requests by forwarding to the
+	 * Servlet container's "default" servlet. A common use case for this is when
+	 * the {@link DispatcherServlet} is mapped to "/" thus overriding the
+	 * Servlet container's default handling of static resources.
+	 */
+	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
+
+	/**
 	 * Add {@link Converter}s and {@link Formatter}s in addition to the ones
 	 * registered by default.
 	 */
 	void addFormatters(FormatterRegistry registry);
+
+	/**
+	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of
+	 * controller method invocations. Interceptors can be registered to apply
+	 * to all requests or be limited to a subset of URL patterns.
+	 * <p><strong>Note</strong> that interceptors registered here only apply to
+	 * controllers and not to resource handler requests. To intercept requests for
+	 * static resources either declare a
+	 * {@link org.springframework.web.servlet.handler.MappedInterceptor MappedInterceptor}
+	 * bean or switch to advanced configuration mode by extending
+	 * {@link org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
+	 * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
+	 */
+	void addInterceptors(InterceptorRegistry registry);
+
+	/**
+	 * Add handlers to serve static resources such as images, js, and, css
+	 * files from specific locations under web application root, the classpath,
+	 * and others.
+	 */
+	void addResourceHandlers(ResourceHandlerRegistry registry);
+
+	/**
+	 * Configure cross origin requests processing.
+	 * @since 4.2
+	 */
+	void addCorsMappings(CorsRegistry registry);
+
+	/**
+	 * Configure simple automated controllers pre-configured with the response
+	 * status code and/or a view to render the response body. This is useful in
+	 * cases where there is no need for custom controller logic -- e.g. render a
+	 * home page, perform simple site URL redirects, return a 404 status with
+	 * HTML content, a 204 with no content, and more.
+	 */
+	void addViewControllers(ViewControllerRegistry registry);
+
+	/**
+	 * Configure view resolvers to translate String-based view names returned from
+	 * controllers into concrete {@link org.springframework.web.servlet.View}
+	 * implementations to perform rendering with.
+	 */
+	void configureViewResolvers(ViewResolverRegistry registry);
+
+	/**
+	 * Add resolvers to support custom controller method argument types.
+	 * <p>This does not override the built-in support for resolving handler
+	 * method arguments. To customize the built-in support for argument
+	 * resolution, configure {@link RequestMappingHandlerAdapter} directly.
+	 * @param argumentResolvers initially an empty list
+	 */
+	void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
+
+	/**
+	 * Add handlers to support custom controller method return value types.
+	 * <p>Using this option does not override the built-in support for handling
+	 * return values. To customize the built-in support for handling return
+	 * values, configure RequestMappingHandlerAdapter directly.
+	 * @param returnValueHandlers initially an empty list
+	 */
+	void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
 
 	/**
 	 * Configure the {@link HttpMessageConverter}s to use for reading or writing
@@ -74,55 +166,6 @@ public interface WebMvcConfigurer {
 	void extendMessageConverters(List<HttpMessageConverter<?>> converters);
 
 	/**
-	 * Provide a custom {@link Validator} instead of the one created by default.
-	 * The default implementation, assuming JSR-303 is on the classpath, is:
-	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
-	 * Leave the return value as {@code null} to keep the default.
-	 */
-	Validator getValidator();
-
-	/**
-	 * Configure content negotiation options.
-	 */
-	void configureContentNegotiation(ContentNegotiationConfigurer configurer);
-
-	/**
-	 * Configure asynchronous request handling options.
-	 */
-	void configureAsyncSupport(AsyncSupportConfigurer configurer);
-
-	/**
-	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
-	 * suffix registration, path matcher and path helper.
-	 * Configured path matcher and path helper instances are shared for:
-	 * <ul>
-	 * <li>RequestMappings</li>
-	 * <li>ViewControllerMappings</li>
-	 * <li>ResourcesMappings</li>
-	 * </ul>
-	 * @since 4.0.3
-	 */
-	void configurePathMatch(PathMatchConfigurer configurer);
-
-	/**
-	 * Add resolvers to support custom controller method argument types.
-	 * <p>This does not override the built-in support for resolving handler
-	 * method arguments. To customize the built-in support for argument
-	 * resolution, configure {@link RequestMappingHandlerAdapter} directly.
-	 * @param argumentResolvers initially an empty list
-	 */
-	void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers);
-
-	/**
-	 * Add handlers to support custom controller method return value types.
-	 * <p>Using this option does not override the built-in support for handling
-	 * return values. To customize the built-in support for handling return
-	 * values, configure RequestMappingHandlerAdapter directly.
-	 * @param returnValueHandlers initially an empty list
-	 */
-	void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers);
-
-	/**
 	 * Configure the {@link HandlerExceptionResolver}s to handle unresolved
 	 * controller exceptions. If no resolvers are added to the list, default
 	 * exception resolvers are added instead.
@@ -140,18 +183,12 @@ public interface WebMvcConfigurer {
 	void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
 	/**
-	 * Add Spring MVC lifecycle interceptors for pre- and post-processing of
-	 * controller method invocations. Interceptors can be registered to apply
-	 * to all requests or be limited to a subset of URL patterns.
-	 * <p><strong>Note</strong> that interceptors registered here only apply to
-	 * controllers and not to resource handler requests. To intercept requests for
-	 * static resources either declare a
-	 * {@link org.springframework.web.servlet.handler.MappedInterceptor MappedInterceptor}
-	 * bean or switch to advanced configuration mode by extending
-	 * {@link org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport
-	 * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
+	 * Provide a custom {@link Validator} instead of the one created by default.
+	 * The default implementation, assuming JSR-303 is on the classpath, is:
+	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
+	 * Leave the return value as {@code null} to keep the default.
 	 */
-	void addInterceptors(InterceptorRegistry registry);
+	Validator getValidator();
 
 	/**
 	 * Provide a custom {@link MessageCodesResolver} for building message codes
@@ -159,42 +196,5 @@ public interface WebMvcConfigurer {
 	 * {@code null} to keep the default.
 	 */
 	MessageCodesResolver getMessageCodesResolver();
-
-	/**
-	 * Configure simple automated controllers pre-configured with the response
-	 * status code and/or a view to render the response body. This is useful in
-	 * cases where there is no need for custom controller logic -- e.g. render a
-	 * home page, perform simple site URL redirects, return a 404 status with
-	 * HTML content, a 204 with no content, and more.
-	 */
-	void addViewControllers(ViewControllerRegistry registry);
-
-	/**
-	 * Configure view resolvers to translate String-based view names returned from
-	 * controllers into concrete {@link org.springframework.web.servlet.View}
-	 * implementations to perform rendering with.
-	 */
-	void configureViewResolvers(ViewResolverRegistry registry);
-
-	/**
-	 * Add handlers to serve static resources such as images, js, and, css
-	 * files from specific locations under web application root, the classpath,
-	 * and others.
-	 */
-	void addResourceHandlers(ResourceHandlerRegistry registry);
-
-	/**
-	 * Configure a handler to delegate unhandled requests by forwarding to the
-	 * Servlet container's "default" servlet. A common use case for this is when
-	 * the {@link DispatcherServlet} is mapped to "/" thus overriding the
-	 * Servlet container's default handling of static resources.
-	 */
-	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
-
-	/**
-	 * Configure cross origin requests processing.
-	 * @since 4.2
-	 */
-	void addCorsMappings(CorsRegistry registry);
 
 }
