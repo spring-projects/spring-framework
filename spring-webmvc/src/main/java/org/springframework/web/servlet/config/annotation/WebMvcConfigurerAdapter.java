@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
  * An implementation of {@link WebMvcConfigurer} with empty methods allowing
- * sub-classes to override only the methods they're interested in.
+ * subclasses to override only the methods they're interested in.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -57,15 +57,6 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 */
 	@Override
 	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>This implementation returns {@code null}
-	 */
-	@Override
-	public Validator getValidator() {
-		return null;
 	}
 
 	/**
@@ -121,15 +112,6 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation is empty.
 	 */
 	@Override
-	public MessageCodesResolver getMessageCodesResolver() {
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>This implementation is empty.
-	 */
-	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 	}
 
@@ -171,6 +153,24 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 */
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation returns {@code null}.
+	 */
+	@Override
+	public Validator getValidator() {
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation returns {@code null}.
+	 */
+	@Override
+	public MessageCodesResolver getMessageCodesResolver() {
+		return null;
 	}
 
 }

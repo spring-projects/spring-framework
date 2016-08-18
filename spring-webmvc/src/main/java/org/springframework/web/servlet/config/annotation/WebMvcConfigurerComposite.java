@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -28,7 +29,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * An {@link WebMvcConfigurer} implementation that delegates to other {@link WebMvcConfigurer} instances.
+ * A {@link WebMvcConfigurer} that delegates to one or more others.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -37,11 +38,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
 	private final List<WebMvcConfigurer> delegates = new ArrayList<WebMvcConfigurer>();
 
+
 	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {
-		if (configurers != null) {
+		if (!CollectionUtils.isEmpty(configurers)) {
 			this.delegates.addAll(configurers);
 		}
 	}
+
 
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
@@ -142,6 +145,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.addCorsMappings(registry);
+		}
+	}
+
+	@Override
 	public Validator getValidator() {
 		List<Validator> candidates = new ArrayList<Validator>();
 		for (WebMvcConfigurer configurer : this.delegates) {
@@ -154,10 +164,15 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.addCorsMappings(registry);
+	public MessageCodesResolver getMessageCodesResolver() {
+		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
+		for (WebMvcConfigurer configurer : this.delegates) {
+			MessageCodesResolver messageCodesResolver = configurer.getMessageCodesResolver();
+			if (messageCodesResolver != null) {
+				candidates.add(messageCodesResolver);
+			}
 		}
+		return selectSingleInstance(candidates, MessageCodesResolver.class);
 	}
 
 	private <T> T selectSingleInstance(List<T> instances, Class<T> instanceType) {
@@ -171,18 +186,6 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		else {
 			return null;
 		}
-	}
-
-	@Override
-	public MessageCodesResolver getMessageCodesResolver() {
-		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
-		for (WebMvcConfigurer configurer : this.delegates) {
-			MessageCodesResolver messageCodesResolver = configurer.getMessageCodesResolver();
-			if (messageCodesResolver != null) {
-				candidates.add(messageCodesResolver);
-			}
-		}
-		return selectSingleInstance(candidates, MessageCodesResolver.class);
 	}
 
 }

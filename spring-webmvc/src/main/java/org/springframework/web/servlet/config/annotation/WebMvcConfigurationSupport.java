@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -229,6 +230,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		return this.servletContext;
 	}
 
+
 	/**
 	 * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping
 	 * requests to annotated controllers.
@@ -251,18 +253,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (configurer.isUseTrailingSlashMatch() != null) {
 			handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
 		}
-		if (configurer.getPathMatcher() != null) {
-			handlerMapping.setPathMatcher(configurer.getPathMatcher());
+		UrlPathHelper pathHelper = configurer.getUrlPathHelper();
+		if (pathHelper != null) {
+			handlerMapping.setUrlPathHelper(pathHelper);
 		}
-		if (configurer.getUrlPathHelper() != null) {
-			handlerMapping.setUrlPathHelper(configurer.getUrlPathHelper());
+		PathMatcher pathMatcher = configurer.getPathMatcher();
+		if (pathMatcher != null) {
+			handlerMapping.setPathMatcher(pathMatcher);
 		}
 
 		return handlerMapping;
 	}
 
 	/**
-	 * Protected method for plugging in a custom sub-class of
+	 * Protected method for plugging in a custom subclass of
 	 * {@link RequestMappingHandlerMapping}.
 	 */
 	protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
@@ -335,7 +339,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	protected Map<String, MediaType> getDefaultMediaTypes() {
-		Map<String, MediaType> map = new HashMap<String, MediaType>();
+		Map<String, MediaType> map = new HashMap<String, MediaType>(4);
 		if (romePresent) {
 			map.put("atom", MediaType.APPLICATION_ATOM_XML);
 			map.put("rss", MediaType.valueOf("application/rss+xml"));
@@ -488,18 +492,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
 		if (jackson2Present) {
-			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<RequestBodyAdvice>();
-			requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
-			adapter.setRequestBodyAdvice(requestBodyAdvices);
-
-			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<ResponseBodyAdvice<?>>();
-			responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
-			adapter.setResponseBodyAdvice(responseBodyAdvices);
+			adapter.setRequestBodyAdvice(
+					Collections.<RequestBodyAdvice>singletonList(new JsonViewRequestBodyAdvice()));
+			adapter.setResponseBodyAdvice(
+					Collections.<ResponseBodyAdvice<?>>singletonList(new JsonViewResponseBodyAdvice()));
 		}
 
 		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
 		configureAsyncSupport(configurer);
-
 		if (configurer.getTaskExecutor() != null) {
 			adapter.setTaskExecutor(configurer.getTaskExecutor());
 		}
@@ -525,6 +525,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Override this method to provide a custom {@link MessageCodesResolver}.
+	 */
+	protected MessageCodesResolver getMessageCodesResolver() {
+		return null;
+	}
+
+	/**
+	 * Override this method to configure asynchronous request processing options.
+	 * @see AsyncSupportConfigurer
+	 */
+	protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
+
+	/**
 	 * Return a {@link FormattingConversionService} for use with annotated
 	 * controller methods and the {@code spring:eval} JSP tag.
 	 * Also see {@link #addFormatters} as an alternative to overriding this method.
@@ -534,6 +548,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		FormattingConversionService conversionService = new DefaultFormattingConversionService();
 		addFormatters(conversionService);
 		return conversionService;
+	}
+
+	/**
+	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
+	 */
+	protected void addFormatters(FormatterRegistry registry) {
 	}
 
 	/**
@@ -560,13 +580,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				catch (LinkageError ex) {
 					throw new BeanInitializationException("Could not load default validator class", ex);
 				}
-				validator = (Validator) BeanUtils.instantiate(clazz);
+				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new NoOpValidator();
 			}
 		}
 		return validator;
+	}
+
+	/**
+	 * Override this method to provide a custom {@link Validator}.
+	 */
+	protected Validator getValidator() {
+		return null;
 	}
 
 	/**
@@ -595,26 +622,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public UrlPathHelper mvcUrlPathHelper() {
-		if (getPathMatchConfigurer().getUrlPathHelper() != null) {
-			return getPathMatchConfigurer().getUrlPathHelper();
-		}
-		else {
-			return new UrlPathHelper();
-		}
-	}
-
-	/**
-	 * Override this method to provide a custom {@link Validator}.
-	 */
-	protected Validator getValidator() {
-		return null;
-	}
-
-	/**
-	 * Override this method to provide a custom {@link MessageCodesResolver}.
-	 */
-	protected MessageCodesResolver getMessageCodesResolver() {
-		return null;
+		UrlPathHelper pathHelper = getPathMatchConfigurer().getUrlPathHelper();
+		return (pathHelper != null ? pathHelper : new UrlPathHelper());
 	}
 
 	/**
@@ -679,6 +688,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
+	/**
+	 * Override this method to extend or modify the list of converters after it
+	 * has been configured. This may be useful for example to allow default
+	 * converters to be registered and then insert a custom converter through
+	 * this method.
+	 * @param converters the list of configured converters to extend.
+	 * @since 4.1.3
+	 */
 	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
@@ -717,19 +734,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		else if (gsonPresent) {
 			messageConverters.add(new GsonHttpMessageConverter());
 		}
-	}
-
-	/**
-	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
-	 */
-	protected void addFormatters(FormatterRegistry registry) {
-	}
-
-	/**
-	 * Override this method to configure asynchronous request processing options.
-	 * @see AsyncSupportConfigurer
-	 */
-	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 	}
 
 	/**
@@ -774,11 +778,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public HandlerExceptionResolver handlerExceptionResolver() {
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<HandlerExceptionResolver>();
 		configureHandlerExceptionResolvers(exceptionResolvers);
-
 		if (exceptionResolvers.isEmpty()) {
 			addDefaultHandlerExceptionResolvers(exceptionResolvers);
 		}
-
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
 		composite.setOrder(0);
 		composite.setExceptionResolvers(exceptionResolvers);

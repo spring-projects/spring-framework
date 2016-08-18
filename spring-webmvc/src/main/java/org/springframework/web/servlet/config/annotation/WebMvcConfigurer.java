@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,14 +74,6 @@ public interface WebMvcConfigurer {
 	void extendMessageConverters(List<HttpMessageConverter<?>> converters);
 
 	/**
-	 * Provide a custom {@link Validator} instead of the one created by default.
-	 * The default implementation, assuming JSR-303 is on the classpath, is:
-	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
-	 * Leave the return value as {@code null} to keep the default.
-	 */
-	Validator getValidator();
-
-	/**
 	 * Configure content negotiation options.
 	 */
 	void configureContentNegotiation(ContentNegotiationConfigurer configurer);
@@ -145,13 +137,6 @@ public interface WebMvcConfigurer {
 	void addInterceptors(InterceptorRegistry registry);
 
 	/**
-	 * Provide a custom {@link MessageCodesResolver} for building message codes
-	 * from data binding and validation error codes. Leave the return value as
-	 * {@code null} to keep the default.
-	 */
-	MessageCodesResolver getMessageCodesResolver();
-
-	/**
 	 * Configure simple automated controllers pre-configured with the response
 	 * status code and/or a view to render the response body. This is useful in
 	 * cases where there is no need for custom controller logic -- e.g. render a
@@ -187,5 +172,20 @@ public interface WebMvcConfigurer {
 	 * @since 4.2
 	 */
 	void addCorsMappings(CorsRegistry registry);
+
+	/**
+	 * Provide a custom {@link Validator} instead of the one created by default.
+	 * The default implementation, assuming JSR-303 is on the classpath, is:
+	 * {@link org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean}.
+	 * Leave the return value as {@code null} to keep the default.
+	 */
+	Validator getValidator();
+
+	/**
+	 * Provide a custom {@link MessageCodesResolver} for building message codes
+	 * from data binding and validation error codes. Leave the return value as
+	 * {@code null} to keep the default.
+	 */
+	MessageCodesResolver getMessageCodesResolver();
 
 }

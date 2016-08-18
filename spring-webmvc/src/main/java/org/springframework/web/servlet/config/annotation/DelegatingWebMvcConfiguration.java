@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -29,7 +30,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * A sub-class of {@code WebMvcConfigurationSupport} that detects and delegates
+ * A subclass of {@code WebMvcConfigurationSupport} that detects and delegates
  * to all beans of type {@link WebMvcConfigurer} allowing them to customize the
  * configuration provided by {@code WebMvcConfigurationSupport}. This is the
  * class actually imported by {@link EnableWebMvc @EnableWebMvc}.
@@ -45,10 +46,9 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 	@Autowired(required = false)
 	public void setConfigurers(List<WebMvcConfigurer> configurers) {
-		if (configurers == null || configurers.isEmpty()) {
-			return;
+		if (!CollectionUtils.isEmpty(configurers)) {
+			this.configurers.addWebMvcConfigurers(configurers);
 		}
-		this.configurers.addWebMvcConfigurers(configurers);
 	}
 
 
@@ -118,16 +118,6 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected Validator getValidator() {
-		return this.configurers.getValidator();
-	}
-
-	@Override
-	protected MessageCodesResolver getMessageCodesResolver() {
-		return this.configurers.getMessageCodesResolver();
-	}
-
-	@Override
 	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		this.configurers.configureHandlerExceptionResolvers(exceptionResolvers);
 	}
@@ -135,6 +125,16 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	@Override
 	protected void addCorsMappings(CorsRegistry registry) {
 		this.configurers.addCorsMappings(registry);
+	}
+
+	@Override
+	protected Validator getValidator() {
+		return this.configurers.getValidator();
+	}
+
+	@Override
+	protected MessageCodesResolver getMessageCodesResolver() {
+		return this.configurers.getMessageCodesResolver();
 	}
 
 }
