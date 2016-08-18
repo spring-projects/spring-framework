@@ -131,11 +131,10 @@ public interface WebMvcConfigurer {
 	void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
 
 	/**
-	 * A hook for extending or modifying the list of
-	 * {@link HandlerExceptionResolver}s after it has been configured. This may
-	 * be useful for example to allow default resolvers to be registered and then
-	 * insert a custom one through this method.
-	 * @param exceptionResolvers the list of configured resolvers to extend.
+	 * A hook for extending or modifying the list of {@link HandlerExceptionResolver}s
+	 * after it has been configured. This may be useful for example to allow default
+	 * resolvers to be registered and then insert a custom one through this method.
+	 * @param exceptionResolvers the list of configured resolvers to extend
 	 * @since 4.3
 	 */
 	void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers);
