@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -28,7 +29,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * An {@link WebMvcConfigurer} implementation that delegates to other {@link WebMvcConfigurer} instances.
+ * A {@link WebMvcConfigurer} that delegates to one or more others.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -37,11 +38,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
 	private final List<WebMvcConfigurer> delegates = new ArrayList<WebMvcConfigurer>();
 
+
 	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {
-		if (configurers != null) {
+		if (!CollectionUtils.isEmpty(configurers)) {
 			this.delegates.addAll(configurers);
 		}
 	}
+
 
 	public void addFormatters(FormatterRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
@@ -126,6 +129,17 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		return selectSingleInstance(candidates, Validator.class);
 	}
 
+	public MessageCodesResolver getMessageCodesResolver() {
+		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
+		for (WebMvcConfigurer configurer : this.delegates) {
+			MessageCodesResolver messageCodesResolver = configurer.getMessageCodesResolver();
+			if (messageCodesResolver != null) {
+				candidates.add(messageCodesResolver);
+			}
+		}
+		return selectSingleInstance(candidates, MessageCodesResolver.class);
+	}
+
 	private <T> T selectSingleInstance(List<T> instances, Class<T> instanceType) {
 		if (instances.size() > 1) {
 			throw new IllegalStateException(
@@ -137,17 +151,6 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		else {
 			return null;
 		}
-	}
-
-	public MessageCodesResolver getMessageCodesResolver() {
-		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
-		for (WebMvcConfigurer configurer : this.delegates) {
-			MessageCodesResolver messageCodesResolver = configurer.getMessageCodesResolver();
-			if (messageCodesResolver != null) {
-				candidates.add(messageCodesResolver);
-			}
-		}
-		return selectSingleInstance(candidates, MessageCodesResolver.class);
 	}
 
 }

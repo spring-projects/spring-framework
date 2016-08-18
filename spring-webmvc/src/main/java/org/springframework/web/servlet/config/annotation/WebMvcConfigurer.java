@@ -62,14 +62,6 @@ public interface WebMvcConfigurer {
 	void configureMessageConverters(List<HttpMessageConverter<?>> converters);
 
 	/**
-	 * Provide a custom {@link Validator} instead of the one created by default.
-	 * The default implementation, assuming JSR-303 is on the classpath, is:
-	 * {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}.
-	 * Leave the return value as {@code null} to keep the default.
-	 */
-	Validator getValidator();
-
-	/**
 	 * Configure content negotiation options.
 	 */
 	void configureContentNegotiation(ContentNegotiationConfigurer configurer);
@@ -78,7 +70,6 @@ public interface WebMvcConfigurer {
 	 * Configure asynchronous request handling options.
 	 */
 	void configureAsyncSupport(AsyncSupportConfigurer configurer);
-
 
 	/**
 	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
@@ -127,13 +118,6 @@ public interface WebMvcConfigurer {
 	void addInterceptors(InterceptorRegistry registry);
 
 	/**
-	 * Provide a custom {@link MessageCodesResolver} for building message codes
-	 * from data binding and validation error codes. Leave the return value as
-	 * {@code null} to keep the default.
-	 */
-	MessageCodesResolver getMessageCodesResolver();
-
-	/**
 	 * Add view controllers to create a direct mapping between a URL path and
 	 * view name without the need for a controller in between.
 	 */
@@ -153,5 +137,20 @@ public interface WebMvcConfigurer {
 	 * Servlet container's default handling of static resources.
 	 */
 	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
+
+	/**
+	 * Provide a custom {@link Validator} instead of the one created by default.
+	 * The default implementation, assuming JSR-303 is on the classpath, is:
+	 * {@link org.springframework.validation.beanvalidation.LocalValidatorFactoryBean}.
+	 * Leave the return value as {@code null} to keep the default.
+	 */
+	Validator getValidator();
+
+	/**
+	 * Provide a custom {@link MessageCodesResolver} for building message codes
+	 * from data binding and validation error codes. Leave the return value as
+	 * {@code null} to keep the default.
+	 */
+	MessageCodesResolver getMessageCodesResolver();
 
 }

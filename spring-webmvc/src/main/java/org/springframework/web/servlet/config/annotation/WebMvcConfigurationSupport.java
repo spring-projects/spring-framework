@@ -164,9 +164,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private List<Object> interceptors;
 
-	private ContentNegotiationManager contentNegotiationManager;
-
 	private PathMatchConfigurer pathMatchConfigurer;
+
+	private ContentNegotiationManager contentNegotiationManager;
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
@@ -185,6 +185,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
+
 
 	/**
 	 * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping
@@ -207,11 +208,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (configurer.isUseTrailingSlashMatch() != null) {
 			handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
 		}
-		if (configurer.getPathMatcher() != null) {
-			handlerMapping.setPathMatcher(configurer.getPathMatcher());
+		UrlPathHelper pathHelper = configurer.getUrlPathHelper();
+		if (pathHelper != null) {
+			handlerMapping.setUrlPathHelper(pathHelper);
 		}
-		if (configurer.getUrlPathHelper() != null) {
-			handlerMapping.setUrlPathHelper(configurer.getUrlPathHelper());
+		PathMatcher pathMatcher = configurer.getPathMatcher();
+		if (pathMatcher != null) {
+			handlerMapping.setPathMatcher(pathMatcher);
 		}
 
 		return handlerMapping;
@@ -238,48 +241,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see InterceptorRegistry
 	 */
 	protected void addInterceptors(InterceptorRegistry registry) {
-	}
-
-	/**
-	 * Return a {@link ContentNegotiationManager} instance to use to determine
-	 * requested {@linkplain MediaType media types} in a given request.
-	 */
-	@Bean
-	public ContentNegotiationManager mvcContentNegotiationManager() {
-		if (this.contentNegotiationManager == null) {
-			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer(this.servletContext);
-			configurer.mediaTypes(getDefaultMediaTypes());
-			configureContentNegotiation(configurer);
-			try {
-				this.contentNegotiationManager = configurer.getContentNegotiationManager();
-			}
-			catch (Exception ex) {
-				throw new BeanInitializationException("Could not create ContentNegotiationManager", ex);
-			}
-		}
-		return this.contentNegotiationManager;
-	}
-
-	protected Map<String, MediaType> getDefaultMediaTypes() {
-		Map<String, MediaType> map = new HashMap<String, MediaType>();
-		if (romePresent) {
-			map.put("atom", MediaType.APPLICATION_ATOM_XML);
-			map.put("rss", MediaType.valueOf("application/rss+xml"));
-		}
-		if (jaxb2Present) {
-			map.put("xml", MediaType.APPLICATION_XML);
-		}
-		if (jackson2Present || jacksonPresent) {
-			map.put("json", MediaType.APPLICATION_JSON);
-		}
-		return map;
-	}
-
-	/**
-	 * Override this method to configure content negotiation.
-	 * @see DefaultServletHandlerConfigurer
-	 */
-	protected void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 	}
 
 	/**
@@ -312,12 +273,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public PathMatcher mvcPathMatcher() {
-		if (getPathMatchConfigurer().getPathMatcher() != null) {
-			return getPathMatchConfigurer().getPathMatcher();
-		}
-		else {
-			return new AntPathMatcher();
-		}
+		PathMatcher pathMatcher = getPathMatchConfigurer().getPathMatcher();
+		return (pathMatcher != null ? pathMatcher : new AntPathMatcher());
 	}
 
 	/**
@@ -329,12 +286,50 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public UrlPathHelper mvcUrlPathHelper() {
-		if (getPathMatchConfigurer().getUrlPathHelper() != null) {
-			return getPathMatchConfigurer().getUrlPathHelper();
+		UrlPathHelper pathHelper = getPathMatchConfigurer().getUrlPathHelper();
+		return (pathHelper != null ? pathHelper : new UrlPathHelper());
+	}
+
+	/**
+	 * Return a {@link ContentNegotiationManager} instance to use to determine
+	 * requested {@linkplain MediaType media types} in a given request.
+	 */
+	@Bean
+	public ContentNegotiationManager mvcContentNegotiationManager() {
+		if (this.contentNegotiationManager == null) {
+			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer(this.servletContext);
+			configurer.mediaTypes(getDefaultMediaTypes());
+			configureContentNegotiation(configurer);
+			try {
+				this.contentNegotiationManager = configurer.getContentNegotiationManager();
+			}
+			catch (Exception ex) {
+				throw new BeanInitializationException("Could not create ContentNegotiationManager", ex);
+			}
 		}
-		else {
-			return new UrlPathHelper();
+		return this.contentNegotiationManager;
+	}
+
+	protected Map<String, MediaType> getDefaultMediaTypes() {
+		Map<String, MediaType> map = new HashMap<String, MediaType>(4);
+		if (romePresent) {
+			map.put("atom", MediaType.APPLICATION_ATOM_XML);
+			map.put("rss", MediaType.valueOf("application/rss+xml"));
 		}
+		if (jaxb2Present) {
+			map.put("xml", MediaType.APPLICATION_XML);
+		}
+		if (jackson2Present || jacksonPresent) {
+			map.put("json", MediaType.APPLICATION_JSON);
+		}
+		return map;
+	}
+
+	/**
+	 * Override this method to configure content negotiation.
+	 * @see DefaultServletHandlerConfigurer
+	 */
+	protected void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 	}
 
 	/**
@@ -450,7 +445,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
 		configureAsyncSupport(configurer);
-
 		if (configurer.getTaskExecutor() != null) {
 			adapter.setTaskExecutor(configurer.getTaskExecutor());
 		}
@@ -476,6 +470,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Override this method to provide a custom {@link MessageCodesResolver}.
+	 */
+	protected MessageCodesResolver getMessageCodesResolver() {
+		return null;
+	}
+
+	/**
+	 * Override this method to configure asynchronous request processing options.
+	 * @see AsyncSupportConfigurer
+	 */
+	protected void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
+
+	/**
 	 * Return a {@link FormattingConversionService} for use with annotated
 	 * controller methods and the {@code spring:eval} JSP tag.
 	 * Also see {@link #addFormatters} as an alternative to overriding this method.
@@ -485,6 +493,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		FormattingConversionService conversionService = new DefaultFormattingConversionService();
 		addFormatters(conversionService);
 		return conversionService;
+	}
+
+	/**
+	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
+	 */
+	protected void addFormatters(FormatterRegistry registry) {
 	}
 
 	/**
@@ -511,7 +525,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				catch (LinkageError ex) {
 					throw new BeanInitializationException("Could not load default validator class", ex);
 				}
-				validator = (Validator) BeanUtils.instantiate(clazz);
+				validator = (Validator) BeanUtils.instantiateClass(clazz);
 			}
 			else {
 				validator = new NoOpValidator();
@@ -524,13 +538,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Override this method to provide a custom {@link Validator}.
 	 */
 	protected Validator getValidator() {
-		return null;
-	}
-
-	/**
-	 * Override this method to provide a custom {@link MessageCodesResolver}.
-	 */
-	protected MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}
 
@@ -626,19 +633,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
-	 */
-	protected void addFormatters(FormatterRegistry registry) {
-	}
-
-	/**
-	 * Override this method to configure asynchronous request processing options.
-	 * @see AsyncSupportConfigurer
-	 */
-	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-	}
-
-	/**
 	 * Returns a {@link HttpRequestHandlerAdapter} for processing requests
 	 * with {@link HttpRequestHandler}s.
 	 */
@@ -670,11 +664,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	public HandlerExceptionResolver handlerExceptionResolver() {
 		List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<HandlerExceptionResolver>();
 		configureHandlerExceptionResolvers(exceptionResolvers);
-
 		if (exceptionResolvers.isEmpty()) {
 			addDefaultHandlerExceptionResolvers(exceptionResolvers);
 		}
-
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
 		composite.setOrder(0);
 		composite.setExceptionResolvers(exceptionResolvers);

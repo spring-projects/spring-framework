@@ -28,7 +28,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
  * An implementation of {@link WebMvcConfigurer} with empty methods allowing
- * sub-classes to override only the methods they're interested in.
+ * subclasses to override only the methods they're interested in.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -47,14 +47,6 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation is empty.
 	 */
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>This implementation returns {@code null}
-	 */
-	public Validator getValidator() {
-		return null;
 	}
 
 	/**
@@ -103,14 +95,6 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
-	public MessageCodesResolver getMessageCodesResolver() {
-		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>This implementation is empty.
-	 */
 	public void addInterceptors(InterceptorRegistry registry) {
 	}
 
@@ -133,6 +117,22 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * <p>This implementation is empty.
 	 */
 	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation returns {@code null}.
+	 */
+	public Validator getValidator() {
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation returns {@code null}.
+	 */
+	public MessageCodesResolver getMessageCodesResolver() {
+		return null;
 	}
 
 }
