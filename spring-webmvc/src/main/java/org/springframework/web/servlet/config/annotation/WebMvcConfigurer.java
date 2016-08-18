@@ -149,6 +149,7 @@ public interface WebMvcConfigurer {
 	 * Configure view resolvers to translate String-based view names returned from
 	 * controllers into concrete {@link org.springframework.web.servlet.View}
 	 * implementations to perform rendering with.
+	 * @since 4.1
 	 */
 	void configureViewResolvers(ViewResolverRegistry registry);
 
