@@ -30,8 +30,6 @@ import rx.Observable;
 import rx.Single;
 import rx.observers.TestSubscriber;
 
-import java.util.List;
-
 import static org.junit.Assert.*;
 
 /**
@@ -148,9 +146,7 @@ public class CacheRxJavaTests {
 		@Cacheable("throwable")
 		@Override
 		public Single<Object> throwable() {
-			return Single.fromCallable(() -> {
-                throw new RuntimeException();
-            });
+			return Single.error(new RuntimeException());
 		}
 
 		@Cacheable("neverFinish")

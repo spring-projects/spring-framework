@@ -86,6 +86,7 @@ public class ReactorTests {
 
 		// Mono values cannot be null
 		testSubscriber.assertError();
+		assertNull("Shouldn't be cached", cache.get(SimpleKey.EMPTY));
 	}
 
 	@Test
@@ -167,9 +168,7 @@ public class ReactorTests {
 		@Cacheable("throwable")
 		@Override
 		public Mono<Object> throwable() {
-			return Mono.fromCallable(() -> {
-				throw new RuntimeException();
-			});
+			return Mono.error(new RuntimeException());
 		}
 
 		@Cacheable("neverFinish")
