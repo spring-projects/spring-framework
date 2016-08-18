@@ -109,7 +109,7 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	@Override
 	public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.configureHandlerExceptionResolvers(exceptionResolvers);
+			delegate.extendHandlerExceptionResolvers(exceptionResolvers);
 		}
 	}
 
