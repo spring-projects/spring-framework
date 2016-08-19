@@ -74,7 +74,7 @@ configure(allprojects) { project ->
 	ext.protobufVersion        = "3.0.0"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
-	ext.reactorCoreVersion     = '3.0.0.BUILD-SNAPSHOT'
+	ext.reactorCoreVersion     = '3.0.0.RELEASE'
 	ext.reactorNettyVersion    = '0.5.0.BUILD-SNAPSHOT'
 	ext.romeVersion            = "1.6.0"
 	ext.rxjavaVersion          = '1.1.9'
@@ -114,6 +114,11 @@ configure(allprojects) { project ->
 		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
 			if (details.requested.group == 'io.netty') {
 				details.useVersion nettyVersion
+			}
+		}
+		resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+			if (details.requested.name == 'reactor-core' && details.requested.version.startsWith('3.')) {
+				details.useVersion reactorCoreVersion
 			}
 		}
 	}
