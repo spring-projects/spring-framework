@@ -5822,9 +5822,10 @@ you should use the `@Named` annotation as follows:
 
 
 [[beans-named]]
-=== @Named: a standard equivalent to the @Component annotation
+=== @Named and @ManagedBean: standard equivalents to the @Component annotation
 
-Instead of `@Component`, `@javax.inject.Named` may be used as follows:
+Instead of `@Component`, `@javax.inject.Named` or `javax.annotation.ManagedBean` may be
+used as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5832,7 +5833,7 @@ Instead of `@Component`, `@javax.inject.Named` may be used as follows:
 	import javax.inject.Inject;
 	import javax.inject.Named;
 
-	@Named("movieListener")
+	@Named("movieListener") // @ManagedBean("movieListener") could be used as well
 	public class SimpleMovieLister {
 
 		private MovieFinder movieFinder;
@@ -5869,8 +5870,8 @@ It is very common to use `@Component` without specifying a name for the componen
 	}
 ----
 
-When using `@Named`, it is possible to use component scanning in the exact same way
-as when using Spring annotations:
+When using `@Named` or `@ManagedBean`, it is possible to use component scanning in the
+exact same way as when using Spring annotations:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5884,8 +5885,9 @@ as when using Spring annotations:
 
 [NOTE]
 ====
-In contrast to `@Component`, the JSR-330 `@Named` annotation is not composable.
-Please use Spring's stereotype model for building custom component annotations.
+In contrast to `@Component`, the JSR-330 `@Named` and the JSR-250 `ManagedBean`
+annotations are not composable. Please use Spring's stereotype model for building custom
+component annotations.
 ====
 
 
@@ -5906,7 +5908,7 @@ features are not available as shown in the table below:
 | `@Inject` has no 'required' attribute; can be used with Java 8's `Optional` instead.
 
 | @Component
-| @Named
+| @Named / @ManagedBean
 | JSR-330 does not provide a composable model, just a way to identify named components.
 
 | @Scope("singleton")

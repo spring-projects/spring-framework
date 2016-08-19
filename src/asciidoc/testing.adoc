@@ -846,6 +846,7 @@ tests and can be used anywhere in the Spring Framework.
 * `@Autowired`
 * `@Qualifier`
 * `@Resource` (javax.annotation) _if JSR-250 is present_
+* `@ManagedBean` (javax.annotation) _if JSR-250 is present_
 * `@Inject` (javax.inject) _if JSR-330 is present_
 * `@Named` (javax.inject) _if JSR-330 is present_
 * `@PersistenceContext` (javax.persistence) _if JPA is present_
