@@ -7978,8 +7978,8 @@ Essentially, this is the standard __Observer__ design pattern.
 As of Spring 4.2, the event infrastructure has been significantly improved and offer
 an <<context-functionality-events-annotation,annotation-based model>> as well as the
 ability to publish any arbitrary event, that is an object that does not necessarily
-extend from `ApplicationEvent`. When such an object is published we wrap it in a
-`PayloadApplicationEvent` for you.
+extend from `ApplicationEvent`. When such an object is published we wrap it in an
+event for you.
 ====
 
 Spring provides the following standard events:
