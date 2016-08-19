@@ -15,17 +15,20 @@
  */
 package org.springframework.cache.interceptor;
 
-import org.springframework.core.ReactiveAdapter;
-import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import reactor.core.publisher.Mono;
-import rx.Single;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import reactor.core.publisher.Mono;
+
+import rx.Single;
+
+import org.springframework.core.ReactiveAdapter;
+import org.springframework.core.ReactiveAdapterRegistry;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+
 
 /**
  * Manages the {@link CacheResultWrapper} instances to apply only the appropriate.

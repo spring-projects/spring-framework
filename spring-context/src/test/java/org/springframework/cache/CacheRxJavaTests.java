@@ -16,9 +16,16 @@
 
 package org.springframework.cache;
 
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import rx.Observable;
+import rx.Single;
+import rx.observers.TestSubscriber;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
@@ -26,11 +33,7 @@ import org.springframework.cache.interceptor.SimpleKey;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import rx.Observable;
-import rx.Single;
-import rx.observers.TestSubscriber;
 
-import static org.junit.Assert.*;
 
 /**
  * Tests to check RxJava support.
