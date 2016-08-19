@@ -29,6 +29,7 @@ package org.springframework.core;
  * are supposed to implement this interface. Proxies that decorate the target
  * object with new behavior, such as AOP proxies, do <i>not</i> qualify here!
  *
+ * <p> 透明的资源管理实现接口,需要考虑等同于底层资源,
  * @author Juergen Hoeller
  * @since 2.5.4
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
@@ -37,6 +38,7 @@ public interface InfrastructureProxy {
 
 	/**
 	 * Return the underlying resource (never {@code null}).
+	 * 返回底层资源
 	 */
 	Object getWrappedObject();
 

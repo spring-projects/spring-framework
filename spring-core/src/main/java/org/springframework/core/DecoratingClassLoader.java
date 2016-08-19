@@ -26,7 +26,8 @@ import org.springframework.util.Assert;
  * Base class for decorating ClassLoaders such as {@link OverridingClassLoader}
  * and {@link org.springframework.instrument.classloading.ShadowingClassLoader},
  * providing common handling of excluded packages and classes.
- *
+ * <p>装饰ClassLoaders的基础类,例如OverridingClassLoader和ShadowingClassLoader
+ *    提供通用的处理去排除给定包名和类名
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @since 2.5.2
@@ -52,6 +53,7 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 	/**
 	 * Create a new DecoratingClassLoader using the given parent ClassLoader
 	 * for delegation.
+	 * 根据给定的父ClassLoader创建一个新的DecoratingClassLoader
 	 */
 	public DecoratingClassLoader(ClassLoader parent) {
 		super(parent);
@@ -62,6 +64,8 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 	 * Add a package name to exclude from decoration (e.g. overriding).
 	 * <p>Any class whose fully-qualified name starts with the name registered
 	 * here will be handled by the parent ClassLoader in the usual fashion.
+	 * 
+	 * <p> 添加一个包名到移除集合,任何包名在排除集合里面的类都会被父类处理
 	 * @param packageName the package name to exclude
 	 */
 	public void excludePackage(String packageName) {
@@ -73,6 +77,7 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 	 * Add a class name to exclude from decoration (e.g. overriding).
 	 * <p>Any class name registered here will be handled by the parent
 	 * ClassLoader in the usual fashion.
+	 * <p>添加一个类名到排除集合
 	 * @param className the class name to exclude
 	 */
 	public void excludeClass(String className) {
@@ -84,6 +89,7 @@ public abstract class DecoratingClassLoader extends ClassLoader {
 	 * Determine whether the specified class is excluded from decoration
 	 * by this class loader.
 	 * <p>The default implementation checks against excluded packages and classes.
+	 * <p> 判断给定的类是否在排除之外
 	 * @param className the class name to check
 	 * @return whether the specified class is eligible
 	 * @see #excludePackage

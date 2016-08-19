@@ -46,6 +46,9 @@ import org.springframework.util.ClassUtils;
  * caches the ASM discovered information for each introspected Class, in a thread-safe
  * manner. It is recommended to reuse ParameterNameDiscoverer instances as far as possible.
  *
+ * <p>ParameterNameDiscoverer 接口的实现类,用LocalVariableTable信息返回参数名称,如果类被编译,但没有debug信息,返回null
+ *    用ObjectWeb's ASM library 去分享类文件,没一个发现的实例缓存ASM发现的信息,在一个线程安全的下,
+ *    被推荐使用的ParameterNameDiscoverer实例
  * @author Adrian Colyer
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -57,9 +60,15 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	private static final Log logger = LogFactory.getLog(LocalVariableTableParameterNameDiscoverer.class);
 
 	// marker object for classes that do not have any debug info
+    /**
+     * 标记类的对象,这些没有debug信息
+     */
 	private static final Map<Member, String[]> NO_DEBUG_INFO_MAP = Collections.emptyMap();
 
 	// the cache uses a nested index (value is a map) to keep the top level cache relatively small in size
+	/**
+	 * 缓存类别index,去缓存相关
+	 */
 	private final Map<Class<?>, Map<Member, String[]>> parameterNamesCache =
 			new ConcurrentHashMap<>(32);
 
@@ -96,12 +105,14 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	/**
 	 * Inspects the target class. Exceptions will be logged and a maker map returned
 	 * to indicate the lack of debug information.
+	 * <p> 检查给定的类
 	 */
 	private Map<Member, String[]> inspectClass(Class<?> clazz) {
 		InputStream is = clazz.getResourceAsStream(ClassUtils.getClassFileName(clazz));
 		if (is == null) {
 			// We couldn't load the class file, which is not fatal as it
 			// simply means this method of discovering parameter names won't work.
+			//无法加载类文件,
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cannot find '.class' file for class [" + clazz +
 						"] - unable to determine constructor/method parameter names");
@@ -160,6 +171,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		@Override
 		public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 			// exclude synthetic + bridged && static class initialization
+			//排除synthetic+bridged和静态类初始化
 			if (!isSyntheticOrBridged(access) && !STATIC_CLASS_INIT.equals(name)) {
 				return new LocalVariableTableVisitor(clazz, memberMap, name, desc, isStatic(access));
 			}

@@ -23,7 +23,9 @@ package org.springframework.core;
  * debug information in the class file.
  *
  * <p>Further discoverers may be added through {@link #addDiscoverer(ParameterNameDiscoverer)}.
- *
+ * <p> 默认实现ParameterNameDiscoverer策略接口,使用jdk8标准反射机制(如果可用),
+ *     如果不可用,就回落到LocalVariableTableParameterNameDiscoverer 为检查debug信息
+ *     
  * @author Juergen Hoeller
  * @since 4.0
  * @see StandardReflectionParameterNameDiscoverer

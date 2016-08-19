@@ -27,7 +27,9 @@ import org.springframework.util.Assert;
  *
  * <p>This implementation always uses the efficient Java 1.4 StackTraceElement
  * mechanism for analyzing control flows.
- *
+ * 
+ * <p>静态工程类隐藏自动选择ControlFlow的实现类
+ *    通常用于jdk1.4分析control flows
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 02.02.2004
@@ -36,6 +38,7 @@ public abstract class ControlFlowFactory {
 
 	/**
 	 * Return an appropriate {@link ControlFlow} instance.
+	 * 返回一个合适的ControlFlow实例
 	 */
 	public static ControlFlow createControlFlow() {
 		return new Jdk14ControlFlow();
@@ -47,7 +50,12 @@ public abstract class ControlFlowFactory {
 	 * 5-10 times more expensive to evaluate than other pointcuts, as they require
 	 * analysis of the stack trace (through constructing a new throwable).
 	 * However, they are useful in some cases.
+	 * 
 	 * <p>This implementation uses the StackTraceElement class introduced in Java 1.4.
+	 * 
+	 * <p>cflow-style 切面工具,比其他切面要耗性能5-10倍,因为需要分析stack trace
+	 *    这个实现在jdk1.4引入StackTraceElement
+	 * 
 	 * @see java.lang.StackTraceElement
 	 */
 	static class Jdk14ControlFlow implements ControlFlow {
@@ -60,6 +68,8 @@ public abstract class ControlFlowFactory {
 
 		/**
 		 * Searches for class name match in a StackTraceElement.
+		 * 
+		 * 检查类名是否有匹配的在StackTraceElement中
 		 */
 		@Override
 		public boolean under(Class<?> clazz) {
@@ -76,6 +86,7 @@ public abstract class ControlFlowFactory {
 		/**
 		 * Searches for class name match plus method name match
 		 * in a StackTraceElement.
+		 * 检查类名和方法是否有匹配的在StackTraceElement中
 		 */
 		@Override
 		public boolean under(Class<?> clazz, String methodName) {
@@ -94,6 +105,8 @@ public abstract class ControlFlowFactory {
 		/**
 		 * Leave it up to the caller to decide what matches.
 		 * Caller must understand stack trace format, so there's less abstraction.
+		 * 检查token是否有匹配的在StackTraceElement中
+		 * 
 		 */
 		@Override
 		public boolean underToken(String token) {

@@ -33,7 +33,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  *
  * <p>Mainly intended for usage within the framework, resolving method
  * parameter types even when they are declared generically.
- *
+ * <p> 解析通讯类型保证类,主要用于框架
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Sam Brannen
@@ -43,7 +43,7 @@ import org.springframework.util.ConcurrentReferenceHashMap;
  */
 public abstract class GenericTypeResolver {
 
-	/** Cache from Class to TypeVariable Map */
+	/** Cache from Class to TypeVariable Map  缓存类到类型变量 */
 	@SuppressWarnings("rawtypes")
 	private static final Map<Class<?>, Map<TypeVariable, Type>> typeVariableCache =
 			new ConcurrentReferenceHashMap<>();
@@ -63,6 +63,7 @@ public abstract class GenericTypeResolver {
 
 	/**
 	 * Determine the target type for the given generic parameter type.
+	 * <p> 根据给定的通用参数类型确定目标类型
 	 * @param methodParameter the method parameter specification
 	 * @param implementationClass the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type

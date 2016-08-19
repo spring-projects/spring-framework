@@ -39,22 +39,27 @@ import org.springframework.util.ReflectionUtils;
  * recognize the same names as the constants themselves, and freeing them
  * from maintaining their own mapping.
  *
+ * <p>该类可以用于parse其他类存在的public static final 定义的常量 ,该类的 {@code asXXXX}方法
+ *   允许通过string name访问常量值
+ * <p> 该类在PropertyEditors使用,可以让他们识别相同的name作为常量,可以释放他们从维护自己的映射中
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 16.03.2003
  */
 public class Constants {
 
-	/** The name of the introspected class */
+	/** The name of the introspected class  要parse的类的类名 */
 	private final String className;
 
-	/** Map from String field name to object value */
+	/** Map from String field name to object value sting字段名对应于对象的值 */
 	private final Map<String, Object> fieldCache = new HashMap<>();
 
 
 	/**
 	 * Create a new Constants converter class wrapping the given class.
 	 * <p>All <b>public</b> static final variables will be exposed, whatever their type.
+	 * 创建一个常量转换类wrapper给定的类,
 	 * @param clazz the class to analyze
 	 * @throws IllegalArgumentException if the supplied {@code clazz} is {@code null}
 	 */
@@ -79,6 +84,7 @@ public class Constants {
 
 	/**
 	 * Return the name of the analyzed class.
+	 * 返回这个分析类的名称
 	 */
 	public final String getClassName() {
 		return this.className;
@@ -86,6 +92,7 @@ public class Constants {
 
 	/**
 	 * Return the number of constants exposed.
+	 * 暴露的类的常量数
 	 */
 	public final int getSize() {
 		return this.fieldCache.size();
@@ -94,6 +101,8 @@ public class Constants {
 	/**
 	 * Exposes the field cache to subclasses:
 	 * a Map from String field name to object value.
+	 * 
+	 * 暴露类的字段缓存
 	 */
 	protected final Map<String, Object> getFieldCache() {
 		return this.fieldCache;
@@ -102,6 +111,7 @@ public class Constants {
 
 	/**
 	 * Return a constant value cast to a Number.
+	 * 返回常量值转换为Number
 	 * @param code the name of the field (never {@code null})
 	 * @return the Number value
 	 * @see #asObject
@@ -118,6 +128,7 @@ public class Constants {
 
 	/**
 	 * Return a constant value as a String.
+	 * 返回常量值转换为String
 	 * @param code the name of the field (never {@code null})
 	 * @return the String value
 	 * Works even if it's not a string (invokes {@code toString()}).
@@ -132,6 +143,8 @@ public class Constants {
 	 * Parse the given String (upper or lower case accepted) and return
 	 * the appropriate value if it's the name of a constant field in the
 	 * class that we're analysing.
+	 * 
+	 * 返回常量值转换为Object
 	 * @param code the name of the field (never {@code null})
 	 * @return the Object value
 	 * @throws ConstantException if there's no such field
@@ -154,6 +167,8 @@ public class Constants {
 	 * values (i.e. all uppercase). The supplied {@code namePrefix}
 	 * will be uppercased (in a locale-insensitive fashion) prior to
 	 * the main logic of this method kicking in.
+	 * 
+	 * 返回所有常量的名称根据前缀
 	 * @param namePrefix prefix of the constant names to search (may be {@code null})
 	 * @return the set of constant names
 	 */
@@ -171,6 +186,7 @@ public class Constants {
 	/**
 	 * Return all names of the group of constants for the
 	 * given bean property name.
+	 * 返回所有常量名,根据给定bean属性的名称
 	 * @param propertyName the name of the bean property
 	 * @return the set of values
 	 * @see #propertyToConstantNamePrefix
@@ -181,6 +197,8 @@ public class Constants {
 
 	/**
 	 * Return all names of the given group of constants.
+	 * 
+	 * 根据后缀返回给定常量名
 	 * <p>Note that this method assumes that constants are named
 	 * in accordance with the standard Java convention for constant
 	 * values (i.e. all uppercase). The supplied {@code nameSuffix}
@@ -203,6 +221,7 @@ public class Constants {
 
 	/**
 	 * Return all values of the given group of constants.
+	 * 根据前缀返回所有常量值
 	 * <p>Note that this method assumes that constants are named
 	 * in accordance with the standard Java convention for constant
 	 * values (i.e. all uppercase). The supplied {@code namePrefix}
@@ -225,6 +244,7 @@ public class Constants {
 	/**
 	 * Return all values of the group of constants for the
 	 * given bean property name.
+	 * 返回所有常量值,根据给定bean属性的名称
 	 * @param propertyName the name of the bean property
 	 * @return the set of values
 	 * @see #propertyToConstantNamePrefix
@@ -235,6 +255,7 @@ public class Constants {
 
 	/**
 	 * Return all values of the given group of constants.
+	 * 根据前缀获取常量值
 	 * <p>Note that this method assumes that constants are named
 	 * in accordance with the standard Java convention for constant
 	 * values (i.e. all uppercase). The supplied {@code nameSuffix}
@@ -257,6 +278,7 @@ public class Constants {
 
 	/**
 	 * Look up the given value within the given group of constants.
+	 * 根据前缀查找给定值和属性名key
 	 * <p>Will return the first match.
 	 * @param value constant value to look up
 	 * @param namePrefix prefix of the constant names to search (may be {@code null})
@@ -288,7 +310,9 @@ public class Constants {
 
 	/**
 	 * Look up the given value within the given group of constants.
+	 * 
 	 * <p>Will return the first match.
+	 * 根据后缀查找给定值和属性名key
 	 * @param value constant value to look up
 	 * @param nameSuffix suffix of the constant names to search (may be {@code null})
 	 * @return the name of the constant field

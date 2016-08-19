@@ -22,7 +22,7 @@ package org.springframework.core;
  * user-readable values, such as "object.failureDescription".
  *
  * <p>An error code can be resolved by a MessageSource, for example.
- *
+ * <p> 可以被类似exceptions等有错误代码的实现,错误代码为Stirng,
  * @author Rod Johnson
  * @see org.springframework.context.MessageSource
  */
@@ -31,6 +31,7 @@ public interface ErrorCoded {
 	/**
 	 * Return the error code associated with this failure.
 	 * The GUI can render this any way it pleases, allowing for localization etc.
+	 * <p>根据error code关联的错误
 	 * @return a String error code associated with this failure,
 	 * or {@code null} if not error-coded
 	 */

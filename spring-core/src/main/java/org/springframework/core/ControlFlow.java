@@ -20,7 +20,7 @@ package org.springframework.core;
  * Interface to be implemented by objects that can return information about
  * the current call stack. Useful in AOP (as in AspectJ cflow concept)
  * but not AOP-specific.
- *
+ * 通过实现该接口,能返回当前调用stack信息,AOP 中使用,但不是AOP-specific
  * @author Rod Johnson
  * @since 02.02.2004
  */
@@ -29,13 +29,15 @@ public interface ControlFlow {
 	/**
 	 * Detect whether we're under the given class,
 	 * according to the current stack trace.
+	 * 检查我们是否在给定class下,根据当前stack trace
 	 * @param clazz the clazz to look for
 	 */
 	boolean under(Class<?> clazz);
 
-	/**
+	/**检查我们是否在给定class和方法下,根据当前stack trace
 	 * Detect whether we're under the given class and method,
 	 * according to the current stack trace.
+	 * 
 	 * @param clazz the clazz to look for
 	 * @param methodName the name of the method to look for
 	 */
@@ -43,6 +45,7 @@ public interface ControlFlow {
 
 	/**
 	 * Detect whether the current stack trace contains the given token.
+	 * 检查我们是否在给定token下,根据当前stack trace
 	 * @param token the token to look for
 	 */
 	boolean underToken(String token);

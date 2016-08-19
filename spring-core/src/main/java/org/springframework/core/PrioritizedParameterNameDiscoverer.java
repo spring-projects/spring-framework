@@ -28,7 +28,7 @@ import java.util.List;
  *
  * <p>The default behavior is always to return {@code null}
  * if no discoverer matches.
- *
+ * <p> 一系列ParameterNameDiscoverer实现的list集合,顺序进行检测
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 2.0

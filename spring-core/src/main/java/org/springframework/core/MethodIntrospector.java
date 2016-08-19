@@ -33,7 +33,7 @@ import org.springframework.util.ReflectionUtils;
  * as well as common scenarios encountered with interface and class-based proxies.
  *
  * <p>Typically, but not necessarily, used for finding annotated handler methods.
- *
+ * <p> 定义这个算法,用于查询元数据相关的方法,包括接口和父类通过也处理参数化的方法,
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @since 4.2.3
@@ -44,6 +44,7 @@ public abstract class MethodIntrospector {
 	 * Select methods on the given target type based on the lookup of associated metadata.
 	 * <p>Callers define methods of interest through the {@link MetadataLookup} parameter,
 	 * allowing to collect the associated metadata into the result map.
+	 * <p> 选择基于查询的管理员数据的给定目标类型,调用者定义
 	 * @param targetType the target type to search methods on
 	 * @param metadataLookup a {@link MetadataLookup} callback to inspect methods of interest,
 	 * returning non-null metadata to be associated with a given method if there is a match,

@@ -40,6 +40,7 @@ public interface DecoratingProxy {
 	 * Return the (ultimate) decorated class behind this proxy.
 	 * <p>In case of an AOP proxy, this will be the ultimate target class,
 	 * not just the immediate target (in case of multiple nested proxies).
+	 * <p> 返回装饰类在代理下,AOP代理将会是最终的目标类,
 	 * @return the decorated class (never {@code null})
 	 */
 	Class<?> getDecoratedClass();

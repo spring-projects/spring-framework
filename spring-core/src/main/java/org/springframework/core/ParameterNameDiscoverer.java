@@ -36,6 +36,7 @@ public interface ParameterNameDiscoverer {
 	/**
 	 * Return parameter names for this method,
 	 * or {@code null} if they cannot be determined.
+	 * <p> 返回方法的参数名,如果无法确定返回null
 	 * @param method method to find parameter names for
 	 * @return an array of parameter names if the names can be resolved,
 	 * or {@code null} if they cannot
@@ -45,6 +46,7 @@ public interface ParameterNameDiscoverer {
 	/**
 	 * Return parameter names for this constructor,
 	 * or {@code null} if they cannot be determined.
+	 * <p> 返回该类构造返回的参数名,不确定返回null
 	 * @param ctor constructor to find parameter names for
 	 * @return an array of parameter names if the names can be resolved,
 	 * or {@code null} if they cannot

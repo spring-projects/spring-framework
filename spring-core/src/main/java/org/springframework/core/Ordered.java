@@ -31,7 +31,8 @@ package org.springframework.core;
  *
  * <p>Consult the Javadoc for {@link OrderComparator} for details on the
  * sort semantics for non-ordered objects.
- *
+ * <p>实现优先级接口
+ * 
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 07.04.2003
@@ -62,6 +63,7 @@ public interface Ordered {
 	 * analogous to Servlet {@code load-on-startup} values).
 	 * <p>Same order values will result in arbitrary sort positions for the
 	 * affected objects.
+	 * <p> 获取order值
 	 * @return the order value
 	 * @see #HIGHEST_PRECEDENCE
 	 * @see #LOWEST_PRECEDENCE

@@ -23,7 +23,7 @@ import java.lang.reflect.Parameter;
 /**
  * {@link ParameterNameDiscoverer} implementation which uses JDK 8's reflection facilities
  * for introspecting parameter names (based on the "-parameters" compiler flag).
- *
+ * <p>jdk8标准反射工具ParameterNameDiscoverer实现类,为反射的参数类
  * @author Juergen Hoeller
  * @since 4.0
  * @see java.lang.reflect.Parameter#getName()

@@ -24,7 +24,8 @@ import org.springframework.util.ObjectUtils;
  * A common key class for a method against a specific target class,
  * including {@link #toString()} representation and {@link Comparable}
  * support (as suggested for custom {@code HashMap} keys as of Java 8).
- *
+ * <p> 一个通用的key类,对于一个方法对于一个特定的目标对象
+ *     
  * @author Juergen Hoeller
  * @since 4.3
  */
@@ -37,6 +38,7 @@ public final class MethodClassKey implements Comparable<MethodClassKey> {
 
 	/**
 	 * Create a key object for the given method and target class.
+	 * <p> 创建一个key对象,根据给定的方向和对象
 	 * @param method the method to wrap (must not be {@code null})
 	 * @param targetClass the target class that the method will be invoked
 	 * on (may be {@code null} if identical to the declaring class)
