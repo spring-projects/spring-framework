@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -86,7 +87,7 @@ public abstract class SpringFactoriesLoader {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Loaded [" + factoryClass.getName() + "] names: " + factoryNames);
 		}
-		List<T> result = new ArrayList<T>(factoryNames.size());
+		List<T> result = new ArrayList<>(factoryNames.size());
 		for (String factoryName : factoryNames) {
 			result.add(instantiateFactory(factoryName, factoryClass, classLoaderToUse));
 		}
@@ -109,7 +110,7 @@ public abstract class SpringFactoriesLoader {
 		try {
 			Enumeration<URL> urls = (classLoader != null ? classLoader.getResources(FACTORIES_RESOURCE_LOCATION) :
 					ClassLoader.getSystemResources(FACTORIES_RESOURCE_LOCATION));
-			List<String> result = new ArrayList<String>();
+			List<String> result = new ArrayList<>();
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
@@ -132,10 +133,10 @@ public abstract class SpringFactoriesLoader {
 				throw new IllegalArgumentException(
 						"Class [" + instanceClassName + "] is not assignable to [" + factoryClass.getName() + "]");
 			}
-			return (T) instanceClass.newInstance();
+			return (T) ReflectionUtils.accessibleConstructor(instanceClass).newInstance();
 		}
 		catch (Throwable ex) {
-			throw new IllegalArgumentException("Cannot instantiate factory class: " + factoryClass.getName(), ex);
+			throw new IllegalArgumentException("Unable to instantiate factory class: " + factoryClass.getName(), ex);
 		}
 	}
 

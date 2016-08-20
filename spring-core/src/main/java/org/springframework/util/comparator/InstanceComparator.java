@@ -43,7 +43,7 @@ public class InstanceComparator<T> implements Comparator<T> {
 	/**
 	 * Create a new {@link InstanceComparator} instance.
 	 * @param instanceOrder the ordered list of classes that should be used when comparing
-	 * objects. Classes earlier in the list will be be given a higher priority.
+	 * objects. Classes earlier in the list will be given a higher priority.
 	 */
 	public InstanceComparator(Class<?>... instanceOrder) {
 		Assert.notNull(instanceOrder, "'instanceOrder' must not be null");

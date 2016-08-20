@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,16 +65,22 @@ import org.springframework.messaging.Message;
  * authentication (e.g. Spring Security based) can be used to secure the
  * HTTP handshake that initiates WebSocket sessions.</li>
  * </ul>
- * <p>By default the return value is wrapped as a message and sent to the destination
- * specified with an {@link SendTo} method-level annotation.
  *
- * <p>STOMP over WebSocket: an {@link SendTo} annotation is not strictly required --
- * by default the message will be sent to the same destination as the incoming
- * message but with an additional prefix ("/topic" by default). It is also possible
- * to use {@link org.springframework.messaging.simp.annotation.SendToUser} to
- * have the message directed to a specific user only if connected.
- * Also the return value is converted with a
- * {@link org.springframework.messaging.converter.MessageConverter}.
+ * <p>By default the return value is wrapped as a message and sent to the destination
+ * specified with an {@link SendTo @SendTo} method-level annotation.
+ *
+ * <h3>STOMP over WebSocket</h3>
+ * <p>An {@link SendTo @SendTo} annotation is not strictly required &mdash; by default
+ * the message will be sent to the same destination as the incoming message but with
+ * an additional prefix ({@code "/topic"} by default). It is also possible to use the
+ * {@link org.springframework.messaging.simp.annotation.SendToUser} annotation to
+ * have the message directed to a specific user if connected. The return value is
+ * converted with a {@link org.springframework.messaging.converter.MessageConverter}.
+ *
+ * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
+ * make sure to consistently put <i>all</i> your mapping annotations - such as
+ * {@code @MessageMapping} and {@code @SubscribeMapping} - on
+ * the controller <i>interface</i> rather than on the implementation class.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -87,9 +93,10 @@ public @interface MessageMapping {
 
 	/**
 	 * Destination-based mapping expressed by this annotation.
-	 * <p>For STOMP over WebSocket messages: this is the destination of the STOMP message
-	 * (e.g. "/positions"). Ant-style path patterns (e.g. "/price.stock.*") are supported
-	 * and so are path template variables (e.g. "/price.stock.{ticker}"").
+	 * <p>For STOMP over WebSocket messages: this is the destination of the
+	 * STOMP message (e.g. {@code "/positions"}). Ant-style path patterns
+	 * (e.g. {@code "/price.stock.*"}) and path template variables (e.g.
+	 * <code>"/price.stock.{ticker}"</code>) are also supported.
 	 */
 	String[] value() default {};
 

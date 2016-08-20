@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class EventCollector {
 	 * Assert that the listener identified by the specified id has not received any event.
 	 */
 	public void assertNoEventReceived(String listenerId) {
-		List<Object> events = content.getOrDefault(listenerId, Collections.emptyList());
+		List<Object> events = this.content.getOrDefault(listenerId, Collections.emptyList());
 		assertEquals("Expected no events but got " + events, 0, events.size());
 	}
 
@@ -72,7 +72,7 @@ public class EventCollector {
 	 * specified events, in that specific order.
 	 */
 	public void assertEvent(String listenerId, Object... events) {
-		List<Object> actual = content.getOrDefault(listenerId, Collections.emptyList());
+		List<Object> actual = this.content.getOrDefault(listenerId, Collections.emptyList());
 		assertEquals("wrong number of events", events.length, actual.size());
 		for (int i = 0; i < events.length; i++) {
 			assertEquals("Wrong event at index " + i, events[i], actual.get(i));

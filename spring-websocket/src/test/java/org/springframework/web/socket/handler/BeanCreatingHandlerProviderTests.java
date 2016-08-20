@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class BeanCreatingHandlerProviderTests {
 	public void getHandlerSimpleInstantiation() {
 
 		BeanCreatingHandlerProvider<SimpleEchoHandler> provider =
-				new BeanCreatingHandlerProvider<SimpleEchoHandler>(SimpleEchoHandler.class);
+				new BeanCreatingHandlerProvider<>(SimpleEchoHandler.class);
 
 		assertNotNull(provider.getHandler());
 	}
@@ -51,17 +51,17 @@ public class BeanCreatingHandlerProviderTests {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
 		BeanCreatingHandlerProvider<EchoHandler> provider =
-				new BeanCreatingHandlerProvider<EchoHandler>(EchoHandler.class);
+				new BeanCreatingHandlerProvider<>(EchoHandler.class);
 		provider.setBeanFactory(context.getBeanFactory());
 
 		assertNotNull(provider.getHandler());
 	}
 
-	@Test(expected=BeanInstantiationException.class)
+	@Test(expected = BeanInstantiationException.class)
 	public void getHandlerNoBeanFactory() {
 
 		BeanCreatingHandlerProvider<EchoHandler> provider =
-				new BeanCreatingHandlerProvider<EchoHandler>(EchoHandler.class);
+				new BeanCreatingHandlerProvider<>(EchoHandler.class);
 
 		provider.getHandler();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.util.Assert;
@@ -85,37 +86,44 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter param, Message<?> message) throws Exception {
-		Payload ann = param.getParameterAnnotation(Payload.class);
-		if (ann != null && StringUtils.hasText(ann.value())) {
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
+		Payload ann = parameter.getParameterAnnotation(Payload.class);
+		if (ann != null && StringUtils.hasText(ann.expression())) {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver");
 		}
 
 		Object payload = message.getPayload();
 		if (isEmptyPayload(payload)) {
 			if (ann == null || ann.required()) {
-				String paramName = getParameterName(param);
+				String paramName = getParameterName(parameter);
 				BindingResult bindingResult = new BeanPropertyBindingResult(payload, paramName);
-				bindingResult.addError(new ObjectError(paramName, "@Payload param is required"));
-				throw new MethodArgumentNotValidException(message, param, bindingResult);
+				bindingResult.addError(new ObjectError(paramName, "Payload value must not be empty"));
+				throw new MethodArgumentNotValidException(message, parameter, bindingResult);
 			}
 			else {
 				return null;
 			}
 		}
 
-		Class<?> targetClass = param.getParameterType();
-		if (ClassUtils.isAssignable(targetClass, payload.getClass())) {
-			validate(message, param, payload);
+		Class<?> targetClass = parameter.getParameterType();
+		Class<?> payloadClass = payload.getClass();
+		if (ClassUtils.isAssignable(targetClass, payloadClass)) {
+			validate(message, parameter, payload);
 			return payload;
 		}
 		else {
-			payload = this.converter.fromMessage(message, targetClass);
-			if (payload == null) {
-				throw new MessageConversionException(message,
-						"No converter found to convert to " + targetClass + ", message=" + message);
+			if (this.converter instanceof SmartMessageConverter) {
+				SmartMessageConverter smartConverter = (SmartMessageConverter) this.converter;
+				payload = smartConverter.fromMessage(message, targetClass, parameter);
 			}
-			validate(message, param, payload);
+			else {
+				payload = this.converter.fromMessage(message, targetClass);
+			}
+			if (payload == null) {
+				throw new MessageConversionException(message, "Cannot convert from [" +
+						payloadClass.getName() + "] to [" + targetClass.getName() + "] for " + message);
+			}
+			validate(message, parameter, payload);
 			return payload;
 		}
 	}

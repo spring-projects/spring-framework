@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 /**
- * A comparator that chains a sequence of one or more more Comparators.
+ * A comparator that chains a sequence of one or more Comparators.
  *
  * <p>A compound comparator calls each Comparator in sequence until a single
  * Comparator returns a non-zero result, or the comparators are exhausted and
@@ -49,7 +49,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	 * IllegalStateException is thrown.
 	 */
 	public CompoundComparator() {
-		this.comparators = new ArrayList<InvertibleComparator>();
+		this.comparators = new ArrayList<>();
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	@SuppressWarnings("unchecked")
 	public CompoundComparator(Comparator... comparators) {
 		Assert.notNull(comparators, "Comparators must not be null");
-		this.comparators = new ArrayList<InvertibleComparator>(comparators.length);
+		this.comparators = new ArrayList<>(comparators.length);
 		for (Comparator comparator : comparators) {
 			this.addComparator(comparator);
 		}
@@ -121,7 +121,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	 * @param ascending the sort order: ascending (true) or descending (false)
 	 */
 	public void setComparator(int index, Comparator<T> comparator, boolean ascending) {
-		this.comparators.set(index, new InvertibleComparator<T>(comparator, ascending));
+		this.comparators.set(index, new InvertibleComparator<>(comparator, ascending));
 	}
 
 	/**

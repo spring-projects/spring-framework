@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.transaction;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Test;
 
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionStatus;
@@ -24,13 +25,16 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @since 29.04.2003
  */
-public class TransactionSupportTests extends TestCase {
+public class TransactionSupportTests {
 
-	public void testNoExistingTransaction() {
+	@Test
+	public void noExistingTransaction() {
 		PlatformTransactionManager tm = new TestTransactionManager(false, true);
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
@@ -50,7 +54,8 @@ public class TransactionSupportTests extends TestCase {
 		}
 	}
 
-	public void testExistingTransaction() {
+	@Test
+	public void existingTransaction() {
 		PlatformTransactionManager tm = new TestTransactionManager(true, true);
 		DefaultTransactionStatus status1 = (DefaultTransactionStatus)
 				tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_SUPPORTS));
@@ -73,7 +78,8 @@ public class TransactionSupportTests extends TestCase {
 		}
 	}
 
-	public void testCommitWithoutExistingTransaction() {
+	@Test
+	public void commitWithoutExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionStatus status = tm.getTransaction(null);
 		tm.commit(status);
@@ -83,7 +89,8 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("no rollbackOnly", !tm.rollbackOnly);
 	}
 
-	public void testRollbackWithoutExistingTransaction() {
+	@Test
+	public void rollbackWithoutExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionStatus status = tm.getTransaction(null);
 		tm.rollback(status);
@@ -93,7 +100,8 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("no rollbackOnly", !tm.rollbackOnly);
 	}
 
-	public void testRollbackOnlyWithoutExistingTransaction() {
+	@Test
+	public void rollbackOnlyWithoutExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionStatus status = tm.getTransaction(null);
 		status.setRollbackOnly();
@@ -104,7 +112,8 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("no rollbackOnly", !tm.rollbackOnly);
 	}
 
-	public void testCommitWithExistingTransaction() {
+	@Test
+	public void commitWithExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(true, true);
 		TransactionStatus status = tm.getTransaction(null);
 		tm.commit(status);
@@ -114,7 +123,8 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("no rollbackOnly", !tm.rollbackOnly);
 	}
 
-	public void testRollbackWithExistingTransaction() {
+	@Test
+	public void rollbackWithExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(true, true);
 		TransactionStatus status = tm.getTransaction(null);
 		tm.rollback(status);
@@ -124,7 +134,8 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("triggered rollbackOnly", tm.rollbackOnly);
 	}
 
-	public void testRollbackOnlyWithExistingTransaction() {
+	@Test
+	public void rollbackOnlyWithExistingTransaction() {
 		TestTransactionManager tm = new TestTransactionManager(true, true);
 		TransactionStatus status = tm.getTransaction(null);
 		status.setRollbackOnly();
@@ -135,7 +146,8 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("triggered rollbackOnly", tm.rollbackOnly);
 	}
 
-	public void testTransactionTemplate() {
+	@Test
+	public void transactionTemplate() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
 		template.execute(new TransactionCallbackWithoutResult() {
@@ -149,7 +161,8 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("no rollbackOnly", !tm.rollbackOnly);
 	}
 
-	public void testTransactionTemplateWithCallbackPreference() {
+	@Test
+	public void transactionTemplateWithCallbackPreference() {
 		MockCallbackPreferringTransactionManager ptm = new MockCallbackPreferringTransactionManager();
 		TransactionTemplate template = new TransactionTemplate(ptm);
 		template.execute(new TransactionCallbackWithoutResult() {
@@ -161,7 +174,8 @@ public class TransactionSupportTests extends TestCase {
 		assertFalse(ptm.getStatus().isRollbackOnly());
 	}
 
-	public void testTransactionTemplateWithException() {
+	@Test
+	public void transactionTemplateWithException() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
 		final RuntimeException ex = new RuntimeException("Some application exception");
@@ -185,7 +199,8 @@ public class TransactionSupportTests extends TestCase {
 	}
 
 	@SuppressWarnings("serial")
-	public void testTransactionTemplateWithRollbackException() {
+	@Test
+	public void transactionTemplateWithRollbackException() {
 		final TransactionSystemException tex = new TransactionSystemException("system exception");
 		TestTransactionManager tm = new TestTransactionManager(false, true) {
 			@Override
@@ -215,7 +230,8 @@ public class TransactionSupportTests extends TestCase {
 		}
 	}
 
-	public void testTransactionTemplateWithError() {
+	@Test
+	public void transactionTemplateWithError() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
 		try {
@@ -236,7 +252,8 @@ public class TransactionSupportTests extends TestCase {
 		}
 	}
 
-	public void testTransactionTemplateInitialization() {
+	@Test
+	public void transactionTemplateInitialization() {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate();
 		template.setTransactionManager(tm);
@@ -283,8 +300,9 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("Correct isolation level set", template.getIsolationLevel() == TransactionDefinition.ISOLATION_REPEATABLE_READ);
 	}
 
-	@Override
-	protected void tearDown() {
+
+	@After
+	public void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}

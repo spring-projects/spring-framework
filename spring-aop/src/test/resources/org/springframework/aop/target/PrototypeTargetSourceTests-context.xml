@@ -26,7 +26,7 @@
 		This will create a bean that creates a new target on each invocation.
 	-->
 	<bean id="prototype" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="targetSource"><ref local="prototypeTargetSource"/></property>
+		<property name="targetSource"><ref bean="prototypeTargetSource"/></property>
 		<property name="interceptorNames"><value>debugInterceptor</value></property>
 	</bean>
 

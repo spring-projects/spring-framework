@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,15 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 
 	private ServletWebRequest request;
 
+
 	@Before
 	public void setUp() {
-		mavResolvers = new ArrayList<ModelAndViewResolver>();
+		mavResolvers = new ArrayList<>();
 		handler = new ModelAndViewResolverMethodReturnValueHandler(mavResolvers);
 		mavContainer = new ModelAndViewContainer();
 		request = new ServletWebRequest(new MockHttpServletRequest());
 	}
+
 
 	@Test
 	public void modelAndViewResolver() throws Exception {
@@ -71,7 +73,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		assertFalse(mavContainer.isRequestHandled());
 	}
 
-	@Test(expected=UnsupportedOperationException.class)
+	@Test(expected = UnsupportedOperationException.class)
 	public void modelAndViewResolverUnresolved() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
 		mavResolvers.add(new TestModelAndViewResolver(TestBean.class));
@@ -88,7 +90,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		assertTrue(mavContainer.getModel().isEmpty());
 	}
 
-	@Test(expected=UnsupportedOperationException.class)
+	@Test(expected = UnsupportedOperationException.class)
 	public void handleSimpleType() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
 		handler.handleReturnValue(55, returnType, mavContainer, request);
@@ -102,6 +104,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		assertTrue(mavContainer.containsAttribute("testBean"));
 	}
 
+
 	@SuppressWarnings("unused")
 	private int intReturnValue() {
 		return 0;
@@ -111,6 +114,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	private TestBean testBeanReturnValue() {
 		return null;
 	}
+
 
 	private static class TestModelAndViewResolver implements ModelAndViewResolver {
 
@@ -132,4 +136,5 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 			}
 		}
 	}
+
 }

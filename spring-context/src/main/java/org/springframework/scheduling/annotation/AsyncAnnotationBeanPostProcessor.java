@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ package org.springframework.scheduling.annotation;
 import java.lang.annotation.Annotation;
 import java.util.concurrent.Executor;
 
-import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.util.Assert;
 
@@ -54,9 +56,23 @@ import org.springframework.util.Assert;
  * @see Async
  * @see AsyncAnnotationAdvisor
  * @see #setBeforeExistingAdvisors
+ * @see ScheduledAnnotationBeanPostProcessor
  */
 @SuppressWarnings("serial")
-public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor implements BeanFactoryAware {
+public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor {
+
+	/**
+	 * The default name of the {@link TaskExecutor} bean to pick up: "taskExecutor".
+	 * <p>Note that the initial lookup happens by type; this is just the fallback
+	 * in case of multiple executor beans found in the context.
+	 * @since 4.2
+	 * @see AnnotationAsyncExecutionInterceptor#DEFAULT_TASK_EXECUTOR_BEAN_NAME
+	 */
+	public static final String DEFAULT_TASK_EXECUTOR_BEAN_NAME =
+			AnnotationAsyncExecutionInterceptor.DEFAULT_TASK_EXECUTOR_BEAN_NAME;
+
+
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Class<? extends Annotation> asyncAnnotationType;
 
@@ -86,6 +102,13 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 
 	/**
 	 * Set the {@link Executor} to use when invoking methods asynchronously.
+	 * <p>If not specified, default executor resolution will apply: searching for a
+	 * unique {@link TaskExecutor} bean in the context, or for an {@link Executor}
+	 * bean named "taskExecutor" otherwise. If neither of the two is resolvable,
+	 * a local default executor will be created within the interceptor.
+	 * @see AsyncAnnotationAdvisor#AsyncAnnotationAdvisor(Executor, AsyncUncaughtExceptionHandler)
+	 * @see AnnotationAsyncExecutionInterceptor#getDefaultExecutor(BeanFactory)
+	 * @see #DEFAULT_TASK_EXECUTOR_BEAN_NAME
 	 */
 	public void setExecutor(Executor executor) {
 		this.executor = executor;
@@ -100,9 +123,12 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 		this.exceptionHandler = exceptionHandler;
 	}
 
+
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
-		AsyncAnnotationAdvisor advisor =  new AsyncAnnotationAdvisor(this.executor, this.exceptionHandler);
+		super.setBeanFactory(beanFactory);
+
+		AsyncAnnotationAdvisor advisor = new AsyncAnnotationAdvisor(this.executor, this.exceptionHandler);
 		if (this.asyncAnnotationType != null) {
 			advisor.setAsyncAnnotationType(this.asyncAnnotationType);
 		}

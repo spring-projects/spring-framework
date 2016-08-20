@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 
 package org.springframework.beans.factory.support;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.tests.sample.beans.TestBean;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  */
-public class BeanDefinitionTests extends TestCase {
+public class BeanDefinitionTests {
 
-	public void testBeanDefinitionEquality() {
+	@Test
+	public void beanDefinitionEquality() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setAbstract(true);
 		bd.setLazyInit(true);
@@ -43,7 +45,8 @@ public class BeanDefinitionTests extends TestCase {
 		assertTrue(bd.hashCode() == otherBd.hashCode());
 	}
 
-	public void testBeanDefinitionEqualityWithPropertyValues() {
+	@Test
+	public void beanDefinitionEqualityWithPropertyValues() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getPropertyValues().add("name", "myName");
 		bd.getPropertyValues().add("age", "99");
@@ -60,7 +63,8 @@ public class BeanDefinitionTests extends TestCase {
 		assertTrue(bd.hashCode() == otherBd.hashCode());
 	}
 
-	public void testBeanDefinitionEqualityWithConstructorArguments() {
+	@Test
+	public void beanDefinitionEqualityWithConstructorArguments() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5));
@@ -77,7 +81,8 @@ public class BeanDefinitionTests extends TestCase {
 		assertTrue(bd.hashCode() == otherBd.hashCode());
 	}
 
-	public void testBeanDefinitionEqualityWithTypedConstructorArguments() {
+	@Test
+	public void beanDefinitionEqualityWithTypedConstructorArguments() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test", "int");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5), "long");
@@ -95,7 +100,8 @@ public class BeanDefinitionTests extends TestCase {
 		assertTrue(bd.hashCode() == otherBd.hashCode());
 	}
 
-	public void testBeanDefinitionHolderEquality() {
+	@Test
+	public void beanDefinitionHolderEquality() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.setAbstract(true);
 		bd.setLazyInit(true);
@@ -113,7 +119,8 @@ public class BeanDefinitionTests extends TestCase {
 		assertTrue(holder.hashCode() == otherHolder.hashCode());
 	}
 
-	public void testBeanDefinitionMerging() {
+	@Test
+	public void beanDefinitionMerging() {
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getConstructorArgumentValues().addGenericArgumentValue("test");
 		bd.getConstructorArgumentValues().addIndexedArgumentValue(1, new Integer(5));
@@ -124,7 +131,7 @@ public class BeanDefinitionTests extends TestCase {
 		childBd.setParentName("bd");
 
 		RootBeanDefinition mergedBd = new RootBeanDefinition(bd);
-		mergedBd.overrideFrom((BeanDefinition) childBd);
+		mergedBd.overrideFrom(childBd);
 		assertEquals(2, mergedBd.getConstructorArgumentValues().getArgumentCount());
 		assertEquals(2, mergedBd.getPropertyValues().size());
 		assertEquals(bd, mergedBd);

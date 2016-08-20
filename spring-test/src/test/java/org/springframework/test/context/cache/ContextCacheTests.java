@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
  * @author Sam Brannen
  * @author Michail Nikolaev
  * @since 3.1
+ * @see LruContextCacheTests
  * @see SpringRunnerContextCacheTests
  */
 public class ContextCacheTests {
@@ -86,14 +87,15 @@ public class ContextCacheTests {
 
 	@Test
 	public void verifyCacheKeyIsBasedOnActiveProfiles() {
-		loadCtxAndAssertStats(FooBarProfilesTestCase.class, 1, 0, 1);
-		loadCtxAndAssertStats(FooBarProfilesTestCase.class, 1, 1, 1);
-		// Profiles {foo, bar} should hash to the same as {bar,foo}
-		loadCtxAndAssertStats(BarFooProfilesTestCase.class, 1, 2, 1);
-		loadCtxAndAssertStats(FooBarProfilesTestCase.class, 1, 3, 1);
-		loadCtxAndAssertStats(FooBarProfilesTestCase.class, 1, 4, 1);
-		loadCtxAndAssertStats(BarFooProfilesTestCase.class, 1, 5, 1);
-		loadCtxAndAssertStats(FooBarActiveProfilesResolverTestCase.class, 1, 6, 1);
+		int size = 0, hit = 0, miss = 0;
+		loadCtxAndAssertStats(FooBarProfilesTestCase.class, ++size, hit, ++miss);
+		loadCtxAndAssertStats(FooBarProfilesTestCase.class, size, ++hit, miss);
+		// Profiles {foo, bar} should not hash to the same as {bar,foo}
+		loadCtxAndAssertStats(BarFooProfilesTestCase.class, ++size, hit, ++miss);
+		loadCtxAndAssertStats(FooBarProfilesTestCase.class, size, ++hit, miss);
+		loadCtxAndAssertStats(FooBarProfilesTestCase.class, size, ++hit, miss);
+		loadCtxAndAssertStats(BarFooProfilesTestCase.class, size, ++hit, miss);
+		loadCtxAndAssertStats(FooBarActiveProfilesResolverTestCase.class, size, ++hit, miss);
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ public class CollectionFactoryTests {
 
 	@Test
 	public void createApproximateCollectionFromNonEmptyHashSet() {
-		HashSet<String> hashSet = new HashSet<String>();
+		HashSet<String> hashSet = new HashSet<>();
 		hashSet.add("foo");
 		Collection<String> set = createApproximateCollection(hashSet, 2);
 		assertThat(set.size(), is(0));
@@ -196,7 +196,7 @@ public class CollectionFactoryTests {
 
 	@Test
 	public void createApproximateMapFromNonEmptyHashMap() {
-		Map<String, String> hashMap = new HashMap<String, String>();
+		Map<String, String> hashMap = new HashMap<>();
 		hashMap.put("foo", "bar");
 		Map<String, String> map = createApproximateMap(hashMap, 2);
 		assertThat(map.size(), is(0));
@@ -210,7 +210,7 @@ public class CollectionFactoryTests {
 
 	@Test
 	public void createApproximateMapFromNonEmptyEnumMap() {
-		EnumMap<Color, String> enumMap = new EnumMap<Color, String>(Color.class);
+		EnumMap<Color, String> enumMap = new EnumMap<>(Color.class);
 		enumMap.put(Color.BLUE, "blue");
 		Map<Color, String> colors = createApproximateMap(enumMap, 2);
 		assertThat(colors.size(), is(0));

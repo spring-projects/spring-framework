@@ -42,7 +42,6 @@ import java.sql.Statement;
  * @see java.sql.Wrapper#unwrap
  * @see SimpleNativeJdbcExtractor
  * @see org.springframework.jdbc.core.JdbcTemplate#setNativeJdbcExtractor
- * @see org.springframework.jdbc.support.lob.OracleLobHandler#setNativeJdbcExtractor
  */
 public class Jdbc4NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 

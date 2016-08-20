@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package org.springframework.messaging.simp.config;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.junit.Test;
 
 import org.springframework.messaging.MessageChannel;
@@ -29,7 +26,8 @@ import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link org.springframework.messaging.simp.config.StompBrokerRelayRegistration}.
+ * Unit tests for
+ * {@link org.springframework.messaging.simp.config.StompBrokerRelayRegistration}.
  *
  * @author Rossen Stoyanchev
  */
@@ -39,15 +37,11 @@ public class StompBrokerRelayRegistrationTests {
 	@Test
 	public void test() {
 
-		SubscribableChannel clientInboundChannel = new StubMessageChannel();
-		MessageChannel clientOutboundChannel = new StubMessageChannel();
-		SubscribableChannel brokerChannel = new StubMessageChannel();
+		SubscribableChannel inChannel = new StubMessageChannel();
+		MessageChannel outChannel = new StubMessageChannel();
+		String[] prefixes = new String[] { "/foo", "/bar" };
 
-		String[] destinationPrefixes = new String[] { "/foo", "/bar" };
-
-		StompBrokerRelayRegistration registration = new StompBrokerRelayRegistration(
-				clientInboundChannel, clientOutboundChannel, destinationPrefixes);
-
+		StompBrokerRelayRegistration registration = new StompBrokerRelayRegistration(inChannel, outChannel, prefixes);
 		registration.setClientLogin("clientlogin");
 		registration.setClientPasscode("clientpasscode");
 		registration.setSystemLogin("syslogin");
@@ -56,18 +50,16 @@ public class StompBrokerRelayRegistrationTests {
 		registration.setSystemHeartbeatSendInterval(456);
 		registration.setVirtualHost("example.org");
 
-		StompBrokerRelayMessageHandler relayMessageHandler = registration.getMessageHandler(brokerChannel);
+		StompBrokerRelayMessageHandler handler = registration.getMessageHandler(new StubMessageChannel());
 
-		assertEquals(Arrays.asList(destinationPrefixes),
-				new ArrayList<String>(relayMessageHandler.getDestinationPrefixes()));
-
-		assertEquals("clientlogin", relayMessageHandler.getClientLogin());
-		assertEquals("clientpasscode", relayMessageHandler.getClientPasscode());
-		assertEquals("syslogin", relayMessageHandler.getSystemLogin());
-		assertEquals("syspasscode", relayMessageHandler.getSystemPasscode());
-		assertEquals(123, relayMessageHandler.getSystemHeartbeatReceiveInterval());
-		assertEquals(456, relayMessageHandler.getSystemHeartbeatSendInterval());
-		assertEquals("example.org", relayMessageHandler.getVirtualHost());
+		assertArrayEquals(prefixes, handler.getDestinationPrefixes().toArray(new String[2]));
+		assertEquals("clientlogin", handler.getClientLogin());
+		assertEquals("clientpasscode", handler.getClientPasscode());
+		assertEquals("syslogin", handler.getSystemLogin());
+		assertEquals("syspasscode", handler.getSystemPasscode());
+		assertEquals(123, handler.getSystemHeartbeatReceiveInterval());
+		assertEquals(456, handler.getSystemHeartbeatSendInterval());
+		assertEquals("example.org", handler.getVirtualHost());
 	}
 
 }

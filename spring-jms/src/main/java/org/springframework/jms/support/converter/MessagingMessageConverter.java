@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.SimpleJmsHeaderMapper;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
+import org.springframework.messaging.core.AbstractMessagingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.Assert;
 
@@ -93,8 +95,11 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 					Message.class.getName() + "] is handled by this converter");
 		}
 		Message<?> input = (Message<?>) object;
-		javax.jms.Message reply = createMessageForPayload(input.getPayload(), session);
-		this.headerMapper.fromHeaders(input.getHeaders(), reply);
+		MessageHeaders headers = input.getHeaders();
+		Object conversionHint = (headers != null ? headers.get(
+				AbstractMessagingTemplate.CONVERSION_HINT_HEADER) : null);
+		javax.jms.Message reply = createMessageForPayload(input.getPayload(), session, conversionHint);
+		this.headerMapper.fromHeaders(headers, reply);
 		return reply;
 	}
 
@@ -104,7 +109,7 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 		if (message == null) {
 			return null;
 		}
-		Map<String, Object> mappedHeaders = this.headerMapper.toHeaders(message);
+		Map<String, Object> mappedHeaders = extractHeaders(message);
 		Object convertedObject = extractPayload(message);
 		MessageBuilder<Object> builder = (convertedObject instanceof org.springframework.messaging.Message) ?
 				MessageBuilder.fromMessage((org.springframework.messaging.Message<Object>) convertedObject) :
@@ -120,11 +125,20 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	}
 
 	/**
-	 * Create a JMS message for the specified payload.
+	 * Create a JMS message for the specified payload and conversionHint.
+	 * The conversion hint is an extra object passed to the {@link MessageConverter},
+	 * e.g. the associated {@code MethodParameter} (may be {@code null}}.
 	 * @see MessageConverter#toMessage(Object, Session)
+	 * @since 4.3
 	 */
-	protected javax.jms.Message createMessageForPayload(Object payload, Session session) throws JMSException {
+	protected javax.jms.Message createMessageForPayload(Object payload, Session session, Object conversionHint)
+			throws JMSException {
+
 		return this.payloadConverter.toMessage(payload, session);
+	}
+
+	protected final MessageHeaders extractHeaders(javax.jms.Message message) {
+		return this.headerMapper.toHeaders(message);
 	}
 
 }

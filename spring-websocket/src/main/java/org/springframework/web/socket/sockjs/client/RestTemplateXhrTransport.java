@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class RestTemplateXhrTransport extends AbstractXhrTransport implements XhrTransport {
+public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 	private final RestOperations restTemplate;
 
@@ -94,27 +94,16 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 
 
 	@Override
-	public ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
-		RequestCallback requestCallback = new XhrRequestCallback(getRequestHeaders());
-		return this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textExtractor);
-	}
-
-	@Override
-	public ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
-		RequestCallback requestCallback = new XhrRequestCallback(headers, message.getPayload());
-		return this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textExtractor);
-	}
-
-	@Override
-	protected void connectInternal(final TransportRequest request, final WebSocketHandler handler,
+	protected void connectInternal(final TransportRequest transportRequest, final WebSocketHandler handler,
 			final URI receiveUrl, final HttpHeaders handshakeHeaders, final XhrClientSockJsSession session,
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		getTaskExecutor().execute(new Runnable() {
 			@Override
 			public void run() {
+				HttpHeaders httpHeaders = transportRequest.getHttpRequestHeaders();
 				XhrRequestCallback requestCallback = new XhrRequestCallback(handshakeHeaders);
-				XhrRequestCallback requestCallbackAfterHandshake = new XhrRequestCallback(getRequestHeaders());
+				XhrRequestCallback requestCallbackAfterHandshake = new XhrRequestCallback(httpHeaders);
 				XhrReceiveExtractor responseExtractor = new XhrReceiveExtractor(session);
 				while (true) {
 					if (session.isDisconnected()) {
@@ -143,24 +132,35 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 		});
 	}
 
+	@Override
+	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
+		RequestCallback requestCallback = new XhrRequestCallback(headers);
+		return this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textResponseExtractor);
+	}
+
+	@Override
+	public ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
+		RequestCallback requestCallback = new XhrRequestCallback(headers, message.getPayload());
+		return this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textResponseExtractor);
+	}
+
 
 	/**
 	 * A simple ResponseExtractor that reads the body into a String.
 	 */
-	private final static ResponseExtractor<ResponseEntity<String>> textExtractor =
+	private final static ResponseExtractor<ResponseEntity<String>> textResponseExtractor =
 			new ResponseExtractor<ResponseEntity<String>>() {
 				@Override
 				public ResponseEntity<String> extractData(ClientHttpResponse response) throws IOException {
 					if (response.getBody() == null) {
-						return new ResponseEntity<String>(response.getHeaders(), response.getStatusCode());
+						return new ResponseEntity<>(response.getHeaders(), response.getStatusCode());
 					}
 					else {
 						String body = StreamUtils.copyToString(response.getBody(), SockJsFrame.CHARSET);
-						return new ResponseEntity<String>(body, response.getHeaders(), response.getStatusCode());
+						return new ResponseEntity<>(body, response.getHeaders(), response.getStatusCode());
 					}
 				}
 			};
-
 
 	/**
 	 * A RequestCallback to add the headers and (optionally) String content.
@@ -190,7 +190,6 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 			}
 		}
 	}
-
 
 	/**
 	 * Splits the body of an HTTP response into SockJS frames and delegates those

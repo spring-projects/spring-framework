@@ -105,7 +105,7 @@ public class DefaultResponseErrorHandlerTests {
 
 	// SPR-9406
 
-	@Test(expected=UnknownHttpStatusCodeException.class)
+	@Test(expected = UnknownHttpStatusCodeException.class)
 	public void unknownStatusCode() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.TEXT_PLAIN);

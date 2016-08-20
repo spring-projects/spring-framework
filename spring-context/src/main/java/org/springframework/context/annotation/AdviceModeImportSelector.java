@@ -21,7 +21,6 @@ import java.lang.annotation.Annotation;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.Assert;
 
  /**
  * Convenient base class for {@link ImportSelector} implementations that select imports
@@ -62,13 +61,17 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 	public final String[] selectImports(AnnotationMetadata importingClassMetadata) {
 		Class<?> annoType = GenericTypeResolver.resolveTypeArgument(getClass(), AdviceModeImportSelector.class);
 		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(importingClassMetadata, annoType);
-		Assert.notNull(attributes, String.format(
+		if (attributes == null) {
+			throw new IllegalArgumentException(String.format(
 				"@%s is not present on importing class '%s' as expected",
 				annoType.getSimpleName(), importingClassMetadata.getClassName()));
+		}
 
 		AdviceMode adviceMode = attributes.getEnum(this.getAdviceModeAttributeName());
 		String[] imports = selectImports(adviceMode);
-		Assert.notNull(imports, String.format("Unknown AdviceMode: '%s'", adviceMode));
+		if (imports == null) {
+			throw new IllegalArgumentException(String.format("Unknown AdviceMode: '%s'", adviceMode));
+		}
 		return imports;
 	}
 

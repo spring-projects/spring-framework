@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionException;
@@ -43,6 +43,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.converter.GenericConverter.ConvertiblePair;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -72,24 +73,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 	private static final GenericConverter NO_MATCH = new NoOpConverter("NO_MATCH");
 
 
-	/** Java 8's java.util.Optional.empty() */
-	private static Object javaUtilOptionalEmpty = null;
-
-	static {
-		try {
-			Class<?> clazz = ClassUtils.forName("java.util.Optional", GenericConversionService.class.getClassLoader());
-			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
-		}
-		catch (Exception ex) {
-			// Java 8 not available - conversion to Optional not supported then.
-		}
-	}
-
-
 	private final Converters converters = new Converters();
 
 	private final Map<ConverterCacheKey, GenericConverter> converterCache =
-			new ConcurrentHashMap<ConverterCacheKey, GenericConverter>(64);
+			new ConcurrentReferenceHashMap<>(64);
 
 
 	// ConverterRegistry implementation
@@ -103,7 +90,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	@Override
-	public void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
+	public <S, T> void addConverter(Class<S> sourceType, Class<T> targetType, Converter<? super S, ? extends T> converter) {
 		addConverter(new ConverterAdapter(
 				converter, ResolvableType.forClass(sourceType), ResolvableType.forClass(targetType)));
 	}
@@ -231,8 +218,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @return the converted null object
 	 */
 	protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (javaUtilOptionalEmpty != null && targetType.getObjectType().equals(javaUtilOptionalEmpty.getClass())) {
-			return javaUtilOptionalEmpty;
+		if (targetType.getObjectType() == Optional.class) {
+			return Optional.empty();
 		}
 		return null;
 	}
@@ -354,7 +341,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			// Check raw type first...
-			if (!this.typeInfo.getTargetType().equals(targetType.getObjectType())) {
+			if (this.typeInfo.getTargetType() != targetType.getObjectType()) {
 				return false;
 			}
 			// Full check for complex generic type match required?
@@ -435,7 +422,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	/**
 	 * Key for use with the converter cache.
 	 */
-	private static final class ConverterCacheKey {
+	private static final class ConverterCacheKey implements Comparable<ConverterCacheKey> {
 
 		private final TypeDescriptor sourceType;
 
@@ -470,6 +457,17 @@ public class GenericConversionService implements ConfigurableConversionService {
 			return ("ConverterCacheKey [sourceType = " + this.sourceType +
 					", targetType = " + this.targetType + "]");
 		}
+
+		@Override
+		public int compareTo(ConverterCacheKey other) {
+			int result = this.sourceType.getResolvableType().toString().compareTo(
+					other.sourceType.getResolvableType().toString());
+			if (result == 0) {
+				result = this.targetType.getResolvableType().toString().compareTo(
+						other.targetType.getResolvableType().toString());
+			}
+			return result;
+		}
 	}
 
 
@@ -478,10 +476,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static class Converters {
 
-		private final Set<GenericConverter> globalConverters = new LinkedHashSet<GenericConverter>();
+		private final Set<GenericConverter> globalConverters = new LinkedHashSet<>();
 
 		private final Map<ConvertiblePair, ConvertersForPair> converters =
-				new LinkedHashMap<ConvertiblePair, ConvertersForPair>(36);
+				new LinkedHashMap<>(36);
 
 		public void add(GenericConverter converter) {
 			Set<ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
@@ -561,8 +559,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 		 * @return an ordered list of all classes that the given type extends or implements
 		 */
 		private List<Class<?>> getClassHierarchy(Class<?> type) {
-			List<Class<?>> hierarchy = new ArrayList<Class<?>>(20);
-			Set<Class<?>> visited = new HashSet<Class<?>>(20);
+			List<Class<?>> hierarchy = new ArrayList<>(20);
+			Set<Class<?>> visited = new HashSet<>(20);
 			addToClassHierarchy(0, ClassUtils.resolvePrimitiveIfNecessary(type), false, hierarchy, visited);
 			boolean array = type.isArray();
 
@@ -619,7 +617,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		private List<String> getConverterStrings() {
-			List<String> converterStrings = new ArrayList<String>();
+			List<String> converterStrings = new ArrayList<>();
 			for (ConvertersForPair convertersForPair : converters.values()) {
 				converterStrings.add(convertersForPair.toString());
 			}
@@ -634,7 +632,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static class ConvertersForPair {
 
-		private final LinkedList<GenericConverter> converters = new LinkedList<GenericConverter>();
+		private final LinkedList<GenericConverter> converters = new LinkedList<>();
 
 		public void add(GenericConverter converter) {
 			this.converters.addFirst(converter);

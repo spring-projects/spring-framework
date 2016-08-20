@@ -25,7 +25,7 @@ For an explanation of this principle, refer to __Expert Spring Web MVC and Web F
 Seth Ladd and others; specifically see the section "A Look At Design," on page 117 of
 the first edition. Alternatively, see
 
-* http://www.objectmentor.com/resources/articles/ocp.pdf[Bob Martin, The Open-Closed
+* https://www.cs.duke.edu/courses/fall07/cps108/papers/ocp.pdf[Bob Martin, The Open-Closed
   Principle (PDF)]
 
 You cannot add advice to final methods when you use Spring MVC. For example, you cannot
@@ -37,7 +37,7 @@ add advice to final methods.
 In Spring Web MVC you can use any object as a command or form-backing object; you do not
 need to implement a framework-specific interface or base class. Spring's data binding is
 highly flexible: for example, it treats type mismatches as validation errors that can be
-evaluated by the application, not as system errors. Thus you need not duplicate your
+evaluated by the application, not as system errors. Thus you do not need to duplicate your
 business objects' properties as simple, untyped strings in your form objects simply to
 handle invalid submissions, or to convert the Strings properly. Instead, it is often
 preferable to bind directly to your business objects.
@@ -49,9 +49,9 @@ configurable through file extension or Accept header content type negotiation, t
 bean names, a properties file, or even a custom `ViewResolver` implementation. The model
 (the M in MVC) is a `Map` interface, which allows for the complete abstraction of the
 view technology. You can integrate directly with template based rendering technologies
-such as JSP, Velocity and Freemarker, or directly generate XML, JSON, Atom, and many
-other types of content. The model `Map` is simply transformed into an appropriate
-format, such as JSP request attributes, a Velocity template model.
+such as JSP and FreeMarker, or directly generate XML, JSON, Atom, and many other types
+of content. The model `Map` is simply transformed into an appropriate format, such as
+JSP request attributes or a FreeMarker template model.
 
 
 
@@ -101,7 +101,7 @@ Spring's web module includes many unique web support features:
 * __Flexible model transfer__. Model transfer with a name/value `Map` supports easy
   integration with any view technology.
 * __Customizable locale, time zone and theme resolution, support for JSPs with or without
-  Spring tag library, support for JSTL, support for Velocity without the need for extra
+  Spring tag library, support for JSTL, support for FreeMarker without the need for extra
   bridges, and so on.__
 * __A simple yet powerful JSP tag library known as the Spring tag library that provides
   support for features such as data binding and themes__. The custom tags allow for
@@ -156,15 +156,47 @@ in the following diagram. The pattern-savvy reader will recognize that the
 `DispatcherServlet` is an expression of the "Front Controller" design pattern (this is a
 pattern that Spring Web MVC shares with many other leading web frameworks).
 
+.The request processing workflow in Spring Web MVC (high level)
 image::images/mvc.png[width=400]
 
-The request processing workflow in Spring Web MVC (high level)
+The `DispatcherServlet` is an actual `Servlet` (it inherits from the `HttpServlet` base
+class), and as such is declared in your web application. You need to map requests that
+you want the `DispatcherServlet` to handle, by using a URL mapping. Here is a standard
+Java EE Servlet configuration in a Servlet 3.0+ environment:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class MyWebApplicationInitializer implements WebApplicationInitializer {
+
+		@Override
+		public void onStartup(ServletContext container) {
+			ServletRegistration.Dynamic registration = container.addServlet("dispatcher", new DispatcherServlet());
+			registration.setLoadOnStartup(1);
+			registration.addMapping("/example/*");
+		}
+
+	}
+----
+
+In the preceding example, all requests starting with `/example` will be handled by the
+`DispatcherServlet` instance named `example`.
+
+`WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
+code-based configuration is detected and automatically used to initialize any Servlet 3
+container. An abstract base class implementation of this interface named
+`AbstractAnnotationConfigDispatcherServletInitializer` makes it even easier to register the
+`DispatcherServlet` by simply specifying its servlet mapping and listing configuration
+classes - it's even the recommended way to set up your Spring MVC application.
+See <<mvc-container-config,Code-based Servlet container initialization>> for more details.
 
 The `DispatcherServlet` is an actual `Servlet` (it inherits from the `HttpServlet` base
 class), and as such is declared in the `web.xml` of your web application. You need to
 map requests that you want the `DispatcherServlet` to handle, by using a URL mapping in
 the same `web.xml` file. This is standard Java EE Servlet configuration; the following
 example shows such a `DispatcherServlet` declaration and mapping:
+
+Below is the `web.xml` equivalent of the above code based example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -184,45 +216,17 @@ example shows such a `DispatcherServlet` declaration and mapping:
 	</web-app>
 ----
 
-In the preceding example, all requests starting with `/example` will be handled by the
-`DispatcherServlet` instance named `example`. In a Servlet 3.0+ environment, you also
-have the option of configuring the Servlet container programmatically. Below is the code
-based equivalent of the above `web.xml` example:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyWebApplicationInitializer implements WebApplicationInitializer {
-
-		@Override
-		public void onStartup(ServletContext container) {
-			ServletRegistration.Dynamic registration = container.addServlet("dispatcher", new DispatcherServlet());
-			registration.setLoadOnStartup(1);
-			registration.addMapping("/example/*");
-		}
-
-	}
-----
-
-`WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
-code-based configuration is detected and automatically used to initialize any Servlet 3
-container. An abstract base class implementation of this interace named
-`AbstractDispatcherServletInitializer` makes it even easier to register the
-`DispatcherServlet` by simply specifying its servlet mapping.
-See <<mvc-container-config,Code-based Servlet container initialization>> for more details.
-
-The above is only the first step in setting up Spring Web MVC. You now need to configure
-the various beans used by the Spring Web MVC framework (over and above the
-`DispatcherServlet` itself).
 
 As detailed in <<context-introduction>>, `ApplicationContext` instances in Spring can be
 scoped. In the Web MVC framework, each `DispatcherServlet` has its own
 `WebApplicationContext`, which inherits all the beans already defined in the root
-`WebApplicationContext`. These inherited beans can be overridden in the servlet-specific
+`WebApplicationContext`. The root `WebApplicationContext` should contain all the
+infrastructure beans that should be shared between your other contexts and Servlet
+instances. These inherited beans can be overridden in the servlet-specific
 scope, and you can define new scope-specific beans local to a given Servlet instance.
 
-.Context hierarchy in Spring Web MVC
-image::images/mvc-contexts.gif[width=400]
+.Typical context hierarchy in Spring Web MVC
+image::images/mvc-context-hierarchy.png[width=400]
 
 Upon initialization of a `DispatcherServlet`, Spring MVC looks for a file named
 __[servlet-name]-servlet.xml__ in the `WEB-INF` directory of your web application and
@@ -252,8 +256,13 @@ With the above Servlet configuration in place, you will need to have a file call
 Spring Web MVC-specific components (beans). You can change the exact location of this
 configuration file through a Servlet initialization parameter (see below for details).
 
-It is also possible to have just one root context for single DispatcherServlet scenarios
-by setting an empty contextConfigLocation servlet init parameter, as shown below:
+It is also possible to have just one root context for single DispatcherServlet scenarios.
+
+.Single root context in Spring Web MVC
+image::images/mvc-root-context.png[width=400]
+
+This can be configured by setting an empty contextConfigLocation servlet init parameter,
+as shown below:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -291,7 +300,32 @@ a link to the `ServletContext`). The `WebApplicationContext` is bound in the
 `ServletContext`, and by using static methods on the `RequestContextUtils` class you can
 always look up the `WebApplicationContext` if you need access to it.
 
+Note that we can achieve the same with java-based configurations:
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class GolfingWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+		@Override
+		protected Class<?>[] getRootConfigClasses() {
+			// GolfingAppConfig defines beans that would be in root-context.xml
+			return new Class[] { GolfingAppConfig.class };
+		}
+
+		@Override
+		protected Class<?>[] getServletConfigClasses() {
+			// GolfingWebConfig defines beans that would be in golfing-servlet.xml
+			return new Class[] { GolfingWebConfig.class };
+		}
+
+		@Override
+		protected String[] getServletMappings() {
+			return new String[] { "/golfing/*" };
+		}
+
+	}
+----
 
 [[mvc-servlet-special-bean-types]]
 === Special Bean Types In the WebApplicationContext
@@ -365,7 +399,7 @@ implementations is ignored.
 In <<mvc-config>> you'll learn about other options for configuring Spring MVC including
 MVC Java config and the MVC XML namespace both of which provide a simple starting point
 and assume little knowledge of how Spring MVC works. Regardless of how you choose to
-configure your application, the concepts explained in this section are fundamental
+configure your application, the concepts explained in this section are fundamental and
 should be of help to you.
 
 
@@ -556,12 +590,12 @@ application that uses this annotation:
 			return appointmentBook.getAppointmentsForToday();
 		}
 
-		**@RequestMapping(value="/{day}", method = RequestMethod.GET)**
+		**@RequestMapping(path = "/{day}", method = RequestMethod.GET)**
 		public Map<String, Appointment> getForDay(@PathVariable @DateTimeFormat(iso=ISO.DATE) Date day, Model model) {
 			return appointmentBook.getAppointmentsForDay(day);
 		}
 
-		**@RequestMapping(value="/new", method = RequestMethod.GET)**
+		**@RequestMapping(path = "/new", method = RequestMethod.GET)**
 		public AppointmentForm getNewForm() {
 			return new AppointmentForm();
 		}
@@ -577,16 +611,16 @@ application that uses this annotation:
 	}
 ----
 
-In the example, the `@RequestMapping` is used in a number of places. The first usage is
-on the type (class) level, which indicates that all handling methods on this controller
+In the above example, `@RequestMapping` is used in a number of places. The first usage is
+on the type (class) level, which indicates that all handler methods in this controller
 are relative to the `/appointments` path. The `get()` method has a further
-`@RequestMapping` refinement: it only accepts GET requests, meaning that an HTTP GET for
+`@RequestMapping` refinement: it only accepts `GET` requests, meaning that an HTTP `GET` for
 `/appointments` invokes this method. The `add()` has a similar refinement, and the
-`getNewForm()` combines the definition of HTTP method and path into one, so that GET
+`getNewForm()` combines the definition of HTTP method and path into one, so that `GET`
 requests for `appointments/new` are handled by that method.
 
 The `getForDay()` method shows another usage of `@RequestMapping`: URI templates. (See
-<<mvc-ann-requestmapping-uri-templates,the next section >>).
+<<mvc-ann-requestmapping-uri-templates>>).
 
 A `@RequestMapping` on the class level is not required. Without it, all paths are simply
 absolute, and not relative. The following example from the __PetClinic__ sample
@@ -617,13 +651,69 @@ application shows a multi-action controller using `@RequestMapping`:
 	}
 ----
 
-The above example does not specify GET vs. PUT, POST, and so forth, because
-`@RequestMapping` maps all HTTP methods by default. Use `@RequestMapping(method=GET)`
-to narrow the mapping.
+The above example does not specify `GET` vs. `PUT`, `POST`, and so forth, because
+`@RequestMapping` maps all HTTP methods by default. Use `@RequestMapping(method=GET)` or
+`@GetMapping` to narrow the mapping.
 
+[[mvc-ann-requestmapping-composed]]
+==== Composed @RequestMapping Variants
+
+Spring Framework 4.3 introduces the following method-level _composed_ variants of the
+`@RequestMapping` annotation that help to simplify mappings for common HTTP methods and
+better express the semantics of the annotated handler method. For example, a
+`@GetMapping` can be read as a `GET` `@RequestMapping`.
+
+- `@GetMapping`
+- `@PostMapping`
+- `@PutMapping`
+- `@DeleteMapping`
+- `@PatchMapping`
+
+The following example shows a modified version of the `AppointmentsController` from the
+previous section that has been simplified with _composed_ `@RequestMapping` annotations.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	**@RequestMapping("/appointments")**
+	public class AppointmentsController {
+
+		private final AppointmentBook appointmentBook;
+
+		@Autowired
+		public AppointmentsController(AppointmentBook appointmentBook) {
+			this.appointmentBook = appointmentBook;
+		}
+
+		**@GetMapping**
+		public Map<String, Appointment> get() {
+			return appointmentBook.getAppointmentsForToday();
+		}
+
+		**@GetMapping("/{day}")**
+		public Map<String, Appointment> getForDay(@PathVariable @DateTimeFormat(iso=ISO.DATE) Date day, Model model) {
+			return appointmentBook.getAppointmentsForDay(day);
+		}
+
+		**@GetMapping("/new")**
+		public AppointmentForm getNewForm() {
+			return new AppointmentForm();
+		}
+
+		**@PostMapping**
+		public String add(@Valid AppointmentForm appointment, BindingResult result) {
+			if (result.hasErrors()) {
+				return "appointments/new";
+			}
+			appointmentBook.addAppointment(appointment);
+			return "redirect:/appointments";
+		}
+	}
+----
 
 [[mvc-ann-requestmapping-proxying]]
-==== ++@Controller++'s and AOP Proxying
+==== @Controller and AOP Proxying
 
 In some cases a controller may need to be decorated with an AOP proxy at runtime.
 One example is if you choose to have `@Transactional` annotations directly on the
@@ -631,8 +721,8 @@ controller. When this is the case, for controllers specifically, we recommend
 using class-based proxying. This is typically the default choice with controllers.
 However if a controller must implement an interface that is not a Spring Context
 callback (e.g. `InitializingBean`, `*Aware`, etc), you may need to explicitly
-configure class-based proxying. For example with `<tx:annotation-driven />`,
-change to `<tx:annotation-driven proxy-target-class="true" />`.
+configure class-based proxying. For example with `<tx:annotation-driven/>`,
+change to `<tx:annotation-driven proxy-target-class="true"/>`.
 
 [[mvc-ann-requestmapping-31-vs-30]]
 ==== New Support Classes for @RequestMapping methods in Spring MVC 3.1
@@ -695,7 +785,7 @@ to the value of a URI template variable:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
+	@GetMapping("/owners/{ownerId}")
 	public String findOwner(**@PathVariable** String ownerId, Model model) {
 		Owner owner = ownerService.findOwner(ownerId);
 		model.addAttribute("owner", owner);
@@ -703,7 +793,7 @@ to the value of a URI template variable:
 	}
 ----
 
-The URI Template " `/owners/{ownerId}`" specifies the variable name `ownerId`. When the
+The URI Template ++"/owners/{ownerId}"++ specifies the variable name `ownerId`. When the
 controller handles this request, the value of `ownerId` is set to the value found in the
 appropriate part of the URI. For example, when a request comes in for `/owners/fred`,
 the value of `ownerId` is `fred`.
@@ -717,20 +807,21 @@ template variable by name. You can specify it in the annotation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
+	@GetMapping("/owners/{ownerId}")
 	public String findOwner(**@PathVariable("ownerId")** String theOwner, Model model) {
 		// implementation omitted
 	}
 ----
 
 Or if the URI template variable name matches the method argument name you can omit that
-detail. As long as your code is not compiled without debugging information, Spring MVC
-will match the method argument name to the URI template variable name:
+detail. As long as your code is compiled with debugging information or the `-parameters`
+compiler flag on Java 8, Spring MVC will match the method argument name to the URI
+template variable name:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/owners/{ownerId}", method=RequestMethod.GET)
+	@GetMapping("/owners/{ownerId}")
 	public String findOwner(**@PathVariable** String ownerId, Model model) {
 		// implementation omitted
 	}
@@ -742,7 +833,7 @@ A method can have any number of `@PathVariable` annotations:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/owners/{ownerId}/pets/{petId}", method=RequestMethod.GET)
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public String findPet(**@PathVariable** String ownerId, **@PathVariable** String petId, Model model) {
 		Owner owner = ownerService.findOwner(ownerId);
 		Pet pet = owner.getPet(petId);
@@ -754,7 +845,7 @@ A method can have any number of `@PathVariable` annotations:
 When a `@PathVariable` annotation is used on a `Map<String, String>` argument, the map
 is populated with all URI template variables.
 
-A URI template can be assembled from type and path level __@RequestMapping__
+A URI template can be assembled from type and method level __@RequestMapping__
 annotations. As a result the `findPet()` method can be invoked with a URL such as
 `/owners/42/pets/21`.
 
@@ -773,7 +864,7 @@ annotations. As a result the `findPet()` method can be invoked with a URL such a
 	}
 ----
 
-A `@PathVariable` argument can be of __any simple type__ such as int, long, Date, etc.
+A `@PathVariable` argument can be of __any simple type__ such as `int`, `long`, `Date`, etc.
 Spring automatically converts to the appropriate type or throws a
 `TypeMismatchException` if it fails to do so. You can also register support for parsing
 additional data types. See <<mvc-ann-typeconversion>> and <<mvc-ann-webdatabinder>>.
@@ -786,24 +877,24 @@ Sometimes you need more precision in defining URI template variables. Consider t
 
 The `@RequestMapping` annotation supports the use of regular expressions in URI template
 variables. The syntax is `{varName:regex}` where the first part defines the variable
-name and the second - the regular expression.For example:
+name and the second - the regular expression. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	@RequestMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{extension:\\.[a-z]+}")
-		public void handle(@PathVariable String version, @PathVariable String extension) {
-			// ...
-		}
+	public void handle(@PathVariable String version, @PathVariable String extension) {
+		// ...
 	}
 ----
 
 
 [[mvc-ann-requestmapping-patterns]]
 ==== Path Patterns
-In addition to URI templates, the `@RequestMapping` annotation also supports Ant-style
-path patterns (for example, `/myPath/{asterisk}.do`). A combination of URI template variables and
-Ant-style globs is also supported (e.g. `/owners/{asterisk}/pets/{petId}`).
+In addition to URI templates, the `@RequestMapping` annotation and all _composed_
+`@RequestMapping` variants also support Ant-style path patterns (for example,
+`/myPath/{asterisk}.do`). A combination of URI template variables and Ant-style globs is
+also supported (e.g. `/owners/{asterisk}/pets/{petId}`).
 
 
 [[mvc-ann-requestmapping-pattern-comparison]]
@@ -833,7 +924,7 @@ can be customized (see <<mvc-config-path-matching>> in the section on configurin
 
 [[mvc-ann-requestmapping-placeholders]]
 ==== Path Patterns with Placeholders
-Patterns in `@RequestMapping` annotations support ${...} placeholders against local
+Patterns in `@RequestMapping` annotations support `${...}` placeholders against local
 properties and/or system properties and environment variables. This may be useful in
 cases where the path a controller is mapped to may need to be customized through
 configuration. For more information on placeholders, see the javadocs of the
@@ -842,21 +933,75 @@ configuration. For more information on placeholders, see the javadocs of the
 
 
 [[mvc-ann-requestmapping-suffix-pattern-match]]
-==== Path Pattern Matching By Suffix
-By default Spring MVC automatically performs `".{asterisk}"` suffix pattern matching so
-that a controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
-This allows indicating content types via file extensions, e.g. `/person.pdf`,
-`/person.xml`, etc. A common pitfall however is when the last path segment of the
-mapping is a URI variable, e.g. `/person/{id}`. While a request for `/person/1.json`
-would correctly result in path variable id=1 and extension ".json", when the id
-naturally contains a dot, e.g. `/person/joe@email.com` the result does not match
-expectations. Clearly here ".com" is not a file extension.
+==== Suffix Pattern Matching
+By default Spring MVC performs `".{asterisk}"` suffix pattern matching so that a
+controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
+This makes it easy to request different representations of a resource through the
+URL path (e.g. `/person.pdf`, `/person.xml`).
 
-The proper way to address this is to configure Spring MVC to only do suffix pattern
-matching against file extensions registered for content negotiation purposes.
-For more on this, first see <<mvc-config-content-negotiation>> and then
-<<mvc-config-path-matching>> showing how to enable suffix pattern matching
-along with how to use registered suffix patterns only.
+Suffix pattern matching can be turned off or restricted to a set of path extensions
+explicitly registered for content negotiation purposes. This is generally
+recommended to minimize ambiguity with common request mappings such as
+`/person/{id}` where a dot might not represent a file extension, e.g.
+`/person/joe@email.com` vs `/person/joe@email.com.json`. Furthermore as explained
+in the note below suffix pattern matching as well as content negotiation may be
+used in some circumstances to attempt malicious attacks and there are good
+reasons to restrict them meaningfully.
+
+See <<mvc-config-path-matching>> for suffix pattern matching configuration and
+also <<mvc-config-content-negotiation>> for content negotiation configuration.
+
+
+
+[[mvc-ann-requestmapping-rfd]]
+==== Suffix Pattern Matching and RFD
+
+Reflected file download (RFD) attack was first described in a
+https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/[paper by Trustwave]
+in 2014. The attack is similar to XSS in that it relies on input
+(e.g. query parameter, URI variable) being reflected in the response.
+However instead of inserting JavaScript into HTML, an RFD attack relies on the
+browser switching to perform a download and treating the response as an executable
+script if double-clicked based on the file extension (e.g. .bat, .cmd).
+
+In Spring MVC `@ResponseBody` and `ResponseEntity` methods are at risk because
+they can render different content types which clients can request including
+via URL path extensions. Note however that neither disabling suffix pattern matching
+nor disabling the use of path extensions for content negotiation purposes alone
+are effective at preventing RFD attacks.
+
+For comprehensive protection against RFD, prior to rendering the response body
+Spring MVC adds a `Content-Disposition:inline;filename=f.txt` header to
+suggest a fixed and safe download file. This is done only if the URL
+path contains a file extension that is neither whitelisted nor explicitly
+registered for content negotiation purposes. However it may potentially have
+side effects when URLs are typed directly into a browser.
+
+Many common path extensions are whitelisted by
+default. Furthermore REST API calls are typically not meant to be used as URLs
+directly in browsers. Nevertheless applications that use custom
+`HttpMessageConverter` implementations can explicitly register file extensions
+for content negotiation and the Content-Disposition header will not be added
+for such extensions. See <<mvc-config-content-negotiation>>.
+
+[NOTE]
+====
+This was originally introduced as part of work for
+http://pivotal.io/security/cve-2015-5211[CVE-2015-5211].
+Below are additional recommendations from the report:
+
+* Encode rather than escape JSON responses. This is also an OWASP XSS recommendation.
+  For an example of how to do that with Spring see https://github.com/rwinch/spring-jackson-owasp[spring-jackson-owasp].
+* Configure suffix pattern matching to be turned off or restricted to explicitly
+  registered suffixes only.
+* Configure content negotiation with the properties "useJaf" and "ignoreUnknownPathExtensions"
+  set to false which would result in a 406 response for URLs with unknown extensions.
+  Note however that this may not be an option if URLs are naturally expected to have
+  a dot towards the end.
+* Add `X-Content-Type-Options: nosniff` header to responses. Spring Security 4 does
+  this by default.
+====
+
 
 
 
@@ -886,7 +1031,7 @@ Below is an example of extracting the matrix variable "q":
 ----
 	// GET /pets/42;q=11;r=22
 
-	@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET)
+	@GetMapping("/pets/{petId}")
 	public void findPet(@PathVariable String petId, @MatrixVariable int q) {
 
 		// petId == 42
@@ -903,10 +1048,10 @@ specific to identify where the variable is expected to be:
 ----
 	// GET /owners/42;q=11/pets/21;q=22
 
-	@RequestMapping(value = "/owners/{ownerId}/pets/{petId}", method = RequestMethod.GET)
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public void findPet(
-			@MatrixVariable(value="q", pathVar="ownerId") int q1,
-			@MatrixVariable(value="q", pathVar="petId") int q2) {
+			@MatrixVariable(name="q", pathVar="ownerId") int q1,
+			@MatrixVariable(name="q", pathVar="petId") int q2) {
 
 		// q1 == 11
 		// q2 == 22
@@ -921,7 +1066,7 @@ A matrix variable may be defined as optional and a default value specified:
 ----
 	// GET /pets/42
 
-	@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET)
+	@GetMapping("/pets/{petId}")
 	public void findPet(@MatrixVariable(required=false, defaultValue="1") int q) {
 
 		// q == 1
@@ -936,10 +1081,10 @@ All matrix variables may be obtained in a Map:
 ----
 	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
 
-	@RequestMapping(value = "/owners/{ownerId}/pets/{petId}", method = RequestMethod.GET)
+	@GetMapping("/owners/{ownerId}/pets/{petId}")
 	public void findPet(
-			@MatrixVariable Map<String, String> matrixVars,
-			@MatrixVariable(pathVar="petId"") Map<String, String> petMatrixVars) {
+			@MatrixVariable MultiValueMap<String, String> matrixVars,
+			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
 
 		// matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
 		// petMatrixVars: ["q" : 11, "s" : 23]
@@ -987,21 +1132,22 @@ to `false`.
 [[mvc-ann-requestmapping-consumes]]
 ==== Consumable Media Types
 You can narrow the primary mapping by specifying a list of consumable media types. The
-request will be matched only if the __Content-Type__ request header matches the specified
+request will be matched only if the `Content-Type` request header matches the specified
 media type. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Controller
-	@RequestMapping(value = "/pets", method = RequestMethod.POST, **consumes="application/json"**)
+	@PostMapping(path = "/pets", **consumes = "application/json"**)
 	public void addPet(@RequestBody Pet pet, Model model) {
 		// implementation omitted
 	}
 ----
 
-Consumable media type expressions can also be negated as in __!text/plain__ to match to
-all requests other than those with __Content-Type__ of __text/plain__.
+Consumable media type expressions can also be negated as in `!text/plain` to match to
+all requests other than those with `Content-Type` of `text/plain`. Also consider
+using constants provided in `MediaType` such as `APPLICATION_JSON_VALUE` and
+`APPLICATION_JSON_UTF8_VALUE`.
 
 [TIP]
 ====
@@ -1015,7 +1161,7 @@ rather than extend type-level consumable types.
 [[mvc-ann-requestmapping-produces]]
 ==== Producible Media Types
 You can narrow the primary mapping by specifying a list of producible media types. The
-request will be matched only if the __Accept__ request header matches one of these
+request will be matched only if the `Accept` request header matches one of these
 values. Furthermore, use of the __produces__ condition ensures the actual content type
 used to generate the response respects the media types specified in the __produces__
 condition. For example:
@@ -1023,17 +1169,25 @@ condition. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Controller
-	@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET, **produces="application/json"**)
+	@GetMapping(path = "/pets/{petId}", **produces = MediaType.APPLICATION_JSON_UTF8_VALUE**)
 	@ResponseBody
 	public Pet getPet(@PathVariable String petId, Model model) {
 		// implementation omitted
 	}
 ----
 
+[NOTE]
+====
+Be aware that the media type specified in the __produces__ condition can also optionally
+specify a character set. For example, in the code snippet above we specify the same media
+type than the default one configured in `MappingJackson2HttpMessageConverter`, including
+the `UTF-8` charset.
+====
+
 Just like with __consumes__, producible media type expressions can be negated as in
-__!text/plain__ to match to all requests other than those with an __Accept__ header
-value of __text/plain__.
+`!text/plain` to match to all requests other than those with an `Accept` header
+value of `text/plain`. Also consider using constants provided in `MediaType` such
+as `APPLICATION_JSON_VALUE` and `APPLICATION_JSON_UTF8_VALUE`.
 
 [TIP]
 ====
@@ -1057,7 +1211,7 @@ example with a request parameter value condition:
 	@RequestMapping("/owners/{ownerId}")
 	public class RelativePathUriTemplateController {
 
-		@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET, **params="myParam=myValue"**)
+		@GetMapping(path = "/pets/{petId}", **params = "myParam=myValue"**)
 		public void findPet(@PathVariable String ownerId, @PathVariable String petId, Model model) {
 			// implementation omitted
 		}
@@ -1075,7 +1229,7 @@ specific request header value:
 	@RequestMapping("/owners/{ownerId}")
 	public class RelativePathUriTemplateController {
 
-		@RequestMapping(value = "/pets", method = RequestMethod.GET, **headers="myHeader=myValue"**)
+		@GetMapping(path = "/pets", **headers = "myHeader=myValue"**)
 		public void findPet(@PathVariable String ownerId, @PathVariable String petId, Model model) {
 			// implementation omitted
 		}
@@ -1093,13 +1247,35 @@ respectively instead. They are intended specifically for that purpose.
 ====
 
 
+[[mvc-ann-requestmapping-head-options]]
+==== HTTP HEAD and HTTP OPTIONS
+
+`@RequestMapping` methods mapped to "GET" are also implicitly mapped to "HEAD",
+i.e. there is no need to have "HEAD" explicitly declared. An HTTP HEAD request
+is processed as if it were an HTTP GET except instead of writing the body only
+the number of bytes are counted and the "Content-Length" header set.
+
+`@RequestMapping` methods have built-in support for HTTP OPTIONS. By default an
+HTTP OPTIONS request is handled by setting the "Allow" response header to the
+HTTP methods explicitly declared on all `@RequestMapping` methods with matching
+URL patterns. When no HTTP methods are explicitly declared the "Allow" header
+is set to "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS". Ideally always declare the
+HTTP method(s) that an `@RequestMapping` method is intended to handle, or alternatively
+use one of the dedicated _composed_ `@RequestMapping` variants (see
+<<mvc-ann-requestmapping-composed>>).
+
+Although not necessary an `@RequestMapping` method can be mapped to and handle
+either HTTP HEAD or HTTP OPTIONS, or both.
+
+
+
 
 [[mvc-ann-methods]]
 === Defining @RequestMapping handler methods
 
-An `@RequestMapping` handler method can have a very flexible signatures. The supported
+`@RequestMapping` handler methods can have very flexible signatures. The supported
 method arguments and return values are described in the following section. Most
-arguments can be used in arbitrary order with the only exception of `BindingResult`
+arguments can be used in arbitrary order with the only exception being `BindingResult`
 arguments. This is described in the next section.
 
 [NOTE]
@@ -1119,14 +1295,14 @@ The following are the supported method arguments:
 
 * Request or response objects (Servlet API). Choose any specific request or response
   type, for example `ServletRequest` or `HttpServletRequest`.
-* Session object (Servlet API): of type `HttpSession`. An argument of this type enforces
+* Session object (Servlet API) of type `HttpSession`. An argument of this type enforces
   the presence of a corresponding session. As a consequence, such an argument is never
   `null`.
 
 [NOTE]
 ====
 Session access may not be thread-safe, in particular in a Servlet environment. Consider
-setting the ++RequestMappingHandlerAdapter++'s "synchronizeOnSession" flag to "true" if
+setting the ``RequestMappingHandlerAdapter``'s "synchronizeOnSession" flag to "true" if
 multiple requests are allowed to access a session concurrently.
 ====
 
@@ -1157,13 +1333,18 @@ multiple requests are allowed to access a session concurrently.
   See <<mvc-ann-requestheader>>.
 * `@RequestBody` annotated parameters for access to the HTTP request body. Parameter
   values are converted to the declared method argument type using
-  ++HttpMessageConverter++s. See <<mvc-ann-requestbody>>.
+  ``HttpMessageConverter``s. See <<mvc-ann-requestbody>>.
 * `@RequestPart` annotated parameters for access to the content of a
   "multipart/form-data" request part. See <<mvc-multipart-forms-non-browsers>> and
   <<mvc-multipart>>.
+* `@SessionAttribute` annotated parameters for access to existing, permanent
+  session attributes (e.g. user authentication object) as opposed to model
+  attributes temporarily stored in the session as part of a controller workflow
+  via `@SessionAttributes`.
+* `@RequestAttribute` annotated parameters for access to request attributes.
 * `HttpEntity<?>` parameters for access to the Servlet request HTTP headers and
   contents. The request stream will be converted to the entity body using
-  ++HttpMessageConverter++s. See <<mvc-ann-httpentity>>.
+  ``HttpMessageConverter``s. See <<mvc-ann-httpentity>>.
 * `java.util.Map` / `org.springframework.ui.Model` / `org.springframework.ui.ModelMap`
   for enriching the implicit model that is exposed to the web view.
 * `org.springframework.web.servlet.mvc.support.RedirectAttributes` to specify the exact
@@ -1176,7 +1357,7 @@ multiple requests are allowed to access a session concurrently.
   methods and/or the HandlerAdapter configuration. See the `webBindingInitializer`
   property on `RequestMappingHandlerAdapter`. Such command objects along with their
   validation results will be exposed as model attributes by default, using the command
-  class class name - e.g. model attribute "orderAddress" for a command object of type
+  class name - e.g. model attribute "orderAddress" for a command object of type
   "some.package.OrderAddress". The `ModelAttribute` annotation can be used on a method
   argument to customize the model attribute name used.
 * `org.springframework.validation.Errors` /
@@ -1190,7 +1371,7 @@ multiple requests are allowed to access a session concurrently.
   part of the servlet mapping.
 
 The `Errors` or `BindingResult` parameters have to follow the model object that is being
-bound immediately as the method signature might have more that one model object and
+bound immediately as the method signature might have more than one model object and
 Spring will create a separate `BindingResult` instance for each of them so the following
 sample won't work:
 
@@ -1198,7 +1379,7 @@ sample won't work:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(method = RequestMethod.POST)
+	@PostMapping
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, Model model, **BindingResult result**) { ... }
 ----
 
@@ -1208,14 +1389,14 @@ this working you have to reorder the parameters as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(method = RequestMethod.POST)
+	@PostMapping
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, **BindingResult result**, Model model) { ... }
 ----
 
 [NOTE]
 ====
 JDK 1.8's `java.util.Optional` is supported as a method parameter type with annotations
-that have a `required` attribute (e.g. `@RequestParam`, `@RequestHeader`, etc. The use
+that have a `required` attribute (e.g. `@RequestParam`, `@RequestHeader`, etc). The use
 of `java.util.Optional` in those cases is equivalent to having `required=false`.
 ====
 
@@ -1246,10 +1427,10 @@ The following are the supported return types:
   signature).
 * If the method is annotated with `@ResponseBody`, the return type is written to the
   response HTTP body. The return value will be converted to the declared method argument
-  type using ++HttpMessageConverter++s. See <<mvc-ann-responsebody>>.
+  type using ``HttpMessageConverter``s. See <<mvc-ann-responsebody>>.
 * An `HttpEntity<?>` or `ResponseEntity<?>` object to provide access to the Servlet
   response HTTP headers and contents. The entity body will be converted to the response
-  stream using ++HttpMessageConverter++s. See <<mvc-ann-httpentity>>.
+  stream using ``HttpMessageConverter``s. See <<mvc-ann-httpentity>>.
 * An `HttpHeaders` object to return a response with no body.
 * A `Callable<?>` can be returned when the application wants to produce the return value
   asynchronously in a thread managed by Spring MVC.
@@ -1288,7 +1469,7 @@ The following code snippet shows the usage:
 
 		// ...
 
-		@RequestMapping(method = RequestMethod.GET)
+		@GetMapping
 		public String setupForm(**@RequestParam("petId") int petId**, ModelMap model) {
 			Pet pet = this.clinic.loadPet(petId);
 			model.addAttribute("pet", pet);
@@ -1301,8 +1482,8 @@ The following code snippet shows the usage:
 ----
 
 Parameters using this annotation are required by default, but you can specify that a
-parameter is optional by setting ++@RequestParam++'s `required` attribute to `false`
-(e.g., `@RequestParam(value="id", required=false)`).
+parameter is optional by setting ``@RequestParam``'s `required` attribute to `false`
+(e.g., `@RequestParam(path="id", required=false)`).
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
@@ -1320,7 +1501,7 @@ be bound to the value of the HTTP request body. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value = "/something", method = RequestMethod.PUT)
+	@PutMapping("/something")
 	public void handle(@RequestBody String body, Writer writer) throws IOException {
 		writer.write(body);
 	}
@@ -1356,7 +1537,7 @@ the MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
 				<ref bean="stringHttpMessageConverter"/>
 				<ref bean="marshallingHttpMessageConverter"/>
 			</util:list>
-		</property
+		</property>
 	</bean>
 
 	<bean id="stringHttpMessageConverter"
@@ -1364,8 +1545,8 @@ the MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
 
 	<bean id="marshallingHttpMessageConverter"
 			class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
-		<property name="marshaller" ref="castorMarshaller" />
-		<property name="unmarshaller" ref="castorMarshaller" />
+		<property name="marshaller" ref="castorMarshaller"/>
+		<property name="unmarshaller" ref="castorMarshaller"/>
 	</bean>
 
 	<bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/>
@@ -1392,14 +1573,14 @@ or the MVC Java config.
 [[mvc-ann-responsebody]]
 ==== Mapping the response body with the @ResponseBody annotation
 
-The `@ResponseBody` annotation is similar to `@RequestBody`. This annotation can be put
+The `@ResponseBody` annotation is similar to `@RequestBody`. This annotation can be placed
 on a method and indicates that the return type should be written straight to the HTTP
 response body (and not placed in a Model, or interpreted as a view name). For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value = "/something", method = RequestMethod.PUT)
+	@GetMapping("/something")
 	@ResponseBody
 	public String helloWorld() {
 		return "Hello World";
@@ -1418,16 +1599,17 @@ section and <<rest-message-conversion,Message Converters>>.
 
 It's a very common use case to have Controllers implement a REST API, thus serving only
 JSON, XML or custom MediaType content. For convenience, instead of annotating all your
-`@RequestMapping` methods with `@ResponseBody`, you can annotate your Controller Class
+`@RequestMapping` methods with `@ResponseBody`, you can annotate your controller Class
 with `@RestController`.
 
-{javadoc-baseurl}/org/springframework/web/bind/annotation/RestController.html[`@RestController`]
+{api-spring-framework}/web/bind/annotation/RestController.html[`@RestController`]
 is a stereotype annotation that combines `@ResponseBody` and `@Controller`. More than
 that, it gives more meaning to your Controller and also may carry additional semantics
 in future releases of the framework.
 
-As with regular ++@Controller++s, a `@RestController` may be assisted by a
-`@ControllerAdvice` Bean. See the <<mvc-ann-controller-advice>> section for more details.
+As with regular ``@Controller``s, a `@RestController` may be assisted by
+`@ControllerAdvice` or `@RestControllerAdvice` beans. See the <<mvc-ann-controller-advice>>
+section for more details.
 
 [[mvc-ann-httpentity]]
 ==== Using HttpEntity
@@ -1442,7 +1624,7 @@ so:
 ----
 	@RequestMapping("/something")
 	public ResponseEntity<String> handle(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
-		String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader"));
+		String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader");
 		byte[] requestBody = requestEntity.getBody();
 
 		// do something with request header and body
@@ -1509,7 +1691,7 @@ depending on your needs.
 A controller can have any number of `@ModelAttribute` methods. All such methods are
 invoked before `@RequestMapping` methods of the same controller.
 
-`@ModelAttribute` methods can also be defined in an ++@ControllerAdvice++-annotated class
+`@ModelAttribute` methods can also be defined in an ``@ControllerAdvice``-annotated class
 and such methods apply to many controllers. See the <<mvc-ann-controller-advice>> section
 for more details.
 
@@ -1526,8 +1708,8 @@ i.e., with or without an attribute name.
 
 The `@ModelAttribute` annotation can be used on `@RequestMapping` methods as well. In
 that case the return value of the `@RequestMapping` method is interpreted as a model
-attribute rather than as a view name. The view name is derived from view name
-conventions instead much like for methods returning void -- see <<mvc-coc-r2vnt>>.
+attribute rather than as a view name. The view name is then derived based on view name
+conventions instead, much like for methods returning `void` -- see <<mvc-coc-r2vnt>>.
 
 
 [[mvc-ann-modelattrib-method-args]]
@@ -1546,7 +1728,7 @@ form field individually.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(**@ModelAttribute Pet pet**) { }
 ----
 
@@ -1560,7 +1742,7 @@ Given the above example where can the Pet instance come from? There are several 
   more detail below).
 * It may be instantiated using its default constructor.
 
-An `@ModelAttribute` method is a common way to to retrieve an attribute from the
+An `@ModelAttribute` method is a common way to retrieve an attribute from the
 database, which may optionally be stored between requests through the use of
 `@SessionAttributes`. In some cases it may be convenient to retrieve the attribute by
 using an URI template variable and a type converter. Here is an example:
@@ -1568,9 +1750,9 @@ using an URI template variable and a type converter. Here is an example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/accounts/{account}", method = RequestMethod.PUT)
+	@PutMapping("/accounts/{account}")
 	public String save(@ModelAttribute("account") Account account) {
-
+		// ...
 	}
 ----
 
@@ -1593,7 +1775,7 @@ following the `@ModelAttribute` argument:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, BindingResult result) {
 
 		if (result.hasErrors()) {
@@ -1609,6 +1791,31 @@ With a `BindingResult` you can check if errors were found in which case it's com
 render the same form where the errors can be shown with the help of Spring's `<errors>`
 form tag.
 
+Note that in some cases it may be useful to gain access to an attribute in the
+model without data binding. For such cases you may inject the `Model` into the
+controller or alternatively use the `binding` flag on the annotation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@ModelAttribute
+public AccountForm setUpForm() {
+    return new AccountForm();
+}
+
+@ModelAttribute
+public Account findAccount(@PathVariable String accountId) {
+    return accountRepository.findOne(accountId);
+}
+
+@PostMapping("update")
+public String update(@Valid AccountUpdateForm form, BindingResult result,
+        **@ModelAttribute(binding=false)** Account account) {
+
+    // ...
+}
+----
+
 In addition to data binding you can also invoke validation using your own custom
 validator passing the same `BindingResult` that was used to record data binding errors.
 That allows for data binding and validation errors to be accumulated in one place and
@@ -1617,7 +1824,7 @@ subsequently reported back to the user:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(**@ModelAttribute("pet") Pet pet**, BindingResult result) {
 
 		new PetValidator().validate(pet, result);
@@ -1636,7 +1843,7 @@ annotation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/owners/{ownerId}/pets/{petId}/edit", method = RequestMethod.POST)
+	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(**@Valid @ModelAttribute("pet") Pet pet**, BindingResult result) {
 
 		if (result.hasErrors()) {
@@ -1650,6 +1857,7 @@ annotation:
 
 See <<validation-beanvalidation>> and <<validation>> for details on how to configure and
 use validation.
+
 
 
 [[mvc-ann-sessionattrib]]
@@ -1673,6 +1881,49 @@ attribute name:
 		// ...
 	}
 ----
+
+
+[[mvc-ann-sessionattrib-global]]
+==== Using @SessionAttribute to access pre-existing global session attributes
+
+If you need access to pre-existing session attributes that are managed globally,
+i.e. outside the controller (e.g. by a filter), and may or may not be present
+use the `@SessionAttribute` annotation on a method parameter:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping("/")
+	public String handle(**@SessionAttribute** User user) {
+		// ...
+	}
+----
+
+For use cases that require adding or removing session attributes consider injecting
+`org.springframework.web.context.request.WebRequest` or
+`javax.servlet.http.HttpSession` into the controller method.
+
+For temporary storage of model attributes in the session as part of a controller
+workflow consider using `SessionAttributes` as described in
+<<mvc-ann-sessionattrib>>.
+
+
+[[mvc-ann-requestattrib]]
+==== Using @RequestAttribute to access request attributes
+
+Similar to `@SessionAttribute` the `@RequestAttribute` annotation can be used to
+access pre-existing request attributes created by a filter or interceptor:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping("/")
+	public String handle(**@RequestAttribute** Client client) {
+		// ...
+	}
+----
+
+
 
 
 [[mvc-ann-form-urlencoded-data]]
@@ -1829,10 +2080,10 @@ binding directly within your controller class. `@InitBinder` identifies methods 
 initialize the `WebDataBinder` that will be used to populate command and form object
 arguments of annotated handler methods.
 
-Such init-binder methods support all arguments that `@RequestMapping` supports, except
-for command/form objects and corresponding validation result objects. Init-binder
-methods must not have a return value. Thus, they are usually declared as `void`. Typical
-arguments include `WebDataBinder` in combination with `WebRequest` or
+Such init-binder methods support all arguments that `@RequestMapping` methods support,
+except for command/form objects and corresponding validation result objects. Init-binder
+methods must not have a return value. Thus, they are usually declared as `void`.
+Typical arguments include `WebDataBinder` in combination with `WebRequest` or
 `java.util.Locale`, allowing code to register context-specific editors.
 
 The following example demonstrates the use of `@InitBinder` to configure a
@@ -1845,14 +2096,34 @@ The following example demonstrates the use of `@InitBinder` to configure a
 	public class MyFormController {
 
 		**@InitBinder**
-		public void initBinder(WebDataBinder binder) {
+		protected void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateFormat.setLenient(false);
 			binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 		}
 
 		// ...
+	}
+----
 
+Alternatively, as of Spring 4.2, consider using `addCustomFormatter` to specify
+`Formatter` implementations instead of `PropertyEditor` instances. This is
+particularly useful if you happen to have a `Formatter`-based setup in a shared
+`FormattingConversionService` as well, with the same approach to be reused for
+controller-specific tweaking of the binding rules.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class MyFormController {
+
+		**@InitBinder**
+		protected void initBinder(WebDataBinder binder) {
+			binder.addCustomFormatter(new DateFormatter("yyyy-MM-dd"));
+		}
+
+		// ...
 	}
 ----
 
@@ -1861,7 +2132,7 @@ The following example demonstrates the use of `@InitBinder` to configure a
 
 To externalize data binding initialization, you can provide a custom implementation of
 the `WebBindingInitializer` interface, which you then enable by supplying a custom bean
-configuration for an `AnnotationMethodHandlerAdapter`, thus overriding the default
+configuration for an `RequestMappingHandlerAdapter`, thus overriding the default
 configuration.
 
 The following example from the PetClinic application shows a configuration using a
@@ -1873,20 +2144,21 @@ PropertyEditors required by several of the PetClinic controllers.
 [subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
-		<property name="cacheSeconds" value="0" />
+		<property name="cacheSeconds" value="0"/>
 		<property name="webBindingInitializer">
-			<bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer" />
+			<bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer"/>
 		</property>
 	</bean>
 ----
 
-`@InitBinder` methods can also be defined in an ++@ControllerAdvice++-annotated class in
+`@InitBinder` methods can also be defined in an ``@ControllerAdvice``-annotated class in
 which case they apply to matching controllers. This provides an alternative to using a
 `WebBindingInitializer`. See the <<mvc-ann-controller-advice>> section for more details.
 
 
 [[mvc-ann-controller-advice]]
-==== Advising controllers with the `@ControllerAdvice` annotation
+==== Advising controllers with @ControllerAdvice and @RestControllerAdvice
+
 The `@ControllerAdvice` annotation is a component annotation allowing implementation
 classes to be auto-detected through classpath scanning. It is automatically enabled when
 using the MVC namespace or the MVC Java config.
@@ -1896,8 +2168,10 @@ Classes annotated with `@ControllerAdvice` can contain `@ExceptionHandler`,
 `@RequestMapping` methods across all controller hierarchies as opposed to the controller
 hierarchy within which they are declared.
 
-The `@ControllerAdvice` annotation can also target a subset of controllers with its
-attributes:
+`@RestControllerAdvice` is an alternative where `@ExceptionHandler` methods
+assume `@ResponseBody` semantics by default.
+
+Both `@ControllerAdvice` and `@RestControllerAdvice` can target a subset of controllers:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1916,7 +2190,7 @@ attributes:
 ----
 
 Check out the
-{javadoc-baseurl}/org/springframework/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`
+{api-spring-framework}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`
 documentation] for more details.
 
 [[mvc-ann-jsonview]]
@@ -1936,7 +2210,7 @@ the view class or interface to be used:
 	@RestController
 	public class UserController {
 
-		@RequestMapping(value = "/user", method = RequestMethod.GET)
+		@GetMapping("/user")
 		@JsonView(User.WithoutPasswordView.class)
 		public User getUser() {
 			return new User("eric", "7!jd#h23");
@@ -1988,7 +2262,7 @@ to the model:
 	@Controller
 	public class UserController extends AbstractController {
 
-		@RequestMapping(value = "/user", method = RequestMethod.GET)
+		@GetMapping("/user")
 		public String getUser(Model model) {
 			model.addAttribute("user", new User("eric", "7!jd#h23"));
 			model.addAttribute(JsonView.class.getName(), User.WithoutPasswordView.class);
@@ -2036,7 +2310,7 @@ is an example of such a controller method:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(method=RequestMethod.POST)
+	@PostMapping
 	public Callable<String> processUpload(final MultipartFile file) {
 
 		return new Callable<String>() {
@@ -2171,8 +2445,8 @@ Here is an example of that:
 [subs="verbatim,quotes"]
 ----
 	@RequestMapping("/events")
-	public ResponseBodyEmitter<String> handle() {
-		ResponseBodyEmitter<String> emitter = new ResponseBodyEmitter<String>();
+	public ResponseBodyEmitter handle() {
+		ResponseBodyEmitter emitter = new ResponseBodyEmitter();
 		// Save the emitter somewhere..
 		return emitter;
 	}
@@ -2198,7 +2472,7 @@ the response.
 http://www.w3.org/TR/eventsource/[Server-Sent Events].
 Server-sent events is a just another variation on the same "HTTP Streaming"
 technique except events pushed from the server are formatted according to
-the W3C Servet-Sent Events specification.
+the W3C Server-Sent Events specification.
 
 Server-Sent Events can be used for their intended purpose, that is to push
 events from the server to clients. It is quite easy to do in Spring MVC and
@@ -2267,7 +2541,7 @@ For applications configured with a `web.xml` be sure to update to version 3.0:
 ----
 
 Asynchronous support must be enabled on the `DispatcherServlet` through the
-`<async-supported>true</async-supported>` web.xml sub-element. Additionally
+`<async-supported>true</async-supported>` sub-element in `web.xml`. Additionally
 any `Filter` that participates in asyncrequest processing must be configured
 to support the ASYNC dispatcher type. It should be safe to enable the ASYNC
 dispatcher type for all filters provided with the Spring Framework since they
@@ -2306,7 +2580,7 @@ Below is some example web.xml configuration:
 If using Servlet 3, Java based configuration for example via `WebApplicationInitializer`,
 you'll also need to set the "asyncSupported" flag as well as the ASYNC dispatcher type
 just like with `web.xml`. To simplify all this configuration, consider extending
-`AbstractDispatcherServletInitializer` or
+`AbstractDispatcherServletInitializer`, or better
 `AbstractAnnotationConfigDispatcherServletInitializer` which automatically
 set those options and make it very easy to register `Filter` instances.
 
@@ -2352,7 +2626,7 @@ don't need to do that because the `RequestMappingHandlerMapping` automatically l
 all `HandlerMapping` classes extending from `AbstractHandlerMapping` have the following
 properties that you can use to customize their behavior:
 
-* `interceptors` List of interceptors to use. ++HandlerInterceptor++s are discussed in
+* `interceptors` List of interceptors to use. ``HandlerInterceptor``s are discussed in
   <<mvc-handlermapping-interceptor>>.
 * `defaultHandler` Default handler to use, when this handler mapping does not result in
   a matching handler.
@@ -2376,12 +2650,12 @@ The following example shows how to configure an interceptor:
 [subs="verbatim,quotes"]
 ----
 	<beans>
-		<bean id="handlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
 			<property name="interceptors">
 				<bean class="example.MyInterceptor"/>
 			</property>
 		</bean>
-	<beans>
+	</beans>
 ----
 
 
@@ -2429,7 +2703,7 @@ the example below:
 			<property name="openingTime" value="9"/>
 			<property name="closingTime" value="18"/>
 		</bean>
-	<beans>
+	</beans>
 ----
 
 [source,java,indent=0]
@@ -2494,16 +2768,11 @@ directly on `RequestMappingHandlerAdapter`.
 
 
 
-
-
-
-
-
 [[mvc-viewresolver]]
 == Resolving views
 All MVC frameworks for web applications provide a way to address views. Spring provides
 view resolvers, which enable you to render models in a browser without tying you to a
-specific view technology. Out of the box, Spring enables you to use JSPs, Velocity
+specific view technology. Out of the box, Spring enables you to use JSPs, FreeMarker
 templates and XSLT views, for example. See <<view>> for a discussion of how to integrate
 and use a number of disparate view technologies.
 
@@ -2555,9 +2824,9 @@ examples follow.
   specify the view class for all views generated by this resolver by using
   `setViewClass(..)`. See the `UrlBasedViewResolver` javadocs for details.
 
-| `VelocityViewResolver` / `FreeMarkerViewResolver`
-| Convenient subclass of `UrlBasedViewResolver` that supports `VelocityView` (in effect,
-  Velocity templates) or `FreeMarkerView` ,respectively, and custom subclasses of them.
+| `FreeMarkerViewResolver`
+| Convenient subclass of `UrlBasedViewResolver` that supports `FreeMarkerView` and
+  custom subclasses of them.
 
 | `ContentNegotiatingViewResolver`
 | Implementation of the `ViewResolver` interface that resolves a view based on the
@@ -2607,7 +2876,7 @@ file "extend". This way you can specify a default view class, for example.
 Subclasses of `AbstractCachingViewResolver` cache view instances that they resolve.
 Caching improves performance of certain view technologies. It's possible to turn off the
 cache by setting the `cache` property to `false`. Furthermore, if you must refresh a
-certain view at runtime (for example when a Velocity template is modified), you can use
+certain view at runtime (for example when a FreeMarker template is modified), you can use
 the `removeFromCache(String viewName, Locale loc)` method.
 ====
 
@@ -2657,7 +2926,7 @@ indicate the view could not be found. Not all view resolvers do this, however, b
 in some cases, the resolver simply cannot detect whether or not the view exists. For
 example, the `InternalResourceViewResolver` uses the `RequestDispatcher` internally, and
 dispatching is the only way to figure out if a JSP exists, but this action can only
-execute once. The same holds for the `VelocityViewResolver` and some others. Check the
+execute once. The same holds for the `FreeMarkerViewResolver` and some others. Check the
 javadocs of the specific view resolver to see whether it reports non-existing views.
 Thus, putting an `InternalResourceViewResolver` in the chain in a place other than
 the last results in the chain not being fully inspected, because the
@@ -2673,7 +2942,7 @@ JSPs that are processed through the Servlet or JSP engine, this resolution is us
 handled through the combination of `InternalResourceViewResolver` and
 `InternalResourceView`, which issues an internal forward or include via the Servlet
 API's `RequestDispatcher.forward(..)` method or `RequestDispatcher.include()` method.
-For other view technologies, such as Velocity, XSLT, and so on, the view itself writes
+For other view technologies, such as FreeMarker, XSLT, and so on, the view itself writes
 the content directly to the response stream.
 
 It is sometimes desirable to issue an HTTP redirect back to the client, before the view
@@ -2738,7 +3007,7 @@ through `Model` nor `RedirectAttributes`. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value = "/files/{path}", method = RequestMethod.POST)
+	@PostMapping("/files/{path}")
 	public String upload(...) {
 		// ...
 		return "redirect:files/{path}";
@@ -2768,6 +3037,9 @@ the controller itself can simply operate in terms of logical view names. A logic
 name such as `redirect:/myapp/some/resource` will redirect relative to the current
 Servlet context, while a name such as `redirect:http://myhost.com/some/arbitrary/path`
 will redirect to an absolute URL.
+
+Note that the controller handler is annotated with the `@ResponseStatus`, the annotation
+value takes precedence over the response status set by `RedirectView`.
 
 
 [[mvc-redirecting-forward-prefix]]
@@ -2841,24 +3113,15 @@ representation of the current resource regardless of the logical view name. The 
 header may include wild cards, for example `text/{asterisk}`, in which case a `View` whose
 Content-Type was `text/xml` is a compatible match.
 
-To support the resolution of a view based on a file extension, use the
-`ContentNegotiatingViewResolver` bean property `mediaTypes` to specify a mapping of file
-extensions to media types. For more information on the algorithm used to determine the
-request media type, refer to the API documentation for `ContentNegotiatingViewResolver`.
+To support custom resolution of a view based on a file extension, use a
+`ContentNegotiationManager`: see <<mvc-config-content-negotiation>>.
 
-Here is an example configuration of a `ContentNegotiatingViewResolver:`
+Here is an example configuration of a `ContentNegotiatingViewResolver`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-		<property name="mediaTypes">
-			<map>
-				<entry key="atom" value="application/atom+xml"/>
-				<entry key="html" value="text/html"/>
-				<entry key="json" value="application/json"/>
-			</map>
-		</property>
 		<property name="viewResolvers">
 			<list>
 				<bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
@@ -2870,7 +3133,7 @@ Here is an example configuration of a `ContentNegotiatingViewResolver:`
 		</property>
 		<property name="defaultViews">
 			<list>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</list>
 		</property>
 	</bean>
@@ -2916,7 +3179,7 @@ application/atom+xml is shown below.
 
 		private List<SampleContent> contentList = new ArrayList<SampleContent>();
 
-		@RequestMapping(value="/content", method=RequestMethod.GET)
+		@GetMapping("/content")
 		public ModelAndView getContent() {
 			ModelAndView mav = new ModelAndView();
 			mav.setViewName("content");
@@ -3055,12 +3318,7 @@ also have the literal part of the servlet mapping included:
 [[mvc-links-to-controllers]]
 === Building URIs to Controllers and methods
 
-Spring MVC provides another mechanism for building and encoding URIs that link to
-Controllers and methods defined within an application.
-{javadoc-baseurl}/org/springframework/web/servlet/mvc/method/annotation/MvcUriComponentsBuilder.html[`MvcUriComponentsBuilder`]
-extends `UriComponentsBuilder` and provides such possibilities.
-
-Given this Controller:
+Spring MVC also provides a mechanism for building links to controller methods. For example, given:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3069,27 +3327,35 @@ Given this Controller:
 	@RequestMapping("/hotels/{hotel}")
 	public class BookingController {
 
-		@RequestMapping("/bookings/{booking}")
+		@GetMapping("/bookings/{booking}")
 		public String getBooking(@PathVariable Long booking) {
 
 		// ...
-
+        }
 	}
 ----
 
-and using the `MvcUriComponentsBuilder`, the previous example is now:
+You can prepare a link by referring to the method by name:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	UriComponents uriComponents = MvcUriComponentsBuilder
-		.fromMethodName(BookingController.class, "getBooking",21).buildAndExpand(42);
+		.fromMethodName(BookingController.class, "getBooking", 21).buildAndExpand(42);
 
 	URI uri = uriComponents.encode().toUri();
 ----
 
-The `MvcUriComponentsBuilder` can also create "mock Controllers", thus enabling to create
-URIs by coding against the actual Controller's API:
+In the above example we provided actual method argument values, in this case the long value 21,
+to be used as a path variable and inserted into the URL. Furthermore, we provided the
+value 42 in order to fill in any remaining URI variables such as the "hotel" variable inherited
+from the type-level request mapping. If the method had more arguments you can supply null for
+arguments not needed for the URL. In general only `@PathVariable` and `@RequestParam` arguments
+are relevant for constructing the URL.
+
+There are additional ways to use `MvcUriComponentsBuilder`. For example you can use a technique
+akin to mock testing through proxies to avoid referring to the controller method by name
+(the example assumes static import of `MvcUriComponentsBuilder.on`):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3100,19 +3366,44 @@ URIs by coding against the actual Controller's API:
 	URI uri = uriComponents.encode().toUri();
 ----
 
+The above examples use static methods in `MvcUriComponentsBuilder`. Internally they rely
+on `ServletUriComponentsBuilder` to prepare a base URL from the scheme, host, port,
+context path and servlet path of the current request. This works well in most cases,
+however sometimes it may be insufficient. For example you may be outside the context of
+a request (e.g. a batch process that prepares links) or perhaps you need to insert a path
+prefix (e.g. a locale prefix that was removed from the request path and needs to be
+re-inserted into links).
+
+For such cases you can use the static "fromXxx" overloaded methods that accept a
+`UriComponentsBuilder` to use base URL. Or you can create an instance of `MvcUriComponentsBuilder`
+with a base URL and then use the instance-based "withXxx" methods. For example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	UriComponentsBuilder base = ServletUriComponentsBuilder.fromCurrentContextPath().path("/en");
+	MvcUriComponentsBuilder builder = MvcUriComponentsBuilder.relativeTo(base);
+	builder.withMethodCall(on(BookingController.class).getBooking(21)).buildAndExpand(42);
+
+	URI uri = uriComponents.encode().toUri();
+----
+
+
 [[mvc-links-to-controllers-from-views]]
 === Building URIs to Controllers and methods from views
 
-It is also useful to build links to annotated controllers from views (e.g. JSP).
-This can be done through a method on `MvcUriComponentsBuilder` which refers to mappings
-by name called `fromMappingName`.
+You can also build links to annotated controllers from views such as JSP, Thymeleaf,
+FreeMarker. This can be done using the `fromMappingName` method in `MvcUriComponentsBuilder`
+which refers to mappings by name.
 
-As of 4.1 every `@RequestMapping` is assigned a default name based on the
-capital letters of the class and the full method name. For example, the method `getFoo` in class
-`FooController` is assigned the name "FC#getFoo". This naming strategy is pluggable
-by implementing `HandlerMethodMappingNamingStrategy` and configuring it on your
-`RequestMappingHandlerMapping`. Furthermore the `@RequestMapping` annotation includes
-a name attribute that can be used to override the default strategy.
+Every `@RequestMapping` is assigned a default name based on the capital letters of the
+class and the full method name. For example, the method `getFoo` in class `FooController`
+is assigned the name "FC#getFoo". This strategy can be replaced or customized by creating
+an instance of `HandlerMethodMappingNamingStrategy` and plugging it into your
+`RequestMappingHandlerMapping`. The default strategy implementation also looks at the
+name attribute on `@RequestMapping` and uses that if present. That means if the default
+mapping name assigned conflicts with another (e.g. overloaded methods) you can assign
+a name explicitly on the `@RequestMapping`.
 
 [NOTE]
 ====
@@ -3128,25 +3419,27 @@ For example given:
 [subs="verbatim,quotes"]
 ----
     @RequestMapping("/people/{id}/addresses")
-    public class MyController {
+    public class PersonAddressController {
 
         @RequestMapping("/{country}")
         public HttpEntity getAddress(@PathVariable String country) { ... }
     }
 ----
 
-The following JSP code can prepare a link:
+You can prepare a link from a JSP as follows:
 
 [source,jsp,indent=0]
 [subs="verbatim,quotes"]
 ----
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 ...
-<a href="${s:mvcUrl(''PC#getPerson'').arg(0,''US'').buildAndExpand(''123'')}">Get Person</a>
+<a href="${s:mvcUrl('PAC#getAddress').arg(0,'US').buildAndExpand('123')}">Get Address</a>
 ----
 
-
-
+The above example relies on the `mvcUrl` JSP function declared in the Spring tag library
+(i.e. META-INF/spring.tld). For more advanced cases (e.g. a custom base URL as explained
+in the previous section), it is easy to define your own function, or use a custom tag file,
+in order to use a specific instance of `MvcUriComponentsBuilder` with a custom base URL.
 
 
 [[mvc-localeresolver]]
@@ -3209,7 +3502,7 @@ maximum age. Find below an example of defining a `CookieLocaleResolver`.
 		<property name="cookieName" value="clientlanguage"/>
 
 		<!-- in seconds. If set to -1, the cookie is not persisted (deleted when browser shuts down) -->
-		<property name="cookieMaxAge" value="100000">
+		<property name="cookieMaxAge" value="100000"/>
 
 	</bean>
 ----
@@ -3242,7 +3535,14 @@ maximum age. Find below an example of defining a `CookieLocaleResolver`.
 === SessionLocaleResolver
 
 The `SessionLocaleResolver` allows you to retrieve `Locale` and `TimeZone` from the
-session that might be associated with the user's request.
+session that might be associated with the user's request. In contrast to
+`CookieLocaleResolver`, this strategy stores locally chosen locale settings in the
+Servlet container's `HttpSession`. As a consequence, those settings are just temporary
+for each session and therefore lost when each session terminates.
+
+Note that there is no direct relationship with external session management mechanisms
+such as the Spring Session project. This `SessionLocaleResolver` will simply evaluate and
+modify corresponding `HttpSession` attributes against the current `HttpServletRequest`.
 
 
 
@@ -3331,9 +3631,9 @@ defined in the previous example to customize the look and feel:
 	<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 	<html>
 		<head>
-			<link rel="stylesheet" href="<spring:theme code=''styleSheet''/>" type="text/css"/>
+			<link rel="stylesheet" href="<spring:theme code='styleSheet'/>" type="text/css"/>
 		</head>
-		<body style="background=<spring:theme code=''background''/>">
+		<body style="background=<spring:theme code='background'/>">
 			...
 		</body>
 	</html>
@@ -3492,7 +3792,7 @@ use `MultipartHttpServletRequest` or `MultipartFile` in the method parameters:
 	@Controller
 	public class FileUploadController {
 
-		@RequestMapping(value = "/form", method = RequestMethod.POST)
+		@PostMapping("/form")
 		public String handleFormUpload(@RequestParam("name") String name,
 				@RequestParam("file") MultipartFile file) {
 
@@ -3521,7 +3821,7 @@ the method parameter:
 	@Controller
 	public class FileUploadController {
 
-		@RequestMapping(value = "/form", method = RequestMethod.POST)
+		@PostMapping("/form")
 		public String handleFormUpload(@RequestParam("name") String name,
 				@RequestParam("file") Part file) {
 
@@ -3579,7 +3879,7 @@ multipart:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping(value="/someUrl", method = RequestMethod.POST)
+	@PostMapping("/someUrl")
 	public String onSubmit(**@RequestPart("meta-data") MetaData metadata,
 			@RequestPart("file-data") MultipartFile file**) {
 
@@ -3638,7 +3938,7 @@ may be more convenient to directly set the status of the response and optionally
 error content to the body of the response.
 
 You can do that with `@ExceptionHandler` methods. When declared within a controller such
-methods apply to exceptions raised by `@RequestMapping` methods of that contoroller (or
+methods apply to exceptions raised by `@RequestMapping` methods of that controller (or
 any of its sub-classes). You can also declare an `@ExceptionHandler` method within an
 `@ControllerAdvice` class in which case it handles exceptions from `@RequestMapping`
 methods from many controllers. Below is an example of a controller-local
@@ -3686,12 +3986,13 @@ raised the status code may indicate a client error (4xx) or a server error (5xx)
 
 The `DefaultHandlerExceptionResolver` translates Spring MVC exceptions to specific error
 status codes. It is registered by default with the MVC namespace, the MVC Java config,
-and also by the the `DispatcherServlet` (i.e. when not using the MVC namespace or Java
+and also by the `DispatcherServlet` (i.e. when not using the MVC namespace or Java
 config). Listed below are some of the exceptions handled by this resolver and the
 corresponding status codes:
 
 |===
-| Exception| HTTP Status Code
+| Exception
+| HTTP Status Code
 
 | `BindException`
 | 400 (Bad Request)
@@ -3716,6 +4017,9 @@ corresponding status codes:
 
 | `MethodArgumentNotValidException`
 | 400 (Bad Request)
+
+| `MissingPathVariableException`
+| 500 (Internal Server Error)
 
 | `MissingServletRequestParameterException`
 | 400 (Bad Request)
@@ -3790,7 +4094,7 @@ When writing error information, the status code and the error message set on the
 	@Controller
 	public class ErrorController {
 
-		@RequestMapping(value="/error", produces="application/json")
+		@RequestMapping(path = "/error", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 		@ResponseBody
 		public Map<String, Object> handle(HttpServletRequest request) {
 
@@ -3822,9 +4126,9 @@ or in a JSP:
 
 The http://projects.spring.io/spring-security/[Spring Security] project provides features
 to protect web applications from malicious exploits. Check out the reference documentation in the sections on
-http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#csrf["CSRF protection"],
-http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#headers["Security Response Headers"], and also
-http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#mvc["Spring MVC Integration"].
+{doc-spring-security}/htmlsingle/#csrf["CSRF protection"],
+{doc-spring-security}/htmlsingle/#headers["Security Response Headers"], and also
+{doc-spring-security}/htmlsingle/#mvc["Spring MVC Integration"].
 Note that using Spring Security to secure the application is not necessarily required for all features.
 For example CSRF protection can be added simply by adding the `CsrfFilter` and
 `CsrfRequestDataValueProcessor` to your configuration. See the
@@ -4110,7 +4414,7 @@ Spring Web MVC uses a configuration convention in several of its APIs:
 * An `n > 0` value will cache the given response for `n` seconds using the
 `'Cache-Control: max-age=n'` directive.
 
-The {javadoc-baseurl}/org/springframework/http/CacheControl.html[`CacheControl`] builder
+The {api-spring-framework}/http/CacheControl.html[`CacheControl`] builder
 class simply describes the available "Cache-Control" directives and makes it easier to
 build your own HTTP caching strategy. Once built, a `CacheControl` instance can then be
 accepted as an argument in several Spring Web MVC APIs.
@@ -4168,7 +4472,7 @@ And in XML:
 [subs="verbatim"]
 ----
 	<mvc:resources mapping="/resources/**" location="/public-resources/">
-		<mvc:cachecontrol max-age="3600" cache-public="true"/>
+		<mvc:cache-control max-age="3600" cache-public="true"/>
 	</mvc:resources>
 ----
 
@@ -4182,14 +4486,14 @@ This involves calculating a lastModified `long` and/or an Etag value for a given
 comparing it against the `'If-Modified-Since'` request header value, and potentially returning
 a response with status code 304 (Not Modified).
 
-As described in <<mvc-ann-httpentity>>, Controllers can interact with the request/response using
+As described in <<mvc-ann-httpentity>>, controllers can interact with the request/response using
 `HttpEntity` types. Controllers returning `ResponseEntity` can include HTTP caching information
 in responses like this:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/book/{id}")
+	@GetMapping("/book/{id}")
 	public ResponseEntity<Book> showBook(@PathVariable Long id) {
 
 		Book book = findBook(id);
@@ -4230,17 +4534,24 @@ This can be achieved as follows:
 ----
 
 There are two key elements here: calling `request.checkNotModified(lastModified)` and
-returning `null`. The former sets the response status to 304 before it returns `true`.
+returning `null`. The former sets the appropriate response status and headers
+before it returns `true`.
 The latter, in combination with the former, causes Spring MVC to do no further
 processing of the request.
 
 Note that there are 3 variants for this:
 
 * `request.checkNotModified(lastModified)` compares lastModified with the
-`'If-Modified-Since'` request header
-* `request.checkNotModified(eTag)` compares eTag with the `'ETag'` request header
+`'If-Modified-Since'` or `'If-Unmodified-Since'` request header
+* `request.checkNotModified(eTag)` compares eTag with the `'If-None-Match'` request header
 * `request.checkNotModified(eTag, lastModified)` does both, meaning that both
-conditions should be valid for the server to issue an `HTTP 304 Not Modified` response
+conditions should be valid
+
+When receiving conditional `'GET'`/`'HEAD'` requests, `checkNotModified` will check
+that the resource has not been modified and if so, it will result in a `HTTP 304 Not Modified`
+response. In case of conditional `'POST'`/`'PUT'`/`'DELETE'` requests, `checkNotModified`
+will check that the resource has not been modified and if it has been, it will result in a
+`HTTP 409 Precondition Failed` response to prevent concurrent modifications.
 
 
 [[mvc-httpcaching-shallowetag]]
@@ -4253,13 +4564,15 @@ ETags, more about that later).The filter caches the content of the rendered JSP 
 other content), generates an MD5 hash over that, and returns that as an ETag header in
 the response. The next time a client sends a request for the same resource, it uses that
 hash as the `If-None-Match` value. The filter detects this, renders the view again, and
-compares the two hashes. If they are equal, a `304` is returned. This filter will not
-save processing power, as the view is still rendered. The only thing it saves is
-bandwidth, as the rendered response is not sent back over the wire.
+compares the two hashes. If they are equal, a `304` is returned.
 
 Note that this strategy saves network bandwidth but not CPU, as the full response must be
 computed for each request. Other strategies at the controller level (described above) can
 save network bandwidth and avoid computation.
+
+This filter has a `writeWeakETag` parameter that configures the filter to write Weak ETags,
+like this: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"`, as defined in
+https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3].
 
 You configure the `ShallowEtagHeaderFilter` in `web.xml`:
 
@@ -4269,6 +4582,12 @@ You configure the `ShallowEtagHeaderFilter` in `web.xml`:
 	<filter>
 		<filter-name>etagFilter</filter-name>
 		<filter-class>org.springframework.web.filter.ShallowEtagHeaderFilter</filter-class>
+		<!-- Optional parameter that configures the filter to write weak ETags
+		<init-param>
+        	<param-name>writeWeakETag</param-name>
+        	<param-value>true</param-value>
+		</init-param>
+		-->
 	</filter>
 
 	<filter-mapping>
@@ -4329,7 +4648,9 @@ implementation is detected and automatically used to initialize any Servlet 3 co
 An abstract base class implementation of `WebApplicationInitializer` named
 `AbstractDispatcherServletInitializer` makes it even easier to register the
 `DispatcherServlet` by simply overriding methods to specify the servlet mapping and the
-location of the `DispatcherServlet` configuration:
+location of the `DispatcherServlet` configuration.
+
+This is recommended for applications that use Java-based Spring configuration:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4354,8 +4675,7 @@ location of the `DispatcherServlet` configuration:
 	}
 ----
 
-The above example is for an application that uses Java-based Spring configuration. If
-using XML-based Spring configuration, extend directly from
+If using XML-based Spring configuration, you should extend directly from
 `AbstractDispatcherServletInitializer`:
 
 [source,java,indent=0]
@@ -4408,6 +4728,9 @@ The `isAsyncSupported` protected method of `AbstractDispatcherServletInitializer
 provides a single place to enable async support on the `DispatcherServlet` and all
 filters mapped to it. By default this flag is set to `true`.
 
+Finally, if you need to further customize the `DispatcherServlet` itself, you can
+override the `createDispatcherServlet` method.
+
 
 
 
@@ -4420,9 +4743,9 @@ the MVC Java config and the MVC XML namespace.
 
 The MVC Java config and the MVC namespace provide similar default configuration that
 overrides the `DispatcherServlet` defaults. The goal is to spare most applications from
-having to having to create the same configuration and also to provide higher-level
-constructs for configuring Spring MVC that serve as a simple starting point and require
-little or no prior knowledge of the underlying configuration.
+having to create the same configuration and also to provide higher-level constructs for
+configuring Spring MVC that serve as a simple starting point and require little or no
+prior knowledge of the underlying configuration.
 
 You can choose either the MVC Java config or the MVC namespace depending on your
 preference. Also as you will see further below, with the MVC Java config it is easier to
@@ -4463,7 +4786,7 @@ context defined):
 			http://www.springframework.org/schema/mvc
 			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-		<mvc:annotation-driven />
+		<mvc:annotation-driven/>
 
 	</beans>
 ----
@@ -4479,11 +4802,11 @@ It also enables the following:
 in addition to the JavaBeans PropertyEditors used for Data Binding.
 . Support for <<format,formatting>> Number fields using the `@NumberFormat` annotation
 through the `ConversionService`.
-. Support for <<format,formatting>> Date, Calendar, Long, and Joda Time fields using the
+. Support for <<format,formatting>> `Date`, `Calendar`, `Long`, and Joda Time fields using the
 `@DateTimeFormat` annotation.
-. Support for <<validation-mvc-jsr303,validating>> `@Controller` inputs with `@Valid`, if
+. Support for <<mvc-config-validation,validating>> `@Controller` inputs with `@Valid`, if
 a JSR-303 Provider is present on the classpath.
-. HttpMessageConverter support for `@RequestBody` method parameters and `@ResponseBody`
+. `HttpMessageConverter` support for `@RequestBody` method parameters and `@ResponseBody`
 method return values from `@RequestMapping` or `@ExceptionHandler` methods.
 
 +
@@ -4511,16 +4834,62 @@ classpath.
 .. `RssChannelHttpMessageConverter` converts RSS feeds -- added if Rome is present on
 the classpath.
 
+See <<mvc-config-message-converters>> for more information about how to customize these
+default converters.
+
+[NOTE]
+====
+Jackson JSON and XML converters are created using `ObjectMapper` instances created by
+{api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`]
+in order to provide a better default configuration.
+
+This builder customizes Jackson's default properties with the following ones:
+
+. http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+. http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+
+It also automatically registers the following well-known modules if they are detected on the classpath:
+
+. https://github.com/FasterXML/jackson-datatype-jdk7[jackson-datatype-jdk7]: support for Java 7 types like `java.nio.file.Path`.
+. https://github.com/FasterXML/jackson-datatype-joda[jackson-datatype-joda]: support for Joda-Time types.
+. https://github.com/FasterXML/jackson-datatype-jsr310[jackson-datatype-jsr310]: support for Java 8 Date & Time API types.
+. https://github.com/FasterXML/jackson-datatype-jdk8[jackson-datatype-jdk8]: support for other Java 8 types like `Optional`.
+====
+
 
 
 [[mvc-config-customize]]
 === Customizing the Provided Configuration
 To customize the default configuration in Java you simply implement the
 `WebMvcConfigurer` interface or more likely extend the class `WebMvcConfigurerAdapter`
-and override the methods you need. Below is an example of some of the available methods
-to override. See
-{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/WebMvcConfigurer.html[`WebMvcConfigurer`]
-for a list of all methods and the javadocs for further details:
+and override the methods you need:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		// Override configuration methods...
+
+	}
+----
+
+To customize the default configuration of `<mvc:annotation-driven/>` check what
+attributes and sub-elements it supports. You can view the
+http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use the code
+completion feature of your IDE to discover what attributes and sub-elements are
+available.
+
+
+[[mvc-config-conversion]]
+=== Conversion and Formatting
+
+By default formatters for `Number` and `Date` types are installed, including support for
+the `@NumberFormat` and `@DateTimeFormat` annotations. Full support for the Joda Time
+formatting library is also installed if Joda Time is present on the classpath. To
+register custom formatters and converters, override the `addFormatters` method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4530,43 +4899,147 @@ for a list of all methods and the javadocs for further details:
 	public class WebConfig extends WebMvcConfigurerAdapter {
 
 		@Override
-		protected void addFormatters(FormatterRegistry registry) {
+		public void addFormatters(FormatterRegistry registry) {
 			// Add formatters and/or converters
-		}
-
-		@Override
-		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-			// Configure the list of HttpMessageConverters to use
 		}
 
 	}
 ----
 
-To customize the default configuration of `<mvc:annotation-driven />` check what
-attributes and sub-elements it supports. You can view the
-http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use the code
-completion feature of your IDE to discover what attributes and sub-elements are
-available. The sample below shows a subset of what is available:
+In the MVC namespace the same defaults apply when `<mvc:annotation-driven>` is added.
+To register custom formatters and converters simply supply a `ConversionService`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<mvc:annotation-driven conversion-service="conversionService">
-		<mvc:message-converters>
-			<bean class="org.example.MyHttpMessageConverter"/>
-			<bean class="org.example.MyOtherHttpMessageConverter"/>
-		</mvc:message-converters>
-	</mvc:annotation-driven>
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
-		<property name="formatters">
-			<list>
-				<bean class="org.example.MyFormatter"/>
-				<bean class="org.example.MyOtherFormatter"/>
-			</list>
-		</property>
-	</bean>
+		<mvc:annotation-driven conversion-service="conversionService"/>
+
+		<bean id="conversionService"
+				class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+			<property name="converters">
+				<set>
+					<bean class="org.example.MyConverter"/>
+				</set>
+			</property>
+			<property name="formatters">
+				<set>
+					<bean class="org.example.MyFormatter"/>
+					<bean class="org.example.MyAnnotationFormatterFactory"/>
+				</set>
+			</property>
+			<property name="formatterRegistrars">
+				<set>
+					<bean class="org.example.MyFormatterRegistrar"/>
+				</set>
+			</property>
+		</bean>
+
+	</beans>
 ----
+
+[NOTE]
+====
+See <<format-FormatterRegistrar-SPI>> and the `FormattingConversionServiceFactoryBean`
+for more information on when to use FormatterRegistrars.
+====
+
+[[mvc-config-validation]]
+=== Validation
+
+Spring provides a <<validator,Validator interface>> that can be used for validation in all layers
+of an application. In Spring MVC you can configure it for use as a global `Validator` instance, to be used
+whenever an `@Valid` or `@Validated` controller method argument is encountered, and/or as a local
+`Validator` within a controller through an `@InitBinder` method. Global and local validator
+instances can be combined to provide composite validation.
+
+Spring also <<validation-beanvalidation-overview,supports JSR-303/JSR-349>> Bean Validation
+via `LocalValidatorFactoryBean` which adapts the Spring `org.springframework.validation.Validator`
+interface to the Bean Validation `javax.validation.Validator` contract. This class can be
+plugged into Spring MVC as a global validator as described next.
+
+By default use of `@EnableWebMvc` or `<mvc:annotation-driven>` automatically registers Bean
+Validation support in Spring MVC through the `LocalValidatorFactoryBean` when a Bean Validation
+provider such as Hibernate Validator is detected on the classpath.
+
+[NOTE]
+====
+Sometimes it's convenient to have a `LocalValidatorFactoryBean` injected into a controller
+or another class. The easiest way to do that is to declare your own `@Bean` and also mark it
+with `@Primary` in order to avoid a conflict with the one provided with the MVC Java config.
+
+If you prefer to use the one from the MVC Java config, you'll need to override the
+`mvcValidator` method from `WebMvcConfigurationSupport` and declare the method to explicitly
+return `LocalValidatorFactory` rather than `Validator`. See <<mvc-config-advanced-java>>
+for information on how to switch to extend the provided configuration.
+====
+
+Alternatively you can configure your own global `Validator` instance:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public Validator getValidator(); {
+			// return "global" validator
+		}
+
+	}
+----
+
+and in XML:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+		<mvc:annotation-driven validator="globalValidator"/>
+
+	</beans>
+----
+
+To combine global with local validation, simply add one or more local validator(s):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class MyController {
+
+		@InitBinder
+		protected void initBinder(WebDataBinder binder) {
+			binder.addValidators(new FooValidator());
+		}
+
+	}
+----
+
+With this minimal configuration any time an `@Valid` or `@Validated` method argument is encountered, it
+will be validated by the configured validators. Any validation violations will automatically
+be exposed as errors in the `BindingResult` accessible as a method argument and also renderable
+in Spring MVC HTML views.
 
 
 
@@ -4600,15 +5073,15 @@ And in XML use the `<mvc:interceptors>` element:
 [subs="verbatim"]
 ----
 	<mvc:interceptors>
-		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
 			<mvc:exclude-mapping path="/admin/**"/>
-			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/secure/*"/>
-			<bean class="org.example.SecurityInterceptor" />
+			<bean class="org.example.SecurityInterceptor"/>
 		</mvc:interceptor>
 	</mvc:interceptors>
 ----
@@ -4617,26 +5090,19 @@ And in XML use the `<mvc:interceptors>` element:
 
 [[mvc-config-content-negotiation]]
 === Content Negotiation
-You can configure how Spring MVC determines the requested media types from the client
-for request mapping as well as for content negotiation purposes. The available options
-are to check the file extension in the request URI, the "Accept" header, a request
-parameter, as well as to fall back on a default content type. By default, file extension
-in the request URI is checked first and the "Accept" header is checked next.
+You can configure how Spring MVC determines the requested media types from the request.
+The available options are to check the URL path for a file extension, check the
+"Accept" header, a specific query parameter, or to fall back on a default content
+type when nothing is requested. By default the path extension in the request URI
+is checked first and the "Accept" header is checked second.
 
-For file extensions in the request URI, the MVC Java config and the MVC namespace,
-automatically register extensions such as `.json`, `.xml`, `.rss`, and `.atom` if the
-corresponding dependencies such as Jackson, JAXB2, or Rome are present on the classpath.
-Additional extensions may be not need to be registered explicitly if they can be
-discovered via `ServletContext.getMimeType(String)` or the __Java Activation Framework__
-(see `javax.activation.MimetypesFileTypeMap`). You can register more extensions with the
-{javadoc-baseurl}/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)[setUseRegisteredSuffixPatternMatch
-method].
+The MVC Java config and the MVC namespace register `json`, `xml`, `rss`, `atom` by
+default if corresponding dependencies are on the classpath. Additional
+path extension-to-media type mappings may also be registered explicitly and that
+also has the effect of whitelisting them as safe extensions for the purpose of RFD
+attack detection (see <<mvc-ann-requestmapping-rfd>> for more detail).
 
-The introduction of `ContentNegotiationManager` also enables selective suffix pattern
-matching for incoming requests. For more details, see its javadocs.
-
-Below is an example of customizing content negotiation options through the MVC Java
-config:
+Below is an example of customizing content negotiation options through the MVC Java config:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4647,7 +5113,7 @@ config:
 
 		@Override
 		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-			configurer.favorPathExtension(false).favorParameter(true);
+			configurer.mediaType("json", MediaType.APPLICATION_JSON);
 		}
 	}
 ----
@@ -4659,12 +5125,10 @@ that in turn can be created with a `ContentNegotiationManagerFactoryBean`:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
 
 	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-		<property name="favorPathExtension" value="false" />
-		<property name="favorParameter" value="true" />
-		<property name="mediaTypes" >
+		<property name="mediaTypes">
 			<value>
 				json=application/json
 				xml=application/xml
@@ -4679,7 +5143,7 @@ for request mapping purposes, and `RequestMappingHandlerAdapter` and
 `ExceptionHandlerExceptionResolver` for content negotiation purposes.
 
 Note that `ContentNegotiatingViewResolver` now can also be configured with a
-`ContentNegotiatingViewResolver`, so you can use one instance throughout Spring MVC.
+`ContentNegotiationManager`, so you can use one shared instance throughout Spring MVC.
 
 In more advanced cases, it may be useful to configure multiple
 `ContentNegotiationManager` instances that in turn may contain custom
@@ -4755,14 +5219,14 @@ And the same in XML:
 	<mvc:view-resolvers>
 		<mvc:content-negotiation>
 			<mvc:default-views>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</mvc:default-views>
 		</mvc:content-negotiation>
-		<mvc:jsp />
+		<mvc:jsp/>
 	</mvc:view-resolvers>
 ----
 
-Note however that FreeMarker, Velocity, Tiles, Groovy Markup and script templates also require
+Note however that FreeMarker, Tiles, Groovy Markup and script templates also require
 configuration of the underlying view technology.
 
 The MVC namespace provides dedicated elements. For example with FreeMarker:
@@ -4774,14 +5238,14 @@ The MVC namespace provides dedicated elements. For example with FreeMarker:
 	<mvc:view-resolvers>
 		<mvc:content-negotiation>
 			<mvc:default-views>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</mvc:default-views>
 		</mvc:content-negotiation>
-		<mvc:freemarker cache="false" />
+		<mvc:freemarker cache="false"/>
 	</mvc:view-resolvers>
 
 	<mvc:freemarker-configurer>
-		<mvc:template-loader-path location="/freemarker" />
+		<mvc:template-loader-path location="/freemarker"/>
 	</mvc:freemarker-configurer>
 
 ----
@@ -4923,7 +5387,8 @@ can provide arbitrary resolution and transformation of resources.
 The built-in `VersionResourceResolver` can be configured with different strategies.
 For example a `FixedVersionStrategy` can use a property, a date, or other as the version.
 A `ContentVersionStrategy` uses an MD5 hash computed from the content of the resource
-(known as "fingerprinting" URLs).
+(known as "fingerprinting" URLs). Note that the `VersionResourceResolver` will automatically
+use the resolved version strings as HTTP ETag header values when serving resources.
 
 `ContentVersionStrategy` is a good default choice to use except in cases where
 it cannot be used (e.g. with JavaScript module loaders). You can configure
@@ -4958,7 +5423,7 @@ XML example:
 ----
 <mvc:resources mapping="/resources/**" location="/public-resources/">
 	<mvc:resource-chain>
-		<mvc:resource-cache />
+		<mvc:resource-cache/>
 		<mvc:resolvers>
 			<mvc:version-resolver>
 				<mvc:content-version-strategy patterns="/**"/>
@@ -4971,12 +5436,17 @@ XML example:
 In order for the above to work the application must also
 render URLs with versions. The easiest way to do that is to configure the
 `ResourceUrlEncodingFilter` which wraps the response and overrides its `encodeURL` method.
-This will work in JSPs, FreeMarker, Velocity, and any other view technology that calls
-the response `encodeURL` method. Alternatively, an application can also inject and
-use directly the `ResourceUrlProvider` bean, which is automatically declared with the MVC
-Java config and the MVC namespace.
+This will work in JSPs, FreeMarker, and any other view technology that calls the response
+`encodeURL` method. Alternatively, an application can also inject and use directly the
+`ResourceUrlProvider` bean, which is automatically declared with the MVC Java config and
+the MVC namespace.
 
-
+Webjars are also supported with `WebJarsResourceResolver`, which is automatically registered
+when the `"org.webjars:webjars-locator"` library is on classpath. This resolver allows
+the resource chain to resolve version agnostic libraries from HTTP GET requests
+`"GET /jquery/jquery.min.js"` will return resource `"/jquery/1.2.0/jquery.min.js"`.
+It also works by rewriting resource URLs in templates
+`<script src="/jquery/jquery.min.js"/> -> <script src="/jquery/1.2.0/jquery.min.js"/>`.
 
 
 [[mvc-default-servlet-handler]]
@@ -5056,7 +5526,7 @@ Or in XML:
 === Path Matching
 This allows customizing various settings related to URL mapping and path matching.
 For details on the individual options check out the
-{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
+{api-spring-framework}/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
 
 Below is an example in Java config:
 
@@ -5101,11 +5571,87 @@ And the same in XML, use the `<mvc:path-matching>` element:
             trailing-slash="false"
             registered-suffixes-only="true"
             path-helper="pathHelper"
-            path-matcher="pathMatcher" />
+            path-matcher="pathMatcher"/>
     </mvc:annotation-driven>
 
-    <bean id="pathHelper" class="org.example.app.MyPathHelper" />
-    <bean id="pathMatcher" class="org.example.app.MyPathMatcher" />
+    <bean id="pathHelper" class="org.example.app.MyPathHelper"/>
+    <bean id="pathMatcher" class="org.example.app.MyPathMatcher"/>
+----
+
+
+
+[[mvc-config-message-converters]]
+=== Message Converters
+
+Customization of `HttpMessageConverter` can be achieved in Java config by overriding
+{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurerAdapter.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`]
+if you want to replace the default converters created by Spring MVC, or by overriding
+{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurerAdapter.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`]
+if you just want to customize them or add additional converters to the default ones.
+
+Below is an example that adds Jackson JSON and XML converters with a customized
+`ObjectMapper` instead of default ones:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfiguration extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+			Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder()
+					.indentOutput(true)
+					.dateFormat(new SimpleDateFormat("yyyy-MM-dd"))
+					.modulesToInstall(new ParameterNamesModule());
+			converters.add(new MappingJackson2HttpMessageConverter(builder.build()));
+			converters.add(new MappingJackson2XmlHttpMessageConverter(builder.xml().build()));
+		}
+
+	}
+----
+
+In this example, `Jackson2ObjectMapperBuilder` is used to create a common configuration for
+both `MappingJackson2HttpMessageConverter` and `MappingJackson2XmlHttpMessageConverter` with
+indentation enabled, a customized date format and the registration of
+https://github.com/FasterXML/jackson-module-parameter-names[jackson-module-parameter-names]
+that adds support for accessing parameter names (feature added in Java 8).
+
+[NOTE]
+====
+Enabling indentation with Jackson XML support requires
+http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.codehaus.woodstox%22%20AND%20a%3A%22woodstox-core-asl%22[`woodstox-core-asl`]
+dependency in addition to http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22jackson-dataformat-xml%22[`jackson-dataformat-xml`] one.
+====
+
+Other interesting Jackson modules are available:
+
+. https://github.com/zalando/jackson-datatype-money[jackson-datatype-money]: support for `javax.money` types (unofficial module)
+. https://github.com/FasterXML/jackson-datatype-hibernate[jackson-datatype-hibernate]: support for Hibernate specific types and properties (including lazy-loading aspects)
+
+It is also possible to do the same in XML:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="objectMapper" ref="objectMapper"/>
+            </bean>
+            <bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter">
+                <property name="objectMapper" ref="xmlMapper"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
+          p:indentOutput="true"
+          p:simpleDateFormat="yyyy-MM-dd"
+          p:modulesToInstall="com.fasterxml.jackson.module.paramnames.ParameterNamesModule"/>
+
+    <bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>
 ----
 
 
@@ -5189,6 +5735,6 @@ by type and then modifying its properties as necessary. For example:
 	}
 ----
 
-Note that `MyPostProcessor` needs to be included in an `<component scan />` in order for
+Note that `MyPostProcessor` needs to be included in an `<component scan/>` in order for
 it to be detected or if you prefer you can declare it explicitly with an XML bean
 declaration.

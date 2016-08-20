@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,11 +60,10 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	private static final String JCACHE_ASPECT_CLASS_NAME =
 			"org.springframework.cache.aspectj.JCacheCacheAspect";
 
-
 	private static final boolean jsr107Present = ClassUtils.isPresent(
 			"javax.cache.Cache", AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader());
 
-	private static final boolean jCacheImplPresent = ClassUtils.isPresent(
+	private static final boolean jcacheImplPresent = ClassUtils.isPresent(
 			"org.springframework.cache.jcache.interceptor.DefaultJCacheOperationSource",
 			AnnotationDrivenCacheBeanDefinitionParser.class.getClassLoader());
 
@@ -91,7 +90,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 
 	private void registerCacheAspect(Element element, ParserContext parserContext) {
 		SpringCachingConfigurer.registerCacheAspect(element, parserContext);
-		if (jsr107Present && jCacheImplPresent) { // Register JCache aspect
+		if (jsr107Present && jcacheImplPresent) {
 			JCacheCachingConfigurer.registerCacheAspect(element, parserContext);
 		}
 	}
@@ -99,7 +98,7 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	private void registerCacheAdvisor(Element element, ParserContext parserContext) {
 		AopNamespaceUtils.registerAutoProxyCreatorIfNecessary(parserContext, element);
 		SpringCachingConfigurer.registerCacheAdvisor(element, parserContext);
-		if (jsr107Present && jCacheImplPresent) { // Register JCache advisor
+		if (jsr107Present && jcacheImplPresent) {
 			JCacheCachingConfigurer.registerCacheAdvisor(element, parserContext);
 		}
 	}

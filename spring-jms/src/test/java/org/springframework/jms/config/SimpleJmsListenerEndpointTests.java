@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 import static org.junit.Assert.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class SimpleJmsListenerEndpointTests {
 
 	private final SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+
 
 	@Test
 	public void createListener() {
@@ -40,4 +40,5 @@ public class SimpleJmsListenerEndpointTests {
 		endpoint.setMessageListener(messageListener);
 		assertSame(messageListener, endpoint.createMessageListener(container));
 	}
+
 }

@@ -91,7 +91,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * Create a new DefaultTransactionDefinition with the the given
+	 * Create a new DefaultTransactionDefinition with the given
 	 * propagation behavior. Can be modified through bean property setters.
 	 * @param propagationBehavior one of the propagation constants in the
 	 * TransactionDefinition interface

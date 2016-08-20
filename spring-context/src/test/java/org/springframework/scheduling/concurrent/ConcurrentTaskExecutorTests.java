@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,31 @@
 
 package org.springframework.scheduling.concurrent;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.core.task.NoOpRunnable;
 
 /**
  * @author Rick Evans
  */
-public class ConcurrentTaskExecutorTests extends TestCase {
+public class ConcurrentTaskExecutorTests {
 
-	public void testZeroArgCtorResultsInDefaultTaskExecutorBeingUsed() throws Exception {
+	@Test
+	public void zeroArgCtorResultsInDefaultTaskExecutorBeingUsed() throws Exception {
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
 		// must not throw a NullPointerException
 		executor.execute(new NoOpRunnable());
 	}
 
-	public void testPassingNullExecutorToCtorResultsInDefaultTaskExecutorBeingUsed() throws Exception {
+	@Test
+	public void passingNullExecutorToCtorResultsInDefaultTaskExecutorBeingUsed() throws Exception {
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor(null);
 		// must not throw a NullPointerException
 		executor.execute(new NoOpRunnable());
 	}
 
-	public void testPassingNullExecutorToSetterResultsInDefaultTaskExecutorBeingUsed() throws Exception {
+	@Test
+	public void passingNullExecutorToSetterResultsInDefaultTaskExecutorBeingUsed() throws Exception {
 		ConcurrentTaskExecutor executor = new ConcurrentTaskExecutor();
 		executor.setConcurrentExecutor(null);
 		// must not throw a NullPointerException

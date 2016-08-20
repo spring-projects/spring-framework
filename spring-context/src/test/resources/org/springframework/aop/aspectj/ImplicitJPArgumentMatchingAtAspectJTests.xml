@@ -12,7 +12,7 @@
 	<aop:aspectj-autoproxy proxy-target-class="true">
 		<aop:include name="counterAtAspectJAspect"/>
 	</aop:aspectj-autoproxy>
-		
+	
 	<bean id="counterAtAspectJAspect"
 		class="org.springframework.aop.aspectj.ImplicitJPArgumentMatchingAtAspectJTests$CounterAtAspectJAspect"/>
 </beans>

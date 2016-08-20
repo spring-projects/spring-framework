@@ -95,6 +95,11 @@ public class MockPart implements Part {
 	}
 
 	@Override
+	public String getSubmittedFileName() {
+		return this.name;
+	}
+
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}

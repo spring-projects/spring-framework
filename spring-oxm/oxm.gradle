@@ -1,16 +1,17 @@
 configurations {
 	castor
 	xjc
-	xmlbeans
 	jibx
 }
 dependencies {
-	castor "org.codehaus.castor:castor-anttasks:1.3.3"
-	castor "org.apache.velocity:velocity:1.7"
-	xjc "com.sun.xml.bind:jaxb-xjc:2.1.17"
-	xmlbeans "org.apache.xmlbeans:xmlbeans:2.6.0"
+	castor "org.codehaus.castor:castor-anttasks:1.4.1"
 	jibx "org.jibx:jibx-bind:1.2.6"
-	jibx "bcel:bcel:5.1"
+	jibx "org.apache.bcel:bcel:6.0"
+	xjc 'com.sun.xml.bind:jaxb-xjc:2.2.11'
+	xjc 'javax.xml.bind:jaxb-api:2.2.11'
+	xjc 'com.sun.xml.bind:jaxb-core:2.2.11'
+	xjc 'com.sun.xml.bind:jaxb-impl:2.2.11'
+	xjc 'javax.activation:activation:1.1.1'
 }
 
 ext.genSourcesDir = "${buildDir}/generated-sources"
@@ -39,7 +40,7 @@ task genCastor {
 			castor(types: "j2", warnings: false, file: orderSchema, todir: sourcesDir,
 					package: "org.springframework.oxm.castor", properties: castorBuilderProperties)
 
-			javac(destdir: classesDir, source: 1.6, target: 1.6, debug: true,
+			javac(destdir: classesDir, source: 1.8, target: 1.8, debug: true,
 					debugLevel: "lines,vars,source", classpath: configurations.castor.asPath) {
 				src(path: sourcesDir)
 				include(name: "**/*.java")
@@ -74,7 +75,7 @@ task genJaxb {
 				produces(dir: sourcesDir, includes: "**/*.java")
 			}
 
-			javac(destdir: classesDir, source: 1.6, target: 1.6, debug: true,
+			javac(destdir: classesDir, source: 1.8, target: 1.8, debug: true,
 					debugLevel: "lines,vars,source",
 					classpath: configurations.castor.asPath) {
 				src(path: sourcesDir)
@@ -91,29 +92,8 @@ task genJaxb {
 	}
 }
 
-task genXmlbeans {
-	ext.classesDir = "${buildDir}/classes/xmlbeans"
-
-	inputs.files flightSchema
-	outputs.dir classesDir
-
-	doLast() {
-		project.ant {
-			taskdef name: "xmlbeans",
-					classname: "org.apache.xmlbeans.impl.tool.XMLBean",
-					classpath: configurations.xmlbeans.asPath
-
-			xmlbeans(classgendir: classesDir, schema: flightSchema,
-					compiler: "modern", verbose: "false",
-					classpath: configurations.xmlbeans.asPath)
-		}
-	}
-}
-
-// add jibx binding to the normal test compilation process
-// INCOMPATIBLE WITH OPENJDK 8 b89+
-def jibxEnabled = project.properties.get("testGroups")?.toLowerCase()?.split(",")?.contains("custom_compilation")
-if (jibxEnabled) {
+// JiBX compiler is currently not compatible with JDK 9
+if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
 	compileTestJava {
 		def bindingXml = "${projectDir}/src/test/resources/org/springframework/oxm/jibx/binding.xml"
 

@@ -9,7 +9,7 @@
 			<!-- 'inline:' prefix is preceded by whitespace... -->
 			<value>
     inline:
-				
+			
 	class Bingo {
 
 		@Property String message;

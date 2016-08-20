@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import static org.junit.Assert.*;
 /**
  * Unit tests for the {@link GenericConversionService}.
  *
- * <p>For tests involving the {@link DefaultConversionService}, see 
+ * <p>For tests involving the {@link DefaultConversionService}, see
  * {@link DefaultConversionServiceTests}.
  *
  * @author Keith Donald
@@ -229,7 +229,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testListToIterableConversion() {
-		List<Object> raw = new ArrayList<Object>();
+		List<Object> raw = new ArrayList<>();
 		raw.add("one");
 		raw.add("two");
 		Object converted = conversionService.convert(raw, Iterable.class);
@@ -238,7 +238,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testListToObjectConversion() {
-		List<Object> raw = new ArrayList<Object>();
+		List<Object> raw = new ArrayList<>();
 		raw.add("one");
 		raw.add("two");
 		Object converted = conversionService.convert(raw, Object.class);
@@ -247,7 +247,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testMapToObjectConversion() {
-		Map<Object, Object> raw = new HashMap<Object, Object>();
+		Map<Object, Object> raw = new HashMap<>();
 		raw.put("key", "value");
 		Object converted = conversionService.convert(raw, Object.class);
 		assertSame(raw, converted);
@@ -301,7 +301,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testWildcardMap() throws Exception {
-		Map<String, String> input = new LinkedHashMap<String, String>();
+		Map<String, String> input = new LinkedHashMap<>();
 		input.put("key", "value");
 		Object converted = conversionService.convert(input, TypeDescriptor.forObject(input), new TypeDescriptor(getClass().getField("wildcardMap")));
 		assertEquals(input, converted);
@@ -333,7 +333,7 @@ public class GenericConversionServiceTests {
 		Assume.group(TestGroup.PERFORMANCE);
 		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
-		List<String> source = new LinkedList<String>();
+		List<String> source = new LinkedList<>();
 		source.add("1");
 		source.add("2");
 		source.add("3");
@@ -344,7 +344,7 @@ public class GenericConversionServiceTests {
 		watch.stop();
 		watch.start("convert 4,000,000 manually");
 		for (int i = 0; i < 4000000; i++) {
-			List<Integer> target = new ArrayList<Integer>(source.size());
+			List<Integer> target = new ArrayList<>(source.size());
 			for (String element : source) {
 				target.add(Integer.valueOf(element));
 			}
@@ -358,7 +358,7 @@ public class GenericConversionServiceTests {
 		Assume.group(TestGroup.PERFORMANCE);
 		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
-		Map<String, String> source = new HashMap<String, String>();
+		Map<String, String> source = new HashMap<>();
 		source.put("1", "1");
 		source.put("2", "2");
 		source.put("3", "3");
@@ -369,7 +369,7 @@ public class GenericConversionServiceTests {
 		watch.stop();
 		watch.start("convert 4,000,000 manually");
 		for (int i = 0; i < 4000000; i++) {
-			Map<String, Integer> target = new HashMap<String, Integer>(source.size());
+			Map<String, Integer> target = new HashMap<>(source.size());
 			for (Map.Entry<String, String> entry : source.entrySet()) {
 				target.put(entry.getKey(), Integer.valueOf(entry.getValue()));
 			}
@@ -382,7 +382,7 @@ public class GenericConversionServiceTests {
 	public void emptyListToArray() {
 		conversionService.addConverter(new CollectionToArrayConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = TypeDescriptor.valueOf(String[].class);
 		assertTrue(conversionService.canConvert(sourceType, targetType));
@@ -393,7 +393,7 @@ public class GenericConversionServiceTests {
 	public void emptyListToObject() {
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = TypeDescriptor.valueOf(Integer.class);
 		assertTrue(conversionService.canConvert(sourceType, targetType));
@@ -420,7 +420,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testConvertiblePairsInSet() {
-		Set<GenericConverter.ConvertiblePair> set = new HashSet<GenericConverter.ConvertiblePair>();
+		Set<GenericConverter.ConvertiblePair> set = new HashSet<>();
 		set.add(new GenericConverter.ConvertiblePair(Number.class, String.class));
 		assert set.contains(new GenericConverter.ConvertiblePair(Number.class, String.class));
 	}
@@ -476,6 +476,21 @@ public class GenericConversionServiceTests {
 		assertEquals(Color.BLACK, conversionService.convert("#000000", Color.class));
 		assertTrue(converter.getMatchAttempts() > 0);
 		assertTrue(converter.getNestedMatchAttempts() > 0);
+	}
+
+	@Test
+	public void conditionalConverterCachingForDifferentAnnotationAttributes() throws Exception {
+		conversionService.addConverter(new ColorConverter());
+		conversionService.addConverter(new MyConditionalColorConverter());
+
+		assertEquals(Color.BLACK, conversionService.convert("000000xxxx",
+				new TypeDescriptor(getClass().getField("activeColor"))));
+		assertEquals(Color.BLACK, conversionService.convert(" #000000 ",
+				new TypeDescriptor(getClass().getField("inactiveColor"))));
+		assertEquals(Color.BLACK, conversionService.convert("000000yyyy",
+				new TypeDescriptor(getClass().getField("activeColor"))));
+		assertEquals(Color.BLACK, conversionService.convert("  #000000  ",
+				new TypeDescriptor(getClass().getField("inactiveColor"))));
 	}
 
 	@Test
@@ -629,14 +644,49 @@ public class GenericConversionServiceTests {
 	}
 
 
+	@ExampleAnnotation(active = true)
+	public String annotatedString;
+
+	@ExampleAnnotation(active = true)
+	public Color activeColor;
+
+	@ExampleAnnotation(active = false)
+	public Color inactiveColor;
+
+	public List<Integer> list;
+
+	public Map<String, Integer> map;
+
+	public Map<String, ?> wildcardMap;
+
+	@SuppressWarnings("rawtypes")
+	public Collection rawCollection;
+
+	public Collection<?> genericCollection;
+
+	public Collection<String> stringCollection;
+
+	public Collection<Integer> integerCollection;
+
+
 	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface ExampleAnnotation {}
+	private @interface ExampleAnnotation {
 
-	private static interface MyBaseInterface {}
+		boolean active();
+	}
 
-	private static interface MyInterface extends MyBaseInterface {}
 
-	private static class MyInterfaceImplementer implements MyInterface {}
+	private interface MyBaseInterface {
+	}
+
+
+	private interface MyInterface extends MyBaseInterface {
+	}
+
+
+	private static class MyInterfaceImplementer implements MyInterface {
+	}
+
 
 	private static class MyBaseInterfaceToStringConverter implements Converter<MyBaseInterface, String> {
 
@@ -646,6 +696,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class MyStringArrayToResourceArrayConverter implements Converter<String[], Resource[]> {
 
 		@Override
@@ -654,6 +705,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class MyStringArrayToIntegerArrayConverter implements Converter<String[], Integer[]> {
 
 		@Override
@@ -661,6 +713,7 @@ public class GenericConversionServiceTests {
 			return Arrays.stream(source).map(s -> s.substring(1)).map(Integer::valueOf).toArray(Integer[]::new);
 		}
 	}
+
 
 	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
 
@@ -671,6 +724,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class WithCopyConstructor {
 
 		WithCopyConstructor() {}
@@ -678,6 +732,7 @@ public class GenericConversionServiceTests {
 		@SuppressWarnings("unused")
 		WithCopyConstructor(WithCopyConstructor value) {}
 	}
+
 
 	private static class MyConditionalConverter implements Converter<String, Color>, ConditionalConverter {
 
@@ -699,6 +754,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class NonConditionalGenericConverter implements GenericConverter {
 
 		@Override
@@ -712,9 +768,10 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class MyConditionalGenericConverter implements GenericConverter, ConditionalConverter {
 
-		private final List<TypeDescriptor> sourceTypes = new ArrayList<TypeDescriptor>();
+		private final List<TypeDescriptor> sourceTypes = new ArrayList<>();
 
 		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
@@ -736,6 +793,7 @@ public class GenericConversionServiceTests {
 			return sourceTypes;
 		}
 	}
+
 
 	private static class MyConditionalConverterFactory implements ConverterFactory<String, Color>, ConditionalConverter {
 
@@ -768,11 +826,13 @@ public class GenericConversionServiceTests {
 		String getBaseCode();
 	}
 
-	private static interface MyEnumInterface extends MyEnumBaseInterface {
+
+	private interface MyEnumInterface extends MyEnumBaseInterface {
 		String getCode();
 	}
 
-	private static enum MyEnum implements MyEnumInterface {
+
+	private enum MyEnum implements MyEnumInterface {
 
 		A("1"),
 		B("2"),
@@ -795,7 +855,8 @@ public class GenericConversionServiceTests {
 		}
 	}
 
-	private static enum EnumWithSubclass {
+
+	private enum EnumWithSubclass {
 
 		FIRST {
 			@Override
@@ -804,6 +865,7 @@ public class GenericConversionServiceTests {
 			}
 		}
 	}
+
 
 	@SuppressWarnings("rawtypes")
 	private static class MyStringToRawCollectionConverter implements Converter<String, Collection> {
@@ -814,6 +876,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class MyStringToGenericCollectionConverter implements Converter<String, Collection<?>> {
 
 		@Override
@@ -821,6 +884,7 @@ public class GenericConversionServiceTests {
 			return Collections.singleton(source + "X");
 		}
 	}
+
 
 	private static class MyEnumInterfaceToStringConverter<T extends MyEnumInterface> implements Converter<T, String> {
 
@@ -830,14 +894,16 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class StringToMyEnumInterfaceConverterFactory implements ConverterFactory<String, MyEnumInterface> {
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"unchecked", "rawtypes"})
 		public <T extends MyEnumInterface> Converter<String, T> getConverter(Class<T> targetType) {
 			return new StringToMyEnumInterfaceConverter(targetType);
 		}
 
 		private static class StringToMyEnumInterfaceConverter<T extends Enum<?> & MyEnumInterface> implements Converter<String, T> {
+
 			private final Class<T> enumType;
 
 			public StringToMyEnumInterfaceConverter(Class<T> enumType) {
@@ -855,9 +921,10 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class StringToMyEnumBaseInterfaceConverterFactory implements ConverterFactory<String, MyEnumBaseInterface> {
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"unchecked", "rawtypes"})
 		public <T extends MyEnumBaseInterface> Converter<String, T> getConverter(Class<T> targetType) {
 			return new StringToMyEnumBaseInterfaceConverter(targetType);
 		}
@@ -881,6 +948,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class MyStringToStringCollectionConverter implements Converter<String, Collection<String>> {
 
 		@Override
@@ -889,6 +957,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class MyStringToIntegerCollectionConverter implements Converter<String, Collection<Integer>> {
 
 		@Override
@@ -896,6 +965,7 @@ public class GenericConversionServiceTests {
 			return Collections.singleton(source.length());
 		}
 	}
+
 
 	@SuppressWarnings("rawtypes")
 	private static class UntypedConverter implements Converter {
@@ -906,28 +976,27 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+
 	private static class ColorConverter implements Converter<String, Color> {
+
 		@Override
-		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
+		public Color convert(String source) {
+			return Color.decode(source.trim());
+		}
 	}
 
 
-	@ExampleAnnotation
-	public String annotatedString;
+	private static class MyConditionalColorConverter implements Converter<String, Color>, ConditionalConverter {
 
-	public List<Integer> list;
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			ExampleAnnotation ann = targetType.getAnnotation(ExampleAnnotation.class);
+			return (ann != null && ann.active());
+		}
 
-	public Map<String, Integer> map;
-
-	public Map<String, ?> wildcardMap;
-
-	@SuppressWarnings("rawtypes")
-	public Collection rawCollection;
-
-	public Collection<?> genericCollection;
-
-	public Collection<String> stringCollection;
-
-	public Collection<Integer> integerCollection;
-
+		@Override
+		public Color convert(String source) {
+			return Color.decode(source.substring(0, 6));
+		}
+	}
 }

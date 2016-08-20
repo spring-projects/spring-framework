@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class MessagingMessageConverterTests {
@@ -46,8 +45,8 @@ public class MessagingMessageConverterTests {
 
 	@Test
 	public void onlyHandlesMessage() throws JMSException {
-		thrown.expect(IllegalArgumentException.class);
-		converter.toMessage(new Object(), mock(Session.class));
+		this.thrown.expect(IllegalArgumentException.class);
+		this.converter.toMessage(new Object(), mock(Session.class));
 	}
 
 	@Test
@@ -57,43 +56,38 @@ public class MessagingMessageConverterTests {
 		ObjectMessage jmsMessage = mock(ObjectMessage.class);
 		given(session.createObjectMessage(payload)).willReturn(jmsMessage);
 
-		converter.toMessage(MessageBuilder.withPayload(payload).build(), session);
+		this.converter.toMessage(MessageBuilder.withPayload(payload).build(), session);
 		verify(session).createObjectMessage(payload);
 	}
 
 	@Test
 	public void fromNull() throws JMSException {
-		assertNull(converter.fromMessage(null));
+		assertNull(this.converter.fromMessage(null));
 	}
 
 	@Test
 	public void customPayloadConverter() throws JMSException {
 		TextMessage jmsMsg = new StubTextMessage("1224");
 
-		converter.setPayloadConverter(new SimpleMessageConverter() {
-			@Override
-			public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
-				TextMessage textMessage = (TextMessage) message;
-				return Long.parseLong(textMessage.getText());
-			}
-		});
-
-		Message<?> msg = (Message<?>) converter.fromMessage(jmsMsg);
+		this.converter.setPayloadConverter(new TestMessageConverter());
+		Message<?> msg = (Message<?>) this.converter.fromMessage(jmsMsg);
 		assertEquals(1224L, msg.getPayload());
 	}
 
-	@Test
-	public void payloadIsAMessage() throws JMSException {
-		final Message<String> message = MessageBuilder.withPayload("Test").setHeader("inside", true).build();
-		converter.setPayloadConverter(new SimpleMessageConverter() {
-			@Override
-			public Object fromMessage(javax.jms.Message jmsMessage) throws JMSException, MessageConversionException {
-				return message;
+	static class TestMessageConverter extends SimpleMessageConverter {
+
+		private boolean called;
+
+		@Override
+		public Object fromMessage(javax.jms.Message message) throws JMSException, MessageConversionException {
+			if (this.called) {
+				throw new java.lang.IllegalStateException("Converter called twice");
 			}
-		});
-		Message<?> msg = (Message<?>) converter.fromMessage(new StubTextMessage());
-		assertEquals(message.getPayload(), msg.getPayload());
-		assertEquals(true, msg.getHeaders().get("inside"));
+			this.called = true;
+			TextMessage textMessage = (TextMessage) message;
+			return Long.parseLong(textMessage.getText());
+		}
+
 	}
 
 }

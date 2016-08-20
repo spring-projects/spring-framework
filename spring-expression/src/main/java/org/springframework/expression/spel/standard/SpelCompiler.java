@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.SpelNodeImpl;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * A SpelCompiler will take a regular parsed expression and create (and load) a class
@@ -72,7 +73,7 @@ public class SpelCompiler implements Opcodes {
 	// A compiler is created for each classloader, it manages a child class loader of that
 	// classloader and the child is used to load the compiled expressions.
 	private static final Map<ClassLoader, SpelCompiler> compilers =
-			new ConcurrentReferenceHashMap<ClassLoader, SpelCompiler>();
+			new ConcurrentReferenceHashMap<>();
 
 
 	// The child ClassLoader used to load the compiled expression classes
@@ -105,7 +106,7 @@ public class SpelCompiler implements Opcodes {
 			Class<? extends CompiledExpression> clazz = createExpressionClass(expression);
 			if (clazz != null) {
 				try {
-					return clazz.newInstance();
+					return ReflectionUtils.accessibleConstructor(clazz).newInstance();
 				}
 				catch (Throwable ex) {
 					throw new IllegalStateException("Failed to instantiate CompiledExpression", ex);
@@ -134,7 +135,7 @@ public class SpelCompiler implements Opcodes {
 	private Class<? extends CompiledExpression> createExpressionClass(SpelNodeImpl expressionToCompile) {
 		// Create class outline 'spel/ExNNN extends org.springframework.expression.spel.CompiledExpression'
 		String clazzName = "spel/Ex" + getNextSuffix();
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS|ClassWriter.COMPUTE_FRAMES);
+		ClassWriter cw = new ExpressionClassWriter();
 		cw.visit(V1_5, ACC_PUBLIC, clazzName, null, "org/springframework/expression/spel/CompiledExpression", null);
 
 		// Create default constructor
@@ -256,24 +257,37 @@ public class SpelCompiler implements Opcodes {
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException(
-					"Unexpected problem dumping class " + nameToUse + " into " + dumpLocation, ex);
+					"Unexpected problem dumping class '" + nameToUse + "' into " + dumpLocation, ex);
 		}
 	}
 
 
 	/**
-	 * A ChildClassLoader will load the generated compiled expression classes
+	 * A ChildClassLoader will load the generated compiled expression classes.
 	 */
-	public static class ChildClassLoader extends URLClassLoader {
+	private static class ChildClassLoader extends URLClassLoader {
 
 		private static final URL[] NO_URLS = new URL[0];
 
-		public ChildClassLoader(ClassLoader classloader) {
-			super(NO_URLS, classloader);
+		public ChildClassLoader(ClassLoader classLoader) {
+			super(NO_URLS, classLoader);
 		}
 
 		public Class<?> defineClass(String name, byte[] bytes) {
 			return super.defineClass(name, bytes, 0, bytes.length);
+		}
+	}
+
+
+	private class ExpressionClassWriter extends ClassWriter {
+
+		public ExpressionClassWriter() {
+			super(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+		}
+
+		@Override
+		protected ClassLoader getClassLoader() {
+			return ccl;
 		}
 	}
 

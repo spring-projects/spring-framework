@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,7 +147,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				List<String> resultList = new ArrayList<String>();
+				List<String> resultList = new ArrayList<>();
 				resultList.addAll(Arrays.asList(result));
 				for (String beanName : parentResult) {
 					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
@@ -180,7 +180,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
-				List<String> resultList = new ArrayList<String>();
+				List<String> resultList = new ArrayList<>();
 				resultList.addAll(Arrays.asList(result));
 				for (String beanName : parentResult) {
 					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
@@ -223,7 +223,7 @@ public abstract class BeanFactoryUtils {
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
-				List<String> resultList = new ArrayList<String>();
+				List<String> resultList = new ArrayList<>();
 				resultList.addAll(Arrays.asList(result));
 				for (String beanName : parentResult) {
 					if (!resultList.contains(beanName) && !hbf.containsLocalBean(beanName)) {
@@ -257,7 +257,7 @@ public abstract class BeanFactoryUtils {
 			throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map<String, T> result = new LinkedHashMap<String, T>(4);
+		Map<String, T> result = new LinkedHashMap<>(4);
 		result.putAll(lbf.getBeansOfType(type));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
@@ -306,7 +306,7 @@ public abstract class BeanFactoryUtils {
 			throws BeansException {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		Map<String, T> result = new LinkedHashMap<String, T>(4);
+		Map<String, T> result = new LinkedHashMap<>(4);
 		result.putAll(lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit));
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;

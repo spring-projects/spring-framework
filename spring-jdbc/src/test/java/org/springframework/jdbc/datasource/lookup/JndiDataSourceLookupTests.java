@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class JndiDataSourceLookupTests {
+public class JndiDataSourceLookupTests {
 
 	private static final String DATA_SOURCE_NAME = "Love is like a stove, burns you when it's hot";
 
@@ -46,7 +46,7 @@ public final class JndiDataSourceLookupTests {
 		assertSame(expectedDataSource, dataSource);
 	}
 
-	@Test(expected=DataSourceLookupFailureException.class)
+	@Test(expected = DataSourceLookupFailureException.class)
 	public void testNoDataSourceAtJndiLocation() throws Exception {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@Override

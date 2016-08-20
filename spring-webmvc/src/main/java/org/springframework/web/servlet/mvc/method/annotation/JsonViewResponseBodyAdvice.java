@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 
 /**
- * A {@code ResponseBodyAdvice} implementation that adds support for
- * Jackson's {@code @JsonView} annotation declared on a Spring MVC
- * {@code @RequestMapping} or {@code @ExceptionHandler} method.
+ * A {@link ResponseBodyAdvice} implementation that adds support for Jackson's
+ * {@code @JsonView} annotation declared on a Spring MVC {@code @RequestMapping}
+ * or {@code @ExceptionHandler} method.
  *
- * <p>The serialization view specified in the annotation will be passed in to
- * the {@code MappingJackson2HttpMessageConverter} which will then use it to
- * serialize the response body with.
+ * <p>The serialization view specified in the annotation will be passed in to the
+ * {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}
+ * which will then use it to serialize the response body.
  *
  * <p>Note that despite {@code @JsonView} allowing for more than one class to
  * be specified, the use for a response body advice is only supported with
@@ -40,13 +40,14 @@ import org.springframework.http.server.ServerHttpResponse;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ * @see com.fasterxml.jackson.annotation.JsonView
  * @see com.fasterxml.jackson.databind.ObjectMapper#writerWithView(Class)
  */
 public class JsonViewResponseBodyAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-		return (super.supports(returnType, converterType) && returnType.getMethodAnnotation(JsonView.class) != null);
+		return super.supports(returnType, converterType) && returnType.hasMethodAnnotation(JsonView.class);
 	}
 
 	@Override

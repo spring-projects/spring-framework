@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ import org.springframework.util.StringUtils;
  * {@code private} or {@code protected} field access as opposed to
  * {@code public} setter methods for properties in a domain entity.</li>
  * <li>Spring's support for annotations such as
- * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} and
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
+ * {@link javax.inject.Inject @Inject}, and
  * {@link javax.annotation.Resource @Resource} which provides dependency
  * injection for {@code private} or {@code protected} fields, setter methods,
  * and configuration methods.</li>
@@ -59,6 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.5
  * @see ReflectionUtils
+ * @see AopTestUtils
  */
 public class ReflectionTestUtils {
 
@@ -72,10 +74,8 @@ public class ReflectionTestUtils {
 	/**
 	 * Set the {@linkplain Field field} with the given {@code name} on the
 	 * provided {@code targetObject} to the supplied {@code value}.
-	 *
 	 * <p>This method delegates to {@link #setField(Object, String, Object, Class)},
 	 * supplying {@code null} for the {@code type} argument.
-	 *
 	 * @param targetObject the target object on which to set the field; never {@code null}
 	 * @param name the name of the field to set; never {@code null}
 	 * @param value the value to set
@@ -87,10 +87,8 @@ public class ReflectionTestUtils {
 	/**
 	 * Set the {@linkplain Field field} with the given {@code name}/{@code type}
 	 * on the provided {@code targetObject} to the supplied {@code value}.
-	 *
 	 * <p>This method delegates to {@link #setField(Object, Class, String, Object, Class)},
 	 * supplying {@code null} for the {@code targetClass} argument.
-	 *
 	 * @param targetObject the target object on which to set the field; never {@code null}
 	 * @param name the name of the field to set; may be {@code null} if
 	 * {@code type} is specified
@@ -105,10 +103,8 @@ public class ReflectionTestUtils {
 	/**
 	 * Set the static {@linkplain Field field} with the given {@code name} on
 	 * the provided {@code targetClass} to the supplied {@code value}.
-	 *
 	 * <p>This method delegates to {@link #setField(Object, Class, String, Object, Class)},
 	 * supplying {@code null} for the {@code targetObject} and {@code type} arguments.
-	 *
 	 * @param targetClass the target class on which to set the static field;
 	 * never {@code null}
 	 * @param name the name of the field to set; never {@code null}
@@ -123,10 +119,8 @@ public class ReflectionTestUtils {
 	 * Set the static {@linkplain Field field} with the given
 	 * {@code name}/{@code type} on the provided {@code targetClass} to
 	 * the supplied {@code value}.
-	 *
 	 * <p>This method delegates to {@link #setField(Object, Class, String, Object, Class)},
 	 * supplying {@code null} for the {@code targetObject} argument.
-	 *
 	 * @param targetClass the target class on which to set the static field;
 	 * never {@code null}
 	 * @param name the name of the field to set; may be {@code null} if
@@ -144,12 +138,13 @@ public class ReflectionTestUtils {
 	 * Set the {@linkplain Field field} with the given {@code name}/{@code type}
 	 * on the provided {@code targetObject}/{@code targetClass} to the supplied
 	 * {@code value}.
-	 *
+	 * <p>If the supplied {@code targetObject} is a <em>proxy</em>, it will
+	 * be {@linkplain AopTestUtils#getUltimateTargetObject unwrapped} allowing
+	 * the field to be set on the ultimate target of the proxy.
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to set {@code protected},
 	 * {@code private}, and <em>package-private</em> fields.
-	 *
 	 * @param targetObject the target object on which to set the field; may be
 	 * {@code null} if the field is static
 	 * @param targetClass the target class on which to set the field; may
@@ -159,43 +154,43 @@ public class ReflectionTestUtils {
 	 * @param value the value to set
 	 * @param type the type of the field to set; may be {@code null} if
 	 * {@code name} is specified
+	 * @since 4.2
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
 	 * @see ReflectionUtils#setField(Field, Object, Object)
-	 * @since 4.2
+	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	public static void setField(Object targetObject, Class<?> targetClass, String name, Object value, Class<?> type) {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		if (targetClass == null) {
-			targetClass = targetObject.getClass();
-		}
-		Field field = ReflectionUtils.findField(targetClass, name, type);
+		Object ultimateTarget = (targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
 
-		// Inline Assert.notNull() to avoid invoking toString() on a non-null target.
+		if (targetClass == null) {
+			targetClass = ultimateTarget.getClass();
+		}
+
+		Field field = ReflectionUtils.findField(targetClass, name, type);
 		if (field == null) {
 			throw new IllegalArgumentException(String.format(
-				"Could not find field [%s] of type [%s] on target object [%s] or target class [%s]", name, type,
-				targetObject, targetClass));
+					"Could not find field '%s' of type [%s] on %s or target class [%s]", name, type,
+					safeToString(ultimateTarget), targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format(
-				"Setting field [%s] of type [%s] on target object [%s] or target class [%s] to value [%s]", name, type,
-				targetObject, targetClass, value));
+					"Setting field '%s' of type [%s] on %s or target class [%s] to value [%s]", name, type,
+					safeToString(ultimateTarget), targetClass, value));
 		}
 		ReflectionUtils.makeAccessible(field);
-		ReflectionUtils.setField(field, targetObject, value);
+		ReflectionUtils.setField(field, ultimateTarget, value);
 	}
 
 	/**
 	 * Get the value of the {@linkplain Field field} with the given {@code name}
 	 * from the provided {@code targetObject}.
-	 *
 	 * <p>This method delegates to {@link #getField(Object, Class, String)},
 	 * supplying {@code null} for the {@code targetClass} argument.
-	 *
 	 * @param targetObject the target object from which to get the field;
 	 * never {@code null}
 	 * @param name the name of the field to get; never {@code null}
@@ -209,16 +204,14 @@ public class ReflectionTestUtils {
 	/**
 	 * Get the value of the static {@linkplain Field field} with the given
 	 * {@code name} from the provided {@code targetClass}.
-	 *
 	 * <p>This method delegates to {@link #getField(Object, Class, String)},
 	 * supplying {@code null} for the {@code targetObject} argument.
-	 *
 	 * @param targetClass the target class from which to get the static field;
 	 * never {@code null}
 	 * @param name the name of the field to get; never {@code null}
 	 * @return the field's current value
-	 * @see #getField(Object, String)
 	 * @since 4.2
+	 * @see #getField(Object, String)
 	 */
 	public static Object getField(Class<?> targetClass, String name) {
 		return getField(null, targetClass, name);
@@ -227,63 +220,62 @@ public class ReflectionTestUtils {
 	/**
 	 * Get the value of the {@linkplain Field field} with the given {@code name}
 	 * from the provided {@code targetObject}/{@code targetClass}.
-	 *
+	 * <p>If the supplied {@code targetObject} is a <em>proxy</em>, it will
+	 * be {@linkplain AopTestUtils#getUltimateTargetObject unwrapped} allowing
+	 * the field to be retrieved from the ultimate target of the proxy.
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to get {@code protected},
 	 * {@code private}, and <em>package-private</em> fields.
-	 *
 	 * @param targetObject the target object from which to get the field; may be
 	 * {@code null} if the field is static
 	 * @param targetClass the target class from which to get the field; may
 	 * be {@code null} if the field is an instance field
 	 * @param name the name of the field to get; never {@code null}
 	 * @return the field's current value
+	 * @since 4.2
 	 * @see #getField(Object, String)
 	 * @see #getField(Class, String)
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
-	 * @see ReflectionUtils#getField(Field, Object, Object)
-	 * @since 4.2
+	 * @see ReflectionUtils#getField(Field, Object)
+	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	public static Object getField(Object targetObject, Class<?> targetClass, String name) {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		if (targetClass == null) {
-			targetClass = targetObject.getClass();
-		}
-		Field field = ReflectionUtils.findField(targetClass, name);
+		Object ultimateTarget = (targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
 
-		// Inline Assert.notNull() to avoid invoking toString() on a non-null target.
+		if (targetClass == null) {
+			targetClass = ultimateTarget.getClass();
+		}
+
+		Field field = ReflectionUtils.findField(targetClass, name);
 		if (field == null) {
-			throw new IllegalArgumentException(
-				String.format("Could not find field [%s] on target object [%s] or target class [%s]", name,
-					targetObject, targetClass));
+			throw new IllegalArgumentException(String.format("Could not find field '%s' on %s or target class [%s]",
+					name, safeToString(ultimateTarget), targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Getting field [%s] from target object [%s] or target class [%s]", name,
-				targetObject, targetClass));
+			logger.debug(String.format("Getting field '%s' from %s or target class [%s]", name,
+					safeToString(ultimateTarget), targetClass));
 		}
 		ReflectionUtils.makeAccessible(field);
-		return ReflectionUtils.getField(field, targetObject);
+		return ReflectionUtils.getField(field, ultimateTarget);
 	}
 
 	/**
 	 * Invoke the setter method with the given {@code name} on the supplied
 	 * target object with the supplied {@code value}.
-	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> setter methods.
-	 *
 	 * <p>In addition, this method supports JavaBean-style <em>property</em>
 	 * names. For example, if you wish to set the {@code name} property on the
 	 * target object, you may pass either &quot;name&quot; or
 	 * &quot;setName&quot; as the method name.
-	 *
 	 * @param target the target object on which to invoke the specified setter
 	 * method
 	 * @param name the name of the setter method to invoke or the corresponding
@@ -300,17 +292,14 @@ public class ReflectionTestUtils {
 	/**
 	 * Invoke the setter method with the given {@code name} on the supplied
 	 * target object with the supplied {@code value}.
-	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> setter methods.
-	 *
 	 * <p>In addition, this method supports JavaBean-style <em>property</em>
 	 * names. For example, if you wish to set the {@code name} property on the
 	 * target object, you may pass either &quot;name&quot; or
 	 * &quot;setName&quot; as the method name.
-	 *
 	 * @param target the target object on which to invoke the specified setter
 	 * method
 	 * @param name the name of the setter method to invoke or the corresponding
@@ -324,41 +313,44 @@ public class ReflectionTestUtils {
 	public static void invokeSetterMethod(Object target, String name, Object value, Class<?> type) {
 		Assert.notNull(target, "Target object must not be null");
 		Assert.hasText(name, "Method name must not be empty");
-		Class<?>[] paramTypes = (type != null ? new Class<?>[] { type } : null);
+		Class<?>[] paramTypes = (type != null ? new Class<?>[] {type} : null);
 
 		String setterMethodName = name;
 		if (!name.startsWith(SETTER_PREFIX)) {
 			setterMethodName = SETTER_PREFIX + StringUtils.capitalize(name);
 		}
+
 		Method method = ReflectionUtils.findMethod(target.getClass(), setterMethodName, paramTypes);
 		if (method == null && !setterMethodName.equals(name)) {
 			setterMethodName = name;
 			method = ReflectionUtils.findMethod(target.getClass(), setterMethodName, paramTypes);
 		}
-		Assert.notNull(method, "Could not find setter method [" + setterMethodName + "] on target [" + target
-				+ "] with parameter type [" + type + "]");
+		if (method == null) {
+			throw new IllegalArgumentException(String.format(
+					"Could not find setter method '%s' on %s with parameter type [%s]", setterMethodName,
+					safeToString(target), type));
+		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking setter method [" + setterMethodName + "] on target [" + target + "]");
+			logger.debug(String.format("Invoking setter method '%s' on %s with value [%s]", setterMethodName,
+					safeToString(target), value));
 		}
+
 		ReflectionUtils.makeAccessible(method);
-		ReflectionUtils.invokeMethod(method, target, new Object[] { value });
+		ReflectionUtils.invokeMethod(method, target, value);
 	}
 
 	/**
 	 * Invoke the getter method with the given {@code name} on the supplied
 	 * target object with the supplied {@code value}.
-	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> getter methods.
-	 *
 	 * <p>In addition, this method supports JavaBean-style <em>property</em>
 	 * names. For example, if you wish to get the {@code name} property on the
 	 * target object, you may pass either &quot;name&quot; or
 	 * &quot;getName&quot; as the method name.
-	 *
 	 * @param target the target object on which to invoke the specified getter
 	 * method
 	 * @param name the name of the getter method to invoke or the corresponding
@@ -381,10 +373,13 @@ public class ReflectionTestUtils {
 			getterMethodName = name;
 			method = ReflectionUtils.findMethod(target.getClass(), getterMethodName);
 		}
-		Assert.notNull(method, "Could not find getter method [" + getterMethodName + "] on target [" + target + "]");
+		if (method == null) {
+			throw new IllegalArgumentException(String.format(
+					"Could not find getter method '%s' on %s", getterMethodName, safeToString(target)));
+		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Invoking getter method [" + getterMethodName + "] on target [" + target + "]");
+			logger.debug(String.format("Invoking getter method '%s' on %s", getterMethodName, safeToString(target)));
 		}
 		ReflectionUtils.makeAccessible(method);
 		return ReflectionUtils.invokeMethod(method, target);
@@ -393,12 +388,10 @@ public class ReflectionTestUtils {
 	/**
 	 * Invoke the method with the given {@code name} on the supplied target
 	 * object with the supplied arguments.
-	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> methods.
-	 *
 	 * @param target the target object on which to invoke the specified method
 	 * @param name the name of the method to invoke
 	 * @param args the arguments to provide to the method
@@ -421,17 +414,26 @@ public class ReflectionTestUtils {
 			methodInvoker.prepare();
 
 			if (logger.isDebugEnabled()) {
-				logger.debug("Invoking method [" + name + "] on target [" + target + "] with arguments ["
-						+ ObjectUtils.nullSafeToString(args) + "]");
+				logger.debug(String.format("Invoking method '%s' on %s with arguments %s", name, safeToString(target),
+						ObjectUtils.nullSafeToString(args)));
 			}
 
 			return (T) methodInvoker.invoke();
 		}
-		catch (Exception e) {
-			ReflectionUtils.handleReflectionException(e);
+		catch (Exception ex) {
+			ReflectionUtils.handleReflectionException(ex);
+			throw new IllegalStateException("Should never get here");
 		}
+	}
 
-		throw new IllegalStateException("Should never get here");
+	private static String safeToString(Object target) {
+		try {
+			return String.format("target object [%s]", target);
+		}
+		catch (Exception ex) {
+			return String.format("target of type [%s] whose toString() method threw [%s]",
+				(target != null ? target.getClass().getName() : "unknown"), ex);
+		}
 	}
 
 }

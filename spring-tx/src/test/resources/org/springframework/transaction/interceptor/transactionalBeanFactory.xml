@@ -11,7 +11,7 @@
 	<bean id="target" class="org.springframework.tests.sample.beans.DerivedTestBean" lazy-init="true">
 		<property name="name"><value>custom</value></property>
 		<property name="age"><value>666</value></property>
-		<property name="spouse"><ref local="targetDependency"/></property>
+		<property name="spouse"><ref bean="targetDependency"/></property>
 	</bean>
 
 	<bean id="debugInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
@@ -19,7 +19,7 @@
 	<bean id="mockMan" class="org.springframework.transaction.interceptor.PlatformTransactionManagerFacade"/>
 
 	<bean id="txInterceptor" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-		<property name="transactionManager"><ref local="mockMan"/></property>
+		<property name="transactionManager"><ref bean="mockMan"/></property>
 		<property name="transactionAttributeSource">
 			<value>
 				org.springframework.tests.sample.beans.ITestBean.s*=PROPAGATION_MANDATORY
@@ -43,7 +43,7 @@
 
 	<bean id="baseProxyFactory" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
 		  abstract="true">
-		<property name="transactionManager"><ref local="mockMan"/></property>
+		<property name="transactionManager"><ref bean="mockMan"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="s*">PROPAGATION_MANDATORY</prop>
@@ -54,7 +54,7 @@
 	</bean>
 
 	<bean id="proxyFactory2DynamicProxy" parent="baseProxyFactory">
-		<property name="target"><ref local="target"/></property>
+		<property name="target"><ref bean="target"/></property>
 	</bean>
 
 	<!--
@@ -62,40 +62,40 @@
 	-->
 	<bean id="proxyFactory2Cglib" parent="baseProxyFactory">
 		<property name="proxyTargetClass"><value>true</value></property>
-		<property name="target"><ref local="target"/></property>
+		<property name="target"><ref bean="target"/></property>
 	</bean>
 
 	<bean id="proxyFactory2Lazy" parent="baseProxyFactory">
 		<property name="target">
 			<bean class="org.springframework.aop.target.LazyInitTargetSource">
-				<property name="targetBeanName"><idref local="target"/></property>		
+				<property name="targetBeanName"><idref bean="target"/></property>
 			</bean>
 		</property>
 	</bean>
 
 	<bean id="proxyFactory3" parent="baseProxyFactory">
-		<property name="target"><ref local="target"/></property>
+		<property name="target"><ref bean="target"/></property>
 		<property name="proxyTargetClass"><value>true</value></property>
 		<property name="pointcut">
-			<ref local="txnInvocationCounterPointcut"/>
+			<ref bean="txnInvocationCounterPointcut"/>
 		</property>
 		<property name="preInterceptors">
 			<list>
-				<ref local="preInvocationCounterInterceptor"/>
+				<ref bean="preInvocationCounterInterceptor"/>
 			</list>
 		</property>
 		<property name="postInterceptors">
 			<list>
-				<ref local="postInvocationCounterInterceptor"/>
+				<ref bean="postInvocationCounterInterceptor"/>
 			</list>
 		</property>
 	</bean>
 
 	<bean name="cglibNoInterfaces" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="mockMan"/></property>
+		<property name="transactionManager"><ref bean="mockMan"/></property>
 		<property name="target">
 			<bean class="org.springframework.transaction.interceptor.ImplementsNoInterfaces">
-				<property name="dependency"><ref local="targetDependency"/></property>
+				<property name="dependency"><ref bean="targetDependency"/></property>
 			</bean>
 		</property>
 		<property name="transactionAttributes">
@@ -109,13 +109,13 @@
 		The HotSwappableTargetSource is a Type 3 component.
 	-->
 	<bean id="swapper" class="org.springframework.aop.target.HotSwappableTargetSource">
-		<constructor-arg><ref local="target"/></constructor-arg>
+		<constructor-arg><ref bean="target"/></constructor-arg>
 	</bean>
 
 	<bean id="hotSwapped" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-		<property name="transactionManager"><ref local="mockMan"/></property>
+		<property name="transactionManager"><ref bean="mockMan"/></property>
 		<!-- Should automatically pick up the target source, rather than simple target -->
-		<property name="target"><ref local="swapper"/></property>
+		<property name="target"><ref bean="swapper"/></property>
 		<property name="transactionAttributes">
 			<props>
 				<prop key="s*">PROPAGATION_MANDATORY</prop>

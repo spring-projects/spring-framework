@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2015 the original author or authors.
+ * Copyright 2012-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,12 +221,28 @@ public class MvcUriComponentsBuilderTests {
 		assertThat(uriComponents.toUriString(), is("http://localhost/input"));
 	}
 
+	@Test // SPR-14405
+	public void testFromMappingNameWithOptionalParam() throws Exception {
+		UriComponents uriComponents = fromMethodName(ControllerWithMethods.class,
+				"methodWithOptionalParam", new Object[] {null}).build();
+
+		assertThat(uriComponents.toUriString(), is("http://localhost/something/optional-param"));
+	}
+
 	@Test
 	public void testFromMethodCall() {
 		UriComponents uriComponents = fromMethodCall(on(ControllerWithMethods.class).myMethod(null)).build();
 
 		assertThat(uriComponents.toUriString(), startsWith("http://localhost"));
 		assertThat(uriComponents.toUriString(), endsWith("/something/else"));
+	}
+
+ 	@Test
+	public void testFromMethodCallOnSubclass() {
+		UriComponents uriComponents = fromMethodCall(on(ExtendedController.class).myMethod(null)).build();
+
+		assertThat(uriComponents.toUriString(), startsWith("http://localhost"));
+		assertThat(uriComponents.toUriString(), endsWith("/extended/else"));
 	}
 
 	@Test
@@ -304,7 +320,7 @@ public class MvcUriComponentsBuilderTests {
 
 		String mappingName = "PAC#getAddressesForCountry";
 		String url = MvcUriComponentsBuilder.fromMappingName(mappingName).arg(0, "DE").buildAndExpand(123);
-		assertEquals("http://example.org:9999/base/people/123/addresses/DE", url);
+		assertEquals("/base/people/123/addresses/DE", url);
 	}
 
 	@Test
@@ -361,25 +377,25 @@ public class MvcUriComponentsBuilderTests {
 
 	}
 
-	class PersonControllerImpl implements PersonController {
+	private class PersonControllerImpl implements PersonController {
 
 	}
 
 	@RequestMapping("/people/{id}/addresses")
-	static class PersonsAddressesController {
+	private static class PersonsAddressesController {
 
 		@RequestMapping("/{country}")
-		public HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
+		HttpEntity<Void> getAddressesForCountry(@PathVariable String country) {
 			return null;
 		}
 	}
 
 	@RequestMapping({ "/persons", "/people" })
-	class InvalidController {
+	private class InvalidController {
 
 	}
 
-	class UnmappedController {
+	private class UnmappedController {
 
 		@RequestMapping
 		public void unmappedMethod() {
@@ -416,10 +432,20 @@ public class MvcUriComponentsBuilderTests {
 				@RequestParam List<Integer> items, @RequestParam Integer limit) {
 			return null;
 		}
+
+		@RequestMapping("/optional-param")
+		HttpEntity<Void> methodWithOptionalParam(@RequestParam(defaultValue = "") String q) {
+			return null;
+		}
+	}
+
+	@RequestMapping("/extended") @SuppressWarnings("WeakerAccess")
+	static class ExtendedController extends ControllerWithMethods {
+
 	}
 
 	@RequestMapping("/user/{userId}/contacts")
-	static class UserContactController {
+	private static class UserContactController {
 
 		@RequestMapping("/create")
 		public String showCreate(@PathVariable Integer userId) {
@@ -432,7 +458,7 @@ public class MvcUriComponentsBuilderTests {
 		abstract T get(ID id);
 	}
 
-	static class PersonCrudController extends AbstractCrudController<Person, Long> {
+	private static class PersonCrudController extends AbstractCrudController<Person, Long> {
 
 		@RequestMapping(path = "/{id}", method = RequestMethod.GET)
 		public Person get(@PathVariable Long id) {
@@ -441,7 +467,7 @@ public class MvcUriComponentsBuilderTests {
 	}
 
 	@Controller
-	static class MetaAnnotationController {
+	private static class MetaAnnotationController {
 
 		@RequestMapping
 		public void handle() {
@@ -459,7 +485,7 @@ public class MvcUriComponentsBuilderTests {
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
-	@interface PostJson {
+	private @interface PostJson {
 		String[] path() default {};
 	}
 

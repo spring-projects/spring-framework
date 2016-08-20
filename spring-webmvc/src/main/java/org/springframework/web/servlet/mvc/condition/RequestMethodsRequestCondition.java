@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,13 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.CorsUtils;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -35,6 +39,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @since 3.1
  */
 public final class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
+
+	private static final RequestMethodsRequestCondition GET_CONDITION =
+			new RequestMethodsRequestCondition(RequestMethod.GET);
+
 
 	private final Set<RequestMethod> methods;
 
@@ -49,7 +57,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	}
 
 	private RequestMethodsRequestCondition(Collection<RequestMethod> requestMethods) {
-		this.methods = Collections.unmodifiableSet(new LinkedHashSet<RequestMethod>(requestMethods));
+		this.methods = Collections.unmodifiableSet(new LinkedHashSet<>(requestMethods));
 	}
 
 
@@ -81,7 +89,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public RequestMethodsRequestCondition combine(RequestMethodsRequestCondition other) {
-		Set<RequestMethod> set = new LinkedHashSet<RequestMethod>(this.methods);
+		Set<RequestMethod> set = new LinkedHashSet<>(this.methods);
 		set.addAll(other.methods);
 		return new RequestMethodsRequestCondition(set);
 	}
@@ -90,32 +98,55 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * Check if any of the HTTP request methods match the given request and
 	 * return an instance that contains the matching HTTP request method only.
 	 * @param request the current request
-	 * @return the same instance if the condition is empty, a new condition with
-	 * the matched request method, or {@code null} if no request methods match
+	 * @return the same instance if the condition is empty (unless the request
+	 * method is HTTP OPTIONS), a new condition with the matched request method,
+	 * or {@code null} if there is no match or the condition is empty and the
+	 * request method is OPTIONS.
 	 */
 	@Override
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (this.methods.isEmpty()) {
+		if (CorsUtils.isPreFlightRequest(request)) {
+			return matchPreFlight(request);
+		}
+
+		if (getMethods().isEmpty()) {
+			if (RequestMethod.OPTIONS.name().equals(request.getMethod()) &&
+					!DispatcherType.ERROR.equals(request.getDispatcherType())) {
+
+				return null; // No implicit match for OPTIONS (we handle it)
+			}
 			return this;
 		}
-		RequestMethod incomingRequestMethod = getRequestMethod(request);
-		if (incomingRequestMethod != null) {
-			for (RequestMethod method : this.methods) {
-				if (method.equals(incomingRequestMethod)) {
+
+		return matchRequestMethod(request.getMethod());
+	}
+
+	/**
+	 * On a pre-flight request match to the would-be, actual request.
+	 * Hence empty conditions is a match, otherwise try to match to the HTTP
+	 * method in the "Access-Control-Request-Method" header.
+	 */
+	private RequestMethodsRequestCondition matchPreFlight(HttpServletRequest request) {
+		if (getMethods().isEmpty()) {
+			return this;
+		}
+		String expectedMethod = request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+		return matchRequestMethod(expectedMethod);
+	}
+
+	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
+		HttpMethod httpMethod = HttpMethod.resolve(httpMethodValue);
+		if (httpMethod != null) {
+			for (RequestMethod method : getMethods()) {
+				if (httpMethod.matches(method.name())) {
 					return new RequestMethodsRequestCondition(method);
 				}
 			}
+			if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
+				return GET_CONDITION;
+			}
 		}
 		return null;
-	}
-
-	private RequestMethod getRequestMethod(HttpServletRequest request) {
-		try {
-			return RequestMethod.valueOf(request.getMethod());
-		}
-		catch (IllegalArgumentException ex) {
-			return null;
-		}
 	}
 
 	/**
@@ -131,7 +162,18 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public int compareTo(RequestMethodsRequestCondition other, HttpServletRequest request) {
-		return (other.methods.size() - this.methods.size());
+		if (other.methods.size() != this.methods.size()) {
+			return other.methods.size() - this.methods.size();
+		}
+		else if (this.methods.size() == 1) {
+			if (this.methods.contains(RequestMethod.HEAD) && other.methods.contains(RequestMethod.GET)) {
+				return -1;
+			}
+			else if (this.methods.contains(RequestMethod.GET) && other.methods.contains(RequestMethod.HEAD)) {
+				return 1;
+			}
+		}
+		return 0;
 	}
 
 }

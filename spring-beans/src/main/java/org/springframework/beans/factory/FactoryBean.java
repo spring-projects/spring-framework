@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ package org.springframework.beans.factory;
  *
  * <p><b>NB: A bean that implements this interface cannot be used as a
  * normal bean.</b> A FactoryBean is defined in a bean style, but the
- * object exposed for bean references ({@link #getObject()} is always
+ * object exposed for bean references ({@link #getObject()}) is always
  * the object that it creates.
  *
  * <p>FactoryBeans can support singletons and prototypes, and can
@@ -111,10 +111,14 @@ public interface FactoryBean<T> {
 	 * implementations which do not implement this extended interface are
 	 * simply assumed to always return independent instances if the
 	 * {@code isSingleton()} implementation returns {@code false}.
+	 * <p>The default implementation returns {@code true}, since a
+	 * {@code FactoryBean} typically manages a singleton instance.
 	 * @return whether the exposed object is a singleton
 	 * @see #getObject()
 	 * @see SmartFactoryBean#isPrototype()
 	 */
-	boolean isSingleton();
+	default boolean isSingleton() {
+		return true;
+	}
 
 }

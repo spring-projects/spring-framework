@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,12 @@
 package org.springframework.web.servlet.resource;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,90 +30,99 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
-import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
+import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
+import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
- * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance
- * (according to the guidelines of Page Speed, YSlow, etc.) by allowing for flexible cache settings
- * ({@linkplain #setCacheSeconds "cacheSeconds" property}, last-modified support).
+ * {@code HttpRequestHandler} that serves static resources in an optimized way
+ * according to the guidelines of Page Speed, YSlow, etc.
  *
- * <p>The {@linkplain #setLocations "locations" property} takes a list of Spring {@link Resource}
- * locations from which static resources are allowed  to be served by this handler. For a given request,
- * the list of locations will be consulted in order for the presence of the requested resource, and the
- * first found match will be written to the response, with a HTTP Caching headers
- * set as configured. The handler also properly evaluates the {@code Last-Modified} header
- * (if present) so that a {@code 304} status code will be returned as appropriate, avoiding unnecessary
- * overhead for resources that are already cached by the client. The use of {@code Resource} locations
- * allows resource requests to easily be mapped to locations other than the web application root.
- * For example, resources could be served from a classpath location such as
- * "classpath:/META-INF/public-web-resources/", allowing convenient packaging and serving of resources
- * such as a JavaScript library from within jar files.
+ * <p>The {@linkplain #setLocations "locations"} property takes a list of Spring
+ * {@link Resource} locations from which static resources are allowed to
+ * be served by this handler. Resources could be served from a classpath location,
+ * e.g. "classpath:/META-INF/public-web-resources/", allowing convenient packaging
+ * and serving of resources such as .js, .css, and others in jar files.
  *
- * <p>To ensure that users with a primed browser cache get the latest changes to application-specific
- * resources upon deployment of new versions of the application, it is recommended that a version
- * string is used in the URL  mapping pattern that selects this handler. Such patterns can be easily
- * parameterized using Spring EL. See the reference manual for further examples of this approach.
+ * <p>This request handler may also be configured with a
+ * {@link #setResourceResolvers(List) resourcesResolver} and
+ * {@link #setResourceTransformers(List) resourceTransformer} chains to support
+ * arbitrary resolution and transformation of resources being served. By default a
+ * {@link PathResourceResolver} simply finds resources based on the configured
+ * "locations". An application can configure additional resolvers and
+ * transformers such as the {@link VersionResourceResolver} which can resolve
+ * and prepare URLs for resources with a version in the URL.
  *
- * <p>For various front-end needs &mdash; such as ensuring that users with a primed browser cache
- * get the latest changes, or serving variations of resources (e.g., minified versions) &mdash;
- * {@link org.springframework.web.servlet.resource.ResourceResolver}s can be configured.
- *
- * <p>This handler can be configured through use of a
- * {@link org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry}
- * or the {@code <mvc:resources/>} XML configuration element.
+ * <p>This handler also properly evaluates the {@code Last-Modified} header (if
+ * present) so that a {@code 304} status code will be returned as appropriate,
+ * avoiding unnecessary overhead for resources that are already cached by the
+ * client.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 3.0.4
  */
-public class ResourceHttpRequestHandler extends WebContentGenerator implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
+public class ResourceHttpRequestHandler extends WebContentGenerator
+		implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
 
-	private static final String CONTENT_ENCODING = "Content-Encoding";
+	// Servlet 3.1 setContentLengthLong(long) available?
+	private static final boolean contentLengthLongAvailable =
+			ClassUtils.hasMethod(ServletResponse.class, "setContentLengthLong", long.class);
 
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
-	private static final boolean jafPresent = ClassUtils.isPresent(
-			"javax.activation.FileTypeMap", ResourceHttpRequestHandler.class.getClassLoader());
 
+	private final List<Resource> locations = new ArrayList<>(4);
 
-	private final List<Resource> locations = new ArrayList<Resource>(4);
+	private final List<ResourceResolver> resourceResolvers = new ArrayList<>(4);
 
-	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>(4);
+	private final List<ResourceTransformer> resourceTransformers = new ArrayList<>(4);
 
-	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>(4);
+	private ResourceHttpMessageConverter resourceHttpMessageConverter;
+
+	private ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
+
+	private ContentNegotiationManager contentNegotiationManager;
+
+	private final ContentNegotiationManagerFactoryBean cnmFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private CorsConfiguration corsConfiguration;
 
 
 	public ResourceHttpRequestHandler() {
-		super(METHOD_GET, METHOD_HEAD);
-		this.resourceResolvers.add(new PathResourceResolver());
+		super(HttpMethod.GET.name(), HttpMethod.HEAD.name());
 	}
 
 
 	/**
-	 * Set a {@code List} of {@code Resource} paths to use as sources
+	 * Set the {@code List} of {@code Resource} paths to use as sources
 	 * for serving static resources.
 	 */
 	public void setLocations(List<Resource> locations) {
@@ -125,6 +131,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		this.locations.addAll(locations);
 	}
 
+	/**
+	 * Return the {@code List} of {@code Resource} paths to use as sources
+	 * for serving static resources.
+	 */
 	public List<Resource> getLocations() {
 		return this.locations;
 	}
@@ -166,9 +176,87 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		return this.resourceTransformers;
 	}
 
+	/**
+	 * Configure the {@link ResourceHttpMessageConverter} to use.
+	 * <p>By default a {@link ResourceHttpMessageConverter} will be configured.
+	 * @since 4.3
+	 */
+	public void setResourceHttpMessageConverter(ResourceHttpMessageConverter resourceHttpMessageConverter) {
+		this.resourceHttpMessageConverter = resourceHttpMessageConverter;
+	}
+
+	/**
+	 * Return the list of configured resource converters.
+	 * @since 4.3
+	 */
+	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
+		return this.resourceHttpMessageConverter;
+	}
+
+	/**
+	 * Configure the {@link ResourceRegionHttpMessageConverter} to use.
+	 * <p>By default a {@link ResourceRegionHttpMessageConverter} will be configured.
+	 * @since 4.3
+	 */
+	public void setResourceRegionHttpMessageConverter(ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter) {
+		this.resourceRegionHttpMessageConverter = resourceRegionHttpMessageConverter;
+	}
+
+	/**
+	 * Return the list of configured resource region converters.
+	 * @since 4.3
+	 */
+	public ResourceRegionHttpMessageConverter getResourceRegionHttpMessageConverter() {
+		return this.resourceRegionHttpMessageConverter;
+	}
+
+	/**
+	 * Configure a {@code ContentNegotiationManager} to determine the media types
+	 * for resources being served. If the manager contains a path
+	 * extension strategy it will be used to look up the file extension
+	 * of resources being served via
+	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource
+	 * getMediaTypeForResource}. If that fails the check is then expanded
+	 * to use any configured content negotiation strategy against the request.
+	 * <p>By default a {@link ContentNegotiationManagerFactoryBean} with default
+	 * settings is used to create the manager. See the Javadoc of
+	 * {@code ContentNegotiationManagerFactoryBean} for details
+	 * @param contentNegotiationManager the manager to use
+	 * @since 4.3
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
+	 * Return the specified content negotiation manager.
+	 * @since 4.3
+	 */
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return this.contentNegotiationManager;
+	}
+
+	/**
+	 * Specify the CORS configuration for resources served by this handler.
+	 * <p>By default this is not set in which allows cross-origin requests.
+	 */
 	public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
 		this.corsConfiguration = corsConfiguration;
 	}
+
+	/**
+	 * Return the specified CORS configuration.
+	 */
+	@Override
+	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+		return this.corsConfiguration;
+	}
+
+	@Override
+	protected void initServletContext(ServletContext servletContext) {
+		this.cnmFactoryBean.setServletContext(servletContext);
+	}
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -176,26 +264,32 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			logger.warn("Locations list is empty. No resources will be served unless a " +
 					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
 		}
+		if (this.resourceResolvers.isEmpty()) {
+			this.resourceResolvers.add(new PathResourceResolver());
+		}
 		initAllowedLocations();
-	}
-
-	@Override
-	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		return corsConfiguration;
+		if (this.contentNegotiationManager == null) {
+			this.cnmFactoryBean.afterPropertiesSet();
+			this.contentNegotiationManager = this.cnmFactoryBean.getObject();
+		}
+		if (this.resourceHttpMessageConverter == null) {
+			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
+		}
+		if (this.resourceRegionHttpMessageConverter == null) {
+			this.resourceRegionHttpMessageConverter = new ResourceRegionHttpMessageConverter();
+		}
 	}
 
 	/**
-	 * Look for a {@link org.springframework.web.servlet.resource.PathResourceResolver}
-	 * among the {@link #getResourceResolvers() resource resolvers} and configure
-	 * its {@code "allowedLocations"} to match the value of the
-	 * {@link #setLocations(java.util.List) locations} property unless the "allowed
-	 * locations" of the {@code PathResourceResolver} is non-empty.
+	 * Look for a {@code PathResourceResolver} among the configured resource
+	 * resolvers and set its {@code allowedLocations} property (if empty) to
+	 * match the {@link #setLocations locations} configured on this class.
 	 */
 	protected void initAllowedLocations() {
 		if (CollectionUtils.isEmpty(this.locations)) {
 			return;
 		}
-		for (int i = getResourceResolvers().size()-1; i >= 0; i--) {
+		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
 			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
 				PathResourceResolver pathResolver = (PathResourceResolver) getResourceResolvers().get(i);
 				if (ObjectUtils.isEmpty(pathResolver.getAllowedLocations())) {
@@ -222,9 +316,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		checkAndPrepare(request, response);
-
-		// check whether a matching resource exists
+		// For very general mappings (e.g. "/") we need to check 404 first
 		Resource resource = getResource(request);
 		if (resource == null) {
 			logger.trace("No matching resource found - returning 404");
@@ -232,14 +324,25 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			return;
 		}
 
-		// header phase
+		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+			response.setHeader("Allow", getAllowHeader());
+			return;
+		}
+
+		// Supported methods and required session
+		checkRequest(request);
+
+		// Header phase
 		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
 			logger.trace("Resource not modified - returning 304");
 			return;
 		}
 
-		// check the resource's media type
-		MediaType mediaType = getMediaType(resource);
+		// Apply cache settings, if any
+		prepareResponse(response);
+
+		// Check the media type for the resource
+		MediaType mediaType = getMediaType(request, resource);
 		if (mediaType != null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Determined media type '" + mediaType + "' for " + resource);
@@ -251,19 +354,37 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			}
 		}
 
-		// content phase
+		// Content phase
 		if (METHOD_HEAD.equals(request.getMethod())) {
 			setHeaders(response, resource, mediaType);
 			logger.trace("HEAD request - skipping content");
 			return;
 		}
 
+		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
 			setHeaders(response, resource, mediaType);
-			writeContent(response, resource);
+			this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
 		}
 		else {
-			writePartialContent(request, response, resource, mediaType);
+			response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+			ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(request);
+			try {
+				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
+				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+				if (httpRanges.size() == 1) {
+					ResourceRegion resourceRegion = httpRanges.get(0).toResourceRegion(resource);
+					this.resourceRegionHttpMessageConverter.write(resourceRegion, mediaType, outputMessage);
+				}
+				else {
+					this.resourceRegionHttpMessageConverter.write(
+							HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
+				}
+			}
+			catch (IllegalArgumentException ex) {
+				response.setHeader("Content-Range", "bytes */" + resource.contentLength());
+				response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+			}
 		}
 	}
 
@@ -366,7 +487,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 				return true;
 			}
 		}
-		if (path.contains("../")) {
+		if (path.contains("..")) {
 			path = StringUtils.cleanPath(path);
 			if (path.contains("../")) {
 				if (logger.isTraceEnabled()) {
@@ -379,22 +500,38 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	}
 
 	/**
-	 * Determine an appropriate media type for the given resource.
+	 * Determine the media type for the given request and the resource matched
+	 * to it. This implementation first tries to determine the MediaType based
+	 * strictly on the file extension of the Resource via
+	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource}
+	 * and then expands to check against the request via
+	 * {@link ContentNegotiationManager#resolveMediaTypes}.
+	 * @param request the current request
 	 * @param resource the resource to check
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
-	protected MediaType getMediaType(Resource resource) {
+	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
 		MediaType mediaType = null;
-		String mimeType = getServletContext().getMimeType(resource.getFilename());
-		if (StringUtils.hasText(mimeType)) {
-			mediaType = MediaType.parseMediaType(mimeType);
+
+		Class<PathExtensionContentNegotiationStrategy> clazz = PathExtensionContentNegotiationStrategy.class;
+		PathExtensionContentNegotiationStrategy strategy = this.contentNegotiationManager.getStrategy(clazz);
+		if (strategy != null) {
+			mediaType = strategy.getMediaTypeForResource(resource);
 		}
-		if (jafPresent && (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType))) {
-			MediaType jafMediaType = ActivationMediaTypeFactory.getMediaType(resource.getFilename());
-			if (jafMediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(jafMediaType)) {
-				mediaType = jafMediaType;
+
+		if (mediaType == null) {
+			ServletWebRequest webRequest = new ServletWebRequest(request);
+			try {
+				List<MediaType> mediaTypes = getContentNegotiationManager().resolveMediaTypes(webRequest);
+				if (!mediaTypes.isEmpty()) {
+					mediaType = mediaTypes.get(0);
+				}
+			}
+			catch (HttpMediaTypeNotAcceptableException ex) {
+				// Ignore
 			}
 		}
+
 		return mediaType;
 	}
 
@@ -409,198 +546,33 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	protected void setHeaders(HttpServletResponse response, Resource resource, MediaType mediaType) throws IOException {
 		long length = resource.contentLength();
 		if (length > Integer.MAX_VALUE) {
-			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
+			if (contentLengthLongAvailable) {
+				response.setContentLengthLong(length);
+			}
+			else {
+				response.setHeader(HttpHeaders.CONTENT_LENGTH, Long.toString(length));
+			}
 		}
-		response.setContentLength((int) length);
+		else {
+			response.setContentLength((int) length);
+		}
 
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
-
 		if (resource instanceof EncodedResource) {
-			response.setHeader(CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
+			response.setHeader(HttpHeaders.CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
 		}
-
+		if (resource instanceof VersionedResource) {
+			response.setHeader(HttpHeaders.ETAG, "\"" + ((VersionedResource) resource).getVersion() + "\"");
+		}
 		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
-	}
-
-	/**
-	 * Write the actual content out to the given servlet response,
-	 * streaming the resource's content.
-	 * @param response current servlet response
-	 * @param resource the identified resource (never {@code null})
-	 * @throws IOException in case of errors while writing the content
-	 */
-	protected void writeContent(HttpServletResponse response, Resource resource) throws IOException {
-		InputStream in = resource.getInputStream();
-		try {
-			StreamUtils.copy(in, response.getOutputStream());
-		}
-		finally {
-			try {
-				in.close();
-			}
-			catch (IOException ex) {
-				// ignore
-			}
-		}
-	}
-
-	/**
-	 * Write parts of the resource as indicated by the request {@code Range} header.
-	 * @param request current servlet request
-	 * @param response current servlet response
-	 * @param resource the identified resource (never {@code null})
-	 * @param contentType the content type
-	 * @throws IOException in case of errors while writing the content
-	 */
-	protected void writePartialContent(HttpServletRequest request, HttpServletResponse response,
-			Resource resource, MediaType contentType) throws IOException {
-
-		long length = resource.contentLength();
-
-		List<HttpRange> ranges;
-		try {
-			HttpHeaders headers = new ServletServerHttpRequest(request).getHeaders();
-			ranges = headers.getRange();
-		}
-		catch (IllegalArgumentException ex) {
-			response.addHeader("Content-Range", "bytes */" + length);
-			response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-            return;
-		}
-
-		response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-
-		if (ranges.size() == 1) {
-			HttpRange range = ranges.get(0);
-
-			long start = range.getRangeStart(length);
-			long end = range.getRangeEnd(length);
-			long rangeLength = end - start + 1;
-
-			setHeaders(response, resource, contentType);
-			response.addHeader("Content-Range", "bytes " + start + "-" + end + "/" + length);
-            response.setContentLength((int) rangeLength);
-
-			InputStream in = resource.getInputStream();
-			try {
-				copyRange(in, response.getOutputStream(), start, end);
-			}
-			finally {
-				try {
-					in.close();
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-			}
-		}
-		else {
-			String boundaryString = MimeTypeUtils.generateMultipartBoundaryString();
-			response.setContentType("multipart/byteranges; boundary=" + boundaryString);
-
-			ServletOutputStream out = response.getOutputStream();
-
-			for (HttpRange range : ranges) {
-				long start = range.getRangeStart(length);
-				long end = range.getRangeEnd(length);
-
-				InputStream in = resource.getInputStream();
-
-                // Writing MIME header.
-                out.println();
-                out.println("--" + boundaryString);
-                if (contentType != null) {
-	                out.println("Content-Type: " + contentType);
-                }
-                out.println("Content-Range: bytes " + start + "-" + end + "/" + length);
-                out.println();
-
-                // Printing content
-                copyRange(in, out, start, end);
-			}
-			out.println();
-            out.print("--" + boundaryString + "--");
-		}
-	}
-
-	private void copyRange(InputStream in, OutputStream out, long start, long end) throws IOException {
-
-		long skipped = in.skip(start);
-
-		if (skipped < start) {
-			throw new IOException("Skipped only " + skipped + " bytes out of " + start + " required.");
-		}
-
-		long bytesToCopy = end - start + 1;
-
-		byte buffer[] = new byte[StreamUtils.BUFFER_SIZE];
-		while (bytesToCopy > 0) {
-			int bytesRead = in.read(buffer);
-			if (bytesRead <= bytesToCopy) {
-				out.write(buffer, 0, bytesRead);
-				bytesToCopy -= bytesRead;
-			}
-			else {
-				out.write(buffer, 0, (int) bytesToCopy);
-				bytesToCopy = 0;
-			}
-			if (bytesRead < buffer.length) {
-				break;
-			}
-		}
 	}
 
 
 	@Override
 	public String toString() {
-		return "ResourceHttpRequestHandler [locations=" +
-				getLocations() + ", resolvers=" + getResourceResolvers() + "]";
-	}
-
-
-	/**
-	 * Inner class to avoid a hard-coded JAF dependency.
-	 */
-	private static class ActivationMediaTypeFactory {
-
-		private static final FileTypeMap fileTypeMap;
-
-		static {
-			fileTypeMap = loadFileTypeMapFromContextSupportModule();
-		}
-
-		private static FileTypeMap loadFileTypeMapFromContextSupportModule() {
-			// See if we can find the extended mime.types from the context-support module...
-			Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
-			if (mappingLocation.exists()) {
-				InputStream inputStream = null;
-				try {
-					inputStream = mappingLocation.getInputStream();
-					return new MimetypesFileTypeMap(inputStream);
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-				finally {
-					if (inputStream != null) {
-						try {
-							inputStream.close();
-						}
-						catch (IOException ex) {
-							// ignore
-						}
-					}
-				}
-			}
-			return FileTypeMap.getDefaultFileTypeMap();
-		}
-
-		public static MediaType getMediaType(String filename) {
-			String mediaType = fileTypeMap.getContentType(filename);
-			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
-		}
+		return "ResourceHttpRequestHandler [locations=" + getLocations() + ", resolvers=" + getResourceResolvers() + "]";
 	}
 
 }

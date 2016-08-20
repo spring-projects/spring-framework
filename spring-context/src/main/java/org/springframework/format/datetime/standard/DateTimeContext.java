@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.TimeZone;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
-import org.springframework.lang.UsesJava8;
 
 /**
  * A context that holds user-specific <code>java.time</code> (JSR-310) settings
@@ -35,7 +34,6 @@ import org.springframework.lang.UsesJava8;
  * @since 4.0
  * @see DateTimeContextHolder
  */
-@UsesJava8
 public class DateTimeContext {
 
 	private Chronology chronology;

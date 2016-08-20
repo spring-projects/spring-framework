@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ abstract class ConfigurationClassUtils {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassUtils.class);
 
-	private static final Set<String> candidateIndicators = new HashSet<String>(4);
+	private static final Set<String> candidateIndicators = new HashSet<>(4);
 
 	static {
 		candidateIndicators.add(Component.class.getName());
@@ -108,22 +108,23 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
+		if (isFullConfigurationCandidate(metadata)) {
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
+		}
+		else if (isLiteConfigurationCandidate(metadata)) {
+			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
+		}
+		else {
+			return false;
+		}
+
+		// It's a full or lite configuration candidate... Let's determine the order value, if any.
 		Map<String, Object> orderAttributes = metadata.getAnnotationAttributes(Order.class.getName());
 		if (orderAttributes != null) {
 			beanDef.setAttribute(ORDER_ATTRIBUTE, orderAttributes.get(AnnotationUtils.VALUE));
 		}
 
-		if (isFullConfigurationCandidate(metadata)) {
-			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
-			return true;
-		}
-		else if (isLiteConfigurationCandidate(metadata)) {
-			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
-			return true;
-		}
-		else {
-			return false;
-		}
+		return true;
 	}
 
 	/**
@@ -161,12 +162,24 @@ abstract class ConfigurationClassUtils {
 		if (metadata.isInterface()) {
 			return false;
 		}
+
+		// Any of the typical annotations found?
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
 			}
 		}
-		return metadata.hasAnnotatedMethods(Bean.class.getName());
+
+		// Finally, let's look for @Bean methods...
+		try {
+			return metadata.hasAnnotatedMethods(Bean.class.getName());
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to introspect @Bean methods on class [" + metadata.getClassName() + "]: " + ex);
+			}
+			return false;
+		}
 	}
 
 	/**
@@ -191,6 +204,7 @@ abstract class ConfigurationClassUtils {
 	 * @param beanDef the bean definition to check
 	 * @return the {@link @Order} annotation value on the configuration class,
 	 * or {@link Ordered#LOWEST_PRECEDENCE} if none declared
+	 * @since 4.2
 	 */
 	public static int getOrder(BeanDefinition beanDef) {
 		Integer order = (Integer) beanDef.getAttribute(ORDER_ATTRIBUTE);

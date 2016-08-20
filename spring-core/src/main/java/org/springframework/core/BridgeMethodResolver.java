@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class BridgeMethodResolver {
 			return bridgeMethod;
 		}
 		// Gather all methods with matching name and parameter size.
-		List<Method> candidateMethods = new ArrayList<Method>();
+		List<Method> candidateMethods = new ArrayList<>();
 		Method[] methods = ReflectionUtils.getAllDeclaredMethods(bridgeMethod.getDeclaringClass());
 		for (Method candidateMethod : methods) {
 			if (isBridgedCandidateFor(candidateMethod, bridgeMethod)) {
@@ -93,7 +93,7 @@ public abstract class BridgeMethodResolver {
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
 		return (!candidateMethod.isBridge() && !candidateMethod.equals(bridgeMethod) &&
 				candidateMethod.getName().equals(bridgeMethod.getName()) &&
-				candidateMethod.getParameterTypes().length == bridgeMethod.getParameterTypes().length);
+				candidateMethod.getParameterCount() == bridgeMethod.getParameterCount());
 	}
 
 	/**
@@ -141,7 +141,7 @@ public abstract class BridgeMethodResolver {
 	private static Method findGenericDeclaration(Method bridgeMethod) {
 		// Search parent types for method that has same signature as bridge.
 		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
-		while (superclass != null && !Object.class.equals(superclass)) {
+		while (superclass != null && Object.class != superclass) {
 			Method method = searchForMatch(superclass, bridgeMethod);
 			if (method != null && !method.isBridge()) {
 				return method;

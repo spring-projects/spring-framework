@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.web.servlet.view.json.AbstractJackson2View;
 
 /**
  * Spring MVC {@link View} that renders XML content by serializing the model for the current request
- * using <a href="http://jackson.codehaus.org/">Jackson 2's</a> {@link XmlMapper}.
+ * using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link XmlMapper}.
  *
  * <p>The Object to be serialized is supplied as a parameter in the model. The first serializable
  * entry is used. Users can either specify a specific entry in the model via the
@@ -36,7 +36,7 @@ import org.springframework.web.servlet.view.json.AbstractJackson2View;
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *
- * <p>Compatible with Jackson 2.1 and higher.
+ * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
  * @author Sebastien Deleuze
  * @since 4.1
@@ -58,6 +58,14 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 		super(Jackson2ObjectMapperBuilder.xml().build(), DEFAULT_CONTENT_TYPE);
 	}
 
+	/**
+	 * Construct a new {@code MappingJackson2XmlView} using the provided {@link XmlMapper}
+	 * and setting the content type to {@code application/xml}.
+	 * @since 4.2.1
+	 */
+	public MappingJackson2XmlView(XmlMapper xmlMapper) {
+		super(xmlMapper, DEFAULT_CONTENT_TYPE);
+	}
 
 	/**
 	 * {@inheritDoc}

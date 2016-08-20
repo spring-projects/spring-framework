@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ public class MethodReference extends SpelNodeImpl {
 		for (int i = 0; i < arguments.length; i++) {
 			// Make the root object the active context again for evaluating the parameter expressions
 			try {
-				state.pushActiveContextObject(state.getRootContextObject());
+				state.pushActiveContextObject(state.getScopeRootContextObject());
 				arguments[i] = this.children[i].getValueInternal(state).getValue();
 			}
 			finally {
@@ -161,7 +161,7 @@ public class MethodReference extends SpelNodeImpl {
 	}
 
 	private List<TypeDescriptor> getArgumentTypes(Object... arguments) {
-		List<TypeDescriptor> descriptors = new ArrayList<TypeDescriptor>(arguments.length);
+		List<TypeDescriptor> descriptors = new ArrayList<>(arguments.length);
 		for (Object argument : arguments) {
 			descriptors.add(TypeDescriptor.forObject(argument));
 		}
@@ -287,35 +287,40 @@ public class MethodReference extends SpelNodeImpl {
 			throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
 		}
 
-		ReflectiveMethodExecutor methodExecutor = (ReflectiveMethodExecutor)executorToCheck.get();
+		ReflectiveMethodExecutor methodExecutor = (ReflectiveMethodExecutor) executorToCheck.get();
 		Method method = methodExecutor.getMethod();
 		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
 		String descriptor = cf.lastDescriptor();
 
-		if (descriptor == null && !isStaticMethod) {
-			cf.loadTarget(mv);
+		if (descriptor == null) {
+			if (!isStaticMethod) {
+				// Nothing on the stack but something is needed
+				cf.loadTarget(mv);
+			}
+		}
+		else {
+			if (isStaticMethod) {
+				// Something on the stack when nothing is needed
+				mv.visitInsn(POP);
+			}
 		}
 		
 		if (CodeFlow.isPrimitive(descriptor)) {
 			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}
 
-		boolean itf = method.getDeclaringClass().isInterface();
-		String methodDeclaringClassSlashedDescriptor = null;
-		if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-			methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.', '/');
-		}
-		else {
-			methodDeclaringClassSlashedDescriptor = methodExecutor.getPublicDeclaringClass().getName().replace('.', '/');			
-		}
+		String classDesc = (Modifier.isPublic(method.getDeclaringClass().getModifiers()) ?
+				method.getDeclaringClass().getName().replace('.', '/') :
+				methodExecutor.getPublicDeclaringClass().getName().replace('.', '/'));
 		if (!isStaticMethod) {
-			if (descriptor == null || !descriptor.substring(1).equals(methodDeclaringClassSlashedDescriptor)) {
-				CodeFlow.insertCheckCast(mv, "L"+ methodDeclaringClassSlashedDescriptor);
+			if (descriptor == null || !descriptor.substring(1).equals(classDesc)) {
+				CodeFlow.insertCheckCast(mv, "L" + classDesc);
 			}
 		}
-		generateCodeForArguments(mv, cf, method, children);		
-		mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,
-				methodDeclaringClassSlashedDescriptor, method.getName(), CodeFlow.createSignatureDescriptor(method), itf);
+
+		generateCodeForArguments(mv, cf, method, this.children);
+		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, method.getName(),
+				CodeFlow.createSignatureDescriptor(method), method.getDeclaringClass().isInterface());
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 
@@ -376,7 +381,7 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		public boolean isSuitable(Object value, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
-			return ((this.staticClass == null || this.staticClass.equals(value)) &&
+			return ((this.staticClass == null || this.staticClass == value) &&
 					this.target.equals(target) && this.argumentTypes.equals(argumentTypes));
 		}
 

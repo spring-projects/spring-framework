@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.mockito.Mockito.*;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("unchecked")
 public class ListenableFutureTaskTests {
 
 	@Test
@@ -39,7 +40,7 @@ public class ListenableFutureTaskTests {
 				return s;
 			}
 		};
-		ListenableFutureTask<String> task = new ListenableFutureTask<String>(callable);
+		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
 		task.addCallback(new ListenableFutureCallback<String>() {
 			@Override
 			public void onSuccess(String result) {
@@ -62,7 +63,7 @@ public class ListenableFutureTaskTests {
 				throw new IOException(s);
 			}
 		};
-		ListenableFutureTask<String> task = new ListenableFutureTask<String>(callable);
+		ListenableFutureTask<String> task = new ListenableFutureTask<>(callable);
 		task.addCallback(new ListenableFutureCallback<String>() {
 			@Override
 			public void onSuccess(String result) {

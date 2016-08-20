@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * as it can easily be mocked or stubbed.
  *
  * @author Thomas Risberg
+ * @author Stephane Nicoll
  * @since 2.5
  */
 public interface SimpleJdbcCallOperations {
@@ -99,6 +100,13 @@ public interface SimpleJdbcCallOperations {
 	 * @return the instance of this SimpleJdbcCall
 	 */
 	SimpleJdbcCallOperations withoutProcedureColumnMetaDataAccess();
+
+	/**
+	 * Indicates that parameters should be bound by name.
+	 * @return the instance of this SimpleJdbcCall
+	 * @since 4.2
+	 */
+	SimpleJdbcCallOperations withNamedBinding();
 
 
 	/**

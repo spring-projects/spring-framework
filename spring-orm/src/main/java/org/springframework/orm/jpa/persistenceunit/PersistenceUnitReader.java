@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.util.xml.SimpleSaxErrorHandler;
  * @author Juergen Hoeller
  * @since 2.0
  */
-class PersistenceUnitReader {
+final class PersistenceUnitReader {
 
 	private static final String PERSISTENCE_VERSION = "version";
 
@@ -84,7 +84,7 @@ class PersistenceUnitReader {
 	private static final String META_INF = "META-INF";
 
 
-	private final Log logger = LogFactory.getLog(getClass());
+	private static final Log logger = LogFactory.getLog(PersistenceUnitReader.class);
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
@@ -121,7 +121,7 @@ class PersistenceUnitReader {
 	 */
 	public SpringPersistenceUnitInfo[] readPersistenceUnitInfos(String[] persistenceXmlLocations) {
 		ErrorHandler handler = new SimpleSaxErrorHandler(logger);
-		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
+		List<SpringPersistenceUnitInfo> infos = new LinkedList<>();
 		String resourceLocation = null;
 		try {
 			for (String location : persistenceXmlLocations) {
@@ -183,47 +183,6 @@ class PersistenceUnitReader {
 		}
 
 		return infos;
-	}
-
-	/**
-	 * Determine the persistence unit root URL based on the given resource
-	 * (which points to the {@code persistence.xml} file we're reading).
-	 * @param resource the resource to check
-	 * @return the corresponding persistence unit root URL
-	 * @throws IOException if the checking failed
-	 */
-	protected URL determinePersistenceUnitRootUrl(Resource resource) throws IOException {
-		URL originalURL = resource.getURL();
-
-		// If we get an archive, simply return the jar URL (section 6.2 from the JPA spec)
-		if (ResourceUtils.isJarURL(originalURL)) {
-			return ResourceUtils.extractJarFileURL(originalURL);
-		}
-
-		// check META-INF folder
-		String urlToString = originalURL.toExternalForm();
-		if (!urlToString.contains(META_INF)) {
-			if (logger.isInfoEnabled()) {
-				logger.info(resource.getFilename() +
-						" should be located inside META-INF directory; cannot determine persistence unit root URL for " +
-						resource);
-			}
-			return null;
-		}
-		if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/') - (1 + META_INF.length())) {
-			if (logger.isInfoEnabled()) {
-				logger.info(resource.getFilename() +
-						" is not located in the root of META-INF directory; cannot determine persistence unit root URL for " +
-						resource);
-			}
-			return null;
-		}
-
-		String persistenceUnitRoot = urlToString.substring(0, urlToString.lastIndexOf(META_INF));
-		if (persistenceUnitRoot.endsWith("/")) {
-			persistenceUnitRoot = persistenceUnitRoot.substring(0, persistenceUnitRoot.length() - 1);
-		}
-		return new URL(persistenceUnitRoot);
 	}
 
 	/**
@@ -363,6 +322,48 @@ class PersistenceUnitReader {
 				}
 			}
 		}
+	}
+
+
+	/**
+	 * Determine the persistence unit root URL based on the given resource
+	 * (which points to the {@code persistence.xml} file we're reading).
+	 * @param resource the resource to check
+	 * @return the corresponding persistence unit root URL
+	 * @throws IOException if the checking failed
+	 */
+	static URL determinePersistenceUnitRootUrl(Resource resource) throws IOException {
+		URL originalURL = resource.getURL();
+
+		// If we get an archive, simply return the jar URL (section 6.2 from the JPA spec)
+		if (ResourceUtils.isJarURL(originalURL)) {
+			return ResourceUtils.extractJarFileURL(originalURL);
+		}
+
+		// Check META-INF folder
+		String urlToString = originalURL.toExternalForm();
+		if (!urlToString.contains(META_INF)) {
+			if (logger.isInfoEnabled()) {
+				logger.info(resource.getFilename() +
+						" should be located inside META-INF directory; cannot determine persistence unit root URL for " +
+						resource);
+			}
+			return null;
+		}
+		if (urlToString.lastIndexOf(META_INF) == urlToString.lastIndexOf('/') - (1 + META_INF.length())) {
+			if (logger.isInfoEnabled()) {
+				logger.info(resource.getFilename() +
+						" is not located in the root of META-INF directory; cannot determine persistence unit root URL for " +
+						resource);
+			}
+			return null;
+		}
+
+		String persistenceUnitRoot = urlToString.substring(0, urlToString.lastIndexOf(META_INF));
+		if (persistenceUnitRoot.endsWith("/")) {
+			persistenceUnitRoot = persistenceUnitRoot.substring(0, persistenceUnitRoot.length() - 1);
+		}
+		return new URL(persistenceUnitRoot);
 	}
 
 }

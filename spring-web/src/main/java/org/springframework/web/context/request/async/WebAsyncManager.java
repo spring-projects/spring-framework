@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.RejectedExecutionException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -78,10 +79,10 @@ public final class WebAsyncManager {
 	private Object[] concurrentResultContext;
 
 	private final Map<Object, CallableProcessingInterceptor> callableInterceptors =
-			new LinkedHashMap<Object, CallableProcessingInterceptor>();
+			new LinkedHashMap<>();
 
 	private final Map<Object, DeferredResultProcessingInterceptor> deferredResultInterceptors =
-			new LinkedHashMap<Object, DeferredResultProcessingInterceptor>();
+			new LinkedHashMap<>();
 
 
 	/**
@@ -104,7 +105,6 @@ public final class WebAsyncManager {
 	 */
 	public void setAsyncWebRequest(final AsyncWebRequest asyncWebRequest) {
 		Assert.notNull(asyncWebRequest, "AsyncWebRequest must not be null");
-		Assert.state(!isConcurrentHandlingStarted(), "Can't set AsyncWebRequest with concurrent handling in progress");
 		this.asyncWebRequest = asyncWebRequest;
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
 			@Override
@@ -278,7 +278,7 @@ public final class WebAsyncManager {
 			this.taskExecutor = executor;
 		}
 
-		List<CallableProcessingInterceptor> interceptors = new ArrayList<CallableProcessingInterceptor>();
+		List<CallableProcessingInterceptor> interceptors = new ArrayList<>();
 		interceptors.add(webAsyncTask.getInterceptor());
 		interceptors.addAll(this.callableInterceptors.values());
 		interceptors.add(timeoutCallableInterceptor);
@@ -306,24 +306,30 @@ public final class WebAsyncManager {
 
 		interceptorChain.applyBeforeConcurrentHandling(this.asyncWebRequest, callable);
 		startAsyncProcessing(processingContext);
-
-		this.taskExecutor.submit(new Runnable() {
-			@Override
-			public void run() {
-				Object result = null;
-				try {
-					interceptorChain.applyPreProcess(asyncWebRequest, callable);
-					result = callable.call();
+		try {
+			this.taskExecutor.submit(new Runnable() {
+				@Override
+				public void run() {
+					Object result = null;
+					try {
+						interceptorChain.applyPreProcess(asyncWebRequest, callable);
+						result = callable.call();
+					}
+					catch (Throwable ex) {
+						result = ex;
+					}
+					finally {
+						result = interceptorChain.applyPostProcess(asyncWebRequest, callable, result);
+					}
+					setConcurrentResultAndDispatch(result);
 				}
-				catch (Throwable ex) {
-					result = ex;
-				}
-				finally {
-					result = interceptorChain.applyPostProcess(asyncWebRequest, callable, result);
-				}
-				setConcurrentResultAndDispatch(result);
-			}
-		});
+			});
+		}
+		catch (RejectedExecutionException ex) {
+			Object result = interceptorChain.applyPostProcess(this.asyncWebRequest, callable, ex);
+			setConcurrentResultAndDispatch(result);
+			throw ex;
+		}
 	}
 
 	private void setConcurrentResultAndDispatch(Object result) {
@@ -372,7 +378,7 @@ public final class WebAsyncManager {
 			this.asyncWebRequest.setTimeout(timeout);
 		}
 
-		List<DeferredResultProcessingInterceptor> interceptors = new ArrayList<DeferredResultProcessingInterceptor>();
+		List<DeferredResultProcessingInterceptor> interceptors = new ArrayList<>();
 		interceptors.add(deferredResult.getInterceptor());
 		interceptors.addAll(this.deferredResultInterceptors.values());
 		interceptors.add(timeoutDeferredResultInterceptor);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.test.web.servlet.result;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.Cookie;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -42,36 +42,31 @@ import org.springframework.web.servlet.ModelAndView;
 import static org.junit.Assert.*;
 
 /**
- * Tests for {@link PrintingResultHandler}.
+ * Unit tests for {@link PrintingResultHandler}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
+ * @see org.springframework.test.web.servlet.samples.standalone.resulthandlers.PrintingResultHandlerSmokeTests
  */
 public class PrintingResultHandlerTests {
 
-	private TestPrintingResultHandler handler;
+	private final TestPrintingResultHandler handler = new TestPrintingResultHandler();
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/") {
+		@Override
+		public boolean isAsyncStarted() {
+			return false;
+		}
+	};
 
-	private MockHttpServletResponse response;
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private StubMvcResult mvcResult;
+	private final StubMvcResult mvcResult = new StubMvcResult(this.request, null, null,
+			null, null, null, this.response);
 
-
-	@Before
-	public void setup() {
-		this.handler = new TestPrintingResultHandler();
-		this.request = new MockHttpServletRequest("GET", "/") {
-			@Override
-			public boolean isAsyncStarted() {
-				return false;
-			}
-		};
-		this.response = new MockHttpServletResponse();
-		this.mvcResult = new StubMvcResult(this.request, null, null, null, null, null, this.response);
-	}
 
 	@Test
-	public void testPrintRequest() throws Exception {
+	public void printRequest() throws Exception {
 		this.request.addParameter("param", "paramValue");
 		this.request.addHeader("header", "headerValue");
 
@@ -80,7 +75,7 @@ public class PrintingResultHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
 
-		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("param", "paramValue");
 
 		assertValue("MockHttpServletRequest", "HTTP Method", this.request.getMethod());
@@ -91,7 +86,15 @@ public class PrintingResultHandlerTests {
 
 	@Test
 	@SuppressWarnings("deprecation")
-	public void testPrintResponse() throws Exception {
+	public void printResponse() throws Exception {
+		Cookie enigmaCookie = new Cookie("enigma", "42");
+		enigmaCookie.setComment("This is a comment");
+		enigmaCookie.setHttpOnly(true);
+		enigmaCookie.setMaxAge(1234);
+		enigmaCookie.setDomain(".example.com");
+		enigmaCookie.setPath("/crumbs");
+		enigmaCookie.setSecure(true);
+
 		this.response.setStatus(400, "error");
 		this.response.addHeader("header", "headerValue");
 		this.response.setContentType("text/plain");
@@ -99,6 +102,7 @@ public class PrintingResultHandlerTests {
 		this.response.setForwardedUrl("redirectFoo");
 		this.response.sendRedirect("/redirectFoo");
 		this.response.addCookie(new Cookie("cookie", "cookieValue"));
+		this.response.addCookie(enigmaCookie);
 
 		this.handler.handle(this.mvcResult);
 
@@ -107,17 +111,30 @@ public class PrintingResultHandlerTests {
 		headers.setContentType(MediaType.TEXT_PLAIN);
 		headers.setLocation(new URI("/redirectFoo"));
 
-		assertValue("MockHttpServletResponse", "Status", this.response.getStatus());
-		assertValue("MockHttpServletResponse", "Error message", response.getErrorMessage());
-		assertValue("MockHttpServletResponse", "Headers", headers);
-		assertValue("MockHttpServletResponse", "Content type", this.response.getContentType());
-		assertValue("MockHttpServletResponse", "Body", this.response.getContentAsString());
-		assertValue("MockHttpServletResponse", "Forwarded URL", this.response.getForwardedUrl());
-		assertValue("MockHttpServletResponse", "Redirected URL", this.response.getRedirectedUrl());
+		String heading = "MockHttpServletResponse";
+		assertValue(heading, "Status", this.response.getStatus());
+		assertValue(heading, "Error message", response.getErrorMessage());
+		assertValue(heading, "Headers", headers);
+		assertValue(heading, "Content type", this.response.getContentType());
+		assertValue(heading, "Body", this.response.getContentAsString());
+		assertValue(heading, "Forwarded URL", this.response.getForwardedUrl());
+		assertValue(heading, "Redirected URL", this.response.getRedirectedUrl());
+
+		Map<String, Map<String, Object>> printedValues = this.handler.getPrinter().printedValues;
+		String[] cookies = (String[]) printedValues.get(heading).get("Cookies");
+		assertEquals(2, cookies.length);
+		String cookie1 = cookies[0];
+		String cookie2 = cookies[1];
+		assertTrue(cookie1.startsWith("[" + Cookie.class.getSimpleName()));
+		assertTrue(cookie1.contains("name = 'cookie', value = 'cookieValue'"));
+		assertTrue(cookie1.endsWith("]"));
+		assertTrue(cookie2.startsWith("[" + Cookie.class.getSimpleName()));
+		assertTrue(cookie2.contains("name = 'enigma', value = '42', comment = 'This is a comment', domain = '.example.com', maxAge = 1234, path = '/crumbs', secure = true, version = 0, httpOnly = true"));
+		assertTrue(cookie2.endsWith("]"));
 	}
 
 	@Test
-	public void testPrintHandlerNull() throws Exception {
+	public void printHandlerNull() throws Exception {
 		StubMvcResult mvcResult = new StubMvcResult(this.request, null, null, null, null, null, this.response);
 		this.handler.handle(mvcResult);
 
@@ -125,7 +142,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void testPrintHandler() throws Exception {
+	public void printHandler() throws Exception {
 		this.mvcResult.setHandler(new Object());
 		this.handler.handle(this.mvcResult);
 
@@ -133,7 +150,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void testPrintHandlerMethod() throws Exception {
+	public void printHandlerMethod() throws Exception {
 		HandlerMethod handlerMethod = new HandlerMethod(this, "handle");
 		this.mvcResult.setHandler(handlerMethod);
 		this.handler.handle(mvcResult);
@@ -143,14 +160,14 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void testResolvedExceptionNull() throws Exception {
+	public void resolvedExceptionNull() throws Exception {
 		this.handler.handle(this.mvcResult);
 
 		assertValue("Resolved Exception", "Type", null);
 	}
 
 	@Test
-	public void testResolvedException() throws Exception {
+	public void resolvedException() throws Exception {
 		this.mvcResult.setResolvedException(new Exception());
 		this.handler.handle(this.mvcResult);
 
@@ -158,7 +175,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void testModelAndViewNull() throws Exception {
+	public void modelAndViewNull() throws Exception {
 		this.handler.handle(this.mvcResult);
 
 		assertValue("ModelAndView", "View name", null);
@@ -167,7 +184,7 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void testModelAndView() throws Exception {
+	public void modelAndView() throws Exception {
 		BindException bindException = new BindException(new Object(), "target");
 		bindException.reject("errorCode");
 
@@ -186,14 +203,14 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void testFlashMapNull() throws Exception {
+	public void flashMapNull() throws Exception {
 		this.handler.handle(mvcResult);
 
 		assertValue("FlashMap", "Type", null);
 	}
 
 	@Test
-	public void testFlashMap() throws Exception {
+	public void flashMap() throws Exception {
 		FlashMap flashMap = new FlashMap();
 		flashMap.put("attrName", "attrValue");
 		this.request.setAttribute(DispatcherServlet.class.getName() + ".OUTPUT_FLASH_MAP", flashMap);
@@ -226,12 +243,12 @@ public class PrintingResultHandlerTests {
 
 			private String printedHeading;
 
-			private Map<String, Map<String, Object>> printedValues = new HashMap<String, Map<String, Object>>();
+			private Map<String, Map<String, Object>> printedValues = new HashMap<>();
 
 			@Override
 			public void printHeading(String heading) {
 				this.printedHeading = heading;
-				this.printedValues.put(heading, new HashMap<String, Object>());
+				this.printedValues.put(heading, new HashMap<>());
 			}
 
 			@Override

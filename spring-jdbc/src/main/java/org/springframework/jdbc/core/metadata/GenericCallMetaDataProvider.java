@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 
 	private boolean storesLowerCaseIdentifiers = false;
 
-	private List<CallParameterMetaData> callParameterMetaData = new ArrayList<CallParameterMetaData>();
+	private List<CallParameterMetaData> callParameterMetaData = new ArrayList<>();
 
 
 	/**
@@ -75,7 +75,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Error retrieving 'DatabaseMetaData.supportsCatalogsInProcedureCalls' - " + ex.getMessage());
+				logger.warn("Error retrieving 'DatabaseMetaData.supportsCatalogsInProcedureCalls': " + ex.getMessage());
 			}
 		}
 		try {
@@ -83,7 +83,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Error retrieving 'DatabaseMetaData.supportsSchemasInProcedureCalls' - " + ex.getMessage());
+				logger.warn("Error retrieving 'DatabaseMetaData.supportsSchemasInProcedureCalls': " + ex.getMessage());
 			}
 		}
 		try {
@@ -91,7 +91,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Error retrieving 'DatabaseMetaData.storesUpperCaseIdentifiers' - " + ex.getMessage());
+				logger.warn("Error retrieving 'DatabaseMetaData.storesUpperCaseIdentifiers': " + ex.getMessage());
 			}
 		}
 		try {
@@ -99,7 +99,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers' - " + ex.getMessage());
+				logger.warn("Error retrieving 'DatabaseMetaData.storesLowerCaseIdentifiers': " + ex.getMessage());
 			}
 		}
 	}
@@ -309,8 +309,9 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	/**
 	 * Process the procedure column metadata
 	 */
-	private void processProcedureColumns(DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName) {
-		ResultSet procs = null;
+	private void processProcedureColumns(
+			DatabaseMetaData databaseMetaData, String catalogName, String schemaName, String procedureName) {
+
 		String metaDataCatalogName = metaDataCatalogNameToUse(catalogName);
 		String metaDataSchemaName = metaDataSchemaNameToUse(schemaName);
 		String metaDataProcedureName = procedureNameToUse(procedureName);
@@ -318,24 +319,34 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 			logger.debug("Retrieving metadata for " + metaDataCatalogName + "/" +
 					metaDataSchemaName + "/" + metaDataProcedureName);
 		}
+
+		ResultSet procs = null;
 		try {
 			procs = databaseMetaData.getProcedures(metaDataCatalogName, metaDataSchemaName, metaDataProcedureName);
-			List<String> found = new ArrayList<String>();
+			List<String> found = new ArrayList<>();
 			while (procs.next()) {
 				found.add(procs.getString("PROCEDURE_CAT") + "." + procs.getString("PROCEDURE_SCHEM") +
 						"." + procs.getString("PROCEDURE_NAME"));
 			}
 			procs.close();
+
 			if (found.size() > 1) {
-				throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature - " +
-						"multiple procedures/functions/signatures for " + metaDataProcedureName + " found " + found);
+				throw new InvalidDataAccessApiUsageException(
+						"Unable to determine the correct call signature - multiple " +
+						"procedures/functions/signatures for '" + metaDataProcedureName + "': found " + found);
 			}
-			if (found.size() < 1) {
+			else if (found.isEmpty()) {
 				if (metaDataProcedureName.contains(".") && !StringUtils.hasText(metaDataCatalogName)) {
 					String packageName = metaDataProcedureName.substring(0, metaDataProcedureName.indexOf("."));
-					throw new InvalidDataAccessApiUsageException("Unable to determine the correct call signature for " +
-							metaDataProcedureName + " - package name should be specified separately using " +
-							"'.withCatalogName(\"" + packageName + "\")'");
+					throw new InvalidDataAccessApiUsageException(
+							"Unable to determine the correct call signature for '" + metaDataProcedureName +
+							"' - package name should be specified separately using '.withCatalogName(\"" +
+							packageName + "\")'");
+				}
+				else {
+					throw new InvalidDataAccessApiUsageException(
+							"Unable to determine the correct call signature - no " +
+							"procedure/function/signature for '" + metaDataProcedureName + "'");
 				}
 			}
 

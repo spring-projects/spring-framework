@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionRes
  * {@link #setArgumentResolvers} and {@link #setReturnValueHandlers(List)}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
@@ -82,25 +83,25 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	private final List<Object> responseBodyAdvice = new ArrayList<Object>();
+	private final List<Object> responseBodyAdvice = new ArrayList<>();
 
 	private ApplicationContext applicationContext;
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
-			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
+			new ConcurrentHashMap<>(64);
 
 	private final Map<ControllerAdviceBean, ExceptionHandlerMethodResolver> exceptionHandlerAdviceCache =
-			new LinkedHashMap<ControllerAdviceBean, ExceptionHandlerMethodResolver>();
+			new LinkedHashMap<>();
 
 
 	public ExceptionHandlerExceptionResolver() {
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
+		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
 
-		this.messageConverters = new ArrayList<HttpMessageConverter<?>>();
+		this.messageConverters = new ArrayList<>();
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
 		this.messageConverters.add(stringHttpMessageConverter);
-		this.messageConverters.add(new SourceHttpMessageConverter<Source>());
+		this.messageConverters.add(new SourceHttpMessageConverter<>());
 		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 	}
 
@@ -264,11 +265,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(adviceBean.getBeanType());
 			if (resolver.hasExceptionMappings()) {
 				this.exceptionHandlerAdviceCache.put(adviceBean, resolver);
-				logger.info("Detected @ExceptionHandler methods in " + adviceBean);
+				if (logger.isInfoEnabled()) {
+					logger.info("Detected @ExceptionHandler methods in " + adviceBean);
+				}
 			}
 			if (ResponseBodyAdvice.class.isAssignableFrom(adviceBean.getBeanType())) {
 				this.responseBodyAdvice.add(adviceBean);
-				logger.info("Detected ResponseBodyAdvice implementation in " + adviceBean);
+				if (logger.isInfoEnabled()) {
+					logger.info("Detected ResponseBodyAdvice implementation in " + adviceBean);
+				}
 			}
 		}
 	}
@@ -288,11 +293,16 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * and custom resolvers provided via {@link #setCustomArgumentResolvers}.
 	 */
 	protected List<HandlerMethodArgumentResolver> getDefaultArgumentResolvers() {
-		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
+		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+
+		// Annotation-based argument resolution
+		resolvers.add(new SessionAttributeMethodArgumentResolver());
+		resolvers.add(new RequestAttributeMethodArgumentResolver());
 
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
 		resolvers.add(new ServletResponseMethodArgumentResolver());
+		resolvers.add(new ModelMethodProcessor());
 
 		// Custom arguments
 		if (getCustomArgumentResolvers() != null) {
@@ -307,7 +317,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 	 * custom handlers provided via {@link #setReturnValueHandlers}.
 	 */
 	protected List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
-		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
 
 		// Single-purpose return value types
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
@@ -359,11 +369,19 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking @ExceptionHandler method: " + exceptionHandlerMethod);
 			}
-			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
+			Throwable cause = exception.getCause();
+			if (cause != null) {
+				// Expose cause as provided argument as well
+				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, cause, handlerMethod);
+			}
+			else {
+				// Otherwise, just the given exception as-is
+				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
+			}
 		}
 		catch (Exception invocationEx) {
-			if (logger.isErrorEnabled()) {
-				logger.error("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to invoke @ExceptionHandler method: " + exceptionHandlerMethod, invocationEx);
 			}
 			return null;
 		}

@@ -49,9 +49,6 @@ import static org.mockito.Mockito.*;
  */
 public class JmsListenerContainerFactoryTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private final ConnectionFactory connectionFactory = new StubConnectionFactory();
 
 	private final DestinationResolver destinationResolver = new DynamicDestinationResolver();
@@ -59,6 +56,10 @@ public class JmsListenerContainerFactoryTests {
 	private final MessageConverter messageConverter = new SimpleMessageConverter();
 
 	private final TransactionManager transactionManager = mock(TransactionManager.class);
+
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -147,6 +148,7 @@ public class JmsListenerContainerFactoryTests {
 
 		assertSame(backOff, new DirectFieldAccessor(container).getPropertyValue("backOff"));
 	}
+
 
 	private void setDefaultJmsConfig(AbstractJmsListenerContainerFactory<?> factory) {
 		factory.setConnectionFactory(connectionFactory);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,21 +107,21 @@ public class CachedIntrospectionResults {
 	 * accept classes from, even if the classes do not qualify as cache-safe.
 	 */
 	static final Set<ClassLoader> acceptedClassLoaders =
-			Collections.newSetFromMap(new ConcurrentHashMap<ClassLoader, Boolean>(16));
+			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, strongly held.
 	 * This variant is being used for cache-safe bean classes.
 	 */
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> strongClassCache =
-			new ConcurrentHashMap<Class<?>, CachedIntrospectionResults>(64);
+			new ConcurrentHashMap<>(64);
 
 	/**
 	 * Map keyed by Class containing CachedIntrospectionResults, softly held.
 	 * This variant is being used for non-cache-safe bean classes.
 	 */
 	static final ConcurrentMap<Class<?>, CachedIntrospectionResults> softClassCache =
-			new ConcurrentReferenceHashMap<Class<?>, CachedIntrospectionResults>(64);
+			new ConcurrentReferenceHashMap<>(64);
 
 
 	/**
@@ -283,12 +283,12 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Caching PropertyDescriptors for class [" + beanClass.getName() + "]");
 			}
-			this.propertyDescriptorCache = new LinkedHashMap<String, PropertyDescriptor>();
+			this.propertyDescriptorCache = new LinkedHashMap<>();
 
 			// This call is slow so we do it once.
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (PropertyDescriptor pd : pds) {
-				if (Class.class.equals(beanClass) &&
+				if (Class.class == beanClass &&
 						("classLoader".equals(pd.getName()) ||  "protectionDomain".equals(pd.getName()))) {
 					// Ignore Class.getClassLoader() and getProtectionDomain() methods - nobody needs to bind to those
 					continue;
@@ -303,7 +303,25 @@ public class CachedIntrospectionResults {
 				this.propertyDescriptorCache.put(pd.getName(), pd);
 			}
 
-			this.typeDescriptorCache = new ConcurrentReferenceHashMap<PropertyDescriptor, TypeDescriptor>();
+			// Explicitly check implemented interfaces for setter/getter methods as well,
+			// in particular for Java 8 default methods...
+			Class<?> clazz = beanClass;
+			while (clazz != null) {
+				Class<?>[] ifcs = clazz.getInterfaces();
+				for (Class<?> ifc : ifcs) {
+					BeanInfo ifcInfo = Introspector.getBeanInfo(ifc, Introspector.IGNORE_ALL_BEANINFO);
+					PropertyDescriptor[] ifcPds = ifcInfo.getPropertyDescriptors();
+					for (PropertyDescriptor pd : ifcPds) {
+						if (!this.propertyDescriptorCache.containsKey(pd.getName())) {
+							pd = buildGenericTypeAwarePropertyDescriptor(beanClass, pd);
+							this.propertyDescriptorCache.put(pd.getName(), pd);
+						}
+					}
+				}
+				clazz = clazz.getSuperclass();
+			}
+
+			this.typeDescriptorCache = new ConcurrentReferenceHashMap<>();
 		}
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to obtain BeanInfo for class [" + beanClass.getName() + "]", ex);

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.simp.stomp;
 
+package org.springframework.messaging.simp.stomp;
 
 /**
  * Raised when the connection for a STOMP session is lost rather than closed.
@@ -24,7 +24,6 @@ package org.springframework.messaging.simp.stomp;
  */
 @SuppressWarnings("serial")
 public class ConnectionLostException extends Exception {
-
 
 	public ConnectionLostException(String message) {
 		super(message);

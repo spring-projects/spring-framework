@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
 public class UriUtilsTests {
 
@@ -102,6 +103,24 @@ public class UriUtilsTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void decodeInvalidSequence() throws UnsupportedEncodingException {
 		UriUtils.decode("foo%2", ENC);
+	}
+
+	@Test
+	public void extractFileExtension() {
+		assertEquals("html", UriUtils.extractFileExtension("index.html"));
+		assertEquals("html", UriUtils.extractFileExtension("/index.html"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/path/a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html#/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a#/path/a"));
+		assertEquals("html", UriUtils.extractFileExtension("/products/view.html?param=/path/a.do#/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products;q=11/view.html?param=/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products;q=11/view.html;r=22?param=/path/a.do"));
+		assertEquals("html", UriUtils.extractFileExtension("/products;q=11/view.html;r=22;s=33?param=/path/a.do"));
 	}
 
 }

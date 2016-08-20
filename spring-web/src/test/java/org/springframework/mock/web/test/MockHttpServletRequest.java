@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -48,6 +51,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
 import javax.servlet.http.Part;
 
 import org.springframework.http.MediaType;
@@ -55,12 +59,17 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>The default, preferred {@link Locale} for the <em>server</em> mocked by this request
+ * is {@link Locale#ENGLISH}. This value can be changed via {@link #addPreferredLocale}
+ * or {@link #setPreferredLocales}.
+ *
+ * <p>As of Spring Framework 5.0, this set of mocks is designed on a Servlet 3.1 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -73,10 +82,14 @@ import org.springframework.util.StringUtils;
  */
 public class MockHttpServletRequest implements HttpServletRequest {
 
+	private static final String HTTP = "http";
+
+	private static final String HTTPS = "https";
+
 	/**
 	 * The default protocol: 'http'.
 	 */
-	public static final String DEFAULT_PROTOCOL = "http";
+	public static final String DEFAULT_PROTOCOL = HTTP;
 
 	/**
 	 * The default server address: '127.0.0.1'.
@@ -105,10 +118,24 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
+	private static final String HOST_HEADER = "Host";
+
 	private static final String CHARSET_PREFIX = "charset=";
 
 	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
-			new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0]));
+			new DelegatingServletInputStream(StreamUtils.emptyInput());
+
+	/**
+	 * Date formats as specified in the HTTP RFC
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
+	private static final String[] DATE_FORMATS = new String[] {
+			"EEE, dd MMM yyyy HH:mm:ss zzz",
+			"EEE, dd-MMM-yy HH:mm:ss zzz",
+			"EEE MMM dd HH:mm:ss yyyy"
+	};
+
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	private boolean active = true;
@@ -118,7 +145,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	// ServletRequest properties
 	// ---------------------------------------------------------------------
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private String characterEncoding;
 
@@ -126,7 +153,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String contentType;
 
-	private final Map<String, String[]> parameters = new LinkedHashMap<String, String[]>(16);
+	private final Map<String, String[]> parameters = new LinkedHashMap<>(16);
 
 	private String protocol = DEFAULT_PROTOCOL;
 
@@ -141,7 +168,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String remoteHost = DEFAULT_REMOTE_HOST;
 
 	/** List of locales in descending order */
-	private final List<Locale> locales = new LinkedList<Locale>();
+	private final List<Locale> locales = new LinkedList<>();
 
 	private boolean secure = false;
 
@@ -172,7 +199,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private Cookie[] cookies;
 
-	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<HeaderValueHolder>();
+	private final Map<String, HeaderValueHolder> headers = new LinkedCaseInsensitiveMap<>();
 
 	private String method;
 
@@ -184,7 +211,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private String remoteUser;
 
-	private final Set<String> userRoles = new HashSet<String>();
+	private final Set<String> userRoles = new HashSet<>();
 
 	private Principal userPrincipal;
 
@@ -202,7 +229,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private boolean requestedSessionIdFromURL = false;
 
-	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<String, Part>();
+	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<>();
 
 
 	// ---------------------------------------------------------------------
@@ -302,9 +329,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * throwing an IllegalStateException if not active anymore.
 	 */
 	protected void checkActive() throws IllegalStateException {
-		if (!this.active) {
-			throw new IllegalStateException("Request is not active anymore");
-		}
+		Assert.state(this.active, "Request is not active anymore");
 	}
 
 
@@ -321,7 +346,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public Enumeration<String> getAttributeNames() {
 		checkActive();
-		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
+		return Collections.enumeration(new LinkedHashSet<>(this.attributes.keySet()));
 	}
 
 	@Override
@@ -364,8 +389,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		if (contentType != null) {
 			try {
 				MediaType mediaType = MediaType.parseMediaType(contentType);
-				if (mediaType.getCharSet() != null) {
-					this.characterEncoding = mediaType.getCharSet().name();
+				if (mediaType.getCharset() != null) {
+					this.characterEncoding = mediaType.getCharset().name();
 				}
 			}
 			catch (Exception ex) {
@@ -551,6 +576,19 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServerName() {
+		String host = getHeader(HOST_HEADER);
+		if (host != null) {
+			host = host.trim();
+			if (host.startsWith("[")) {
+				host = host.substring(1, host.indexOf(']'));
+			}
+			else if (host.contains(":")) {
+				host = host.substring(0, host.indexOf(':'));
+			}
+			return host;
+		}
+
+		// else
 		return this.serverName;
 	}
 
@@ -560,6 +598,22 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getServerPort() {
+		String host = getHeader(HOST_HEADER);
+		if (host != null) {
+			host = host.trim();
+			int idx;
+			if (host.startsWith("[")) {
+				idx = host.indexOf(':', host.indexOf(']'));
+			}
+			else {
+				idx = host.indexOf(':');
+			}
+			if (idx != -1) {
+				return Integer.parseInt(host.substring(idx + 1));
+			}
+		}
+
+		// else
 		return this.serverPort;
 	}
 
@@ -641,23 +695,61 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.locales.addAll(locales);
 	}
 
+	/**
+	 * Return the first preferred {@linkplain Locale locale} configured
+	 * in this mock request.
+	 * <p>If no locales have been explicitly configured, the default,
+	 * preferred {@link Locale} for the <em>server</em> mocked by this
+	 * request is {@link Locale#ENGLISH}.
+	 * <p>In contrast to the Servlet specification, this mock implementation
+	 * does <strong>not</strong> take into consideration any locales
+	 * specified via the {@code Accept-Language} header.
+	 * @see javax.servlet.ServletRequest#getLocale()
+	 * @see #addPreferredLocale(Locale)
+	 * @see #setPreferredLocales(List)
+	 */
 	@Override
 	public Locale getLocale() {
 		return this.locales.get(0);
 	}
 
+	/**
+	 * Return an {@linkplain Enumeration enumeration} of the preferred
+	 * {@linkplain Locale locales} configured in this mock request.
+	 * <p>If no locales have been explicitly configured, the default,
+	 * preferred {@link Locale} for the <em>server</em> mocked by this
+	 * request is {@link Locale#ENGLISH}.
+	 * <p>In contrast to the Servlet specification, this mock implementation
+	 * does <strong>not</strong> take into consideration any locales
+	 * specified via the {@code Accept-Language} header.
+	 * @see javax.servlet.ServletRequest#getLocales()
+	 * @see #addPreferredLocale(Locale)
+	 * @see #setPreferredLocales(List)
+	 */
 	@Override
 	public Enumeration<Locale> getLocales() {
 		return Collections.enumeration(this.locales);
 	}
 
+	/**
+	 * Set the boolean {@code secure} flag indicating whether the mock request
+	 * was made using a secure channel, such as HTTPS.
+	 * @see #isSecure()
+	 * @see #getScheme()
+	 * @see #setScheme(String)
+	 */
 	public void setSecure(boolean secure) {
 		this.secure = secure;
 	}
 
+	/**
+	 * Return {@code true} if the {@link #setSecure secure} flag has been set
+	 * to {@code true} or if the {@link #getScheme scheme} is {@code https}.
+	 * @see javax.servlet.ServletRequest#isSecure()
+	 */
 	@Override
 	public boolean isSecure() {
-		return this.secure;
+		return (this.secure || HTTPS.equalsIgnoreCase(this.scheme));
 	}
 
 	@Override
@@ -666,6 +758,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
+	@Deprecated
 	public String getRealPath(String path) {
 		return this.servletContext.getRealPath(path);
 	}
@@ -713,9 +806,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
-		if (!this.asyncSupported) {
-			throw new IllegalStateException("Async not supported");
-		}
+		Assert.state(this.asyncSupported, "Async not supported");
 		this.asyncStarted = true;
 		this.asyncContext = new MockAsyncContext(request, response);
 		return this.asyncContext;
@@ -782,20 +873,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add a header entry for the given name.
-	 * <p>If there was no entry for that header name before, the value will be used
-	 * as-is. In case of an existing entry, a String array will be created,
-	 * adding the given value (more specifically, its toString representation)
-	 * as further element.
-	 * <p>Multiple values can only be stored as list of Strings, following the
-	 * Servlet spec (see {@code getHeaders} accessor). As alternative to
-	 * repeated {@code addHeader} calls for individual elements, you can
-	 * use a single call with an entire array or Collection of values as
-	 * parameter.
+	 * <p>While this method can take any {@code Object} as a parameter, it
+	 * is recommended to use the following types:
+	 * <ul>
+	 * <li>String or any Object to be converted using {@code toString()}; see {@link #getHeader}.</li>
+	 * <li>String, Number, or Date for date headers; see {@link #getDateHeader}.</li>
+	 * <li>String or Number for integer headers; see {@link #getIntHeader}.</li>
+	 * <li>{@code String[]} or {@code Collection<String>} for multiple values; see {@link #getHeaders}.</li>
+	 * </ul>
 	 * @see #getHeaderNames
-	 * @see #getHeader
 	 * @see #getHeaders
+	 * @see #getHeader
 	 * @see #getDateHeader
-	 * @see #getIntHeader
 	 */
 	public void addHeader(String name, Object value) {
 		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
@@ -824,6 +913,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
+	/**
+	 * Return the long timestamp for the date header with the given {@code name}.
+	 * <p>If the internal value representation is a String, this method will try
+	 * to parse it as a date using the supported date formats:
+	 * <ul>
+	 * <li>"EEE, dd MMM yyyy HH:mm:ss zzz"</li>
+	 * <li>"EEE, dd-MMM-yy HH:mm:ss zzz"</li>
+	 * <li>"EEE MMM dd HH:mm:ss yyyy"</li>
+	 * </ul>
+	 * @param name the header name
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
 	@Override
 	public long getDateHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -834,13 +935,30 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		else if (value instanceof Number) {
 			return ((Number) value).longValue();
 		}
+		else if (value instanceof String) {
+			return parseDateHeader(name, (String) value);
+		}
 		else if (value != null) {
 			throw new IllegalArgumentException(
-					"Value for header '" + name + "' is neither a Date nor a Number: " + value);
+					"Value for header '" + name + "' is not a Date, Number, or String: " + value);
 		}
 		else {
 			return -1L;
 		}
+	}
+
+	private long parseDateHeader(String name, String value) {
+		for (String dateFormat : DATE_FORMATS) {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+			simpleDateFormat.setTimeZone(GMT);
+			try {
+				return simpleDateFormat.parse(value).getTime();
+			}
+			catch (ParseException ex) {
+				// ignore
+			}
+		}
+		throw new IllegalArgumentException("Cannot parse date value '" + value + "' for '" + name + "' header");
 	}
 
 	@Override
@@ -852,7 +970,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public Enumeration<String> getHeaders(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<String>());
+		return Collections.enumeration(header != null ? header.getStringValues() : new LinkedList<>());
 	}
 
 	@Override
@@ -970,7 +1088,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
 
 		if (this.serverPort > 0
-				&& (("http".equalsIgnoreCase(scheme) && this.serverPort != 80) || ("https".equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+				&& ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) || (HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
 		}
 
@@ -1059,6 +1177,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
+	@Deprecated
 	public boolean isRequestedSessionIdFromUrl() {
 		return isRequestedSessionIdFromURL();
 	}
@@ -1091,11 +1210,16 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
-		List<Part> result = new LinkedList<Part>();
-		for(List<Part> list : this.parts.values()) {
+		List<Part> result = new LinkedList<>();
+		for (List<Part> list : this.parts.values()) {
 			result.addAll(list);
 		}
 		return result;
+	}
+
+	@Override
+	public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+		throw new UnsupportedOperationException();
 	}
 
 }

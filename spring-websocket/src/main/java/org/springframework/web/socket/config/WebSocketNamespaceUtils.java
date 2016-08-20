@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  */
 class WebSocketNamespaceUtils {
 
-
 	public static RuntimeBeanReference registerHandshakeHandler(Element element, ParserContext context, Object source) {
 		RuntimeBeanReference handlerRef;
 		Element handlerElem = DomUtils.getChildElementByTagName(element, "handshake-handler");
@@ -62,7 +61,7 @@ class WebSocketNamespaceUtils {
 		return handlerRef;
 	}
 
-	public static RuntimeBeanReference registerSockJsService(Element element, String sockJsSchedulerName,
+	public static RuntimeBeanReference registerSockJsService(Element element, String schedulerName,
 			ParserContext context, Object source) {
 
 		Element sockJsElement = DomUtils.getChildElementByTagName(element, "sockjs");
@@ -79,7 +78,7 @@ class WebSocketNamespaceUtils {
 				scheduler = new RuntimeBeanReference(customTaskSchedulerName);
 			}
 			else {
-				scheduler = registerSockJsScheduler(sockJsSchedulerName, context, source);
+				scheduler = registerScheduler(schedulerName, context, source);
 			}
 			sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(0, scheduler);
 
@@ -94,7 +93,6 @@ class WebSocketNamespaceUtils {
 			}
 			else if (handshakeHandler != null) {
 				RuntimeBeanReference handshakeHandlerRef = new RuntimeBeanReference(handshakeHandler.getAttribute("ref"));
-
 				RootBeanDefinition transportHandler = new RootBeanDefinition(WebSocketTransportHandler.class);
 				transportHandler.setSource(source);
 				transportHandler.getConstructorArgumentValues().addIndexedArgumentValue(0, handshakeHandlerRef);
@@ -106,7 +104,9 @@ class WebSocketNamespaceUtils {
 			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
 			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
 			sockJsServiceDef.getPropertyValues().add("allowedOrigins", allowedOrigins);
-			interceptors.add(new OriginHandshakeInterceptor(allowedOrigins));
+			RootBeanDefinition originHandshakeInterceptor = new RootBeanDefinition(OriginHandshakeInterceptor.class);
+			originHandshakeInterceptor.getPropertyValues().add("allowedOrigins", allowedOrigins);
+			interceptors.add(originHandshakeInterceptor);
 			sockJsServiceDef.getPropertyValues().add("handshakeInterceptors", interceptors);
 
 			String attrValue = sockJsElement.getAttribute("name");
@@ -156,7 +156,7 @@ class WebSocketNamespaceUtils {
 		return null;
 	}
 
-	private static RuntimeBeanReference registerSockJsScheduler(String schedulerName, ParserContext context, Object source) {
+	public static RuntimeBeanReference registerScheduler(String schedulerName, ParserContext context, Object source) {
 		if (!context.getRegistry().containsBeanDefinition(schedulerName)) {
 			RootBeanDefinition taskSchedulerDef = new RootBeanDefinition(ThreadPoolTaskScheduler.class);
 			taskSchedulerDef.setSource(source);
@@ -171,10 +171,10 @@ class WebSocketNamespaceUtils {
 	}
 
 	public static ManagedList<? super Object> parseBeanSubElements(Element parentElement, ParserContext context) {
-		ManagedList<? super Object> beans = new ManagedList<Object>();
+		ManagedList<? super Object> beans = new ManagedList<>();
 		if (parentElement != null) {
 			beans.setSource(context.extractSource(parentElement));
-			for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, new String[] {"bean", "ref"})) {
+			for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
 				beans.add(context.getDelegate().parsePropertySubElement(beanElement, null));
 			}
 		}

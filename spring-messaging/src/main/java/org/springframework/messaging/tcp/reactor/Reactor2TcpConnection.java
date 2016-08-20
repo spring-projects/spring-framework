@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import reactor.fn.Functions;
 import reactor.io.net.ChannelStream;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
@@ -54,17 +53,19 @@ public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 	public ListenableFuture<Void> send(Message<P> message) {
 		Promise<Void> afterWrite = Promises.prepare();
 		this.channelStream.writeWith(Streams.just(message)).subscribe(afterWrite);
-		return new PassThroughPromiseToListenableFutureAdapter<Void>(afterWrite);
+		return new PassThroughPromiseToListenableFutureAdapter<>(afterWrite);
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		this.channelStream.on().readIdle(inactivityDuration, Functions.<Void>consumer(runnable));
+		this.channelStream.on().readIdle(inactivityDuration, reactor.fn.Functions.<Void>consumer(runnable));
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		this.channelStream.on().writeIdle(inactivityDuration, Functions.<Void>consumer(runnable));
+		this.channelStream.on().writeIdle(inactivityDuration, reactor.fn.Functions.<Void>consumer(runnable));
 	}
 
 	@Override

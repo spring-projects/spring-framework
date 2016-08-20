@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,7 +74,7 @@ public class InlineMap extends SpelNodeImpl {
 			}
 		}
 		if (isConstant) {
-			Map<Object,Object> constantMap = new LinkedHashMap<Object,Object>();			
+			Map<Object,Object> constantMap = new LinkedHashMap<>();
 			int childCount = getChildCount();
 			for (int c = 0; c < childCount; c++) {
 				SpelNode keyChild = getChild(c++);
@@ -111,7 +111,7 @@ public class InlineMap extends SpelNodeImpl {
 			return this.constant;
 		}
 		else {
-			Map<Object, Object> returnValue = new LinkedHashMap<Object, Object>();
+			Map<Object, Object> returnValue = new LinkedHashMap<>();
 			int childcount = getChildCount();
 			for (int c = 0; c < childcount; c++) {
 				// TODO allow for key being PropertyOrFieldReference like Indexer on maps

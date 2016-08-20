@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class SetFactoryBean extends AbstractFactoryBean<Set<Object>> {
 			result = BeanUtils.instantiateClass(this.targetSetClass);
 		}
 		else {
-			result = new LinkedHashSet<Object>(this.sourceSet.size());
+			result = new LinkedHashSet<>(this.sourceSet.size());
 		}
 		Class<?> valueType = null;
 		if (this.targetSetClass != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import static org.junit.Assert.*;
  *
  * @author Andy Clement
  */
+@SuppressWarnings("rawtypes")
 public class SpelDocumentationTests extends AbstractExpressionTests {
 
 	static Inventor tesla ;
@@ -69,9 +70,9 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 
 		public Inventor[] Members = new Inventor[1];
 		public List Members2 = new ArrayList();
-		public Map<String,Object> officers = new HashMap<String,Object>();
+		public Map<String,Object> officers = new HashMap<>();
 
-		public List<Map<String, Object>> reverse = new ArrayList<Map<String, Object>>();
+		public List<Map<String, Object>> reverse = new ArrayList<>();
 
 		@SuppressWarnings("unchecked")
 		IEEE() {
@@ -418,7 +419,7 @@ public class SpelDocumentationTests extends AbstractExpressionTests {
 	@Test
 	public void testSpecialVariables() throws Exception {
 		// create an array of integers
-		List<Integer> primes = new ArrayList<Integer>();
+		List<Integer> primes = new ArrayList<>();
 		primes.addAll(Arrays.asList(2,3,5,7,11,13,17));
 
 		// create parser and set variable 'primes' as the array of integers

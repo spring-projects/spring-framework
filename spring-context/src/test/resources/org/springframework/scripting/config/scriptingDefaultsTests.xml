@@ -14,7 +14,7 @@
 
 	<lang:groovy id="testBean" name="/url" script-source="classpath:org/springframework/scripting/config/TestBean.groovy"/>
 
-	<lang:groovy id="nonRefreshableTestBean" refresh-check-delay="-1" 
+	<lang:groovy id="nonRefreshableTestBean" refresh-check-delay="-1"
 			script-source="classpath:org/springframework/scripting/config/TestBean.groovy"/>
 
 	<bean id="otherBean" class="org.springframework.scripting.config.OtherTestBean"/>

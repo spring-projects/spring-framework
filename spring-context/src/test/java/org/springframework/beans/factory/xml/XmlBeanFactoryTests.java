@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
@@ -78,7 +79,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Sam Brannen
  */
-public final class XmlBeanFactoryTests {
+public class XmlBeanFactoryTests {
 
 	private static final Class<?> CLASS = XmlBeanFactoryTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
@@ -112,14 +113,8 @@ public final class XmlBeanFactoryTests {
 	private static final ClassPathResource NO_SUCH_FACTORY_METHOD_CONTEXT = classPathResource("-noSuchFactoryMethod.xml");
 	private static final ClassPathResource RECURSIVE_IMPORT_CONTEXT = classPathResource("-recursiveImport.xml");
 	private static final ClassPathResource RESOURCE_CONTEXT = classPathResource("-resource.xml");
-	private static final ClassPathResource SATISFIED_ALL_DEP_CONTEXT = classPathResource("-satisfiedAllDepCheck.xml");
-	private static final ClassPathResource SATISFIED_OBJECT_DEP_CONTEXT = classPathResource("-satisfiedObjectDepCheck.xml");
-	private static final ClassPathResource SATISFIED_SIMPLE_DEP_CONTEXT = classPathResource("-satisfiedSimpleDepCheck.xml");
 	private static final ClassPathResource TEST_WITH_DUP_NAMES_CONTEXT = classPathResource("-testWithDuplicateNames.xml");
 	private static final ClassPathResource TEST_WITH_DUP_NAME_IN_ALIAS_CONTEXT = classPathResource("-testWithDuplicateNameInAlias.xml");
-	private static final ClassPathResource UNSATISFIED_ALL_DEP_CONTEXT = classPathResource("-unsatisfiedAllDepCheckMissingObjects.xml");
-	private static final ClassPathResource UNSATISFIED_OBJECT_DEP_CONTEXT = classPathResource("-unsatisfiedObjectDepCheck.xml");
-	private static final ClassPathResource UNSATISFIED_SIMPLE_DEP_CONTEXT = classPathResource("-unsatisfiedSimpleDepCheck.xml");
 	private static final ClassPathResource REFTYPES_CONTEXT = classPathResource("-reftypes.xml");
 	private static final ClassPathResource DEFAULT_LAZY_CONTEXT = classPathResource("-defaultLazyInit.xml");
 	private static final ClassPathResource DEFAULT_AUTOWIRE_CONTEXT = classPathResource("-defaultAutowire.xml");
@@ -775,54 +770,6 @@ public final class XmlBeanFactoryTests {
 		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(INVALID_CONTEXT);
 	}
 
-	@Test(expected = UnsatisfiedDependencyException.class)
-	public void unsatisfiedObjectDependencyCheck() throws Exception {
-		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(UNSATISFIED_OBJECT_DEP_CONTEXT);
-		xbf.getBean("a", DependenciesBean.class);
-	}
-
-	@Test(expected = UnsatisfiedDependencyException.class)
-	public void unsatisfiedSimpleDependencyCheck() throws Exception {
-		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(UNSATISFIED_SIMPLE_DEP_CONTEXT);
-		xbf.getBean("a", DependenciesBean.class);
-	}
-
-	@Test
-	public void testSatisfiedObjectDependencyCheck() throws Exception {
-		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(SATISFIED_OBJECT_DEP_CONTEXT);
-		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
-		assertNotNull(a.getSpouse());
-		assertEquals(xbf, a.getBeanFactory());
-	}
-
-	@Test
-	public void testSatisfiedSimpleDependencyCheck() throws Exception {
-		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(SATISFIED_SIMPLE_DEP_CONTEXT);
-		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
-		assertEquals(a.getAge(), 33);
-	}
-
-	@Test(expected = UnsatisfiedDependencyException.class)
-	public void unsatisfiedAllDependencyCheck() throws Exception {
-		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(UNSATISFIED_ALL_DEP_CONTEXT);
-		xbf.getBean("a", DependenciesBean.class);
-	}
-
-	@Test
-	public void testSatisfiedAllDependencyCheck() throws Exception {
-		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(SATISFIED_ALL_DEP_CONTEXT);
-		DependenciesBean a = (DependenciesBean) xbf.getBean("a");
-		assertEquals(a.getAge(), 33);
-		assertNotNull(a.getName());
-		assertNotNull(a.getSpouse());
-	}
-
 	@Test
 	public void testAutowire() throws Exception {
 		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
@@ -908,13 +855,6 @@ public final class XmlBeanFactoryTests {
 		// should have been autowired
 		assertNotNull(rod2.getSpouse());
 		assertTrue(rod2.getSpouse().getName().equals("Kerry"));
-
-		try {
-			xbf.getBean("rod3", DependenciesBean.class);
-			fail("Must have thrown UnsatisfiedDependencyException");
-		}
-		catch (UnsatisfiedDependencyException expected) {
-		}
 	}
 
 	@Test
@@ -1608,6 +1548,16 @@ public final class XmlBeanFactoryTests {
 		ConstructorArrayTestBean bean = (ConstructorArrayTestBean) xbf.getBean("constructorArrayNoType");
 		assertTrue(bean.array instanceof String[]);
 		assertEquals(0, ((String[]) bean.array).length);
+	}
+
+	@Test
+	public void testConstructorWithUnresolvableParameterName() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(CONSTRUCTOR_ARG_CONTEXT);
+		AtomicInteger bean = (AtomicInteger) xbf.getBean("constructorUnresolvableName");
+		assertEquals(1, bean.get());
+		bean = (AtomicInteger) xbf.getBean("constructorUnresolvableNameWithIndex");
+		assertEquals(1, bean.get());
 	}
 
 	@Test

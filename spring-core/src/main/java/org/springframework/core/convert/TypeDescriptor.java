@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.lang.UsesJava8;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -48,10 +48,7 @@ public class TypeDescriptor implements Serializable {
 
 	static final Annotation[] EMPTY_ANNOTATION_ARRAY = new Annotation[0];
 
-	private static final boolean streamAvailable = ClassUtils.isPresent(
-			"java.util.stream.Stream", TypeDescriptor.class.getClassLoader());
-
-	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<Class<?>, TypeDescriptor>(18);
+	private static final Map<Class<?>, TypeDescriptor> commonTypesCache = new HashMap<>(18);
 
 	private static final Class<?>[] CACHED_COMMON_TYPES = {
 			boolean.class, Boolean.class, byte.class, Byte.class, char.class, Character.class,
@@ -144,10 +141,9 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * The type of the backing class, method parameter, field, or property
 	 * described by this TypeDescriptor.
-	 * <p>Returns primitive types as-is.
-	 * <p>See {@link #getObjectType()} for a variation of this operation that
-	 * resolves primitive types to their corresponding Object types if necessary.
-	 * @return the type, or {@code null} if it cannot be determined
+	 * <p>Returns primitive types as-is. See {@link #getObjectType()} for a
+	 * variation of this operation that resolves primitive types to their
+	 * corresponding Object types if necessary.
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {
@@ -200,7 +196,7 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * Cast this {@link TypeDescriptor} to a superclass or implemented interface
 	 * preserving annotations and nested type context.
-	 * @param superType the super type to cast to (can be {@code null}
+	 * @param superType the super type to cast to (can be {@code null})
 	 * @return a new TypeDescriptor for the up-cast type
 	 * @throws IllegalArgumentException if this type is not assignable to the super-type
 	 * @since 3.2
@@ -237,6 +233,8 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * Determine if this type descriptor has the specified annotation.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels
+	 * of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return <tt>true</tt> if the annotation is present
 	 */
@@ -245,19 +243,24 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Obtain the annotation associated with this type descriptor of the specified type.
+	 * Obtain the annotation of the specified {@code annotationType} that is on this type descriptor.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return the annotation, or {@code null} if no such annotation exists on this type descriptor
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
+		// Search in annotations that are "present" (i.e., locally declared or inherited)
+		// NOTE: this unfortunately favors inherited annotations over locally declared composed annotations.
 		for (Annotation annotation : getAnnotations()) {
-			if (annotation.annotationType().equals(annotationType)) {
+			if (annotation.annotationType() == annotationType) {
 				return (T) annotation;
 			}
 		}
-		for (Annotation metaAnn : getAnnotations()) {
-			T ann = metaAnn.annotationType().getAnnotation(annotationType);
+
+		// Search in annotation hierarchy
+		for (Annotation composedAnnotation : getAnnotations()) {
+			T ann = AnnotationUtils.findAnnotation(composedAnnotation.annotationType(), annotationType);
 			if (ann != null) {
 				return ann;
 			}
@@ -333,10 +336,10 @@ public class TypeDescriptor implements Serializable {
 		if (this.resolvableType.isArray()) {
 			return new TypeDescriptor(this.resolvableType.getComponentType(), null, this.annotations);
 		}
-		if (streamAvailable && StreamDelegate.isStream(this.type)) {
-			return StreamDelegate.getStreamElementType(this);
+		if (Stream.class.isAssignableFrom(this.type)) {
+			return getRelatedIfResolvable(this, this.resolvableType.as(Stream.class).getGeneric(0));
 		}
-		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric());
+		return getRelatedIfResolvable(this, this.resolvableType.asCollection().getGeneric(0));
 	}
 
 	/**
@@ -460,7 +463,7 @@ public class TypeDescriptor implements Serializable {
 			return false;
 		}
 		for (Annotation ann : getAnnotations()) {
-			if (other.getAnnotation(ann.annotationType()) == null) {
+			if (!ann.equals(other.getAnnotation(ann.annotationType()))) {
 				return false;
 			}
 		}
@@ -666,7 +669,7 @@ public class TypeDescriptor implements Serializable {
 	private static TypeDescriptor nested(TypeDescriptor typeDescriptor, int nestingLevel) {
 		ResolvableType nested = typeDescriptor.resolvableType;
 		for (int i = 0; i < nestingLevel; i++) {
-			if (Object.class.equals(nested.getType())) {
+			if (Object.class == nested.getType()) {
 				// Could be a collection type but we don't know about its element type,
 				// so let's just assume there is an element type of type Object...
 			}
@@ -685,22 +688,6 @@ public class TypeDescriptor implements Serializable {
 			return null;
 		}
 		return new TypeDescriptor(type, null, source.annotations);
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class StreamDelegate {
-
-		public static boolean isStream(Class<?> type) {
-			return Stream.class.isAssignableFrom(type);
-		}
-
-		public static TypeDescriptor getStreamElementType(TypeDescriptor source) {
-			return getRelatedIfResolvable(source, source.resolvableType.as(Stream.class).getGeneric());
-		}
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Base class for {@code Filter}s that perform logging operations before and after a request
@@ -45,7 +47,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
  *
  * <p>Prefixes and suffixes for the before and after messages can be configured using the
  * {@code beforeMessagePrefix}, {@code afterMessagePrefix}, {@code beforeMessageSuffix} and
- * {@code afterMessageSuffix} properties,
+ * {@code afterMessageSuffix} properties.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -71,6 +73,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	private boolean includeClientInfo = false;
 
+	private boolean includeHeaders = false;
+
 	private boolean includePayload = false;
 
 	private int maxPayloadLength = DEFAULT_MAX_PAYLOAD_LENGTH;
@@ -86,7 +90,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Set whether the query string should be included in the log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includeQueryString" in the filter definition in {@code web.xml}.
 	 */
 	public void setIncludeQueryString(boolean includeQueryString) {
@@ -103,7 +107,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	/**
 	 * Set whether the client address and session id should be included in the
 	 * log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includeClientInfo" in the filter definition in {@code web.xml}.
 	 */
 	public void setIncludeClientInfo(boolean includeClientInfo) {
@@ -119,11 +123,28 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
+	 * Set whether the request headers should be included in the log message.
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
+	 * "includeHeaders" in the filter definition in {@code web.xml}.
+	 * @since 4.3
+	 */
+	public void setIncludeHeaders(boolean includeHeaders) {
+		this.includeHeaders = includeHeaders;
+	}
+
+	/**
+	 * Return whether the request headers should be included in the log message.
+	 * @since 4.3
+	 */
+	public boolean isIncludeHeaders() {
+		return this.includeHeaders;
+	}
+
+	/**
 	 * Set whether the request payload (body) should be included in the log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includePayload" in the filter definition in {@code web.xml}.
 	 */
-
 	public void setIncludePayload(boolean includePayload) {
 		this.includePayload = includePayload;
 	}
@@ -253,9 +274,14 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 		StringBuilder msg = new StringBuilder();
 		msg.append(prefix);
 		msg.append("uri=").append(request.getRequestURI());
+
 		if (isIncludeQueryString()) {
-			msg.append('?').append(request.getQueryString());
+			String queryString = request.getQueryString();
+			if (queryString != null) {
+				msg.append('?').append(queryString);
+			}
 		}
+
 		if (isIncludeClientInfo()) {
 			String client = request.getRemoteAddr();
 			if (StringUtils.hasLength(client)) {
@@ -270,22 +296,30 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 				msg.append(";user=").append(user);
 			}
 		}
-		if (isIncludePayload() && request instanceof ContentCachingRequestWrapper) {
-			ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
-			byte[] buf = wrapper.getContentAsByteArray();
-			if (buf.length > 0) {
-				int length = Math.min(buf.length, getMaxPayloadLength());
-				String payload;
-				try {
-					payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
-				}
-				catch (UnsupportedEncodingException e) {
-					payload = "[unknown]";
-				}
-				msg.append(";payload=").append(payload);
-			}
 
+		if (isIncludeHeaders()) {
+			msg.append(";headers=").append(new ServletServerHttpRequest(request).getHeaders());
 		}
+
+		if (isIncludePayload()) {
+			ContentCachingRequestWrapper wrapper =
+					WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
+			if (wrapper != null) {
+				byte[] buf = wrapper.getContentAsByteArray();
+				if (buf.length > 0) {
+					int length = Math.min(buf.length, getMaxPayloadLength());
+					String payload;
+					try {
+						payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
+					}
+					catch (UnsupportedEncodingException ex) {
+						payload = "[unknown]";
+					}
+					msg.append(";payload=").append(payload);
+				}
+			}
+		}
+
 		msg.append(suffix);
 		return msg.toString();
 	}

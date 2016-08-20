@@ -18,7 +18,6 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLConnection;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
@@ -39,7 +38,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
-
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
@@ -70,11 +68,11 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private SslContext sslContext;
 
-	private volatile Bootstrap bootstrap;
-
 	private int connectTimeout = -1;
 
 	private int readTimeout = -1;
+
+	private volatile Bootstrap bootstrap;
 
 
 	/**

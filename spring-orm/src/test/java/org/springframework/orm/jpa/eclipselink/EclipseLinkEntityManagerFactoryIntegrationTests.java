@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,18 @@
 package org.springframework.orm.jpa.eclipselink;
 
 import org.eclipse.persistence.jpa.JpaEntityManager;
+import org.junit.Test;
 
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+
+import static org.junit.Assert.*;
 
 /**
  * EclipseLink-specific JPA tests.
  *
  * @author Juergen Hoeller
  */
-@SuppressWarnings("deprecation")
 public class EclipseLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	@Override
@@ -35,11 +37,13 @@ public class EclipseLinkEntityManagerFactoryIntegrationTests extends AbstractCon
 	}
 
 
+	@Test
 	public void testCanCastNativeEntityManagerFactoryToEclipseLinkEntityManagerFactoryImpl() {
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
 		assertTrue(emfi.getNativeEntityManagerFactory().getClass().getName().endsWith("EntityManagerFactoryImpl"));
 	}
 
+	@Test
 	public void testCanCastSharedEntityManagerProxyToEclipseLinkEntityManager() {
 		assertTrue(sharedEntityManager instanceof JpaEntityManager);
 		JpaEntityManager eclipselinkEntityManager = (JpaEntityManager) sharedEntityManager;

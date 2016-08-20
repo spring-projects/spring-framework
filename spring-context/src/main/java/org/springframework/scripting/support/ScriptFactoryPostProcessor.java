@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,7 +176,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	final DefaultListableBeanFactory scriptBeanFactory = new DefaultListableBeanFactory();
 
 	/** Map from bean name String to ScriptSource object */
-	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<String, ScriptSource>();
+	private final Map<String, ScriptSource> scriptSourceCache = new HashMap<>();
 
 	/**
 	 * Set the delay between refresh checks, in milliseconds.
@@ -381,7 +381,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	 * If the {@link BeanDefinition} has a
 	 * {@link org.springframework.core.AttributeAccessor metadata attribute}
 	 * under the key {@link #REFRESH_CHECK_DELAY_ATTRIBUTE} which is a valid {@link Number}
-	 * type, then this value is used. Otherwise, the the {@link #defaultRefreshCheckDelay}
+	 * type, then this value is used. Otherwise, the {@link #defaultRefreshCheckDelay}
 	 * value is used.
 	 * @param beanDefinition the BeanDefinition to check
 	 * @return the refresh check delay
@@ -505,7 +505,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 				Signature signature = new Signature(abd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
 				maker.add(signature, new Type[0]);
 			}
-			if (abd.getDestroyMethodName() != null) {
+			if (StringUtils.hasText(abd.getDestroyMethodName())) {
 				Signature signature = new Signature(abd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
 				maker.add(signature, new Type[0]);
 			}

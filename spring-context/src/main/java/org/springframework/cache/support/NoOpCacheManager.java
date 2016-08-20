@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -40,9 +41,9 @@ import org.springframework.cache.CacheManager;
  */
 public class NoOpCacheManager implements CacheManager {
 
-	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>(16);
+	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<>(16);
 
-	private final Set<String> cacheNames = new LinkedHashSet<String>(16);
+	private final Set<String> cacheNames = new LinkedHashSet<>(16);
 
 
 	/**
@@ -97,6 +98,16 @@ public class NoOpCacheManager implements CacheManager {
 		@Override
 		public <T> T get(Object key, Class<T> type) {
 			return null;
+		}
+
+		@Override
+		public <T> T get(Object key, Callable<T> valueLoader) {
+			try {
+				return valueLoader.call();
+			}
+			catch (Exception ex) {
+				throw new ValueRetrievalException(key, valueLoader, ex);
+			}
 		}
 
 		@Override

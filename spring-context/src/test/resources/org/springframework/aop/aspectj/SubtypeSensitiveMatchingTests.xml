@@ -5,7 +5,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
-	
+
 	<aop:config>
 		<aop:aspect id="thisMatcher" ref="testAspect">
 		  <aop:before pointcut="execution(* *(..)) and this(java.io.Serializable)" method="toString"/>
@@ -18,10 +18,10 @@
 		</aop:aspect>
 	</aop:config>
 
-	<!--  should not be proxied -->	
+	<!--  should not be proxied -->
 	<bean id="testClassA" class="org.springframework.aop.aspectj.SubtypeMatchingTestClassA"/>
 
-	<!--  should be proxied -->	
+	<!--  should be proxied -->
 	<bean id="testClassB" class="org.springframework.aop.aspectj.SubtypeMatchingTestClassB"/>
 
 	<!--  should be proxied -->

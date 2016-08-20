@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ abstract class AbstractJCacheKeyOperation<A extends Annotation> extends Abstract
 	 * used to compute the key
 	 */
 	public CacheInvocationParameter[] getKeyParameters(Object... values) {
-		List<CacheInvocationParameter> result = new ArrayList<CacheInvocationParameter>();
+		List<CacheInvocationParameter> result = new ArrayList<>();
 		for (CacheParameterDetail keyParameterDetail : this.keyParameterDetails) {
 			int parameterPosition = keyParameterDetail.getParameterPosition();
 			if (parameterPosition >= values.length) {
@@ -87,8 +87,8 @@ abstract class AbstractJCacheKeyOperation<A extends Annotation> extends Abstract
 
 
 	private static List<CacheParameterDetail> initializeKeyParameterDetails(List<CacheParameterDetail> allParameters) {
-		List<CacheParameterDetail> all = new ArrayList<CacheParameterDetail>();
-		List<CacheParameterDetail> annotated = new ArrayList<CacheParameterDetail>();
+		List<CacheParameterDetail> all = new ArrayList<>();
+		List<CacheParameterDetail> annotated = new ArrayList<>();
 		for (CacheParameterDetail allParameter : allParameters) {
 			if (!allParameter.isValue()) {
 				all.add(allParameter);

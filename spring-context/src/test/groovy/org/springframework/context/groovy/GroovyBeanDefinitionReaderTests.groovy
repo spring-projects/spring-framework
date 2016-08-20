@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.context.groovy
 
+import org.junit.Test
+
 import org.springframework.aop.SpringProxy
 import org.springframework.beans.factory.ObjectFactory
 import org.springframework.beans.factory.config.Scope
@@ -24,12 +26,16 @@ import org.springframework.context.support.GenericApplicationContext
 import org.springframework.context.support.GenericGroovyApplicationContext
 import org.springframework.stereotype.Component
 
+import static groovy.test.GroovyAssert.*
+
 /**
  * @author Jeff Brown
+ * @author Sam Brannen
  */
-class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
+class GroovyBeanDefinitionReaderTests {
 
-	void testImportSpringXml() {
+	@Test
+	void importSpringXml() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -43,7 +49,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "hello", foo
 	}
 
-	void testImportBeansFromGroovy() {
+	@Test
+	void importBeansFromGroovy() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -57,7 +64,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "hello", foo
 	}
 
-	void testSingletonPropertyOnBeanDefinition() {
+	@Test
+	void singletonPropertyOnBeanDefinition() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -76,7 +84,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertTrue 'unSpecifiedScopeBean should not have been a singleton', appCtx.isSingleton('unSpecifiedScopeBean')
 	}
 
-	void testInheritPropertiesFromAbstractBean() {
+	@Test
+	void inheritPropertiesFromAbstractBean() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -102,7 +111,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertNotNull bean.bean1
 	}
 
-	void testContextComponentScanSpringTag() {
+	@Test
+	void contextComponentScanSpringTag() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -118,7 +128,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertTrue(p instanceof AdvisedPerson)
 	}
 
-	void testUseSpringNamespaceAsMethod() {
+	@Test
+	void useSpringNamespaceAsMethod() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -152,7 +163,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "Fred", birthDaySender.peopleSentCards[0].name
 	}
 
-	void testUseTwoSpringNamespaces() {
+	@Test
+	void useTwoSpringNamespaces() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		TestScope scope = new TestScope()
@@ -209,7 +221,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals 4, scope.instanceCount
 	}
 
-	void testSpringAopSupport() {
+	@Test
+	void springAopSupport() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -241,7 +254,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "Fred", birthDaySender.peopleSentCards[0].name
 	}
 
-	void testSpringScopedProxyBean() {
+	@Test
+	void springScopedProxyBean() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -264,7 +278,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals 2, scope.instanceCount
 	}
 
-	void testSpringNamespaceBean() {
+	@Test
+	void springNamespaceBean() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -279,7 +294,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assert ['one', 'two'] == appCtx.getBean('foo')
 	}
 
-	void testNamedArgumentConstructor() {
+	@Test
+	void namedArgumentConstructor() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -296,7 +312,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals quest, knights.quest
 	}
 
-	void testAbstractBeanDefinition() {
+	@Test
+	void abstractBeanDefinition() {
 		def appCtx = new GenericGroovyApplicationContext()
 		appCtx.reader.beans {
 			abstractBean {
@@ -318,7 +335,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "Lancelot", knights.leader
 	}
 
-	void testAbstractBeanDefinitionWithClass() {
+	@Test
+	void abstractBeanDefinitionWithClass() {
 		def appCtx = new GenericGroovyApplicationContext()
 		appCtx.reader.beans {
 			abstractBean(KnightOfTheRoundTable) { bean ->
@@ -341,7 +359,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "Lancelot", knights.leader
 	}
 
-	void testScopes() {
+	@Test
+	void scopes() {
 		def appCtx = new GenericGroovyApplicationContext()
 		appCtx.reader.beans {
 			myBean(ScopeTestBean) { bean ->
@@ -362,7 +381,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals b1, b2
 	}
 
-	void testSimpleBean() {
+	@Test
+	void simpleBean() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -386,7 +406,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 
 	}
 
-	void testBeanWithParentRef() {
+	@Test
+	void beanWithParentRef() {
 		def parentAppCtx = new GenericApplicationContext()
 		def parentBeanReader = new GroovyBeanDefinitionReader(parentAppCtx)
 		parentBeanReader.beans {
@@ -414,7 +435,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "homer",bart.parent?.person
 	}
 
-	void testWithAnonymousInnerBean() {
+	@Test
+	void withAnonymousInnerBean() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -442,7 +464,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "homer", marge.bean1.person
 	}
 
-	void testWithUntypedAnonymousInnerBean() {
+	@Test
+	void withUntypedAnonymousInnerBean() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -470,7 +493,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "homer", marge.bean1.person
 	}
 
-	void testBeanReferences() {
+	@Test
+	void beanReferences() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -508,7 +532,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertTrue marge.children.contains(lisa)
 	}
 
-	void testBeanWithConstructor() {
+	@Test
+	void beanWithConstructor() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -528,7 +553,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals 40, marge.age
 	}
 
-	void testBeanWithFactoryMethod() {
+	@Test
+	void beanWithFactoryMethod() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -548,7 +574,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assert "marge", marge.person
 	}
 
-	void testBeanWithFactoryMethodUsingClosureArgs() {
+	@Test
+	void beanWithFactoryMethodUsingClosureArgs() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -567,7 +594,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assert "marge", marge.person
 	}
 
-	void testBeanWithFactoryMethodWithConstructorArgs() {
+	@Test
+	void beanWithFactoryMethodWithConstructorArgs() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -599,7 +627,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assert "mcBain", appCtx.getBean("mcBain").person
 	}
 
-	void testGetBeanDefinitions() {
+	@Test
+	void getBeanDefinitions() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -614,13 +643,14 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 			}
 		}
 
-		junit.framework.TestCase.assertEquals 'beanDefinitions was the wrong size', 3, reader.registry.beanDefinitionCount
+		assertEquals 'beanDefinitions was the wrong size', 3, reader.registry.beanDefinitionCount
 		assertNotNull 'beanDefinitions did not contain jeff', reader.registry.getBeanDefinition('jeff')
 		assertNotNull 'beanDefinitions did not contain guillaume', reader.registry.getBeanDefinition('guillaume')
 		assertNotNull 'beanDefinitions did not contain graeme', reader.registry.getBeanDefinition('graeme')
 	}
 
-	void testBeanWithFactoryBean() {
+	@Test
+	void beanWithFactoryBean() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -639,7 +669,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "homer", homer.person
 	}
 
-	void testBeanWithFactoryBeanAndMethod() {
+	@Test
+	void beanWithFactoryBeanAndMethod() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -657,14 +688,16 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "homer", homer.person
 	}
 
-	void testLoadExternalBeans() {
+	@Test
+	void loadExternalBeans() {
 		def appCtx = new GenericGroovyApplicationContext("org/springframework/context/groovy/applicationContext.groovy")
 
 		assert appCtx.containsBean("foo")
 		def foo = appCtx.getBean("foo")
 	}
 
-	void testLoadExternalBeansWithExplicitRefresh() {
+	@Test
+	void loadExternalBeansWithExplicitRefresh() {
 		def appCtx = new GenericGroovyApplicationContext()
 		appCtx.load("org/springframework/context/groovy/applicationContext.groovy")
 		appCtx.refresh()
@@ -673,7 +706,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		def foo = appCtx.getBean("foo")
 	}
 
-	void testHolyGrailWiring() {
+	@Test
+	void holyGrailWiring() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -691,7 +725,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		knight.embarkOnQuest()
 	}
 
-	void testAbstractBeanSpecifyingClass() {
+	@Test
+	void abstractBeanSpecifyingClass() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -726,7 +761,8 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
 		assertEquals "homer", homerBean.person
 	}
 
-	void testGroovyBeanDefinitionReaderWithScript() {
+	@Test
+	void groovyBeanDefinitionReaderWithScript() {
 		def script = '''
 def appCtx = new org.springframework.context.support.GenericGroovyApplicationContext()
 appCtx.reader.beans {
@@ -744,7 +780,8 @@ return appCtx
 	}
 
 	// test for GRAILS-5057
-	void testRegisterBeans() {
+	@Test
+	void registerBeans() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -769,7 +806,8 @@ return appCtx
 		assertEquals "Fred", appCtx.getBean("personA").name
 	}
 
-	void testListOfBeansAsConstructorArg() {
+	@Test
+	void listOfBeansAsConstructorArg() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 
@@ -785,7 +823,8 @@ return appCtx
 		assert appCtx.containsBean('somebean')
 	}
 
-	void testBeanWithListAndMapConstructor() {
+	@Test
+	void beanWithListAndMapConstructor() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -814,7 +853,8 @@ return appCtx
 		assertEquals "bart", beanWithMap.peopleByName.bart.person
 	}
 
-	void testAnonymousInnerBeanViaBeanMethod() {
+	@Test
+	void anonymousInnerBeanViaBeanMethod() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {
@@ -843,7 +883,8 @@ return appCtx
 		assertEquals "homer", marge.bean1.person
 	}
 
-	void testAnonymousInnerBeanViaBeanMethodWithConstructorArgs() {
+	@Test
+	void anonymousInnerBeanViaBeanMethodWithConstructorArgs() {
 		def appCtx = new GenericApplicationContext()
 		def reader = new GroovyBeanDefinitionReader(appCtx)
 		reader.beans {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the JMS {@code &lt;jca-listener-container&gt;} element.
+ * Parser for the JMS {@code <jca-listener-container>} element.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
@@ -88,7 +88,7 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 
 		String prefetch = containerEle.getAttribute(PREFETCH_ATTRIBUTE);
 		if (StringUtils.hasText(prefetch)) {
-			properties.add("prefetchSize", new Integer(prefetch));
+			properties.add("prefetchSize", Integer.valueOf(prefetch));
 		}
 
 		return properties;

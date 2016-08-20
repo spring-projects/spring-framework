@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class for {@link ClientHttpRequestFactory} implementations that decorate another request factory.
+ * Abstract base class for {@link ClientHttpRequestFactory} implementations
+ * that decorate another request factory.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -34,11 +35,11 @@ public abstract class AbstractClientHttpRequestFactoryWrapper implements ClientH
 
 
 	/**
-	 * Creates a {@code AbstractClientHttpRequestFactoryWrapper} wrapping the given request factory.
+	 * Create a {@code AbstractClientHttpRequestFactoryWrapper} wrapping the given request factory.
 	 * @param requestFactory the request factory to be wrapped
 	 */
 	protected AbstractClientHttpRequestFactoryWrapper(ClientHttpRequestFactory requestFactory) {
-		Assert.notNull(requestFactory, "'requestFactory' must not be null");
+		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
 		this.requestFactory = requestFactory;
 	}
 
@@ -50,12 +51,12 @@ public abstract class AbstractClientHttpRequestFactoryWrapper implements ClientH
 	 */
 	@Override
 	public final ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		return createRequest(uri, httpMethod, requestFactory);
+		return createRequest(uri, httpMethod, this.requestFactory);
 	}
 
 	/**
-	 * Create a new {@link ClientHttpRequest} for the specified URI and HTTP method by using the
-	 * passed-on request factory.
+	 * Create a new {@link ClientHttpRequest} for the specified URI and HTTP method
+	 * by using the passed-on request factory.
 	 * <p>Called from {@link #createRequest(URI, HttpMethod)}.
 	 * @param uri the URI to create a request for
 	 * @param httpMethod the HTTP method to execute

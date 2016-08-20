@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.util.Assert;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
@@ -55,7 +53,7 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 	private final BeanCreatingHandlerProvider<WebSocketHandler> provider;
 
 	private final Map<WebSocketSession, WebSocketHandler> handlers =
-			new ConcurrentHashMap<WebSocketSession, WebSocketHandler>();
+			new ConcurrentHashMap<>();
 
 	private final boolean supportsPartialMessages;
 
@@ -65,14 +63,16 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 	}
 
 	public PerConnectionWebSocketHandler(Class<? extends WebSocketHandler> handlerType, boolean supportsPartialMessages) {
-		this.provider = new BeanCreatingHandlerProvider<WebSocketHandler>(handlerType);
+		this.provider = new BeanCreatingHandlerProvider<>(handlerType);
 		this.supportsPartialMessages = supportsPartialMessages;
 	}
 
+
 	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		this.provider.setBeanFactory(beanFactory);
 	}
+
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -86,12 +86,6 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 		getHandler(session).handleMessage(session, message);
 	}
 
-	private WebSocketHandler getHandler(WebSocketSession session) {
-		WebSocketHandler handler = this.handlers.get(session);
-		Assert.isTrue(handler != null, "WebSocketHandler not found for " + session);
-		return handler;
-	}
-
 	@Override
 	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
 		getHandler(session).handleTransportError(session, exception);
@@ -103,19 +97,7 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 			getHandler(session).afterConnectionClosed(session, closeStatus);
 		}
 		finally {
-			destroy(session);
-		}
-	}
-
-	private void destroy(WebSocketSession session) {
-		WebSocketHandler handler = this.handlers.remove(session);
-		try {
-			if (handler != null) {
-				this.provider.destroy(handler);
-			}
-		}
-		catch (Throwable t) {
-			logger.warn("Error while destroying " + handler, t);
+			destroyHandler(session);
 		}
 	}
 
@@ -123,6 +105,30 @@ public class PerConnectionWebSocketHandler implements WebSocketHandler, BeanFact
 	public boolean supportsPartialMessages() {
 		return this.supportsPartialMessages;
 	}
+
+
+	private WebSocketHandler getHandler(WebSocketSession session) {
+		WebSocketHandler handler = this.handlers.get(session);
+		if (handler == null) {
+			throw new IllegalStateException("WebSocketHandler not found for " + session);
+		}
+		return handler;
+	}
+
+	private void destroyHandler(WebSocketSession session) {
+		WebSocketHandler handler = this.handlers.remove(session);
+		try {
+			if (handler != null) {
+				this.provider.destroy(handler);
+			}
+		}
+		catch (Throwable ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("Error while destroying " + handler, ex);
+			}
+		}
+	}
+
 
 	@Override
 	public String toString() {

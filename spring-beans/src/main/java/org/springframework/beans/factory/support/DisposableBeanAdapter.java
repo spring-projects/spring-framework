@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.io.Closeable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,11 +36,13 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Adapter that implements the {@link DisposableBean} and {@link Runnable} interfaces
- * performing various destruction steps on a given bean instance:
+ * Adapter that implements the {@link DisposableBean} and {@link Runnable}
+ * interfaces performing various destruction steps on a given bean instance:
  * <ul>
  * <li>DestructionAwareBeanPostProcessors;
  * <li>the bean implementing DisposableBean itself;
@@ -50,6 +51,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @author Costin Leau
+ * @author Stephane Nicoll
  * @since 2.0
  * @see AbstractBeanFactory
  * @see org.springframework.beans.factory.DisposableBean
@@ -64,18 +66,6 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	private static final String SHUTDOWN_METHOD_NAME = "shutdown";
 
 	private static final Log logger = LogFactory.getLog(DisposableBeanAdapter.class);
-
-	private static Class<?> closeableInterface;
-
-	static {
-		try {
-			closeableInterface = ClassUtils.forName("java.lang.AutoCloseable",
-					DisposableBeanAdapter.class.getClassLoader());
-		}
-		catch (ClassNotFoundException ex) {
-			closeableInterface = Closeable.class;
-		}
-	}
 
 
 	private final Object bean;
@@ -130,13 +120,13 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
 							beanName + "' has more than one parameter - not supported as destroy method");
 				}
-				else if (paramTypes.length == 1 && !paramTypes[0].equals(boolean.class)) {
+				else if (paramTypes.length == 1 && boolean.class != paramTypes[0]) {
 					throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
 							beanName + "' has a non-boolean parameter - not supported as destroy method");
 				}
 			}
 		}
-		this.beanPostProcessors = filterPostProcessors(postProcessors);
+		this.beanPostProcessors = filterPostProcessors(postProcessors, bean);
 	}
 
 	/**
@@ -152,7 +142,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		this.invokeDisposableBean = (this.bean instanceof DisposableBean);
 		this.nonPublicAccessAllowed = true;
 		this.acc = acc;
-		this.beanPostProcessors = filterPostProcessors(postProcessors);
+		this.beanPostProcessors = filterPostProcessors(postProcessors, bean);
 	}
 
 	/**
@@ -175,8 +165,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	/**
 	 * If the current value of the given beanDefinition's "destroyMethodName" property is
 	 * {@link AbstractBeanDefinition#INFER_METHOD}, then attempt to infer a destroy method.
-	 * Candidate methods are currently limited to public, no-arg methods named "close"
-	 * (whether declared locally or inherited). The given BeanDefinition's
+	 * Candidate methods are currently limited to public, no-arg methods named "close" or
+	 * "shutdown" (whether declared locally or inherited). The given BeanDefinition's
 	 * "destroyMethodName" is updated to be null if no such method is found, otherwise set
 	 * to the name of the inferred method. This constant serves as the default for the
 	 * {@code @Bean#destroyMethod} attribute and the value of the constant may also be
@@ -186,8 +176,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * interfaces, reflectively calling the "close" method on implementing beans as well.
 	 */
 	private String inferDestroyMethodIfNecessary(Object bean, RootBeanDefinition beanDefinition) {
-		if (AbstractBeanDefinition.INFER_METHOD.equals(beanDefinition.getDestroyMethodName()) ||
-				(beanDefinition.getDestroyMethodName() == null && closeableInterface.isInstance(bean))) {
+		String destroyMethodName = beanDefinition.getDestroyMethodName();
+		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
+				(destroyMethodName == null && bean instanceof AutoCloseable)) {
 			// Only perform destroy method inference or Closeable detection
 			// in case of the bean not explicitly implementing DisposableBean
 			if (!(bean instanceof DisposableBean)) {
@@ -205,21 +196,31 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 			return null;
 		}
-		return beanDefinition.getDestroyMethodName();
+		return (StringUtils.hasLength(destroyMethodName) ? destroyMethodName : null);
 	}
 
 	/**
 	 * Search for all DestructionAwareBeanPostProcessors in the List.
-	 * @param postProcessors the List to search
+	 * @param processors the List to search
 	 * @return the filtered List of DestructionAwareBeanPostProcessors
 	 */
-	private List<DestructionAwareBeanPostProcessor> filterPostProcessors(List<BeanPostProcessor> postProcessors) {
+	private List<DestructionAwareBeanPostProcessor> filterPostProcessors(List<BeanPostProcessor> processors, Object bean) {
 		List<DestructionAwareBeanPostProcessor> filteredPostProcessors = null;
-		if (postProcessors != null && !postProcessors.isEmpty()) {
-			filteredPostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>(postProcessors.size());
-			for (BeanPostProcessor postProcessor : postProcessors) {
-				if (postProcessor instanceof DestructionAwareBeanPostProcessor) {
-					filteredPostProcessors.add((DestructionAwareBeanPostProcessor) postProcessor);
+		if (!CollectionUtils.isEmpty(processors)) {
+			filteredPostProcessors = new ArrayList<>(processors.size());
+			for (BeanPostProcessor processor : processors) {
+				if (processor instanceof DestructionAwareBeanPostProcessor) {
+					DestructionAwareBeanPostProcessor dabpp = (DestructionAwareBeanPostProcessor) processor;
+					try {
+						if (dabpp.requiresDestruction(bean)) {
+							filteredPostProcessors.add(dabpp);
+						}
+					}
+					catch (AbstractMethodError err) {
+						// A pre-4.3 third-party DestructionAwareBeanPostProcessor...
+						// As of 5.0, we can let requiresDestruction be a Java 8 default method which returns true.
+						filteredPostProcessors.add(dabpp);
+					}
 				}
 			}
 		}
@@ -234,7 +235,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	@Override
 	public void destroy() {
-		if (this.beanPostProcessors != null && !this.beanPostProcessors.isEmpty()) {
+		if (!CollectionUtils.isEmpty(this.beanPostProcessors)) {
 			for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
 				processor.postProcessBeforeDestruction(this.bean, this.beanName);
 			}
@@ -296,7 +297,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		catch (IllegalArgumentException ex) {
-			throw new BeanDefinitionValidationException("Couldn't find a unique destroy method on bean with name '" +
+			throw new BeanDefinitionValidationException("Could not find unique destroy method on bean with name '" +
 					this.beanName + ": " + ex.getMessage());
 		}
 	}
@@ -374,7 +375,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	protected Object writeReplace() {
 		List<DestructionAwareBeanPostProcessor> serializablePostProcessors = null;
 		if (this.beanPostProcessors != null) {
-			serializablePostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>();
+			serializablePostProcessors = new ArrayList<>();
 			for (DestructionAwareBeanPostProcessor postProcessor : this.beanPostProcessors) {
 				if (postProcessor instanceof Serializable) {
 					serializablePostProcessors.add(postProcessor);
@@ -392,14 +393,41 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * @param beanDefinition the corresponding bean definition
 	 */
 	public static boolean hasDestroyMethod(Object bean, RootBeanDefinition beanDefinition) {
-		if (bean instanceof DisposableBean || closeableInterface.isInstance(bean)) {
+		if (bean instanceof DisposableBean || bean instanceof AutoCloseable) {
 			return true;
 		}
 		String destroyMethodName = beanDefinition.getDestroyMethodName();
 		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName)) {
-			return ClassUtils.hasMethod(bean.getClass(), CLOSE_METHOD_NAME);
+			return (ClassUtils.hasMethod(bean.getClass(), CLOSE_METHOD_NAME) ||
+					ClassUtils.hasMethod(bean.getClass(), SHUTDOWN_METHOD_NAME));
 		}
-		return (destroyMethodName != null);
+		return StringUtils.hasLength(destroyMethodName);
+	}
+
+	/**
+	 * Check whether the given bean has destruction-aware post-processors applying to it.
+	 * @param bean the bean instance
+	 * @param postProcessors the post-processor candidates
+	 */
+	public static boolean hasApplicableProcessors(Object bean, List<BeanPostProcessor> postProcessors) {
+		if (!CollectionUtils.isEmpty(postProcessors)) {
+			for (BeanPostProcessor processor : postProcessors) {
+				if (processor instanceof DestructionAwareBeanPostProcessor) {
+					DestructionAwareBeanPostProcessor dabpp = (DestructionAwareBeanPostProcessor) processor;
+					try {
+						if (dabpp.requiresDestruction(bean)) {
+							return true;
+						}
+					}
+					catch (AbstractMethodError err) {
+						// A pre-4.3 third-party DestructionAwareBeanPostProcessor...
+						// As of 5.0, we can let requiresDestruction be a Java 8 default method which returns true.
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 }

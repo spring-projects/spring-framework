@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import javax.persistence.TransactionRequiredException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
@@ -64,9 +65,9 @@ public abstract class SharedEntityManagerCreator {
 
 	private static final Class<?>[] NO_ENTITY_MANAGER_INTERFACES = new Class<?>[0];
 
-	private static final Set<String> transactionRequiringMethods = new HashSet<String>(6);
+	private static final Set<String> transactionRequiringMethods = new HashSet<>(6);
 
-	private static final Set<String> queryTerminationMethods = new HashSet<String>(3);
+	private static final Set<String> queryTerminationMethods = new HashSet<>(3);
 
 	static {
 		transactionRequiringMethods.add("joinTransaction");
@@ -114,11 +115,11 @@ public abstract class SharedEntityManagerCreator {
 	 */
 	public static EntityManager createSharedEntityManager(
 			EntityManagerFactory emf, Map<?, ?> properties, boolean synchronizedWithTransaction) {
-		Class<?> entityManagerInterface = (emf instanceof EntityManagerFactoryInfo ?
+
+		Class<?> emIfc = (emf instanceof EntityManagerFactoryInfo ?
 				((EntityManagerFactoryInfo) emf).getEntityManagerInterface() : EntityManager.class);
 		return createSharedEntityManager(emf, properties, synchronizedWithTransaction,
-				(entityManagerInterface == null ? NO_ENTITY_MANAGER_INTERFACES :
-					new Class<?>[] { entityManagerInterface }));
+				(emIfc == null ? NO_ENTITY_MANAGER_INTERFACES : new Class<?>[] {emIfc}));
 	}
 
 	/**
@@ -231,7 +232,7 @@ public abstract class SharedEntityManagerCreator {
 			else if (method.getName().equals("unwrap")) {
 				// JPA 2.0: handle unwrap method - could be a proxy match.
 				Class<?> targetClass = (Class<?>) args[0];
-				if (targetClass == null || targetClass.isInstance(proxy)) {
+				if (targetClass != null && targetClass.isInstance(proxy)) {
 					return proxy;
 				}
 			}
@@ -262,6 +263,10 @@ public abstract class SharedEntityManagerCreator {
 				return target;
 			}
 			else if (method.getName().equals("unwrap")) {
+				Class<?> targetClass = (Class<?>) args[0];
+				if (targetClass == null) {
+					return (target != null ? target : proxy);
+				}
 				// We need a transactional target now.
 				if (target == null) {
 					throw new IllegalStateException("No transactional EntityManager available");
@@ -271,8 +276,10 @@ public abstract class SharedEntityManagerCreator {
 			else if (transactionRequiringMethods.contains(method.getName())) {
 				// We need a transactional target now, according to the JPA spec.
 				// Otherwise, the operation would get accepted but remain unflushed...
-				if (target == null) {
-					throw new TransactionRequiredException("No transactional EntityManager available");
+				if (target == null || (!TransactionSynchronizationManager.isActualTransactionActive() &&
+						!target.getTransaction().isActive())) {
+					throw new TransactionRequiredException("No EntityManager with actual transaction available " +
+							"for current thread - cannot reliably process '" + method.getName() + "' call");
 				}
 			}
 
@@ -352,7 +359,10 @@ public abstract class SharedEntityManagerCreator {
 			else if (method.getName().equals("unwrap")) {
 				// Handle JPA 2.0 unwrap method - could be a proxy match.
 				Class<?> targetClass = (Class<?>) args[0];
-				if (targetClass == null || targetClass.isInstance(proxy)) {
+				if (targetClass == null) {
+					return this.target;
+				}
+				else if (targetClass.isInstance(proxy)) {
 					return proxy;
 				}
 			}

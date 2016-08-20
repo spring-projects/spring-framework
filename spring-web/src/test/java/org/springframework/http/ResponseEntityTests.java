@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,14 +134,12 @@ public class ResponseEntityTests {
 
 	@Test
 	public void headers() throws URISyntaxException {
-		String eTag = "\"foo\"";
 		URI location = new URI("location");
 		long contentLength = 67890;
 		MediaType contentType = MediaType.TEXT_PLAIN;
 
 		ResponseEntity<Void> responseEntity = ResponseEntity.ok().
 				allow(HttpMethod.GET).
-				eTag(eTag).
 				lastModified(12345L).
 				location(location).
 				contentLength(contentLength).
@@ -153,7 +151,6 @@ public class ResponseEntityTests {
 		HttpHeaders responseHeaders = responseEntity.getHeaders();
 
 		assertEquals("GET", responseHeaders.getFirst("Allow"));
-		assertEquals(eTag, responseHeaders.getFirst("ETag"));
 		assertEquals("Thu, 01 Jan 1970 00:00:12 GMT",
 				responseHeaders.getFirst("Last-Modified"));
 		assertEquals(location.toASCIIString(),
@@ -162,6 +159,19 @@ public class ResponseEntityTests {
 		assertEquals(contentType.toString(), responseHeaders.getFirst("Content-Type"));
 
 		assertNull(responseEntity.getBody());
+	}
+
+	@Test
+	public void Etagheader() throws URISyntaxException {
+
+		ResponseEntity<Void> responseEntity = ResponseEntity.ok().eTag("\"foo\"").build();
+		assertEquals("\"foo\"", responseEntity.getHeaders().getETag());
+
+		responseEntity = ResponseEntity.ok().eTag("foo").build();
+		assertEquals("\"foo\"", responseEntity.getHeaders().getETag());
+
+		responseEntity = ResponseEntity.ok().eTag("W/\"foo\"").build();
+		assertEquals("W/\"foo\"", responseEntity.getHeaders().getETag());
 	}
 
 	@Test
@@ -193,7 +203,6 @@ public class ResponseEntityTests {
 
 	@Test
 	public void emptyCacheControl() {
-
 		Integer entity = new Integer(42);
 
 		ResponseEntity<Integer> responseEntity =
@@ -241,6 +250,24 @@ public class ResponseEntityTests {
 
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
 		assertThat(cacheControlHeader, Matchers.equalTo("no-store"));
+	}
+
+	@Test
+	public void statusCodeAsInt() {
+		Integer entity = new Integer(42);
+		ResponseEntity<Integer> responseEntity = ResponseEntity.status(200).body(entity);
+
+		assertEquals(200, responseEntity.getStatusCode().value());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void customStatusCode() {
+		Integer entity = new Integer(42);
+		ResponseEntity<Integer> responseEntity = ResponseEntity.status(299).body(entity);
+
+		assertEquals(299, responseEntity.getStatusCodeValue());
+		assertEquals(entity, responseEntity.getBody());
 	}
 
 }

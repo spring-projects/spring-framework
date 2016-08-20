@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.context.annotation.configuration;
 
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
@@ -23,9 +25,12 @@ import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ConfigurationClassPostProcessor;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.tests.sample.beans.TestBean;
@@ -44,8 +49,20 @@ import static org.junit.Assert.*;
  * processing of the Aspect annotation.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  */
 public class ConfigurationClassAspectIntegrationTests {
+
+	@Test
+	public void aspectAnnotatedConfiguration() {
+		assertAdviceWasApplied(AspectConfig.class);
+	}
+
+	@Test
+	public void configurationIncludesAspect() {
+		assertAdviceWasApplied(ConfigurationWithAspect.class);
+	}
+
 	private void assertAdviceWasApplied(Class<?> configClass) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
@@ -62,19 +79,19 @@ public class ConfigurationClassAspectIntegrationTests {
 	}
 
 	@Test
-	public void aspectAnnotatedConfiguration() {
-		assertAdviceWasApplied(AspectConfig.class);
-	}
+	public void withInnerClassAndLambdaExpression() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(Application.class, CountingAspect.class);
+		ctx.getBeansOfType(Runnable.class).forEach((k, v) -> v.run());
 
-	@Test
-	public void configurationIncludesAspect() {
-		assertAdviceWasApplied(ConfigurationWithAspect.class);
+		// TODO: returns just 1 as of AspectJ 1.9 beta 3, not detecting the applicable lambda expression anymore
+		// assertEquals(2, ctx.getBean(CountingAspect.class).count);
 	}
 
 
 	@Aspect
 	@Configuration
 	static class AspectConfig {
+
 		@Bean
 		public TestBean testBean() {
 			return new TestBean("name");
@@ -86,8 +103,10 @@ public class ConfigurationClassAspectIntegrationTests {
 		}
 	}
 
+
 	@Configuration
 	static class ConfigurationWithAspect {
+
 		@Bean
 		public TestBean testBean() {
 			return new TestBean("name");
@@ -99,11 +118,48 @@ public class ConfigurationClassAspectIntegrationTests {
 		}
 	}
 
+
 	@Aspect
 	static class NameChangingAspect {
+
 		@Before("execution(* org.springframework.tests.sample.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}
 	}
+
+
+
+	@Configuration
+	@EnableAspectJAutoProxy
+	public static class Application {
+
+		@Bean
+		Runnable fromInnerClass() {
+			return new Runnable() {
+				@Override
+				public void run() {
+				}
+			};
+		}
+
+		@Bean
+		Runnable fromLambdaExpression() {
+			return () -> {
+			};
+		}
+	}
+
+
+	@Aspect
+	public static class CountingAspect {
+
+		public int count = 0;
+
+		@After("execution(* java.lang.Runnable.*(..))")
+		public void after(JoinPoint joinPoint) {
+			count++;
+		}
+	}
+
 }

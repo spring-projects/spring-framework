@@ -29,8 +29,7 @@ Framework. The Spring Framework provides a consistent abstraction for transactio
 management that delivers the following benefits:
 
 * Consistent programming model across different transaction APIs such as Java
-  Transaction API (JTA), JDBC, Hibernate, Java Persistence API (JPA), and Java Data
-  Objects (JDO).
+  Transaction API (JTA), JDBC, Hibernate, and Java Persistence API (JPA).
 * Support for <<transaction-declarative,declarative transaction management>>.
 * Simpler API for <<transaction-programmatic,programmatic>> transaction management than
   complex transaction APIs such as JTA.
@@ -54,6 +53,8 @@ server integration, and solutions to common problems.)
   declarative transaction management.
 * <<transaction-programmatic,Programmatic transaction management>> covers support for
   programmatic (that is, explicitly coded) transaction management.
+* <<transaction-event,Transaction bound event>> describes how you could use application
+  events within a transaction.
 
 
 
@@ -306,7 +307,7 @@ infrastructure.
 [NOTE]
 ====
 The above definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from the
-`jee` namespace. For more information on schema-based configuration, see <<xsd-config>>,
+`jee` namespace. For more information on schema-based configuration, see <<xsd-configuration>>,
 and for more information on the `<jee/>` tags see the section entitled
 <<xsd-config-body-schemas-jee>>.
 ====
@@ -332,8 +333,8 @@ the `HibernateTransactionManager` needs a reference to the `SessionFactory`.
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
 		<property name="mappingResources">
 			<list>
 				<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
@@ -346,8 +347,8 @@ the `HibernateTransactionManager` needs a reference to the `SessionFactory`.
 		</property>
 	</bean>
 
-	<bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
-		<property name="sessionFactory" ref="sessionFactory" />
+	<bean id="txManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 ----
 
@@ -382,7 +383,7 @@ It should now be clear how you create different transaction managers, and how th
 linked to related resources that need to be synchronized to transactions (for example
 `DataSourceTransactionManager` to a JDBC `DataSource`, `HibernateTransactionManager` to
 a Hibernate `SessionFactory`, and so forth). This section describes how the application
-code, directly or indirectly using a persistence API such as JDBC, Hibernate, or JDO,
+code, directly or indirectly using a persistence API such as JDBC, Hibernate, or JPA,
 ensures that these resources are created, reused, and cleaned up properly. The section
 also discusses how transaction synchronization is triggered (optionally) through the
 relevant `PlatformTransactionManager`.
@@ -406,12 +407,11 @@ chapters of this reference documentation.
 [[tx-resource-synchronization-low]]
 ==== Low-level synchronization approach
 Classes such as `DataSourceUtils` (for JDBC), `EntityManagerFactoryUtils` (for JPA),
-`SessionFactoryUtils` (for Hibernate), `PersistenceManagerFactoryUtils` (for JDO), and
-so on exist at a lower level. When you want the application code to deal directly with
-the resource types of the native persistence APIs, you use these classes to ensure that
-proper Spring Framework-managed instances are obtained, transactions are (optionally)
-synchronized, and exceptions that occur in the process are properly mapped to a
-consistent API.
+`SessionFactoryUtils` (for Hibernate), and so on exist at a lower level. When you want the
+application code to deal directly with the resource types of the native persistence APIs,
+you use these classes to ensure that proper Spring Framework-managed instances are obtained,
+transactions are (optionally) synchronized, and exceptions that occur in the process are
+properly mapped to a consistent API.
 
 For example, in the case of JDBC, instead of the traditional JDBC approach of calling
 the `getConnection()` method on the `DataSource`, you instead use Spring's
@@ -483,7 +483,7 @@ necessary. The differences between the two types of transaction management are:
 
 * Unlike EJB CMT, which is tied to JTA, the Spring Framework's declarative transaction
   management works in any environment. It can work with JTA transactions or local
-  transactions using JDBC, JPA, Hibernate or JDO by simply adjusting the configuration
+  transactions using JDBC, JPA or Hibernate by simply adjusting the configuration
   files.
 * You can apply the Spring Framework declarative transaction management to any class,
   not merely special classes such as EJBs.
@@ -799,7 +799,7 @@ the call stack, and make a determination whether to mark the transaction for rol
 In its default configuration, the Spring Framework's transaction infrastructure code
 __only__ marks a transaction for rollback in the case of runtime, unchecked exceptions;
 that is, when the thrown exception is an instance or subclass of `RuntimeException`. (
-++Error++s will also - by default - result in a rollback). Checked exceptions that are
+``Error``s will also - by default - result in a rollback). Checked exceptions that are
 thrown from a transactional method do __not__ result in rollback in the default
 configuration.
 
@@ -1294,7 +1294,7 @@ These default settings can be changed; the various properties of the `@Transacti
 annotation are summarized in the following table:
 
 [[tx-attransactional-properties]]
-.@
+.@Transactional Settings
 |===
 | Property| Type| Description
 
@@ -1776,7 +1776,7 @@ a transaction. You then pass an instance of your custom `TransactionCallback` to
 
 		// use constructor-injection to supply the PlatformTransactionManager
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
+			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 		}
 
@@ -1843,7 +1843,7 @@ a specific `TransactionTemplate:`
 		private final TransactionTemplate transactionTemplate;
 
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
+			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 
 			// the transaction settings can be set here explicitly if so desired
@@ -1924,8 +1924,44 @@ management out of business logic, and is not difficult to configure. When using 
 Spring Framework, rather than EJB CMT, the configuration cost of declarative transaction
 management is greatly reduced.
 
+[[transaction-event]]
+=== Transaction bound event
 
+As of Spring 4.2, the listener of an event can be bound to a phase of the transaction. The
+typical example is to handle the event when the transaction has completed successfully: this
+allows events to be used with more flexibility when the outcome of the current transaction
+actually matters to the listener.
 
+Registering a regular event listener is done via the `@EventListener` annotation. If you need
+to bind it to the transaction use `@TransactionalEventListener`. When you do so, the listener
+will be bound to the commit phase of the transaction by default.
+
+Let's take an example to illustrate this concept. Assume that a component publish an order
+created event and we want to define a listener that should only handle that event once the
+transaction in which it has been published as committed successfully:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Component
+    public class MyComponent {
+
+    	@TransactionalEventListener
+    	public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
+      		...
+    	}
+
+    }
+----
+
+The `TransactionalEventListener` annotation exposes a `phase` attribute  that allows to customize
+to which phase of the transaction the listener should be bound to. The valid phases are `BEFORE_COMMIT`,
+`AFTER_COMMIT` (default), `AFTER_ROLLBACK` and `AFTER_COMPLETION` that aggregates the transaction
+completion (be it a commit or a rollback).
+
+If no transaction is running, the listener is not invoked at all since we can't honor the required
+semantics. It is however possible to override that behaviour by setting the `fallbackExecution` attribute
+of the annotation to `true`.
 
 [[transaction-application-server-integration]]
 === Application server-specific integration
@@ -2020,7 +2056,7 @@ For more information about the Spring Framework's transaction support:
 [[dao-introduction]]
 === Introduction
 The Data Access Object (DAO) support in Spring is aimed at making it easy to work with
-data access technologies like JDBC, Hibernate, JPA or JDO in a consistent way. This
+data access technologies like JDBC, Hibernate or JPA in a consistent way. This
 allows one to switch between the aforementioned persistence technologies fairly easily
 and it also allows one to code without worrying about catching exceptions that are
 specific to each technology.
@@ -2036,24 +2072,23 @@ the root exception. These exceptions wrap the original exception so there is nev
 risk that one might lose any information as to what might have gone wrong.
 
 In addition to JDBC exceptions, Spring can also wrap Hibernate-specific exceptions,
-converting them from proprietary, checked exceptions (in the case of versions of
-Hibernate prior to Hibernate 3.0), to a set of focused runtime exceptions (the same is
-true for JDO and JPA exceptions). This allows one to handle most persistence exceptions,
-which are non-recoverable, only in the appropriate layers, without having annoying
-boilerplate catch-and-throw blocks and exception declarations in one's DAOs. (One can
-still trap and handle exceptions anywhere one needs to though.) As mentioned above, JDBC
+converting them to a set of focused runtime exceptions (the same is true for JPA
+exceptions). This allows one to handle most persistence exceptions, which are
+non-recoverable, only in the appropriate layers, without having annoying boilerplate
+catch-and-throw blocks and exception declarations in one's DAOs. (One can still trap
+and handle exceptions anywhere one needs to though.) As mentioned above, JDBC
 exceptions (including database-specific dialects) are also converted to the same
 hierarchy, meaning that one can perform some operations with JDBC within a consistent
 programming model.
 
 The above holds true for the various template classes in Springs support for various ORM
 frameworks. If one uses the interceptor-based classes then the application must care
-about handling `HibernateExceptions` and `JDOExceptions` itself, preferably via
+about handling `HibernateExceptions` and `PersistenceExceptions` itself, preferably via
 delegating to `SessionFactoryUtils`' `convertHibernateAccessException(..)` or
-`convertJdoAccessException()` methods respectively. These methods convert the exceptions
+`convertJpaAccessException()` methods respectively. These methods convert the exceptions
 to ones that are compatible with the exceptions in the `org.springframework.dao`
-exception hierarchy. As `JDOExceptions` are unchecked, they can simply get thrown too,
-sacrificing generic DAO abstraction in terms of exceptions though.
+exception hierarchy. As `PersistenceExceptions` are unchecked, they can simply get
+thrown too, sacrificing generic DAO abstraction in terms of exceptions though.
 
 The exception hierarchy that Spring provides can be seen below. (Please note that the
 class hierarchy detailed in the image shows only a subset of the entire
@@ -2254,19 +2289,19 @@ various callback interfaces, plus a variety of related classes. A subpackage nam
 `SimpleJdbcCall` classes. Another subpackage named
 `org.springframework.jdbc.core.namedparam` contains the `NamedParameterJdbcTemplate`
 class and the related support classes. See <<jdbc-core>>, <<jdbc-advanced-jdbc>>, and
-<<jdbc-simple-jdbc>>
+<<jdbc-simple-jdbc>>.
 
 The `org.springframework.jdbc.datasource` package contains a utility class for easy
-`DataSource` access, and various simple `DataSource` implementations that can be used
-for testing and running unmodified JDBC code outside of a Java EE container. A
-subpackage named `org.springfamework.jdbc.datasource.embedded` provides support for
-creating in-memory database instances using Java database engines such as HSQL and H2.
-See <<jdbc-connections>> and <<jdbc-embedded-database-support>>
+`DataSource` access, and various simple `DataSource` implementations that can be used for
+testing and running unmodified JDBC code outside of a Java EE container. A subpackage
+named `org.springfamework.jdbc.datasource.embedded` provides support for creating
+embedded databases using Java database engines such as HSQL, H2, and Derby. See
+<<jdbc-connections>> and <<jdbc-embedded-database-support>>.
 
 The `org.springframework.jdbc.object` package contains classes that represent RDBMS
-queries, updates, and stored procedures as thread safe, reusable objects. See
-<<jdbc-object>>.This approach is modeled by JDO, although of course objects returned by
-queries are "disconnected" from the database. This higher level of JDBC abstraction
+queries, updates, and stored procedures as thread-safe, reusable objects. See
+<<jdbc-object>>. This approach is modeled by JDO, although objects returned by queries
+are naturally _disconnected_ from the database. This higher level of JDBC abstraction
 depends on the lower-level abstraction in the `org.springframework.jdbc.core` package.
 
 The `org.springframework.jdbc.support` package provides `SQLException` translation
@@ -2293,7 +2328,7 @@ creation and release of resources, which helps you avoid common errors such as
 forgetting to close the connection. It performs the basic tasks of the core JDBC
 workflow such as statement creation and execution, leaving application code to provide
 SQL and extract results. The `JdbcTemplate` class executes SQL queries, update
-statements and stored procedure calls, performs iteration over ++ResultSet++s and
+statements and stored procedure calls, performs iteration over ``ResultSet``s and
 extraction of returned parameter values. It also catches JDBC exceptions and translates
 them to the generic, more informative, exception hierarchy defined in the
 `org.springframework.dao` package.
@@ -2881,10 +2916,6 @@ query methods, one for an `int` and one that queries for a `String`.
 		public String getName() {
 			return this.jdbcTemplate.queryForObject("select name from mytable", String.class);
 		}
-
-		public void setDataSource(DataSource dataSource) {
-			this.dataSource = dataSource;
-		}
 	}
 ----
 
@@ -3402,7 +3433,7 @@ The batch update methods for this call returns an array of int arrays containing
 entry for each batch with an array of the number of affected rows for each update. The top
 level array's length indicates the number of batches executed and the second level array's
 length indicates the number of updates in that batch. The number of updates in each batch
-should be the the batch size provided for all batches except for the last one that might
+should be the batch size provided for all batches except for the last one that might
 be less, depending on the total number of update objects provided. The update count for
 each update statement is the one reported by the JDBC driver. If the count is not
 available, the JDBC driver returns a -2 value.
@@ -3700,12 +3731,10 @@ data retrieved. Again, it is important to use the names of the `out` parameters 
 are declared in the stored procedure. Also, the case in the names of the `out`
 parameters stored in the results map matches that of the `out` parameter names in the
 database, which could vary between databases. To make your code more portable you should
-do a case-insensitive lookup or instruct Spring to use a `CaseInsensitiveMap` from the
-Jakarta Commons project. To do the latter, you create your own `JdbcTemplate` and set
-the `setResultsMapCaseInsensitive` property to `true`. Then you pass this customized
-`JdbcTemplate` instance into the constructor of your `SimpleJdbcCall`. You must include
-the `commons-collections.jar` in your classpath for this to work. Here is an example of
-this configuration:
+do a case-insensitive lookup or instruct Spring to use a `LinkedCaseInsensitiveMap`.
+To do the latter, you create your own `JdbcTemplate` and set the `setResultsMapCaseInsensitive`
+property to `true`. Then you pass this customized `JdbcTemplate` instance into
+the constructor of your `SimpleJdbcCall`. Here is an example of this configuration:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3743,7 +3772,7 @@ as input. See the next section for details on how to define an `SqlParameter`.
 Explicit declarations are necessary if the database you use is not a Spring-supported
 database. Currently Spring supports metadata lookup of stored procedure calls for the
 following databases: Apache Derby, DB2, MySQL, Microsoft SQL Server, Oracle, and Sybase.
-We also support metadata lookup of stored functions for: MySQL, Microsoft SQL Server,
+We also support metadata lookup of stored functions for MySQL, Microsoft SQL Server,
 and Oracle.
 ====
 
@@ -3916,7 +3945,7 @@ rows from the t_actor table. Here is the MySQL source for this procedure:
 ----
 
 To call this procedure you declare the `RowMapper`. Because the class you want to map to
-follows the JavaBean rules, you can use a `ParameterizedBeanPropertyRowMapper` that is
+follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is
 created by passing in the required class to map to in the `newInstance` method.
 
 [source,java,indent=0]
@@ -3932,7 +3961,7 @@ created by passing in the required class to map to in the `newInstance` method.
 			this.procReadAllActors = new SimpleJdbcCall(jdbcTemplate)
 					.withProcedureName("read_all_actors")
 					.returningResultSet("actors",
-					ParameterizedBeanPropertyRowMapper.newInstance(Actor.class));
+					BeanPropertyRowMapper.newInstance(Actor.class));
 		}
 
 		public List getActorsList() {
@@ -4357,33 +4386,34 @@ You can provide SQL type information in several ways:
 
 [[jdbc-lob]]
 ==== Handling BLOB and CLOB objects
-You can store images, other binary objects, and large chunks of text. These large object
-are called BLOB for binary data and CLOB for character data. In Spring you can handle
-these large objects by using the JdbcTemplate directly and also when using the higher
-abstractions provided by RDBMS Objects and the `SimpleJdbc` classes. All of these
-approaches use an implementation of the `LobHandler` interface for the actual management
-of the LOB data. The `LobHandler` provides access to a `LobCreator` class, through the
-`getLobCreator` method, used for creating new LOB objects to be inserted.
+You can store images, other binary data, and large chunks of text in the database. These
+large objects are called BLOBs (Binary Large OBject) for binary data and CLOBs (Character
+Large OBject) for character data. In Spring you can handle these large objects by using
+the `JdbcTemplate` directly and also when using the higher abstractions provided by RDBMS
+Objects and the `SimpleJdbc` classes. All of these approaches use an implementation of
+the `LobHandler` interface for the actual management of the LOB (Large OBject) data. The
+`LobHandler` provides access to a `LobCreator` class, through the `getLobCreator` method,
+used for creating new LOB objects to be inserted.
 
 The `LobCreator/LobHandler` provides the following support for LOB input and output:
 
 * BLOB
-* byte[] -- getBlobAsBytes and setBlobAsBytes
-* InputStream -- getBlobAsBinaryStream and setBlobAsBinaryStream
+** `byte[]` -- `getBlobAsBytes` and `setBlobAsBytes`
+** `InputStream` -- `getBlobAsBinaryStream` and `setBlobAsBinaryStream`
 * CLOB
-* String -- getClobAsString and setClobAsString
-* InputStream -- getClobAsAsciiStream and setClobAsAsciiStream
-* Reader -- getClobAsCharacterStream and setClobAsCharacterStream
+** `String` -- `getClobAsString` and `setClobAsString`
+** `InputStream` -- `getClobAsAsciiStream` and `setClobAsAsciiStream`
+** `Reader` -- `getClobAsCharacterStream` and `setClobAsCharacterStream`
 
 The next example shows how to create and insert a BLOB. Later you will see how to read
 it back from the database.
 
 This example uses a `JdbcTemplate` and an implementation of the
-`AbstractLobCreatingPreparedStatementCallbac` `k`. It implements one method,
+`AbstractLobCreatingPreparedStatementCallback`. It implements one method,
 `setValues`. This method provides a `LobCreator` that you use to set the values for the
 LOB columns in your SQL insert statement.
 
-For this example we assume that there is a variable, `lobHandle` `r`, that already is
+For this example we assume that there is a variable, `lobHandler`, that already is
 set to an instance of a `DefaultLobHandler`. You typically set this value through
 dependency injection.
 
@@ -4409,12 +4439,27 @@ dependency injection.
 	clobReader.close();
 ----
 
-<1> Pass in the lobHandler that in this example is a plain `DefaultLobHandler`
+<1> Pass in the `lobHandler` that in this example is a plain `DefaultLobHandler`.
 <2> Using the method `setClobAsCharacterStream`, pass in the contents of the CLOB.
 <3> Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
 
+
+[NOTE]
+====
+If you invoke the `setBlobAsBinaryStream`, `setClobAsAsciiStream`, or
+`setClobAsCharacterStream` method on the `LobCreator` returned from
+`DefaultLobHandler.getLobCreator()`, you can optionally specify a negative value for the
+`contentLength` argument. If the specified content length is negative, the
+`DefaultLobHandler` will use the JDBC 4.0 variants of the set-stream methods without a
+length parameter; otherwise, it will pass the specified length on to the driver.
+
+Consult the documentation for the JDBC driver in use to verify support for streaming a
+LOB without providing the content length.
+====
+
+
 Now it's time to read the LOB data from the database. Again, you use a `JdbcTemplate`
-with the same instance variable `l` `obHandler` and a reference to a `DefaultLobHandler`.
+with the same instance variable `lobHandler` and a reference to a `DefaultLobHandler`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4496,8 +4541,8 @@ declaration of an `SqlOutParameter`.
 You use the `SqlTypeValue` to pass in the value of a Java object like `TestItem` into a
 stored procedure. The `SqlTypeValue` interface has a single method named
 `createTypeValue` that you must implement. The active connection is passed in, and you
-can use it to create database-specific objects such as ++StructDescriptor++s, as shown in
-the following example, or ++ArrayDescriptor++s.
+can use it to create database-specific objects such as ``StructDescriptor``s, as shown in
+the following example, or ``ArrayDescriptor``s.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4563,91 +4608,121 @@ testability, and the ability to rapidly evolve SQL during development.
 
 
 [[jdbc-embedded-database-xml]]
-==== Creating an embedded database instance using Spring XML
+==== Creating an embedded database using Spring XML
+
 If you want to expose an embedded database instance as a bean in a Spring
-ApplicationContext, use the embedded-database tag in the spring-jdbc namespace:
+`ApplicationContext`, use the `embedded-database` tag in the `spring-jdbc` namespace:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<jdbc:embedded-database id="dataSource">
+	<jdbc:embedded-database id="dataSource" generate-name="true">
 		<jdbc:script location="classpath:schema.sql"/>
 		<jdbc:script location="classpath:test-data.sql"/>
 	</jdbc:embedded-database>
 ----
 
 The preceding configuration creates an embedded HSQL database populated with SQL from
-schema.sql and testdata.sql resources in the classpath. The database instance is made
-available to the Spring container as a bean of type `javax.sql.DataSource`. This bean
-can then be injected into data access objects as needed.
+`schema.sql` and `test-data.sql` resources in the root of the classpath. In addition, as
+a best practice, the embedded database will be assigned a uniquely generated name. The
+embedded database is made available to the Spring container as a bean of type
+`javax.sql.DataSource` which can then be injected into data access objects as needed.
 
 
 
 [[jdbc-embedded-database-java]]
-==== Creating an embedded database instance programmatically
+==== Creating an embedded database programmatically
+
 The `EmbeddedDatabaseBuilder` class provides a fluent API for constructing an embedded
-database programmatically. Use this when you need to create an embedded database
-instance in a standalone environment, such as a data access object unit test:
+database programmatically. Use this when you need to create an embedded database in a
+standalone environment or in a standalone integration test like in the following example.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-	EmbeddedDatabase db = builder.setType(H2).addScript("my-schema.sql").addScript("my-test-data.sql").build();
-	// do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
-	db.shutdown()
+EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+    .generateUniqueName(true)
+    .setType(H2)
+    .setScriptEncoding("UTF-8")
+    .ignoreFailedDrops(true)
+    .addScript("schema.sql")
+    .addScripts("user_data.sql", "country_data.sql")
+    .build();
+
+// perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
+
+db.shutdown()
 ----
 
+Consult the Javadoc for `EmbeddedDatabaseBuilder` for further details on all supported
+options.
 
+The `EmbeddedDatabaseBuilder` can also be used to create an embedded database using Java
+Config like in the following example.
 
-[[jdbc-embedded-database-extension]]
-==== Extending the embedded database support
-Spring JDBC embedded database support can be extended in two ways:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class DataSourceConfig {
 
-* Implement `EmbeddedDatabaseConfigurer` to support a new embedded database type, such
-  as Apache Derby.
-* Implement `DataSourceFactory` to support a new DataSource implementation, such as a
-  connection pool, to manage embedded database connections.
+    @Bean
+    public DataSource dataSource() {
+        return new EmbeddedDatabaseBuilder()
+            .generateUniqueName(true)
+            .setType(H2)
+            .setScriptEncoding("UTF-8")
+            .ignoreFailedDrops(true)
+            .addScript("schema.sql")
+            .addScripts("user_data.sql", "country_data.sql")
+            .build();
+    }
+}
+----
 
-You are encouraged to contribute back extensions to the Spring community at
-https://jira.spring.io/browse/SPR[jira.spring.io].
-
+[[jdbc-embedded-database-types]]
+==== Selecting the embedded database type
 
 
 [[jdbc-embedded-database-using-HSQL]]
-==== Using HSQL
-Spring supports HSQL 1.8.0 and above. HSQL is the default embedded database if no type
-is specified explicitly. To specify HSQL explicitly, set the `type` attribute of the
+===== Using HSQL
+Spring supports HSQL 1.8.0 and above. HSQL is the default embedded database if no type is
+specified explicitly. To specify HSQL explicitly, set the `type` attribute of the
 `embedded-database` tag to `HSQL`. If you are using the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.HSQL`.
 
 
-
 [[jdbc-embedded-database-using-H2]]
-==== Using H2
+===== Using H2
 Spring supports the H2 database as well. To enable H2, set the `type` attribute of the
 `embedded-database` tag to `H2`. If you are using the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.H2`.
 
 
-
 [[jdbc-embedded-database-using-Derby]]
-==== Using Derby
+===== Using Derby
 Spring also supports Apache Derby 10.5 and above. To enable Derby, set the `type`
-attribute of the `embedded-database` tag to `Derby`. If using the builder API, call the
-`setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.Derby`.
+attribute of the `embedded-database` tag to `DERBY`. If you are using the builder API,
+call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY`.
 
 
 
 [[jdbc-embedded-database-dao-testing]]
 ==== Testing data access logic with an embedded database
-Embedded databases provide a lightweight way to test data access code. The following is
-a data access unit test template that uses an embedded database:
+
+Embedded databases provide a lightweight way to test data access code. The following is a
+data access integration test template that uses an embedded database. Using a template
+like this can be useful for _one-offs_ when the embedded database does not need to be
+reused across test classes. However, if you wish to create an embedded database that is
+shared within a test suite, consider using the <<testcontext-framework,Spring TestContext
+Framework>> and configuring the embedded database as a bean in the Spring
+`ApplicationContext` as described in <<jdbc-embedded-database-xml>> and
+<<jdbc-embedded-database-java>>.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class DataAccessUnitTestTemplate {
+	public class DataAccessIntegrationTestTemplate {
 
 		private EmbeddedDatabase db;
 
@@ -4655,13 +4730,16 @@ a data access unit test template that uses an embedded database:
 		public void setUp() {
 			// creates an HSQL in-memory database populated from default scripts
 			// classpath:schema.sql and classpath:data.sql
-			db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
+			db = new EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.addDefaultScripts()
+					.build();
 		}
 
 		@Test
 		public void testDataAccess() {
 			JdbcTemplate template = new JdbcTemplate(db);
-			template.query(...);
+			template.query( /* ... */ );
 		}
 
 		@After
@@ -4672,6 +4750,50 @@ a data access unit test template that uses an embedded database:
 	}
 ----
 
+
+[[jdbc-embedded-database-unique-names]]
+==== Generating unique names for embedded databases
+
+Development teams often encounter errors with embedded databases if their test suite
+inadvertently attempts to recreate additional instances of the same database. This can
+happen quite easily if an XML configuration file or `@Configuration` class is responsible
+for creating an embedded database and the corresponding configuration is then reused
+across multiple testing scenarios within the same test suite (i.e., within the same JVM
+process) –- for example, integration tests against embedded databases whose
+`ApplicationContext` configuration only differs with regard to which bean definition
+profiles are active.
+
+The root cause of such errors is the fact that Spring's `EmbeddedDatabaseFactory` (used
+internally by both the `<jdbc:embedded-database>` XML namespace element and the
+`EmbeddedDatabaseBuilder` for Java Config) will set the name of the embedded database to
+`"testdb"` if not otherwise specified. For the case of `<jdbc:embedded-database>`, the
+embedded database is typically assigned a name equal to the bean's `id` (i.e., often
+something like `"dataSource"`). Thus, subsequent attempts to create an embedded database
+will not result in a new database. Instead, the same JDBC connection URL will be reused,
+and attempts to create a new embedded database will actually point to an existing
+embedded database created from the same configuration.
+
+To address this common issue Spring Framework 4.2 provides support for generating
+_unique_ names for embedded databases. To enable the use of generated names, use one of
+the following options.
+
+* `EmbeddedDatabaseFactory.setGenerateUniqueDatabaseName()`
+* `EmbeddedDatabaseBuilder.generateUniqueName()`
+* `<jdbc:embedded-database generate-name="true" ... >`
+
+
+
+[[jdbc-embedded-database-extension]]
+==== Extending the embedded database support
+
+Spring JDBC embedded database support can be extended in two ways:
+
+* Implement `EmbeddedDatabaseConfigurer` to support a new embedded database type.
+* Implement `DataSourceFactory` to support a new `DataSource` implementation, such as a
+  connection pool to manage embedded database connections.
+
+You are encouraged to contribute back extensions to the Spring community at
+https://jira.spring.io/browse/SPR[jira.spring.io].
 
 
 
@@ -4685,8 +4807,8 @@ an instance running on a server somewhere.
 
 
 [[jdbc-initializing-datasource-xml]]
-==== Initializing a database instance using Spring XML
-If you want to initialize a database and you can provide a reference to a DataSource
+==== Initializing a database using Spring XML
+If you want to initialize a database and you can provide a reference to a `DataSource`
 bean, use the `initialize-database` tag in the `spring-jdbc` namespace:
 
 [source,xml,indent=0]
@@ -4698,23 +4820,24 @@ bean, use the `initialize-database` tag in the `spring-jdbc` namespace:
 	</jdbc:initialize-database>
 ----
 
-The example above runs the two scripts specified against the database: the first script
-is a schema creation, and the second is a test data set insert. The script locations can
-also be patterns with wildcards in the usual ant style used for resources in Spring
-(e.g. `classpath{asterisk}:/com/foo/{asterisk}{asterisk}/sql/{asterisk}-data.sql`).
-If a pattern is used the scripts are executed in lexical order of their URL or filename.
+The example above executes the two scripts specified against the database: the first
+script creates a schema, and the second populates tables with a test data set. The script
+locations can also be patterns with wildcards in the usual ant style used for resources
+in Spring (e.g.
+`classpath{asterisk}:/com/foo/{asterisk}{asterisk}/sql/{asterisk}-data.sql`). If a
+pattern is used, the scripts are executed in lexical order of their URL or filename.
 
 The default behavior of the database initializer is to unconditionally execute the
-scripts provided. This will not always be what you want, for instance if running against
-an existing database that already has test data in it. The likelihood of accidentally
-deleting data is reduced by the commonest pattern (as shown above) that creates the
-tables first and then inserts the data - the first step will fail if the tables already
-exist.
+scripts provided. This will not always be what you want, for instance, if you are
+executing the scripts against a database that already has test data in it. The likelihood
+of accidentally deleting data is reduced by following the common pattern (as shown above)
+of creating the tables first and then inserting the data -- the first step will fail if
+the tables already exist.
 
-However, to get more control over the creation and deletion of existing data, the XML
-namespace provides a couple more options. The first is flag to switch the initialization
-on and off. This can be set according to the environment (e.g. to pull a boolean value
-from system properties or an environment bean), e.g.
+However, to gain more control over the creation and deletion of existing data, the XML
+namespace provides a few additional options. The first is a flag to switch the
+initialization on and off. This can be set according to the environment (e.g. to pull a
+boolean value from system properties or an environment bean), for example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4727,7 +4850,7 @@ from system properties or an environment bean), e.g.
 
 The second option to control what happens with existing data is to be more tolerant of
 failures. To this end you can control the ability of the initializer to ignore certain
-errors in the SQL it executes from the scripts, e.g.
+errors in the SQL it executes from the scripts, for example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4737,62 +4860,87 @@ errors in the SQL it executes from the scripts, e.g.
 	</jdbc:initialize-database>
 ----
 
-In this example we are saying we expect that sometimes the scripts will be run against
-an empty database and there are some DROP statements in the scripts which would
-therefore fail. So failed SQL `DROP` statements will be ignored, but other failures will
-cause an exception. This is useful if your SQL dialect doesn't support `DROP ... IF
+In this example we are saying we expect that sometimes the scripts will be executed
+against an empty database, and there are some `DROP` statements in the scripts which
+would therefore fail. So failed SQL `DROP` statements will be ignored, but other failures
+will cause an exception. This is useful if your SQL dialect doesn't support `DROP ... IF
 EXISTS` (or similar) but you want to unconditionally remove all test data before
-re-creating it. In that case the first script is usually a set of drops, followed by a
-set of `CREATE` statements.
+re-creating it. In that case the first script is usually a set of `DROP` statements,
+followed by a set of `CREATE` statements.
 
 The `ignore-failures` option can be set to `NONE` (the default), `DROPS` (ignore failed
-drops) or `ALL` (ignore all failures).
+drops), or `ALL` (ignore all failures).
+
+Each statement should be separated by `;` or a new line if the `;` character is not
+present at all in the script. You can control that globally or script by script, for
+example:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jdbc:initialize-database data-source="dataSource" **separator="@@"**>
+		<jdbc:script location="classpath:com/foo/sql/db-schema.sql" **separator=";"**/>
+		<jdbc:script location="classpath:com/foo/sql/db-test-data-1.sql"/>
+		<jdbc:script location="classpath:com/foo/sql/db-test-data-2.sql"/>
+	</jdbc:initialize-database>
+----
+
+In this example, the two `test-data` scripts use `@@` as statement separator and only
+the `db-schema.sql` uses `;`. This configuration specifies that the default separator
+is `@@` and override that default for the `db-schema` script.
+
 
 If you need more control than you get from the XML namespace, you can simply use the
-`DataSourceInitializer` directly, and define it as a component in your application.
+`DataSourceInitializer` directly and define it as a component in your application.
 
 
 [[jdbc-client-component-initialization]]
-===== Initialization of Other Components that Depend on the Database
+===== Initialization of other components that depend on the database
+
 A large class of applications can just use the database initializer with no further
 complications: those that do not use the database until after the Spring context has
-started. If your application is __not__ one of those then you might need to read the
-rest of this section.
+started. If your application is __not__ one of those then you might need to read the rest
+of this section.
 
-The database initializer depends on a data source instance and runs the scripts provided
-in its initialization callback (c.f. `init-method` in an XML bean definition or
-`InitializingBean`). If other beans depend on the same data source and also use the data
-source in an initialization callback then there might be a problem because the data has
-not yet been initialized. A common example of this is a cache that initializes eagerly
-and loads up data from the database on application startup.
+The database initializer depends on a `DataSource` instance and executes the scripts
+provided in its initialization callback (analogous to an `init-method` in an XML bean
+definition, a `@PostConstruct` method in a component, or the `afterPropertiesSet()`
+method in a component that implements `InitializingBean`). If other beans depend on the
+same data source and also use the data source in an initialization callback, then there
+might be a problem because the data has not yet been initialized. A common example of
+this is a cache that initializes eagerly and loads data from the database on application
+startup.
 
-To get round this issue you two options: change your cache initialization strategy to a
-later phase, or ensure that the database initializer is initialized first.
+To get around this issue you have two options: change your cache initialization strategy
+to a later phase, or ensure that the database initializer is initialized first.
 
 The first option might be easy if the application is in your control, and not otherwise.
-Some suggestions for how to implement this are
+Some suggestions for how to implement this include:
 
-* Make the cache initialize lazily on first usage, which improves application startup time
+* Make the cache initialize lazily on first usage, which improves application startup
+  time.
 * Have your cache or a separate component that initializes the cache implement
   `Lifecycle` or `SmartLifecycle`. When the application context starts up a
   `SmartLifecycle` can be automatically started if its `autoStartup` flag is set, and a
-  `Lifecycle` can be started manually by calling
-  `ConfigurableApplicationContext.start()` on the enclosing context.
+  `Lifecycle` can be started manually by calling `ConfigurableApplicationContext.start()`
+  on the enclosing context.
 * Use a Spring `ApplicationEvent` or similar custom observer mechanism to trigger the
   cache initialization. `ContextRefreshedEvent` is always published by the context when
   it is ready for use (after all beans have been initialized), so that is often a useful
   hook (this is how the `SmartLifecycle` works by default).
 
-The second option can also be easy. Some suggestions on how to implement this are
+The second option can also be easy. Some suggestions on how to implement this include:
 
-* Rely on Spring BeanFactory default behavior, which is that beans are initialized in
-  registration order. You can easily arrange that by adopting the common practice of a
-  set of <import/> elements that order your application modules, and ensure that the
-  database and database initialization are listed first
-* Separate the datasource and the business components that use it and control their
-  startup order by putting them in separate ApplicationContext instances (e.g. parent
-  has the datasource and child has the business components). This structure is common in
-  Spring web applications, but can be more generally applied.
+* Rely on the default behavior of the Spring `BeanFactory`, which is that beans are
+  initialized in registration order. You can easily arrange that by adopting the common
+  practice of a set of `<import/>` elements in XML configuration that order your
+  application modules, and ensure that the database and database initialization are
+  listed first.
+* Separate the `DataSource` and the business components that use it, and control their
+  startup order by putting them in separate `ApplicationContext` instances (e.g. the
+  parent context contains the `DataSource`, and child context contains the business
+  components). This structure is common in Spring web applications but can be more
+  generally applied.
 
 
 
@@ -4802,17 +4950,17 @@ The second option can also be easy. Some suggestions on how to implement this ar
 
 [[orm-introduction]]
 === Introduction to ORM with Spring
-The Spring Framework supports integration with Hibernate, Java Persistence API (JPA)
-and Java Data Objects (JDO) for resource management, data access object
-(DAO) implementations, and transaction strategies. For example, for Hibernate there is
-first-class support with several convenient IoC features that address many typical
-Hibernate integration issues. You can configure all of the supported features for O/R
-(object relational) mapping tools through Dependency Injection. They can participate in
-Spring's resource and transaction management, and they comply with Spring's generic
-transaction and DAO exception hierarchies. The recommended integration style is to code
-DAOs against plain Hibernate, JPA, and JDO APIs. The older style of using Spring's DAO
-templates is no longer recommended; however, coverage of this style can be found in the
-<<classic-spring-orm>> in the appendices.
+The Spring Framework supports integration with the Java Persistence API (JPA) as well
+as native Hibernate for resource management, data access object (DAO) implementations,
+and transaction strategies. For example, for Hibernate there is first-class support with
+several convenient IoC features that address many typical Hibernate integration issues.
+You can configure all of the supported features for O/R (object relational) mapping
+tools through Dependency Injection. They can participate in Spring's resource and
+transaction management, and they comply with Spring's generic transaction and DAO
+exception hierarchies. The recommended integration style is to code DAOs against plain
+Hibernate or JPA APIs. The older style of using Spring's DAO templates is no longer
+recommended; however, coverage of this style can be found in the <<classic-spring-orm>>
+in the appendices.
 
 Spring adds significant enhancements to the ORM layer of your choice when you create
 data access applications. You can leverage as much of the integration support as you
@@ -4911,26 +5059,25 @@ translation benefits.
 
 When it comes to transaction management, the `JdbcTemplate` class hooks in to the Spring
 transaction support and supports both JTA and JDBC transactions, through respective
-Spring transaction managers. For the supported ORM technologies Spring offers Hibernate,
-JPA and JDO support through the Hibernate, JPA, and JDO transaction managers as well as
-JTA support. For details on transaction support, see the <<transaction>> chapter.
+Spring transaction managers. For the supported ORM technologies Spring offers Hibernate
+and JPA support through the Hibernate and JPA transaction managers as well as JTA support.
+For details on transaction support, see the <<transaction>> chapter.
 
 
 
 [[orm-exception-translation]]
 ==== Exception translation
-When you use Hibernate, JPA, or JDO in a DAO, you must decide how to handle the
-persistence technology's native exception classes. The DAO throws a subclass of a
-`HibernateException`, `PersistenceException` or `JDOException` depending on the
-technology. These exceptions are all run-time exceptions and do not have to be declared
-or caught. You may also have to deal with `IllegalArgumentException` and
-`IllegalStateException`. This means that callers can only treat exceptions as generally
-fatal, unless they want to depend on the persistence technology's own exception
-structure. Catching specific causes such as an optimistic locking failure is not
-possible without tying the caller to the implementation strategy. This trade off might
-be acceptable to applications that are strongly ORM-based and/or do not need any special
-exception treatment. However, Spring enables exception translation to be applied
-transparently through the `@Repository` annotation:
+When you use Hibernate or JPA in a DAO, you must decide how to handle the persistence
+technology's native exception classes. The DAO throws a subclass of a `HibernateException`
+or `PersistenceException` depending on the technology. These exceptions are all runtime
+exceptions and do not have to be declared or caught. You may also have to deal with
+`IllegalArgumentException` and `IllegalStateException`. This means that callers can only
+treat exceptions as generally fatal, unless they want to depend on the persistence
+technology's own exception structure. Catching specific causes such as an optimistic
+locking failure is not possible without tying the caller to the implementation strategy.
+This trade-off might be acceptable to applications that are strongly ORM-based and/or
+do not need any special exception treatment. However, Spring enables exception
+translation to be applied transparently through the `@Repository` annotation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4971,7 +5118,7 @@ exception hierarchies.
 
 [[orm-hibernate]]
 === Hibernate
-We will start with a coverage of http://www.hibernate.org/[Hibernate 3] in a Spring
+We will start with a coverage of http://www.hibernate.org/[Hibernate 5] in a Spring
 environment, using it to demonstrate the approach that Spring takes towards integrating
 O/R mappers. This section will cover many issues in detail and show different variations
 of DAO implementations and transaction demarcation. Most of these patterns can be
@@ -4980,7 +5127,9 @@ chapter will then cover the other ORM technologies, showing briefer examples the
 
 [NOTE]
 ====
-As of Spring 4.0, Spring requires Hibernate 3.6 or later.
+As of Spring 4.0, Spring requires Hibernate 3.6 or later. Note that the Hibernate team
+stopped supporting Hibernate 3 years ago and even phased out support for Hibernate 4.x
+in late 2015. We therefore recommend Hibernate 5.1 and higher from a 2016+ perspective.
 ====
 
 
@@ -5009,7 +5158,7 @@ JDBC `DataSource` and a Hibernate `SessionFactory` on top of it:
 			<property name="password" value=""/>
 		</bean>
 
-		<bean id="mySessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<bean id="mySessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 			<property name="dataSource" ref="myDataSource"/>
 			<property name="mappingResources">
 				<list>
@@ -5045,8 +5194,8 @@ is typically not common outside of an EJB context.
 
 
 [[orm-hibernate-straight]]
-==== Implementing DAOs based on plain Hibernate 3 API
-Hibernate 3 has a feature called contextual sessions, wherein Hibernate itself manages
+==== Implementing DAOs based on plain Hibernate API
+Hibernate has a feature called contextual sessions, wherein Hibernate itself manages
 one current `Session` per transaction. This is roughly equivalent to Spring's
 synchronization of one Hibernate `Session` per transaction. A corresponding DAO
 implementation resembles the following example, based on the plain Hibernate API:
@@ -5115,7 +5264,7 @@ the return of the current `Session` associated with the ongoing JTA transaction,
 This behavior applies regardless of whether you are using Spring's
 `JtaTransactionManager`, EJB container managed transactions (CMTs), or JTA.
 
-In summary: you can implement DAOs based on the plain Hibernate 3 API, while still being
+In summary: you can implement DAOs based on the plain Hibernate API, while still being
 able to participate in Spring-managed transactions.
 
 
@@ -5160,7 +5309,7 @@ XML, for a simple service class:
 		<!-- SessionFactory, DataSource, etc. omitted -->
 
 		<bean id="transactionManager"
-				class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+				class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 			<property name="sessionFactory" ref="sessionFactory"/>
 		</bean>
 
@@ -5262,7 +5411,7 @@ provide is the TransactionManager implementation and a "<tx:annotation-driven/>"
 		<!-- SessionFactory, DataSource, etc. omitted -->
 
 		<bean id="transactionManager"
-				class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+				class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 			<property name="sessionFactory" ref="sessionFactory"/>
 		</bean>
 
@@ -5293,7 +5442,7 @@ and an example for a business method implementation:
 ----
 	<beans>
 
-		<bean id="myTxManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<bean id="myTxManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 			<property name="sessionFactory" ref="mySessionFactory"/>
 		</bean>
 
@@ -5373,7 +5522,7 @@ long as it is using `JtaTransactionManager` as the strategy.
 		<jee:jndi-lookup id="dataSource2" jndi-name="java:comp/env/jdbc/myds2"/>
 
 		<bean id="mySessionFactory1"
-				class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+				class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 			<property name="dataSource" ref="myDataSource1"/>
 			<property name="mappingResources">
 				<list>
@@ -5389,7 +5538,7 @@ long as it is using `JtaTransactionManager` as the strategy.
 		</bean>
 
 		<bean id="mySessionFactory2"
-				class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+				class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 			<property name="dataSource" ref="myDataSource2"/>
 			<property name="mappingResources">
 				<list>
@@ -5566,310 +5715,12 @@ following events occur when a JTA transaction commits:
 
 
 
-[[orm-jdo]]
-=== JDO
-Spring supports the standard JDO 2.0 and 2.1 APIs as data access strategy, following the
-same style as the Hibernate support. The corresponding integration classes reside in the
-`org.springframework.orm.jdo` package.
-
-
-
-[[orm-jdo-setup]]
-==== PersistenceManagerFactory setup
-
-Spring provides a `LocalPersistenceManagerFactoryBean` class that allows you to define a
-local JDO `PersistenceManagerFactory` within a Spring application context:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-
-		<bean id="myPmf" class="org.springframework.orm.jdo.LocalPersistenceManagerFactoryBean">
-			<property name="configLocation" value="classpath:kodo.properties"/>
-		</bean>
-
-	</beans>
-----
-
-Alternatively, you can set up a `PersistenceManagerFactory` through direct instantiation
-of a `PersistenceManagerFactory` implementation class. A JDO `PersistenceManagerFactory`
-implementation class follows the JavaBeans pattern, just like a JDBC `DataSource`
-implementation class, which is a natural fit for a configuration that uses Spring. This
-setup style usually supports a Spring-defined JDBC `DataSource`, passed into the
-`connectionFactory` property. For example, for the open source JDO implementation
-DataNucleus (formerly JPOX) ( http://www.datanucleus.org/[http://www.datanucleus.org/]),
-this is the XML configuration of the `PersistenceManagerFactory` implementation:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-
-	 <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-		<property name="driverClassName" value="${jdbc.driverClassName}"/>
-		<property name="url" value="${jdbc.url}"/>
-		<property name="username" value="${jdbc.username}"/>
-		<property name="password" value="${jdbc.password}"/>
-	 </bean>
-
-	 <bean id="myPmf" class="org.datanucleus.jdo.JDOPersistenceManagerFactory" destroy-method="close">
-		<property name="connectionFactory" ref="dataSource"/>
-		<property name="nontransactionalRead" value="true"/>
-	 </bean>
-
-	</beans>
-----
-
-You can also set up JDO `PersistenceManagerFactory` in the JNDI environment of a Java EE
-application server, usually through the JCA connector provided by the particular JDO
-implementation. Spring's standard `JndiObjectFactoryBean` or `<jee:jndi-lookup>` can be
-used to retrieve and expose such a `PersistenceManagerFactory`. However, outside an EJB
-context, no real benefit exists in holding the `PersistenceManagerFactory` in JNDI: only
-choose such a setup for a good reason. See <<orm-hibernate-resources>> for a discussion;
-the arguments there apply to JDO as well.
-
-
-
-[[orm-jdo-daos-straight]]
-==== Implementing DAOs based on the plain JDO API
-DAOs can also be written directly against plain JDO API, without any Spring
-dependencies, by using an injected `PersistenceManagerFactory`. The following is an
-example of a corresponding DAO implementation:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class ProductDaoImpl implements ProductDao {
-
-		private PersistenceManagerFactory persistenceManagerFactory;
-
-		public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
-			this.persistenceManagerFactory = pmf;
-		}
-
-		public Collection loadProductsByCategory(String category) {
-			PersistenceManager pm = this.persistenceManagerFactory.getPersistenceManager();
-			try {
-				Query query = pm.newQuery(Product.class, "category = pCategory");
-				query.declareParameters("String pCategory");
-				return query.execute(category);
-			}
-			finally {
-				pm.close();
-			}
-		}
-	}
-----
-
-Because the above DAO follows the dependency injection pattern, it fits nicely into a
-Spring container, just as it would if coded against Spring's `JdoTemplate`:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-
-		<bean id="myProductDao" class="product.ProductDaoImpl">
-			<property name="persistenceManagerFactory" ref="myPmf"/>
-		</bean>
-
-	</beans>
-----
-
-The main problem with such DAOs is that they always get a new `PersistenceManager` from
-the factory. To access a Spring-managed transactional `PersistenceManager`, define a
-`TransactionAwarePersistenceManagerFactoryProxy` (as included in Spring) in front of
-your target `PersistenceManagerFactory`, then passing a reference to that proxy into
-your DAOs as in the following example:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-
-		<bean id="myPmfProxy"
-				class="org.springframework.orm.jdo.TransactionAwarePersistenceManagerFactoryProxy">
-			<property name="targetPersistenceManagerFactory" ref="myPmf"/>
-		</bean>
-
-		<bean id="myProductDao" class="product.ProductDaoImpl">
-			<property name="persistenceManagerFactory" ref="myPmfProxy"/>
-		</bean>
-
-	</beans>
-----
-
-Your data access code will receive a transactional `PersistenceManager` (if any) from
-the `PersistenceManagerFactory.getPersistenceManager()` method that it calls. The latter
-method call goes through the proxy, which first checks for a current transactional
-`PersistenceManager` before getting a new one from the factory. Any `close()` calls on
-the `PersistenceManager` are ignored in case of a transactional `PersistenceManager`.
-
-If your data access code always runs within an active transaction (or at least within
-active transaction synchronization), it is safe to omit the `PersistenceManager.close()`
-call and thus the entire `finally` block, which you might do to keep your DAO
-implementations concise:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class ProductDaoImpl implements ProductDao {
-
-		private PersistenceManagerFactory persistenceManagerFactory;
-
-		public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
-			this.persistenceManagerFactory = pmf;
-		}
-
-		public Collection loadProductsByCategory(String category) {
-			PersistenceManager pm = this.persistenceManagerFactory.getPersistenceManager();
-			Query query = pm.newQuery(Product.class, "category = pCategory");
-			query.declareParameters("String pCategory");
-			return query.execute(category);
-		}
-	}
-----
-
-With such DAOs that rely on active transactions, it is recommended that you enforce
-active transactions through turning off
-`TransactionAwarePersistenceManagerFactoryProxy`'s `allowCreate` flag:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-
-		<bean id="myPmfProxy"
-				class="org.springframework.orm.jdo.TransactionAwarePersistenceManagerFactoryProxy">
-			<property name="targetPersistenceManagerFactory" ref="myPmf"/>
-			<property name="allowCreate" value="false"/>
-		</bean>
-
-		<bean id="myProductDao" class="product.ProductDaoImpl">
-			<property name="persistenceManagerFactory" ref="myPmfProxy"/>
-		</bean>
-
-	</beans>
-----
-
-The main advantage of this DAO style is that it depends on JDO API only; no import of
-any Spring class is required. This is of course appealing from a non-invasiveness
-perspective, and might feel more natural to JDO developers.
-
-However, the DAO throws plain `JDOException` (which is unchecked, so does not have to be
-declared or caught), which means that callers can only treat exceptions as fatal, unless
-you want to depend on JDO's own exception structure. Catching specific causes such as an
-optimistic locking failure is not possible without tying the caller to the
-implementation strategy. This trade off might be acceptable to applications that are
-strongly JDO-based and/or do not need any special exception treatment.
-
-In summary, you can DAOs based on the plain JDO API, and they can still participate in
-Spring-managed transactions. This strategy might appeal to you if you are already
-familiar with JDO. However, such DAOs throw plain `JDOException`, and you would have to
-convert explicitly to Spring's `DataAccessException` (if desired).
-
-
-
-[[orm-jdo-tx]]
-==== Transaction management
-[NOTE]
-====
-You are __strongly__ encouraged to read <<transaction-declarative>> if you have not done
-so, to get a more detailed coverage of Spring's declarative transaction support.
-====
-
-To execute service operations within transactions, you can use Spring's common
-declarative transaction facilities. For example:
-
-[source,xml,indent=0]
-[subs="verbatim"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:aop="http://www.springframework.org/schema/aop"
-		xmlns:tx="http://www.springframework.org/schema/tx"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/tx
-			http://www.springframework.org/schema/tx/spring-tx.xsd
-			http://www.springframework.org/schema/aop
-			http://www.springframework.org/schema/aop/spring-aop.xsd">
-
-		<bean id="myTxManager" class="org.springframework.orm.jdo.JdoTransactionManager">
-			<property name="persistenceManagerFactory" ref="myPmf"/>
-		</bean>
-
-		<bean id="myProductService" class="product.ProductServiceImpl">
-			<property name="productDao" ref="myProductDao"/>
-		</bean>
-
-		<tx:advice id="txAdvice" transaction-manager="txManager">
-			<tx:attributes>
-				<tx:method name="increasePrice*" propagation="REQUIRED"/>
-				<tx:method name="someOtherBusinessMethod" propagation="REQUIRES_NEW"/>
-				<tx:method name="*" propagation="SUPPORTS" read-only="true"/>
-			</tx:attributes>
-		</tx:advice>
-
-		<aop:config>
-			<aop:pointcut id="productServiceMethods"
-					expression="execution(* product.ProductService.*(..))"/>
-			<aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/>
-		</aop:config>
-
-	</beans>
-----
-
-JDO requires an active transaction to modify a persistent object. The non-transactional
-flush concept does not exist in JDO, in contrast to Hibernate. For this reason, you need
-to set up the chosen JDO implementation for a specific environment. Specifically, you
-need to set it up explicitly for JTA synchronization, to detect an active JTA
-transaction itself. This is not necessary for local transactions as performed by
-Spring's `JdoTransactionManager`, but it is necessary to participate in JTA
-transactions, whether driven by Spring's `JtaTransactionManager` or by EJB CMT and plain
-JTA.
-
-`JdoTransactionManager` is capable of exposing a JDO transaction to JDBC access code
-that accesses the same JDBC `DataSource`, provided that the registered `JdoDialect`
-supports retrieval of the underlying JDBC `Connection`. This is the case for JDBC-based
-JDO 2.0 implementations by default.
-
-
-
-[[orm-jdo-dialect]]
-==== JdoDialect
-
-As an advanced feature, both `JdoTemplate` and `JdoTransactionManager` support a custom
-`JdoDialect` that can be passed into the `jdoDialect` bean property. In this scenario,
-the DAOs will not receive a `PersistenceManagerFactory` reference but rather a full
-`JdoTemplate` instance (for example, passed into the `jdoTemplate` property of
-`JdoDaoSupport`). Using a `JdoDialect` implementation, you can enable advanced features
-supported by Spring, usually in a vendor-specific manner:
-
-* Applying specific transaction semantics such as custom isolation level or transaction
-  timeout
-* Retrieving the transactional JDBC `Connection` for exposure to JDBC-based DAOs
-* Applying query timeouts, which are automatically calculated from Spring-managed
-  transaction timeouts
-* Eagerly flushing a `PersistenceManager,` to make transactional changes visible to
-  JDBC-based data access code
-* Advanced translation of `JDOExceptions` to Spring `DataAccessExceptions`
-
-See the `JdoDialect` javadocs for more details on its operations and how to use them
-within Spring's JDO support.
-
-
-
-
 [[orm-jpa]]
 === JPA
 The Spring JPA, available under the `org.springframework.orm.jpa` package, offers
 comprehensive support for the
 http://www.oracle.com/technetwork/articles/javaee/jpa-137156.html[Java Persistence
-API] in a similar manner to the integration with Hibernate or JDO, while being aware of
+API] in a similar manner to the integration with Hibernate, while being aware of
 the underlying implementation in order to provide additional features.
 
 
@@ -6325,21 +6176,18 @@ declarative transaction facilities. For example:
 Spring JPA allows a configured `JpaTransactionManager` to expose a JPA transaction to
 JDBC access code that accesses the same JDBC `DataSource`, provided that the registered
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`. Out of the box,
-Spring provides dialects for the Toplink, Hibernate and OpenJPA JPA implementations. See
-the next section for details on the `JpaDialect` mechanism.
+Spring provides dialects for the EclipseLink and Hibernate JPA implementations.
+See the next section for details on the `JpaDialect` mechanism.
 
 
 
 [[orm-jpa-dialect]]
 ==== JpaDialect
 
-As an advanced feature `JpaTemplate`, `JpaTransactionManager` and subclasses of
+As an advanced feature `JpaTransactionManager` and subclasses of
 `AbstractEntityManagerFactoryBean` support a custom `JpaDialect`, to be passed into the
-`jpaDialect` bean property. In such a scenario, the DAOs do not receive an
-`EntityManagerFactory` reference but rather a full `JpaTemplate` instance (for example,
-passed into the `jpaTemplate` property of `JpaDaoSupport`). A `JpaDialect`
-implementation can enable some advanced features supported by Spring, usually in a
-vendor-specific manner:
+`jpaDialect` bean property. A `JpaDialect` implementation can enable some advanced
+features supported by Spring, usually in a vendor-specific manner:
 
 * Applying specific transaction semantics such as custom isolation level or transaction
   timeout)
@@ -6514,6 +6362,7 @@ provide a distinction between marshalling and unmarshalling operations, even tho
 underlying O/X mapping tool does not do so.
 
 The O/X Mapping exception hierarchy is shown in the following figure:
+
 image::images/oxm-exceptions.png[width=400]
 
 O/X Mapping exception hierarchy
@@ -6771,7 +6620,7 @@ not require any further configuration, though a mapping file can be used to have
 control over the behavior of Castor.
 
 For more information on Castor, refer to the
-http://castor.codehaus.org/xml-framework.html[__Castor web site__]. The Spring
+http://castor-data-binding.github.io/castor[__Castor web site__]. The Spring
 integration classes reside in the `org.springframework.oxm.castor` package.
 
 
@@ -6796,7 +6645,7 @@ interface. It can be wired up as follows:
 ==== Mapping
 Although it is possible to rely on Castor's default marshalling behavior, it might be
 necessary to have more control over it. This can be accomplished using a Castor mapping
-file. For more information, refer to http://castor.codehaus.org/xml-mapping.html[Castor
+file. For more information, refer to http://castor-data-binding.github.io/castor/reference-guides/1.3.3/html-single/index.html#xml.mapping[Castor
 XML Mapping].
 
 The mapping can be set using the `mappingLocation` resource property, indicated below
@@ -6862,74 +6711,9 @@ Available attributes are:
 
 
 
-[[oxm-xmlbeans]]
-=== XMLBeans
-XMLBeans is an XML binding tool that has full XML Schema support, and offers full XML
-Infoset fidelity. It takes a different approach to that of most other O/X mapping
-frameworks, in that all classes that are generated from an XML Schema are all derived
-from `XmlObject`, and contain XML binding information in them.
-
-For more information on XMLBeans, refer to the http://xmlbeans.apache.org/[__XMLBeans
-web site __]. The Spring-WS integration classes reside in the
-`org.springframework.oxm.xmlbeans` package.
-
-
-
-[[oxm-xmlbeans-marshaller]]
-==== XmlBeansMarshaller
-The `XmlBeansMarshaller` implements both the `Marshaller` and `Unmarshaller` interfaces.
-It can be configured as follows:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-
-		<bean id="xmlBeansMarshaller" class="org.springframework.oxm.xmlbeans.XmlBeansMarshaller" />
-		...
-
-	</beans>
-----
-
-[NOTE]
-====
-Note that the `XmlBeansMarshaller` can only marshal objects of type `XmlObject`, and not
-every `java.lang.Object`.
-====
-
-
-[[oxm-xmlbeans-xsd]]
-===== XML Schema-based Configuration
-The `xmlbeans-marshaller` tag configures a
-`org.springframework.oxm.xmlbeans.XmlBeansMarshaller`. Here is an example:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<oxm:xmlbeans-marshaller id="marshaller"/>
-----
-
-Available attributes are:
-
-|===
-| Attribute| Description| Required
-
-| `id`
-| the id of the marshaller
-| no
-
-| `options`
-| the bean name of the XmlOptions that is to be used for this marshaller. Typically a
-  `XmlOptionsFactoryBean` definition
-| no
-|===
-
-
-
-
 [[oxm-jibx]]
 === JiBX
-The JiBX framework offers a solution similar to that which JDO provides for ORM: a
+The JiBX framework offers a solution similar to that which Hibernate provides for ORM: a
 binding definition defines the rules for how your Java objects are converted to or from
 XML. After preparing the binding and compiling the classes, a JiBX binding compiler
 enhances the class files, and adds code to handle converting instances of the classes
@@ -6960,7 +6744,7 @@ set using the `targetClass` property. Optionally, you can set the binding name u
 ----
 
 A `JibxMarshaller` is configured for a single class. If you want to marshal multiple
-classes, you have to configure multiple ++JibxMarshaller++s with different `targetClass`
+classes, you have to configure multiple ``JibxMarshaller``s with different `targetClass`
 property values.
 
 
@@ -7001,7 +6785,7 @@ Available attributes are:
 XStream is a simple library to serialize objects to XML and back again. It does not
 require any mapping, and generates clean XML.
 
-For more information on XStream, refer to the http://xstream.codehaus.org/[__XStream
+For more information on XStream, refer to the http://x-stream.github.io/[__XStream
 web site__]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
 
@@ -7050,7 +6834,7 @@ unmarshal XML from an external source, set the `supportedClasses` property on th
 This will make sure that only the registered classes are eligible for unmarshalling.
 
 Additionally, you can register
-{javadoc-baseurl}/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher...)[custom
+{api-spring-framework}/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher...)[custom
 converters] to make sure that only your supported classes can be unmarshalled. You might
 want to add a `CatchAllConverter` as the last converter in the list, in addition to
 converters that explicitly support the domain classes that should be supported. As a

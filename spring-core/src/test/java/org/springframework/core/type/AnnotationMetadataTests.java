@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -154,7 +155,7 @@ public class AnnotationMetadataTests {
 		assertThat(metadata.getSuperClassName(), nullValue());
 		assertThat(metadata.getInterfaceNames().length, is(1));
 		assertThat(metadata.getInterfaceNames()[0], is(Annotation.class.getName()));
-		assertThat(metadata.isAnnotated(Documented.class.getName()), is(true));
+		assertThat(metadata.isAnnotated(Documented.class.getName()), is(false));
 		assertThat(metadata.isAnnotated(Scope.class.getName()), is(false));
 		assertThat(metadata.isAnnotated(SpecialAttr.class.getName()), is(false));
 		assertThat(metadata.hasAnnotation(Documented.class.getName()), is(true));
@@ -194,7 +195,7 @@ public class AnnotationMetadataTests {
 
 	private void assertMetaAnnotationOverrides(AnnotationMetadata metadata) {
 		AnnotationAttributes attributes = (AnnotationAttributes) metadata.getAnnotationAttributes(
-			TestComponentScan.class.getName(), false);
+				TestComponentScan.class.getName(), false);
 		String[] basePackages = attributes.getStringArray("basePackages");
 		assertThat("length of basePackages[]", basePackages.length, is(1));
 		assertThat("basePackages[0]", basePackages[0], is("org.example.componentscan"));
@@ -291,10 +292,11 @@ public class AnnotationMetadataTests {
 		Set<MethodMetadata> methods = metadata.getAnnotatedMethods(DirectAnnotation.class.getName());
 		MethodMetadata method = methods.iterator().next();
 		assertEquals("direct", method.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"));
+		assertEquals("direct", method.getAnnotationAttributes(DirectAnnotation.class.getName()).get("myValue"));
 		List<Object> allMeta = method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
-		assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
+		assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
 		allMeta = method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
-		assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct")))));
+		assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct")))));
 
 		assertTrue(metadata.isAnnotated(IsAnnotatedAnnotation.class.getName()));
 
@@ -334,9 +336,9 @@ public class AnnotationMetadataTests {
 
 			assertEquals("direct", metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"));
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
-			assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
+			assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
-			assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct")))));
+			assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct")))));
 		}
 		{ // perform tests with classValuesAsString = true
 			AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(
@@ -365,7 +367,7 @@ public class AnnotationMetadataTests {
 
 			assertEquals(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value"), "direct");
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
-			assertThat(new HashSet<Object>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
+			assertThat(new HashSet<>(allMeta), is(equalTo(new HashSet<Object>(Arrays.asList("direct", "meta")))));
 		}
 	}
 
@@ -416,7 +418,11 @@ public class AnnotationMetadataTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface DirectAnnotation {
 
-		String value();
+		@AliasFor("myValue")
+		String value() default "";
+
+		@AliasFor("value")
+		String myValue() default "";
 
 		String additional() default "direct";
 	}
@@ -449,7 +455,7 @@ public class AnnotationMetadataTests {
 	}
 
 	// SPR-10914
-	public static enum SubclassEnum {
+	public enum SubclassEnum {
 		FOO {
 		/* Do not delete! This subclassing is intentional. */
 		},
@@ -489,14 +495,14 @@ public class AnnotationMetadataTests {
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Component
-	public static @interface TestConfiguration {
+	public @interface TestConfiguration {
 
 		String value() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface TestComponentScan {
+	public @interface TestComponentScan {
 
 		String[] value() default {};
 
@@ -509,7 +515,7 @@ public class AnnotationMetadataTests {
 	@TestComponentScan(basePackages = "bogus")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface ComposedConfigurationWithAttributeOverrides {
+	public @interface ComposedConfigurationWithAttributeOverrides {
 
 		String[] basePackages() default {};
 	}
@@ -520,19 +526,19 @@ public class AnnotationMetadataTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface NamedAnnotation1 {
+	public @interface NamedAnnotation1 {
 		String name() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface NamedAnnotation2 {
+	public @interface NamedAnnotation2 {
 		String name() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface NamedAnnotation3 {
+	public @interface NamedAnnotation3 {
 		String name() default "";
 	}
 
@@ -547,7 +553,7 @@ public class AnnotationMetadataTests {
 	@NamedAnnotation3(name = "name 3")
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
-	public static @interface NamedComposedAnnotation {
+	public @interface NamedComposedAnnotation {
 	}
 
 	@NamedComposedAnnotation

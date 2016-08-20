@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
  * @author Ramnivas Laddad
  * @since 2.0
  */
-public final class MethodInvocationProceedingJoinPointTests {
+public class MethodInvocationProceedingJoinPointTests {
 
 	@Test
 	public void testingBindingWithJoinPoint() {
@@ -211,11 +211,12 @@ public final class MethodInvocationProceedingJoinPointTests {
 		itb.setName("foo");
 		itb.getDoctor();
 		itb.getStringArray();
-		itb.getSpouses();
+		itb.getSpouse();
 		itb.setSpouse(new TestBean());
 		try {
 			itb.unreliableFileOperation();
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			// we don't realy care...
 		}
 	}

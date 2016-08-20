@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.messaging.simp.stomp;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,7 +26,9 @@ import org.junit.Test;
 
 import org.springframework.messaging.Message;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link BufferingStompDecoder}.
@@ -177,16 +180,33 @@ public class BufferingStompDecoderTests {
 		assertEquals(0, messages.size());
 	}
 
-	@Test(expected = StompConversionException.class)  // SPR-12418
-	public void endingBackslashHeaderValueCheck() {
+	// SPR-13416
+
+	@Test
+	public void incompleteHeaderWithPartialEscapeSequence() throws Exception {
+		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
+		String chunk = "SEND\na:long\\";
+
+		List<Message<byte[]>> messages = stompDecoder.decode(toByteBuffer(chunk));
+		assertEquals(0, messages.size());
+	}
+
+	@Test(expected = StompConversionException.class)
+	public void invalidEscapeSequence() {
+		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
+		String payload = "SEND\na:alpha\\x\\n\nMessage body\0";
+		stompDecoder.decode(toByteBuffer(payload));
+	}
+
+	@Test(expected = StompConversionException.class)
+	public void invalidEscapeSequenceWithSingleSlashAtEndOfHeaderValue() {
 		BufferingStompDecoder stompDecoder = new BufferingStompDecoder(STOMP_DECODER, 128);
 		String payload = "SEND\na:alpha\\\n\nMessage body\0";
 		stompDecoder.decode(toByteBuffer(payload));
 	}
 
-
 	private ByteBuffer toByteBuffer(String chunk) {
-		return ByteBuffer.wrap(chunk.getBytes(Charset.forName("UTF-8")));
+		return ByteBuffer.wrap(chunk.getBytes(StandardCharsets.UTF_8));
 	}
 
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,20 +17,29 @@
 package org.springframework.web.cors;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+
 /**
- * Represents the CORS configuration that stores various properties used to check if a
- * CORS request is allowed and to generate CORS response headers.
+ * A container for CORS configuration that also provides methods to check
+ * the actual or requested origin, HTTP methods, and headers.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+ * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public class CorsConfiguration {
+
+	/**
+	 * Wildcard representing <em>all</em> origins, methods, or headers.
+	 */
+	public static final String ALL = "*";
 
 	private List<String> allowedOrigins;
 
@@ -45,192 +54,341 @@ public class CorsConfiguration {
 	private Long maxAge;
 
 
+	/**
+	 * Construct a new, empty {@code CorsConfiguration} instance.
+	 */
 	public CorsConfiguration() {
 	}
 
-
-	public CorsConfiguration(CorsConfiguration config) {
-		if (config.allowedOrigins != null) {
-			this.allowedOrigins = new ArrayList<String>(config.allowedOrigins);
-		}
-		if (config.allowCredentials != null) {
-			this.allowCredentials = config.allowCredentials;
-		}
-		if (config.exposedHeaders != null) {
-			this.exposedHeaders = new ArrayList<String>(config.exposedHeaders);
-		}
-		if (config.allowedMethods != null) {
-			this.allowedMethods = new ArrayList<String>(config.allowedMethods);
-		}
-		if (config.allowedHeaders != null) {
-			this.allowedHeaders = new ArrayList<String>(config.allowedHeaders);
-		}
-		if (config.maxAge != null) {
-			this.maxAge = config.maxAge;
-		}
+	/**
+	 * Construct a new {@code CorsConfiguration} instance by copying all
+	 * values from the supplied {@code CorsConfiguration}.
+	 */
+	public CorsConfiguration(CorsConfiguration other) {
+		this.allowedOrigins = other.allowedOrigins;
+		this.allowedMethods = other.allowedMethods;
+		this.allowedHeaders = other.allowedHeaders;
+		this.exposedHeaders = other.exposedHeaders;
+		this.allowCredentials = other.allowCredentials;
+		this.maxAge = other.maxAge;
 	}
 
-	public CorsConfiguration combine(CorsConfiguration other) {
-		CorsConfiguration config = new CorsConfiguration(this);
 
-		if (other.getAllowedOrigins() != null) {
-			config.setAllowedOrigins(other.getAllowedOrigins());
+	/**
+	 * Combine the supplied {@code CorsConfiguration} with this one.
+	 * <p>Properties of this configuration are overridden by any non-null
+	 * properties of the supplied one.
+	 * @return the combined {@code CorsConfiguration} or {@code this}
+	 * configuration if the supplied configuration is {@code null}
+	 */
+	public CorsConfiguration combine(CorsConfiguration other) {
+		if (other == null) {
+			return this;
 		}
-		if (other.getAllowedMethods() != null) {
-			config.setAllowedMethods(other.getAllowedMethods());
+		CorsConfiguration config = new CorsConfiguration(this);
+		config.setAllowedOrigins(combine(this.getAllowedOrigins(), other.getAllowedOrigins()));
+		config.setAllowedMethods(combine(this.getAllowedMethods(), other.getAllowedMethods()));
+		config.setAllowedHeaders(combine(this.getAllowedHeaders(), other.getAllowedHeaders()));
+		config.setExposedHeaders(combine(this.getExposedHeaders(), other.getExposedHeaders()));
+		Boolean allowCredentials = other.getAllowCredentials();
+		if (allowCredentials != null) {
+			config.setAllowCredentials(allowCredentials);
 		}
-		if (other.getAllowedHeaders() != null) {
-			config.setAllowedHeaders(other.getAllowedHeaders());
-		}
-		if (other.getExposedHeaders() != null) {
-			config.setExposedHeaders(other.getExposedHeaders());
-		}
-		if (other.getMaxAge() != null) {
-			config.setMaxAge(other.getMaxAge());
-		}
-		if (other.isAllowCredentials() != null) {
-			config.setAllowCredentials(other.isAllowCredentials());
+		Long maxAge = other.getMaxAge();
+		if (maxAge != null) {
+			config.setMaxAge(maxAge);
 		}
 		return config;
 	}
 
-	/**
-	 * @see #setAllowedOrigins(java.util.List)
-	 */
-	public List<String> getAllowedOrigins() {
-		if (this.allowedOrigins != null) {
-			return this.allowedOrigins.contains("*") ? Arrays.asList("*") : Collections.unmodifiableList(this.allowedOrigins);
+	private List<String> combine(List<String> source, List<String> other) {
+		if (other == null || other.contains(ALL)) {
+			return source;
 		}
-		return null;
+		if (source == null || source.contains(ALL)) {
+			return other;
+		}
+		List<String> combined = new ArrayList<>(source);
+		combined.addAll(other);
+		return combined;
 	}
 
+
 	/**
-	 * Set allowed allowedOrigins that will define Access-Control-Allow-Origin response
-	 * header values (mandatory). For example "http://domain1.com", "http://domain2.com" ...
-	 * "*" means that all domains are allowed.
+	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
+	 * <p>The special value {@code "*"} allows all domains.
+	 * <p>By default this is not set.
 	 */
 	public void setAllowedOrigins(List<String> allowedOrigins) {
-		this.allowedOrigins = allowedOrigins;
+		this.allowedOrigins = (allowedOrigins != null ? new ArrayList<>(allowedOrigins) : null);
 	}
 
 	/**
-	 * @see #setAllowedOrigins(java.util.List)
+	 * Return the configured origins to allow, possibly {@code null}.
+	 * @see #addAllowedOrigin(String)
+	 * @see #setAllowedOrigins(List)
 	 */
-	public void addAllowedOrigin(String allowedOrigin) {
+	public List<String> getAllowedOrigins() {
+		return this.allowedOrigins;
+	}
+
+	/**
+	 * Add an origin to allow.
+	 */
+	public void addAllowedOrigin(String origin) {
 		if (this.allowedOrigins == null) {
-			this.allowedOrigins = new ArrayList<String>();
+			this.allowedOrigins = new ArrayList<>();
 		}
-		this.allowedOrigins.add(allowedOrigin);
+		this.allowedOrigins.add(origin);
 	}
 
 	/**
-	 * @see #setAllowedMethods(java.util.List)
-	 */
-	public List<String> getAllowedMethods() {
-		return this.allowedMethods == null ? null : Collections.unmodifiableList(this.allowedMethods);
-	}
-
-	/**
-	 * Set allow methods that will define Access-Control-Allow-Methods response header
-	 * values. For example "GET", "POST", "PUT" ... "*" means that all methods requested
-	 * by the client are allowed. If not set, allowed method is set to "GET".
-	 *
+	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"},
+	 * {@code "PUT"}, etc.
+	 * <p>The special value {@code "*"} allows all methods.
+	 * <p>If not set, only {@code "GET"} is allowed.
+	 * <p>By default this is not set.
 	 */
 	public void setAllowedMethods(List<String> allowedMethods) {
-		this.allowedMethods = allowedMethods;
+		this.allowedMethods = (allowedMethods != null ? new ArrayList<>(allowedMethods) : null);
 	}
 
 	/**
-	 * @see #setAllowedMethods(java.util.List)
+	 * Return the allowed HTTP methods, possibly {@code null} in which case
+	 * only {@code "GET"} is allowed.
+	 * @see #addAllowedMethod(HttpMethod)
+	 * @see #addAllowedMethod(String)
+	 * @see #setAllowedMethods(List)
 	 */
-	public void addAllowedMethod(String allowedMethod) {
-		if (this.allowedMethods == null) {
-			this.allowedMethods = new ArrayList<String>();
+	public List<String> getAllowedMethods() {
+		return this.allowedMethods;
+	}
+
+	/**
+	 * Add an HTTP method to allow.
+	 */
+	public void addAllowedMethod(HttpMethod method) {
+		if (method != null) {
+			addAllowedMethod(method.name());
 		}
-		this.allowedMethods.add(allowedMethod);
 	}
 
 	/**
-	 * @see #setAllowedHeaders(java.util.List)
+	 * Add an HTTP method to allow.
 	 */
-	public List<String> getAllowedHeaders() {
-		return this.allowedHeaders == null ? null : Collections.unmodifiableList(this.allowedHeaders);
+	public void addAllowedMethod(String method) {
+		if (StringUtils.hasText(method)) {
+			if (this.allowedMethods == null) {
+				this.allowedMethods = new ArrayList<>();
+			}
+			this.allowedMethods.add(method);
+		}
 	}
 
 	/**
-	 * Set a list of request headers that will define Access-Control-Allow-Methods response
-	 * header values. If a header field name is one of the following, it is not required
-	 * to be listed: Cache-Control, Content-Language, Expires, Last-Modified, Pragma.
-	 * "*" means that all headers asked by the client will be allowed.
+	 * Set the list of headers that a pre-flight request can list as allowed
+	 * for use during an actual request.
+	 * <p>The special value {@code "*"} allows actual requests to send any
+	 * header.
+	 * <p>A header name is not required to be listed if it is one of:
+	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
+	 * {@code Last-Modified}, or {@code Pragma}.
+	 * <p>By default this is not set.
 	 */
 	public void setAllowedHeaders(List<String> allowedHeaders) {
-		this.allowedHeaders = allowedHeaders;
+		this.allowedHeaders = (allowedHeaders != null ? new ArrayList<>(allowedHeaders) : null);
 	}
 
 	/**
-	 * @see #setAllowedHeaders(java.util.List)
+	 * Return the allowed actual request headers, possibly {@code null}.
+	 * @see #addAllowedHeader(String)
+	 * @see #setAllowedHeaders(List)
+	 */
+	public List<String> getAllowedHeaders() {
+		return this.allowedHeaders;
+	}
+
+	/**
+	 * Add an actual request header to allow.
 	 */
 	public void addAllowedHeader(String allowedHeader) {
 		if (this.allowedHeaders == null) {
-			this.allowedHeaders = new ArrayList<String>();
+			this.allowedHeaders = new ArrayList<>();
 		}
 		this.allowedHeaders.add(allowedHeader);
 	}
 
 	/**
-	 * @see #setExposedHeaders(java.util.List)
-	 */
-	public List<String> getExposedHeaders() {
-		return this.exposedHeaders == null ? null : Collections.unmodifiableList(this.exposedHeaders);
-	}
-
-	/**
-	 * Set a list of response headers other than simple headers that the resource might use
-	 * and can be exposed. Simple response headers are: Cache-Control, Content-Language,
-	 * Content-Type, Expires, Last-Modified, Pragma.
+	 * Set the list of response headers other than simple headers (i.e.
+	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
+	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}) that an
+	 * actual response might have and can be exposed.
+	 * <p>Note that {@code "*"} is not a valid exposed header value.
+	 * <p>By default this is not set.
 	 */
 	public void setExposedHeaders(List<String> exposedHeaders) {
-		this.exposedHeaders = exposedHeaders;
+		if (exposedHeaders != null && exposedHeaders.contains(ALL)) {
+			throw new IllegalArgumentException("'*' is not a valid exposed header value");
+		}
+		this.exposedHeaders = (exposedHeaders == null ? null : new ArrayList<>(exposedHeaders));
 	}
 
 	/**
-	 * @see #setExposedHeaders(java.util.List)
+	 * Return the configured response headers to expose, possibly {@code null}.
+	 * @see #addExposedHeader(String)
+	 * @see #setExposedHeaders(List)
+	 */
+	public List<String> getExposedHeaders() {
+		return this.exposedHeaders;
+	}
+
+	/**
+	 * Add a response header to expose.
+	 * <p>Note that {@code "*"} is not a valid exposed header value.
 	 */
 	public void addExposedHeader(String exposedHeader) {
+		if (ALL.equals(exposedHeader)) {
+			throw new IllegalArgumentException("'*' is not a valid exposed header value");
+		}
 		if (this.exposedHeaders == null) {
-			this.exposedHeaders = new ArrayList<String>();
+			this.exposedHeaders = new ArrayList<>();
 		}
 		this.exposedHeaders.add(exposedHeader);
 	}
 
 	/**
-	 * @see #setAllowCredentials(Boolean)
-	 */
-	public Boolean isAllowCredentials() {
-		return this.allowCredentials;
-	}
-
-	/**
-	 * Indicates whether the resource supports user credentials.
-	 * Set the value of Access-Control-Allow-Credentials response header.
+	 * Whether user credentials are supported.
+	 * <p>By default this is not set (i.e. user credentials are not supported).
 	 */
 	public void setAllowCredentials(Boolean allowCredentials) {
 		this.allowCredentials = allowCredentials;
 	}
 
 	/**
-	 * @see #setMaxAge(Long)
+	 * Return the configured {@code allowCredentials} flag, possibly {@code null}.
+	 * @see #setAllowCredentials(Boolean)
 	 */
-	public Long getMaxAge() {
-		return maxAge;
+	public Boolean getAllowCredentials() {
+		return this.allowCredentials;
 	}
 
 	/**
-	 * Indicates how long (seconds) the results of a preflight request can be cached
-	 * in a preflight result cache.
+	 * Configure how long, in seconds, the response from a pre-flight request
+	 * can be cached by clients.
+	 * <p>By default this is not set.
 	 */
 	public void setMaxAge(Long maxAge) {
 		this.maxAge = maxAge;
+	}
+
+	/**
+	 * Return the configured {@code maxAge} value, possibly {@code null}.
+	 * @see #setMaxAge(Long)
+	 */
+	public Long getMaxAge() {
+		return this.maxAge;
+	}
+
+
+	/**
+	 * Check the origin of the request against the configured allowed origins.
+	 * @param requestOrigin the origin to check
+	 * @return the origin to use for the response, possibly {@code null} which
+	 * means the request origin is not allowed
+	 */
+	public String checkOrigin(String requestOrigin) {
+		if (!StringUtils.hasText(requestOrigin)) {
+			return null;
+		}
+		if (ObjectUtils.isEmpty(this.allowedOrigins)) {
+			return null;
+		}
+
+		if (this.allowedOrigins.contains(ALL)) {
+			if (this.allowCredentials != Boolean.TRUE) {
+				return ALL;
+			}
+			else {
+				return requestOrigin;
+			}
+		}
+		for (String allowedOrigin : this.allowedOrigins) {
+			if (requestOrigin.equalsIgnoreCase(allowedOrigin)) {
+				return requestOrigin;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check the HTTP request method (or the method from the
+	 * {@code Access-Control-Request-Method} header on a pre-flight request)
+	 * against the configured allowed methods.
+	 * @param requestMethod the HTTP request method to check
+	 * @return the list of HTTP methods to list in the response of a pre-flight
+	 * request, or {@code null} if the supplied {@code requestMethod} is not allowed
+	 */
+	public List<HttpMethod> checkHttpMethod(HttpMethod requestMethod) {
+		if (requestMethod == null) {
+			return null;
+		}
+		List<String> allowedMethods =
+				(this.allowedMethods != null ? this.allowedMethods : new ArrayList<>());
+		if (allowedMethods.contains(ALL)) {
+			return Collections.singletonList(requestMethod);
+		}
+		if (allowedMethods.isEmpty()) {
+			allowedMethods.add(HttpMethod.GET.name());
+			allowedMethods.add(HttpMethod.HEAD.name());
+		}
+		List<HttpMethod> result = new ArrayList<>(allowedMethods.size());
+		boolean allowed = false;
+		for (String method : allowedMethods) {
+			if (requestMethod.matches(method)) {
+				allowed = true;
+			}
+			HttpMethod resolved = HttpMethod.resolve(method);
+			if (resolved != null) {
+				result.add(resolved);
+			}
+		}
+		return (allowed ? result : null);
+	}
+
+	/**
+	 * Check the supplied request headers (or the headers listed in the
+	 * {@code Access-Control-Request-Headers} of a pre-flight request) against
+	 * the configured allowed headers.
+	 * @param requestHeaders the request headers to check
+	 * @return the list of allowed headers to list in the response of a pre-flight
+	 * request, or {@code null} if none of the supplied request headers is allowed
+	 */
+	public List<String> checkHeaders(List<String> requestHeaders) {
+		if (requestHeaders == null) {
+			return null;
+		}
+		if (requestHeaders.isEmpty()) {
+			return Collections.emptyList();
+		}
+		if (ObjectUtils.isEmpty(this.allowedHeaders)) {
+			return null;
+		}
+
+		boolean allowAnyHeader = this.allowedHeaders.contains(ALL);
+		List<String> result = new ArrayList<>();
+		for (String requestHeader : requestHeaders) {
+			if (StringUtils.hasText(requestHeader)) {
+				requestHeader = requestHeader.trim();
+				for (String allowedHeader : this.allowedHeaders) {
+					if (allowAnyHeader || requestHeader.equalsIgnoreCase(allowedHeader)) {
+						result.add(requestHeader);
+						break;
+					}
+				}
+			}
+		}
+		return (result.isEmpty() ? null : result);
 	}
 
 }

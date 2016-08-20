@@ -82,7 +82,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	protected String resolveUrlPathInternal(String resourcePath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
-		return (getResource(resourcePath, locations) != null ? resourcePath : null);
+		return (StringUtils.hasText(resourcePath) && getResource(resourcePath, locations) != null ? resourcePath : null);
 	}
 
 	private Resource getResource(String resourcePath, List<? extends Resource> locations) {
@@ -158,11 +158,13 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	}
 
 	private boolean isResourceUnderLocation(Resource resource, Resource location) throws IOException {
-		if (!resource.getClass().equals(location.getClass())) {
+		if (resource.getClass() != location.getClass()) {
 			return false;
 		}
+
 		String resourcePath;
 		String locationPath;
+
 		if (resource instanceof UrlResource) {
 			resourcePath = resource.getURL().toExternalForm();
 			locationPath = StringUtils.cleanPath(location.getURL().toString());
@@ -179,13 +181,15 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			resourcePath = resource.getURL().getPath();
 			locationPath = StringUtils.cleanPath(location.getURL().getPath());
 		}
-		if(locationPath.equals(resourcePath)) {
+
+		if (locationPath.equals(resourcePath)) {
 			return true;
 		}
 		locationPath = (locationPath.endsWith("/") || locationPath.isEmpty() ? locationPath : locationPath + "/");
 		if (!resourcePath.startsWith(locationPath)) {
 			return false;
 		}
+
 		if (resourcePath.contains("%")) {
 			// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars...
 			if (URLDecoder.decode(resourcePath, "UTF-8").contains("../")) {
@@ -195,6 +199,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 				return false;
 			}
 		}
+
 		return true;
 	}
 

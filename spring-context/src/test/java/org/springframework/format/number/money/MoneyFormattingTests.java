@@ -55,8 +55,10 @@ public class MoneyFormattingTests {
 
 	@Test
 	public void testAmountAndUnit() {
-		DataBinder binder = new DataBinder(new MoneyHolder());
+		MoneyHolder bean = new MoneyHolder();
+		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
+
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("amount", "USD 10.50");
 		propertyValues.add("unit", "USD");
@@ -64,11 +66,23 @@ public class MoneyFormattingTests {
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("USD10.50", binder.getBindingResult().getFieldValue("amount"));
 		assertEquals("USD", binder.getBindingResult().getFieldValue("unit"));
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
+		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
+
+		LocaleContextHolder.setLocale(Locale.CANADA);
+		binder.bind(propertyValues);
+		LocaleContextHolder.setLocale(Locale.US);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("USD10.50", binder.getBindingResult().getFieldValue("amount"));
+		assertEquals("USD", binder.getBindingResult().getFieldValue("unit"));
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
+		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
 	}
 
 	@Test
 	public void testAmountWithNumberFormat1() {
-		DataBinder binder = new DataBinder(new FormattedMoneyHolder1());
+		FormattedMoneyHolder1 bean = new FormattedMoneyHolder1();
+		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
 
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -76,19 +90,22 @@ public class MoneyFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("$10.50", binder.getBindingResult().getFieldValue("amount"));
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
+		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
 
-		/* TODO: preserve currency from given value
 		LocaleContextHolder.setLocale(Locale.CANADA);
 		binder.bind(propertyValues);
 		LocaleContextHolder.setLocale(Locale.US);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("$10.50", binder.getBindingResult().getFieldValue("amount"));
-		*/
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
+		assertEquals("CAD", bean.getAmount().getCurrency().getCurrencyCode());
 	}
 
 	@Test
 	public void testAmountWithNumberFormat2() {
-		DataBinder binder = new DataBinder(new FormattedMoneyHolder2());
+		FormattedMoneyHolder2 bean = new FormattedMoneyHolder2();
+		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
 
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -96,11 +113,14 @@ public class MoneyFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("10.5", binder.getBindingResult().getFieldValue("amount"));
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
+		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
 	}
 
 	@Test
 	public void testAmountWithNumberFormat3() {
-		DataBinder binder = new DataBinder(new FormattedMoneyHolder3());
+		FormattedMoneyHolder3 bean = new FormattedMoneyHolder3();
+		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
 
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -108,11 +128,14 @@ public class MoneyFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("10%", binder.getBindingResult().getFieldValue("amount"));
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 0.1d);
+		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
 	}
 
 	@Test
 	public void testAmountWithNumberFormat4() {
-		DataBinder binder = new DataBinder(new FormattedMoneyHolder4());
+		FormattedMoneyHolder4 bean = new FormattedMoneyHolder4();
+		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
 
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -120,26 +143,31 @@ public class MoneyFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("010.500", binder.getBindingResult().getFieldValue("amount"));
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
+		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
 	}
 
 	@Test
 	public void testAmountWithNumberFormat5() {
-		DataBinder binder = new DataBinder(new FormattedMoneyHolder5());
+		FormattedMoneyHolder5 bean = new FormattedMoneyHolder5();
+		DataBinder binder = new DataBinder(bean);
 		binder.setConversionService(conversionService);
 
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("amount", "$ 10.50");
+		propertyValues.add("amount", "USD 10.50");
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("$ 010.500", binder.getBindingResult().getFieldValue("amount"));
+		assertEquals("USD 010.500", binder.getBindingResult().getFieldValue("amount"));
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
+		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
 
-		/* TODO: preserve currency from given value
 		LocaleContextHolder.setLocale(Locale.CANADA);
 		binder.bind(propertyValues);
 		LocaleContextHolder.setLocale(Locale.US);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
-		assertEquals("$ 010.500", binder.getBindingResult().getFieldValue("amount"));
-		*/
+		assertEquals("USD 010.500", binder.getBindingResult().getFieldValue("amount"));
+		assertTrue(bean.getAmount().getNumber().doubleValue() == 10.5d);
+		assertEquals("USD", bean.getAmount().getCurrency().getCurrencyCode());
 	}
 
 
@@ -229,7 +257,7 @@ public class MoneyFormattingTests {
 
 	public static class FormattedMoneyHolder5 {
 
-		@NumberFormat(pattern = "\u00A4 #000.000#")
+		@NumberFormat(pattern = "\u00A4\u00A4 #000.000#")
 		private MonetaryAmount amount;
 
 		public MonetaryAmount getAmount() {

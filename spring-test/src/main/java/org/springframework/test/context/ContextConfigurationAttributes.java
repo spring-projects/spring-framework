@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,18 @@ import org.springframework.util.StringUtils;
  * attributes declared via {@link ContextConfiguration @ContextConfiguration}.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.1
  * @see ContextConfiguration
  * @see SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
  * @see MergedContextConfiguration
  */
 public class ContextConfigurationAttributes {
+
+	private static final String[] EMPTY_LOCATIONS = new String[0];
+
+	private static final Class<?>[] EMPTY_CLASSES = new Class<?>[0];
+
 
 	private static final Log logger = LogFactory.getLog(ContextConfigurationAttributes.class);
 
@@ -61,6 +67,17 @@ public class ContextConfigurationAttributes {
 
 
 	/**
+	 * Construct a new {@link ContextConfigurationAttributes} instance with default values.
+	 * @param declaringClass the test class that declared {@code @ContextConfiguration},
+	 * either explicitly or implicitly
+	 * @since 4.3
+	 */
+	@SuppressWarnings("unchecked")
+	public ContextConfigurationAttributes(Class<?> declaringClass) {
+		this(declaringClass, EMPTY_LOCATIONS, EMPTY_CLASSES, false, (Class[]) EMPTY_CLASSES, true, ContextLoader.class);
+	}
+
+	/**
 	 * Construct a new {@link ContextConfigurationAttributes} instance for the
 	 * supplied {@link ContextConfiguration @ContextConfiguration} annotation and
 	 * the {@linkplain Class test class} that declared it.
@@ -68,7 +85,7 @@ public class ContextConfigurationAttributes {
 	 * @param contextConfiguration the annotation from which to retrieve the attributes
 	 */
 	public ContextConfigurationAttributes(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
-		this(declaringClass, resolveLocations(declaringClass, contextConfiguration), contextConfiguration.classes(),
+		this(declaringClass, contextConfiguration.locations(), contextConfiguration.classes(),
 				contextConfiguration.inheritLocations(), contextConfiguration.initializers(),
 				contextConfiguration.inheritInitializers(), contextConfiguration.name(), contextConfiguration.loader());
 	}
@@ -83,12 +100,9 @@ public class ContextConfigurationAttributes {
 	 */
 	@SuppressWarnings("unchecked")
 	public ContextConfigurationAttributes(Class<?> declaringClass, AnnotationAttributes annAttrs) {
-		this(declaringClass,
-				resolveLocations(declaringClass, annAttrs.getStringArray("locations"), annAttrs.getStringArray("value")),
-				annAttrs.getClassArray("classes"), annAttrs.getBoolean("inheritLocations"),
+		this(declaringClass, annAttrs.getStringArray("locations"), annAttrs.getClassArray("classes"), annAttrs.getBoolean("inheritLocations"),
 				(Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[]) annAttrs.getClassArray("initializers"),
-				annAttrs.getBoolean("inheritInitializers"), annAttrs.getString("name"),
-				(Class<? extends ContextLoader>) annAttrs.getClass("loader"));
+				annAttrs.getBoolean("inheritInitializers"), annAttrs.getString("name"), (Class<? extends ContextLoader>) annAttrs.getClass("loader"));
 	}
 
 	/**
@@ -142,8 +156,8 @@ public class ContextConfigurationAttributes {
 		if (!ObjectUtils.isEmpty(locations) && !ObjectUtils.isEmpty(classes) && logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Test class [%s] has been configured with @ContextConfiguration's 'locations' (or 'value') %s " +
-							"and 'classes' %s attributes. Most SmartContextLoader implementations support " +
-							"only one declaration of resources per @ContextConfiguration annotation.",
+					"and 'classes' %s attributes. Most SmartContextLoader implementations support " +
+					"only one declaration of resources per @ContextConfiguration annotation.",
 					declaringClass.getName(), ObjectUtils.nullSafeToString(locations),
 					ObjectUtils.nullSafeToString(classes)));
 		}
@@ -160,39 +174,9 @@ public class ContextConfigurationAttributes {
 
 
 	/**
-	 * Resolve resource locations from the {@link ContextConfiguration#locations() locations}
-	 * and {@link ContextConfiguration#value() value} attributes of the supplied
-	 * {@link ContextConfiguration} annotation.
-	 * @throws IllegalStateException if both the locations and value attributes have been declared
-	 */
-	private static String[] resolveLocations(Class<?> declaringClass, ContextConfiguration contextConfiguration) {
-		return resolveLocations(declaringClass, contextConfiguration.locations(), contextConfiguration.value());
-	}
-
-	/**
-	 * Resolve resource locations from the supplied {@code locations} and
-	 * {@code value} arrays, which correspond to attributes of the same names in
-	 * the {@link ContextConfiguration} annotation.
-	 * @throws IllegalStateException if both the locations and value attributes have been declared
-	 */
-	private static String[] resolveLocations(Class<?> declaringClass, String[] locations, String[] value) {
-		Assert.notNull(declaringClass, "declaringClass must not be null");
-		if (!ObjectUtils.isEmpty(value) && !ObjectUtils.isEmpty(locations)) {
-			throw new IllegalStateException(String.format("Test class [%s] has been configured with " +
-							"@ContextConfiguration's 'value' %s and 'locations' %s attributes. Only one declaration " +
-							"of resource locations is permitted per @ContextConfiguration annotation.",
-					declaringClass.getName(), ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(locations)));
-		}
-		else if (!ObjectUtils.isEmpty(value)) {
-			locations = value;
-		}
-		return locations;
-	}
-
-
-	/**
 	 * Get the {@linkplain Class class} that declared the
-	 * {@link ContextConfiguration @ContextConfiguration} annotation.
+	 * {@link ContextConfiguration @ContextConfiguration} annotation, either explicitly
+	 * or implicitly.
 	 * @return the declaring class (never {@code null})
 	 */
 	public Class<?> getDeclaringClass() {

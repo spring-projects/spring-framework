@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -41,7 +42,7 @@ import org.springframework.web.util.UrlPathHelper;
 public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry {
 
 	private final List<ServletWebSocketHandlerRegistration> registrations =
-			new ArrayList<ServletWebSocketHandlerRegistration>();
+			new ArrayList<>();
 
 	private TaskScheduler sockJsTaskScheduler;
 
@@ -92,7 +93,7 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 	 * Return a {@link HandlerMapping} with mapped {@link HttpRequestHandler}s.
 	 */
 	public AbstractHandlerMapping getHandlerMapping() {
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (ServletWebSocketHandlerRegistration registration : this.registrations) {
 			MultiValueMap<HttpRequestHandler, String> mappings = registration.getMappings();
 			for (HttpRequestHandler httpHandler : mappings.keySet()) {
@@ -101,7 +102,7 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 				}
 			}
 		}
-		SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
+		WebSocketHandlerMapping hm = new WebSocketHandlerMapping();
 		hm.setUrlMap(urlMap);
 		hm.setOrder(this.order);
 		if (this.urlPathHelper != null) {

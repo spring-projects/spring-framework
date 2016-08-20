@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 	}
 
 	private <A extends Annotation> CacheMethodDetails<A> createMethodDetails(Method method, A annotation, String cacheName) {
-		return new DefaultCacheMethodDetails<A>(method, annotation, cacheName);
+		return new DefaultCacheMethodDetails<>(method, annotation, cacheName);
 	}
 
 	protected CacheResolver getCacheResolver(CacheResolverFactory factory, CacheMethodDetails<?> details) {
@@ -160,10 +160,10 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 	protected CacheResolverFactory determineCacheResolverFactory(CacheDefaults defaults,
 			Class<? extends CacheResolverFactory> candidate) {
 
-		if (!CacheResolverFactory.class.equals(candidate)) {
+		if (CacheResolverFactory.class != candidate) {
 			return getBean(candidate);
 		}
-		else if (defaults != null && !CacheResolverFactory.class.equals(defaults.cacheResolverFactory())) {
+		else if (defaults != null && CacheResolverFactory.class != defaults.cacheResolverFactory()) {
 			return getBean(defaults.cacheResolverFactory());
 		}
 		else {
@@ -172,10 +172,10 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 	}
 
 	protected KeyGenerator determineKeyGenerator(CacheDefaults defaults, Class<? extends CacheKeyGenerator> candidate) {
-		if (!CacheKeyGenerator.class.equals(candidate)) {
+		if (CacheKeyGenerator.class != candidate) {
 			return new KeyGeneratorAdapter(this, getBean(candidate));
 		}
-		else if (defaults != null && !CacheKeyGenerator.class.equals(defaults.cacheKeyGenerator())) {
+		else if (defaults != null && CacheKeyGenerator.class != defaults.cacheKeyGenerator()) {
 			return new KeyGeneratorAdapter(this, getBean(defaults.cacheKeyGenerator()));
 		}
 		else {
@@ -200,7 +200,7 @@ public abstract class AnnotationJCacheOperationSource extends AbstractFallbackJC
 	 */
 	protected String generateDefaultCacheName(Method method) {
 		Class<?>[] parameterTypes = method.getParameterTypes();
-		List<String> parameters = new ArrayList<String>(parameterTypes.length);
+		List<String> parameters = new ArrayList<>(parameterTypes.length);
 		for (Class<?> parameterType : parameterTypes) {
 			parameters.add(parameterType.getName());
 		}

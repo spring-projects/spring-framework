@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,14 +28,12 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.View;
-
-import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link PathVariableMethodArgumentResolver}.
@@ -75,7 +75,7 @@ public class PathVariableMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgument() throws Exception {
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name", "value");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
@@ -92,11 +92,11 @@ public class PathVariableMethodArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveArgumentWithExistingPathVars() throws Exception {
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("name", "value");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		Map<String, Object> pathVars = new HashMap<String, Object>();
+		Map<String, Object> pathVars;
 		uriTemplateVars.put("oldName", "oldValue");
 		request.setAttribute(View.PATH_VARIABLES, uriTemplateVars);
 
@@ -110,12 +110,13 @@ public class PathVariableMethodArgumentResolverTests {
 		assertEquals("oldValue", pathVars.get("oldName"));
 	}
 
-	@Test(expected = ServletRequestBindingException.class)
+	@Test(expected = MissingPathVariableException.class)
 	public void handleMissingValue() throws Exception {
 		resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
 		fail("Unresolved path variable should lead to exception.");
 	}
 
+	@SuppressWarnings("unused")
 	public void handle(@PathVariable(value = "name") String param1, String param2) {
 	}
 

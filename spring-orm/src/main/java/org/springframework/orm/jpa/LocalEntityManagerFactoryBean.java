@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ import javax.persistence.spi.PersistenceProvider;
  * to the JPA provider, consider using Spring's more powerful
  * {@link LocalContainerEntityManagerFactoryBean} instead.
  *
- * <p><b>NOTE: Spring's JPA support requires JPA 2.0 or higher, as of Spring 4.0.</b>
- * JPA 1.0 based applications are still supported; however, a JPA 2.0/2.1 compliant
+ * <p><b>NOTE: Spring's JPA support requires JPA 2.1 or higher, as of Spring 5.0.</b>
+ * JPA 1.0/2.0 based applications are still supported; however, a JPA 2.1 compliant
  * persistence provider is needed at runtime.
  *
  * @author Juergen Hoeller

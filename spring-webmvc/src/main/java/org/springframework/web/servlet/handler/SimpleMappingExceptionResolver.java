@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	/** The default name of the exception attribute: "exception". */
 	public static final String DEFAULT_EXCEPTION_ATTRIBUTE = "exception";
 
+
 	private Properties exceptionMappings;
 
 	private Class<?>[] excludedExceptions;
@@ -54,7 +55,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 
 	private Integer defaultStatusCode;
 
-	private Map<String, Integer> statusCodes = new HashMap<String, Integer>();
+	private Map<String, Integer> statusCodes = new HashMap<>();
 
 	private String exceptionAttribute = DEFAULT_EXCEPTION_ATTRIBUTE;
 
@@ -108,7 +109,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	public void setStatusCodes(Properties statusCodes) {
 		for (Enumeration<?> enumeration = statusCodes.propertyNames(); enumeration.hasMoreElements();) {
 			String viewName = (String) enumeration.nextElement();
-			Integer statusCode = new Integer(statusCodes.getProperty(viewName));
+			Integer statusCode = Integer.valueOf(statusCodes.getProperty(viewName));
 			this.statusCodes.put(viewName, statusCode);
 		}
 	}
@@ -267,7 +268,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 			return depth;
 		}
 		// If we've gone as far as we can go and haven't found it...
-		if (exceptionClass.equals(Throwable.class)) {
+		if (exceptionClass == Throwable.class) {
 			return -1;
 		}
 		return getDepth(exceptionMapping, exceptionClass.getSuperclass(), depth + 1);

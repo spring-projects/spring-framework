@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,23 +144,6 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the name of the form attribute in the model.
-	 * <p>May be a runtime expression.
-	 * @see #setModelAttribute
-	 */
-	public void setCommandName(String commandName) {
-		this.modelAttribute = commandName;
-	}
-
-	/**
-	 * Get the name of the form attribute in the model.
-	 * @see #getModelAttribute
-	 */
-	protected String getCommandName() {
-		return this.modelAttribute;
-	}
-
-	/**
 	 * Set the value of the '{@code name}' attribute.
 	 * <p>May be a runtime expression.
 	 * <p>Name is not a valid attribute for form on XHTML 1.0. However,
@@ -194,15 +177,18 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the value of the '{@code action}' attribute.
+	 * Set the value of the '{@code action}' attribute through a value
+	 * that is to be appended to the current servlet path.
 	 * <p>May be a runtime expression.
+	 * @since 3.2.3
 	 */
-	public void setServletRelativeAction(String servletRelativeaction) {
-		this.servletRelativeAction = (servletRelativeaction != null ? servletRelativeaction : "");
+	public void setServletRelativeAction(String servletRelativeAction) {
+		this.servletRelativeAction = (servletRelativeAction != null ? servletRelativeAction : "");
 	}
 
 	/**
-	 * Get the value of the '{@code action}' attribute.
+	 * Get the servlet-relative value of the '{@code action}' attribute.
+	 * @since 3.2.3
 	 */
 	protected String getServletRelativeAction() {
 		return this.servletRelativeAction;
@@ -322,8 +308,9 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the name of the request param for non-browser supported HTTP methods.
+	 * @since 4.2.3
 	 */
-	protected String getMethodParameter() {
+	protected String getMethodParam() {
 		return this.methodParam;
 	}
 
@@ -333,6 +320,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	protected boolean isMethodBrowserSupported(String method) {
 		return ("get".equalsIgnoreCase(method) || "post".equalsIgnoreCase(method));
 	}
+
 
 	/**
 	 * Writes the opening part of the block	'{@code form}' tag and exposes
@@ -359,7 +347,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 		if (!isMethodBrowserSupported(getMethod())) {
 			assertHttpMethod(getMethod());
-			String inputName = getMethodParameter();
+			String inputName = getMethodParam();
 			String inputType = "hidden";
 			tagWriter.startTag(INPUT_TAG);
 			writeOptionalAttribute(tagWriter, TYPE_ATTRIBUTE, inputType);

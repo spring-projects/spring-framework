@@ -196,12 +196,10 @@ public class DefaultJCacheOperationSource extends AnnotationJCacheOperationSourc
 
 	/**
 	 * Only resolve the default exception cache resolver when an exception needs to be handled.
-	 * <p>
-	 * A non-JSR-107 setup requires either a {@link CacheManager} or a {@link CacheResolver}. If only
+	 * <p>A non-JSR-107 setup requires either a {@link CacheManager} or a {@link CacheResolver}. If only
 	 * the latter is specified, it is not possible to extract a default exception {@code CacheResolver}
 	 * from a custom {@code CacheResolver} implementation so we have to fallback on the {@code CacheManager}.
-	 * <p>
-	 * This gives this weird situation of a perfectly valid configuration that breaks all the sudden
+	 * <p>This gives this weird situation of a perfectly valid configuration that breaks all the sudden
 	 * because the JCache support is enabled. To avoid this we resolve the default exception {@code CacheResolver}
 	 * as late as possible to avoid such hard requirement in other cases.
 	 */

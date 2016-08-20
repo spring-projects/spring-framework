@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -64,6 +63,7 @@ import org.springframework.util.IdGenerator;
  * @author Arjen Poutsma
  * @author Mark Fisher
  * @author Gary Russell
+ * @author Juergen Hoeller
  * @since 4.0
  * @see org.springframework.messaging.support.MessageBuilder
  * @see org.springframework.messaging.support.MessageHeaderAccessor
@@ -117,7 +117,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	 * @param timestamp the {@link #TIMESTAMP} header value
 	 */
 	protected MessageHeaders(Map<String, Object> headers, UUID id, Long timestamp) {
-		this.headers = (headers != null ? new HashMap<String, Object>(headers) : new HashMap<String, Object>());
+		this.headers = (headers != null ? new HashMap<>(headers) : new HashMap<String, Object>());
 
 		if (id == null) {
 			this.headers.put(ID, getIdGenerator().generateId());
@@ -137,6 +137,21 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		}
 		else {
 			this.headers.put(TIMESTAMP, timestamp);
+		}
+	}
+
+	/**
+	 * Copy constructor which allows for ignoring certain entries.
+	 * Used for serialization without non-serializable entries.
+	 * @param original the MessageHeaders to copy
+	 * @param keysToIgnore the keys of the entries to ignore
+	 */
+	private MessageHeaders(MessageHeaders original, Set<String> keysToIgnore) {
+		this.headers = new HashMap<>(original.headers.size() - keysToIgnore.size());
+		for (Map.Entry<String, Object> entry : original.headers.entrySet()) {
+			if (!keysToIgnore.contains(entry.getKey())) {
+				this.headers.put(entry.getKey(), entry.getValue());
+			}
 		}
 	}
 
@@ -165,6 +180,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return get(ERROR_CHANNEL);
 	}
 
+
 	@SuppressWarnings("unchecked")
 	public <T> T get(Object key, Class<T> type) {
 		Object value = this.headers.get(key);
@@ -179,23 +195,6 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 
-	@Override
-	public boolean equals(Object other) {
-		return (this == other ||
-				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
-	}
-
-	@Override
-	public int hashCode() {
-		return this.headers.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return this.headers.toString();
-	}
-
-
 	// Delegating Map implementation
 
 	public boolean containsKey(Object key) {
@@ -207,7 +206,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	public Set<Map.Entry<String, Object>> entrySet() {
-		return Collections.unmodifiableSet(this.headers.entrySet());
+		return Collections.unmodifiableMap(this.headers).entrySet();
 	}
 
 	public Object get(Object key) {
@@ -269,23 +268,47 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	// Serialization methods
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		List<String> keysToRemove = new ArrayList<String>();
+		Set<String> keysToIgnore = new HashSet<>();
 		for (Map.Entry<String, Object> entry : this.headers.entrySet()) {
 			if (!(entry.getValue() instanceof Serializable)) {
-				keysToRemove.add(entry.getKey());
+				keysToIgnore.add(entry.getKey());
 			}
 		}
-		for (String key : keysToRemove) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Removing non-serializable header: " + key);
-			}
-			this.headers.remove(key);
+
+		if (keysToIgnore.isEmpty()) {
+			// All entries are serializable -> serialize the regular MessageHeaders instance
+			out.defaultWriteObject();
 		}
-		out.defaultWriteObject();
+		else {
+			// Some non-serializable entries -> serialize a temporary MessageHeaders copy
+			if (logger.isDebugEnabled()) {
+				logger.debug("Ignoring non-serializable message headers: " + keysToIgnore);
+			}
+			out.writeObject(new MessageHeaders(this, keysToIgnore));
+		}
 	}
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
+	}
+
+
+	// equals, hashCode, toString
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other ||
+				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.headers.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.headers.toString();
 	}
 
 }

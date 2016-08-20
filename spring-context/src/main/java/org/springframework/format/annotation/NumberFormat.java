@@ -70,11 +70,11 @@ public @interface NumberFormat {
 	/**
 	 * Common number format styles.
 	 */
-	public enum Style {
+	enum Style {
 
 		/**
-		 * The default format for the annotated type: typically number
-		 * but possibly currency for a money type.
+		 * The default format for the annotated type: typically 'number' but possibly
+		 * 'currency' for a money type (e.g. {@code javax.money.MonetaryAmount)}.
 		 * @since 4.2
 		 */
 		DEFAULT,
@@ -85,14 +85,14 @@ public @interface NumberFormat {
 		NUMBER,
 
 		/**
-		 * The currency format for the current locale.
-		 */
-		CURRENCY,
-
-		/**
 		 * The percent format for the current locale.
 		 */
-		PERCENT
+		PERCENT,
+
+		/**
+		 * The currency format for the current locale.
+		 */
+		CURRENCY
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.simp.stomp;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -40,6 +38,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.util.concurrent.ListenableFuture;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for {@link Reactor2TcpStompClient}.
@@ -86,7 +87,8 @@ public class Reactor2TcpStompClientTests {
 	public void tearDown() throws Exception {
 		try {
 			this.client.shutdown();
-		} catch (Throwable ex) {
+		}
+		catch (Throwable ex) {
 			logger.error("Failed to shut client", ex);
 		}
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -100,7 +102,6 @@ public class Reactor2TcpStompClientTests {
 
 	@Test
 	public void publishSubscribe() throws Exception {
-
 		String destination = "/topic/foo";
 		ConsumingHandler consumingHandler1 = new ConsumingHandler(destination);
 		ListenableFuture<StompSession> consumerFuture1 = this.client.connect(consumingHandler1);
@@ -146,8 +147,8 @@ public class Reactor2TcpStompClientTests {
 		public void handleTransportError(StompSession session, Throwable exception) {
 			logger.error(exception);
 		}
-
 	}
+
 
 	private static class ConsumingHandler extends LoggingSessionHandler {
 
@@ -157,13 +158,11 @@ public class Reactor2TcpStompClientTests {
 
 		private final List<String> received = new ArrayList<>();
 
-
 		public ConsumingHandler(String... topics) {
 			Assert.notEmpty(topics);
 			this.topics = Arrays.asList(topics);
 			this.subscriptionLatch = new CountDownLatch(this.topics.size());
 		}
-
 
 		public List<String> getReceived() {
 			return this.received;
@@ -208,15 +207,14 @@ public class Reactor2TcpStompClientTests {
 			}
 			return true;
 		}
-
 	}
+
 
 	private static class ProducingHandler extends LoggingSessionHandler {
 
 		private final List<String> topics = new ArrayList<>();
 
 		private final List<Object> payloads = new ArrayList<>();
-
 
 		public ProducingHandler addToSend(String topic, Object payload) {
 			this.topics.add(topic);
@@ -226,7 +224,7 @@ public class Reactor2TcpStompClientTests {
 
 		@Override
 		public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-			for (int i=0; i < this.topics.size(); i++) {
+			for (int i = 0; i < this.topics.size(); i++) {
 				session.send(this.topics.get(i), this.payloads.get(i));
 			}
 		}

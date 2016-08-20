@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,10 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 
 	private List<String> aspectBeanNames;
 
-	private final Map<String, List<Advisor>> advisorsCache = new HashMap<String, List<Advisor>>();
+	private final Map<String, List<Advisor>> advisorsCache = new HashMap<>();
 
 	private final Map<String, MetadataAwareAspectInstanceFactory> aspectFactoryCache =
-			new HashMap<String, MetadataAwareAspectInstanceFactory>();
+			new HashMap<>();
 
 
 	/**
@@ -85,8 +85,8 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 		synchronized (this) {
 			aspectNames = this.aspectBeanNames;
 			if (aspectNames == null) {
-				List<Advisor> advisors = new LinkedList<Advisor>();
-				aspectNames = new LinkedList<String>();
+				List<Advisor> advisors = new LinkedList<>();
+				aspectNames = new LinkedList<>();
 				String[] beanNames =
 						BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, Object.class, true, false);
 				for (String beanName : beanNames) {
@@ -136,7 +136,7 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 		if (aspectNames.isEmpty()) {
 			return Collections.emptyList();
 		}
-		List<Advisor> advisors = new LinkedList<Advisor>();
+		List<Advisor> advisors = new LinkedList<>();
 		for (String aspectName : aspectNames) {
 			List<Advisor> cachedAdvisors = this.advisorsCache.get(aspectName);
 			if (cachedAdvisors != null) {

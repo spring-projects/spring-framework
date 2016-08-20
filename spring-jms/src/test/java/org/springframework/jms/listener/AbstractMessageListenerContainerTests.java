@@ -29,12 +29,12 @@ public abstract class AbstractMessageListenerContainerTests {
 	protected abstract AbstractMessageListenerContainer getContainer();
 
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSettingMessageListenerToANullType() throws Exception {
 		getContainer().setMessageListener(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSettingMessageListenerToAnUnsupportedType() throws Exception {
 		getContainer().setMessageListener("Bingo");
 	}

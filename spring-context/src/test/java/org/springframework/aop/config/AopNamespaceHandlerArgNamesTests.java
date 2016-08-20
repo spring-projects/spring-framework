@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class AopNamespaceHandlerArgNamesTests {
+public class AopNamespaceHandlerArgNamesTests {
 
 	@Test
 	public void testArgNamesOK() {

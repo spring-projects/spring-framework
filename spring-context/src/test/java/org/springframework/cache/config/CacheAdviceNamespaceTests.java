@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.context.support.GenericXmlApplicationContext;
  * @author Costin Leau
  * @author Chris Beams
  */
-public class CacheAdviceNamespaceTests extends AbstractAnnotationTests {
+public class CacheAdviceNamespaceTests extends AbstractCacheAnnotationTests {
 
 	@Override
 	protected ConfigurableApplicationContext getApplicationContext() {
@@ -37,8 +37,8 @@ public class CacheAdviceNamespaceTests extends AbstractAnnotationTests {
 
 	@Test
 	public void testKeyStrategy() throws Exception {
-		CacheInterceptor bean = ctx.getBean("cacheAdviceClass", CacheInterceptor.class);
-		Assert.assertSame(ctx.getBean("keyGenerator"), bean.getKeyGenerator());
+		CacheInterceptor bean = this.ctx.getBean("cacheAdviceClass", CacheInterceptor.class);
+		Assert.assertSame(this.ctx.getBean("keyGenerator"), bean.getKeyGenerator());
 	}
 
 }

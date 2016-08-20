@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.TestDataSourceWrapper"/>
 
-	<bean id="queryWithPlaceHolders" class="org.springframework.jdbc.object.GenericSqlQuery">
+	<bean id="queryWithPlaceholders" class="org.springframework.jdbc.object.GenericSqlQuery">
 		<property name="dataSource" ref="dataSource"/>
 		<property name="sql" value="select id, forename from custmr where id = ? and country = ?"/>
 		<property name="parameters">
@@ -15,7 +15,7 @@
 					<constructor-arg index="0" value="amount"/>
 					<constructor-arg index="1">
 						<util:constant static-field="java.sql.Types.INTEGER"/>
-					</constructor-arg> 
+					</constructor-arg>
 				</bean>
 				<bean class="org.springframework.jdbc.core.SqlParameter">
 					<constructor-arg index="0" value="custid"/>
@@ -47,7 +47,31 @@
 				</bean>
 			</list>
 		</property>
-    <property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
+        <property name="rowMapperClass" value="org.springframework.jdbc.object.CustomerMapper"/>
+	</bean>
+
+	<bean id="queryWithRowMapperBean" class="org.springframework.jdbc.object.GenericSqlQuery">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="sql" value="select id, forename from custmr where id = :id and country = :country"/>
+		<property name="parameters">
+			<list>
+				<bean class="org.springframework.jdbc.core.SqlParameter">
+					<constructor-arg index="0" value="id"/>
+					<constructor-arg index="1">
+						<util:constant static-field="java.sql.Types.INTEGER"/>
+					</constructor-arg>
+				</bean>
+				<bean class="org.springframework.jdbc.core.SqlParameter">
+					<constructor-arg index="0" value="country"/>
+					<constructor-arg index="1">
+						<util:constant static-field="java.sql.Types.VARCHAR"/>
+					</constructor-arg>
+				</bean>
+			</list>
+		</property>
+		<property name="rowMapper">
+			<bean class="org.springframework.jdbc.object.CustomerMapper"/>
+		</property>
 	</bean>
 
 </beans>

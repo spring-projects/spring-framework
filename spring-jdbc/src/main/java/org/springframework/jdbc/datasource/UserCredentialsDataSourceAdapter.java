@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,8 +65,12 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 
 	private String password;
 
+	private String catalog;
+
+	private String schema;
+
 	private final ThreadLocal<JdbcUserCredentials> threadBoundCredentials =
-			new NamedThreadLocal<JdbcUserCredentials>("Current JDBC user credentials");
+			new NamedThreadLocal<>("Current JDBC user credentials");
 
 
 	/**
@@ -91,6 +95,24 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	/**
+	 * Specify a database catalog to be applied to each retrieved Connection.
+	 * @since 4.3.2
+	 * @see Connection#setCatalog
+	 */
+	public void setCatalog(String catalog) {
+		this.catalog = catalog;
+	}
+
+	/**
+	 * Specify a database schema to be applied to each retrieved Connection.
+	 * @since 4.3.2
+	 * @see Connection#setSchema
+	 */
+	public void setSchema(String schema) {
+		this.schema = schema;
 	}
 
 
@@ -128,12 +150,17 @@ public class UserCredentialsDataSourceAdapter extends DelegatingDataSource {
 	@Override
 	public Connection getConnection() throws SQLException {
 		JdbcUserCredentials threadCredentials = this.threadBoundCredentials.get();
-		if (threadCredentials != null) {
-			return doGetConnection(threadCredentials.username, threadCredentials.password);
+		Connection con = (threadCredentials != null ?
+				doGetConnection(threadCredentials.username, threadCredentials.password) :
+				doGetConnection(this.username, this.password));
+
+		if (this.catalog != null) {
+			con.setCatalog(this.catalog);
 		}
-		else {
-			return doGetConnection(this.username, this.password);
+		if (this.schema != null) {
+			con.setSchema(this.schema);
 		}
+		return con;
 	}
 
 	/**

@@ -32,7 +32,7 @@ public class ContentResultMatchersTests {
 		new ContentResultMatchers().contentType("application/json;charset=UTF-8").match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void typeNoMatch() throws Exception {
 		new ContentResultMatchers().contentType("text/plain").match(getStubMvcResult());
 	}
@@ -42,7 +42,7 @@ public class ContentResultMatchersTests {
 		new ContentResultMatchers().encoding("UTF-8").match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void encodingNoMatch() throws Exception {
 		new ContentResultMatchers().encoding("ISO-8859-1").match(getStubMvcResult());
 	}
@@ -52,7 +52,7 @@ public class ContentResultMatchersTests {
 		new ContentResultMatchers().string(new String(CONTENT.getBytes("UTF-8"))).match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void stringNoMatch() throws Exception {
 		new ContentResultMatchers().encoding("bogus").match(getStubMvcResult());
 	}
@@ -63,7 +63,7 @@ public class ContentResultMatchersTests {
 		new ContentResultMatchers().string(Matchers.equalTo(content)).match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void stringMatcherNoMatch() throws Exception {
 		new ContentResultMatchers().string(Matchers.equalTo("bogus")).match(getStubMvcResult());
 	}
@@ -73,23 +73,34 @@ public class ContentResultMatchersTests {
 		new ContentResultMatchers().bytes(CONTENT.getBytes("UTF-8")).match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void bytesNoMatch() throws Exception {
 		new ContentResultMatchers().bytes("bogus".getBytes()).match(getStubMvcResult());
 	}
 
 	@Test
-	public void json() throws Exception {
-		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"         \n}").match(getStubMvcResult());
+	public void jsonLenientMatch() throws Exception {
+		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"  \n}").match(getStubMvcResult());
+		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"  \n}", false).match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
-	public void jsonNoMatch() throws Exception {
+	@Test
+	public void jsonStrictMatch() throws Exception {
+		new ContentResultMatchers().json("{\n \"foo\":\"bar\",   \"foo array\":[\"foo\",\"bar\"] \n}", true).match(getStubMvcResult());
+		new ContentResultMatchers().json("{\n \"foo array\":[\"foo\",\"bar\"], \"foo\":\"bar\" \n}", true).match(getStubMvcResult());
+	}
+
+	@Test(expected = AssertionError.class)
+	public void jsonLenientNoMatch() throws Exception {
 		new ContentResultMatchers().json("{\n\"fooo\":\"bar\"\n}").match(getStubMvcResult());
 	}
 
+	@Test(expected = AssertionError.class)
+	public void jsonStrictNoMatch() throws Exception {
+		new ContentResultMatchers().json("{\"foo\":\"bar\",   \"foo array\":[\"bar\",\"foo\"]}", true).match(getStubMvcResult());
+	}
 
-	private static final String CONTENT = "{\"foo\":\"bar\"}";
+	private static final String CONTENT = "{\"foo\":\"bar\",\"foo array\":[\"foo\",\"bar\"]}";
 
 	private StubMvcResult getStubMvcResult() throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();

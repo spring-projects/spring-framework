@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import java.util.concurrent.Callable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -83,8 +83,11 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private void initResponseStatus() {
 		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
+		if (annotation == null) {
+			annotation = AnnotatedElementUtils.findMergedAnnotation(getBeanType(), ResponseStatus.class);
+		}
 		if (annotation != null) {
-			this.responseStatus = annotation.value();
+			this.responseStatus = annotation.code();
 			this.responseReason = annotation.reason();
 		}
 	}
@@ -239,6 +242,14 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 			return ServletInvocableHandlerMethod.this.getMethodAnnotation(annotationType);
 		}
+
+		/**
+		 * Bridge to controller method-level annotations.
+		 */
+		@Override
+		public <A extends Annotation> boolean hasMethodAnnotation(Class<A> annotationType) {
+			return ServletInvocableHandlerMethod.this.hasMethodAnnotation(annotationType);
+		}
 	}
 
 
@@ -259,24 +270,31 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
 		}
 
+		public ConcurrentResultMethodParameter(ConcurrentResultMethodParameter original) {
+			super(original);
+			this.returnValue = original.returnValue;
+			this.returnType = original.returnType;
+		}
+
 		@Override
 		public Class<?> getParameterType() {
 			if (this.returnValue != null) {
 				return this.returnValue.getClass();
 			}
-			Class<?> parameterType = super.getParameterType();
-			if (ResponseBodyEmitter.class.isAssignableFrom(parameterType) ||
-					StreamingResponseBody.class.isAssignableFrom(parameterType)) {
-				return parameterType;
+			if (!ResolvableType.NONE.equals(this.returnType)) {
+				return this.returnType.getRawClass();
 			}
-			Assert.isTrue(!ResolvableType.NONE.equals(this.returnType), "Expected one of" +
-					"Callable, DeferredResult, or ListenableFuture: " + super.getParameterType());
-			return this.returnType.getRawClass();
+			return super.getParameterType();
 		}
 
 		@Override
 		public Type getGenericParameterType() {
 			return this.returnType.getType();
+		}
+
+		@Override
+		public ConcurrentResultMethodParameter clone() {
+			return new ConcurrentResultMethodParameter(this);
 		}
 	}
 

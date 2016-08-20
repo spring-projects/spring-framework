@@ -2032,7 +2032,7 @@ class MethodWriter extends MethodVisitor {
         }
         int size = 8;
         if (code.length > 0) {
-            if (code.length > 65536) {
+            if (code.length > 65535) {
                 throw new RuntimeException("Method code too large!");
             }
             cw.newUTF8("Code");
@@ -2706,11 +2706,13 @@ class MethodWriter extends MethodVisitor {
                 l = l.successor;
             }
             // Update the offsets in the uninitialized types
-            for (i = 0; i < cw.typeTable.length; ++i) {
-                Item item = cw.typeTable[i];
-                if (item != null && item.type == ClassWriter.TYPE_UNINIT) {
-                    item.intVal = getNewOffset(allIndexes, allSizes, 0,
-                            item.intVal);
+            if (cw.typeTable != null) {
+                for (i = 0; i < cw.typeTable.length; ++i) {
+                    Item item = cw.typeTable[i];
+                    if (item != null && item.type == ClassWriter.TYPE_UNINIT) {
+                        item.intVal = getNewOffset(allIndexes, allSizes, 0,
+                                item.intVal);
+                    }
                 }
             }
             // The stack map frames are not serialized yet, so we don't need

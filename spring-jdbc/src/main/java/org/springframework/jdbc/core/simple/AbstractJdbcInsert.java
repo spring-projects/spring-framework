@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public abstract class AbstractJdbcInsert {
 	private final TableMetaDataContext tableMetaDataContext = new TableMetaDataContext();
 
 	/** List of columns objects to be used in insert statement */
-	private final List<String> declaredColumns = new ArrayList<String>();
+	private final List<String> declaredColumns = new ArrayList<>();
 
 	/** The names of the columns holding the generated key */
 	private String[] generatedKeyNames = new String[0];
@@ -80,7 +80,7 @@ public abstract class AbstractJdbcInsert {
 	 * Has this operation been compiled? Compilation means at least checking
 	 * that a DataSource or JdbcTemplate has been provided.
 	 */
-	private boolean compiled = false;
+	private volatile boolean compiled = false;
 
 	/** The generated string used for insert statement */
 	private String insertString;
@@ -296,7 +296,7 @@ public abstract class AbstractJdbcInsert {
 
 	/**
 	 * Is this operation "compiled"?
-	 * @return whether this operation is compiled, and ready to use.
+	 * @return whether this operation is compiled and ready to use
 	 */
 	public boolean isCompiled() {
 		return this.compiled;
@@ -467,7 +467,7 @@ public abstract class AbstractJdbcInsert {
 			if (keyQuery.toUpperCase().startsWith("RETURNING")) {
 				Long key = getJdbcTemplate().queryForObject(getInsertString() + " " + keyQuery,
 						values.toArray(new Object[values.size()]), Long.class);
-				Map<String, Object> keys = new HashMap<String, Object>(1);
+				Map<String, Object> keys = new HashMap<>(1);
 				keys.put(getGeneratedKeyNames()[0], key);
 				keyHolder.getKeyList().add(keys);
 			}
@@ -488,7 +488,7 @@ public abstract class AbstractJdbcInsert {
 						//Get the key
 						Statement keyStmt = null;
 						ResultSet rs = null;
-						Map<String, Object> keys = new HashMap<String, Object>(1);
+						Map<String, Object> keys = new HashMap<>(1);
 						try {
 							keyStmt = con.createStatement();
 							rs = keyStmt.executeQuery(keyQuery);
@@ -542,9 +542,10 @@ public abstract class AbstractJdbcInsert {
 	 * @param batch array of Maps with parameter names and values to be used in batch insert
 	 * @return array of number of rows affected
 	 */
+	@SuppressWarnings("unchecked")
 	protected int[] doExecuteBatch(Map<String, ?>... batch) {
 		checkCompiled();
-		List<List<Object>> batchValues = new ArrayList<List<Object>>(batch.length);
+		List<List<Object>> batchValues = new ArrayList<>(batch.length);
 		for (Map<String, ?> args : batch) {
 			batchValues.add(matchInParameterValuesWithInsertColumns(args));
 		}
@@ -558,7 +559,7 @@ public abstract class AbstractJdbcInsert {
 	 */
 	protected int[] doExecuteBatch(SqlParameterSource... batch) {
 		checkCompiled();
-		List<List<Object>> batchValues = new ArrayList<List<Object>>(batch.length);
+		List<List<Object>> batchValues = new ArrayList<>(batch.length);
 		for (SqlParameterSource parameterSource : batch) {
 			batchValues.add(matchInParameterValuesWithInsertColumns(parameterSource));
 		}

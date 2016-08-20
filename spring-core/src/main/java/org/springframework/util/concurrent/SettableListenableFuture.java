@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * A {@link org.springframework.util.concurrent.ListenableFuture ListenableFuture}
@@ -43,17 +44,17 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 
 	public SettableListenableFuture() {
-		this.settableTask = new SettableTask<T>();
-		this.listenableFuture = new ListenableFutureTask<T>(this.settableTask);
+		this.settableTask = new SettableTask<>();
+		this.listenableFuture = new ListenableFutureTask<>(this.settableTask);
 	}
 
 
 	/**
-	 * Set the value of this future. This method will return {@code true} if
-	 * the value was set successfully, or {@code false} if the future has already
-	 * been set or cancelled.
-	 * @param value the value that will be set.
-	 * @return {@code true} if the value was successfully set, else {@code false}.
+	 * Set the value of this future. This method will return {@code true} if the
+	 * value was set successfully, or {@code false} if the future has already been
+	 * set or cancelled.
+	 * @param value the value that will be set
+	 * @return {@code true} if the value was successfully set, else {@code false}
 	 */
 	public boolean set(T value) {
 		boolean success = this.settableTask.setValue(value);
@@ -64,14 +65,14 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 	}
 
 	/**
-	 * Set the exception of this future. This method will return {@code true} if
-	 * the exception was set successfully, or {@code false} if the future has already
-	 * been set or cancelled.
-	 * @param exception the value that will be set.
-	 * @return {@code true} if the exception was successfully set, else {@code false}.
+	 * Set the exception of this future. This method will return {@code true} if the
+	 * exception was set successfully, or {@code false} if the future has already been
+	 * set or cancelled.
+	 * @param exception the value that will be set
+	 * @return {@code true} if the exception was successfully set, else {@code false}
 	 */
 	public boolean setException(Throwable exception) {
-		Assert.notNull(exception, "'exception' must not be null");
+		Assert.notNull(exception, "Exception must not be null");
 		boolean success = this.settableTask.setException(exception);
 		if (success) {
 			this.listenableFuture.run();
@@ -149,9 +150,9 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 
 	private static class SettableTask<T> implements Callable<T> {
 
-		private static final String NO_VALUE = SettableListenableFuture.class.getName() + ".NO_VALUE";
+		private static final Object NO_VALUE = new Object();
 
-		private final AtomicReference<Object> value = new AtomicReference<Object>(NO_VALUE);
+		private final AtomicReference<Object> value = new AtomicReference<>(NO_VALUE);
 
 		private volatile boolean cancelled = false;
 
@@ -176,10 +177,11 @@ public class SettableListenableFuture<T> implements ListenableFuture<T> {
 		@SuppressWarnings("unchecked")
 		@Override
 		public T call() throws Exception {
-			if (value.get() instanceof Exception) {
-				throw (Exception) value.get();
+			Object val = this.value.get();
+			if (val instanceof Throwable) {
+				ReflectionUtils.rethrowException((Throwable) val);
 			}
-			return (T) value.get();
+			return (T) val;
 		}
 	}
 

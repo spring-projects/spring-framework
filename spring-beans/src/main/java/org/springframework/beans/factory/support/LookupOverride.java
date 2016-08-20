@@ -83,7 +83,7 @@ public class LookupOverride extends MethodOverride {
 		}
 		else {
 			return (method.getName().equals(getMethodName()) && (!isOverloaded() ||
-					Modifier.isAbstract(method.getModifiers()) || method.getParameterTypes().length == 0));
+					Modifier.isAbstract(method.getModifiers()) || method.getParameterCount() == 0));
 		}
 	}
 

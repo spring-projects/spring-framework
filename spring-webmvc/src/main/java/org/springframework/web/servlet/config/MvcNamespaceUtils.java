@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.config;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
@@ -49,6 +53,8 @@ abstract class MvcNamespaceUtils {
 	private static final String URL_PATH_HELPER_BEAN_NAME = "mvcUrlPathHelper";
 
 	private static final String PATH_MATCHER_BEAN_NAME = "mvcPathMatcher";
+
+	private static final String CORS_CONFIGURATION_BEAN_NAME = "mvcCorsConfigurations";
 
 
 	public static void registerDefaultComponents(ParserContext parserContext, Object source) {
@@ -113,6 +119,8 @@ abstract class MvcNamespaceUtils {
 			beanNameMappingDef.setSource(source);
 			beanNameMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			beanNameMappingDef.getPropertyValues().add("order", 2);	// consistent with WebMvcConfigurationSupport
+			RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
+			beanNameMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
 			parserContext.getRegistry().registerBeanDefinition(BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME, beanNameMappingDef);
 			parserContext.registerComponent(new BeanComponentDefinition(beanNameMappingDef, BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME));
 		}
@@ -145,5 +153,48 @@ abstract class MvcNamespaceUtils {
 			parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef, SIMPLE_CONTROLLER_HANDLER_ADAPTER_BEAN_NAME));
 		}
 	}
+
+	/**
+	 * Registers a {@code Map<String, CorsConfiguration>} (mapped {@code CorsConfiguration}s)
+	 * under a well-known name unless already registered. The bean definition may be updated
+	 * if a non-null CORS configuration is provided.
+	 * @return a RuntimeBeanReference to this {@code Map<String, CorsConfiguration>} instance
+	 */
+	public static RuntimeBeanReference registerCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations, ParserContext parserContext, Object source) {
+		if (!parserContext.getRegistry().containsBeanDefinition(CORS_CONFIGURATION_BEAN_NAME)) {
+			RootBeanDefinition corsConfigurationsDef = new RootBeanDefinition(LinkedHashMap.class);
+			corsConfigurationsDef.setSource(source);
+			corsConfigurationsDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			if (corsConfigurations != null) {
+				corsConfigurationsDef.getConstructorArgumentValues().addIndexedArgumentValue(0, corsConfigurations);
+			}
+			parserContext.getReaderContext().getRegistry().registerBeanDefinition(CORS_CONFIGURATION_BEAN_NAME, corsConfigurationsDef);
+			parserContext.registerComponent(new BeanComponentDefinition(corsConfigurationsDef, CORS_CONFIGURATION_BEAN_NAME));
+		}
+		else if (corsConfigurations != null) {
+			BeanDefinition corsConfigurationsDef = parserContext.getRegistry().getBeanDefinition(CORS_CONFIGURATION_BEAN_NAME);
+			corsConfigurationsDef.getConstructorArgumentValues().addIndexedArgumentValue(0, corsConfigurations);
+		}
+		return new RuntimeBeanReference(CORS_CONFIGURATION_BEAN_NAME);
+	}
+
+	/**
+	 * Find the {@code ContentNegotiationManager} bean created by or registered
+	 * with the {@code annotation-driven} element.
+	 * @return a bean definition, bean reference, or null.
+	 */
+	public static Object getContentNegotiationManager(ParserContext context) {
+		String name = AnnotationDrivenBeanDefinitionParser.HANDLER_MAPPING_BEAN_NAME;
+		if (context.getRegistry().containsBeanDefinition(name)) {
+			BeanDefinition handlerMappingBeanDef = context.getRegistry().getBeanDefinition(name);
+			return handlerMappingBeanDef.getPropertyValues().get("contentNegotiationManager");
+		}
+		name = AnnotationDrivenBeanDefinitionParser.CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
+		if (context.getRegistry().containsBeanDefinition(name)) {
+			return new RuntimeBeanReference(name);
+		}
+		return null;
+	}
+
 
 }

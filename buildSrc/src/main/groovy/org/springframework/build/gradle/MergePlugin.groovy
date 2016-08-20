@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,8 +132,9 @@ class MergePlugin implements Plugin<Project> {
 						intoConfiguration.dependencies.add(it)
 					}
 				}
+				def index = project.parent.childProjects.findIndexOf {p -> p.getValue() == project}
 				project.merge.into.install.repositories.mavenInstaller.pom.scopeMappings.addMapping(
-					mapping.priority + 100, intoConfiguration, mapping.scope)
+					mapping.priority + 100 + index, intoConfiguration, mapping.scope)
 			}
 		}
 	}

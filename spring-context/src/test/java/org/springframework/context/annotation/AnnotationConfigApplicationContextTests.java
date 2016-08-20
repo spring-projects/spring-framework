@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
@@ -40,10 +41,10 @@ import static org.springframework.util.StringUtils.*;
  */
 public class AnnotationConfigApplicationContextTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void nullGetBeanParameterIsDisallowed() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
-		context.getBean((Class<?>)null);
+		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+		context.getBean((Class<?>) null);
 	}
 
 	@Test
@@ -83,7 +84,7 @@ public class AnnotationConfigApplicationContextTests {
 
 	@Test
 	public void getBeanByType() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		TestBean testBean = context.getBean(TestBean.class);
 		assertNotNull("getBean() should not return null", testBean);
 		assertThat(testBean.name, equalTo("foo"));
@@ -95,7 +96,7 @@ public class AnnotationConfigApplicationContextTests {
 	 */
 	@Test
 	public void defaultConfigClassBeanNameIsGeneratedProperly() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
 		// attempt to retrieve the instance by its generated bean name
 		Config configObject = (Config) context.getBean("annotationConfigApplicationContextTests.Config");
@@ -108,18 +109,16 @@ public class AnnotationConfigApplicationContextTests {
 	 */
 	@Test
 	public void explicitConfigClassBeanNameIsRespected() {
-		AnnotationConfigApplicationContext context =
-			new AnnotationConfigApplicationContext(ConfigWithCustomName.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(ConfigWithCustomName.class);
 
 		// attempt to retrieve the instance by its specified name
-		ConfigWithCustomName configObject =
-			(ConfigWithCustomName) context.getBean("customConfigBeanName");
+		ConfigWithCustomName configObject = (ConfigWithCustomName) context.getBean("customConfigBeanName");
 		assertNotNull(configObject);
 	}
 
 	@Test
 	public void getBeanByTypeRaisesNoSuchBeanDefinitionException() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
 		// attempt to retrieve a bean that does not exist
 		Class<?> targetType = Pattern.class;
@@ -135,7 +134,7 @@ public class AnnotationConfigApplicationContextTests {
 
 	@Test
 	public void getBeanByTypeAmbiguityRaisesException() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(TwoTestBeanConfig.class);
 
 		try {
 			context.getBean(TestBean.class);
@@ -153,7 +152,7 @@ public class AnnotationConfigApplicationContextTests {
 
 	@Test
 	public void autowiringIsEnabledByDefault() {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AutowiredConfig.class);
+		ApplicationContext context = new AnnotationConfigApplicationContext(AutowiredConfig.class);
 		assertThat(context.getBean(TestBean.class).name, equalTo("foo"));
 	}
 
@@ -255,13 +254,14 @@ public class AnnotationConfigApplicationContextTests {
 }
 
 class TestBean {
+
 	String name;
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + (name == null ? 0 : name.hashCode());
 		return result;
 	}
 
@@ -277,7 +277,8 @@ class TestBean {
 		if (name == null) {
 			if (other.name != null)
 				return false;
-		} else if (!name.equals(other.name))
+		}
+		else if (!name.equals(other.name))
 			return false;
 		return true;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -28,7 +29,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * An {@link WebMvcConfigurer} implementation that delegates to other {@link WebMvcConfigurer} instances.
+ * A {@link WebMvcConfigurer} that delegates to one or more others.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -37,16 +38,18 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 
 	private final List<WebMvcConfigurer> delegates = new ArrayList<WebMvcConfigurer>();
 
+
 	public void addWebMvcConfigurers(List<WebMvcConfigurer> configurers) {
-		if (configurers != null) {
+		if (!CollectionUtils.isEmpty(configurers)) {
 			this.delegates.addAll(configurers);
 		}
 	}
 
+
 	@Override
-	public void addFormatters(FormatterRegistry registry) {
+	public void configurePathMatch(PathMatchConfigurer configurer) {
 		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.addFormatters(registry);
+			delegate.configurePathMatch(configurer);
 		}
 	}
 
@@ -65,44 +68,16 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void configurePathMatch(PathMatchConfigurer configurer) {
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.configurePathMatch(configurer);
+			delegate.configureDefaultServletHandling(configurer);
 		}
 	}
 
 	@Override
-	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+	public void addFormatters(FormatterRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.configureMessageConverters(converters);
-		}
-	}
-
-	@Override
-	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.extendMessageConverters(converters);
-		}
-	}
-
-	@Override
-	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.addArgumentResolvers(argumentResolvers);
-		}
-	}
-
-	@Override
-	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.addReturnValueHandlers(returnValueHandlers);
-		}
-	}
-
-	@Override
-	public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.configureHandlerExceptionResolvers(exceptionResolvers);
+			delegate.addFormatters(registry);
 		}
 	}
 
@@ -110,6 +85,20 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.addInterceptors(registry);
+		}
+	}
+
+	@Override
+	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.addResourceHandlers(registry);
+		}
+	}
+
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.addCorsMappings(registry);
 		}
 	}
 
@@ -128,54 +117,77 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 	}
 
 	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.addResourceHandlers(registry);
+			delegate.addArgumentResolvers(argumentResolvers);
 		}
 	}
 
 	@Override
-	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+	public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
 		for (WebMvcConfigurer delegate : this.delegates) {
-			delegate.configureDefaultServletHandling(configurer);
+			delegate.addReturnValueHandlers(returnValueHandlers);
+		}
+	}
+
+	@Override
+	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureMessageConverters(converters);
+		}
+	}
+
+	@Override
+	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.extendMessageConverters(converters);
+		}
+	}
+
+	@Override
+	public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureHandlerExceptionResolvers(exceptionResolvers);
+		}
+	}
+
+	@Override
+	public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.extendHandlerExceptionResolvers(exceptionResolvers);
 		}
 	}
 
 	@Override
 	public Validator getValidator() {
-		List<Validator> candidates = new ArrayList<Validator>();
+		Validator selected = null;
 		for (WebMvcConfigurer configurer : this.delegates) {
 			Validator validator = configurer.getValidator();
 			if (validator != null) {
-				candidates.add(validator);
+				if (selected != null) {
+					throw new IllegalStateException("No unique Validator found: {" +
+							selected + ", " + validator + "}");
+				}
+				selected = validator;
 			}
 		}
-		return selectSingleInstance(candidates, Validator.class);
-	}
-
-	private <T> T selectSingleInstance(List<T> instances, Class<T> instanceType) {
-		if (instances.size() > 1) {
-			throw new IllegalStateException(
-					"Only one [" + instanceType + "] was expected but multiple instances were provided: " + instances);
-		}
-		else if (instances.size() == 1) {
-			return instances.get(0);
-		}
-		else {
-			return null;
-		}
+		return selected;
 	}
 
 	@Override
 	public MessageCodesResolver getMessageCodesResolver() {
-		List<MessageCodesResolver> candidates = new ArrayList<MessageCodesResolver>();
+		MessageCodesResolver selected = null;
 		for (WebMvcConfigurer configurer : this.delegates) {
 			MessageCodesResolver messageCodesResolver = configurer.getMessageCodesResolver();
 			if (messageCodesResolver != null) {
-				candidates.add(messageCodesResolver);
+				if (selected != null) {
+					throw new IllegalStateException("No unique MessageCodesResolver found: {" +
+							selected + ", " + messageCodesResolver + "}");
+				}
+				selected = messageCodesResolver;
 			}
 		}
-		return selectSingleInstance(candidates, MessageCodesResolver.class);
+		return selected;
 	}
 
 }

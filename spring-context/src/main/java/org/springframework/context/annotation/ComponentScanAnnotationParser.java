@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,17 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.Aware;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -47,6 +54,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  * @see ClassPathBeanDefinitionScanner#scan(String...)
  * @see ComponentScanBeanDefinitionParser
@@ -73,17 +81,16 @@ class ComponentScanAnnotationParser {
 
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
+		Assert.state(this.environment != null, "Environment must not be null");
+		Assert.state(this.resourceLoader != null, "ResourceLoader must not be null");
+
 		ClassPathBeanDefinitionScanner scanner =
 				new ClassPathBeanDefinitionScanner(this.registry, componentScan.getBoolean("useDefaultFilters"));
-
-		Assert.notNull(this.environment, "Environment must not be null");
 		scanner.setEnvironment(this.environment);
-
-		Assert.notNull(this.resourceLoader, "ResourceLoader must not be null");
 		scanner.setResourceLoader(this.resourceLoader);
 
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
-		boolean useInheritedGenerator = BeanNameGenerator.class.equals(generatorClass);
+		boolean useInheritedGenerator = BeanNameGenerator.class == generatorClass;
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
 				BeanUtils.instantiateClass(generatorClass));
 
@@ -114,12 +121,9 @@ class ComponentScanAnnotationParser {
 			scanner.getBeanDefinitionDefaults().setLazyInit(true);
 		}
 
-		Set<String> basePackages = new LinkedHashSet<String>();
-		Set<String> specifiedPackages = new LinkedHashSet<String>();
-		specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("value")));
-		specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("basePackages")));
-
-		for (String pkg : specifiedPackages) {
+		Set<String> basePackages = new LinkedHashSet<>();
+		String[] basePackagesArray = componentScan.getStringArray("basePackages");
+		for (String pkg : basePackagesArray) {
 			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
 					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
 			basePackages.addAll(Arrays.asList(tokenized));
@@ -141,14 +145,14 @@ class ComponentScanAnnotationParser {
 	}
 
 	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) {
-		List<TypeFilter> typeFilters = new ArrayList<TypeFilter>();
+		List<TypeFilter> typeFilters = new ArrayList<>();
 		FilterType filterType = filterAttributes.getEnum("type");
 
-		for (Class<?> filterClass : filterAttributes.getClassArray("value")) {
+		for (Class<?> filterClass : filterAttributes.getClassArray("classes")) {
 			switch (filterType) {
 				case ANNOTATION:
 					Assert.isAssignable(Annotation.class, filterClass,
-							"An error occured while processing a @ComponentScan ANNOTATION type filter: ");
+							"An error occurred while processing a @ComponentScan ANNOTATION type filter: ");
 					@SuppressWarnings("unchecked")
 					Class<Annotation> annotationType = (Class<Annotation>) filterClass;
 					typeFilters.add(new AnnotationTypeFilter(annotationType));
@@ -158,8 +162,10 @@ class ComponentScanAnnotationParser {
 					break;
 				case CUSTOM:
 					Assert.isAssignable(TypeFilter.class, filterClass,
-							"An error occured while processing a @ComponentScan CUSTOM type filter: ");
-					typeFilters.add(BeanUtils.instantiateClass(filterClass, TypeFilter.class));
+							"An error occurred while processing a @ComponentScan CUSTOM type filter: ");
+					TypeFilter filter = BeanUtils.instantiateClass(filterClass, TypeFilter.class);
+					invokeAwareMethods(filter);
+					typeFilters.add(filter);
 					break;
 				default:
 					throw new IllegalArgumentException("Filter type not supported with Class value: " + filterType);
@@ -182,4 +188,27 @@ class ComponentScanAnnotationParser {
 		return typeFilters;
 	}
 
+	/**
+	 * Invoke {@link ResourceLoaderAware}, {@link BeanClassLoaderAware} and
+	 * {@link BeanFactoryAware} contracts if implemented by the given {@code filter}.
+	 */
+	private void invokeAwareMethods(TypeFilter filter) {
+		if (filter instanceof Aware) {
+			if (filter instanceof EnvironmentAware) {
+				((EnvironmentAware) filter).setEnvironment(this.environment);
+			}
+			if (filter instanceof ResourceLoaderAware) {
+				((ResourceLoaderAware) filter).setResourceLoader(this.resourceLoader);
+			}
+			if (filter instanceof BeanClassLoaderAware) {
+				ClassLoader classLoader = (this.registry instanceof ConfigurableBeanFactory ?
+						((ConfigurableBeanFactory) this.registry).getBeanClassLoader() :
+						this.resourceLoader.getClassLoader());
+				((BeanClassLoaderAware) filter).setBeanClassLoader(classLoader);
+			}
+			if (filter instanceof BeanFactoryAware && this.registry instanceof BeanFactory) {
+				((BeanFactoryAware) filter).setBeanFactory((BeanFactory) this.registry);
+			}
+		}
+	}
 }

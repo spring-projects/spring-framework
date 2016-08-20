@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -148,6 +149,10 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
+	public static final String HANDLER_MAPPING_BEAN_NAME = RequestMappingHandlerMapping.class.getName();
+
+	public static final String HANDLER_ADAPTER_BEAN_NAME = RequestMappingHandlerAdapter.class.getName();
+
 	public static final String CONTENT_NEGOTIATION_MANAGER_BEAN_NAME = "mvcContentNegotiationManager";
 
 	private static final boolean javaxValidationPresent =
@@ -173,6 +178,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
+		XmlReaderContext readerContext = parserContext.getReaderContext();
 
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		parserContext.pushContainingComponent(compDefinition);
@@ -184,18 +190,17 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		handlerMappingDef.getPropertyValues().add("order", 0);
 		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
-		String methodMappingName = parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
 
 		if (element.hasAttribute("enable-matrix-variables")) {
 			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enable-matrix-variables"));
 			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
 		}
-		else if (element.hasAttribute("enableMatrixVariables")) {
-			Boolean enableMatrixVariables = Boolean.valueOf(element.getAttribute("enableMatrixVariables"));
-			handlerMappingDef.getPropertyValues().add("removeSemicolonContent", !enableMatrixVariables);
-		}
 
 		configurePathMatchingProperties(handlerMappingDef, element, parserContext);
+		readerContext.getRegistry().registerBeanDefinition(HANDLER_MAPPING_BEAN_NAME , handlerMappingDef);
+
+		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
+		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
@@ -229,12 +234,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignore-default-model-on-redirect"));
 			handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
 		}
-		else if (element.hasAttribute("ignoreDefaultModelOnRedirect")) {
-			// "ignoreDefaultModelOnRedirect" spelling is deprecated
-			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignoreDefaultModelOnRedirect"));
-			handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
-		}
-
 		if (argumentResolvers != null) {
 			handlerAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
 		}
@@ -250,14 +249,14 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		handlerAdapterDef.getPropertyValues().add("callableInterceptors", callableInterceptors);
 		handlerAdapterDef.getPropertyValues().add("deferredResultInterceptors", deferredResultInterceptors);
-		String handlerAdapterName = parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
+		readerContext.getRegistry().registerBeanDefinition(HANDLER_ADAPTER_BEAN_NAME , handlerAdapterDef);
 
 		String uriCompContribName = MvcUriComponentsBuilder.MVC_URI_COMPONENTS_CONTRIBUTOR_BEAN_NAME;
 		RootBeanDefinition uriCompContribDef = new RootBeanDefinition(CompositeUriComponentsContributorFactoryBean.class);
 		uriCompContribDef.setSource(source);
 		uriCompContribDef.getPropertyValues().addPropertyValue("handlerAdapter", handlerAdapterDef);
 		uriCompContribDef.getPropertyValues().addPropertyValue("conversionService", conversionService);
-		parserContext.getReaderContext().getRegistry().registerBeanDefinition(uriCompContribName, uriCompContribDef);
+		readerContext.getRegistry().registerBeanDefinition(uriCompContribName, uriCompContribDef);
 
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
 		csInterceptorDef.setSource(source);
@@ -267,7 +266,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		mappedCsInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, (Object) null);
 		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, csInterceptorDef);
-		String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedCsInterceptorDef);
+		String mappedInterceptorName = readerContext.registerWithGeneratedName(mappedCsInterceptorDef);
 
 		RootBeanDefinition exceptionHandlerExceptionResolver = new RootBeanDefinition(ExceptionHandlerExceptionResolver.class);
 		exceptionHandlerExceptionResolver.setSource(source);
@@ -277,25 +276,31 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		exceptionHandlerExceptionResolver.getPropertyValues().add("order", 0);
 		addResponseBodyAdvice(exceptionHandlerExceptionResolver);
 
-		String methodExceptionResolverName =
-				parserContext.getReaderContext().registerWithGeneratedName(exceptionHandlerExceptionResolver);
+		if (argumentResolvers != null) {
+			exceptionHandlerExceptionResolver.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
+		}
+		if (returnValueHandlers != null) {
+			exceptionHandlerExceptionResolver.getPropertyValues().add("customReturnValueHandlers", returnValueHandlers);
+		}
+
+		String methodExceptionResolverName = readerContext.registerWithGeneratedName(exceptionHandlerExceptionResolver);
 
 		RootBeanDefinition responseStatusExceptionResolver = new RootBeanDefinition(ResponseStatusExceptionResolver.class);
 		responseStatusExceptionResolver.setSource(source);
 		responseStatusExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		responseStatusExceptionResolver.getPropertyValues().add("order", 1);
 		String responseStatusExceptionResolverName =
-				parserContext.getReaderContext().registerWithGeneratedName(responseStatusExceptionResolver);
+				readerContext.registerWithGeneratedName(responseStatusExceptionResolver);
 
 		RootBeanDefinition defaultExceptionResolver = new RootBeanDefinition(DefaultHandlerExceptionResolver.class);
 		defaultExceptionResolver.setSource(source);
 		defaultExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		defaultExceptionResolver.getPropertyValues().add("order", 2);
 		String defaultExceptionResolverName =
-				parserContext.getReaderContext().registerWithGeneratedName(defaultExceptionResolver);
+				readerContext.registerWithGeneratedName(defaultExceptionResolver);
 
-		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, methodMappingName));
-		parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef, handlerAdapterName));
+		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, HANDLER_MAPPING_BEAN_NAME));
+		parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef, HANDLER_ADAPTER_BEAN_NAME));
 		parserContext.registerComponent(new BeanComponentDefinition(uriCompContribDef, uriCompContribName));
 		parserContext.registerComponent(new BeanComponentDefinition(exceptionHandlerExceptionResolver, methodExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(responseStatusExceptionResolver, responseStatusExceptionResolverName));
@@ -358,10 +363,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 	}
 
-	private RuntimeBeanReference getContentNegotiationManager(Element element, Object source, ParserContext parserContext) {
-		RuntimeBeanReference contentNegotiationManagerRef;
+	private RuntimeBeanReference getContentNegotiationManager(Element element, Object source,
+			ParserContext parserContext) {
+
+		RuntimeBeanReference beanRef;
 		if (element.hasAttribute("content-negotiation-manager")) {
-			contentNegotiationManagerRef = new RuntimeBeanReference(element.getAttribute("content-negotiation-manager"));
+			String name = element.getAttribute("content-negotiation-manager");
+			beanRef = new RuntimeBeanReference(name);
 		}
 		else {
 			RootBeanDefinition factoryBeanDef = new RootBeanDefinition(ContentNegotiationManagerFactoryBean.class);
@@ -369,16 +377,17 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			factoryBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			factoryBeanDef.getPropertyValues().add("mediaTypes", getDefaultMediaTypes());
 
-			String beanName = CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
-			parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName , factoryBeanDef);
-			parserContext.registerComponent(new BeanComponentDefinition(factoryBeanDef, beanName));
-			contentNegotiationManagerRef = new RuntimeBeanReference(beanName);
+			String name = CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
+			parserContext.getReaderContext().getRegistry().registerBeanDefinition(name , factoryBeanDef);
+			parserContext.registerComponent(new BeanComponentDefinition(factoryBeanDef, name));
+			beanRef = new RuntimeBeanReference(name);
 		}
-		return contentNegotiationManagerRef;
+		return beanRef;
 	}
 
-	private void configurePathMatchingProperties(RootBeanDefinition handlerMappingDef,
-	                                             Element element, ParserContext parserContext) {
+	private void configurePathMatchingProperties(RootBeanDefinition handlerMappingDef, Element element,
+			ParserContext parserContext) {
+
 		Element pathMatchingElement = DomUtils.getChildElementByTagName(element, "path-matching");
 		if (pathMatchingElement != null) {
 			Object source = parserContext.extractSource(element);
@@ -450,7 +459,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private ManagedList<?> getCallableInterceptors(Element element, Object source, ParserContext parserContext) {
-		ManagedList<? super Object> interceptors = new ManagedList<Object>();
+		ManagedList<? super Object> interceptors = new ManagedList<>();
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "callable-interceptors");
@@ -467,7 +476,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private ManagedList<?> getDeferredResultInterceptors(Element element, Object source, ParserContext parserContext) {
-		ManagedList<? super Object> interceptors = new ManagedList<Object>();
+		ManagedList<? super Object> interceptors = new ManagedList<>();
 		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
 		if (asyncElement != null) {
 			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "deferred-result-interceptors");
@@ -493,7 +502,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private ManagedList<Object> wrapLegacyResolvers(List<Object> list, ParserContext context) {
-		ManagedList<Object> result = new ManagedList<Object>();
+		ManagedList<Object> result = new ManagedList<>();
 		for (Object object : list) {
 			if (object instanceof BeanDefinitionHolder) {
 				BeanDefinitionHolder beanDef = (BeanDefinitionHolder) object;
@@ -518,7 +527,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 	private ManagedList<?> getMessageConverters(Element element, Object source, ParserContext parserContext) {
 		Element convertersElement = DomUtils.getChildElementByTagName(element, "message-converters");
-		ManagedList<? super Object> messageConverters = new ManagedList<Object>();
+		ManagedList<? super Object> messageConverters = new ManagedList<>();
 		if (convertersElement != null) {
 			messageConverters.setSource(source);
 			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, "bean", "ref")) {
@@ -585,7 +594,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 
 	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
-		ManagedList<Object> list = new ManagedList<Object>();
+		ManagedList<Object> list = new ManagedList<>();
 		list.setSource(parserContext.extractSource(parentElement));
 		for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
 			Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
@@ -595,7 +604,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
     private ManagedList<BeanReference> extractBeanRefSubElements(Element parentElement, ParserContext parserContext){
-        ManagedList<BeanReference> list = new ManagedList<BeanReference>();
+        ManagedList<BeanReference> list = new ManagedList<>();
         list.setSource(parserContext.extractSource(parentElement));
         for (Element refElement : DomUtils.getChildElementsByTagName(parentElement, "ref")) {
             BeanReference reference;

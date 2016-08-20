@@ -6,39 +6,39 @@
 	<bean id="aapc" class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
 		<property name="customTargetSourceCreators">
 			<list>
-				<ref local="aapc.quickTargetSourceCreator"/>
+				<ref bean="aapc.quickTargetSourceCreator"/>
 			</list>
 		</property>
 	</bean>
-	
+
 	<bean id="aapc.quickTargetSourceCreator"
 		class="org.springframework.aop.framework.autoproxy.target.QuickTargetSourceCreator"/>
 
 	<bean id="test" scope="prototype" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
+		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
-	
+
 	<bean id="wife" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 	</bean>
-	
+
 	<!-- Prefix means it will be pooled -->
 	<bean id=":test" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
+		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
-	
+
 	<!-- Prefix means it will be thread local -->
 	<bean name="%test" scope="prototype" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
+		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
-	
+
 	<!-- Prefix means it will be a prototype target source -->
 	<bean name="!test" scope="prototype" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
+		<property name="spouse"><ref bean="wife"/></property>
 	</bean>
 
-</beans>		
+</beans>	

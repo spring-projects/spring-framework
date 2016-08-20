@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.cache.ehcache;
+
+import java.util.concurrent.Callable;
 
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
@@ -62,8 +64,45 @@ public class EhCacheCache implements Cache {
 
 	@Override
 	public ValueWrapper get(Object key) {
-		Element element = this.cache.get(key);
-		return toWrapper(element);
+		Element element = lookup(key);
+		return toValueWrapper(element);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T get(Object key, Callable<T> valueLoader) {
+		Element element = lookup(key);
+		if (element != null) {
+			return (T) element.getObjectValue();
+		}
+		else {
+			this.cache.acquireWriteLockOnKey(key);
+			try {
+				element = lookup(key); // One more attempt with the write lock
+				if (element != null) {
+					return (T) element.getObjectValue();
+				}
+				else {
+					return loadValue(key, valueLoader);
+				}
+			}
+			finally {
+				this.cache.releaseWriteLockOnKey(key);
+			}
+		}
+
+	}
+
+	private <T> T loadValue(Object key, Callable<T> valueLoader) {
+		T value;
+		try {
+			value = valueLoader.call();
+		}
+		catch (Exception ex) {
+			throw new ValueRetrievalException(key, valueLoader, ex);
+		}
+		put(key, value);
+		return value;
 	}
 
 	@Override
@@ -85,7 +124,7 @@ public class EhCacheCache implements Cache {
 	@Override
 	public ValueWrapper putIfAbsent(Object key, Object value) {
 		Element existingElement = this.cache.putIfAbsent(new Element(key, value));
-		return toWrapper(existingElement);
+		return toValueWrapper(existingElement);
 	}
 
 	@Override
@@ -98,7 +137,12 @@ public class EhCacheCache implements Cache {
 		this.cache.removeAll();
 	}
 
-	private ValueWrapper toWrapper(Element element) {
+
+	private Element lookup(Object key) {
+		return this.cache.get(key);
+	}
+
+	private ValueWrapper toValueWrapper(Element element) {
 		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
 	}
 

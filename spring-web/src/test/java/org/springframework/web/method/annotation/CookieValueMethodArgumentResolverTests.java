@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -52,18 +53,20 @@ public class CookieValueMethodArgumentResolverTests {
 
 	private MockHttpServletRequest request;
 
+
 	@Before
 	public void setUp() throws Exception {
 		resolver = new TestCookieValueMethodArgumentResolver();
 
 		Method method = getClass().getMethod("params", Cookie.class, String.class, String.class);
-		paramNamedCookie = new MethodParameter(method, 0);
-		paramNamedDefaultValueString = new MethodParameter(method, 1);
-		paramString = new MethodParameter(method, 2);
+		paramNamedCookie = new SynthesizingMethodParameter(method, 0);
+		paramNamedDefaultValueString = new SynthesizingMethodParameter(method, 1);
+		paramString = new SynthesizingMethodParameter(method, 2);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -98,8 +101,9 @@ public class CookieValueMethodArgumentResolverTests {
 		}
 	}
 
+
 	public void params(@CookieValue("name") Cookie param1,
-					   @CookieValue(value = "name", defaultValue = "bar") String param2,
+					   @CookieValue(name = "name", defaultValue = "bar") String param2,
 					   String param3) {
 	}
 

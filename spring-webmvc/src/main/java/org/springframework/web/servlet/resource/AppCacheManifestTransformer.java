@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -60,12 +61,12 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 	private static final String MANIFEST_HEADER = "CACHE MANIFEST";
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final Log logger = LogFactory.getLog(AppCacheManifestTransformer.class);
 
 
-	private final Map<String, SectionTransformer> sectionTransformers = new HashMap<String, SectionTransformer>();
+	private final Map<String, SectionTransformer> sectionTransformers = new HashMap<>();
 
 	private final String fileExtension;
 
@@ -97,9 +98,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			throws IOException {
 
 		resource = transformerChain.transform(request, resource);
-
-		String filename = resource.getFilename();
-		if (!this.fileExtension.equals(StringUtils.getFilenameExtension(filename))) {
+		if (!this.fileExtension.equals(StringUtils.getFilenameExtension(resource.getFilename()))) {
 			return resource;
 		}
 
@@ -138,14 +137,15 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		String hash = hashBuilder.build();
 		contentWriter.write("\n" + "# Hash: " + hash);
 		if (logger.isTraceEnabled()) {
-			logger.trace("AppCache file: [" + resource.getFilename()+ "] Hash: [" + hash + "]");
+			logger.trace("AppCache file: [" + resource.getFilename()+ "] hash: [" + hash + "]");
 		}
 
 		return new TransformedResource(resource, contentWriter.toString().getBytes(DEFAULT_CHARSET));
 	}
 
 
-	private static interface SectionTransformer {
+	@FunctionalInterface
+	private interface SectionTransformer {
 
 		/**
 		 * Transforms a line in a section of the manifest.
@@ -170,7 +170,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 	private class CacheSection implements SectionTransformer {
 
-		private final String COMMENT_DIRECTIVE = "#";
+		private static final String COMMENT_DIRECTIVE = "#";
 
 		@Override
 		public String transform(String line, HashBuilder builder, Resource resource,
@@ -178,7 +178,8 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 			if (isLink(line) && !hasScheme(line)) {
 				ResourceResolverChain resolverChain = transformerChain.getResolverChain();
-				Resource appCacheResource = resolverChain.resolveResource(null, line, Arrays.asList(resource));
+				Resource appCacheResource =
+						resolverChain.resolveResource(null, line, Collections.singletonList(resource));
 				String path = resolveUrlPath(line, request, resource, transformerChain);
 				builder.appendResource(appCacheResource);
 				if (logger.isTraceEnabled()) {

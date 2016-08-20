@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package org.springframework.http.client;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
-import java.net.URI;
 import java.net.URL;
 
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
+
+import static org.junit.Assert.*;
 
 public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
@@ -92,5 +92,11 @@ public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFa
 		public boolean usingProxy() {
 			return false;
 		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return new ByteArrayInputStream(new byte[0]);
+		}
 	}
+
 }

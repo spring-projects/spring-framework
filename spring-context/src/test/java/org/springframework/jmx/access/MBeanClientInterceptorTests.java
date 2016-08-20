@@ -1,17 +1,17 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.jmx.access;
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.net.BindException;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.management.Descriptor;
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnectorServer;
@@ -68,7 +67,7 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		target.setName("Rob Harrop");
 
 		MBeanExporter adapter = new MBeanExporter();
-		Map<String, Object> beans = new HashMap<String, Object>();
+		Map<String, Object> beans = new HashMap<>();
 		beans.put(OBJECT_NAME, target);
 		adapter.setServer(getServer());
 		adapter.setBeans(beans);
@@ -196,7 +195,8 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		// now start the connector
 		try {
 			connector.start();
-		} catch (BindException ex) {
+		}
+		catch (BindException ex) {
 			System.out.println("Skipping remainder of JMX LazyConnectionToRemote test because binding to local port ["
 					+ port + "] failed: " + ex.getMessage());
 			return;
@@ -206,13 +206,15 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		try {
 			assertEquals("Rob Harrop", bean.getName());
 			assertEquals(100, bean.getAge());
-		} finally {
+		}
+		finally {
 			connector.stop();
 		}
 
 		try {
 			bean.getName();
-		} catch (JmxException ex) {
+		}
+		catch (JmxException ex) {
 			// expected
 		}
 
@@ -223,7 +225,8 @@ public class MBeanClientInterceptorTests extends AbstractMBeanServerTests {
 		try {
 			assertEquals("Rob Harrop", bean.getName());
 			assertEquals(100, bean.getAge());
-		} finally {
+		}
+		finally {
 			connector.stop();
 		}
 	}

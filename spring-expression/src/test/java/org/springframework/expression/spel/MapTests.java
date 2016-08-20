@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class MapTests extends AbstractExpressionTests {
 
 	// if the list is full of literals then it will be of the type unmodifiableClass
 	// rather than HashMap (or similar)
-	Class<?> unmodifiableClass = Collections.unmodifiableMap(new LinkedHashMap<Object,Object>()).getClass();
+	Class<?> unmodifiableClass = Collections.unmodifiableMap(new LinkedHashMap<>()).getClass();
 
 
 	@Test
@@ -136,7 +136,7 @@ public class MapTests extends AbstractExpressionTests {
 		// list should be unmodifiable
 		evaluate("{a:1, b:2, c:3, d:4, e:5}[a]=6", "[a:1,b: 2,c: 3,d: 4,e: 5]", unmodifiableClass);
 	}
-	
+
 	@Test
 	public void testMapKeysThatAreAlsoSpELKeywords() {
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -166,7 +166,7 @@ public class MapTests extends AbstractExpressionTests {
 		expression = (SpelExpression) parser.parseExpression("foo['abc.def']");
 		o = expression.getValue(new MapHolder());
 		assertEquals("value", o);
-		
+
 		expression = (SpelExpression)parser.parseExpression("foo[foo[NEW]]");
 		o = expression.getValue(new MapHolder());
 		assertEquals("37",o);
@@ -174,7 +174,7 @@ public class MapTests extends AbstractExpressionTests {
 		expression = (SpelExpression)parser.parseExpression("foo[foo[new]]");
 		o = expression.getValue(new MapHolder());
 		assertEquals("38",o);
-		
+
 		expression = (SpelExpression)parser.parseExpression("foo[foo[foo[T]]]");
 		o = expression.getValue(new MapHolder());
 		assertEquals("value",o);

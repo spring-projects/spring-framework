@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
  * @author Adrian Colyer
  * @author Chris Beams
  */
-public final class OverloadedAdviceTests {
+public class OverloadedAdviceTests {
 
 	@Test
 	public void testExceptionOnConfigParsingWithMismatchedAdviceMethod() {

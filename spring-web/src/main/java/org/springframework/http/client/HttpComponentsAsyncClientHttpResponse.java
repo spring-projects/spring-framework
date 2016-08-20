@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.StreamUtils;
 
 /**
  * {@link ClientHttpResponse} implementation that uses
@@ -72,7 +73,7 @@ final class HttpComponentsAsyncClientHttpResponse extends AbstractClientHttpResp
 	@Override
 	public InputStream getBody() throws IOException {
 		HttpEntity entity = this.httpResponse.getEntity();
-		return entity != null ? entity.getContent() : null;
+		return (entity != null ? entity.getContent() : StreamUtils.emptyInput());
 	}
 
 	@Override

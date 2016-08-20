@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
  *
  * <p><b>WARNING: Do not define the same bean as Spring-managed bean and as
  * EJB3 session bean in the same deployment unit.</b> In particular, be
- * careful when using the {@code &lt;context:component-scan&gt;} feature
+ * careful when using the {@code <context:component-scan>} feature
  * in combination with the deployment of Spring-based EJB3 session beans:
  * Make sure that the EJB3 session beans are <i>not</i> autodetected as
  * Spring-managed beans as well, using appropriate package restrictions.
@@ -82,7 +82,7 @@ public class SpringBeanAutowiringInterceptor {
 	 * It simply protects against future usage of the interceptor in a shared scenario.
 	 */
 	private final Map<Object, BeanFactoryReference> beanFactoryReferences =
-			new WeakHashMap<Object, BeanFactoryReference>();
+			new WeakHashMap<>();
 
 
 	/**

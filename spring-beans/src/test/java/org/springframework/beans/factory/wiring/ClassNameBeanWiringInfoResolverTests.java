@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,24 @@
 
 package org.springframework.beans.factory.wiring;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the ClassNameBeanWiringInfoResolver class.
  *
  * @author Rick Evans
  */
-public final class ClassNameBeanWiringInfoResolverTests extends TestCase {
+public class ClassNameBeanWiringInfoResolverTests {
 
-	public void testResolveWiringInfoWithNullBeanInstance() throws Exception {
-		try {
-			new ClassNameBeanWiringInfoResolver().resolveWiringInfo(null);
-			fail("Must have thrown an IllegalArgumentException by this point (null argument).");
-		}
-		catch (IllegalArgumentException expected) {
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void resolveWiringInfoWithNullBeanInstance() throws Exception {
+		new ClassNameBeanWiringInfoResolver().resolveWiringInfo(null);
 	}
 
-	public void testResolveWiringInfo() {
+	@Test
+	public void resolveWiringInfo() {
 		ClassNameBeanWiringInfoResolver resolver = new ClassNameBeanWiringInfoResolver();
 		Long beanInstance = new Long(1);
 		BeanWiringInfo info = resolver.resolveWiringInfo(beanInstance);

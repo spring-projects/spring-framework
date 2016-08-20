@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,6 +162,58 @@ public class CookieLocaleResolverTests {
 		assertEquals(Locale.GERMANY, loc.getLocale());
 		assertTrue(loc instanceof TimeZoneAwareLocaleContext);
 		assertEquals(TimeZone.getTimeZone("GMT+1"), ((TimeZoneAwareLocaleContext) loc).getTimeZone());
+	}
+
+	@Test
+	public void testSetAndResolveLocaleWithCountry() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		CookieLocaleResolver resolver = new CookieLocaleResolver();
+		resolver.setLocale(request, response, new Locale("de", "AT"));
+
+		Cookie cookie = response.getCookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
+		assertNotNull(cookie);
+		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_NAME, cookie.getName());
+		assertEquals(null, cookie.getDomain());
+		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_PATH, cookie.getPath());
+		assertFalse(cookie.getSecure());
+		assertEquals("de_AT", cookie.getValue());
+
+		request = new MockHttpServletRequest();
+		request.setCookies(cookie);
+
+		resolver = new CookieLocaleResolver();
+		Locale loc = resolver.resolveLocale(request);
+		assertEquals("de", loc.getLanguage());
+		assertEquals("AT", loc.getCountry());
+	}
+
+	@Test
+	public void testSetAndResolveLocaleWithCountryAsLanguageTag() {
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		CookieLocaleResolver resolver = new CookieLocaleResolver();
+		resolver.setLanguageTagCompliant(true);
+		resolver.setLocale(request, response, new Locale("de", "AT"));
+
+		Cookie cookie = response.getCookie(CookieLocaleResolver.DEFAULT_COOKIE_NAME);
+		assertNotNull(cookie);
+		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_NAME, cookie.getName());
+		assertEquals(null, cookie.getDomain());
+		assertEquals(CookieLocaleResolver.DEFAULT_COOKIE_PATH, cookie.getPath());
+		assertFalse(cookie.getSecure());
+		assertEquals("de-AT", cookie.getValue());
+
+		request = new MockHttpServletRequest();
+		request.setCookies(cookie);
+
+		resolver = new CookieLocaleResolver();
+		resolver.setLanguageTagCompliant(true);
+		Locale loc = resolver.resolveLocale(request);
+		assertEquals("de", loc.getLanguage());
+		assertEquals("AT", loc.getCountry());
 	}
 
 	@Test

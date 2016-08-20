@@ -59,7 +59,7 @@ public class CurrencyStyleFormatterTests {
 		assertEquals(new BigDecimal("23.00"), formatter.parse("$23", Locale.US));
 	}
 
-	@Test(expected=ParseException.class)
+	@Test(expected = ParseException.class)
 	public void parseValueNotLenientFailure() throws ParseException {
 		formatter.parse("$23.56bogus", Locale.US);
 	}

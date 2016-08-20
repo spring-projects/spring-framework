@@ -52,5 +52,5 @@
 	<bean id="thisAsInterfaceAndTargetAsInterfaceCounter" class="org.springframework.aop.aspectj.Counter" />
 	<bean id="thisAsInterfaceAndTargetAsClassCounter" class="org.springframework.aop.aspectj.Counter" />
 	<bean id="testBean" class="org.springframework.aop.aspectj.TestImpl" />
-	
+
 </beans>

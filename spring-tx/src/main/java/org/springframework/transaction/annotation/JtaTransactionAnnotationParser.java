@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 
 	@Override
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
-		AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(ae, javax.transaction.Transactional.class.getName());
-		if (ann != null) {
-			return parseTransactionAnnotation(ann);
+		AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ae, javax.transaction.Transactional.class);
+		if (attributes != null) {
+			return parseTransactionAnnotation(attributes);
 		}
 		else {
 			return null;
@@ -56,7 +56,7 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 		RuleBasedTransactionAttribute rbta = new RuleBasedTransactionAttribute();
 		rbta.setPropagationBehaviorName(
 				RuleBasedTransactionAttribute.PREFIX_PROPAGATION + attributes.getEnum("value").toString());
-		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<RollbackRuleAttribute>();
+		ArrayList<RollbackRuleAttribute> rollBackRules = new ArrayList<>();
 		Class<?>[] rbf = attributes.getClassArray("rollbackOn");
 		for (Class<?> rbRule : rbf) {
 			RollbackRuleAttribute rule = new RollbackRuleAttribute(rbRule);

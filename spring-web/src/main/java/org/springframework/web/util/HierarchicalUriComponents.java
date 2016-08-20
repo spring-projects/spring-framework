@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -84,7 +86,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		this.port = port;
 		this.path = path != null ? path : NULL_PATH_COMPONENT;
 		this.queryParams = CollectionUtils.unmodifiableMultiValueMap(
-				queryParams != null ? queryParams : new LinkedMultiValueMap<String, String>(0));
+				queryParams != null ? queryParams : new LinkedMultiValueMap<>(0));
 		this.encoded = encoded;
 		if (verify) {
 			verify();
@@ -179,34 +181,33 @@ final class HierarchicalUriComponents extends UriComponents {
 	/**
 	 * Encode all URI components using their specific encoding rules and return
 	 * the result as a new {@code UriComponents} instance.
-	 * @param encoding the encoding of the values contained in this map
+	 * @param charset the encoding of the values contained in this map
 	 * @return the encoded uri components
 	 * @throws UnsupportedEncodingException if the given encoding is not supported
 	 */
 	@Override
-	public HierarchicalUriComponents encode(String encoding) throws UnsupportedEncodingException {
+	public HierarchicalUriComponents encode(Charset charset) throws UnsupportedEncodingException {
 		if (this.encoded) {
 			return this;
 		}
-		Assert.hasLength(encoding, "Encoding must not be empty");
-		String schemeTo = encodeUriComponent(getScheme(), encoding, Type.SCHEME);
-		String userInfoTo = encodeUriComponent(this.userInfo, encoding, Type.USER_INFO);
-		String hostTo = encodeUriComponent(this.host, encoding, getHostType());
-		PathComponent pathTo = this.path.encode(encoding);
-		MultiValueMap<String, String> paramsTo = encodeQueryParams(encoding);
-		String fragmentTo = encodeUriComponent(this.getFragment(), encoding, Type.FRAGMENT);
+		String schemeTo = encodeUriComponent(getScheme(), charset, Type.SCHEME);
+		String userInfoTo = encodeUriComponent(this.userInfo, charset, Type.USER_INFO);
+		String hostTo = encodeUriComponent(this.host, charset, getHostType());
+		PathComponent pathTo = this.path.encode(charset);
+		MultiValueMap<String, String> paramsTo = encodeQueryParams(charset);
+		String fragmentTo = encodeUriComponent(this.getFragment(), charset, Type.FRAGMENT);
 		return new HierarchicalUriComponents(schemeTo, userInfoTo, hostTo, this.port,
 				pathTo, paramsTo, fragmentTo, true, false);
 	}
 
-	private MultiValueMap<String, String> encodeQueryParams(String encoding) throws UnsupportedEncodingException {
+	private MultiValueMap<String, String> encodeQueryParams(Charset charset) throws UnsupportedEncodingException {
 		int size = this.queryParams.size();
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(size);
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
 		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
-			String name = encodeUriComponent(entry.getKey(), encoding, Type.QUERY_PARAM);
-			List<String> values = new ArrayList<String>(entry.getValue().size());
+			String name = encodeUriComponent(entry.getKey(), charset, Type.QUERY_PARAM);
+			List<String> values = new ArrayList<>(entry.getValue().size());
 			for (String value : entry.getValue()) {
-				values.add(encodeUriComponent(value, encoding, Type.QUERY_PARAM));
+				values.add(encodeUriComponent(value, charset, Type.QUERY_PARAM));
 			}
 			result.put(name, values);
 		}
@@ -222,15 +223,25 @@ final class HierarchicalUriComponents extends UriComponents {
 	 * @return the encoded URI
 	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
 	 */
-	static String encodeUriComponent(String source, String encoding, Type type)
-			throws UnsupportedEncodingException {
+	static String encodeUriComponent(String source, String encoding, Type type) {
+		return encodeUriComponent(source, Charset.forName(encoding), type);
+	}
 
+	/**
+	 * Encode the given source into an encoded String using the rules specified
+	 * by the given component and with the given options.
+	 * @param source the source string
+	 * @param charset the encoding of the source string
+	 * @param type the URI component for the source
+	 * @return the encoded URI
+	 * @throws IllegalArgumentException when the given uri parameter is not a valid URI
+	 */
+	static String encodeUriComponent(String source, Charset charset, Type type) {
 		if (source == null) {
 			return null;
 		}
-		Assert.hasLength(encoding, "Encoding must not be empty");
-		byte[] bytes = encodeBytes(source.getBytes(encoding), type);
-		return new String(bytes, "US-ASCII");
+		byte[] bytes = encodeBytes(source.getBytes(charset), type);
+		return new String(bytes, StandardCharsets.US_ASCII);
 	}
 
 	private static byte[] encodeBytes(byte[] source, Type type) {
@@ -289,7 +300,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return;
 		}
 		int length = source.length();
-		for (int i=0; i < length; i++) {
+		for (int i = 0; i < length; i++) {
 			char ch = source.charAt(i);
 			if (ch == '%') {
 				if ((i + 2) < length) {
@@ -336,10 +347,11 @@ final class HierarchicalUriComponents extends UriComponents {
 
 	private MultiValueMap<String, String> expandQueryParams(UriTemplateVariables variables) {
 		int size = this.queryParams.size();
-		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(size);
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>(size);
+		variables = new QueryUriTemplateVariables(variables);
 		for (Map.Entry<String, List<String>> entry : this.queryParams.entrySet()) {
 			String name = expandUriComponent(entry.getKey(), variables);
-			List<String> values = new ArrayList<String>(entry.getValue().size());
+			List<String> values = new ArrayList<>(entry.getValue().size());
 			for (String value : entry.getValue()) {
 				values.add(expandUriComponent(value, variables));
 			}
@@ -479,7 +491,7 @@ final class HierarchicalUriComponents extends UriComponents {
 	// inner types
 
 	/**
-	 * Enumeration used to identify the parts of a URI.
+	 * Enumeration used to identify the allowed characters per URI component.
 	 * <p>Contains methods to indicate whether a given character is valid in a specific URI component.
 	 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
 	 */
@@ -555,6 +567,12 @@ final class HierarchicalUriComponents extends UriComponents {
 			public boolean isAllowed(int c) {
 				return isPchar(c) || '/' == c || '?' == c;
 			}
+		},
+		URI {
+			@Override
+			public boolean isAllowed(int c) {
+				return isUnreserved(c);
+			}
 		};
 
 		/**
@@ -600,7 +618,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		 * Indicates whether the given character is in the {@code reserved} set.
 		 * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986, appendix A</a>
 		 */
-		protected boolean isReserved(char c) {
+		protected boolean isReserved(int c) {
 			return isGenericDelimiter(c) || isSubDelimiter(c);
 		}
 
@@ -631,7 +649,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		List<String> getPathSegments();
 
-		PathComponent encode(String encoding) throws UnsupportedEncodingException;
+		PathComponent encode(Charset charset) throws UnsupportedEncodingException;
 
 		void verify();
 
@@ -646,60 +664,11 @@ final class HierarchicalUriComponents extends UriComponents {
 	 */
 	static final class FullPathComponent implements PathComponent {
 
-		// Pattern used to split the path into segments: '/' if not preceded by '{',
-		// using negative look-behind
-		private static final Pattern DELIMITER_PATTERN = Pattern.compile("(?<!\\{)/");
-
-
-		private final List<PartialPath> partialPaths;
-
 		private final String path;
 
 
 		public FullPathComponent(String path) {
-			this.partialPaths = Collections.unmodifiableList(initPartialPaths(path));
 			this.path = path;
-		}
-
-		private FullPathComponent(List<PartialPath> partialPaths) {
-			this.partialPaths = Collections.unmodifiableList(partialPaths);
-			this.path = initPath(partialPaths);
-		}
-
-		private static String initPath(List<PartialPath> partialPaths) {
-			StringBuilder builder = new StringBuilder();
-			for (PartialPath partialPath : partialPaths) {
-				builder.append(partialPath.getValue());
-			}
-			return builder.toString();
-		}
-
-		private static List<PartialPath> initPartialPaths(String path) {
-			List<PartialPath> result = new ArrayList<PartialPath>();
-			int startIdx;
-			int endIdx = 0;
-			while ((startIdx = path.indexOf("{/", endIdx)) != -1) {
-				if (startIdx > endIdx) {
-					String prevPart = path.substring(endIdx, startIdx);
-					result.add(new PartialPath(prevPart, Type.PATH));
-				}
-				endIdx = path.indexOf('}', startIdx + 2) + 1;
-				if (endIdx == -1) {
-					throw new IllegalArgumentException("Path \"" + path + "\" has no " +
-							"closing \"}\" after \"{/\" at index " + startIdx);
-				}
-				String part = path.substring(startIdx, endIdx);
-				result.add(new PartialPath(part, Type.PATH_SEGMENT));
-			}
-			if (endIdx < path.length()) {
-				String endPart = path.substring(endIdx);
-				result.add(new PartialPath(endPart, Type.PATH));
-			}
-			return result;
-		}
-
-		List<PartialPath> getPartialPaths() {
-			return this.partialPaths;
 		}
 
 		@Override
@@ -709,41 +678,26 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			String[] pathSegments = DELIMITER_PATTERN.split(getPath());
-			List<String> result = new ArrayList<String>(pathSegments.length);
-			for (String pathSegment : pathSegments) {
-				if (StringUtils.hasLength(pathSegment)) {
-					result.add(pathSegment);
-				}
-			}
-			return Collections.unmodifiableList(result);
+			String delimiter = new String(new char[] {PATH_DELIMITER});
+			String[] pathSegments = StringUtils.tokenizeToStringArray(path, delimiter);
+			return Collections.unmodifiableList(Arrays.asList(pathSegments));
 		}
 
 		@Override
-		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
-			List<PartialPath> result = new ArrayList<PartialPath>();
-			for (PartialPath partialPath : this.partialPaths) {
-				PartialPath encoded = partialPath.encode(encoding);
-				result.add(encoded);
-			}
-			return new FullPathComponent(result);
+		public PathComponent encode(Charset charset) throws UnsupportedEncodingException {
+			String encodedPath = encodeUriComponent(getPath(), charset, Type.PATH);
+			return new FullPathComponent(encodedPath);
 		}
 
 		@Override
 		public void verify() {
-			for (PartialPath partialPath : this.partialPaths) {
-				partialPath.verify();
-			}
+			verifyUriComponent(this.path, Type.PATH);
 		}
 
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
-			List<PartialPath> result = new ArrayList<PartialPath>();
-			for (PartialPath partialPath : this.partialPaths) {
-				PartialPath expanded = partialPath.expand(uriVariables);
-				result.add(expanded);
-			}
-			return new FullPathComponent(result);
+			String expandedPath = expandUriComponent(getPath(), uriVariables);
+			return new FullPathComponent(expandedPath);
 		}
 
 		@Override
@@ -761,49 +715,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		public int hashCode() {
 			return getPath().hashCode();
 		}
-
-		/**
-		 * Represents a part of the full path, with a separate encoding type.
-		 * Required because of {/...} uri variables, which need to encoded as PATH_SEGMENT
-		 * rather than PATH.
-		 */
-		static final class PartialPath implements Serializable {
-
-			final String value;
-
-			final Type type;
-
-			private PartialPath(String value, Type type) {
-				Assert.hasLength(value);
-				Assert.isTrue(Type.PATH == type || Type.PATH_SEGMENT == type);
-				this.value = value;
-				this.type = type;
-			}
-
-			public String getValue() {
-				return this.value;
-			}
-
-			private PartialPath expand(UriTemplateVariables uriVariables) {
-				String expandedValue = expandUriComponent(this.value, uriVariables);
-				return new PartialPath(expandedValue, this.type);
-			}
-
-			private PartialPath encode(String encoding) throws UnsupportedEncodingException {
-				String encodedPath = encodeUriComponent(this.value, encoding, this.type);
-				return new PartialPath(encodedPath, this.type);
-			}
-
-			public void verify() {
-				verifyUriComponent(this.value, this.type);
-			}
-
-			@Override
-			public String toString() {
-				return this.value;
-			}
-		}
 	}
+
 
 	/**
 	 * Represents a path backed by a string list (i.e. path segments).
@@ -814,7 +727,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		public PathSegmentComponent(List<String> pathSegments) {
 			Assert.notNull(pathSegments);
-			this.pathSegments = Collections.unmodifiableList(new ArrayList<String>(pathSegments));
+			this.pathSegments = Collections.unmodifiableList(new ArrayList<>(pathSegments));
 		}
 
 		@Override
@@ -837,11 +750,11 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
+		public PathComponent encode(Charset charset) throws UnsupportedEncodingException {
 			List<String> pathSegments = getPathSegments();
-			List<String> encodedPathSegments = new ArrayList<String>(pathSegments.size());
+			List<String> encodedPathSegments = new ArrayList<>(pathSegments.size());
 			for (String pathSegment : pathSegments) {
-				String encodedPathSegment = encodeUriComponent(pathSegment, encoding, Type.PATH_SEGMENT);
+				String encodedPathSegment = encodeUriComponent(pathSegment, charset, Type.PATH_SEGMENT);
 				encodedPathSegments.add(encodedPathSegment);
 			}
 			return new PathSegmentComponent(encodedPathSegments);
@@ -857,7 +770,7 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
 			List<String> pathSegments = getPathSegments();
-			List<String> expandedPathSegments = new ArrayList<String>(pathSegments.size());
+			List<String> expandedPathSegments = new ArrayList<>(pathSegments.size());
 			for (String pathSegment : pathSegments) {
 				String expandedPathSegment = expandUriComponent(pathSegment, uriVariables);
 				expandedPathSegments.add(expandedPathSegment);
@@ -906,7 +819,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public List<String> getPathSegments() {
-			List<String> result = new ArrayList<String>();
+			List<String> result = new ArrayList<>();
 			for (PathComponent pathComponent : this.pathComponents) {
 				result.addAll(pathComponent.getPathSegments());
 			}
@@ -914,10 +827,10 @@ final class HierarchicalUriComponents extends UriComponents {
 		}
 
 		@Override
-		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
-			List<PathComponent> encodedComponents = new ArrayList<PathComponent>(this.pathComponents.size());
+		public PathComponent encode(Charset charset) throws UnsupportedEncodingException {
+			List<PathComponent> encodedComponents = new ArrayList<>(this.pathComponents.size());
 			for (PathComponent pathComponent : this.pathComponents) {
-				encodedComponents.add(pathComponent.encode(encoding));
+				encodedComponents.add(pathComponent.encode(charset));
 			}
 			return new PathComponentComposite(encodedComponents);
 		}
@@ -931,7 +844,7 @@ final class HierarchicalUriComponents extends UriComponents {
 
 		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
-			List<PathComponent> expandedComponents = new ArrayList<PathComponent>(this.pathComponents.size());
+			List<PathComponent> expandedComponents = new ArrayList<>(this.pathComponents.size());
 			for (PathComponent pathComponent : this.pathComponents) {
 				expandedComponents.add(pathComponent.expand(uriVariables));
 			}
@@ -960,7 +873,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return Collections.emptyList();
 		}
 		@Override
-		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
+		public PathComponent encode(Charset charset) throws UnsupportedEncodingException {
 			return this;
 		}
 		@Override
@@ -973,7 +886,6 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
 		}
-		@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 		@Override
 		public boolean equals(Object obj) {
 			return (this == obj);
@@ -983,5 +895,24 @@ final class HierarchicalUriComponents extends UriComponents {
 			return 42;
 		}
 	};
+
+
+	private static class QueryUriTemplateVariables implements UriTemplateVariables {
+
+		private final UriTemplateVariables delegate;
+
+		public QueryUriTemplateVariables(UriTemplateVariables delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public Object getValue(String name) {
+			Object value = this.delegate.getValue(name);
+			if (ObjectUtils.isArray(value)) {
+				value = StringUtils.arrayToCommaDelimitedString(ObjectUtils.toObjectArray(value));
+			}
+			return value;
+		}
+	}
 
 }

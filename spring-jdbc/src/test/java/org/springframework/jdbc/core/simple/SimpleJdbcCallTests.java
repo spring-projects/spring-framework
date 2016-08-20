@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import javax.sql.DataSource;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,19 +42,24 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.tests.Matchers.*;
 
 /**
- * Mock object based tests for SimpleJdbcCall.
+ * Tests for {@link SimpleJdbcCall}.
  *
  * @author Thomas Risberg
+ * @author Kiril Nugmanov
  */
 public class SimpleJdbcCallTests {
+
+	private Connection connection;
+
+	private DatabaseMetaData databaseMetaData;
+
+	private DataSource dataSource;
+
+	private CallableStatement callableStatement;
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	private Connection connection;
-	private DatabaseMetaData databaseMetaData;
-	private DataSource dataSource;
-	private CallableStatement callableStatement;
 
 	@Before
 	public void setUp() throws Exception {
@@ -64,6 +70,7 @@ public class SimpleJdbcCallTests {
 		given(connection.getMetaData()).willReturn(databaseMetaData);
 		given(dataSource.getConnection()).willReturn(connection);
 	}
+
 
 	@Test
 	public void testNoSuchStoredProcedure() throws Exception {
@@ -103,8 +110,7 @@ public class SimpleJdbcCallTests {
 		adder.declareParameters(
 				new SqlParameter("amount", Types.INTEGER),
 				new SqlParameter("custid", Types.INTEGER),
-				new SqlOutParameter("newid",
-				Types.INTEGER));
+				new SqlOutParameter("newid", Types.INTEGER));
 		Number newId = adder.executeObject(Number.class, new MapSqlParameterSource().
 				addValue("amount", 1103).
 				addValue("custid", 3));
@@ -120,8 +126,7 @@ public class SimpleJdbcCallTests {
 		adder.declareParameters(
 				new SqlParameter("amount", Types.INTEGER),
 				new SqlParameter("custid", Types.INTEGER),
-				new SqlOutParameter("newid",
-				Types.INTEGER));
+				new SqlOutParameter("newid", Types.INTEGER));
 		Number newId = adder.executeObject(Number.class, 1103, 3);
 		assertEquals(4, newId.intValue());
 		verifyAddInvoiceWithoutMetaData(false);
@@ -193,7 +198,8 @@ public class SimpleJdbcCallTests {
 
 	}
 
-	@Test public void testAddInvoiceFuncWithMetaDataUsingArrayParams() throws Exception {
+	@Test
+	public void testAddInvoiceFuncWithMetaDataUsingArrayParams() throws Exception {
 		initializeAddInvoiceWithMetaData(true);
 		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withFunctionName("add_invoice");
 		Number newId = adder.executeFunction(Number.class, 1103, 3);
@@ -203,8 +209,36 @@ public class SimpleJdbcCallTests {
 
 	}
 
-	private void initializeAddInvoiceWithoutMetaData(boolean isFunction)
-			throws SQLException {
+	@Test
+	public void testCorrectFunctionStatement() throws Exception {
+		initializeAddInvoiceWithMetaData(true);
+		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withFunctionName("add_invoice");
+		adder.compile();
+		verifyStatement(adder, "{? = call ADD_INVOICE(?, ?)}");
+	}
+
+	@Test
+	public void testCorrectFunctionStatementNamed() throws Exception {
+		initializeAddInvoiceWithMetaData(true);
+		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withNamedBinding().withFunctionName("add_invoice");
+		adder.compile();
+		verifyStatement(adder, "{? = call ADD_INVOICE(AMOUNT => ?, CUSTID => ?)}");
+	}
+
+	@Test
+	public void testCorrectProcedureStatementNamed() throws Exception {
+		initializeAddInvoiceWithMetaData(false);
+		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withNamedBinding().withProcedureName("add_invoice");
+		adder.compile();
+		verifyStatement(adder, "{call ADD_INVOICE(AMOUNT => ?, CUSTID => ?, NEWID => ?)}");
+	}
+
+
+	private void verifyStatement(SimpleJdbcCall adder, String expected) {
+		Assert.assertEquals("Incorrect call statement", expected, adder.getCallString());
+	}
+
+	private void initializeAddInvoiceWithoutMetaData(boolean isFunction) throws SQLException {
 		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
 		given(databaseMetaData.getUserName()).willReturn("me");
 		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
@@ -281,6 +315,6 @@ public class SimpleJdbcCallTests {
 		verify(callableStatement).close();
 		verify(proceduresResultSet).close();
 		verify(procedureColumnsResultSet).close();
+	}
 
-}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.List;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.junit.Test;
+
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.mock.web.test.MockBodyContent;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -33,18 +35,20 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.web.servlet.support.BindStatus;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Jeremy Grelle
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	private static final String ARRAY_SOURCE = "abc,123,def";
 
 	private static final String[] ARRAY = StringUtils.commaDelimitedListToStringArray(ARRAY_SOURCE);
-
 
 	private OptionTag tag;
 
@@ -72,7 +76,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 
-	public void testCanBeDisabledEvenWhenSelected() throws Exception {
+	@Test
+	public void canBeDisabledEvenWhenSelected() throws Exception {
 		String selectName = "testBean.name";
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("bar");
@@ -92,7 +97,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "Bar");
 	}
 
-	public void testRenderNotSelected() throws Exception {
+	@Test
+	public void renderNotSelected() throws Exception {
 		String selectName = "testBean.name";
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("bar");
@@ -110,7 +116,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "Bar");
 	}
 
-	public void testRenderWithDynamicAttributes() throws Exception {
+	@Test
+	public void renderWithDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 
@@ -136,7 +143,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "Bar");
 	}
 
-	public void testRenderSelected() throws Exception {
+	@Test
+	public void renderSelected() throws Exception {
 		String selectName = "testBean.name";
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setId("myOption");
@@ -157,7 +165,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "Foo");
 	}
 
-	public void testWithNoLabel() throws Exception {
+	@Test
+	public void withNoLabel() throws Exception {
 		String selectName = "testBean.name";
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue("bar");
@@ -178,7 +187,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "bar");
 	}
 
-	public void testWithoutContext() throws Exception {
+	@Test
+	public void withoutContext() throws Exception {
 		this.tag.setParent(null);
 		this.tag.setValue("foo");
 		this.tag.setLabel("Foo");
@@ -191,7 +201,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		}
 	}
 
-	public void testWithPropertyEditor() throws Exception {
+	@Test
+	public void withPropertyEditor() throws Exception {
 		String selectName = "testBean.stringArray";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
 			@Override
@@ -219,7 +230,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	}
 
-	public void testWithPropertyEditorStringComparison() throws Exception {
+	@Test
+	public void withPropertyEditorStringComparison() throws Exception {
 		final PropertyEditor testBeanEditor = new TestBeanPropertyEditor();
 		testBeanEditor.setValue(new TestBean("Sally"));
 		String selectName = "testBean.spouse";
@@ -246,7 +258,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "Sally");
 	}
 
-	public void testWithCustomObjectSelected() throws Exception {
+	@Test
+	public void withCustomObjectSelected() throws Exception {
 		String selectName = "testBean.someNumber";
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue(new Float(12.34));
@@ -265,7 +278,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "GBP 12.34");
 	}
 
-	public void testWithCustomObjectNotSelected() throws Exception {
+	@Test
+	public void withCustomObjectNotSelected() throws Exception {
 		String selectName = "testBean.someNumber";
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), selectName, false));
 		this.tag.setValue(new Float(12.35));
@@ -284,7 +298,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "GBP 12.35");
 	}
 
-	public void testWithCustomObjectAndEditorSelected() throws Exception {
+	@Test
+	public void withCustomObjectAndEditorSelected() throws Exception {
 		final PropertyEditor floatEditor = new SimpleFloatEditor();
 		floatEditor.setValue(new Float("12.34"));
 		String selectName = "testBean.someNumber";
@@ -311,7 +326,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "12.34f");
 	}
 
-	public void testWithCustomObjectAndEditorNotSelected() throws Exception {
+	@Test
+	public void withCustomObjectAndEditorNotSelected() throws Exception {
 		final PropertyEditor floatEditor = new SimpleFloatEditor();
 		String selectName = "testBean.someNumber";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
@@ -337,7 +353,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, "12.35f");
 	}
 
-	public void testAsBodyTag() throws Exception {
+	@Test
+	public void asBodyTag() throws Exception {
 		String selectName = "testBean.name";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
@@ -358,7 +375,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, bodyContent);
 	}
 
-	public void testAsBodyTagSelected() throws Exception {
+	@Test
+	public void asBodyTagSelected() throws Exception {
 		String selectName = "testBean.name";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
@@ -378,7 +396,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, bodyContent);
 	}
 
-	public void testAsBodyTagCollapsed() throws Exception {
+	@Test
+	public void asBodyTagCollapsed() throws Exception {
 		String selectName = "testBean.name";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false);
 		getPageContext().setAttribute(SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, bindStatus);
@@ -399,7 +418,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertBlockTagContains(output, bodyContent);
 	}
 
-	public void testAsBodyTagWithEditor() throws Exception {
+	@Test
+	public void asBodyTagWithEditor() throws Exception {
 		String selectName = "testBean.stringArray";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
 			@Override
@@ -422,7 +442,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(Tag.EVAL_PAGE, result);
 	}
 
-	public void testMultiBind() throws Exception {
+	@Test
+	public void multiBind() throws Exception {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(new TestBean(), "testBean");
 		result.getPropertyAccessor().registerCustomEditor(TestBean.class, "friends", new FriendEditor());
 		exposeBindingResult(result);
@@ -437,13 +458,15 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("<option value=\"foo\">foo</option>", getOutput());
 	}
 
-	public void testOptionTagNotNestedWithinSelectTag() throws Exception {
+	@Test
+	public void optionTagNotNestedWithinSelectTag() throws Exception {
 		try {
 			tag.setParent(null);
 			tag.setValue("foo");
 			tag.doStartTag();
 			fail("Must throw an IllegalStateException when not nested within a <select/> tag.");
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
@@ -520,7 +543,8 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		public String toId() {
 			if (this.variant != null) {
 				return this.rules + "-" + this.variant;
-			} else {
+			}
+			else {
 				return rules;
 			}
 		}

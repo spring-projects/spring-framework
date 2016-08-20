@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License; Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,6 @@ public interface MvcResult {
 	/**
 	 * Return any exception raised by a handler and successfully resolved
 	 * through a {@link HandlerExceptionResolver}.
-	 *
 	 * @return an exception, possibly {@code null}
 	 */
  	Exception getResolvedException();
@@ -79,20 +78,17 @@ public interface MvcResult {
 	 * Get the result of async execution. This method will wait for the async result
 	 * to be set for up to the amount of time configured on the async request,
 	 * i.e. {@link org.springframework.mock.web.MockAsyncContext#getTimeout()}.
-	 *
-	 * @throws IllegalStateException if the async result was not set.
+	 * @throws IllegalStateException if the async result was not set
 	 */
 	Object getAsyncResult();
 
 	/**
 	 * Get the result of async execution. This method will wait for the async result
 	 * to be set for up to the specified amount of time.
-	 *
 	 * @param timeToWait how long to wait for the async result to be set, in
 	 * 	milliseconds; if -1, then the async request timeout value is used,
 	 *  i.e.{@link org.springframework.mock.web.MockAsyncContext#getTimeout()}.
-	 *
-	 * @throws IllegalStateException if the async result was not set.
+	 * @throws IllegalStateException if the async result was not set
 	 */
 	Object getAsyncResult(long timeToWait);
 

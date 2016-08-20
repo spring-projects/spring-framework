@@ -110,20 +110,6 @@
 			</g>
 			<rect x="0" y="151.44" width="72.212" height="39.6" class="st6"/>
 			<text x="11.2" y="173.64" class="st7" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Hessian client</text>		</g>
-		<g id="shape8-31" v:mID="8" v:groupContext="shape" transform="translate(184.094,-151.2)">
-			<title>Box.6</title>
-			<desc>Burlap client</desc>
-			<v:userDefs>
-				<v:ud v:nameU="visVersion" v:val="VT0(11):26"/>
-			</v:userDefs>
-			<v:textBlock v:margins="rect(3.99999,3.99999,3.99999,3.99999)"/>
-			<v:textRect cx="33.6885" cy="171.24" width="67.38" height="39.6"/>
-			<g id="shadow8-32" v:groupContext="shadow" v:shadowOffsetX="1.8" v:shadowOffsetY="-1.8" v:shadowType="1"
-					transform="matrix(1,0,0,1,1.8,1.8)" class="st4">
-				<rect x="0" y="151.44" width="67.3778" height="39.6" class="st5"/>
-			</g>
-			<rect x="0" y="151.44" width="67.3778" height="39.6" class="st6"/>
-			<text x="11.69" y="173.64" class="st7" v:langID="1033"><v:paragraph v:horizAlign="1"/><v:tabList/>Burlap client</text>		</g>
 		<g id="shape9-36" v:mID="9" v:groupContext="shape" transform="translate(266.126,-151.2)">
 			<title>Box.7</title>
 			<desc>RMI client</desc>

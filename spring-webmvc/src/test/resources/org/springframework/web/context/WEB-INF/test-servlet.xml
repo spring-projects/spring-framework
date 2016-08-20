@@ -6,7 +6,7 @@
 	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
 		<property name="basename"><value>org/springframework/web/context/WEB-INF/test-messages</value></property>
 	</bean>
-	
+
 	<bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
 		<property name="basenamePrefix"><value>org/springframework/web/context/WEB-INF/test-</value></property>
 	</bean>
@@ -33,13 +33,13 @@
 	<bean id="kerry" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 		<property name="age"><value>34</value></property>
-		<property name="spouse"><ref local="rod"/></property>
+		<property name="spouse"><ref bean="rod"/></property>
 	</bean>
 
 	<bean id="typeMismatch" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>typeMismatch</value></property>
 		<property name="age"><value>34x</value></property>
-		<property name="spouse"><ref local="rod"/></property>
+		<property name="spouse"><ref bean="rod"/></property>
 	</bean>
 
 	<bean id="singletonFactory" class="org.springframework.tests.sample.beans.factory.DummyFactory">
@@ -48,7 +48,7 @@
 	<bean id="prototypeFactory" class="org.springframework.tests.sample.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
-	
+
 	<bean id="listenerVeto" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>listenerVeto</value></property>
 		<property name="age"><value>66</value></property>

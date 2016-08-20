@@ -16,12 +16,14 @@
 
 package org.springframework.util.xml;
 
+import java.util.List;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.stream.events.XMLEvent;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.stax.StAXResult;
@@ -209,6 +211,16 @@ public abstract class StaxUtils {
 		else {
 			throw new IllegalArgumentException("Result '" + result + "' is neither StaxResult nor StAXResult");
 		}
+	}
+
+	/**
+	 * Create a {@link XMLEventReader} from the given list of {@link XMLEvent}.
+	 * @param events the list of {@link XMLEvent}s.
+	 * @return an {@code XMLEventReader} that reads from the given events
+	 * @since 5.0
+	 */
+	public static XMLEventReader createXMLEventReader(List<XMLEvent> events) {
+		return new ListBasedXMLEventReader(events);
 	}
 
 	/**

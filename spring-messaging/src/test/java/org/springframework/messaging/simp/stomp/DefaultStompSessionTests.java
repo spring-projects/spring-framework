@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.*;
-
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -40,6 +35,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.converter.MessageConversionException;
+import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession.Receiptable;
 import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.messaging.support.MessageBuilder;
@@ -50,15 +46,20 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.notNull;
+import static org.mockito.Mockito.same;
+
 /**
  * Unit tests for {@link DefaultStompSession}.
  *
  * @author Rossen Stoyanchev
  */
 public class DefaultStompSessionTests {
-
-	private static Charset UTF_8 = Charset.forName("UTF-8");
-
 
 	private DefaultStompSession session;
 
@@ -79,12 +80,12 @@ public class DefaultStompSessionTests {
 
 	@Before
 	public void setUp() throws Exception {
-
 		MockitoAnnotations.initMocks(this);
 
 		this.sessionHandler = mock(StompSessionHandler.class);
 		this.connectHeaders = new StompHeaders();
 		this.session = new DefaultStompSession(this.sessionHandler, this.connectHeaders);
+		this.session.setMessageConverter(new StringMessageConverter());
 
 		SettableListenableFuture<Void> future = new SettableListenableFuture<>();
 		future.set(null);
@@ -94,7 +95,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void afterConnected() throws Exception {
-
 		assertFalse(this.session.isConnected());
 		this.connectHeaders.setHost("my-host");
 		this.connectHeaders.setHeartbeat(new long[] {11, 12});
@@ -120,7 +120,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleConnectedFrame() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -139,7 +138,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void heartbeatValues() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -162,7 +160,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void heartbeatNotSupportedByServer() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		verify(this.connection).send(any());
 
@@ -179,7 +176,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void heartbeatTasks() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		verify(this.connection).send(any());
 
@@ -215,9 +211,8 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleErrorFrame() throws Exception {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
-		accessor.setContentType(new MimeType("text", "plain", UTF_8));
+		accessor.setContentType(new MimeType("text", "plain", StandardCharsets.UTF_8));
 		accessor.addNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
 		String payload = "Oops";
@@ -225,7 +220,7 @@ public class DefaultStompSessionTests {
 		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		when(this.sessionHandler.getPayloadType(stompHeaders)).thenReturn(String.class);
 
-		this.session.handleMessage(MessageBuilder.createMessage(payload.getBytes(UTF_8), accessor.getMessageHeaders()));
+		this.session.handleMessage(MessageBuilder.createMessage(payload.getBytes(StandardCharsets.UTF_8), accessor.getMessageHeaders()));
 
 		verify(this.sessionHandler).getPayloadType(stompHeaders);
 		verify(this.sessionHandler).handleFrame(stompHeaders, payload);
@@ -234,7 +229,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleErrorFrameWithEmptyPayload() throws Exception {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.addNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
@@ -247,12 +241,11 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleErrorFrameWithConversionException() throws Exception {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.setContentType(MimeTypeUtils.APPLICATION_JSON);
 		accessor.addNativeHeader("foo", "bar");
 		accessor.setLeaveMutable(true);
-		byte[] payload = "{'foo':'bar'}".getBytes(UTF_8);
+		byte[] payload = "{'foo':'bar'}".getBytes(StandardCharsets.UTF_8);
 
 		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		when(this.sessionHandler.getPayloadType(stompHeaders)).thenReturn(Map.class);
@@ -267,7 +260,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleMessageFrame() throws Exception {
-
 		this.session.afterConnected(this.connection);
 
 		StompFrameHandler frameHandler = mock(StompFrameHandler.class);
@@ -285,7 +277,8 @@ public class DefaultStompSessionTests {
 		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		when(frameHandler.getPayloadType(stompHeaders)).thenReturn(String.class);
 
-		this.session.handleMessage(MessageBuilder.createMessage(payload.getBytes(UTF_8), accessor.getMessageHeaders()));
+		this.session.handleMessage(MessageBuilder.createMessage(payload.getBytes(StandardCharsets.UTF_8),
+				accessor.getMessageHeaders()));
 
 		verify(frameHandler).getPayloadType(stompHeaders);
 		verify(frameHandler).handleFrame(stompHeaders, payload);
@@ -294,7 +287,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void handleMessageFrameWithConversionException() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -308,7 +300,7 @@ public class DefaultStompSessionTests {
 		accessor.setContentType(MimeTypeUtils.APPLICATION_JSON);
 		accessor.setMessageId("1");
 		accessor.setLeaveMutable(true);
-		byte[] payload = "{'foo':'bar'}".getBytes(UTF_8);
+		byte[] payload = "{'foo':'bar'}".getBytes(StandardCharsets.UTF_8);
 
 		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
 		when(frameHandler.getPayloadType(stompHeaders)).thenReturn(Map.class);
@@ -342,7 +334,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void send() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -358,14 +349,13 @@ public class DefaultStompSessionTests {
 		assertEquals(stompHeaders.toString(), 2, stompHeaders.size());
 
 		assertEquals(destination, stompHeaders.getDestination());
-		assertEquals(new MimeType("text", "plain", UTF_8), stompHeaders.getContentType());
-		assertEquals(-1, stompHeaders.getContentLength()); // StompEncoder isn't involved
-		assertEquals(payload, new String(message.getPayload(), UTF_8));
+		assertEquals(new MimeType("text", "plain", StandardCharsets.UTF_8), stompHeaders.getContentType());
+		assertEquals(-1, stompHeaders.getContentLength());  // StompEncoder isn't involved
+		assertEquals(payload, new String(message.getPayload(), StandardCharsets.UTF_8));
 	}
 
 	@Test
 	public void sendWithReceipt() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -389,7 +379,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void sendWithConversionException() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -405,7 +394,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void sendWithExecutionException() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -417,14 +405,13 @@ public class DefaultStompSessionTests {
 		this.expected.expect(MessageDeliveryException.class);
 		this.expected.expectCause(Matchers.sameInstance(exception));
 
-		this.session.send("/topic/foo", "sample payload".getBytes(UTF_8));
+		this.session.send("/topic/foo", "sample payload".getBytes(StandardCharsets.UTF_8));
 
 		verifyNoMoreInteractions(this.connection);
 	}
 
 	@Test
 	public void subscribe() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -444,7 +431,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void subscribeWithHeaders() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -471,7 +457,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void unsubscribe() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 
@@ -490,8 +475,41 @@ public class DefaultStompSessionTests {
 	}
 
 	@Test
-	public void receiptReceived() throws Exception {
+	public void ack() throws Exception {
+		this.session.afterConnected(this.connection);
+		assertTrue(this.session.isConnected());
 
+		String messageId = "123";
+		this.session.acknowledge(messageId, true);
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		assertEquals(StompCommand.ACK, accessor.getCommand());
+
+		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertEquals(stompHeaders.toString(), 1, stompHeaders.size());
+		assertEquals(messageId, stompHeaders.getId());
+	}
+
+	@Test
+	public void nack() throws Exception {
+		this.session.afterConnected(this.connection);
+		assertTrue(this.session.isConnected());
+
+		String messageId = "123";
+		this.session.acknowledge(messageId, false);
+
+		Message<byte[]> message = this.messageCaptor.getValue();
+		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+		assertEquals(StompCommand.NACK, accessor.getCommand());
+
+		StompHeaders stompHeaders = StompHeaders.readOnlyStompHeaders(accessor.getNativeHeaders());
+		assertEquals(stompHeaders.toString(), 1, stompHeaders.size());
+		assertEquals(messageId, stompHeaders.getId());
+	}
+
+	@Test
+	public void receiptReceived() throws Exception {
 		this.session.afterConnected(this.connection);
 		this.session.setTaskScheduler(mock(TaskScheduler.class));
 
@@ -516,7 +534,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void receiptReceivedBeforeTaskAdded() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		this.session.setTaskScheduler(mock(TaskScheduler.class));
 
@@ -541,7 +558,6 @@ public class DefaultStompSessionTests {
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void receiptNotReceived() throws Exception {
-
 		TaskScheduler taskScheduler = mock(TaskScheduler.class);
 
 		this.session.afterConnected(this.connection);
@@ -573,7 +589,6 @@ public class DefaultStompSessionTests {
 
 	@Test
 	public void disconnect() throws Exception {
-
 		this.session.afterConnected(this.connection);
 		assertTrue(this.session.isConnected());
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,12 @@ import java.util.Collections;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.junit.Test;
+
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -38,7 +41,6 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	private static final String REQUEST_URI = "/my/form";
 
 	private static final String QUERY_STRING = "foo=bar";
-
 
 	private FormTag tag;
 
@@ -64,7 +66,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.request = request;
 	}
 
-	public void testWriteForm() throws Exception {
+	@Test
+	public void writeForm() throws Exception {
 		String commandName = "myCommand";
 		String name = "formName";
 		String action = "/form.html";
@@ -83,7 +86,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setName(name);
 		this.tag.setCssClass(cssClass);
 		this.tag.setCssStyle(cssStyle);
-		this.tag.setCommandName(commandName);
+		this.tag.setModelAttribute(commandName);
 		this.tag.setAction(action);
 		this.tag.setMethod(method);
 		this.tag.setTarget(target);
@@ -127,14 +130,15 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(output, dynamicAttribute2, dynamicAttribute2);
 	}
 
-	public void testWithActionFromRequest() throws Exception {
+	@Test
+	public void withActionFromRequest() throws Exception {
 		String commandName = "myCommand";
 		String enctype = "my/enctype";
 		String method = "POST";
 		String onsubmit = "onsubmit";
 		String onreset = "onreset";
 
-		this.tag.setCommandName(commandName);
+		this.tag.setModelAttribute(commandName);
 		this.tag.setMethod(method);
 		this.tag.setEnctype(enctype);
 		this.tag.setOnsubmit(onsubmit);
@@ -164,7 +168,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertAttributeNotPresent(output, "name");
 	}
 
-	public void testPrependServletPath() throws Exception {
+	@Test
+	public void prependServletPath() throws Exception {
 
 		this.request.setContextPath("/myApp");
 		this.request.setServletPath("/main");
@@ -177,7 +182,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String onsubmit = "onsubmit";
 		String onreset = "onreset";
 
-		this.tag.setCommandName(commandName);
+		this.tag.setModelAttribute(commandName);
 		this.tag.setServletRelativeAction(action);
 		this.tag.setMethod(method);
 		this.tag.setEnctype(enctype);
@@ -208,9 +213,10 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertAttributeNotPresent(output, "name");
 	}
 
-	public void testWithNullResolvedCommand() throws Exception {
+	@Test
+	public void withNullResolvedCommand() throws Exception {
 		try {
-			tag.setCommandName(null);
+			tag.setModelAttribute(null);
 			tag.doStartTag();
 			fail("Must not be able to have a command name that resolves to null");
 		}
@@ -219,10 +225,11 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		}
 	}
 
-	/*
-	 * See http://opensource.atlassian.com/projects/spring/browse/SPR-2645
+	/**
+	 * https://jira.spring.io/browse/SPR-2645
 	 */
-	public void testXSSScriptingExploitWhenActionIsResolvedFromQueryString() throws Exception {
+	@Test
+	public void xssExploitWhenActionIsResolvedFromQueryString() throws Exception {
 		String xssQueryString = QUERY_STRING + "&stuff=\"><script>alert('XSS!')</script>";
 		request.setQueryString(xssQueryString);
 		tag.doStartTag();
@@ -230,7 +237,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 				getOutput());
 	}
 
-	public void testGet() throws Exception {
+	@Test
+	public void get() throws Exception {
 		this.tag.setMethod("get");
 
 		this.tag.doStartTag();
@@ -245,7 +253,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("", inputOutput);
 	}
 
-	public void testPost() throws Exception {
+	@Test
+	public void post() throws Exception {
 		this.tag.setMethod("post");
 
 		this.tag.doStartTag();
@@ -260,7 +269,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("", inputOutput);
 	}
 
-	public void testPut() throws Exception {
+	@Test
+	public void put() throws Exception {
 		this.tag.setMethod("put");
 
 		this.tag.doStartTag();
@@ -277,7 +287,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(inputOutput, "type", "hidden");
 	}
 
-	public void testDelete() throws Exception {
+	@Test
+	public void delete() throws Exception {
 		this.tag.setMethod("delete");
 
 		this.tag.doStartTag();
@@ -294,7 +305,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(inputOutput, "type", "hidden");
 	}
 
-	public void testCustomMethodParameter() throws Exception {
+	@Test
+	public void customMethodParameter() throws Exception {
 		this.tag.setMethod("put");
 		this.tag.setMethodParam("methodParameter");
 
@@ -312,7 +324,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(inputOutput, "type", "hidden");
 	}
 
-	public void testClearAttributesOnFinally() throws Exception {
+	@Test
+	public void clearAttributesOnFinally() throws Exception {
 		this.tag.setModelAttribute("model");
 		getPageContext().setAttribute("model", "foo bar");
 		assertNull(getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
@@ -322,7 +335,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertNull(getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
 
-	public void testRequestDataValueProcessorHooks() throws Exception {
+	@Test
+	public void requestDataValueProcessorHooks() throws Exception {
 		String action = "/my/form?foo=bar";
 		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
 		given(processor.processAction(this.request, action, "post")).willReturn(action);
@@ -339,7 +353,8 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertFormTagClosed(output);
 	}
 
-	public void testDefaultActionEncoded() throws Exception {
+	@Test
+	public void defaultActionEncoded() throws Exception {
 
 		this.request.setRequestURI("/a b c");
 		request.setQueryString("");

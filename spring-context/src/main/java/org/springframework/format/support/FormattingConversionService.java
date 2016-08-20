@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,10 @@ public class FormattingConversionService extends GenericConversionService
 	private StringValueResolver embeddedValueResolver;
 
 	private final Map<AnnotationConverterKey, GenericConverter> cachedPrinters =
-			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>(64);
+			new ConcurrentHashMap<>(64);
 
 	private final Map<AnnotationConverterKey, GenericConverter> cachedParsers =
-			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>(64);
+			new ConcurrentHashMap<>(64);
 
 
 	@Override
@@ -67,12 +67,7 @@ public class FormattingConversionService extends GenericConversionService
 
 	@Override
 	public void addFormatter(Formatter<?> formatter) {
-		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
-		if (fieldType == null) {
-			throw new IllegalArgumentException("Unable to extract parameterized field type argument from Formatter [" +
-					formatter.getClass().getName() + "]; does the formatter parameterize the <T> generic type?");
-		}
-		addFormatterForFieldType(fieldType, formatter);
+		addFormatterForFieldType(getFieldType(formatter), formatter);
 	}
 
 	@Override
@@ -88,14 +83,8 @@ public class FormattingConversionService extends GenericConversionService
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory annotationFormatterFactory) {
-		Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
-				GenericTypeResolver.resolveTypeArgument(annotationFormatterFactory.getClass(), AnnotationFormatterFactory.class);
-		if (annotationType == null) {
-			throw new IllegalArgumentException("Unable to extract parameterized Annotation type argument from AnnotationFormatterFactory [" +
-					annotationFormatterFactory.getClass().getName() + "]; does the factory parameterize the <A extends Annotation> generic type?");
-		}
+	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory<? extends Annotation> annotationFormatterFactory) {
+		Class<? extends Annotation> annotationType = getAnnotationType(annotationFormatterFactory);
 		if (this.embeddedValueResolver != null && annotationFormatterFactory instanceof EmbeddedValueResolverAware) {
 			((EmbeddedValueResolverAware) annotationFormatterFactory).setEmbeddedValueResolver(this.embeddedValueResolver);
 		}
@@ -104,6 +93,28 @@ public class FormattingConversionService extends GenericConversionService
 			addConverter(new AnnotationPrinterConverter(annotationType, annotationFormatterFactory, fieldType));
 			addConverter(new AnnotationParserConverter(annotationType, annotationFormatterFactory, fieldType));
 		}
+	}
+
+
+	static Class<?> getFieldType(Formatter<?> formatter) {
+		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
+		if (fieldType == null) {
+			throw new IllegalArgumentException("Unable to extract parameterized field type argument from Formatter [" +
+					formatter.getClass().getName() + "]; does the formatter parameterize the <T> generic type?");
+		}
+		return fieldType;
+	}
+
+	@SuppressWarnings("unchecked")
+	static Class<? extends Annotation> getAnnotationType(AnnotationFormatterFactory<? extends Annotation> factory) {
+		Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
+				GenericTypeResolver.resolveTypeArgument(factory.getClass(), AnnotationFormatterFactory.class);
+		if (annotationType == null) {
+			throw new IllegalArgumentException("Unable to extract parameterized Annotation type argument from " +
+					"AnnotationFormatterFactory [" + factory.getClass().getName() +
+					"]; does the factory parameterize the <A extends Annotation> generic type?");
+		}
+		return annotationType;
 	}
 
 
@@ -148,7 +159,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public String toString() {
-			return this.fieldType.getName() + " -> " + String.class.getName() + " : " + this.printer;
+			return (this.fieldType.getName() + " -> " + String.class.getName() + " : " + this.printer);
 		}
 	}
 
@@ -183,7 +194,7 @@ public class FormattingConversionService extends GenericConversionService
 				result = this.parser.parse(text, LocaleContextHolder.getLocale());
 			}
 			catch (ParseException ex) {
-				throw new IllegalArgumentException("Unable to parse '" + text + "'", ex);
+				throw new IllegalArgumentException("Parse attempt failed for value [" + text + "]", ex);
 			}
 			if (result == null) {
 				throw new IllegalStateException("Parsers are not allowed to return null");
@@ -197,7 +208,7 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public String toString() {
-			return String.class.getName() + " -> " + this.fieldType.getName() + ": " + this.parser;
+			return (String.class.getName() + " -> " + this.fieldType.getName() + ": " + this.parser);
 		}
 	}
 
@@ -249,8 +260,8 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public String toString() {
-			return "@" + this.annotationType.getName() + " " + this.fieldType.getName() + " -> " +
-					String.class.getName() + ": " + this.annotationFormatterFactory;
+			return ("@" + this.annotationType.getName() + " " + this.fieldType.getName() + " -> " +
+					String.class.getName() + ": " + this.annotationFormatterFactory);
 		}
 	}
 
@@ -302,8 +313,8 @@ public class FormattingConversionService extends GenericConversionService
 
 		@Override
 		public String toString() {
-			return String.class.getName() + " -> @" + this.annotationType.getName() + " " +
-					this.fieldType.getName() + ": " + this.annotationFormatterFactory;
+			return (String.class.getName() + " -> @" + this.annotationType.getName() + " " +
+					this.fieldType.getName() + ": " + this.annotationFormatterFactory);
 		}
 	}
 

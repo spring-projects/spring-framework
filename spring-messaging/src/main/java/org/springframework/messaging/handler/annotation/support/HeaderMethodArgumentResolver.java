@@ -104,7 +104,7 @@ public class HeaderMethodArgumentResolver extends AbstractNamedValueMethodArgume
 	private static class HeaderNamedValueInfo extends NamedValueInfo {
 
 		private HeaderNamedValueInfo(Header annotation) {
-			super(annotation.value(), annotation.required(), annotation.defaultValue());
+			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
 

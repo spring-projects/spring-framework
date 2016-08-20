@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +35,8 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.NumberUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,20 +55,6 @@ import org.springframework.util.StringUtils;
 class TypeConverterDelegate {
 
 	private static final Log logger = LogFactory.getLog(TypeConverterDelegate.class);
-
-	/** Java 8's java.util.Optional.empty() instance */
-	private static Object javaUtilOptionalEmpty = null;
-
-	static {
-		try {
-			Class<?> clazz = ClassUtils.forName("java.util.Optional", TypeConverterDelegate.class.getClassLoader());
-			javaUtilOptionalEmpty = ClassUtils.getMethod(clazz, "empty").invoke(null);
-		}
-		catch (Exception ex) {
-			// Java 8 not available - conversion to Optional not supported then.
-		}
-	}
-
 
 	private final PropertyEditorRegistrySupport propertyEditorRegistry;
 
@@ -158,35 +147,38 @@ class TypeConverterDelegate {
 	public <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
 			Class<T> requiredType, TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
-		Object convertedValue = newValue;
-
 		// Custom editor for this type?
 		PropertyEditor editor = this.propertyEditorRegistry.findCustomEditor(requiredType, propertyName);
 
-		ConversionFailedException firstAttemptEx = null;
+		ConversionFailedException conversionAttemptEx = null;
 
 		// No custom editor but custom ConversionService specified?
 		ConversionService conversionService = this.propertyEditorRegistry.getConversionService();
-		if (editor == null && conversionService != null && convertedValue != null && typeDescriptor != null) {
+		if (editor == null && conversionService != null && newValue != null && typeDescriptor != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
-			TypeDescriptor targetTypeDesc = typeDescriptor;
-			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
+			if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
 				try {
-					return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
+					return (T) conversionService.convert(newValue, sourceTypeDesc, typeDescriptor);
 				}
 				catch (ConversionFailedException ex) {
 					// fallback to default conversion logic below
-					firstAttemptEx = ex;
+					conversionAttemptEx = ex;
 				}
 			}
 		}
 
+		Object convertedValue = newValue;
+
 		// Value not of required type?
 		if (editor != null || (requiredType != null && !ClassUtils.isAssignableValue(requiredType, convertedValue))) {
-			if (requiredType != null && Collection.class.isAssignableFrom(requiredType) && convertedValue instanceof String) {
-				TypeDescriptor elementType = typeDescriptor.getElementTypeDescriptor();
-				if (elementType != null && Enum.class.isAssignableFrom(elementType.getType())) {
-					convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
+			if (typeDescriptor != null && requiredType != null && Collection.class.isAssignableFrom(requiredType) &&
+					convertedValue instanceof String) {
+				TypeDescriptor elementTypeDesc = typeDescriptor.getElementTypeDescriptor();
+				if (elementTypeDesc != null) {
+					Class<?> elementType = elementTypeDesc.getType();
+					if (Class.class == elementType || Enum.class.isAssignableFrom(elementType)) {
+						convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
+					}
 				}
 			}
 			if (editor == null) {
@@ -201,10 +193,10 @@ class TypeConverterDelegate {
 			// Try to apply some standard type conversion rules if appropriate.
 
 			if (convertedValue != null) {
-				if (Object.class.equals(requiredType)) {
+				if (Object.class == requiredType) {
 					return (T) convertedValue;
 				}
-				if (requiredType.isArray()) {
+				else if (requiredType.isArray()) {
 					// Array required -> apply appropriate conversion of elements.
 					if (convertedValue instanceof String && Enum.class.isAssignableFrom(requiredType.getComponentType())) {
 						convertedValue = StringUtils.commaDelimitedListToStringArray((String) convertedValue);
@@ -227,12 +219,12 @@ class TypeConverterDelegate {
 					convertedValue = Array.get(convertedValue, 0);
 					standardConversion = true;
 				}
-				if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
+				if (String.class == requiredType && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
 					// We can stringify any primitive value...
 					return (T) convertedValue.toString();
 				}
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-					if (firstAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
+					if (conversionAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
 						try {
 							Constructor<T> strCtor = requiredType.getConstructor(String.class);
 							return BeanUtils.instantiateClass(strCtor, convertedValue);
@@ -257,18 +249,33 @@ class TypeConverterDelegate {
 					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
 					standardConversion = true;
 				}
+				else if (convertedValue instanceof Number && Number.class.isAssignableFrom(requiredType)) {
+					convertedValue = NumberUtils.convertNumberToTargetClass(
+							(Number) convertedValue, (Class<Number>) requiredType);
+					standardConversion = true;
+				}
 			}
 			else {
 				// convertedValue == null
-				if (javaUtilOptionalEmpty != null && requiredType.equals(javaUtilOptionalEmpty.getClass())) {
-					convertedValue = javaUtilOptionalEmpty;
+				if (requiredType == Optional.class) {
+					convertedValue = Optional.empty();
 				}
 			}
 
 			if (!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
-				if (firstAttemptEx != null) {
-					throw firstAttemptEx;
+				if (conversionAttemptEx != null) {
+					// Original exception from former ConversionService call above...
+					throw conversionAttemptEx;
 				}
+				else if (conversionService != null) {
+					// ConversionService not tried before, probably custom editor found
+					// but editor couldn't produce the required type...
+					TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
+					if (conversionService.canConvert(sourceTypeDesc, typeDescriptor)) {
+						return (T) conversionService.convert(newValue, sourceTypeDesc, typeDescriptor);
+					}
+				}
+
 				// Definitely doesn't match: throw IllegalArgumentException/IllegalStateException
 				StringBuilder msg = new StringBuilder();
 				msg.append("Cannot convert value of type [").append(ClassUtils.getDescriptiveType(newValue));
@@ -289,12 +296,12 @@ class TypeConverterDelegate {
 			}
 		}
 
-		if (firstAttemptEx != null) {
-			if (editor == null && !standardConversion && requiredType != null && !Object.class.equals(requiredType)) {
-				throw firstAttemptEx;
+		if (conversionAttemptEx != null) {
+			if (editor == null && !standardConversion && requiredType != null && Object.class != requiredType) {
+				throw conversionAttemptEx;
 			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
-					"PropertyEditor based conversion eventually succeeded", firstAttemptEx);
+					"PropertyEditor based conversion eventually succeeded", conversionAttemptEx);
 		}
 
 		return (T) convertedValue;
@@ -303,7 +310,7 @@ class TypeConverterDelegate {
 	private Object attemptToConvertStringToEnum(Class<?> requiredType, String trimmedValue, Object currentConvertedValue) {
 		Object convertedValue = currentConvertedValue;
 
-		if (Enum.class.equals(requiredType)) {
+		if (Enum.class == requiredType) {
 			// target type is declared as raw enum, treat the trimmed value as <enum.fqn>.FIELD_NAME
 			int index = trimmedValue.lastIndexOf(".");
 			if (index > - 1) {
@@ -339,7 +346,6 @@ class TypeConverterDelegate {
 			catch (Throwable ex) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Field [" + convertedValue + "] isn't an enum value", ex);
-
 				}
 			}
 		}
@@ -356,7 +362,7 @@ class TypeConverterDelegate {
 		if (requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
 			editor = this.propertyEditorRegistry.getDefaultEditor(requiredType);
-			if (editor == null && !String.class.equals(requiredType)) {
+			if (editor == null && String.class != requiredType) {
 				// No BeanWrapper default editor -> check standard JavaBean editor.
 				editor = BeanUtils.findEditorByConvention(requiredType);
 			}
@@ -422,7 +428,7 @@ class TypeConverterDelegate {
 				String newTextValue = (String) convertedValue;
 				return doConvertTextValue(oldValue, newTextValue, editor);
 			}
-			else if (String.class.equals(requiredType)) {
+			else if (String.class == requiredType) {
 				returnValue = convertedValue;
 			}
 		}
@@ -507,7 +513,6 @@ class TypeConverterDelegate {
 		}
 
 		boolean originalAllowed = requiredType.isInstance(original);
-		typeDescriptor = typeDescriptor.narrow(original);
 		TypeDescriptor elementType = typeDescriptor.getElementTypeDescriptor();
 		if (elementType == null && originalAllowed &&
 				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
@@ -539,7 +544,8 @@ class TypeConverterDelegate {
 				convertedCopy = CollectionFactory.createApproximateCollection(original, original.size());
 			}
 			else {
-				convertedCopy = (Collection<Object>) requiredType.newInstance();
+				convertedCopy = (Collection<Object>)
+						ReflectionUtils.accessibleConstructor(requiredType).newInstance();
 			}
 		}
 		catch (Throwable ex) {
@@ -589,7 +595,6 @@ class TypeConverterDelegate {
 		}
 
 		boolean originalAllowed = requiredType.isInstance(original);
-		typeDescriptor = typeDescriptor.narrow(original);
 		TypeDescriptor keyType = typeDescriptor.getMapKeyTypeDescriptor();
 		TypeDescriptor valueType = typeDescriptor.getMapValueTypeDescriptor();
 		if (keyType == null && valueType == null && originalAllowed &&
@@ -622,7 +627,8 @@ class TypeConverterDelegate {
 				convertedCopy = CollectionFactory.createApproximateMap(original, original.size());
 			}
 			else {
-				convertedCopy = (Map<Object, Object>) requiredType.newInstance();
+				convertedCopy = (Map<Object, Object>)
+						ReflectionUtils.accessibleConstructor(requiredType).newInstance();
 			}
 		}
 		catch (Throwable ex) {

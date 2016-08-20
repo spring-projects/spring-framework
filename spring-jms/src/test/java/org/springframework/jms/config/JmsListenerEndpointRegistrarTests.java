@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,6 @@ import static org.junit.Assert.*;
  */
 public class JmsListenerEndpointRegistrarTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
 	private final JmsListenerEndpointRegistry registry = new JmsListenerEndpointRegistry();
@@ -40,11 +37,16 @@ public class JmsListenerEndpointRegistrarTests {
 	private final JmsListenerContainerTestFactory containerFactory = new JmsListenerContainerTestFactory();
 
 
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
+
 	@Before
 	public void setup() {
 		registrar.setEndpointRegistry(registry);
 		registrar.setBeanFactory(new StaticListableBeanFactory());
 	}
+
 
 	@Test
 	public void registerNullEndpoint() {
@@ -76,6 +78,7 @@ public class JmsListenerEndpointRegistrarTests {
 		registrar.afterPropertiesSet();
 		assertNotNull("Container not created", registry.getListenerContainer("some id"));
 		assertEquals(1, registry.getListenerContainers().size());
+		assertEquals("some id", registry.getListenerContainerIds().iterator().next());
 	}
 
 	@Test
@@ -98,6 +101,7 @@ public class JmsListenerEndpointRegistrarTests {
 		registrar.afterPropertiesSet();
 		assertNotNull("Container not created", registry.getListenerContainer("myEndpoint"));
 		assertEquals(1, registry.getListenerContainers().size());
+		assertEquals("myEndpoint", registry.getListenerContainerIds().iterator().next());
 	}
 
 }

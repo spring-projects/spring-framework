@@ -52,7 +52,7 @@ public interface JpaVendorAdapter {
 	 * <p>Note that there might be further JPA properties defined on
 	 * the EntityManagerFactory bean, which might potentially override
 	 * individual JPA property values specified here.
-	 * @return a Map of JPA properties, as as accepted by the standard
+	 * @return a Map of JPA properties, as accepted by the standard
 	 * JPA bootstrap facilities, or {@code null} or an empty Map
 	 * if there are no such properties to expose
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.ResolvableTypeProvider;
 
 /**
  * @author Stephane Nicoll
@@ -48,9 +49,26 @@ public abstract class AbstractApplicationEventListenerTests {
 		}
 
 		public T getPayload() {
-			return payload;
+			return this.payload;
 		}
 
+	}
+
+	protected static class SmartGenericTestEvent<T>
+			extends GenericTestEvent<T> implements ResolvableTypeProvider {
+
+		private final ResolvableType resolvableType;
+
+		public SmartGenericTestEvent(Object source, T payload) {
+			super(source, payload);
+			this.resolvableType = ResolvableType.forClassWithGenerics(
+					getClass(), payload.getClass());
+		}
+
+		@Override
+		public ResolvableType getResolvableType() {
+			return this.resolvableType;
+		}
 	}
 
 	protected static class StringEvent extends GenericTestEvent<String> {
@@ -99,13 +117,13 @@ public abstract class AbstractApplicationEventListenerTests {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	static class RawApplicationListener implements ApplicationListener {
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	static class TestEvents {
 
 		public ApplicationEvent applicationEvent;

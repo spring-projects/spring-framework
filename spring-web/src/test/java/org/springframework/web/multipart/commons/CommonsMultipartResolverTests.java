@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,10 +111,12 @@ public class CommonsMultipartResolverTests {
 		doTestFiles(request);
 
 		doTestBinding(resolver, originalRequest, request);
+
+		wac.close();
 	}
 
 	private void doTestParameters(MultipartHttpServletRequest request) {
-		Set<String> parameterNames = new HashSet<String>();
+		Set<String> parameterNames = new HashSet<>();
 		Enumeration<String> parameterEnum = request.getParameterNames();
 		while (parameterEnum.hasMoreElements()) {
 			parameterNames.add(parameterEnum.nextElement());
@@ -135,8 +137,8 @@ public class CommonsMultipartResolverTests {
 		assertEquals("value4", request.getParameter("field4"));
 		assertEquals("getValue", request.getParameter("getField"));
 
-		List<String> parameterMapKeys = new ArrayList<String>();
-		List<Object> parameterMapValues = new ArrayList<Object>();
+		List<String> parameterMapKeys = new ArrayList<>();
+		List<Object> parameterMapValues = new ArrayList<>();
 		for (Object o : request.getParameterMap().keySet()) {
 			String key = (String) o;
 			parameterMapKeys.add(key);
@@ -163,7 +165,7 @@ public class CommonsMultipartResolverTests {
 	}
 
 	private void doTestFiles(MultipartHttpServletRequest request) throws IOException {
-		Set<String> fileNames = new HashSet<String>();
+		Set<String> fileNames = new HashSet<>();
 		Iterator<String> fileIter = request.getFileNames();
 		while (fileIter.hasNext()) {
 			fileNames.add(fileIter.next());
@@ -282,7 +284,7 @@ public class CommonsMultipartResolverTests {
 		final MultipartFilter filter = new MultipartFilter();
 		filter.init(filterConfig);
 
-		final List<MultipartFile> files = new ArrayList<MultipartFile>();
+		final List<MultipartFile> files = new ArrayList<>();
 		final FilterChain filterChain = new FilterChain() {
 			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
@@ -320,7 +322,7 @@ public class CommonsMultipartResolverTests {
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 		filterConfig.addInitParameter("multipartResolverBeanName", "myMultipartResolver");
 
-		final List<MultipartFile> files = new ArrayList<MultipartFile>();
+		final List<MultipartFile> files = new ArrayList<>();
 		FilterChain filterChain = new FilterChain() {
 			@Override
 			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
@@ -375,15 +377,15 @@ public class CommonsMultipartResolverTests {
 					if (request instanceof MultipartHttpServletRequest) {
 						throw new IllegalStateException("Already a multipart request");
 					}
-					List<FileItem> fileItems = new ArrayList<FileItem>();
+					List<FileItem> fileItems = new ArrayList<>();
 					MockFileItem fileItem1 = new MockFileItem(
 						"field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
 					MockFileItem fileItem1x = new MockFileItem(
 						"field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
 					MockFileItem fileItem2 = new MockFileItem(
-						"field2", "type2", empty ? "" : "C:/field2.txt", empty ? "" : "text2");
+						"field2", "type2", empty ? "" : "C:\\mypath/field2.txt", empty ? "" : "text2");
 					MockFileItem fileItem2x = new MockFileItem(
-						"field2x", "type2", empty ? "" : "C:\\field2x.txt", empty ? "" : "text2");
+						"field2x", "type2", empty ? "" : "C:/mypath\\field2x.txt", empty ? "" : "text2");
 					MockFileItem fileItem3 = new MockFileItem("field3", null, null, "value3");
 					MockFileItem fileItem4 = new MockFileItem("field4", "text/html; charset=iso-8859-1", null, "value4");
 					MockFileItem fileItem5 = new MockFileItem("field4", null, null, "value5");

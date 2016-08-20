@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -47,7 +47,7 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
  */
 public class WebSocketTransport implements Transport, Lifecycle {
 
-	private static Log logger = LogFactory.getLog(WebSocketTransport.class);
+	private static final Log logger = LogFactory.getLog(WebSocketTransport.class);
 
 	private final WebSocketClient webSocketClient;
 
@@ -55,7 +55,7 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 
 	public WebSocketTransport(WebSocketClient webSocketClient) {
-		Assert.notNull(webSocketClient, "'webSocketClient' is required");
+		Assert.notNull(webSocketClient, "WebSocketClient is required");
 		this.webSocketClient = webSocketClient;
 	}
 
@@ -69,12 +69,12 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 	@Override
 	public List<TransportType> getTransportTypes() {
-		return Arrays.asList(TransportType.WEBSOCKET);
+		return Collections.singletonList(TransportType.WEBSOCKET);
 	}
 
 	@Override
 	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
-		final SettableListenableFuture<WebSocketSession> future = new SettableListenableFuture<WebSocketSession>();
+		final SettableListenableFuture<WebSocketSession> future = new SettableListenableFuture<>();
 		WebSocketClientSockJsSession session = new WebSocketClientSockJsSession(request, handler, future);
 		handler = new ClientSockJsWebSocketHandler(session);
 		request.addTimeoutTask(session.getTimeoutTask());
@@ -146,7 +146,7 @@ public class WebSocketTransport implements Transport, Lifecycle {
 
 		private final AtomicInteger connectCount = new AtomicInteger(0);
 
-		private ClientSockJsWebSocketHandler(WebSocketClientSockJsSession session) {
+		public ClientSockJsWebSocketHandler(WebSocketClientSockJsSession session) {
 			Assert.notNull(session);
 			this.sockJsSession = session;
 		}

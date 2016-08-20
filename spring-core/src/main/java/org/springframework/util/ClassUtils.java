@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -34,7 +35,7 @@ import java.util.Set;
 
 /**
  * Miscellaneous class utility methods.
- * <p>Mainly for internal use within the framework.
+ * Mainly for internal use within the framework.
  *
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -55,16 +56,16 @@ public abstract class ClassUtils {
 	/** Prefix for internal non-primitive array class names: "[L" */
 	private static final String NON_PRIMITIVE_ARRAY_PREFIX = "[L";
 
-	/** The package separator character '.' */
+	/** The package separator character: '.' */
 	private static final char PACKAGE_SEPARATOR = '.';
 
-	/** The path separator character '/' */
+	/** The path separator character: '/' */
 	private static final char PATH_SEPARATOR = '/';
 
-	/** The inner class separator character '$' */
+	/** The inner class separator character: '$' */
 	private static final char INNER_CLASS_SEPARATOR = '$';
 
-	/** The CGLIB class separator character "$$" */
+	/** The CGLIB class separator: "$$" */
 	public static final String CGLIB_CLASS_SEPARATOR = "$$";
 
 	/** The ".class" file suffix */
@@ -75,25 +76,25 @@ public abstract class ClassUtils {
 	 * Map with primitive wrapper type as key and corresponding primitive
 	 * type as value, for example: Integer.class -> int.class.
 	 */
-	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new HashMap<Class<?>, Class<?>>(8);
+	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new IdentityHashMap<>(8);
 
 	/**
 	 * Map with primitive type as key and corresponding wrapper
 	 * type as value, for example: int.class -> Integer.class.
 	 */
-	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new HashMap<Class<?>, Class<?>>(8);
+	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<>(8);
 
 	/**
 	 * Map with primitive type name as key and corresponding primitive
 	 * type as value, for example: "int" -> "int.class".
 	 */
-	private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<String, Class<?>>(32);
+	private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<>(32);
 
 	/**
 	 * Map with common "java.lang" class name as key and corresponding Class as value.
 	 * Primarily for efficient deserialization of remote invocations.
 	 */
-	private static final Map<String, Class<?>> commonClassCache = new HashMap<String, Class<?>>(32);
+	private static final Map<String, Class<?>> commonClassCache = new HashMap<>(32);
 
 
 	static {
@@ -111,7 +112,7 @@ public abstract class ClassUtils {
 			registerCommonClasses(entry.getKey());
 		}
 
-		Set<Class<?>> primitiveTypes = new HashSet<Class<?>>(32);
+		Set<Class<?>> primitiveTypes = new HashSet<>(32);
 		primitiveTypes.addAll(primitiveWrapperTypeMap.values());
 		primitiveTypes.addAll(Arrays.asList(new Class<?>[] {
 				boolean[].class, byte[].class, char[].class, double[].class,
@@ -352,9 +353,9 @@ public abstract class ClassUtils {
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
 		if (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
-			Class<?> superClass = clazz.getSuperclass();
-			if (superClass != null && !Object.class.equals(superClass)) {
-				return superClass;
+			Class<?> superclass = clazz.getSuperclass();
+			if (superclass != null && Object.class != superclass) {
+				return superclass;
 			}
 		}
 		return clazz;
@@ -427,7 +428,7 @@ public abstract class ClassUtils {
 	 * @see java.beans.Introspector#decapitalize(String)
 	 */
 	public static String getShortNameAsProperty(Class<?> clazz) {
-		String shortName = ClassUtils.getShortName(clazz);
+		String shortName = getShortName(clazz);
 		int dotIndex = shortName.lastIndexOf(PACKAGE_SEPARATOR);
 		shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
 		return Introspector.decapitalize(shortName);
@@ -497,7 +498,7 @@ public abstract class ClassUtils {
 		StringBuilder result = new StringBuilder();
 		while (clazz.isArray()) {
 			clazz = clazz.getComponentType();
-			result.append(ClassUtils.ARRAY_SUFFIX);
+			result.append(ARRAY_SUFFIX);
 		}
 		result.insert(0, clazz.getName());
 		return result.toString();
@@ -628,7 +629,7 @@ public abstract class ClassUtils {
 			}
 		}
 		else {
-			Set<Method> candidates = new HashSet<Method>(1);
+			Set<Method> candidates = new HashSet<>(1);
 			Method[] methods = clazz.getMethods();
 			for (Method method : methods) {
 				if (methodName.equals(method.getName())) {
@@ -672,7 +673,7 @@ public abstract class ClassUtils {
 			}
 		}
 		else {
-			Set<Method> candidates = new HashSet<Method>(1);
+			Set<Method> candidates = new HashSet<>(1);
 			Method[] methods = clazz.getMethods();
 			for (Method method : methods) {
 				if (methodName.equals(method.getName())) {
@@ -761,7 +762,7 @@ public abstract class ClassUtils {
 	 */
 	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
 		if (method != null && isOverridable(method, targetClass) &&
-				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
+				targetClass != null && targetClass != method.getDeclaringClass()) {
 			try {
 				if (Modifier.isPublic(method.getModifiers())) {
 					try {
@@ -913,7 +914,7 @@ public abstract class ClassUtils {
 		}
 		if (lhsType.isPrimitive()) {
 			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
-			if (resolvedPrimitive != null && lhsType.equals(resolvedPrimitive)) {
+			if (lhsType == resolvedPrimitive) {
 				return true;
 			}
 		}
@@ -1135,7 +1136,7 @@ public abstract class ClassUtils {
 		if (clazz.isInterface() && isVisible(clazz, classLoader)) {
 			return Collections.<Class<?>>singleton(clazz);
 		}
-		Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
+		Set<Class<?>> interfaces = new LinkedHashSet<>();
 		while (clazz != null) {
 			Class<?>[] ifcs = clazz.getInterfaces();
 			for (Class<?> ifc : ifcs) {
@@ -1155,9 +1156,9 @@ public abstract class ClassUtils {
 	 * @return the merged interface as Class
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
+	@SuppressWarnings("deprecation")
 	public static Class<?> createCompositeInterface(Class<?>[] interfaces, ClassLoader classLoader) {
 		Assert.notEmpty(interfaces, "Interfaces must not be empty");
-		Assert.notNull(classLoader, "ClassLoader must not be null");
 		return Proxy.getProxyClass(classLoader, interfaces);
 	}
 
@@ -1186,7 +1187,7 @@ public abstract class ClassUtils {
 		Class<?> ancestor = clazz1;
 		do {
 			ancestor = ancestor.getSuperclass();
-			if (ancestor == null || Object.class.equals(ancestor)) {
+			if (ancestor == null || Object.class == ancestor) {
 				return null;
 			}
 		}
@@ -1221,7 +1222,7 @@ public abstract class ClassUtils {
 	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
 	 */
 	public static boolean isCglibProxy(Object object) {
-		return ClassUtils.isCglibProxyClass(object.getClass());
+		return isCglibProxyClass(object.getClass());
 	}
 
 	/**

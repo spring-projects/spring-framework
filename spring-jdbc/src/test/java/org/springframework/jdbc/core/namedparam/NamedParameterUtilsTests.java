@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Artur Geraschenko
  */
 public class NamedParameterUtilsTests {
 
@@ -69,7 +70,7 @@ public class NamedParameterUtilsTests {
 
 	@Test
 	public void convertParamMapToArray() {
-		Map<String, String> paramMap = new HashMap<String, String>();
+		Map<String, String> paramMap = new HashMap<>();
 		paramMap.put("a", "a");
 		paramMap.put("b", "b");
 		paramMap.put("c", "c");
@@ -137,10 +138,7 @@ public class NamedParameterUtilsTests {
 		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
 	}
 
-	/*
-	 * SPR-4789
-	 */
-	@Test
+	@Test  // SPR-4789
 	public void parseSqlContainingComments() {
 		String sql1 = "/*+ HINT */ xxx /* comment ? */ :a yyyy :b :c :a zzzzz -- :xx XX\n";
 		ParsedSql psql1 = NamedParameterUtils.parseSqlStatement(sql1);
@@ -174,10 +172,7 @@ public class NamedParameterUtilsTests {
 				NamedParameterUtils.substituteNamedParameters(psql4, new MapSqlParameterSource(parameters)));
 	}
 
-	/*
-	 * SPR-4612
-	 */
-	@Test
+	@Test  // SPR-4612
 	public void parseSqlStatementWithPostgresCasting() throws Exception {
 		String expectedSql = "select 'first name' from artists where id = ? and birth_date=?::timestamp";
 		String sql = "select 'first name' from artists where id = :id and birth_date=:birthDate::timestamp";
@@ -185,10 +180,16 @@ public class NamedParameterUtilsTests {
 		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
 	}
 
-	/*
-	 * SPR-7476
-	 */
-	@Test
+	@Test  // SPR-13582
+	public void parseSqlStatementWithPostgresContainedOperator() throws Exception {
+		String expectedSql = "select 'first name' from artists where info->'stat'->'albums' = ?? ? and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
+		String sql = "select 'first name' from artists where info->'stat'->'albums' = ?? :album and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, parsedSql.getTotalParameterCount());
+		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
+	}
+
+	@Test  // SPR-7476
 	public void parseSqlStatementWithEscapedColon() throws Exception {
 		String expectedSql = "select '0\\:0' as a, foo from bar where baz < DATE(? 23:59:59) and baz = ?";
 		String sql = "select '0\\:0' as a, foo from bar where baz < DATE(:p1 23\\:59\\:59) and baz = :p2";
@@ -201,10 +202,7 @@ public class NamedParameterUtilsTests {
 		assertEquals(expectedSql, finalSql);
 	}
 
-	/*
-	 * SPR-7476
-	 */
-	@Test
+	@Test  // SPR-7476
 	public void parseSqlStatementWithBracketDelimitedParameterNames() throws Exception {
 		String expectedSql = "select foo from bar where baz = b??z";
 		String sql = "select foo from bar where baz = b:{p1}:{p2}z";
@@ -217,10 +215,7 @@ public class NamedParameterUtilsTests {
 		assertEquals(expectedSql, finalSql);
 	}
 
-	/*
-	 * SPR-7476
-	 */
-	@Test
+	@Test  // SPR-7476
 	public void parseSqlStatementWithEmptyBracketsOrBracketsInQuotes() throws Exception {
 		String expectedSql = "select foo from bar where baz = b:{}z";
 		String sql = "select foo from bar where baz = b:{}z";
@@ -238,40 +233,28 @@ public class NamedParameterUtilsTests {
 		assertEquals(expectedSql2, finalSql2);
 	}
 
-	/*
-	 * SPR-2544
-	 */
-	@Test
+	@Test  // SPR-2544
 	public void parseSqlStatementWithLogicalAnd() {
 		String expectedSql = "xxx & yyyy";
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(expectedSql);
 		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
 	}
 
-	/*
-	 * SPR-2544
-	 */
-	@Test
+	@Test  // SPR-2544
 	public void substituteNamedParametersWithLogicalAnd() throws Exception {
 		String expectedSql = "xxx & yyyy";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);
 	}
 
-	/*
-	 * SPR-3173
-	 */
-	@Test
+	@Test  // SPR-3173
 	public void variableAssignmentOperator() throws Exception {
 		String expectedSql = "x := 1";
 		String newSql = NamedParameterUtils.substituteNamedParameters(expectedSql, new MapSqlParameterSource());
 		assertEquals(expectedSql, newSql);
 	}
 
-	/*
-	 * SPR-8280
-	 */
-	@Test
+	@Test  // SPR-8280
 	public void parseSqlStatementWithQuotedSingleQuote() {
 		String sql = "SELECT ':foo'':doo', :xxx FROM DUAL";
 		ParsedSql psql = NamedParameterUtils.parseSqlStatement(sql);

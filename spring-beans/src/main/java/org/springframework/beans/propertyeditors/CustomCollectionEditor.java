@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Property editor for Collections, converting any source Collection
@@ -152,21 +154,21 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	protected Collection<Object> createCollection(Class<? extends Collection> collectionType, int initialCapacity) {
 		if (!collectionType.isInterface()) {
 			try {
-				return collectionType.newInstance();
+				return ReflectionUtils.accessibleConstructor(collectionType).newInstance();
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new IllegalArgumentException(
-						"Could not instantiate collection class [" + collectionType.getName() + "]: " + ex.getMessage());
+						"Could not instantiate collection class: " + collectionType.getName(), ex);
 			}
 		}
-		else if (List.class.equals(collectionType)) {
-			return new ArrayList<Object>(initialCapacity);
+		else if (List.class == collectionType) {
+			return new ArrayList<>(initialCapacity);
 		}
-		else if (SortedSet.class.equals(collectionType)) {
-			return new TreeSet<Object>();
+		else if (SortedSet.class == collectionType) {
+			return new TreeSet<>();
 		}
 		else {
-			return new LinkedHashSet<Object>(initialCapacity);
+			return new LinkedHashSet<>(initialCapacity);
 		}
 	}
 

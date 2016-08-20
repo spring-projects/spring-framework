@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class ExtendedBeanInfo implements BeanInfo {
 	private final BeanInfo delegate;
 
 	private final Set<PropertyDescriptor> propertyDescriptors =
-			new TreeSet<PropertyDescriptor>(new PropertyDescriptorComparator());
+			new TreeSet<>(new PropertyDescriptorComparator());
 
 
 	/**
@@ -128,7 +128,7 @@ class ExtendedBeanInfo implements BeanInfo {
 
 
 	private List<Method> findCandidateWriteMethods(MethodDescriptor[] methodDescriptors) {
-		List<Method> matches = new ArrayList<Method>();
+		List<Method> matches = new ArrayList<>();
 		for (MethodDescriptor methodDescriptor : methodDescriptors) {
 			Method method = methodDescriptor.getMethod();
 			if (isCandidateWriteMethod(method)) {
@@ -153,11 +153,11 @@ class ExtendedBeanInfo implements BeanInfo {
 		int nParams = parameterTypes.length;
 		return (methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
 				(!void.class.isAssignableFrom(method.getReturnType()) || Modifier.isStatic(method.getModifiers())) &&
-				(nParams == 1 || (nParams == 2 && parameterTypes[0].equals(int.class))));
+				(nParams == 1 || (nParams == 2 && int.class == parameterTypes[0])));
 	}
 
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {
-		int nParams = method.getParameterTypes().length;
+		int nParams = method.getParameterCount();
 		String propertyName = propertyNameFor(method);
 		Class<?> propertyType = method.getParameterTypes()[nParams - 1];
 		PropertyDescriptor existingPd = findExistingPropertyDescriptor(propertyName, propertyType);

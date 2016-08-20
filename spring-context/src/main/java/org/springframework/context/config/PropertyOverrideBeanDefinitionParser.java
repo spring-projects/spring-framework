@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ class PropertyOverrideBeanDefinitionParser extends AbstractPropertyLoadingBeanDe
 
 	@Override
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
-
 		super.doParse(element, builder);
+
 		builder.addPropertyValue("ignoreInvalidKeys",
 				Boolean.valueOf(element.getAttribute("ignore-unresolvable")));
 

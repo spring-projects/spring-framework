@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,25 @@
 
 package org.springframework.web.servlet.view.feed;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.rometools.rome.feed.atom.Content;
 import com.rometools.rome.feed.atom.Entry;
 import com.rometools.rome.feed.atom.Feed;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.xmlunit.matchers.CompareMatcher;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.custommonkey.xmlunit.XMLUnit.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Arjen Poutsma
@@ -47,7 +46,6 @@ public class AtomFeedViewTests {
 	@Before
 	public void createView() throws Exception {
 		view = new MyAtomFeedView();
-		setIgnoreWhitespace(true);
 	}
 
 	@Test
@@ -55,7 +53,7 @@ public class AtomFeedViewTests {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		Map<String, String> model = new LinkedHashMap<String, String>();
+		Map<String, String> model = new LinkedHashMap<>();
 		model.put("2", "This is entry 2");
 		model.put("1", "This is entry 1");
 
@@ -64,9 +62,13 @@ public class AtomFeedViewTests {
 		String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>Test Feed</title>" +
 				"<entry><title>2</title><summary>This is entry 2</summary></entry>" +
 				"<entry><title>1</title><summary>This is entry 1</summary></entry>" + "</feed>";
-		assertXMLEqual(expected, response.getContentAsString());
+		assertThat(response.getContentAsString(), isSimilarTo(expected));
 	}
 
+	private static CompareMatcher isSimilarTo(final String content) {
+		return CompareMatcher.isSimilarTo(content)
+				.ignoreWhitespace();
+	}
 
 	private static class MyAtomFeedView extends AbstractAtomFeedView {
 
@@ -78,7 +80,7 @@ public class AtomFeedViewTests {
 		@Override
 		protected List<Entry> buildFeedEntries(Map model, HttpServletRequest request, HttpServletResponse response)
 				throws Exception {
-			List<Entry> entries = new ArrayList<Entry>();
+			List<Entry> entries = new ArrayList<>();
 			for (Iterator iterator = model.keySet().iterator(); iterator.hasNext();) {
 				String name = (String) iterator.next();
 				Entry entry = new Entry();

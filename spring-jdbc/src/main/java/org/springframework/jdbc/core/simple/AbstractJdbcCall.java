@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,16 +58,16 @@ public abstract class AbstractJdbcCall {
 	private final CallMetaDataContext callMetaDataContext = new CallMetaDataContext();
 
 	/** List of SqlParameter objects */
-	private final List<SqlParameter> declaredParameters = new ArrayList<SqlParameter>();
+	private final List<SqlParameter> declaredParameters = new ArrayList<>();
 
 	/** List of RefCursor/ResultSet RowMapper objects */
-	private final Map<String, RowMapper<?>> declaredRowMappers = new LinkedHashMap<String, RowMapper<?>>();
+	private final Map<String, RowMapper<?>> declaredRowMappers = new LinkedHashMap<>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at least checking
 	 * that a DataSource or JdbcTemplate has been provided.
 	 */
-	private boolean compiled = false;
+	private volatile boolean compiled = false;
 
 	/** The generated string used for call statement */
 	private String callString;
@@ -188,6 +188,23 @@ public abstract class AbstractJdbcCall {
 	 */
 	public boolean isReturnValueRequired() {
 		return this.callMetaDataContext.isReturnValueRequired();
+	}
+
+	/**
+	 * Specify whether parameters should be bound by name.
+	 * The default is {@code false}.
+	 * @since 4.2
+	 */
+	public void setNamedBinding(boolean namedBinding) {
+		this.callMetaDataContext.setNamedBinding(namedBinding);
+	}
+
+	/**
+	 * Should parameters be bound by name?
+	 * @since 4.2
+	 */
+	public boolean isNamedBinding() {
+		return this.callMetaDataContext.isNamedBinding();
 	}
 
 	/**
@@ -314,7 +331,7 @@ public abstract class AbstractJdbcCall {
 
 	/**
 	 * Is this operation "compiled"?
-	 * @return whether this operation is compiled, and ready to use.
+	 * @return whether this operation is compiled and ready to use
 	 */
 	public boolean isCompiled() {
 		return this.compiled;

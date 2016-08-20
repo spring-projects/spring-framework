@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,23 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * A strategy for resolving the requested media types in a request.
+ * A strategy for resolving the requested media types for a request.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
+@FunctionalInterface
 public interface ContentNegotiationStrategy {
 
 	/**
 	 * Resolve the given request to a list of media types. The returned list is
 	 * ordered by specificity first and by quality parameter second.
-	 *
 	 * @param webRequest the current request
-	 * @return the requested media types or an empty list, never {@code null}
-	 *
-	 * @throws HttpMediaTypeNotAcceptableException if the requested media types cannot be parsed
+	 * @return the requested media types or an empty list (never {@code null})
+	 * @throws HttpMediaTypeNotAcceptableException if the requested media
+	 * types cannot be parsed
 	 */
-	List<MediaType> resolveMediaTypes(NativeWebRequest webRequest) throws HttpMediaTypeNotAcceptableException;
+	List<MediaType> resolveMediaTypes(NativeWebRequest webRequest)
+			throws HttpMediaTypeNotAcceptableException;
 
 }

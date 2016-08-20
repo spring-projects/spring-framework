@@ -2,7 +2,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:aop="http://www.springframework.org/schema/aop"
 		xmlns:lang="http://www.springframework.org/schema/lang"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
 				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd">
 
@@ -24,7 +24,7 @@
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
 
-	<lang:groovy id="calculator" depends-on="messenger" customizer-ref="customizer">
+	<lang:groovy id="calculator" depends-on="messenger" customizer-ref="groovyObjectCustomizer">
 		<lang:inline-script>
 			package org.springframework.scripting.groovy;
 import org.springframework.scripting.Calculator
@@ -33,28 +33,35 @@ class GroovyCalculator implements Calculator {
 	   return x + y;
 	}
 }
-		 </lang:inline-script>
+		</lang:inline-script>
 	</lang:groovy>
 
-	<lang:groovy id="customizer">
+	<lang:groovy id="groovyObjectCustomizer" customizer-ref="importCustomizer">
 		<lang:inline-script><![CDATA[
-import org.springframework.scripting.groovy.GroovyObjectCustomizer;
-
 public class TestCustomizer implements GroovyObjectCustomizer {
-	public void customize(GroovyObject o) {
-		println "customizing ${o}.."
+	public void customize(GroovyObject go) {
+		println "customizing ${go}..."
 	}
 }]]>
 		</lang:inline-script>
 	</lang:groovy>
+
+	<bean id="importCustomizer" class="org.springframework.scripting.groovy.MyImportCustomizer"/>
 
 	<lang:groovy id="refreshableMessenger" refresh-check-delay="5000"
 			script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
 		<lang:property name="message" value="Hello World!"/>
 	</lang:groovy>
 
-  <lang:groovy script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
-    <lang:property name="message" value="Hello World!"/>
-  </lang:groovy>
+	<lang:groovy script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy"
+			customizer-ref="compilerConfiguration">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:groovy>
+
+	<bean id="compilerConfiguration" class="org.codehaus.groovy.control.CompilerConfiguration">
+		<property name="bytecodePostprocessor" ref="bytecodeProcessor"/>
+	</bean>
+
+	<bean id="bytecodeProcessor" class="org.springframework.scripting.groovy.MyBytecodeProcessor"/>
 
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private final SpelParserConfiguration configuration;
 
 	// For rules that build nodes, they are stacked here for return
-	private final Stack<SpelNodeImpl> constructedNodes = new Stack<SpelNodeImpl>();
+	private final Stack<SpelNodeImpl> constructedNodes = new Stack<>();
 
 	// The expression being parsed
 	private String expressionString;
@@ -339,7 +339,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	// primaryExpression : startNode (node)? -> ^(EXPRESSION startNode (node)?);
 	private SpelNodeImpl eatPrimaryExpression() {
-		List<SpelNodeImpl> nodes = new ArrayList<SpelNodeImpl>();
+		List<SpelNodeImpl> nodes = new ArrayList<>();
 		SpelNodeImpl start = eatStartNode();  // always a start node
 		nodes.add(start);
 		while (maybeEatNode()) {
@@ -439,7 +439,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (!peekToken(TokenKind.LPAREN)) {
 			return null;
 		}
-		List<SpelNodeImpl> args = new ArrayList<SpelNodeImpl>();
+		List<SpelNodeImpl> args = new ArrayList<>();
 		consumeArguments(args);
 		eatToken(TokenKind.RPAREN);
 		return args.toArray(new SpelNodeImpl[args.size()]);
@@ -525,7 +525,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// parse: @beanname @'bean.name'
 	// quoted if dotted
 	private boolean maybeEatBeanReference() {
-		if (peekToken(TokenKind.BEAN_REF)) {
+		if (peekToken(TokenKind.BEAN_REF) || peekToken(TokenKind.FACTORY_BEAN_REF)) {
 			Token beanRefToken = nextToken();
 			Token beanNameToken = null;
 			String beanName = null;
@@ -543,7 +543,14 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 						SpelMessage.INVALID_BEAN_REFERENCE);
 			}
 
-			BeanReference beanReference = new BeanReference(toPos(beanNameToken) ,beanName);
+			BeanReference beanReference = null;
+			if (beanRefToken.getKind() == TokenKind.FACTORY_BEAN_REF) {
+				String beanNameString = new StringBuilder().append(TokenKind.FACTORY_BEAN_REF.tokenChars).append(beanName).toString();
+				beanReference = new BeanReference(toPos(beanRefToken.startPos,beanNameToken.endPos),beanNameString);
+			}
+			else {
+				beanReference = new BeanReference(toPos(beanNameToken) ,beanName);
+			}
 			this.constructedNodes.push(beanReference);
 			return true;
 		}
@@ -628,15 +635,15 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			// '}' - end of list
 			// ',' - more expressions in this list
 			// ':' - this is a map!
-	
+
 			if (peekToken(TokenKind.RCURLY)) { // list with one item in it
-				List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
+				List<SpelNodeImpl> listElements = new ArrayList<>();
 				listElements.add(firstExpression);
 				closingCurly = eatToken(TokenKind.RCURLY);
 				expr = new InlineList(toPos(t.startPos,closingCurly.endPos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
 			}
 			else if (peekToken(TokenKind.COMMA, true)) { // multi item list
-				List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
+				List<SpelNodeImpl> listElements = new ArrayList<>();
 				listElements.add(firstExpression);
 				do {
 					listElements.add(eatExpression());
@@ -644,10 +651,10 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				while (peekToken(TokenKind.COMMA,true));
 				closingCurly = eatToken(TokenKind.RCURLY);
 				expr = new InlineList(toPos(t.startPos,closingCurly.endPos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
-		
+
 			}
 			else if (peekToken(TokenKind.COLON, true)) {  // map!
-				List<SpelNodeImpl> mapElements = new ArrayList<SpelNodeImpl>();
+				List<SpelNodeImpl> mapElements = new ArrayList<>();
 				mapElements.add(firstExpression);
 				mapElements.add(eatExpression());
 				while (peekToken(TokenKind.COMMA,true)) {
@@ -705,7 +712,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	 * TODO AndyC Could create complete identifiers (a.b.c) here rather than a sequence of them? (a, b, c)
 	 */
 	private SpelNodeImpl eatPossiblyQualifiedId() {
-		LinkedList<SpelNodeImpl> qualifiedIdPieces = new LinkedList<SpelNodeImpl>();
+		LinkedList<SpelNodeImpl> qualifiedIdPieces = new LinkedList<>();
 		Token node = peekToken();
 		while (isValidQualifiedId(node)) {
 			nextToken();
@@ -767,11 +774,11 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				return true;
 			}
 			SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId();
-			List<SpelNodeImpl> nodes = new ArrayList<SpelNodeImpl>();
+			List<SpelNodeImpl> nodes = new ArrayList<>();
 			nodes.add(possiblyQualifiedConstructorName);
 			if (peekToken(TokenKind.LSQUARE)) {
 				// array initializer
-				List<SpelNodeImpl> dimensions = new ArrayList<SpelNodeImpl>();
+				List<SpelNodeImpl> dimensions = new ArrayList<>();
 				while (peekToken(TokenKind.LSQUARE,true)) {
 					if (!peekToken(TokenKind.RSQUARE)) {
 						dimensions.add(eatExpression());

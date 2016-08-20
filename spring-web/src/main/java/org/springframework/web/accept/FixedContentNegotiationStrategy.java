@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * A ContentNegotiationStrategy that returns a fixed content type.
+ * A {@code ContentNegotiationStrategy} that returns a fixed content type.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -35,21 +35,23 @@ public class FixedContentNegotiationStrategy implements ContentNegotiationStrate
 
 	private static final Log logger = LogFactory.getLog(FixedContentNegotiationStrategy.class);
 
-	private final MediaType defaultContentType;
+	private final List<MediaType> contentType;
+
 
 	/**
-	 * Create an instance that always returns the given content type.
+	 * Create an instance with the given content type.
 	 */
-	public FixedContentNegotiationStrategy(MediaType defaultContentType) {
-		this.defaultContentType = defaultContentType;
+	public FixedContentNegotiationStrategy(MediaType contentType) {
+		this.contentType = Collections.singletonList(contentType);
 	}
 
+
 	@Override
-	public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest) {
+	public List<MediaType> resolveMediaTypes(NativeWebRequest request) {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Requested media types is " + this.defaultContentType + " (based on default MediaType)");
+			logger.debug("Requested media types: " + this.contentType);
 		}
-		return Collections.singletonList(this.defaultContentType);
+		return this.contentType;
 	}
 
 }

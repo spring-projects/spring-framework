@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,17 +47,17 @@ import org.springframework.web.context.WebApplicationContext;
 public abstract class AbstractMockMvcBuilder<B extends AbstractMockMvcBuilder<B>>
 		extends MockMvcBuilderSupport implements ConfigurableMockMvcBuilder<B> {
 
-	private List<Filter> filters = new ArrayList<Filter>();
+	private List<Filter> filters = new ArrayList<>();
 
 	private RequestBuilder defaultRequestBuilder;
 
-	private final List<ResultMatcher> globalResultMatchers = new ArrayList<ResultMatcher>();
+	private final List<ResultMatcher> globalResultMatchers = new ArrayList<>();
 
-	private final List<ResultHandler> globalResultHandlers = new ArrayList<ResultHandler>();
+	private final List<ResultHandler> globalResultHandlers = new ArrayList<>();
 
-	private Boolean dispatchOptions = Boolean.FALSE;
+	private Boolean dispatchOptions = Boolean.TRUE;
 
-	private final List<MockMvcConfigurer> configurers = new ArrayList<MockMvcConfigurer>(4);
+	private final List<MockMvcConfigurer> configurers = new ArrayList<>(4);
 
 
 	@SuppressWarnings("unchecked")

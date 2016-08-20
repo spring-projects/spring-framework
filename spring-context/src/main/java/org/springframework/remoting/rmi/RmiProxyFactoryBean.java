@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ import org.springframework.beans.factory.FactoryBean;
  * RemoteExceptions thrown by the RMI stub will automatically get converted to
  * Spring's unchecked RemoteAccessException.
  *
- * <p>The major advantage of RMI, compared to Hessian and Burlap, is serialization.
+ * <p>The major advantage of RMI, compared to Hessian, is serialization.
  * Effectively, any serializable Java object can be transported without hassle.
- * Hessian and Burlap have their own (de-)serialization mechanisms, but are
- * HTTP-based and thus much easier to setup than RMI. Alternatively, consider
- * Spring's HTTP invoker to combine Java serialization with HTTP-based transport.
+ * Hessian has its own (de-)serialization mechanisms, but is HTTP-based and thus
+ * much easier to setup than RMI. Alternatively, consider Spring's HTTP invoker
+ * to combine Java serialization with HTTP-based transport.
  *
  * @author Juergen Hoeller
  * @since 13.05.2003
@@ -55,7 +55,6 @@ import org.springframework.beans.factory.FactoryBean;
  * @see java.rmi.RemoteException
  * @see org.springframework.remoting.RemoteAccessException
  * @see org.springframework.remoting.caucho.HessianProxyFactoryBean
- * @see org.springframework.remoting.caucho.BurlapProxyFactoryBean
  * @see org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean
  */
 public class RmiProxyFactoryBean extends RmiClientInterceptor implements FactoryBean<Object>, BeanClassLoaderAware {

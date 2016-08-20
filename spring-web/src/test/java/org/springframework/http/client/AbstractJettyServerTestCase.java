@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Map;
+
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -28,31 +29,34 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
 import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 
-import org.springframework.util.SocketUtils;
 import org.springframework.util.StreamUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
 public abstract class AbstractJettyServerTestCase {
 
-	protected static String baseUrl;
-
 	private static Server jettyServer;
 
+	protected static String baseUrl;
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-		int port = SocketUtils.findAvailableTcpPort();
-		jettyServer = new Server(port);
-		baseUrl = "http://localhost:" + port;
+
+		// Let server pick its own random, available port.
+		jettyServer = new Server(0);
 
 		ServletContextHandler handler = new ServletContextHandler();
 		handler.setContextPath("/");
@@ -71,6 +75,10 @@ public abstract class AbstractJettyServerTestCase {
 
 		jettyServer.setHandler(handler);
 		jettyServer.start();
+
+		Connector[] connectors = jettyServer.getConnectors();
+		NetworkConnector connector = (NetworkConnector) connectors[0];
+		baseUrl = "http://localhost:" + connector.getLocalPort();
 	}
 
 	@AfterClass

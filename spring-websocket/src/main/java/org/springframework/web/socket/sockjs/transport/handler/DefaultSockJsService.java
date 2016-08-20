@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,13 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
@@ -37,7 +40,7 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
  * @author Juergen Hoeller
  * @since 4.0
  */
-public class DefaultSockJsService extends TransportHandlingSockJsService {
+public class DefaultSockJsService extends TransportHandlingSockJsService implements ServletContextAware {
 
 	/**
 	 * Create a DefaultSockJsService with default {@link TransportHandler handler} types.
@@ -76,7 +79,7 @@ public class DefaultSockJsService extends TransportHandlingSockJsService {
 
 
 	private static Set<TransportHandler> getDefaultTransportHandlers(Collection<TransportHandler> overrides) {
-		Set<TransportHandler> result = new LinkedHashSet<TransportHandler>(8);
+		Set<TransportHandler> result = new LinkedHashSet<>(8);
 		result.add(new XhrPollingTransportHandler());
 		result.add(new XhrReceivingTransportHandler());
 		result.add(new XhrStreamingTransportHandler());
@@ -99,4 +102,12 @@ public class DefaultSockJsService extends TransportHandlingSockJsService {
 		return result;
 	}
 
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		for (TransportHandler handler : getTransportHandlers().values()) {
+			if (handler instanceof ServletContextAware) {
+				((ServletContextAware) handler).setServletContext(servletContext);
+			}
+		}
+	}
 }

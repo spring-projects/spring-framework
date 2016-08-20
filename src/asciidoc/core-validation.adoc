@@ -25,7 +25,7 @@ There are pros and cons for considering validation as business logic, and Spring
 a design for validation (and data binding) that does not exclude either one of them.
 Specifically validation should not be tied to the web tier, should be easy to localize
 and it should be possible to plug in any validator available. Considering the above,
-Spring has come up with a `Validator` interface that is both basic ands eminently usable
+Spring has come up with a `Validator` interface that is both basic and eminently usable
 in every layer of an application.
 
 Data binding is useful for allowing user input to be dynamically bound to the domain
@@ -191,9 +191,9 @@ convenience to aid developers in targeting error messages and suchlike.
 
 More information on the `MessageCodesResolver` and the default strategy can be found
 online in the javadocs of
-{javadoc-baseurl}/org/springframework/validation/MessageCodesResolver.html[`MessageCodesResolver`]
+{api-spring-framework}/validation/MessageCodesResolver.html[`MessageCodesResolver`]
 and
-{javadoc-baseurl}/org/springframework/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
+{api-spring-framework}/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
 respectively.
 
 
@@ -325,7 +325,7 @@ the properties of instantiated `Companies` and `Employees`:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	BeanWrapper company = BeanWrapperImpl(new Company());
+	BeanWrapper company = new BeanWrapperImpl(new Company());
 	// setting the company name..
 	company.setPropertyValue("name", "Some Company Inc.");
 	// ... can also be done like this:
@@ -333,7 +333,7 @@ the properties of instantiated `Companies` and `Employees`:
 	company.setPropertyValue(value);
 
 	// ok, let's create the director and tie it to the company:
-	BeanWrapper jim = BeanWrapperImpl(new Employee());
+	BeanWrapper jim = new BeanWrapperImpl(new Employee());
 	jim.setPropertyValue("name", "Jim Stravinsky");
 	company.setPropertyValue("managingDirector", jim.getWrappedInstance());
 
@@ -349,7 +349,7 @@ the properties of instantiated `Companies` and `Employees`:
 Spring uses the concept of `PropertyEditors` to effect the conversion between an
 `Object` and a `String`. If you think about it, it sometimes might be handy to be able
 to represent properties in a different way than the object itself. For example, a `Date`
-can be represented in a human readable way (as the `String` ' `2007-14-09`'), while
+can be represented in a human readable way (as the `String` `'2007-14-09'`), while
 we're still able to convert the human readable form back to the original date (or even
 better: convert any date entered in a human readable form, back to `Date` objects). This
 behavior can be achieved by __registering custom editors__, of type
@@ -853,28 +853,29 @@ Favor Converter or ConverterFactory for basic type conversion needs.
 
 [[core-convert-ConditionalGenericConverter-SPI]]
 ==== ConditionalGenericConverter
-Sometimes you only want a Converter to execute if a specific condition holds true. For
-example, you might only want to execute a Converter if a specific annotation is present
-on the target field. Or you might only want to execute a Converter if a specific method,
-such as static valueOf method, is defined on the target class.
-ConditionalGenericConverter is an subinterface of GenericConverter that allows you to
-define such custom matching criteria:
+Sometimes you only want a `Converter` to execute if a specific condition holds true. For
+example, you might only want to execute a `Converter` if a specific annotation is present
+on the target field. Or you might only want to execute a `Converter` if a specific method,
+such as a `static valueOf` method, is defined on the target class.
+`ConditionalGenericConverter` is the union of the `GenericConverter` and
+`ConditionalConverter` interfaces that allows you to define such custom matching criteria:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public interface ConditionalGenericConverter extends GenericConverter {
+	public interface ConditionalGenericConverter
+	        extends GenericConverter, ConditionalConverter {
 
 		boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	}
 ----
 
-A good example of a ConditionalGenericConverter is an EntityConverter that converts
+A good example of a `ConditionalGenericConverter` is an EntityConverter that converts
 between an persistent entity identifier and an entity reference. Such a EntityConverter
 might only match if the target entity type declares a static finder method e.g.
-findAccount(Long). You would perform such a finder method check in the implementation of
-matches(TypeDescriptor, TypeDescriptor).
+`findAccount(Long)`. You would perform such a finder method check in the implementation of
+`matches(TypeDescriptor, TypeDescriptor)`.
 
 
 
@@ -956,7 +957,7 @@ either of the Converter, ConverterFactory, or GenericConverter interfaces.
 ----
 
 It is also common to use a ConversionService within a Spring MVC application. See
-<<format-configuring-formatting-mvc>> for details on use with `<mvc:annotation-driven/>`.
+<<mvc-config-conversion>> in the Spring MVC chapter.
 
 In certain situations you may wish to apply formatting during conversion. See
 <<format-FormatterRegistry-SPI>> for details on using
@@ -1307,85 +1308,8 @@ converter and formatter registration.
 
 [[format-configuring-formatting-mvc]]
 === Configuring Formatting in Spring MVC
-In a Spring MVC application, you may configure a custom ConversionService instance
-explicitly as an attribute of the `annotation-driven` element of the MVC namespace. This
-ConversionService will then be used anytime a type conversion is required during
-Controller model binding. If not configured explicitly, Spring MVC will automatically
-register default formatters and converters for common types such as numbers and dates.
 
-To rely on default formatting rules, no custom configuration is required in your Spring
-MVC config XML:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:mvc="http://www.springframework.org/schema/mvc"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
-
-		<mvc:annotation-driven/>
-
-	</beans>
-----
-
-With this one-line of configuration, default formatters for Numbers and Date types will
-be installed, including support for the @NumberFormat and @DateTimeFormat annotations.
-Full support for the Joda Time formatting library is also installed if Joda Time is
-present on the classpath.
-
-To inject a ConversionService instance with custom formatters and converters registered,
-set the conversion-service attribute and then specify custom converters, formatters, or
-FormatterRegistrars as properties of the FormattingConversionServiceFactoryBean:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:mvc="http://www.springframework.org/schema/mvc"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
-
-		<mvc:annotation-driven conversion-service="conversionService"/>
-
-		<bean id="conversionService"
-				class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
-			<property name="converters">
-				<set>
-					<bean class="org.example.MyConverter"/>
-				</set>
-			</property>
-			<property name="formatters">
-				<set>
-					<bean class="org.example.MyFormatter"/>
-					<bean class="org.example.MyAnnotationFormatterFactory"/>
-				</set>
-			</property>
-			<property name="formatterRegistrars">
-				<set>
-					<bean class="org.example.MyFormatterRegistrar"/>
-				</set>
-			</property>
-		</bean>
-
-	</beans>
-----
-
-[NOTE]
-====
-See <<format-FormatterRegistrar-SPI>> and the `FormattingConversionServiceFactoryBean`
-for more information on when to use FormatterRegistrars.
-====
+See <<mvc-config-conversion>> in the Spring MVC chapter.
 
 
 
@@ -1393,7 +1317,7 @@ for more information on when to use FormatterRegistrars.
 [[format-configuring-formatting-globaldatetimeformat]]
 == Configuring a global date & time format
 By default, date and time fields that are not annotated with `@DateTimeFormat` are
-converted from strings using the the `DateFormat.SHORT` style. If you prefer, you can
+converted from strings using the `DateFormat.SHORT` style. If you prefer, you can
 change this by defining your own global format.
 
 You will need to ensure that Spring does not register default formatters, and instead
@@ -1478,7 +1402,7 @@ If you are using Spring MVC remember to explicitly configure the conversion serv
 is used. For Java based `@Configuration` this means extending the
 `WebMvcConfigurationSupport` class and overriding the `mvcConversionService()` method.
 For XML you should use the `'conversion-service'` attribute of the
-`mvc:annotation-driven` element. See <<format-configuring-formatting-mvc>> for details.
+`mvc:annotation-driven` element. See <<mvc-config-conversion>> for details.
 
 
 
@@ -1706,131 +1630,6 @@ locally on a DataBinder instance. See <<validation-mvc-configuring>>.
 
 [[validation-mvc]]
 === Spring MVC 3 Validation
-Beginning with Spring 3, Spring MVC has the ability to automatically validate
-`@Controller` inputs. In previous versions it was up to the developer to manually invoke
-validation logic.
 
-
-[[validation-mvc-triggering]]
-==== Triggering @Controller Input Validation
-To trigger validation of a `@Controller` input, simply annotate the input argument as
-++@Valid++:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Controller
-	public class MyController {
-
-		@RequestMapping("/foo", method=RequestMethod.POST)
-		public void processFoo(**@Valid** Foo foo) { /* ... */ }
-----
-
-Spring MVC will validate a @Valid object after binding so-long as an appropriate
-Validator has been configured.
-
-[NOTE]
-====
-The @Valid annotation is part of the standard JSR-303 Bean Validation API, and is not a
-Spring-specific construct.
-====
-
-
-[[validation-mvc-configuring]]
-==== Configuring a Validator for use by Spring MVC
-The `Validator` instance invoked when a `@Valid` method argument is encountered may be
-configured in two ways. First, you may call `binder.setValidator(Validator)` within a
-++@Controller++'s `@InitBinder` callback. This allows you to configure a `Validator`
-instance per `@Controller` class:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Controller
-	public class MyController {
-
-		@InitBinder
-		protected void initBinder(WebDataBinder binder) {
-			binder.setValidator(new FooValidator());
-		}
-
-		@RequestMapping("/foo", method=RequestMethod.POST)
-		public void processFoo(@Valid Foo foo) { ... }
-
-	}
-----
-
-Second, you may call `setValidator(Validator)` on the global `WebBindingInitializer`. This
-allows you to configure a `Validator` instance across all `@Controller` classes. This can be
-achieved easily by using the Spring MVC namespace:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:mvc="http://www.springframework.org/schema/mvc"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
-
-		<mvc:annotation-driven validator="globalValidator"/>
-
-	</beans>
-----
-
-To combine a global and a local validator, configure the global validator as shown above
-and then add a local validator:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@Controller
-	public class MyController {
-
-		@InitBinder
-		protected void initBinder(WebDataBinder binder) {
-			binder.addValidators(new FooValidator());
-		}
-
-	}
-----
-
-
-[[validation-mvc-jsr303]]
-==== Configuring a JSR-303/JSR-349 Validator for use by Spring MVC
-With Bean Validation, a single `javax.validation.Validator` instance typically validates
-__all__ model objects that declare validation constraints. To configure such a JSR-303
-backed Validator with Spring MVC, simply add a Bean Validation provider, such as
-Hibernate Validator, to your classpath. Spring MVC will detect it and automatically
-enable Bean Validation support across all Controllers.
-
-The Spring MVC configuration required to enable Bean Validation support is shown below:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<?xml version="1.0" encoding="UTF-8"?>
-	<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:mvc="http://www.springframework.org/schema/mvc"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd
-			http://www.springframework.org/schema/mvc
-			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
-
-		<!-- JSR-303/JSR-349 support will be detected on classpath and enabled automatically -->
-		<mvc:annotation-driven/>
-
-	</beans>
-----
-
-With this minimal configuration, anytime a `@Valid` `@Controller` input is encountered, it
-will be validated by the Bean Validation provider. That provider, in turn, will enforce
-any constraints declared against the input. Any ++ConstraintViolation++s will automatically
-be exposed as errors in the `BindingResult` renderable by standard Spring MVC form tags.
+See <<mvc-config-validation>> in the Spring MVC chapter.
 

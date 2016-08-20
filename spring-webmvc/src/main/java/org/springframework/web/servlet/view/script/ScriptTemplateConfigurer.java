@@ -16,28 +16,8 @@
 
 package org.springframework.web.servlet.view.script;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * An implementation of Spring MVC's {@link ScriptTemplateConfig} for creating
@@ -46,10 +26,8 @@ import org.springframework.util.StringUtils;
  * <pre class="code">
  *
  * // Add the following to an &#64;Configuration class
- *
  * &#64;Bean
  * public ScriptTemplateConfigurer mustacheConfigurer() {
- *
  *    ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
  *    configurer.setEngineName("nashorn");
  *    configurer.setScripts("mustache.js");
@@ -59,17 +37,21 @@ import org.springframework.util.StringUtils;
  * }
  * </pre>
  *
+ * <p><b>NOTE:</b> It is possible to use non thread-safe script engines with
+ * templating libraries not designed for concurrency, like Handlebars or React running on
+ * Nashorn, by setting the {@link #setSharedEngine sharedEngine} property to {@code false}.
+ *
  * @author Sebastien Deleuze
  * @since 4.2
  * @see ScriptTemplateView
  */
-public class ScriptTemplateConfigurer implements ScriptTemplateConfig, ApplicationContextAware, InitializingBean {
+public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 
 	private ScriptEngine engine;
 
 	private String engineName;
 
-	private ApplicationContext applicationContext;
+	private Boolean sharedEngine;
 
 	private String[] scripts;
 
@@ -77,19 +59,23 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 
 	private String renderFunction;
 
-	private Charset charset = Charset.forName("UTF-8");
+	private String contentType;
 
-	private ResourceLoader resourceLoader;
+	private Charset charset;
 
-	private String resourceLoaderPath = "classpath:";
+	private String resourceLoaderPath;
+
 
 	/**
 	 * Set the {@link ScriptEngine} to use by the view.
 	 * The script engine must implement {@code Invocable}.
 	 * You must define {@code engine} or {@code engineName}, not both.
+	 * <p>When the {@code sharedEngine} flag is set to {@code false}, you should not specify
+	 * the script engine with this setter, but with the {@link #setEngineName(String)}
+	 * one (since it implies multiple lazy instantiations of the script engine).
+	 * @see #setEngineName(String)
 	 */
 	public void setEngine(ScriptEngine engine) {
-		Assert.isInstanceOf(Invocable.class, engine);
 		this.engine = engine;
 	}
 
@@ -102,31 +88,48 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 	 * Set the engine name that will be used to instantiate the {@link ScriptEngine}.
 	 * The script engine must implement {@code Invocable}.
 	 * You must define {@code engine} or {@code engineName}, not both.
+	 * @see #setEngine(ScriptEngine)
 	 */
 	public void setEngineName(String engineName) {
 		this.engineName = engineName;
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
+	public String getEngineName() {
+		return this.engineName;
 	}
 
-	protected ApplicationContext getApplicationContext() {
-		return this.applicationContext;
+	/**
+	 * When set to {@code false}, use thread-local {@link ScriptEngine} instances instead
+	 * of one single shared instance. This flag should be set to {@code false} for those
+	 * using non thread-safe script engines with templating libraries not designed for
+	 * concurrency, like Handlebars or React running on Nashorn for example.
+	 * In this case, Java 8u60 or greater is required due to
+	 * <a href="https://bugs.openjdk.java.net/browse/JDK-8076099">this bug</a>.
+	 * <p>When this flag is set to {@code false}, the script engine must be specified using
+	 * {@link #setEngineName(String)}. Using {@link #setEngine(ScriptEngine)} is not
+	 * possible because multiple instances of the script engine need to be created lazily
+	 * (one per thread).
+	 * @see <a href="http://docs.oracle.com/javase/8/docs/api/javax/script/ScriptEngineFactory.html#getParameter-java.lang.String-">THREADING ScriptEngine parameter<a/>
+	 */
+	public void setSharedEngine(Boolean sharedEngine) {
+		this.sharedEngine = sharedEngine;
+	}
+
+	@Override
+	public Boolean isSharedEngine() {
+		return this.sharedEngine;
 	}
 
 	/**
 	 * Set the scripts to be loaded by the script engine (library or user provided).
 	 * Since {@code resourceLoaderPath} default value is "classpath:", you can load easily
 	 * any script available on the classpath.
-	 *
-	 * For example, in order to use a Javascript library available as a WebJars dependency
+	 * <p>For example, in order to use a JavaScript library available as a WebJars dependency
 	 * and a custom "render.js" file, you should call
 	 * {@code configurer.setScripts("/META-INF/resources/webjars/library/version/library.js",
 	 * "com/myproject/script/render.js");}.
-	 *
-	 * @see #setResourceLoaderPath(String)
+	 * @see #setResourceLoaderPath
 	 * @see <a href="http://www.webjars.org">WebJars</a>
 	 */
 	public void setScripts(String... scriptNames) {
@@ -134,12 +137,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 	}
 
 	@Override
-	public String getRenderObject() {
-		return renderObject;
+	public String[] getScripts() {
+		return this.scripts;
 	}
 
 	/**
-	 * Set the object where belongs the render function (optional).
+	 * Set the object where the render function belongs (optional).
 	 * For example, in order to call {@code Mustache.render()}, {@code renderObject}
 	 * should be set to {@code "Mustache"} and {@code renderFunction} to {@code "render"}.
 	 */
@@ -148,20 +151,45 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 	}
 
 	@Override
-	public String getRenderFunction() {
-		return renderFunction;
+	public String getRenderObject() {
+		return this.renderObject;
 	}
 
 	/**
-	 * Set the render function name (mandatory). This function will be called with the
-	 * following parameters:
+	 * Set the render function name (mandatory).
+	 *
+	 * <p>This function will be called with the following parameters:
 	 * <ol>
-	 *     <li>{@code template}: the view template content (String)</li>
-	 *     <li>{@code model}: the view model (Map)</li>
+	 * <li>{@code String template}: the template content</li>
+	 * <li>{@code Map model}: the view model</li>
+	 * <li>{@code String url}: the template url (since 4.2.2)</li>
 	 * </ol>
 	 */
 	public void setRenderFunction(String renderFunction) {
 		this.renderFunction = renderFunction;
+	}
+
+	@Override
+	public String getRenderFunction() {
+		return this.renderFunction;
+	}
+
+	/**
+	 * Set the content type to use for the response.
+	 * ({@code text/html} by default).
+	 * @since 4.2.1
+	 */
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	/**
+	 * Return the content type to use for the response.
+	 * @since 4.2.1
+	 */
+	@Override
+	public String getContentType() {
+		return this.contentType;
 	}
 
 	/**
@@ -183,75 +211,15 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 	 * Standard URLs like "file:" and "classpath:" and pseudo URLs are supported
 	 * as understood by Spring's {@link org.springframework.core.io.ResourceLoader}.
 	 * Relative paths are allowed when running in an ApplicationContext.
-	 * Default is "classpath:".
+	 * <p>Default is "classpath:".
 	 */
 	public void setResourceLoaderPath(String resourceLoaderPath) {
 		this.resourceLoaderPath = resourceLoaderPath;
 	}
 
+	@Override
 	public String getResourceLoaderPath() {
-		return resourceLoaderPath;
-	}
-
-	@Override
-	public ResourceLoader getResourceLoader() {
-		return resourceLoader;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.engine == null) {
-			this.engine = createScriptEngine();
-		}
-		Assert.state(this.renderFunction != null, "renderFunction property must be defined.");
-		this.resourceLoader  = new DefaultResourceLoader(createClassLoader());
-		if (this.scripts != null) {
-			try {
-				for (String script : this.scripts) {
-					this.engine.eval(read(script));
-				}
-			}
-			catch (ScriptException e) {
-				throw new IllegalStateException("could not load script", e);
-			}
-		}
-	}
-
-	protected ClassLoader createClassLoader() throws IOException {
-		String[] paths = StringUtils.commaDelimitedListToStringArray(this.resourceLoaderPath);
-		List<URL> urls = new ArrayList<URL>();
-		for (String path : paths) {
-			Resource[] resources = getApplicationContext().getResources(path);
-			if (resources.length > 0) {
-				for (Resource resource : resources) {
-					if (resource.exists()) {
-						urls.add(resource.getURL());
-					}
-				}
-			}
-		}
-		ClassLoader classLoader = getApplicationContext().getClassLoader();
-		return (urls.size() > 0 ? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader) : classLoader);
-	}
-
-	private Reader read(String path) throws IOException {
-		Resource resource = this.resourceLoader.getResource(path);
-		Assert.state(resource.exists(), "Resource " + path + " not found.");
-		return new InputStreamReader(resource.getInputStream());
-	}
-
-	protected ScriptEngine createScriptEngine() throws IOException {
-		if (this.engine != null && this.engineName != null) {
-			throw new IllegalStateException("You should define engine or engineName properties, not both.");
-		}
-		if (this.engineName != null) {
-			ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(this.engineName);
-			Assert.state(scriptEngine != null, "No engine \"" + this.engineName + "\" found.");
-			Assert.state(scriptEngine instanceof Invocable, "Script engine should be instance of Invocable");
-			this.engine = scriptEngine;
-		}
-		Assert.state(this.engine != null, "No script engine found, please specify valid engine or engineName properties.");
-		return this.engine;
+		return this.resourceLoaderPath;
 	}
 
 }

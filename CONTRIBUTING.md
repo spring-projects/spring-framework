@@ -6,6 +6,10 @@ to expect from the Spring team when evaluating your submission._
 _Please refer back to this document as a checklist before issuing any pull
 request; this will save time for everyone!_
 
+## Code of Conduct
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).
+By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
 ## Take Your First Steps
 
 ### Understand the basics
@@ -13,8 +17,15 @@ request; this will save time for everyone!_
 Not sure what a pull request is, or how to submit one? Take a look at GitHub's
 excellent [help documentation][] first.
 
+### Search Stack Overflow first; discuss if necessary
 
-### Search JIRA first; create an issue if necessary
+If you're unsure why something isn't working or wondering if there is a better
+way of doing it please check on Stack Overflow first and if necessary start
+a discussion. This is the official list of
+[Spring project tags](https://spring.io/questions). In short the issue tracker
+should be used to report issues and make feature requests.
+
+### Search JIRA; create an issue if necessary
 
 Is there already an issue that addresses your concern? Do a bit of searching
 in our [JIRA issue tracker][] to see if you can find something similar. If you
@@ -22,40 +33,18 @@ do not find something similar, please create a new JIRA issue before submitting
 a pull request unless the change is truly trivial -- for example: typo fixes,
 removing compiler warnings, etc.
 
-### Discuss non-trivial contribution ideas with committers
+### Sign the Contributor License Agreement (CLA)
 
-If you're considering anything more than correcting a typo or fixing a minor
-bug, please discuss it on the [spring-framework-contrib][] mailing list before
-submitting a pull request. We're happy to provide guidance, but please spend an
-hour or two researching the subject on your own, including searching the mailing
-list for prior discussions.
-
-### Sign the Contributor License Agreement
-
-If you have not previously done so, please fill out and submit the
-[SpringSource CLA form][]. You'll receive a token when this process is complete.
-Keep track of this; you may be asked for it later!
-
-Note that emailing/postal mailing a signed copy is _not_ necessary. Submission
-of the web form is all that is required.
-
-Once you've completed the web form, simply add the following in a comment on
-your pull request:
-
-    I have signed and agree to the terms of the SpringSource Individual
-    Contributor License Agreement.
-
-You do not need to include your token/id. Please add the above statement to all
-future pull requests as well, simply so that the Spring Framework team knows
-immediately that this process is complete.
+If you have not previously done so, please sign the [Contributor License Agreement][].
+If you forget to do so, you'll be reminded when you submit a pull request.
 
 ## Create a Branch
 
 ### Branch from `master`
 
-Master currently represents work toward Spring Framework 4.0. Please submit
+Master currently represents work toward Spring Framework 5.0. Please submit
 all pull requests there, even bug fixes and minor improvements. Backports to
-`3.2.x` will be considered on a case-by-case basis.
+`4.3.x` will be considered on a case-by-case basis.
 
 
 ### Use short branch names
@@ -93,7 +82,7 @@ present in the framework.
 
 ```java
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,16 +103,18 @@ package ...;
 ### Update Apache license header in modified files as necessary
 
 Always check the date range in the license header. For example, if you've
-modified a file in 2014 whose header still reads:
+modified a file in 2015 whose header still reads:
 
 ```java
+/*
  * Copyright 2002-2011 the original author or authors.
 ```
 
-Then be sure to update it to 2014 accordingly:
+Then be sure to update it to 2015 accordingly:
 
 ```java
- * Copyright 2002-2014 the original author or authors.
+/*
+ * Copyright 2002-2015 the original author or authors.
 ```
 
 ### Use @since tags for newly-added public API types and methods
@@ -135,7 +126,7 @@ For example:
  * ...
  *
  * @author First Last
- * @since 4.0
+ * @since 4.2.3
  * @see ...
  */
 ```
@@ -187,11 +178,11 @@ intend to submit as pull requests. For example, this is not acceptable:
     Author: Nickname <user@mail.com>
 
 Rather, please include your first and last name, properly capitalized, as
-submitted against the SpringSource contributor license agreement:
+submitted against the Spring Individual Contributor License Agreement (ICLA):
 
     Author: First Last <user@mail.com>
 
-This helps ensure traceability against the CLA and also goes a long way to
+This helps ensure traceability against the ICLA and also goes a long way to
 ensuring useful output from tools like `git shortlog` and others.
 
 You can configure this via the account admin area in GitHub (useful for
@@ -234,16 +225,16 @@ Most importantly, please format your commit messages in the following way
     Issue: SPR-1234, SPR-1235
 
 
-1. Use imperative statements in the subject line, e.g. "Fix broken Javadoc link"
+1. Use imperative statements in the subject line, e.g. "Fix broken Javadoc link".
 1. Begin the subject line with a capitalized verb, e.g. "Add, Prune, Fix,
     Introduce, Avoid, etc."
-1. Do not end the subject line with a period
-1. Restrict the subject line to 50 characters or less if possible
-1. Wrap lines in the body at 72 characters or less
+1. Do not end the subject line with a period.
+1. Restrict the subject line to 50 characters or less if possible.
+1. Wrap lines in the body at 72 characters or less.
 1. Mention associated JIRA issue(s) at the end of the commit comment, prefixed
-    with "Issue: " as above
+    with "Issue: " as above.
 1. In the body of the commit message, explain how things worked before this
-    commit, what has changed, and how things work now
+    commit, what has changed, and how things work now.
 
 For examples of this style, issue a `git log --author=cbeams` in the
 `spring-framework` git repository. For convenience, here are several such commits:
@@ -274,9 +265,9 @@ In the body:
     mechanisms in the framework insufficient? Make a case that this is a
     general-purpose problem and that yours is a general-purpose solution, etc.
 1. Add any additional information and ask questions; start a conversation or
-    continue one from JIRA
-1. Mention the JIRA issue ID
-1. Also mention that you have submitted the CLA as described above
+    continue one from JIRA.
+1. Mention the JIRA issue ID.
+1. Also mention that you have submitted the ICLA as described above.
 
 Note that for pull requests containing a single commit, GitHub will default the
 subject line and body of the pull request to match the subject line and body of
@@ -306,8 +297,7 @@ need to issue a new pull request when asked to make changes.
 
 [help documentation]: http://help.github.com/send-pull-requests
 [JIRA issue tracker]: https://jira.spring.io/browse/SPR
-[spring-framework-contrib]: https://groups.google.com/forum/#!forum/spring-framework-contrib
-[SpringSource CLA form]: https://support.springsource.com/spring_committer_signup
+[Contributor License Agreement]: https://cla.pivotal.io/sign/spring
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
 [Spring Framework Code Style]: https://github.com/spring-projects/spring-framework/wiki/Spring-Framework-Code-Style
 [Rewriting History section of Pro Git]: http://git-scm.com/book/en/Git-Tools-Rewriting-History

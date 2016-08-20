@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,16 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.junit.Test;
+
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link MessageTag}.
@@ -38,10 +42,11 @@ import org.springframework.web.util.WebUtils;
  * @author Alef Arendsen
  * @author Nicholas Williams
  */
+@SuppressWarnings("serial")
 public class MessageTagTests extends AbstractTagTests {
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithMessageSourceResolvable() throws JspException {
+	@Test
+	public void messageTagWithMessageSourceResolvable() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -57,8 +62,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test message", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCode() throws JspException {
+	@Test
+	public void messageTagWithCode() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -74,8 +79,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test message", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithNullCode() throws JspException {
+	@Test
+	public void messageTagWithNullCode() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -91,8 +96,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "null", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndArgument() throws JspException {
+	@Test
+	public void messageTagWithCodeAndArgument() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -109,8 +114,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test arg1 message {1}", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndArguments() throws JspException {
+	@Test
+	public void messageTagWithCodeAndArguments() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -127,8 +132,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test arg1 message arg2", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndStringArgumentWithCustomSeparator() throws JspException {
+	@Test
+	public void messageTagWithCodeAndStringArgumentWithCustomSeparator() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -146,8 +151,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test arg1,1 message arg2,2", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndArrayArgument() throws JspException {
+	@Test
+	public void messageTagWithCodeAndArrayArgument() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -164,8 +169,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test arg1 message 5", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndObjectArgument() throws JspException {
+	@Test
+	public void messageTagWithCodeAndObjectArgument() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -182,8 +187,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test 5 message {1}", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndArgumentAndNestedArgument() throws JspException {
+	@Test
+	public void messageTagWithCodeAndArgumentAndNestedArgument() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -201,8 +206,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test 5 message 7", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndNestedArgument() throws JspException {
+	@Test
+	public void messageTagWithCodeAndNestedArgument() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -219,8 +224,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test 7 message {1}", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndNestedArguments() throws JspException {
+	@Test
+	public void messageTagWithCodeAndNestedArguments() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -238,8 +243,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test arg1 message 6", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithCodeAndText() throws JspException {
+	@Test
+	public void messageTagWithCodeAndText() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -256,8 +261,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test message", (message.toString()));
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithText() throws JspException {
+	@Test
+	public void messageTagWithText() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -274,8 +279,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertTrue("Correct message", message.toString().startsWith("test &amp; text &"));
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithTextEncodingEscaped() throws JspException {
+	@Test
+	public void messageTagWithTextEncodingEscaped() throws JspException {
 		PageContext pc = createPageContext();
 		pc.getServletContext().setInitParameter(WebUtils.RESPONSE_ENCODED_HTML_ESCAPE_CONTEXT_PARAM, "true");
 		pc.getResponse().setCharacterEncoding("UTF-8");
@@ -294,8 +299,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test &lt;&amp;&gt; é", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithTextAndJavaScriptEscape() throws JspException {
+	@Test
+	public void messageTagWithTextAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -312,8 +317,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "\\' test & text \\\\", message.toString());
 	}
 
-	@SuppressWarnings("serial")
-	public void testMessageTagWithTextAndHtmlEscapeAndJavaScriptEscape() throws JspException {
+	@Test
+	public void messageTagWithTextAndHtmlEscapeAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
@@ -331,7 +336,8 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "&#39; test &amp; text \\\\", message.toString());
 	}
 
-	public void testMessageWithVarAndScope() throws JspException {
+	@Test
+	public void messageWithVarAndScope() throws JspException {
 		PageContext pc = createPageContext();
 		MessageTag tag = new MessageTag();
 		tag.setPageContext(pc);
@@ -353,7 +359,8 @@ public class MessageTagTests extends AbstractTagTests {
 		tag.release();
 	}
 
-	public void testMessageWithVar() throws JspException {
+	@Test
+	public void messageWithVar() throws JspException {
 		PageContext pc = createPageContext();
 		MessageTag tag = new MessageTag();
 		tag.setPageContext(pc);
@@ -374,10 +381,12 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct message", "test message", pc.getAttribute("testvar"));
 	}
 
-	public void testNullMessageSource() throws JspException {
+	@Test
+	@SuppressWarnings("deprecation")
+	public void nullMessageSource() throws JspException {
 		PageContext pc = createPageContext();
 		ConfigurableWebApplicationContext ctx = (ConfigurableWebApplicationContext)
-				RequestContextUtils.getWebApplicationContext(pc.getRequest(), pc.getServletContext());
+				RequestContextUtils.findWebApplicationContext((HttpServletRequest) pc.getRequest(), pc.getServletContext());
 		ctx.close();
 
 		MessageTag tag = new MessageTag();
@@ -388,7 +397,9 @@ public class MessageTagTests extends AbstractTagTests {
 		assertEquals("Correct doEndTag return value", Tag.EVAL_PAGE, tag.doEndTag());
 	}
 
-	public void testRequestContext() throws ServletException {
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void requestContext() throws ServletException {
 		PageContext pc = createPageContext();
 		RequestContext rc = new RequestContext((HttpServletRequest) pc.getRequest(), pc.getServletContext());
 		assertEquals("test message", rc.getMessage("test"));

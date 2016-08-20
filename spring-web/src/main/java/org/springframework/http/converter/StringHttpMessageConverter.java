@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,14 +34,13 @@ import org.springframework.util.StreamUtils;
  * by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class StringHttpMessageConverter extends AbstractHttpMessageConverter<String> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
 
-
-	private final Charset defaultCharset;
 
 	private final List<Charset> availableCharsets;
 
@@ -62,9 +60,8 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	 * type does not specify one.
 	 */
 	public StringHttpMessageConverter(Charset defaultCharset) {
-		super(new MediaType("text", "plain", defaultCharset), MediaType.ALL);
-		this.defaultCharset = defaultCharset;
-		this.availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
+		super(defaultCharset, MediaType.TEXT_PLAIN, MediaType.ALL);
+		this.availableCharsets = new ArrayList<>(Charset.availableCharsets().values());
 	}
 
 
@@ -79,7 +76,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return String.class.equals(clazz);
+		return String.class == clazz;
 	}
 
 	@Override
@@ -91,13 +88,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Override
 	protected Long getContentLength(String str, MediaType contentType) {
 		Charset charset = getContentTypeCharset(contentType);
-		try {
-			return (long) str.getBytes(charset.name()).length;
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should not occur
-			throw new IllegalStateException(ex);
-		}
+		return (long) str.getBytes(charset).length;
 	}
 
 	@Override
@@ -121,11 +112,11 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	}
 
 	private Charset getContentTypeCharset(MediaType contentType) {
-		if (contentType != null && contentType.getCharSet() != null) {
-			return contentType.getCharSet();
+		if (contentType != null && contentType.getCharset() != null) {
+			return contentType.getCharset();
 		}
 		else {
-			return this.defaultCharset;
+			return getDefaultCharset();
 		}
 	}
 

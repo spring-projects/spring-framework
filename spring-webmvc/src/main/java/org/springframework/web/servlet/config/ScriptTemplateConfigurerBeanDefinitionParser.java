@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class ScriptTemplateConfigurerBeanDefinitionParser extends AbstractSimple
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		List<Element> childElements = DomUtils.getChildElementsByTagName(element, "script");
 		if (!childElements.isEmpty()) {
-			List<String> locations = new ArrayList<String>(childElements.size());
+			List<String> locations = new ArrayList<>(childElements.size());
 			for (Element childElement : childElements) {
 				locations.add(childElement.getAttribute("location"));
 			}
@@ -67,18 +67,25 @@ public class ScriptTemplateConfigurerBeanDefinitionParser extends AbstractSimple
 		if (element.hasAttribute("render-function")) {
 			builder.addPropertyValue("renderFunction", element.getAttribute("render-function"));
 		}
+		if (element.hasAttribute("content-type")) {
+			builder.addPropertyValue("contentType", element.getAttribute("content-type"));
+		}
 		if (element.hasAttribute("charset")) {
 			builder.addPropertyValue("charset", Charset.forName(element.getAttribute("charset")));
 		}
 		if (element.hasAttribute("resource-loader-path")) {
 			builder.addPropertyValue("resourceLoaderPath", element.getAttribute("resource-loader-path"));
 		}
+		if (element.hasAttribute("shared-engine")) {
+			builder.addPropertyValue("sharedEngine", element.getAttribute("shared-engine"));
+		}
 	}
 
 	@Override
 	protected boolean isEligibleAttribute(String name) {
 		return (name.equals("engine-name") || name.equals("scripts") || name.equals("render-object") ||
-				name.equals("render-function") || name.equals("charset") || name.equals("resource-loader-path"));
+				name.equals("render-function") || name.equals("content-type") ||
+				name.equals("charset") || name.equals("resource-loader-path"));
 	}
 
 }

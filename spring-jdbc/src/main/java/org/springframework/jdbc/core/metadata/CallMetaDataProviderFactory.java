@@ -32,9 +32,10 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 
 /**
  * Factory used to create a {@link CallMetaDataProvider} implementation
- * based on the type of databse being used.
+ * based on the type of database being used.
  *
  * @author Thomas Risberg
+ * @author Juergen Hoeller
  * @since 2.5
  */
 public class CallMetaDataProviderFactory {
@@ -117,6 +118,9 @@ public class CallMetaDataProviderFactory {
 					}
 					else if ("Microsoft SQL Server".equals(databaseProductName)) {
 						provider = new SqlServerCallMetaDataProvider((databaseMetaData));
+					}
+					else if ("HDB".equals(databaseProductName)) {
+						provider = new HanaCallMetaDataProvider((databaseMetaData));
 					}
 					else {
 						provider = new GenericCallMetaDataProvider(databaseMetaData);

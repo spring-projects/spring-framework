@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Oliver Gierke
  * @author Chris Baldwin
+ * @author Nicolas Debeissat
  * @since 4.0.3
  */
 public abstract class ScriptUtils {
@@ -173,7 +175,8 @@ public abstract class ScriptUtils {
 		Assert.hasText(blockCommentEndDelimiter, "blockCommentEndDelimiter must not be null or empty");
 
 		StringBuilder sb = new StringBuilder();
-		boolean inLiteral = false;
+		boolean inSingleQuote = false;
+		boolean inDoubleQuote = false;
 		boolean inEscape = false;
 		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
@@ -189,10 +192,13 @@ public abstract class ScriptUtils {
 				sb.append(c);
 				continue;
 			}
-			if (c == '\'') {
-				inLiteral = !inLiteral;
+			if (!inDoubleQuote && (c == '\'')) {
+				inSingleQuote = !inSingleQuote;
 			}
-			if (!inLiteral) {
+			else if (!inSingleQuote && (c == '"')) {
+				inDoubleQuote = !inDoubleQuote;
+			}
+			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
 					// we've reached the end of the current statement
 					if (sb.length() > 0) {
@@ -394,7 +400,7 @@ public abstract class ScriptUtils {
 	 */
 	public static void executeSqlScript(Connection connection, EncodedResource resource) throws ScriptException {
 		executeSqlScript(connection, resource, false, false, DEFAULT_COMMENT_PREFIX, DEFAULT_STATEMENT_SEPARATOR,
-			DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+				DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 	/**
@@ -454,7 +460,7 @@ public abstract class ScriptUtils {
 				separator = FALLBACK_STATEMENT_SEPARATOR;
 			}
 
-			List<String> statements = new LinkedList<String>();
+			List<String> statements = new LinkedList<>();
 			splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
 					blockCommentEndDelimiter, statements);
 
@@ -467,7 +473,14 @@ public abstract class ScriptUtils {
 						stmt.execute(statement);
 						int rowsAffected = stmt.getUpdateCount();
 						if (logger.isDebugEnabled()) {
-							logger.debug(rowsAffected + " returned as updateCount for SQL: " + statement);
+							logger.debug(rowsAffected + " returned as update count for SQL: " + statement);
+							SQLWarning warningToLog = stmt.getWarnings();
+							while (warningToLog != null) {
+								logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() +
+										"', error code '" + warningToLog.getErrorCode() +
+										"', message [" + warningToLog.getMessage() + "]");
+								warningToLog = warningToLog.getNextWarning();
+							}
 						}
 					}
 					catch (SQLException ex) {

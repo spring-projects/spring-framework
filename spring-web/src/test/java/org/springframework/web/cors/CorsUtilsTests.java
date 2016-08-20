@@ -21,6 +21,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
 /**
@@ -46,9 +47,9 @@ public class CorsUtilsTests {
 	@Test
 	public void isPreFlightRequest() {
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.setMethod("OPTIONS");
+		request.setMethod(HttpMethod.OPTIONS.name());
 		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
-		request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		assertTrue(CorsUtils.isPreFlightRequest(request));
 	}
 
@@ -58,11 +59,13 @@ public class CorsUtilsTests {
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 
 		request = new MockHttpServletRequest();
+		request.setMethod(HttpMethod.OPTIONS.name());
 		request.addHeader(HttpHeaders.ORIGIN, "http://domain.com");
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 
 		request = new MockHttpServletRequest();
-		request.addHeader(CorsUtils.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		request.setMethod(HttpMethod.OPTIONS.name());
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		assertFalse(CorsUtils.isPreFlightRequest(request));
 	}
 

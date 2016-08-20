@@ -87,7 +87,7 @@ public class UserDestinationResult {
 	 * @return the user name or {@code null} if we have a session id only such as
 	 * when the user is not authenticated; in such cases it is possible to use
 	 * sessionId in place of a user name thus removing the need for a user-to-session
-	 * lookup via {@link org.springframework.messaging.simp.user.UserSessionRegistry}.
+	 * lookup via {@link SimpUserRegistry}.
 	 */
 	public String getUser() {
 		return this.user;

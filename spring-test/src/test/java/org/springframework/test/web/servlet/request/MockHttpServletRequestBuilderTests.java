@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.request;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,12 +27,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -36,27 +40,34 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
- * Tests building a MockHttpServletRequest with {@link MockHttpServletRequestBuilder}.
+ * Unit tests for building a {@link MockHttpServletRequest} with
+ * {@link MockHttpServletRequestBuilder}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class MockHttpServletRequestBuilderTests {
 
-	private MockHttpServletRequestBuilder builder;
+	private final ServletContext servletContext = new MockServletContext();
 
-	private ServletContext servletContext;
+	private MockHttpServletRequestBuilder builder;
 
 
 	@Before
 	public void setUp() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar");
-		servletContext = new MockServletContext();
 	}
 
 	@Test
@@ -87,6 +98,16 @@ public class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("/foo%20bar", request.getRequestURI());
+	}
+
+	// SPR-13435
+
+	@Test
+	public void requestUriWithDoubleSlashes() throws URISyntaxException {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, new URI("/test//currentlyValid/0"));
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertEquals("/test//currentlyValid/0", request.getRequestURI());
 	}
 
 	@Test
@@ -238,6 +259,35 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("foo", request.getQueryString());
 	}
 
+	// SPR-13801
+
+	@Test
+	public void requestParameterFromMultiValueMap() throws Exception {
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("foo", "bar");
+		params.add("foo", "baz");
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.POST, "/foo");
+		this.builder.params(params);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertArrayEquals(new String[] {"bar", "baz"}, request.getParameterMap().get("foo"));
+	}
+
+	@Test
+	public void requestParameterFromRequestBodyFormData() throws Exception {
+		String contentType = "application/x-www-form-urlencoded;charset=UTF-8";
+		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
+
+		MockHttpServletRequest request = new MockHttpServletRequestBuilder(HttpMethod.POST, "/foo")
+				.contentType(contentType).content(body.getBytes(StandardCharsets.UTF_8))
+				.buildRequest(this.servletContext);
+
+		assertArrayEquals(new String[] {"value 1"}, request.getParameterMap().get("name 1"));
+		assertArrayEquals(new String[] {"value A", "value B"}, request.getParameterMap().get("name 2"));
+		assertArrayEquals(new String[] {null}, request.getParameterMap().get("name 3"));
+	}
+
 	@Test
 	public void acceptHeader() {
 		this.builder.accept(MediaType.TEXT_HTML, MediaType.APPLICATION_XML);
@@ -355,6 +405,12 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
+	public void noCookies() {
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertNull(request.getCookies());
+	}
+
+	@Test
 	public void locale() {
 		Locale locale = new Locale("nl", "nl");
 		this.builder.locale(locale);
@@ -392,7 +448,7 @@ public class MockHttpServletRequestBuilderTests {
 
 	@Test
 	public void sessionAttributes() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		this.builder.sessionAttrs(map);
 
@@ -435,6 +491,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	// SPR-12945
+
 	@Test
 	public void mergeInvokesDefaultRequestPostProcessorFirst() {
 		final String ATTR = "ATTR";
@@ -453,6 +510,20 @@ public class MockHttpServletRequestBuilderTests {
 		request = builder.postProcessRequest(request);
 
 		assertEquals(EXEPCTED, request.getAttribute(ATTR));
+	}
+
+	// SPR-13719
+
+	@Test
+	public void arbitraryMethod() {
+		String httpMethod = "REPort";
+		URI url = UriComponentsBuilder.fromPath("/foo/{bar}").buildAndExpand(42).toUri();
+		this.builder = new MockHttpServletRequestBuilder(httpMethod, url);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertEquals(httpMethod, request.getMethod());
+		assertEquals("/foo/42", request.getPathInfo());
 	}
 
 

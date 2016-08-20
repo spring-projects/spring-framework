@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.simp.stomp;
 
+package org.springframework.messaging.simp.stomp;
 
 /**
  * Represents a STOMP session with operations to send messages, create
@@ -41,7 +41,6 @@ public interface StompSession {
 	 * the server to return a RECEIPT. An application can then use the
 	 * {@link StompSession.Receiptable
 	 * Receiptable} returned from the operation to track the receipt.
-	 *
 	 * <p>A receipt header can also be added manually through the overloaded
 	 * methods that accept {@code StompHeaders}.
 	 */
@@ -88,6 +87,19 @@ public interface StompSession {
 	Subscription subscribe(StompHeaders headers, StompFrameHandler handler);
 
 	/**
+	 * Send an acknowledgement whether a message was consumed or not resulting
+	 * in an ACK or NACK frame respectively.
+	 * <p><strong>Note:</strong> to use this when subscribing you must set the
+	 * {@link StompHeaders#setAck(String) ack} header to "client" or
+	 * "client-individual" in order ot use this.
+	 * @param messageId the id of the message
+	 * @param consumed whether the message was consumed or not
+	 * @return a Receiptable for tracking receipts
+	 * @since 4.3
+	 */
+	Receiptable acknowledge(String messageId, boolean consumed);
+
+	/**
 	 * Disconnect the session by sending a DISCONNECT frame.
 	 */
 	void disconnect();
@@ -117,7 +129,6 @@ public interface StompSession {
 		 * @see org.springframework.messaging.simp.stomp.StompClientSupport#setReceiptTimeLimit(long)
 		 */
 		void addReceiptLostTask(Runnable runnable);
-
 	}
 
 	/**
@@ -134,7 +145,6 @@ public interface StompSession {
 		 * Remove the subscription by sending an UNSUBSCRIBE frame.
 		 */
 		void unsubscribe();
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
-import org.springframework.lang.UsesJava8;
 
 /**
  * Converts a {@link Stream} to and from a collection or array, converting the
@@ -35,8 +34,7 @@ import org.springframework.lang.UsesJava8;
  * @author Stephane Nicoll
  * @since 4.2
  */
-@UsesJava8
-public class StreamConverter implements ConditionalGenericConverter {
+class StreamConverter implements ConditionalGenericConverter {
 
 	private static final TypeDescriptor STREAM_TYPE = TypeDescriptor.valueOf(Stream.class);
 
@@ -44,9 +42,11 @@ public class StreamConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public StreamConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -105,15 +105,14 @@ public class StreamConverter implements ConditionalGenericConverter {
 	}
 
 	private Object convertToStream(Object source, TypeDescriptor sourceType, TypeDescriptor streamType) {
-		TypeDescriptor targetCollection =
-				TypeDescriptor.collection(List.class, streamType.getElementTypeDescriptor());
+		TypeDescriptor targetCollection = TypeDescriptor.collection(List.class, streamType.getElementTypeDescriptor());
 		List<?> target = (List<?>) this.conversionService.convert(source, sourceType, targetCollection);
 		return target.stream();
 	}
 
 
 	private static Set<ConvertiblePair> createConvertibleTypes() {
-		Set<ConvertiblePair> convertiblePairs = new HashSet<ConvertiblePair>();
+		Set<ConvertiblePair> convertiblePairs = new HashSet<>();
 		convertiblePairs.add(new ConvertiblePair(Stream.class, Collection.class));
 		convertiblePairs.add(new ConvertiblePair(Stream.class, Object[].class));
 		convertiblePairs.add(new ConvertiblePair(Collection.class, Stream.class));

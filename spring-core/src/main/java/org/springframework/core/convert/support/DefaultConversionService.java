@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import java.nio.charset.Charset;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -38,18 +40,9 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultConversionService extends GenericConversionService {
 
-	/** Java 8's java.util.Optional class available? */
-	private static final boolean javaUtilOptionalClassAvailable =
-			ClassUtils.isPresent("java.util.Optional", DefaultConversionService.class.getClassLoader());
-
 	/** Java 8's java.time package available? */
 	private static final boolean jsr310Available =
 			ClassUtils.isPresent("java.time.ZoneId", DefaultConversionService.class.getClassLoader());
-
-	/** Java 8's java.util.stream.Stream class available? */
-	private static final boolean streamAvailable = ClassUtils.isPresent(
-			"java.util.stream.Stream", DefaultConversionService.class.getClassLoader());
-
 
 
 	/**
@@ -75,49 +68,23 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new ByteBufferConverter((ConversionService) converterRegistry));
 		if (jsr310Available) {
-			Jsr310ConverterRegistrar.registerZoneIdConverters(converterRegistry);
+			Jsr310ConverterRegistrar.registerJsr310Converters(converterRegistry);
 		}
 
 		converterRegistry.addConverter(new ObjectToObjectConverter());
 		converterRegistry.addConverter(new IdToEntityConverter((ConversionService) converterRegistry));
 		converterRegistry.addConverter(new FallbackObjectToStringConverter());
-		if (javaUtilOptionalClassAvailable) {
-			converterRegistry.addConverter(new ObjectToOptionalConverter((ConversionService) converterRegistry));
-		}
+		converterRegistry.addConverter(new ObjectToOptionalConverter((ConversionService) converterRegistry));
 	}
 
-	// internal helpers
-
-	private static void addScalarConverters(ConverterRegistry converterRegistry) {
-		converterRegistry.addConverterFactory(new NumberToNumberConverterFactory());
-
-		converterRegistry.addConverterFactory(new StringToNumberConverterFactory());
-		converterRegistry.addConverter(Number.class, String.class, new ObjectToStringConverter());
-
-		converterRegistry.addConverter(new StringToCharacterConverter());
-		converterRegistry.addConverter(Character.class, String.class, new ObjectToStringConverter());
-
-		converterRegistry.addConverter(new NumberToCharacterConverter());
-		converterRegistry.addConverterFactory(new CharacterToNumberFactory());
-
-		converterRegistry.addConverter(new StringToBooleanConverter());
-		converterRegistry.addConverter(Boolean.class, String.class, new ObjectToStringConverter());
-
-		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
-		converterRegistry.addConverter(Enum.class, String.class,
-				new EnumToStringConverter((ConversionService) converterRegistry));
-
-		converterRegistry.addConverter(new StringToLocaleConverter());
-		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());
-
-		converterRegistry.addConverter(new StringToPropertiesConverter());
-		converterRegistry.addConverter(new PropertiesToStringConverter());
-
-		converterRegistry.addConverter(new StringToUUIDConverter());
-		converterRegistry.addConverter(UUID.class, String.class, new ObjectToStringConverter());
-	}
-
-	private static void addCollectionConverters(ConverterRegistry converterRegistry) {
+	/**
+	 * Add collection converters.
+	 * @param converterRegistry the registry of converters to add to (must also be castable to ConversionService,
+	 * e.g. being a {@link ConfigurableConversionService})
+	 * @throws ClassCastException if the given ConverterRegistry could not be cast to a ConversionService
+	 * @since 4.2.3
+	 */
+	public static void addCollectionConverters(ConverterRegistry converterRegistry) {
 		ConversionService conversionService = (ConversionService) converterRegistry;
 
 		converterRegistry.addConverter(new ArrayToCollectionConverter(conversionService));
@@ -139,9 +106,47 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new CollectionToObjectConverter(conversionService));
 		converterRegistry.addConverter(new ObjectToCollectionConverter(conversionService));
 
-		if (streamAvailable) {
-			converterRegistry.addConverter(new StreamConverter(conversionService));
-		}
+		converterRegistry.addConverter(new StreamConverter(conversionService));
+	}
+
+
+	// internal helpers
+
+	private static void addScalarConverters(ConverterRegistry converterRegistry) {
+		converterRegistry.addConverterFactory(new NumberToNumberConverterFactory());
+
+		converterRegistry.addConverterFactory(new StringToNumberConverterFactory());
+		converterRegistry.addConverter(Number.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new StringToCharacterConverter());
+		converterRegistry.addConverter(Character.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new NumberToCharacterConverter());
+		converterRegistry.addConverterFactory(new CharacterToNumberFactory());
+
+		converterRegistry.addConverter(new StringToBooleanConverter());
+		converterRegistry.addConverter(Boolean.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
+		converterRegistry.addConverter(new EnumToStringConverter((ConversionService) converterRegistry));
+		
+		converterRegistry.addConverterFactory(new IntegerToEnumConverterFactory());
+		converterRegistry.addConverter(new EnumToIntegerConverter((ConversionService) converterRegistry));
+
+		converterRegistry.addConverter(new StringToLocaleConverter());
+		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new StringToCharsetConverter());
+		converterRegistry.addConverter(Charset.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new StringToCurrencyConverter());
+		converterRegistry.addConverter(Currency.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new StringToPropertiesConverter());
+		converterRegistry.addConverter(new PropertiesToStringConverter());
+
+		converterRegistry.addConverter(new StringToUUIDConverter());
+		converterRegistry.addConverter(UUID.class, String.class, new ObjectToStringConverter());
 	}
 
 
@@ -150,7 +155,8 @@ public class DefaultConversionService extends GenericConversionService {
 	 */
 	private static final class Jsr310ConverterRegistrar {
 
-		public static void registerZoneIdConverters(ConverterRegistry converterRegistry) {
+		public static void registerJsr310Converters(ConverterRegistry converterRegistry) {
+			converterRegistry.addConverter(new StringToTimeZoneConverter());
 			converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
 			converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
 		}

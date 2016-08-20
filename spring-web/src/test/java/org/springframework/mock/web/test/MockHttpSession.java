@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionContext;
 
 import org.springframework.util.Assert;
 
@@ -64,7 +63,7 @@ public class MockHttpSession implements HttpSession {
 
 	private final ServletContext servletContext;
 
-	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
+	private final Map<String, Object> attributes = new LinkedHashMap<>();
 
 	private boolean invalid = false;
 
@@ -148,7 +147,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	@Override
-	public HttpSessionContext getSessionContext() {
+	public javax.servlet.http.HttpSessionContext getSessionContext() {
 		throw new UnsupportedOperationException("getSessionContext");
 	}
 
@@ -167,7 +166,7 @@ public class MockHttpSession implements HttpSession {
 	@Override
 	public Enumeration<String> getAttributeNames() {
 		assertIsValid();
-		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
+		return Collections.enumeration(new LinkedHashSet<>(this.attributes.keySet()));
 	}
 
 	@Override
@@ -271,7 +270,7 @@ public class MockHttpSession implements HttpSession {
 	 * @return a representation of this session's serialized state
 	 */
 	public Serializable serializeState() {
-		HashMap<String, Serializable> state = new HashMap<String, Serializable>();
+		HashMap<String, Serializable> state = new HashMap<>();
 		for (Iterator<Map.Entry<String, Object>> it = this.attributes.entrySet().iterator(); it.hasNext();) {
 			Map.Entry<String, Object> entry = it.next();
 			String name = entry.getKey();

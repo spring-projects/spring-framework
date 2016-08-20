@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @DirtiesContext
-@Transactional("txMgr1")
+@Transactional(transactionManager = "txMgr1")
 @SqlConfig(dataSource = "dataSource1", transactionManager = "txMgr1")
 public class MultipleDataSourcesAndTransactionManagersTransactionalSqlScriptsTests {
 
@@ -66,7 +66,7 @@ public class MultipleDataSourcesAndTransactionManagersTransactionalSqlScriptsTes
 	}
 
 	@Test
-	@Transactional("txMgr2")
+	@Transactional(transactionManager = "txMgr2")
 	@Sql(scripts = "data-add-catbert.sql", config = @SqlConfig(dataSource = "dataSource2", transactionManager = "txMgr2"))
 	public void database2() {
 		assertUsers(new JdbcTemplate(dataSource2), "Dilbert", "Catbert");

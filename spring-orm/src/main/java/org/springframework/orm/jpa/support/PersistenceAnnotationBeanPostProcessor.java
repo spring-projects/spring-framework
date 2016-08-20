@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
+import javax.persistence.SynchronizationType;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
@@ -40,14 +41,14 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.config.NamedBeanHolder;
 import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.BridgeMethodResolver;
@@ -168,11 +169,6 @@ public class PersistenceAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, DestructionAwareBeanPostProcessor,
 		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware, Serializable {
 
-	/* Check JPA 2.1 PersistenceContext.synchronization() attribute */
-	private static final Method synchronizationAttribute =
-			ClassUtils.getMethodIfAvailable(PersistenceContext.class, "synchronization");
-
-
 	private Object jndiEnvironment;
 
 	private boolean resourceRef = true;
@@ -190,10 +186,10 @@ public class PersistenceAnnotationBeanPostProcessor
 	private transient ListableBeanFactory beanFactory;
 
 	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(64);
+			new ConcurrentHashMap<>(256);
 
 	private final Map<Object, EntityManager> extendedEntityManagersToClose =
-			new ConcurrentHashMap<Object, EntityManager>(16);
+			new ConcurrentHashMap<>(16);
 
 
 	/**
@@ -375,6 +371,11 @@ public class PersistenceAnnotationBeanPostProcessor
 		EntityManagerFactoryUtils.closeEntityManager(emToClose);
 	}
 
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return this.extendedEntityManagersToClose.containsKey(bean);
+	}
+
 
 	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz, PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
@@ -403,12 +404,12 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	private InjectionMetadata buildPersistenceMetadata(final Class<?> clazz) {
-		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
+		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
 		Class<?> targetClass = clazz;
 
 		do {
 			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<InjectionMetadata.InjectedElement>();
+					new LinkedList<>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
 				@Override
@@ -436,7 +437,7 @@ public class PersistenceAnnotationBeanPostProcessor
 						if (Modifier.isStatic(method.getModifiers())) {
 							throw new IllegalStateException("Persistence annotations are not supported on static methods");
 						}
-						if (method.getParameterTypes().length != 1) {
+						if (method.getParameterCount() != 1) {
 							throw new IllegalStateException("Persistence annotation requires a single-arg method: " + method);
 						}
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
@@ -568,21 +569,16 @@ public class PersistenceAnnotationBeanPostProcessor
 	protected EntityManagerFactory findDefaultEntityManagerFactory(String requestingBeanName)
 			throws NoSuchBeanDefinitionException {
 
-		String[] beanNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
-		if (beanNames.length == 1) {
-			String unitName = beanNames[0];
-			EntityManagerFactory emf = (EntityManagerFactory) this.beanFactory.getBean(unitName);
-			if (this.beanFactory instanceof ConfigurableBeanFactory) {
-				((ConfigurableBeanFactory) this.beanFactory).registerDependentBean(unitName, requestingBeanName);
-			}
-			return emf;
-		}
-		else if (beanNames.length > 1) {
-			throw new NoUniqueBeanDefinitionException(EntityManagerFactory.class, beanNames);
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
+			// Fancy variant with dependency registration
+			ConfigurableListableBeanFactory clbf = (ConfigurableListableBeanFactory) this.beanFactory;
+			NamedBeanHolder<EntityManagerFactory> emfHolder = clbf.resolveNamedBean(EntityManagerFactory.class);
+			clbf.registerDependentBean(emfHolder.getBeanName(), requestingBeanName);
+			return emfHolder.getBeanInstance();
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(EntityManagerFactory.class);
+			// Plain variant: just find a default bean
+			return this.beanFactory.getBean(EntityManagerFactory.class);
 		}
 	}
 
@@ -657,8 +653,7 @@ public class PersistenceAnnotationBeanPostProcessor
 				}
 				this.unitName = pc.unitName();
 				this.type = pc.type();
-				this.synchronizedWithTransaction = (synchronizationAttribute == null ||
-						"SYNCHRONIZED".equals(ReflectionUtils.invokeMethod(synchronizationAttribute, pc).toString()));
+				this.synchronizedWithTransaction = SynchronizationType.SYNCHRONIZED.equals(pc.synchronization());
 				this.properties = properties;
 			}
 			else {

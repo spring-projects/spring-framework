@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,13 +84,13 @@ public class GzipResourceResolverTests {
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(versionStrategyMap);
 
-		List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>();
+		List<ResourceResolver> resolvers = new ArrayList<>();
 		resolvers.add(new CachingResourceResolver(this.cache));
 		resolvers.add(new GzipResourceResolver());
 		resolvers.add(versionResolver);
 		resolvers.add(new PathResourceResolver());
 		resolver = new DefaultResourceResolverChain(resolvers);
-		locations = new ArrayList<Resource>();
+		locations = new ArrayList<>();
 		locations.add(new ClassPathResource("test/", getClass()));
 		locations.add(new ClassPathResource("testalternatepath/", getClass()));
 	}
@@ -147,6 +147,23 @@ public class GzipResourceResolverTests {
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
 		assertFalse("Expected " + resolved + " to *not* be of type " + EncodedResource.class,
+				resolved instanceof EncodedResource);
+	}
+
+	// SPR-13149
+	@Test
+	public void resolveWithNullRequest() throws IOException {
+
+		String file = "js/foo.js";
+		String gzFile = file+".gz";
+		Resource gzResource = new ClassPathResource("test/"+gzFile, getClass());
+
+		// resolved resource is now cached in CachingResourceResolver
+		Resource resolved = resolver.resolveResource(null, file, locations);
+
+		assertEquals(gzResource.getDescription(), resolved.getDescription());
+		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
+		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
 				resolved instanceof EncodedResource);
 	}
 }

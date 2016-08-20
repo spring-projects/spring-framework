@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.support;
 
+import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpRequest;
@@ -27,8 +28,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 import org.springframework.web.util.UrlPathHelper;
-import org.springframework.web.util.WebUtils;
 
 /**
  * A UriComponentsBuilder that extracts information from the HttpServletRequest.
@@ -43,7 +44,6 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 
 	/**
 	 * Default constructor. Protected to prevent direct instantiation.
-	 *
 	 * @see #fromContextPath(HttpServletRequest)
 	 * @see #fromServletMapping(HttpServletRequest)
 	 * @see #fromRequest(HttpServletRequest)
@@ -133,8 +133,15 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	private static String prependForwardedPrefix(HttpServletRequest request, String path) {
-		String prefix = request.getHeader("X-Forwarded-Prefix");
-		if (StringUtils.hasText(prefix)) {
+		String prefix = null;
+		Enumeration<String> names = request.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String name = names.nextElement();
+			if ("X-Forwarded-Prefix".equalsIgnoreCase(name)) {
+				prefix = request.getHeader(name);
+			}
+		}
+		if (prefix != null) {
 			path = prefix + path;
 		}
 		return path;
@@ -211,8 +218,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	public String removePathExtension() {
 		String extension = null;
 		if (this.originalPath != null) {
-			String filename = WebUtils.extractFullFilenameFromUrlPath(this.originalPath);
-			extension = StringUtils.getFilenameExtension(filename);
+			extension = UriUtils.extractFileExtension(this.originalPath);
 			if (!StringUtils.isEmpty(extension)) {
 				int end = this.originalPath.length() - (extension.length() + 1);
 				replacePath(this.originalPath.substring(0, end));
@@ -223,7 +229,7 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 	}
 
 	@Override
-	public Object clone() {
+	public ServletUriComponentsBuilder cloneBuilder() {
 		return new ServletUriComponentsBuilder(this);
 	}
 

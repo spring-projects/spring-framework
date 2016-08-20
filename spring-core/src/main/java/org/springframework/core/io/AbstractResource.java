@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,14 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
+	 * This implementation always returns {@code false}.
+	 */
+	@Override
+	public boolean isFile() {
+		return false;
+	}
+
+	/**
 	 * This implementation throws a FileNotFoundException, assuming
 	 * that the resource cannot be resolved to a URL.
 	 */
@@ -123,8 +131,8 @@ public abstract class AbstractResource implements Resource {
 	 */
 	@Override
 	public long contentLength() throws IOException {
-		InputStream is = this.getInputStream();
-		Assert.state(is != null, "resource input stream must not be null");
+		InputStream is = getInputStream();
+		Assert.state(is != null, "Resource InputStream must not be null");
 		try {
 			long size = 0;
 			byte[] buf = new byte[255];

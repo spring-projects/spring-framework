@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.messaging.support;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ import org.springframework.util.StringUtils;
  * </pre>
  *
  * <p>Note that the above examples aim to demonstrate the general idea of using
- * header accessors. The most likely usage however is through sub-classes.
+ * header accessors. The most likely usage however is through subclasses.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -115,7 +116,7 @@ import org.springframework.util.StringUtils;
  */
 public class MessageHeaderAccessor {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final MimeType[] READABLE_MIME_TYPES = new MimeType[] {
 			MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.APPLICATION_XML,
@@ -282,7 +283,7 @@ public class MessageHeaderAccessor {
 	 * where each new call returns a fresh copy of the current header values.
 	 */
 	public Map<String, Object> toMap() {
-		return new HashMap<String, Object>(this.headers);
+		return new HashMap<>(this.headers);
 	}
 
 
@@ -306,12 +307,17 @@ public class MessageHeaderAccessor {
 			throw new IllegalArgumentException("'" + name + "' header is read-only");
 		}
 		verifyType(name, value);
-		if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
-			this.modified = true;
-			if (value != null) {
+		if (value != null) {
+			// Modify header if necessary
+			if (!ObjectUtils.nullSafeEquals(value, getHeader(name))) {
+				this.modified = true;
 				this.headers.getRawHeaders().put(name, value);
 			}
-			else {
+		}
+		else {
+			// Remove header if available
+			if (this.headers.containsKey(name)) {
+				this.modified = true;
 				this.headers.getRawHeaders().remove(name);
 			}
 		}
@@ -319,7 +325,8 @@ public class MessageHeaderAccessor {
 
 	protected void verifyType(String headerName, Object headerValue) {
 		if (headerName != null && headerValue != null) {
-			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) || MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
+			if (MessageHeaders.ERROR_CHANNEL.equals(headerName) ||
+					MessageHeaders.REPLY_CHANNEL.endsWith(headerName)) {
 				if (!(headerValue instanceof MessageChannel || headerValue instanceof String)) {
 					throw new IllegalArgumentException(
 							"'" + headerName + "' header value must be a MessageChannel or String");
@@ -353,7 +360,7 @@ public class MessageHeaderAccessor {
 	 * names. Supported pattern styles are: "xxx*", "*xxx", "*xxx*" and "xxx*yyy".
 	 */
 	public void removeHeaders(String... headerPatterns) {
-		List<String> headersToRemove = new ArrayList<String>();
+		List<String> headersToRemove = new ArrayList<>();
 		for (String pattern : headerPatterns) {
 			if (StringUtils.hasLength(pattern)){
 				if (pattern.contains("*")){
@@ -370,7 +377,7 @@ public class MessageHeaderAccessor {
 	}
 
 	private List<String> getMatchingHeaderNames(String pattern, Map<String, Object> headers) {
-		List<String> matchingHeaderNames = new ArrayList<String>();
+		List<String> matchingHeaderNames = new ArrayList<>();
 		if (headers != null) {
 			for (String key : headers.keySet()) {
 				if (PatternMatchUtils.simpleMatch(pattern, key)) {
@@ -500,7 +507,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return (bytes.length < 80) ?
 						" payload=" + new String(bytes, charset) :
@@ -525,7 +532,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return " payload=" + new String(bytes, charset);
 			}
@@ -572,11 +579,13 @@ public class MessageHeaderAccessor {
 	 * A variation of {@link #getAccessor(org.springframework.messaging.Message, Class)}
 	 * with a {@code MessageHeaders} instance instead of a {@code Message}.
 	 * <p>This is for cases when a full message may not have been created yet.
-	 * @return an accessor instance of the specified typem or {@code null} if none
+	 * @return an accessor instance of the specified type, or {@code null} if none
 	 * @since 4.1
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends MessageHeaderAccessor> T getAccessor(MessageHeaders messageHeaders, Class<T> requiredType) {
+	public static <T extends MessageHeaderAccessor> T getAccessor(
+			MessageHeaders messageHeaders, Class<T> requiredType) {
+
 		if (messageHeaders instanceof MutableMessageHeaders) {
 			MutableMessageHeaders mutableHeaders = (MutableMessageHeaders) messageHeaders;
 			MessageHeaderAccessor headerAccessor = mutableHeaders.getMessageHeaderAccessor();
@@ -593,7 +602,7 @@ public class MessageHeaderAccessor {
 	 * wrapping the message with a {@code MessageHeaderAccessor} instance.
 	 * <p>This is for cases where a header needs to be updated in generic code
 	 * while preserving the accessor type for downstream processing.
-	 * @return an accessor of the required type, never {@code null}.
+	 * @return an accessor of the required type (never {@code null})
 	 * @since 4.1
 	 */
 	public static MessageHeaderAccessor getMutableAccessor(Message<?> message) {
@@ -646,7 +655,6 @@ public class MessageHeaderAccessor {
 			if (getId() == null) {
 				IdGenerator idGenerator = (MessageHeaderAccessor.this.idGenerator != null ?
 						MessageHeaderAccessor.this.idGenerator : MessageHeaders.getIdGenerator());
-
 				UUID id = idGenerator.generateId();
 				if (id != null && id != MessageHeaders.ID_VALUE_NONE) {
 					getRawHeaders().put(ID, id);

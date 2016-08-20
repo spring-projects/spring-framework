@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.web.method.support;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
@@ -53,6 +56,11 @@ public class ModelAndViewContainer {
 	private ModelMap redirectModel;
 
 	private boolean redirectModelScenario = false;
+
+	/* Names of attributes with binding disabled */
+	private final Set<String> bindingDisabledAttributes = new HashSet<>(4);
+
+	private HttpStatus status;
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
@@ -126,8 +134,29 @@ public class ModelAndViewContainer {
 			return this.defaultModel;
 		}
 		else {
-			return (this.redirectModel != null) ? this.redirectModel : new ModelMap();
+			if (this.redirectModel == null) {
+				this.redirectModel = new ModelMap();
+			}
+			return this.redirectModel;
 		}
+	}
+
+	/**
+	 * Register an attribute for which data binding should not occur, for example
+	 * corresponding to an {@code @ModelAttribute(binding=false)} declaration.
+	 * @param attributeName the name of the attribute
+	 * @since 4.3
+	 */
+	public void setBindingDisabled(String attributeName) {
+		this.bindingDisabledAttributes.add(attributeName);
+	}
+
+	/**
+	 * Whether binding is disabled for the given model attribute.
+	 * @since 4.3
+	 */
+	public boolean isBindingDisabled(String name) {
+		return this.bindingDisabledAttributes.contains(name);
 	}
 
 	/**
@@ -144,7 +173,8 @@ public class ModelAndViewContainer {
 	 * model (redirect URL preparation). Use of this method may be needed for
 	 * advanced cases when access to the "default" model is needed regardless,
 	 * e.g. to save model attributes specified via {@code @SessionAttributes}.
-	 * @return the default model, never {@code null}
+	 * @return the default model (never {@code null})
+	 * @since 4.1.4
 	 */
 	public ModelMap getDefaultModel() {
 		return this.defaultModel;
@@ -152,7 +182,7 @@ public class ModelAndViewContainer {
 
 	/**
 	 * Provide a separate model instance to use in a redirect scenario.
-	 * The provided additional model however is not used used unless
+	 * The provided additional model however is not used unless
 	 * {@link #setRedirectModelScenario(boolean)} gets set to {@code true} to signal
 	 * a redirect scenario.
 	 */
@@ -174,6 +204,23 @@ public class ModelAndViewContainer {
 	 */
 	public SessionStatus getSessionStatus() {
 		return this.sessionStatus;
+	}
+
+	/**
+	 * Provide a HTTP status that will be passed on to with the
+	 * {@code ModelAndView} used for view rendering purposes.
+	 * @since 4.3
+	 */
+	public void setStatus(HttpStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * Return the configured HTTP status, if any.
+	 * @since 4.3
+	 */
+	public HttpStatus getStatus() {
+		return this.status;
 	}
 
 	/**

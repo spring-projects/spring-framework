@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  *
  * <p>This class also automatically opens a default "system" TCP connection to the message
  * broker that is used for sending messages that originate from the server application (as
- * opposed to from a client). Such messages are are not associated with any client and
+ * opposed to from a client). Such messages are not associated with any client and
  * therefore do not have a session id header. The "system" connection is effectively
  * shared and cannot be used to receive messages. Several properties are provided to
  * configure the "system" connection including:
@@ -81,12 +81,20 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
-	private static final ListenableFutureTask<Void> EMPTY_TASK = new ListenableFutureTask<Void>(new VoidCallable());
+	private static final ListenableFutureTask<Void> EMPTY_TASK = new ListenableFutureTask<>(new VoidCallable());
 
 	// STOMP recommends error of margin for receiving heartbeats
 	private static final long HEARTBEAT_MULTIPLIER = 3;
 
 	private static final Message<byte[]> HEARTBEAT_MESSAGE;
+
+	/**
+	 * A heartbeat is setup once a CONNECTED frame is received which contains
+	 * the heartbeat settings we need. If we don't receive CONNECTED within
+	 * a minute, the connection is closed proactively.
+	 */
+	private static final int MAX_TIME_TO_CONNECTED_FRAME = 60 * 1000;
+
 
 
 	static {
@@ -114,14 +122,14 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 
 	private String virtualHost;
 
-	private final Map<String, MessageHandler> systemSubscriptions = new HashMap<String, MessageHandler>(4);
+	private final Map<String, MessageHandler> systemSubscriptions = new HashMap<>(4);
 
 	private TcpOperations<byte[]> tcpClient;
 
 	private MessageHeaderInitializer headerInitializer;
 
 	private final Map<String, StompConnectionHandler> connectionHandlers =
-			new ConcurrentHashMap<String, StompConnectionHandler>();
+			new ConcurrentHashMap<>();
 
 	private final Stats stats = new Stats();
 
@@ -567,12 +575,21 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				logger.debug("TCP connection opened in session=" + getSessionId());
 			}
 			this.tcpConnection = connection;
+			this.tcpConnection.onReadInactivity(new Runnable() {
+				@Override
+				public void run() {
+					if (tcpConnection != null && !isStompConnected) {
+						handleTcpConnectionFailure("No CONNECTED frame received in " +
+								MAX_TIME_TO_CONNECTED_FRAME + " ms.", null);
+					}
+				}
+			}, MAX_TIME_TO_CONNECTED_FRAME);
 			connection.send(MessageBuilder.createMessage(EMPTY_PAYLOAD, this.connectHeaders.getMessageHeaders()));
 		}
 
 		@Override
 		public void afterConnectFailure(Throwable ex) {
-			handleTcpConnectionFailure("failed to establish TCP connection in session " + this.sessionId, ex);
+			handleTcpConnectionFailure("Failed to connect: " + ex.getMessage(), ex);
 		}
 
 		/**
@@ -675,8 +692,8 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 										public void onSuccess(Void result) {
 										}
 										public void onFailure(Throwable ex) {
-											String error = "failed to forward heartbeat in \"system\" session.";
-											handleTcpConnectionFailure(error, ex);
+											handleTcpConnectionFailure(
+													"Failed to forward heartbeat: " + ex.getMessage(), ex);
 										}
 									});
 						}
@@ -688,7 +705,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 				this.tcpConnection.onReadInactivity(new Runnable() {
 					@Override
 					public void run() {
-						handleTcpConnectionFailure("no messages received for more than " + interval + " ms.", null);
+						handleTcpConnectionFailure("No messages received in " + interval + " ms.", null);
 					}
 				}, interval);
 			}
@@ -697,7 +714,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		@Override
 		public void handleFailure(Throwable ex) {
 			if (this.tcpConnection != null) {
-				handleTcpConnectionFailure("transport failure.", ex);
+				handleTcpConnectionFailure("Transport failure: " + ex.getMessage(), ex);
 			}
 			else if (logger.isErrorEnabled()) {
 				logger.error("Transport failure: " + ex);
@@ -957,7 +974,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 	private static class StompTcpClientFactory {
 
 		public TcpOperations<byte[]> create(String relayHost, int relayPort, Reactor2StompCodec codec) {
-			return new Reactor2TcpClient<byte[]>(relayHost, relayPort, codec);
+			return new Reactor2TcpClient<>(relayHost, relayPort, codec);
 		}
 	}
 

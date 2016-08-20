@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class ServletModelAttributeMethodProcessorTests {
 
 	@Test
 	public void createAttributeUriTemplateVar() throws Exception {
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("testBean1", "Patty");
 		this.request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
@@ -102,7 +102,7 @@ public class ServletModelAttributeMethodProcessorTests {
 
 	@Test
 	public void createAttributeUriTemplateVarCannotConvert() throws Exception {
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("testBean2", "Patty");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
@@ -115,7 +115,7 @@ public class ServletModelAttributeMethodProcessorTests {
 
 	@Test
 	public void createAttributeUriTemplateVarWithOptional() throws Exception {
-		Map<String, String> uriTemplateVars = new HashMap<String, String>();
+		Map<String, String> uriTemplateVars = new HashMap<>();
 		uriTemplateVars.put("testBean3", "Patty");
 		this.request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 

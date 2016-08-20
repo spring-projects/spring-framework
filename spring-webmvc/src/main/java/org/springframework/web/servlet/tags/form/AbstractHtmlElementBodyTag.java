@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Convenient super class for many html tags that render content using the databinding
- * features of the {@link AbstractHtmlElementTag AbstractHtmlElementTag}. The only thing sub tags
- * need to do is override {@link #renderDefaultContent(TagWriter)}.
+ * features of the {@link AbstractHtmlElementTag AbstractHtmlElementTag}. The only thing
+ * sub-tags need to do is override {@link #renderDefaultContent(TagWriter)}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -136,8 +136,8 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 		try {
 			bodyContent.writeOut(bodyContent.getEnclosingWriter());
 		}
-		catch (IOException e) {
-			throw new JspException("Unable to write buffered body content.", e);
+		catch (IOException ex) {
+			throw new JspException("Unable to write buffered body content.", ex);
 		}
 	}
 

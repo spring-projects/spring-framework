@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import java.io.InputStream;
  * Represents an HTTP input message, consisting of {@linkplain #getHeaders() headers}
  * and a readable {@linkplain #getBody() body}.
  *
- * <p>Typically implemented by an HTTP request on the server-side, or a response on the client-side.
+ * <p>Typically implemented by an HTTP request handle on the server side,
+ * or an HTTP response handle on the client side.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -32,7 +33,7 @@ public interface HttpInputMessage extends HttpMessage {
 
 	/**
 	 * Return the body of the message as an input stream.
-	 * @return the input stream body
+	 * @return the input stream body (never {@code null})
 	 * @throws IOException in case of I/O Errors
 	 */
 	InputStream getBody() throws IOException;

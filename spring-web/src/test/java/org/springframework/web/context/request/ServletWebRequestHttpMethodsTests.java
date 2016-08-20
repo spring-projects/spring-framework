@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -41,6 +43,8 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 @RunWith(Parameterized.class)
 public class ServletWebRequestHttpMethodsTests {
 
+	private static final String CURRENT_TIME = "Wed, 09 Apr 2014 09:57:42 GMT";
+
 	private SimpleDateFormat dateFormat;
 
 	private MockHttpServletRequest servletRequest;
@@ -49,9 +53,12 @@ public class ServletWebRequestHttpMethodsTests {
 
 	private ServletWebRequest request;
 
-	private String method;
+	private Date currentDate;
 
-	@Parameters
+	@Parameter
+	public String method;
+
+	@Parameters(name = "{0}")
 	static public Iterable<Object[]> safeMethods() {
 		return Arrays.asList(new Object[][] {
 				{"GET"},
@@ -59,39 +66,71 @@ public class ServletWebRequestHttpMethodsTests {
 		});
 	}
 
-	public ServletWebRequestHttpMethodsTests(String method) {
-		this.method = method;
-	}
-
 	@Before
 	public void setUp() {
+		currentDate = new Date();
 		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 		servletRequest = new MockHttpServletRequest(method, "http://example.org");
 		servletResponse = new MockHttpServletResponse();
 		request = new ServletWebRequest(servletRequest, servletResponse);
 	}
 
 	@Test
-	public void checkNotModifiedTimestamp() {
-		long currentTime = new Date().getTime();
-		servletRequest.addHeader("If-Modified-Since", currentTime);
+	public void checkNotModifiedNon2xxStatus() {
+		long epochTime = currentDate.getTime();
+		servletRequest.addHeader("If-Modified-Since", epochTime);
+		servletResponse.setStatus(304);
 
-		assertTrue(request.checkNotModified(currentTime));
+		assertFalse(request.checkNotModified(epochTime));
+		assertEquals(304, servletResponse.getStatus());
+		assertNull(servletResponse.getHeader("Last-Modified"));
+	}
+
+	// SPR-13516
+	@Test
+	public void checkNotModifiedInvalidStatus() {
+		long epochTime = currentDate.getTime();
+		servletRequest.addHeader("If-Modified-Since", epochTime);
+		servletResponse.setStatus(0);
+
+		assertTrue(request.checkNotModified(epochTime));
+		assertEquals(304, servletResponse.getStatus());
+		assertEquals(dateFormat.format(epochTime), servletResponse.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void checkNotModifiedHeaderAlreadySet() {
+		long epochTime = currentDate.getTime();
+		servletRequest.addHeader("If-Modified-Since", epochTime);
+		servletResponse.addHeader("Last-Modified", CURRENT_TIME);
+
+		assertTrue(request.checkNotModified(epochTime));
+		assertEquals(304, servletResponse.getStatus());
+		assertEquals(1, servletResponse.getHeaders("Last-Modified").size());
+		assertEquals(CURRENT_TIME, servletResponse.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void checkNotModifiedTimestamp() throws Exception {
+		long epochTime = currentDate.getTime();
+		servletRequest.addHeader("If-Modified-Since", epochTime);
+
+		assertTrue(request.checkNotModified(epochTime));
 
 		assertEquals(304, servletResponse.getStatus());
-		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+		assertEquals(dateFormat.format(epochTime), servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
 	public void checkModifiedTimestamp() {
-		long currentTime = new Date().getTime();
-		long oneMinuteAgo = currentTime - (1000 * 60);
+		long oneMinuteAgo = currentDate.getTime() - (1000 * 60);
 		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
 
-		assertFalse(request.checkNotModified(currentTime));
+		assertFalse(request.checkNotModified(currentDate.getTime()));
 
 		assertEquals(200, servletResponse.getStatus());
-		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+		assertEquals(dateFormat.format(currentDate.getTime()), servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -104,6 +143,18 @@ public class ServletWebRequestHttpMethodsTests {
 		assertEquals(304, servletResponse.getStatus());
 		assertEquals(eTag, servletResponse.getHeader("ETag"));
 	}
+
+	@Test
+	public void checkNotModifiedETagWithSeparatorChars() {
+		String eTag = "\"Foo, Bar\"";
+		servletRequest.addHeader("If-None-Match", eTag);
+
+		assertTrue(request.checkNotModified(eTag));
+
+		assertEquals(304, servletResponse.getStatus());
+		assertEquals(eTag, servletResponse.getHeader("ETag"));
+	}
+
 
 	@Test
 	public void checkModifiedETag() {
@@ -156,44 +207,44 @@ public class ServletWebRequestHttpMethodsTests {
 	public void checkNotModifiedETagAndTimestamp() {
 		String eTag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", eTag);
-		long currentTime = new Date().getTime();
-		servletRequest.addHeader("If-Modified-Since", currentTime);
+		servletRequest.addHeader("If-Modified-Since", currentDate.getTime());
 
-		assertTrue(request.checkNotModified(eTag, currentTime));
+		assertTrue(request.checkNotModified(eTag, currentDate.getTime()));
 
 		assertEquals(304, servletResponse.getStatus());
 		assertEquals(eTag, servletResponse.getHeader("ETag"));
-		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+		assertEquals(dateFormat.format(currentDate.getTime()), servletResponse.getHeader("Last-Modified"));
 	}
 
+	// SPR-14224
 	@Test
 	public void checkNotModifiedETagAndModifiedTimestamp() {
 		String eTag = "\"Foo\"";
 		servletRequest.addHeader("If-None-Match", eTag);
-		long currentTime = new Date().getTime();
-		long oneMinuteAgo = currentTime - (1000 * 60);
+		long currentEpoch = currentDate.getTime();
+		long oneMinuteAgo = currentEpoch - (1000 * 60);
 		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
 
-		assertFalse(request.checkNotModified(eTag, currentTime));
+		assertTrue(request.checkNotModified(eTag, currentEpoch));
 
-		assertEquals(200, servletResponse.getStatus());
+		assertEquals(304, servletResponse.getStatus());
 		assertEquals(eTag, servletResponse.getHeader("ETag"));
-		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+		assertEquals(dateFormat.format(currentEpoch), servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
-	public void checkModifiedETagAndNotModifiedTimestamp() {
+	public void checkModifiedETagAndNotModifiedTimestamp() throws Exception {
 		String currentETag = "\"Foo\"";
 		String oldEtag = "\"Bar\"";
 		servletRequest.addHeader("If-None-Match", oldEtag);
-		long currentTime = new Date().getTime();
-		servletRequest.addHeader("If-Modified-Since", currentTime);
+		long epochTime = currentDate.getTime();
+		servletRequest.addHeader("If-Modified-Since", epochTime);
 
-		assertFalse(request.checkNotModified(currentETag, currentTime));
+		assertFalse(request.checkNotModified(currentETag, epochTime));
 
 		assertEquals(200, servletResponse.getStatus());
 		assertEquals(currentETag, servletResponse.getHeader("ETag"));
-		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+		assertEquals(dateFormat.format(epochTime), servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
@@ -233,26 +284,50 @@ public class ServletWebRequestHttpMethodsTests {
 
 	@Test
 	public void checkNotModifiedTimestampWithLengthPart() throws Exception {
-		long currentTime = dateFormat.parse("Wed, 09 Apr 2014 09:57:42 GMT").getTime();
+		long epochTime = dateFormat.parse(CURRENT_TIME).getTime();
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
 
-		assertTrue(request.checkNotModified(currentTime));
+		assertTrue(request.checkNotModified(epochTime));
 
 		assertEquals(304, servletResponse.getStatus());
-		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+		assertEquals(dateFormat.format(epochTime), servletResponse.getHeader("Last-Modified"));
 	}
 
 	@Test
 	public void checkModifiedTimestampWithLengthPart() throws Exception {
-		long currentTime = dateFormat.parse("Wed, 09 Apr 2014 09:57:42 GMT").getTime();
+		long epochTime = dateFormat.parse(CURRENT_TIME).getTime();
 		servletRequest.setMethod("GET");
 		servletRequest.addHeader("If-Modified-Since", "Wed, 08 Apr 2014 09:57:42 GMT; length=13774");
 
-		assertFalse(request.checkNotModified(currentTime));
+		assertFalse(request.checkNotModified(epochTime));
 
 		assertEquals(200, servletResponse.getStatus());
-		assertEquals("" + currentTime, servletResponse.getHeader("Last-Modified"));
+		assertEquals(dateFormat.format(epochTime), servletResponse.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void checkNotModifiedTimestampConditionalPut() throws Exception {
+		long currentEpoch = currentDate.getTime();
+		long oneMinuteAgo = currentEpoch - (1000 * 60);
+		servletRequest.setMethod("PUT");
+		servletRequest.addHeader("If-UnModified-Since", currentEpoch);
+
+		assertFalse(request.checkNotModified(oneMinuteAgo));
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals(null, servletResponse.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void checkNotModifiedTimestampConditionalPutConflict() throws Exception {
+		long currentEpoch = currentDate.getTime();
+		long oneMinuteAgo = currentEpoch - (1000 * 60);
+		servletRequest.setMethod("PUT");
+		servletRequest.addHeader("If-UnModified-Since", oneMinuteAgo);
+
+		assertTrue(request.checkNotModified(currentEpoch));
+		assertEquals(412, servletResponse.getStatus());
+		assertEquals(null, servletResponse.getHeader("Last-Modified"));
 	}
 
 }

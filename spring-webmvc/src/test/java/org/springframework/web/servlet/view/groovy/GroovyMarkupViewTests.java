@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Brian Clozel
@@ -69,7 +68,7 @@ public class GroovyMarkupViewTests {
 	public void missingGroovyMarkupConfig() throws Exception {
 		GroovyMarkupView view = new GroovyMarkupView();
 		given(this.webAppContext.getBeansOfType(GroovyMarkupConfig.class, true, false))
-				.willReturn(new HashMap<String, GroovyMarkupConfig>());
+				.willReturn(new HashMap<>());
 
 		view.setUrl("sampleView");
 		try {

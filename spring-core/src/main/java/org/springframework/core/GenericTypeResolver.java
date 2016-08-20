@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,33 +46,33 @@ public abstract class GenericTypeResolver {
 	/** Cache from Class to TypeVariable Map */
 	@SuppressWarnings("rawtypes")
 	private static final Map<Class<?>, Map<TypeVariable, Type>> typeVariableCache =
-			new ConcurrentReferenceHashMap<Class<?>, Map<TypeVariable, Type>>();
+			new ConcurrentReferenceHashMap<>();
 
 
 	/**
 	 * Determine the target type for the given parameter specification.
-	 * @param methodParam the method parameter specification
+	 * @param methodParameter the method parameter specification
 	 * @return the corresponding generic parameter type
 	 * @deprecated as of Spring 4.0, use {@link MethodParameter#getGenericParameterType()}
 	 */
 	@Deprecated
-	public static Type getTargetType(MethodParameter methodParam) {
-		Assert.notNull(methodParam, "MethodParameter must not be null");
-		return methodParam.getGenericParameterType();
+	public static Type getTargetType(MethodParameter methodParameter) {
+		Assert.notNull(methodParameter, "MethodParameter must not be null");
+		return methodParameter.getGenericParameterType();
 	}
 
 	/**
 	 * Determine the target type for the given generic parameter type.
-	 * @param methodParam the method parameter specification
-	 * @param clazz the class to resolve type variables against
+	 * @param methodParameter the method parameter specification
+	 * @param implementationClass the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
 	 */
-	public static Class<?> resolveParameterType(MethodParameter methodParam, Class<?> clazz) {
-		Assert.notNull(methodParam, "MethodParameter must not be null");
-		Assert.notNull(clazz, "Class must not be null");
-		methodParam.setContainingClass(clazz);
-		methodParam.setParameterType(ResolvableType.forMethodParameter(methodParam).resolve());
-		return methodParam.getParameterType();
+	public static Class<?> resolveParameterType(MethodParameter methodParameter, Class<?> implementationClass) {
+		Assert.notNull(methodParameter, "MethodParameter must not be null");
+		Assert.notNull(implementationClass, "Class must not be null");
+		methodParameter.setContainingClass(implementationClass);
+		ResolvableType.resolveMethodParameter(methodParameter);
+		return methodParameter.getParameterType();
 	}
 
 	/**
@@ -224,10 +224,9 @@ public abstract class GenericTypeResolver {
 	}
 
 	private static Class<?> getSingleGeneric(ResolvableType resolvableType) {
-		if (resolvableType.getGenerics().length > 1) {
-			throw new IllegalArgumentException("Expected 1 type argument on generic interface [" +
-					resolvableType + "] but found " + resolvableType.getGenerics().length);
-		}
+		Assert.isTrue(resolvableType.getGenerics().length == 1,
+				() -> "Expected 1 type argument on generic interface [" + resolvableType +
+				"] but found " + resolvableType.getGenerics().length);
 		return resolvableType.getGeneric().resolve();
 	}
 
@@ -273,7 +272,7 @@ public abstract class GenericTypeResolver {
 	public static Map<TypeVariable, Type> getTypeVariableMap(Class<?> clazz) {
 		Map<TypeVariable, Type> typeVariableMap = typeVariableCache.get(clazz);
 		if (typeVariableMap == null) {
-			typeVariableMap = new HashMap<TypeVariable, Type>();
+			typeVariableMap = new HashMap<>();
 			buildTypeVariableMap(ResolvableType.forClass(clazz), typeVariableMap);
 			typeVariableCache.put(clazz, Collections.unmodifiableMap(typeVariableMap));
 		}

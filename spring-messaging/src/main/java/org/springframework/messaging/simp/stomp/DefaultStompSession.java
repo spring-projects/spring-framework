@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
@@ -34,7 +35,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -47,7 +48,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
-
 /**
  * Default implementation of {@link ConnectionHandlingStompSession}.
  *
@@ -56,7 +56,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  */
 public class DefaultStompSession implements ConnectionHandlingStompSession {
 
-	private static Log logger = LogFactory.getLog(DefaultStompSession.class);
+	private static final Log logger = LogFactory.getLog(DefaultStompSession.class);
 
 	private static final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
@@ -66,7 +66,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	private static final long HEARTBEAT_MULTIPLIER = 3;
 
 	private static final Message<byte[]> HEARTBEAT;
-
 
 	static {
 		StompHeaderAccessor accessor = StompHeaderAccessor.createForHeartbeat();
@@ -80,26 +79,28 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final StompHeaders connectHeaders;
 
-	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<StompSession>();
+	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<>();
 
-	private MessageConverter converter = new StringMessageConverter();
+	private MessageConverter converter = new SimpleMessageConverter();
 
 	private TaskScheduler taskScheduler;
 
 	private long receiptTimeLimit = 15 * 1000;
 
-	private volatile  boolean autoReceiptEnabled;
+	private volatile boolean autoReceiptEnabled;
 
 
 	private volatile TcpConnection<byte[]> connection;
 
+	private volatile String version;
+
 	private final AtomicInteger subscriptionIndex = new AtomicInteger();
 
-	private final Map<String, DefaultSubscription> subscriptions = new ConcurrentHashMap<String, DefaultSubscription>(4);
+	private final Map<String, DefaultSubscription> subscriptions = new ConcurrentHashMap<>(4);
 
 	private final AtomicInteger receiptIndex = new AtomicInteger();
 
-	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<String, ReceiptHandler>(4);
+	private final Map<String, ReceiptHandler> receiptHandlers = new ConcurrentHashMap<>(4);
 
 	/* Whether the client is willfully closing the connection */
 	private volatile boolean closing = false;
@@ -107,7 +108,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	/**
 	 * Create a new session.
-	 *
 	 * @param sessionHandler the application handler for the session
 	 * @param connectHeaders headers for the STOMP CONNECT frame
 	 */
@@ -141,7 +141,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	 * Set the {@link MessageConverter} to use to convert the payload of incoming
 	 * and outgoing messages to and from {@code byte[]} based on object type, or
 	 * expected object type, and the "content-type" header.
-	 * <p>By default, {@link StringMessageConverter} is configured.
+	 * <p>By default, {@link SimpleMessageConverter} is configured.
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
@@ -201,7 +201,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	@Override
 	public boolean isConnected() {
-		return this.connection != null;
+		return (this.connection != null);
 	}
 
 	@Override
@@ -311,6 +311,28 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		return subscription;
 	}
 
+	@Override
+	public Receiptable acknowledge(String messageId, boolean consumed) {
+		StompHeaders stompHeaders = new StompHeaders();
+		if ("1.1".equals(this.version)) {
+			stompHeaders.setMessageId(messageId);
+		}
+		else {
+			stompHeaders.setId(messageId);
+		}
+
+		String receiptId = checkOrAddReceipt(stompHeaders);
+		Receiptable receiptable = new ReceiptHandler(receiptId);
+
+		StompCommand command = (consumed ? StompCommand.ACK : StompCommand.NACK);
+		StompHeaderAccessor accessor = createHeaderAccessor(command);
+		accessor.addNativeHeaders(stompHeaders);
+		Message<byte[]> message = createMessage(accessor, null);
+		execute(message);
+
+		return receiptable;
+	}
+
 	private void unsubscribe(String id) {
 		StompHeaderAccessor accessor = createHeaderAccessor(StompCommand.UNSUBSCRIBE);
 		accessor.setSubscriptionId(id);
@@ -330,6 +352,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			resetConnection();
 		}
 	}
+
 
 	// TcpConnectionHandler
 
@@ -390,6 +413,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 				}
 				else if (StompCommand.CONNECTED.equals(command)) {
 					initHeartbeatTasks(stompHeaders);
+					this.version = stompHeaders.getFirst("version");
 					this.sessionFuture.set(this);
 					this.sessionHandler.afterConnected(this, stompHeaders);
 				}
@@ -415,7 +439,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		Class<?> payloadType = ResolvableType.forType(type).getRawClass();
 		Object object = getMessageConverter().fromMessage(message, payloadType);
 		if (object == null) {
-			throw new MessageConversionException("No suitable converter, payloadType=" + payloadType);
+			throw new MessageConversionException("No suitable converter, payloadType=" + payloadType +
+					", handlerType=" + handler.getClass());
 		}
 		handler.handleFrame(stompHeaders, object);
 	}
@@ -474,19 +499,17 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	}
 
 
-
 	private class ReceiptHandler implements Receiptable {
 
 		private final String receiptId;
 
-		private final List<Runnable> receiptCallbacks = new ArrayList<Runnable>(2);
+		private final List<Runnable> receiptCallbacks = new ArrayList<>(2);
 
-		private final List<Runnable> receiptLostCallbacks = new ArrayList<Runnable>(2);
+		private final List<Runnable> receiptLostCallbacks = new ArrayList<>(2);
 
 		private ScheduledFuture<?> future;
 
 		private Boolean result;
-
 
 		public ReceiptHandler(String receiptId) {
 			this.receiptId = receiptId;
@@ -573,6 +596,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 	}
 
+
 	private class DefaultSubscription extends ReceiptHandler implements Subscription {
 
 		private final String id;
@@ -580,7 +604,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		private final String destination;
 
 		private final StompFrameHandler handler;
-
 
 		public DefaultSubscription(String id, String destination, String receiptId, StompFrameHandler handler) {
 			super(receiptId);
@@ -619,6 +642,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 	}
 
+
 	private class WriteInactivityTask implements Runnable {
 
 		@Override
@@ -636,6 +660,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			}
 		}
 	}
+
 
 	private class ReadInactivityTask implements Runnable {
 

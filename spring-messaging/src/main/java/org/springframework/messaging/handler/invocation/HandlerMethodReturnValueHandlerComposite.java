@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A HandlerMethodReturnValueHandler that wraps and delegates to others.
@@ -33,11 +34,11 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
+public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMethodReturnValueHandler {
 
 	private static final Log logger = LogFactory.getLog(HandlerMethodReturnValueHandlerComposite.class);
 
-	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+	private final List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
 
 
 	/**
@@ -98,6 +99,20 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 			logger.trace("Processing return value with " + handler);
 		}
 		handler.handleReturnValue(returnValue, returnType, message);
+	}
+
+	@Override
+	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
+		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
+		return (handler != null && handler instanceof AsyncHandlerMethodReturnValueHandler &&
+				((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(returnValue, returnType));
+	}
+
+	@Override
+	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
+		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
+		Assert.isTrue(handler != null && handler instanceof AsyncHandlerMethodReturnValueHandler);
+		return ((AsyncHandlerMethodReturnValueHandler) handler).toListenableFuture(returnValue, returnType);
 	}
 
 }

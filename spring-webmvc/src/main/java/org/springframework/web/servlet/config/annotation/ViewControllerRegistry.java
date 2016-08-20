@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -35,12 +36,14 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
  */
 public class ViewControllerRegistry {
 
-	private final List<ViewControllerRegistration> registrations = new ArrayList<ViewControllerRegistration>(4);
+	private final List<ViewControllerRegistration> registrations = new ArrayList<>(4);
 
 	private final List<RedirectViewControllerRegistration> redirectRegistrations =
-			new ArrayList<RedirectViewControllerRegistration>(10);
+			new ArrayList<>(10);
 
 	private int order = 1;
+
+	private ApplicationContext applicationContext;
 
 
 	/**
@@ -49,6 +52,7 @@ public class ViewControllerRegistry {
 	 */
 	public ViewControllerRegistration addViewController(String urlPath) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
+		registration.setApplicationContext(this.applicationContext);
 		this.registrations.add(registration);
 		return registration;
 	}
@@ -61,6 +65,7 @@ public class ViewControllerRegistry {
 	 */
 	public RedirectViewControllerRegistration addRedirectViewController(String urlPath, String redirectUrl) {
 		RedirectViewControllerRegistration registration = new RedirectViewControllerRegistration(urlPath, redirectUrl);
+		registration.setApplicationContext(this.applicationContext);
 		this.redirectRegistrations.add(registration);
 		return registration;
 	}
@@ -72,6 +77,7 @@ public class ViewControllerRegistry {
 	 */
 	public void addStatusController(String urlPath, HttpStatus statusCode) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
+		registration.setApplicationContext(this.applicationContext);
 		registration.setStatusCode(statusCode);
 		registration.getViewController().setStatusOnly(true);
 		this.registrations.add(registration);
@@ -87,6 +93,10 @@ public class ViewControllerRegistry {
 		this.order = order;
 	}
 
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+
 
 	/**
 	 * Return the {@code HandlerMapping} that contains the registered view
@@ -96,7 +106,7 @@ public class ViewControllerRegistry {
 		if (this.registrations.isEmpty() && this.redirectRegistrations.isEmpty()) {
 			return null;
 		}
-		Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> urlMap = new LinkedHashMap<>();
 		for (ViewControllerRegistration registration : this.registrations) {
 			urlMap.put(registration.getUrlPath(), registration.getViewController());
 		}

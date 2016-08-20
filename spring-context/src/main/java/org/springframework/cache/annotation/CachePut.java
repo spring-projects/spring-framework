@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,43 +23,78 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.cache.Cache;
+import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation indicating that a method (or all methods on a class) trigger(s)
- * a {@link Cache#put(Object, Object)} operation. As opposed to {@link Cacheable} annotation,
- * this annotation does not cause the target method to be skipped - rather it
- * always causes the method to be invoked and its result to be placed into the cache.
+ * Annotation indicating that a method (or all methods on a class) triggers a
+ * {@link org.springframework.cache.Cache#put(Object, Object) cache put} operation.
+ *
+ * <p>In contrast to the {@link Cacheable @Cacheable} annotation, this annotation
+ * does not cause the advised method to be skipped. Rather, it always causes the
+ * method to be invoked and its result to be stored in the associated cache. Note
+ * that Java8's {@code Optional} return types are automatically handled and its
+ * content is stored in the cache if present.
+ *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
  *
  * @author Costin Leau
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 3.1
  * @see CacheConfig
  */
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface CachePut {
 
 	/**
-	 * Name of the caches in which the update takes place.
-	 * <p>May be used to determine the target cache (or caches), matching the
-	 * qualifier value (or the bean name(s)) of (a) specific bean definition.
+	 * Alias for {@link #cacheNames}.
 	 */
+	@AliasFor("cacheNames")
 	String[] value() default {};
 
 	/**
-	 * Spring Expression Language (SpEL) attribute for computing the key dynamically.
-	 * <p>Default is "", meaning all method parameters are considered as a key, unless
-	 * a custom {@link #keyGenerator()} has been set.
+	 * Names of the caches to use for the cache put operation.
+	 * <p>Names may be used to determine the target cache (or caches), matching
+	 * the qualifier value or bean name of a specific bean definition.
+	 * @since 4.2
+	 * @see #value
+	 * @see CacheConfig#cacheNames
+	 */
+	@AliasFor("value")
+	String[] cacheNames() default {};
+
+	/**
+	 * Spring Expression Language (SpEL) expression for computing the key dynamically.
+	 * <p>Default is {@code ""}, meaning all method parameters are considered as a key,
+	 * unless a custom {@link #keyGenerator} has been set.
+	 * <p>The SpEL expression evaluates against a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #result} for a reference to the result of the method invocation. For
+	 * supported wrappers such as {@code Optional}, {@code #result} refers to the actual
+	 * object, not the wrapper</li>
+	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
+	 * references to the {@link java.lang.reflect.Method method}, target object, and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 */
 	String key() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator} to use.
-	 * <p>Mutually exclusive with the {@link #key()} attribute.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator}
+	 * to use.
+	 * <p>Mutually exclusive with the {@link #key} attribute.
+	 * @see CacheConfig#keyGenerator
 	 */
 	String keyGenerator() default "";
 
@@ -67,29 +102,60 @@ public @interface CachePut {
 	 * The bean name of the custom {@link org.springframework.cache.CacheManager} to use to
 	 * create a default {@link org.springframework.cache.interceptor.CacheResolver} if none
 	 * is set already.
-	 * <p>Mutually exclusive with the {@link #cacheResolver()}  attribute.
+	 * <p>Mutually exclusive with the {@link #cacheResolver} attribute.
 	 * @see org.springframework.cache.interceptor.SimpleCacheResolver
+	 * @see CacheConfig#cacheManager
 	 */
 	String cacheManager() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver} to use.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver}
+	 * to use.
+	 * @see CacheConfig#cacheResolver
 	 */
 	String cacheResolver() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for making the cache
+	 * Spring Expression Language (SpEL) expression used for making the cache
 	 * put operation conditional.
-	 * <p>Default is "", meaning the method result is always cached.
+	 * <p>Default is {@code ""}, meaning the method result is always cached.
+	 * <p>The SpEL expression evaluates against a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
+	 * references to the {@link java.lang.reflect.Method method}, target object, and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 */
 	String condition() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used to veto the cache update.
-	 * <p>Unlike {@link #condition()}, this expression is evaluated after the method
-	 * has been called and can therefore refer to the {@code result}. Default is "",
-	 * meaning that caching is never vetoed.
+	 * Spring Expression Language (SpEL) expression used to veto the cache put operation.
+	 * <p>Unlike {@link #condition}, this expression is evaluated after the method
+	 * has been called and can therefore refer to the {@code result}.
+	 * <p>Default is {@code ""}, meaning that caching is never vetoed.
+	 * <p>The SpEL expression evaluates against a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #result} for a reference to the result of the method invocation. For
+	 * supported wrappers such as {@code Optional}, {@code #result} refers to the actual
+	 * object, not the wrapper</li>
+	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
+	 * references to the {@link java.lang.reflect.Method method}, target object, and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 * @since 3.2
 	 */
 	String unless() default "";
+
 }

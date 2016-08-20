@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -29,7 +30,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
-import java.util.TreeSet;
 
 /**
  * Miscellaneous {@link String} utility methods.
@@ -79,41 +79,9 @@ public abstract class StringUtils {
 	 * Objects since attributes may e.g. be primitive value objects as well.
 	 * @param str the candidate String
 	 * @since 3.2.1
-	 * @see #isNotEmpty(CharSequence)
-	 * @see #isNotEmpty(String)
 	 */
 	public static boolean isEmpty(Object str) {
 		return (str == null || "".equals(str));
-	}
-
-	/**
-	 * Check that the given {@code CharSequence} is not empty (i.e., neither
-	 * {@code null} nor of length 0).
-	 * <p>This method is an alias for {@link #hasLength(CharSequence)}.
-	 * <p>Note: this method returns {@code true} for a {@code CharSequence}
-	 * that purely consists of whitespace.
-	 * @param str the {@code CharSequence} to check (may be {@code null})
-	 * @return {@code true} if the {@code CharSequence} is not {@code null} and has length
-	 * @see #hasText(CharSequence)
-	 * @since 4.2
-	 */
-	public static boolean isNotEmpty(CharSequence str) {
-		return hasLength(str);
-	}
-
-	/**
-	 * Check that the given {@code String} is not empty (i.e., neither
-	 * {@code null} nor of length 0).
-	 * <p>This method is an alias for {@link #hasLength(String)}.
-	 * <p>Note: this method returns {@code true} for a {@code String} that
-	 * purely consists of whitespace.
-	 * @param str the {@code String} to check (may be {@code null})
-	 * @return {@code true} if the {@code String} is not {@code null} and has length
-	 * @see #hasText(String)
-	 * @since 4.2
-	 */
-	public static boolean isNotEmpty(String str) {
-		return hasLength(str);
 	}
 
 	/**
@@ -559,7 +527,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Extract the filename from the given path,
+	 * Extract the filename from the given Java resource path,
 	 * e.g. {@code "mypath/myfile.txt" -> "myfile.txt"}.
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename, or {@code null} if none
@@ -573,7 +541,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Extract the filename extension from the given path,
+	 * Extract the filename extension from the given Java resource path,
 	 * e.g. "mypath/myfile.txt" -> "txt".
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename extension, or {@code null} if none
@@ -594,7 +562,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Strip the filename extension from the given path,
+	 * Strip the filename extension from the given Java resource path,
 	 * e.g. "mypath/myfile.txt" -> "mypath/myfile".
 	 * @param path the file path (may be {@code null})
 	 * @return the path with stripped filename extension,
@@ -616,7 +584,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Apply the given relative path to the given path,
+	 * Apply the given relative path to the given Java resource path,
 	 * assuming standard Java folder separation (i.e. "/" separators).
 	 * @param path the path to start from (usually a full file path)
 	 * @param relativePath the relative path to apply
@@ -672,7 +640,7 @@ public abstract class StringUtils {
 		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-		List<String> pathElements = new LinkedList<String>();
+		List<String> pathElements = new LinkedList<>();
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {
@@ -840,7 +808,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array2)) {
 			return array1;
 		}
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		result.addAll(Arrays.asList(array1));
 		for (String str : array2) {
 			if (!result.contains(str)) {
@@ -912,7 +880,7 @@ public abstract class StringUtils {
 
 	/**
 	 * Remove duplicate strings from the given array.
-	 * <p>Also sorts the array, as it uses a {@link TreeSet}.
+	 * <p>As of 4.2, it preserves the original order, as it uses a {@link LinkedHashSet}.
 	 * @param array the {@code String} array
 	 * @return an array without duplicates, in natural sort order
 	 */
@@ -920,7 +888,7 @@ public abstract class StringUtils {
 		if (ObjectUtils.isEmpty(array)) {
 			return array;
 		}
-		Set<String> set = new TreeSet<String>();
+		Set<String> set = new LinkedHashSet<>();
 		for (String element : array) {
 			set.add(element);
 		}
@@ -1045,7 +1013,7 @@ public abstract class StringUtils {
 			return null;
 		}
 		StringTokenizer st = new StringTokenizer(str, delimiters);
-		List<String> tokens = new ArrayList<String>();
+		List<String> tokens = new ArrayList<>();
 		while (st.hasMoreTokens()) {
 			String token = st.nextToken();
 			if (trimTokens) {
@@ -1097,7 +1065,7 @@ public abstract class StringUtils {
 		if (delimiter == null) {
 			return new String[] {str};
 		}
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<>();
 		if ("".equals(delimiter)) {
 			for (int i = 0; i < str.length(); i++) {
 				result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
@@ -1130,13 +1098,14 @@ public abstract class StringUtils {
 
 	/**
 	 * Convert a comma delimited list (e.g., a row from a CSV file) into a set.
-	 * <p>Note that this will suppress duplicates, and the elements in the
-	 * returned set will be sorted, since a {@link TreeSet} is used internally.
+	 * <p>Note that this will suppress duplicates, and as of 4.2, the elements in
+	 * the returned set will preserve the original order in a {@link LinkedHashSet}.
 	 * @param str the input {@code String}
 	 * @return a set of {@code String} entries in the list
+	 * @see #removeDuplicateStrings(String[])
 	 */
 	public static Set<String> commaDelimitedListToSet(String str) {
-		Set<String> set = new TreeSet<String>();
+		Set<String> set = new LinkedHashSet<>();
 		String[] tokens = commaDelimitedListToStringArray(str);
 		for (String token : tokens) {
 			set.add(token);

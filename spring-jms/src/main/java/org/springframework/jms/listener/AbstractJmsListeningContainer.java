@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	private boolean running = false;
 
-	private final List<Object> pausedTasks = new LinkedList<Object>();
+	private final List<Object> pausedTasks = new LinkedList<>();
 
 	protected final Object lifecycleMonitor = new Object();
 
@@ -315,7 +315,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	@Override
 	public void stop(Runnable callback) {
-		this.stop();
+		stop();
 		callback.run();
 	}
 

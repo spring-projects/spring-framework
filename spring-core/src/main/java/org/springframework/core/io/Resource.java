@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,41 +37,57 @@ import java.net.URL;
  * @see #getFile()
  * @see WritableResource
  * @see ContextResource
- * @see FileSystemResource
- * @see ClassPathResource
  * @see UrlResource
+ * @see ClassPathResource
+ * @see FileSystemResource
+ * @see PathResource
  * @see ByteArrayResource
  * @see InputStreamResource
- * @see PathResource
  */
 public interface Resource extends InputStreamSource {
 
 	/**
-	 * Return whether this resource actually exists in physical form.
+	 * Determine whether this resource actually exists in physical form.
 	 * <p>This method performs a definitive existence check, whereas the
-	 * existence of a {@code Resource} handle only guarantees a
-	 * valid descriptor handle.
+	 * existence of a {@code Resource} handle only guarantees a valid
+	 * descriptor handle.
 	 */
 	boolean exists();
 
 	/**
-	 * Return whether the contents of this resource can be read,
-	 * e.g. via {@link #getInputStream()} or {@link #getFile()}.
+	 * Indicate whether the contents of this resource can be read via
+	 * {@link #getInputStream()}.
 	 * <p>Will be {@code true} for typical resource descriptors;
 	 * note that actual content reading may still fail when attempted.
 	 * However, a value of {@code false} is a definitive indication
 	 * that the resource content cannot be read.
 	 * @see #getInputStream()
 	 */
-	boolean isReadable();
+	default boolean isReadable() {
+		return true;
+	}
 
 	/**
-	 * Return whether this resource represents a handle with an open
-	 * stream. If true, the InputStream cannot be read multiple times,
+	 * Indicate whether this resource represents a handle with an open stream.
+	 * If {@code true}, the InputStream cannot be read multiple times,
 	 * and must be read and closed to avoid resource leaks.
 	 * <p>Will be {@code false} for typical resource descriptors.
 	 */
-	boolean isOpen();
+	default boolean isOpen() {
+		return false;
+	}
+
+	/**
+	 * Determine whether this resource represents a file in a file system.
+	 * A value of {@code true} strongly suggests (but does not guarantee)
+	 * that a {@link #getFile()} call will succeed.
+	 * <p>This is conservatively {@code false} by default.
+	 * @since 5.0
+	 * @see #getFile()
+	 */
+	default boolean isFile() {
+		return false;
+	}
 
 	/**
 	 * Return a URL handle for this resource.
@@ -84,6 +100,7 @@ public interface Resource extends InputStreamSource {
 	 * Return a URI handle for this resource.
 	 * @throws IOException if the resource cannot be resolved as URI,
 	 * i.e. if the resource is not available as descriptor
+	 * @since 2.5
 	 */
 	URI getURI() throws IOException;
 

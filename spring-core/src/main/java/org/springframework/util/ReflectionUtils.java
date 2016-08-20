@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,18 +51,23 @@ public abstract class ReflectionUtils {
 	 */
 	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
 
+	private static final Method[] NO_METHODS = {};
+
+	private static final Field[] NO_FIELDS = {};
+
+
 	/**
 	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
 	 * from Java 8 based interfaces, allowing for fast iteration.
 	 */
 	private static final Map<Class<?>, Method[]> declaredMethodsCache =
-			new ConcurrentReferenceHashMap<Class<?>, Method[]>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 	/**
 	 * Cache for {@link Class#getDeclaredFields()}, allowing for fast iteration.
 	 */
 	private static final Map<Class<?>, Field[]> declaredFieldsCache =
-			new ConcurrentReferenceHashMap<Class<?>, Field[]>(256);
+			new ConcurrentReferenceHashMap<>(256);
 
 
 	/**
@@ -89,10 +94,11 @@ public abstract class ReflectionUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
 		Class<?> searchType = clazz;
-		while (!Object.class.equals(searchType) && searchType != null) {
+		while (Object.class != searchType && searchType != null) {
 			Field[] fields = getDeclaredFields(searchType);
 			for (Field field : fields) {
-				if ((name == null || name.equals(field.getName())) && (type == null || type.equals(field.getType()))) {
+				if ((name == null || name.equals(field.getName())) &&
+						(type == null || type.equals(field.getType()))) {
 					return field;
 				}
 			}
@@ -109,7 +115,7 @@ public abstract class ReflectionUtils {
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to set
 	 * @param target the target object on which to set the field
-	 * @param value the value to set; may be {@code null}
+	 * @param value the value to set (may be {@code null})
 	 */
 	public static void setField(Field field, Object target, Object value) {
 		try {
@@ -259,7 +265,8 @@ public abstract class ReflectionUtils {
 	 * checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of an
 	 * InvocationTargetException with such a root cause. Throws an
-	 * IllegalStateException with an appropriate message else.
+	 * IllegalStateException with an appropriate message or
+	 * UndeclaredThrowableException otherwise.
 	 * @param ex the reflection exception to handle
 	 */
 	public static void handleReflectionException(Exception ex) {
@@ -282,7 +289,7 @@ public abstract class ReflectionUtils {
 	 * Handle the given invocation target exception. Should only be called if no
 	 * checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of such a root
-	 * cause. Throws an IllegalStateException else.
+	 * cause. Throws an UndeclaredThrowableException otherwise.
 	 * @param ex the invocation target exception to handle
 	 */
 	public static void handleInvocationTargetException(InvocationTargetException ex) {
@@ -291,12 +298,12 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Rethrow the given {@link Throwable exception}, which is presumably the
-	 * <em>target exception</em> of an {@link InvocationTargetException}. Should
-	 * only be called if no checked exception is expected to be thrown by the
-	 * target method.
-	 * <p>Rethrows the underlying exception cast to an {@link RuntimeException} or
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown
+	 * by the target method.
+	 * <p>Rethrows the underlying exception cast to a {@link RuntimeException} or
 	 * {@link Error} if appropriate; otherwise, throws an
-	 * {@link IllegalStateException}.
+	 * {@link UndeclaredThrowableException}.
 	 * @param ex the exception to rethrow
 	 * @throws RuntimeException the rethrown exception
 	 */
@@ -312,12 +319,12 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Rethrow the given {@link Throwable exception}, which is presumably the
-	 * <em>target exception</em> of an {@link InvocationTargetException}. Should
-	 * only be called if no checked exception is expected to be thrown by the
-	 * target method.
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown
+	 * by the target method.
 	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
 	 * {@link Error} if appropriate; otherwise, throws an
-	 * {@link IllegalStateException}.
+	 * {@link UndeclaredThrowableException}.
 	 * @param ex the exception to rethrow
 	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */
@@ -333,8 +340,8 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Determine whether the given method explicitly declares the given
-	 * exception or one of its superclasses, which means that an exception of
-	 * that type can be propagated as-is within a reflective invocation.
+	 * exception or one of its superclasses, which means that an exception
+	 * of that type can be propagated as-is within a reflective invocation.
 	 * @param method the declaring method
 	 * @param exceptionType the exception to throw
 	 * @return {@code true} if the exception can be thrown as-is;
@@ -377,7 +384,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public static boolean isHashCodeMethod(Method method) {
-		return (method != null && method.getName().equals("hashCode") && method.getParameterTypes().length == 0);
+		return (method != null && method.getName().equals("hashCode") && method.getParameterCount() == 0);
 	}
 
 	/**
@@ -385,7 +392,7 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.Object#toString()
 	 */
 	public static boolean isToStringMethod(Method method) {
-		return (method != null && method.getName().equals("toString") && method.getParameterTypes().length == 0);
+		return (method != null && method.getName().equals("toString") && method.getParameterCount() == 0);
 	}
 
 	/**
@@ -418,8 +425,7 @@ public abstract class ReflectionUtils {
 				i--;
 			}
 			return ((i > CGLIB_RENAMED_METHOD_PREFIX.length()) &&
-						(i < name.length() - 1) &&
-						(name.charAt(i) == '$'));
+						(i < name.length() - 1) && name.charAt(i) == '$');
 		}
 		return false;
 	}
@@ -433,7 +439,8 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.reflect.Field#setAccessible
 	 */
 	public static void makeAccessible(Field field) {
-		if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
+		if ((!Modifier.isPublic(field.getModifiers()) ||
+				!Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
 				Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
 			field.setAccessible(true);
 		}
@@ -467,6 +474,22 @@ public abstract class ReflectionUtils {
 				!Modifier.isPublic(ctor.getDeclaringClass().getModifiers())) && !ctor.isAccessible()) {
 			ctor.setAccessible(true);
 		}
+	}
+
+	/**
+	 * Obtain an accessible constructor for the given class and parameters.
+	 * @param clazz the clazz to check
+	 * @param parameterTypes the parameter types of the desired constructor
+	 * @return the constructor reference
+	 * @throws NoSuchMethodException if no such constructor exists
+	 * @since 5.0
+	 */
+	public static <T> Constructor<T> accessibleConstructor(Class<T> clazz, Class<?>... parameterTypes)
+			throws NoSuchMethodException {
+
+		Constructor<T> ctor = clazz.getDeclaredConstructor(parameterTypes);
+		makeAccessible(ctor);
+		return ctor;
 	}
 
 	/**
@@ -542,7 +565,7 @@ public abstract class ReflectionUtils {
 	 * @param leafClass the class to introspect
 	 */
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) {
-		final List<Method> methods = new ArrayList<Method>(32);
+		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, new MethodCallback() {
 			@Override
 			public void doWith(Method method) {
@@ -559,7 +582,7 @@ public abstract class ReflectionUtils {
 	 * @param leafClass the class to introspect
 	 */
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass) {
-		final List<Method> methods = new ArrayList<Method>(32);
+		final List<Method> methods = new ArrayList<>(32);
 		doWithMethods(leafClass, new MethodCallback() {
 			@Override
 			public void doWith(Method method) {
@@ -616,7 +639,7 @@ public abstract class ReflectionUtils {
 			else {
 				result = declaredMethods;
 			}
-			declaredMethodsCache.put(clazz, result);
+			declaredMethodsCache.put(clazz, (result.length == 0 ? NO_METHODS : result));
 		}
 		return result;
 	}
@@ -627,7 +650,7 @@ public abstract class ReflectionUtils {
 			for (Method ifcMethod : ifc.getMethods()) {
 				if (!Modifier.isAbstract(ifcMethod.getModifiers())) {
 					if (result == null) {
-						result = new LinkedList<Method>();
+						result = new LinkedList<>();
 					}
 					result.add(ifcMethod);
 				}
@@ -704,7 +727,7 @@ public abstract class ReflectionUtils {
 		Field[] result = declaredFieldsCache.get(clazz);
 		if (result == null) {
 			result = clazz.getDeclaredFields();
-			declaredFieldsCache.put(clazz, result);
+			declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
 		}
 		return result;
 	}
@@ -735,10 +758,20 @@ public abstract class ReflectionUtils {
 		}, COPYABLE_FIELDS);
 	}
 
+	/**
+	 * Clear the internal method/field cache.
+	 * @since 4.2.4
+	 */
+	public static void clearCache() {
+		declaredMethodsCache.clear();
+		declaredFieldsCache.clear();
+	}
+
 
 	/**
 	 * Action to take on each method.
 	 */
+	@FunctionalInterface
 	public interface MethodCallback {
 
 		/**
@@ -752,6 +785,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback optionally used to filter methods to be operated on by a method callback.
 	 */
+	@FunctionalInterface
 	public interface MethodFilter {
 
 		/**
@@ -765,6 +799,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback interface invoked on each field in the hierarchy.
 	 */
+	@FunctionalInterface
 	public interface FieldCallback {
 
 		/**
@@ -778,6 +813,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Callback optionally used to filter fields to be operated on by a field callback.
 	 */
+	@FunctionalInterface
 	public interface FieldFilter {
 
 		/**
@@ -791,7 +827,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
-	public static FieldFilter COPYABLE_FIELDS = new FieldFilter() {
+	public static final FieldFilter COPYABLE_FIELDS = new FieldFilter() {
 
 		@Override
 		public boolean matches(Field field) {
@@ -803,7 +839,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods.
 	 */
-	public static MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
+	public static final MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {
@@ -816,7 +852,7 @@ public abstract class ReflectionUtils {
 	 * Pre-built MethodFilter that matches all non-bridge methods
 	 * which are not declared on {@code java.lang.Object}.
 	 */
-	public static MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
+	public static final MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {

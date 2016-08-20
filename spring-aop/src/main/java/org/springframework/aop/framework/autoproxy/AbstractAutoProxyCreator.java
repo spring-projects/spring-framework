@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.aop.Advisor;
+import org.springframework.aop.Pointcut;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AopInfrastructureBean;
 import org.springframework.aop.framework.ProxyFactory;
@@ -42,9 +43,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
@@ -125,15 +128,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	private BeanFactory beanFactory;
 
-	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<Object, Boolean>(64);
-
 	private final Set<String> targetSourcedBeans =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(16));
+			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
 	private final Set<Object> earlyProxyReferences =
-			Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>(16));
+			Collections.newSetFromMap(new ConcurrentHashMap<>(16));
 
-	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>(16);
+	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<>(16);
+
+	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<>(256);
 
 
 	/**
@@ -214,6 +217,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
+		if (this.proxyTypes.isEmpty()) {
+			return null;
+		}
 		Object cacheKey = getCacheKey(beanClass, beanName);
 		return this.proxyTypes.get(cacheKey);
 	}
@@ -299,12 +305,23 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	/**
 	 * Build a cache key for the given bean class and bean name.
+	 * <p>Note: As of 4.2.3, this implementation does not return a concatenated
+	 * class/name String anymore but rather the most efficient cache key possible:
+	 * a plain bean name, prepended with {@link BeanFactory#FACTORY_BEAN_PREFIX}
+	 * in case of a {@code FactoryBean}; or if no bean name specified, then the
+	 * given bean {@code Class} as-is.
 	 * @param beanClass the bean class
 	 * @param beanName the bean name
 	 * @return the cache key for the given class and name
 	 */
 	protected Object getCacheKey(Class<?> beanClass, String beanName) {
-		return beanClass.getName() + "_" + beanName;
+		if (StringUtils.hasLength(beanName)) {
+			return (FactoryBean.class.isAssignableFrom(beanClass) ?
+					BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+		}
+		else {
+			return beanClass;
+		}
 	}
 
 	/**
@@ -330,7 +347,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
 			this.advisedBeans.put(cacheKey, Boolean.TRUE);
-			Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+			Object proxy = createProxy(
+					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
 			this.proxyTypes.put(cacheKey, proxy.getClass());
 			return proxy;
 		}
@@ -353,6 +371,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	protected boolean isInfrastructureClass(Class<?> beanClass) {
 		boolean retVal = Advice.class.isAssignableFrom(beanClass) ||
+				Pointcut.class.isAssignableFrom(beanClass) ||
 				Advisor.class.isAssignableFrom(beanClass) ||
 				AopInfrastructureBean.class.isAssignableFrom(beanClass);
 		if (retVal && logger.isTraceEnabled()) {
@@ -418,6 +437,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	protected Object createProxy(
 			Class<?> beanClass, String beanName, Object[] specificInterceptors, TargetSource targetSource) {
+
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
+			AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
+		}
 
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.copyFrom(this);
@@ -487,10 +510,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		// Handle prototypes correctly...
 		Advisor[] commonInterceptors = resolveInterceptorNames();
 
-		List<Object> allInterceptors = new ArrayList<Object>();
+		List<Object> allInterceptors = new ArrayList<>();
 		if (specificInterceptors != null) {
 			allInterceptors.addAll(Arrays.asList(specificInterceptors));
-			if (commonInterceptors != null) {
+			if (commonInterceptors.length > 0) {
 				if (this.applyCommonInterceptorsFirst) {
 					allInterceptors.addAll(0, Arrays.asList(commonInterceptors));
 				}
@@ -500,7 +523,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			int nrOfCommonInterceptors = (commonInterceptors != null ? commonInterceptors.length : 0);
+			int nrOfCommonInterceptors = commonInterceptors.length;
 			int nrOfSpecificInterceptors = (specificInterceptors != null ? specificInterceptors.length : 0);
 			logger.debug("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
 					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
@@ -518,9 +541,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @see #setInterceptorNames
 	 */
 	private Advisor[] resolveInterceptorNames() {
-		ConfigurableBeanFactory cbf = (this.beanFactory instanceof ConfigurableBeanFactory) ?
-				(ConfigurableBeanFactory) this.beanFactory : null;
-		List<Advisor> advisors = new ArrayList<Advisor>();
+		ConfigurableBeanFactory cbf = (this.beanFactory instanceof ConfigurableBeanFactory ?
+				(ConfigurableBeanFactory) this.beanFactory : null);
+		List<Advisor> advisors = new ArrayList<>();
 		for (String beanName : this.interceptorNames) {
 			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
 				Object next = this.beanFactory.getBean(beanName);
@@ -536,7 +559,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * <p>The default implementation is empty.
 	 * @param proxyFactory ProxyFactory that is already configured with
 	 * TargetSource and interfaces and will be used to create the proxy
-	 * immediably after this method returns
+	 * immediately after this method returns
 	 */
 	protected void customizeProxyFactory(ProxyFactory proxyFactory) {
 	}

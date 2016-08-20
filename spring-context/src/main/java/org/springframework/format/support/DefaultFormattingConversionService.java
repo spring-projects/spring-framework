@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ import org.springframework.util.StringValueResolver;
  * utility method for ad hoc use against any {@code FormatterRegistry} instance, just
  * as {@code DefaultConversionService} exposes its own
  * {@link DefaultConversionService#addDefaultConverters addDefaultConverters} method.
+ *
+ * <p>Automatically registers formatters for JSR-354 Money & Currency, JSR-310 Date-Time
+ * and/or Joda-Time, depending on the presence of the corresponding API on the classpath.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -92,9 +95,10 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 
 
 	/**
-	 * Add formatters appropriate for most environments, including number formatters and a Joda-Time
-	 * date formatter if Joda-Time is present on the classpath.
-	 * @param formatterRegistry the service to register default formatters against
+	 * Add formatters appropriate for most environments: including number formatters,
+	 * JSR-354 Money & Currency formatters, JSR-310 Date-Time and/or Joda-Time formatters,
+	 * depending on the presence of the corresponding API on the classpath.
+	 * @param formatterRegistry the service to register default formatters with
 	 */
 	public static void addDefaultFormatters(FormatterRegistry formatterRegistry) {
 		// Default handling of number values

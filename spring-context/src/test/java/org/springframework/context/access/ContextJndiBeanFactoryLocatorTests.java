@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -28,11 +28,13 @@ import org.springframework.beans.factory.access.BootstrapException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Colin Sampaleanu
  * @author Chris Beams
  */
-public final class ContextJndiBeanFactoryLocatorTests extends TestCase {
+public class ContextJndiBeanFactoryLocatorTests {
 
 	private static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
 
@@ -45,7 +47,8 @@ public final class ContextJndiBeanFactoryLocatorTests extends TestCase {
 	private static final String PARENT_CONTEXT = FQ_PATH + CLASSNAME + "-parent.xml";
 
 
-	public void testBeanFactoryPathRequiredFromJndiEnvironment() throws Exception {
+	@Test
+	public void beanFactoryPathRequiredFromJndiEnvironment() throws Exception {
 		// Set up initial context but don't bind anything
 		SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
@@ -60,7 +63,8 @@ public final class ContextJndiBeanFactoryLocatorTests extends TestCase {
 		}
 	}
 
-	public void testBeanFactoryPathFromJndiEnvironmentNotFound() throws Exception  {
+	@Test
+	public void beanFactoryPathFromJndiEnvironmentNotFound() throws Exception  {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
 		String bogusPath = "RUBBISH/com/xxxx/framework/server/test1.xml";
@@ -79,7 +83,8 @@ public final class ContextJndiBeanFactoryLocatorTests extends TestCase {
 		}
 	}
 
-	public void testBeanFactoryPathFromJndiEnvironmentNotValidXml() throws Exception {
+	@Test
+	public void beanFactoryPathFromJndiEnvironmentNotValidXml() throws Exception {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
 		String nonXmlPath = "com/xxxx/framework/server/SlsbEndpointBean.class";
@@ -98,7 +103,8 @@ public final class ContextJndiBeanFactoryLocatorTests extends TestCase {
 		}
 	}
 
-	public void testBeanFactoryPathFromJndiEnvironmentWithSingleFile() throws Exception {
+	@Test
+	public void beanFactoryPathFromJndiEnvironmentWithSingleFile() throws Exception {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
 		// Set up initial context
@@ -110,7 +116,8 @@ public final class ContextJndiBeanFactoryLocatorTests extends TestCase {
 		assertTrue(bf instanceof ApplicationContext);
 	}
 
-	public void testBeanFactoryPathFromJndiEnvironmentWithMultipleFiles() throws Exception {
+	@Test
+	public void beanFactoryPathFromJndiEnvironmentWithMultipleFiles() throws Exception {
 		SimpleNamingContextBuilder sncb = SimpleNamingContextBuilder.emptyActivatedContextBuilder();
 
 		String path = String.format("%s %s", COLLECTIONS_CONTEXT, PARENT_CONTEXT);

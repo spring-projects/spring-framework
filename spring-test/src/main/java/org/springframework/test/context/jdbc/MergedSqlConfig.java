@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.util.Assert;
 
 /**
  * {@code MergedSqlConfig} encapsulates the <em>merged</em> {@link SqlConfig @SqlConfig}
- * attributes declared locally via {@link Sql#config} and globally as a
- * class-level annotation.
+ * attributes declared locally via {@link Sql#config} and globally as a class-level annotation.
+ *
  * <p>Explicit local configuration attributes override global configuration attributes.
  *
  * @author Sam Brannen
@@ -56,23 +56,6 @@ class MergedSqlConfig {
 	private final ErrorMode errorMode;
 
 
-	private static <E extends Enum<?>> E getEnum(AnnotationAttributes attributes, String attributeName,
-			E inheritedOrDefaultValue, E defaultValue) {
-		E value = attributes.getEnum(attributeName);
-		if (value == inheritedOrDefaultValue) {
-			value = defaultValue;
-		}
-		return value;
-	}
-
-	private static String getString(AnnotationAttributes attributes, String attributeName, String defaultValue) {
-		String value = attributes.getString(attributeName);
-		if ("".equals(value)) {
-			value = defaultValue;
-		}
-		return value;
-	}
-
 	/**
 	 * Construct a {@code MergedSqlConfig} instance by merging the configuration
 	 * from the supplied local (potentially method-level) {@code @SqlConfig} annotation
@@ -86,8 +69,8 @@ class MergedSqlConfig {
 		Assert.notNull(testClass, "testClass must not be null");
 
 		// Get global attributes, if any.
-		AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(testClass,
-			SqlConfig.class.getName());
+		AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(
+				testClass, SqlConfig.class.getName(), false, false);
 
 		// Override global attributes with local attributes.
 		if (attributes != null) {
@@ -95,7 +78,7 @@ class MergedSqlConfig {
 				Object value = AnnotationUtils.getValue(localSqlConfig, key);
 				if (value != null) {
 					// Is the value explicit (i.e., not a 'default')?
-					if (!value.equals("") && (value != TransactionMode.DEFAULT) && (value != ErrorMode.DEFAULT)) {
+					if (!value.equals("") && value != TransactionMode.DEFAULT && value != ErrorMode.DEFAULT) {
 						attributes.put(key, value);
 					}
 				}
@@ -113,9 +96,9 @@ class MergedSqlConfig {
 		this.separator = getString(attributes, "separator", ScriptUtils.DEFAULT_STATEMENT_SEPARATOR);
 		this.commentPrefix = getString(attributes, "commentPrefix", ScriptUtils.DEFAULT_COMMENT_PREFIX);
 		this.blockCommentStartDelimiter = getString(attributes, "blockCommentStartDelimiter",
-			ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER);
+				ScriptUtils.DEFAULT_BLOCK_COMMENT_START_DELIMITER);
 		this.blockCommentEndDelimiter = getString(attributes, "blockCommentEndDelimiter",
-			ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+				ScriptUtils.DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 		this.errorMode = getEnum(attributes, "errorMode", ErrorMode.DEFAULT, ErrorMode.FAIL_ON_ERROR);
 	}
 
@@ -187,17 +170,36 @@ class MergedSqlConfig {
 	 */
 	@Override
 	public String toString() {
-		return new ToStringCreator(this)//
-		.append("dataSource", dataSource)//
-		.append("transactionManager", transactionManager)//
-		.append("transactionMode", transactionMode)//
-		.append("encoding", encoding)//
-		.append("separator", separator)//
-		.append("commentPrefix", commentPrefix)//
-		.append("blockCommentStartDelimiter", blockCommentStartDelimiter)//
-		.append("blockCommentEndDelimiter", blockCommentEndDelimiter)//
-		.append("errorMode", errorMode)//
-		.toString();
+		return new ToStringCreator(this)
+				.append("dataSource", this.dataSource)
+				.append("transactionManager", this.transactionManager)
+				.append("transactionMode", this.transactionMode)
+				.append("encoding", this.encoding)
+				.append("separator", this.separator)
+				.append("commentPrefix", this.commentPrefix)
+				.append("blockCommentStartDelimiter", this.blockCommentStartDelimiter)
+				.append("blockCommentEndDelimiter", this.blockCommentEndDelimiter)
+				.append("errorMode", this.errorMode)
+				.toString();
+	}
+
+
+	private static <E extends Enum<?>> E getEnum(AnnotationAttributes attributes, String attributeName,
+			E inheritedOrDefaultValue, E defaultValue) {
+
+		E value = attributes.getEnum(attributeName);
+		if (value == inheritedOrDefaultValue) {
+			value = defaultValue;
+		}
+		return value;
+	}
+
+	private static String getString(AnnotationAttributes attributes, String attributeName, String defaultValue) {
+		String value = attributes.getString(attributeName);
+		if ("".equals(value)) {
+			value = defaultValue;
+		}
+		return value;
 	}
 
 }

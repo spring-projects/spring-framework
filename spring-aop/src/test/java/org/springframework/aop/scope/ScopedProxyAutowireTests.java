@@ -29,7 +29,7 @@ import static org.springframework.tests.TestResourceUtils.*;
  * @author Mark Fisher
  * @author Chris Beams
  */
-public final class ScopedProxyAutowireTests {
+public class ScopedProxyAutowireTests {
 
 	private static final Class<?> CLASS = ScopedProxyAutowireTests.class;
 

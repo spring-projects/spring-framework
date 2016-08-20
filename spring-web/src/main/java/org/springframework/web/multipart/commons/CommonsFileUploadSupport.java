@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,16 +47,10 @@ import org.springframework.web.util.WebUtils;
  * as representation of uploaded files and a String-based parameter Map as
  * representation of uploaded form fields.
  *
- * <p>Subclasses implement concrete resolution strategies for Servlet or Portlet
- * environments: see CommonsMultipartResolver and CommonsPortletMultipartResolver,
- * respectively. This base class is not tied to either of those APIs, factoring
- * out common functionality.
- *
  * @author Juergen Hoeller
  * @since 2.0
  * @see CommonsMultipartFile
  * @see CommonsMultipartResolver
- * @see org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver
  */
 public abstract class CommonsFileUploadSupport {
 
@@ -100,13 +94,24 @@ public abstract class CommonsFileUploadSupport {
 	}
 
 	/**
-	 * Set the maximum allowed size (in bytes) before uploads are refused.
+	 * Set the maximum allowed size (in bytes) before an upload gets rejected.
 	 * -1 indicates no limit (the default).
 	 * @param maxUploadSize the maximum upload size allowed
 	 * @see org.apache.commons.fileupload.FileUploadBase#setSizeMax
 	 */
 	public void setMaxUploadSize(long maxUploadSize) {
 		this.fileUpload.setSizeMax(maxUploadSize);
+	}
+
+	/**
+	 * Set the maximum allowed size (in bytes) for each individual file before
+	 * an upload gets rejected. -1 indicates no limit (the default).
+	 * @param maxUploadSizePerFile the maximum upload size per file
+	 * @since 4.2
+	 * @see org.apache.commons.fileupload.FileUploadBase#setFileSizeMax
+	 */
+	public void setMaxUploadSizePerFile(long maxUploadSizePerFile) {
+		this.fileUpload.setFileSizeMax(maxUploadSizePerFile);
 	}
 
 	/**
@@ -200,6 +205,7 @@ public abstract class CommonsFileUploadSupport {
 		if (encoding != null && !encoding.equals(fileUpload.getHeaderEncoding())) {
 			actualFileUpload = newFileUpload(getFileItemFactory());
 			actualFileUpload.setSizeMax(fileUpload.getSizeMax());
+			actualFileUpload.setFileSizeMax(fileUpload.getFileSizeMax());
 			actualFileUpload.setHeaderEncoding(encoding);
 		}
 
@@ -215,9 +221,9 @@ public abstract class CommonsFileUploadSupport {
 	 * @see CommonsMultipartFile#CommonsMultipartFile(org.apache.commons.fileupload.FileItem)
 	 */
 	protected MultipartParsingResult parseFileItems(List<FileItem> fileItems, String encoding) {
-		MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<String, MultipartFile>();
-		Map<String, String[]> multipartParameters = new HashMap<String, String[]>();
-		Map<String, String> multipartParameterContentTypes = new HashMap<String, String>();
+		MultiValueMap<String, MultipartFile> multipartFiles = new LinkedMultiValueMap<>();
+		Map<String, String[]> multipartParameters = new HashMap<>();
+		Map<String, String> multipartParameterContentTypes = new HashMap<>();
 
 		// Extract multipart files and multipart parameters.
 		for (FileItem fileItem : fileItems) {
@@ -292,7 +298,7 @@ public abstract class CommonsFileUploadSupport {
 			return defaultEncoding;
 		}
 		MediaType contentType = MediaType.parseMediaType(contentTypeHeader);
-		Charset charset = contentType.getCharSet();
+		Charset charset = contentType.getCharset();
 		return (charset != null ? charset.name() : defaultEncoding);
 	}
 

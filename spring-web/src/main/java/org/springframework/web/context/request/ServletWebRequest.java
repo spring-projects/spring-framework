@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,14 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -38,7 +40,6 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Brian Clozel
  * @author Markus Malkusch
- *
  * @since 2.0
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
@@ -47,6 +48,8 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
 
+	private static final String HEADER_IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+
 	private static final String HEADER_IF_NONE_MATCH = "If-None-Match";
 
 	private static final String HEADER_LAST_MODIFIED = "Last-Modified";
@@ -54,6 +57,18 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	private static final String METHOD_GET = "GET";
 
 	private static final String METHOD_HEAD = "HEAD";
+
+	private static final String METHOD_POST = "POST";
+
+	private static final String METHOD_PUT = "PUT";
+
+	private static final String METHOD_DELETE = "DELETE";
+
+	/**
+	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match"
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
+	 */
+	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
 
 	private boolean notModified = false;
@@ -75,6 +90,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public ServletWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		super(request, response);
 	}
+
 
 	@Override
 	public Object getNativeRequest() {
@@ -101,7 +117,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 * @since 4.0.2
 	 */
 	public HttpMethod getHttpMethod() {
-		return HttpMethod.valueOf(getRequest().getMethod().trim().toUpperCase());
+		return HttpMethod.resolve(getRequest().getMethod());
 	}
 
 	@Override
@@ -170,108 +186,84 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return getRequest().isSecure();
 	}
 
+
 	@Override
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (lastModifiedTimestamp >= 0 && !this.notModified) {
-			if (response == null || !response.containsHeader(HEADER_LAST_MODIFIED)) {
-				this.notModified = isTimeStampNotModified(lastModifiedTimestamp);
+			if (isCompatibleWithConditionalRequests(response)) {
+				this.notModified = isTimestampNotModified(lastModifiedTimestamp);
 				if (response != null) {
-					if (this.notModified && supportsNotModifiedStatus()) {
-						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+					if (supportsNotModifiedStatus()) {
+						if (this.notModified) {
+							response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+						}
+						if (isHeaderAbsent(response, HEADER_LAST_MODIFIED)) {
+							response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
+						}
 					}
-					response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
+					else if (supportsConditionalUpdate()) {
+						if (this.notModified) {
+							response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+						}
+					}
 				}
 			}
 		}
 		return this.notModified;
-	}
-
-	@SuppressWarnings("deprecation")
-	private boolean isTimeStampNotModified(long lastModifiedTimestamp) {
-		long ifModifiedSince = -1;
-		try {
-			ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
-		}
-		catch (IllegalArgumentException ex) {
-			String headerValue = getRequest().getHeader(HEADER_IF_MODIFIED_SINCE);
-			// Possibly an IE 10 style value: "Wed, 09 Apr 2014 09:57:42 GMT; length=13774"
-			int separatorIndex = headerValue.indexOf(';');
-			if (separatorIndex != -1) {
-				String datePart = headerValue.substring(0, separatorIndex);
-				try {
-					ifModifiedSince = Date.parse(datePart);
-				}
-				catch (IllegalArgumentException ex2) {
-					// Giving up
-				}
-			}
-		}
-		return (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
 	}
 
 	@Override
 	public boolean checkNotModified(String etag) {
 		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (response == null || !response.containsHeader(HEADER_ETAG)) {
+			if (isCompatibleWithConditionalRequests(response)) {
 				etag = addEtagPadding(etag);
-				this.notModified = isETagNotModified(etag);
+				if (hasRequestHeader(HEADER_IF_NONE_MATCH)) {
+					this.notModified = isEtagNotModified(etag);
+				}
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					response.setHeader(HEADER_ETAG, etag);
+					if (isHeaderAbsent(response, HEADER_ETAG)) {
+						response.setHeader(HEADER_ETAG, etag);
+					}
 				}
 			}
 		}
 		return this.notModified;
 	}
 
-	private String addEtagPadding(String etag) {
-		if (!(etag.startsWith("\"") || etag.startsWith("W/\"")) || !etag.endsWith("\"")) {
-			etag = "\"" + etag + "\"";
-		}
-		return etag;
-	}
-
-	private boolean isETagNotModified(String etag) {
-		if (StringUtils.hasLength(etag)) {
-			String ifNoneMatch = getRequest().getHeader(HEADER_IF_NONE_MATCH);
-			if (StringUtils.hasLength(ifNoneMatch)) {
-				String[] clientETags = StringUtils.delimitedListToStringArray(ifNoneMatch, ",", " ");
-				for (String clientETag : clientETags) {
-					// compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-					if (StringUtils.hasLength(clientETag) &&
-							(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))
-								|| clientETag.equals("*"))) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	private boolean supportsNotModifiedStatus() {
-		String method = getRequest().getMethod();
-		return (METHOD_GET.equals(method) || METHOD_HEAD.equals(method));
-	}
-
 	@Override
 	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (response == null ||
-					(!response.containsHeader(HEADER_ETAG) && !response.containsHeader(HEADER_LAST_MODIFIED))) {
+			if (isCompatibleWithConditionalRequests(response)) {
 				etag = addEtagPadding(etag);
-				this.notModified = isETagNotModified(etag) && isTimeStampNotModified(lastModifiedTimestamp);
+				if (hasRequestHeader(HEADER_IF_NONE_MATCH)) {
+					this.notModified = isEtagNotModified(etag);
+				}
+				else if (hasRequestHeader(HEADER_IF_MODIFIED_SINCE)) {
+					this.notModified = isTimestampNotModified(lastModifiedTimestamp);
+				}
 				if (response != null) {
-					if (this.notModified && supportsNotModifiedStatus()) {
-						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+					if (supportsNotModifiedStatus()) {
+						if (this.notModified) {
+							response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+						}
+						if (isHeaderAbsent(response, HEADER_ETAG)) {
+							response.setHeader(HEADER_ETAG, etag);
+						}
+						if (isHeaderAbsent(response, HEADER_LAST_MODIFIED)) {
+							response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
+						}
 					}
-					response.setHeader(HEADER_ETAG, etag);
-					response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
+					else if (supportsConditionalUpdate()) {
+						if (this.notModified) {
+							response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
+						}
+					}
 				}
 			}
 		}
@@ -280,6 +272,99 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	public boolean isNotModified() {
 		return this.notModified;
+	}
+
+
+	private boolean isCompatibleWithConditionalRequests(HttpServletResponse response) {
+		try {
+			if (response == null) {
+				// Can't check response.getStatus() - let's assume we're good
+				return true;
+			}
+			return HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
+		}
+		catch (IllegalArgumentException ex) {
+			return true;
+		}
+	}
+
+	private boolean isHeaderAbsent(HttpServletResponse response, String header) {
+		if (response == null) {
+			// Can't check response.getHeader(header) - let's assume it's not set
+			return true;
+		}
+		return (response.getHeader(header) == null);
+	}
+
+	private boolean hasRequestHeader(String headerName) {
+		return StringUtils.hasLength(getHeader(headerName));
+	}
+
+	private boolean supportsNotModifiedStatus() {
+		String method = getRequest().getMethod();
+		return (METHOD_GET.equals(method) || METHOD_HEAD.equals(method));
+	}
+
+	private boolean supportsConditionalUpdate() {
+		String method = getRequest().getMethod();
+		return (METHOD_POST.equals(method) || METHOD_PUT.equals(method) || METHOD_DELETE.equals(method))
+				&& hasRequestHeader(HEADER_IF_UNMODIFIED_SINCE);
+	}
+
+	private boolean isTimestampNotModified(long lastModifiedTimestamp) {
+		long ifModifiedSince = parseDateHeader(HEADER_IF_MODIFIED_SINCE);
+		if (ifModifiedSince != -1) {
+			return (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
+		}
+		long ifUnmodifiedSince = parseDateHeader(HEADER_IF_UNMODIFIED_SINCE);
+		if (ifUnmodifiedSince != -1) {
+			return (ifUnmodifiedSince < (lastModifiedTimestamp / 1000 * 1000));
+		}
+		return false;
+	}
+
+	@SuppressWarnings("deprecation")
+	private long parseDateHeader(String headerName) {
+		long dateValue = -1;
+		try {
+			dateValue = getRequest().getDateHeader(headerName);
+		}
+		catch (IllegalArgumentException ex) {
+			String headerValue = getHeader(headerName);
+			// Possibly an IE 10 style value: "Wed, 09 Apr 2014 09:57:42 GMT; length=13774"
+			int separatorIndex = headerValue.indexOf(';');
+			if (separatorIndex != -1) {
+				String datePart = headerValue.substring(0, separatorIndex);
+				try {
+					dateValue = Date.parse(datePart);
+				}
+				catch (IllegalArgumentException ex2) {
+					// Giving up
+				}
+			}
+		}
+		return dateValue;
+	}
+
+	private boolean isEtagNotModified(String etag) {
+		String ifNoneMatch = getHeader(HEADER_IF_NONE_MATCH);
+		// compare weak/strong ETag as per https://tools.ietf.org/html/rfc7232#section-2.3
+		String serverETag = etag.replaceFirst("^W/", "");
+		Matcher eTagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(ifNoneMatch);
+		while (eTagMatcher.find()) {
+			if ("*".equals(eTagMatcher.group())
+					|| serverETag.equals(eTagMatcher.group(3))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private String addEtagPadding(String etag) {
+		if (!(etag.startsWith("\"") || etag.startsWith("W/\"")) || !etag.endsWith("\"")) {
+			etag = "\"" + etag + "\"";
+		}
+		return etag;
 	}
 
 	@Override

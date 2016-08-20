@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,19 +31,43 @@ import org.springframework.http.server.ServerHttpResponse;
  * <a href="http://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.2
  */
 public class SseEmitter extends ResponseBodyEmitter {
 
-	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", Charset.forName("UTF-8"));
+	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", StandardCharsets.UTF_8);
+
+	static final MediaType UTF8_TEXT_EVENTSTREAM = new MediaType("text", "event-stream", StandardCharsets.UTF_8);
+
+
+	/**
+	 * Create a new SseEmitter instance.
+	 */
+	public SseEmitter() {
+		super();
+	}
+
+	/**
+	 * Create a SseEmitter with a custom timeout value.
+	 * <p>By default not set in which case the default configured in the MVC
+	 * Java Config or the MVC namespace is used, or if that's not set, then the
+	 * timeout depends on the default of the underlying server.
+	 * @param timeout timeout value in milliseconds
+	 * @since 4.2.2
+	 */
+	public SseEmitter(Long timeout) {
+		super(timeout);
+	}
 
 
 	@Override
 	protected void extendResponse(ServerHttpResponse outputMessage) {
 		super.extendResponse(outputMessage);
+
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			headers.setContentType(new MediaType("text", "event-stream"));
+			headers.setContentType(UTF8_TEXT_EVENTSTREAM);
 		}
 	}
 
@@ -75,14 +99,12 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * @param object the object to write
 	 * @param mediaType a MediaType hint for selecting an HttpMessageConverter
 	 * @throws IOException raised when an I/O error occurs
-	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	@Override
 	public void send(Object object, MediaType mediaType) throws IOException {
-		if (object == null) {
-			return;
+		if (object != null) {
+			send(event().data(object, mediaType));
 		}
-		send(event().data(object, mediaType));
 	}
 
 	/**
@@ -95,18 +117,19 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * </pre>
 	 * @param builder a builder for an SSE formatted event.
 	 * @throws IOException raised when an I/O error occurs
-	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
 	public void send(SseEventBuilder builder) throws IOException {
-		Map<Object, MediaType> map = builder.build();
-		for (Map.Entry<Object, MediaType> entry : map.entrySet()) {
-			super.send(entry.getKey(), entry.getValue());
+		Set<DataWithMediaType> dataToSend = builder.build();
+		synchronized (this) {
+			for (DataWithMediaType entry : dataToSend) {
+				super.send(entry.getData(), entry.getMediaType());
+			}
 		}
 	}
 
 
 	public static SseEventBuilder event() {
-		return new DefaultSseEventBuilder();
+		return new SseEventBuilderImpl();
 	}
 
 
@@ -146,20 +169,20 @@ public class SseEmitter extends ResponseBodyEmitter {
 		SseEventBuilder data(Object object, MediaType mediaType);
 
 		/**
-		 * Return a map with objects that represent the data to be written to
-		 * the response as well as the required SSE text formatting that
-		 * surrounds it.
+		 * Return one or more Object-MediaType  pairs to write via
+		 * {@link #send(Object, MediaType)}.
+		 * @since 4.2.3
 		 */
-		Map<Object, MediaType> build();
+		Set<DataWithMediaType> build();
 	}
 
 
 	/**
 	 * Default implementation of SseEventBuilder.
 	 */
-	private static class DefaultSseEventBuilder implements SseEventBuilder {
+	private static class SseEventBuilderImpl implements SseEventBuilder {
 
-		private final Map<Object, MediaType> map = new LinkedHashMap<Object, MediaType>(4);
+		private final Set<DataWithMediaType> dataToSend = new LinkedHashSet<>(4);
 
 		private StringBuilder sb;
 
@@ -171,7 +194,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		@Override
 		public SseEventBuilder name(String name) {
-			append("name:").append(name != null ? name : "").append("\n");
+			append("event:").append(name != null ? name : "").append("\n");
 			return this;
 		}
 
@@ -196,12 +219,12 @@ public class SseEmitter extends ResponseBodyEmitter {
 		public SseEventBuilder data(Object object, MediaType mediaType) {
 			append("data:");
 			saveAppendedText();
-			this.map.put(object, mediaType);
+			this.dataToSend.add(new DataWithMediaType(object, mediaType));
 			append("\n");
 			return this;
 		}
 
-		DefaultSseEventBuilder append(String text) {
+		SseEventBuilderImpl append(String text) {
 			if (this.sb == null) {
 				this.sb = new StringBuilder();
 			}
@@ -209,21 +232,21 @@ public class SseEmitter extends ResponseBodyEmitter {
 			return this;
 		}
 
-		private void saveAppendedText() {
-			if (this.sb != null) {
-				this.map.put(this.sb.toString(), TEXT_PLAIN);
-				this.sb = null;
-			}
-		}
-
 		@Override
-		public Map<Object, MediaType> build() {
-			if (this.sb == null || this.sb.length() == 0 && this.map.isEmpty()) {
-				return Collections.<Object, MediaType>emptyMap();
+		public Set<DataWithMediaType> build() {
+			if ((this.sb == null || this.sb.length() == 0) && this.dataToSend.isEmpty()) {
+				return Collections.<DataWithMediaType>emptySet();
 			}
 			append("\n");
 			saveAppendedText();
-			return this.map;
+			return this.dataToSend;
+		}
+
+		private void saveAppendedText() {
+			if (this.sb != null) {
+				this.dataToSend.add(new DataWithMediaType(this.sb.toString(), TEXT_PLAIN));
+				this.sb = null;
+			}
 		}
 	}
 

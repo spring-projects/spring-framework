@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
  * the one for the child context (i.e., the lowest context in the hierarchy).
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;RunWith(SpringRunner.class)
  * &#064;WebAppConfiguration
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(classes = TestAppConfig.class),
@@ -71,7 +71,7 @@ import java.lang.annotation.Target;
  * the parent context for each of the contexts loaded for the concrete subclasses.
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;RunWith(SpringRunner.class)
  * &#064;WebAppConfiguration
  * &#064;ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
  * public abstract class AbstractWebTests {}
@@ -98,7 +98,7 @@ import java.lang.annotation.Target;
  * "/order-config.xml"}</code>.
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;RunWith(SpringRunner.class)
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(name = "parent", locations = "/app-config.xml"),
  *     &#064;ContextConfiguration(name = "child",  locations = "/user-config.xml")
@@ -119,7 +119,7 @@ import java.lang.annotation.Target;
  * context loaded from {@code "/app-config.xml"}.
  *
  * <pre class="code">
- * &#064;RunWith(SpringJUnit4ClassRunner.class)
+ * &#064;RunWith(SpringRunner.class)
  * &#064;ContextHierarchy({
  *     &#064;ContextConfiguration(name = "parent", locations = "/app-config.xml"),
  *     &#064;ContextConfiguration(name = "child",  locations = "/user-config.xml")
@@ -139,16 +139,15 @@ import java.lang.annotation.Target;
  * @see ContextConfiguration
  * @see org.springframework.context.ApplicationContext
  */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
 public @interface ContextHierarchy {
 
 	/**
 	 * A list of {@link ContextConfiguration @ContextConfiguration} instances,
 	 * each of which defines a level in the context hierarchy.
-	 *
 	 * <p>If you need to merge or override the configuration for a given level
 	 * of the context hierarchy within a test class hierarchy, you must explicitly
 	 * name that level by supplying the same value to the {@link ContextConfiguration#name

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.util.concurrent.ListenableFuture;
-
 
 /**
  * A {@link StompSession} that implements

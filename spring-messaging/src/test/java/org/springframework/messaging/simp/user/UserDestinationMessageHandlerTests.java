@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ import static org.mockito.BDDMockito.*;
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.*;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
@@ -47,19 +46,17 @@ public class UserDestinationMessageHandlerTests {
 
 	private static final String SESSION_ID = "123";
 
-
 	private UserDestinationMessageHandler handler;
 
-	private UserSessionRegistry registry;
+	private SimpUserRegistry registry;
 
-	@Mock
 	private SubscribableChannel brokerChannel;
 
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		this.registry = new DefaultUserSessionRegistry();
+		this.registry = mock(SimpUserRegistry.class);
+		this.brokerChannel = mock(SubscribableChannel.class);
 		UserDestinationResolver resolver = new DefaultUserDestinationResolver(this.registry);
 		this.handler = new UserDestinationMessageHandler(new StubMessageChannel(), this.brokerChannel, resolver);
 	}
@@ -91,7 +88,9 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleMessage() {
-		this.registry.registerSessionId("joe", "123");
+		TestSimpUser simpUser = new TestSimpUser("joe");
+		simpUser.addSessions(new TestSimpSession("123"));
+		when(this.registry.getUser("joe")).thenReturn(simpUser);
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.handler.handleMessage(createWith(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
 
@@ -105,7 +104,7 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleMessageWithoutActiveSession() {
-		this.handler.setUserDestinationBroadcast("/topic/unresolved");
+		this.handler.setBroadcastDestination("/topic/unresolved");
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.handler.handleMessage(createWith(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
 
@@ -126,9 +125,11 @@ public class UserDestinationMessageHandlerTests {
 	@Test
 	public void handleMessageFromBrokerWithActiveSession() {
 
-		this.registry.registerSessionId("joe", "123");
+		TestSimpUser simpUser = new TestSimpUser("joe");
+		simpUser.addSessions(new TestSimpSession("123"));
+		when(this.registry.getUser("joe")).thenReturn(simpUser);
 
-		this.handler.setUserDestinationBroadcast("/topic/unresolved");
+		this.handler.setBroadcastDestination("/topic/unresolved");
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
@@ -137,7 +138,7 @@ public class UserDestinationMessageHandlerTests {
 		accessor.setNativeHeader(ORIGINAL_DESTINATION, "/user/joe/queue/foo");
 		accessor.setNativeHeader("customHeader", "customHeaderValue");
 		accessor.setLeaveMutable(true);
-		byte[] payload = "payload".getBytes(Charset.forName("UTF-8"));
+		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
 		this.handler.handleMessage(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
 
 		ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
@@ -152,7 +153,7 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleMessageFromBrokerWithoutActiveSession() {
-		this.handler.setUserDestinationBroadcast("/topic/unresolved");
+		this.handler.setBroadcastDestination("/topic/unresolved");
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
@@ -160,7 +161,7 @@ public class UserDestinationMessageHandlerTests {
 		accessor.setDestination("/topic/unresolved");
 		accessor.setNativeHeader(ORIGINAL_DESTINATION, "/user/joe/queue/foo");
 		accessor.setLeaveMutable(true);
-		byte[] payload = "payload".getBytes(Charset.forName("UTF-8"));
+		byte[] payload = "payload".getBytes(StandardCharsets.UTF_8);
 		this.handler.handleMessage(MessageBuilder.createMessage(payload, accessor.getMessageHeaders()));
 
 		// No re-broadcast

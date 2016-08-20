@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Period;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -31,7 +35,6 @@ import java.util.Map;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.lang.UsesJava8;
 
 /**
  * Configures the JSR-310 <code>java.time</code> formatting system for use with Spring.
@@ -47,16 +50,15 @@ import org.springframework.lang.UsesJava8;
  * @see org.springframework.format.datetime.DateFormatterRegistrar
  * @see org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean
  */
-@UsesJava8
 public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
-	private static enum Type {DATE, TIME, DATE_TIME}
+	private enum Type {DATE, TIME, DATE_TIME}
 
 
 	/**
 	 * User defined formatters.
 	 */
-	private final Map<Type, DateTimeFormatter> formatters = new HashMap<Type, DateTimeFormatter>();
+	private final Map<Type, DateTimeFormatter> formatters = new HashMap<>();
 
 	/**
 	 * Factories used when specific formatters have not been specified.
@@ -65,7 +67,7 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 
 	public DateTimeFormatterRegistrar() {
-		this.factories = new HashMap<Type, DateTimeFormatterFactory>();
+		this.factories = new HashMap<>();
 		for (Type type : Type.values()) {
 			this.factories.put(type, new DateTimeFormatterFactory());
 		}
@@ -182,6 +184,10 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 				new TemporalAccessorParser(OffsetTime.class, timeFormatter));
 
 		registry.addFormatterForFieldType(Instant.class, new InstantFormatter());
+		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
+		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
+		registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
+		registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 
 		registry.addFormatterForFieldAnnotation(new Jsr310DateTimeFormatAnnotationFormatterFactory());
 	}

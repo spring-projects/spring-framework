@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,20 @@
 package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Test-specific annotation to indicate that a test method has to finish
- * execution in a {@link #millis() specified time period}.
+ * execution in a {@linkplain #millis() specified time period}.
  *
  * <p>If the text execution takes longer than the specified time period, then
- * the test is to be considered failed.
+ * the test is considered to have failed.
  *
  * <p>Note that the time period includes execution of the test method itself,
- * any {@link Repeat repetitions} of the test, and any <em>set up</em> or
+ * any {@linkplain Repeat repetitions} of the test, and any <em>set up</em> or
  * <em>tear down</em> of the test fixture.
  *
  * <p>As of Spring Framework 4.0, this annotation may be used as a
@@ -40,11 +39,14 @@ import static java.lang.annotation.RetentionPolicy.*;
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
- * @see Repeat
+ * @see org.springframework.test.annotation.Repeat
+ * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+ * @see org.springframework.test.context.junit4.rules.SpringMethodRule
+ * @see org.springframework.test.context.junit4.statements.SpringFailOnTimeout
  */
+@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Retention(RUNTIME)
-@Target({ METHOD, ANNOTATION_TYPE })
 public @interface Timed {
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -51,10 +51,15 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 	private final TransactionalEventListener annotation;
 
+
 	public ApplicationListenerMethodTransactionalAdapter(String beanName, Class<?> targetClass, Method method) {
 		super(beanName, targetClass, method);
-		this.annotation = findAnnotation(method);
+		this.annotation = AnnotatedElementUtils.findMergedAnnotation(method, TransactionalEventListener.class);
+		if (this.annotation == null) {
+			throw new IllegalStateException("No TransactionalEventListener annotation found on '" + method + "'");
+		}
 	}
+
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
@@ -62,8 +67,8 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 			TransactionSynchronization transactionSynchronization = createTransactionSynchronization(event);
 			TransactionSynchronizationManager.registerSynchronization(transactionSynchronization);
 		}
-		else if (annotation.fallbackExecution()) {
-			if (annotation.phase() == TransactionPhase.AFTER_ROLLBACK) {
+		else if (this.annotation.fallbackExecution()) {
+			if (this.annotation.phase() == TransactionPhase.AFTER_ROLLBACK) {
 				logger.warn("Processing '" + event + "' as a fallback execution on AFTER_ROLLBACK phase.");
 			}
 			processEvent(event);
@@ -79,14 +84,6 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 		return new TransactionSynchronizationEventAdapter(this, event, this.annotation.phase());
 	}
 
-	static TransactionalEventListener findAnnotation(Method method) {
-		TransactionalEventListener annotation = AnnotationUtils
-				.findAnnotation(method, TransactionalEventListener.class);
-		if (annotation == null) {
-			throw new IllegalStateException("No TransactionalEventListener annotation found on '" + method + "'");
-		}
-		return annotation;
-	}
 
 
 	private static class TransactionSynchronizationEventAdapter extends TransactionSynchronizationAdapter {
@@ -97,7 +94,7 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 		private final TransactionPhase phase;
 
-		protected TransactionSynchronizationEventAdapter(ApplicationListenerMethodAdapter listener,
+		public TransactionSynchronizationEventAdapter(ApplicationListenerMethodAdapter listener,
 				ApplicationEvent event, TransactionPhase phase) {
 
 			this.listener = listener;
@@ -107,20 +104,20 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 
 		@Override
 		public void beforeCommit(boolean readOnly) {
-			if (phase == TransactionPhase.BEFORE_COMMIT) {
+			if (this.phase == TransactionPhase.BEFORE_COMMIT) {
 				processEvent();
 			}
 		}
 
 		@Override
 		public void afterCompletion(int status) {
-			if (phase == TransactionPhase.AFTER_COMPLETION) {
+			if (this.phase == TransactionPhase.AFTER_COMPLETION) {
 				processEvent();
 			}
-			else if (phase == TransactionPhase.AFTER_COMMIT && status == STATUS_COMMITTED) {
+			else if (this.phase == TransactionPhase.AFTER_COMMIT && status == STATUS_COMMITTED) {
 				processEvent();
 			}
-			else if (phase == TransactionPhase.AFTER_ROLLBACK && status == STATUS_ROLLED_BACK) {
+			else if (this.phase == TransactionPhase.AFTER_ROLLBACK && status == STATUS_ROLLED_BACK) {
 				processEvent();
 			}
 		}

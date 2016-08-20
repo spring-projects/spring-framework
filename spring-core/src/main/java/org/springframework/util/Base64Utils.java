@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,62 +17,82 @@
 package org.springframework.util;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-
-import org.springframework.lang.UsesJava8;
 
 /**
  * A simple utility class for Base64 encoding and decoding.
  *
- * <p>Adapts to either Java 8's {@link java.util.Base64} class or Apache
- * Commons Codec's {@link org.apache.commons.codec.binary.Base64} class.
- * With neither Java 8 nor Commons Codec present, encode/decode calls
- * will fail with an IllegalStateException.
+ * <p>Adapts to Java 8's {@link java.util.Base64} in a convenience fashion.
  *
  * @author Juergen Hoeller
+ * @author Gary Russell
  * @since 4.1
  * @see java.util.Base64
- * @see org.apache.commons.codec.binary.Base64
  */
 public abstract class Base64Utils {
 
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
-
-
-	private static final Base64Delegate delegate;
-
-	static {
-		Base64Delegate delegateToUse = null;
-		// JDK 8's java.util.Base64 class present?
-		if (ClassUtils.isPresent("java.util.Base64", Base64Utils.class.getClassLoader())) {
-			delegateToUse = new JdkBase64Delegate();
-		}
-		// Apache Commons Codec present on the classpath?
-		else if (ClassUtils.isPresent("org.apache.commons.codec.binary.Base64", Base64Utils.class.getClassLoader())) {
-			delegateToUse = new CommonsCodecBase64Delegate();
-		}
-		delegate = delegateToUse;
-	}
-
-	/**
-	 * Assert that Byte64 encoding is actually supported.
-	 * @throws IllegalStateException if neither Java 8 nor Apache Commons Codec is present
-	 */
-	private static void assertSupported() {
-		Assert.state(delegate != null, "Neither Java 8 nor Apache Commons Codec found - Base64 encoding not supported");
-	}
+	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
 	/**
 	 * Base64-encode the given byte array.
 	 * @param src the original byte array (may be {@code null})
 	 * @return the encoded byte array (or {@code null} if the input was {@code null})
-	 * @throws IllegalStateException if Base64 encoding is not supported,
-	 * i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
+	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static byte[] encode(byte[] src) {
-		assertSupported();
-		return delegate.encode(src);
+		if (src == null || src.length == 0) {
+			return src;
+		}
+		return Base64.getEncoder().encode(src);
+	}
+
+	/**
+	 * Base64-decode the given byte array.
+	 * @param src the encoded byte array (may be {@code null})
+	 * @return the original byte array (or {@code null} if the input was {@code null})
+	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
+	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 */
+	public static byte[] decode(byte[] src) {
+		if (src == null || src.length == 0) {
+			return src;
+		}
+		return Base64.getDecoder().decode(src);
+	}
+
+	/**
+	 * Base64-encode the given byte array using the RFC 4648
+	 * "URL and Filename Safe Alphabet".
+	 * @param src the original byte array (may be {@code null})
+	 * @return the encoded byte array (or {@code null} if the input was {@code null})
+	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
+	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 * @since 4.2.4
+	 */
+	public static byte[] encodeUrlSafe(byte[] src) {
+		if (src == null || src.length == 0) {
+			return src;
+		}
+		return Base64.getUrlEncoder().encode(src);
+	}
+
+	/**
+	 * Base64-decode the given byte array using the RFC 4648
+	 * "URL and Filename Safe Alphabet".
+	 * @param src the encoded byte array (may be {@code null})
+	 * @return the original byte array (or {@code null} if the input was {@code null})
+	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
+	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 * @since 4.2.4
+	 */
+	public static byte[] decodeUrlSafe(byte[] src) {
+		if (src == null || src.length == 0) {
+			return src;
+		}
+		return Base64.getUrlDecoder().decode(src);
 	}
 
 	/**
@@ -80,89 +100,55 @@ public abstract class Base64Utils {
 	 * @param src the original byte array (may be {@code null})
 	 * @return the encoded byte array as a UTF-8 String
 	 * (or {@code null} if the input was {@code null})
-	 * @throws IllegalStateException if Base64 encoding is not supported,
-	 * i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static String encodeToString(byte[] src) {
-		assertSupported();
 		if (src == null) {
 			return null;
 		}
 		if (src.length == 0) {
 			return "";
 		}
-		return new String(delegate.encode(src), DEFAULT_CHARSET);
-	}
-
-	/**
-	 * Base64-decode the given byte array.
-	 * @param src the encoded byte array (may be {@code null})
-	 * @return the original byte array (or {@code null} if the input was {@code null})
-	 * @throws IllegalStateException if Base64 encoding is not supported,
-	 * i.e. neither Java 8 nor Apache Commons Codec is present at runtime
-	 */
-	public static byte[] decode(byte[] src) {
-		assertSupported();
-		return delegate.decode(src);
+		return new String(encode(src), DEFAULT_CHARSET);
 	}
 
 	/**
 	 * Base64-decode the given byte array from an UTF-8 String.
 	 * @param src the encoded UTF-8 String (may be {@code null})
 	 * @return the original byte array (or {@code null} if the input was {@code null})
-	 * @throws IllegalStateException if Base64 encoding is not supported,
-	 * i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static byte[] decodeFromString(String src) {
-		assertSupported();
 		if (src == null) {
 			return null;
 		}
 		if (src.length() == 0) {
 			return new byte[0];
 		}
-		return delegate.decode(src.getBytes(DEFAULT_CHARSET));
+		return decode(src.getBytes(DEFAULT_CHARSET));
 	}
 
-
-	private interface Base64Delegate {
-
-		byte[] encode(byte[] src);
-
-		byte[] decode(byte[] src);
+	/**
+	 * Base64-encode the given byte array to a String using the RFC 4648
+	 * "URL and Filename Safe Alphabet".
+	 * @param src the original byte array (may be {@code null})
+	 * @return the encoded byte array as a UTF-8 String
+	 * (or {@code null} if the input was {@code null})
+	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
+	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 */
+	public static String encodeToUrlSafeString(byte[] src) {
+		return new String(encodeUrlSafe(src), DEFAULT_CHARSET);
 	}
 
-
-	@UsesJava8
-	private static class JdkBase64Delegate implements Base64Delegate {
-
-		public byte[] encode(byte[] src) {
-			if (src == null || src.length == 0) {
-				return src;
-			}
-			return Base64.getEncoder().encode(src);
-		}
-
-		public byte[] decode(byte[] src) {
-			if (src == null || src.length == 0) {
-				return src;
-			}
-			return Base64.getDecoder().decode(src);
-		}
-	}
-
-
-	private static class CommonsCodecBase64Delegate implements Base64Delegate {
-
-		private final org.apache.commons.codec.binary.Base64 base64 = new org.apache.commons.codec.binary.Base64();
-
-		public byte[] encode(byte[] src) {
-			return this.base64.encode(src);
-		}
-
-		public byte[] decode(byte[] src) {
-			return this.base64.decode(src);
-		}
+	/**
+	 * Base64-decode the given byte array from an UTF-8 String using the RFC 4648
+	 * "URL and Filename Safe Alphabet".
+	 * @param src the encoded UTF-8 String (may be {@code null})
+	 * @return the original byte array (or {@code null} if the input was {@code null})
+	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
+	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 */
+	public static byte[] decodeFromUrlSafeString(String src) {
+		return decodeUrlSafe(src.getBytes(DEFAULT_CHARSET));
 	}
 
 }

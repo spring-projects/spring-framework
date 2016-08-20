@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,19 +43,13 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
  * meaningful validation. All exposed Commons Pool properties use the
  * corresponding Commons Pool defaults.
  *
- * <p>Commons Pool 2.x uses object equality while Commons Pool 1.x used identity
- * equality. This clearly means that Commons Pool 2 behaves differently if several
- * instances having the same identity according to their {@link Object#equals(Object)}
- * method are managed in the same pool. To provide a smooth upgrade, a
- * backward-compatible pool is created by default; use {@link #setUseObjectEquality(boolean)}
- * if you need the standard Commons Pool 2.x behavior.
- *
- * <p>Compatible with Apache Commons Pool 2.2
+ * <p>Compatible with Apache Commons Pool 2.4, as of Spring 4.2.
  *
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Kazuki Shimizu
  * @since 4.2
  * @see GenericObjectPool
  * @see #createObjectPool()
@@ -73,15 +67,13 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 
 	private int minIdle = GenericObjectPoolConfig.DEFAULT_MIN_IDLE;
 
-	private long maxWait = GenericObjectPoolConfig.DEFAULT_MAX_TOTAL;
+	private long maxWait = GenericObjectPoolConfig.DEFAULT_MAX_WAIT_MILLIS;
 
 	private long timeBetweenEvictionRunsMillis = GenericObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
 
 	private long minEvictableIdleTimeMillis = GenericObjectPoolConfig.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
 
 	private boolean blockWhenExhausted = GenericObjectPoolConfig.DEFAULT_BLOCK_WHEN_EXHAUSTED;
-
-	private boolean useObjectEquality;
 
 	/**
 	 * The Apache Commons {@code ObjectPool} used to pool target objects
@@ -98,6 +90,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	public CommonsPool2TargetSource() {
 		setMaxSize(GenericObjectPoolConfig.DEFAULT_MAX_TOTAL);
 	}
+
 
 	/**
 	 * Set the maximum number of idle objects in the pool.
@@ -134,7 +127,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	/**
 	 * Set the maximum waiting time for fetching an object from the pool.
 	 * Default is -1, waiting forever.
-	 * @see GenericObjectPool#setMaxTotal
+	 * @see GenericObjectPool#setMaxWaitMillis
 	 */
 	public void setMaxWait(long maxWait) {
 		this.maxWait = maxWait;
@@ -194,26 +187,9 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	 * Specify if the call should block when the pool is exhausted.
 	 */
 	public boolean isBlockWhenExhausted() {
-		return blockWhenExhausted;
+		return this.blockWhenExhausted;
 	}
 
-	/**
-	 * Set if the pool should use object equality. Commons Pool 1.x has no specific requirement in
-	 * that regard and allows two distinct instances being equal to be put in the same pool. However,
-	 * this behavior has changed with commons pool 2. To preserve backward compatibility, the pool
-	 * is configured to use reference equality ({@code false}.
-	 */
-	public void setUseObjectEquality(boolean useObjectEquality) {
-		this.useObjectEquality = useObjectEquality;
-	}
-
-	/**
-	 * Specify if the pool should use object equality. Return {@code false} if it should use
-	 * reference equality (as it was the case for Commons Pool 1.x)
-	 */
-	public boolean isUseObjectEquality() {
-		return useObjectEquality;
-	}
 
 	/**
 	 * Creates and holds an ObjectPool instance.
@@ -247,12 +223,11 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 
 
 	/**
-	 * Borrow an object from the {@code ObjectPool}.
+	 * Borrows an object from the {@code ObjectPool}.
 	 */
 	@Override
 	public Object getTarget() throws Exception {
-		Object o = this.pool.borrowObject();
-		return (isUseObjectEquality() ? o : ((IdentityWrapper)o).target);
+		return this.pool.borrowObject();
 	}
 
 	/**
@@ -260,8 +235,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	 */
 	@Override
 	public void releaseTarget(Object target) throws Exception {
-		Object value = (isUseObjectEquality() ? target : new IdentityWrapper(target));
-		this.pool.returnObject(value);
+		this.pool.returnObject(target);
 	}
 
 	@Override
@@ -291,9 +265,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 
 	@Override
 	public PooledObject<Object> makeObject() throws Exception {
-		Object target = newPrototypeInstance();
-		Object poolValue = (isUseObjectEquality() ? target : new IdentityWrapper(target));
-		return new DefaultPooledObject<Object>(poolValue);
+		return new DefaultPooledObject<>(newPrototypeInstance());
 	}
 
 	@Override
@@ -312,34 +284,6 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 
 	@Override
 	public void passivateObject(PooledObject<Object> p) throws Exception {
-	}
-
-
-	/**
-	 * Wraps the target type in the pool to restore the behavior of commons-pool 1.x.
-	 */
-	private static class IdentityWrapper {
-		private final Object target;
-
-		public IdentityWrapper(Object target) {
-			this.target = target;
-		}
-
-		@Override
-		public int hashCode() {
-			return System.identityHashCode(this.target);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			IdentityWrapper that = (IdentityWrapper) o;
-
-			return !(target != null ? !(target == that.target) : that.target != null);
-		}
-
 	}
 
 }

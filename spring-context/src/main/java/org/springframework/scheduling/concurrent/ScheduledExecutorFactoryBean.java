@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.lang.UsesJava7;
 import org.springframework.scheduling.support.DelegatingErrorHandlingRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -42,7 +40,14 @@ import org.springframework.util.ObjectUtils;
  * cancelling it on destruction of the context. In scenarios that only require static
  * registration of tasks at startup, there is no need to access the
  * {@link ScheduledExecutorService} instance itself in application code at all;
- * ScheduledExecutorFactoryBean is then just being used for lifecycle integration.
+ * {@code ScheduledExecutorFactoryBean} is then just being used for lifecycle integration.
+ *
+ * <p>For an alternative, you may set up a {@link ScheduledThreadPoolExecutor} instance
+ * directly using constructor injection, or use a factory method definition that points
+ * to the {@link java.util.concurrent.Executors} class.
+ * <b>This is strongly recommended in particular for common {@code @Bean} methods in
+ * configuration classes, where this {@code FactoryBean} variant would force you to
+ * return the {@code FactoryBean} type instead of {@code ScheduledExecutorService}.</b>
  *
  * <p>Note that {@link java.util.concurrent.ScheduledExecutorService}
  * uses a {@link Runnable} instance that is shared between repeated executions,
@@ -67,11 +72,6 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 		implements FactoryBean<ScheduledExecutorService> {
-
-	// ScheduledThreadPoolExecutor.setRemoveOnCancelPolicy(boolean) only available on JDK 7+
-	private static final boolean setRemoveOnCancelPolicyAvailable =
-			ClassUtils.hasMethod(ScheduledThreadPoolExecutor.class, "setRemoveOnCancelPolicy", boolean.class);
-
 
 	private int poolSize = 1;
 
@@ -143,7 +143,6 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 
 
 	@Override
-	@UsesJava7
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
@@ -151,7 +150,7 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 				createExecutor(this.poolSize, threadFactory, rejectedExecutionHandler);
 
 		if (this.removeOnCancelPolicy) {
-			if (setRemoveOnCancelPolicyAvailable && executor instanceof ScheduledThreadPoolExecutor) {
+			if (executor instanceof ScheduledThreadPoolExecutor) {
 				((ScheduledThreadPoolExecutor) executor).setRemoveOnCancelPolicy(true);
 			}
 			else {

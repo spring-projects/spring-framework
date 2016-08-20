@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ public class MessageBrokerRegistry {
 
 	private String userDestinationPrefix;
 
-	private String userDestinationBroadcast;
-
 	private PathMatcher pathMatcher;
+
+	private Integer cacheLimit;
 
 
 	public MessageBrokerRegistry(SubscribableChannel clientInboundChannel, MessageChannel clientOutboundChannel) {
@@ -98,6 +98,16 @@ public class MessageBrokerRegistry {
 		return this.brokerChannelRegistration;
 	}
 
+	protected String getUserDestinationBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
+	}
+
+	protected String getUserRegistryBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
+	}
+
 	/**
 	 * Configure one or more prefixes to filter destinations targeting application
 	 * annotated methods. For example destinations prefixed with "/app" may be
@@ -140,24 +150,6 @@ public class MessageBrokerRegistry {
 	}
 
 	/**
-	 * Set a destination to broadcast messages to that remain unresolved because
-	 * the user is not connected. In a multi-application server scenario this
-	 * gives other application servers a chance to try.
-	 * <p><strong>Note:</strong> this option applies only when the
-	 * {@link #enableStompBrokerRelay "broker relay"} is enabled.
-	 * <p>By default this is not set.
-	 * @param destination the destination to forward unresolved
-	 * messages to, e.g. "/topic/unresolved-user-destination".
-	 */
-	public void setUserDestinationBroadcast(String destination) {
-		this.userDestinationBroadcast = destination;
-	}
-
-	protected String getUserDestinationBroadcast() {
-		return this.userDestinationBroadcast;
-	}
-
-	/**
 	 * Configure the PathMatcher to use to match the destinations of incoming
 	 * messages to {@code @MessageMapping} and {@code @SubscribeMapping} methods.
 	 * <p>By default {@link org.springframework.util.AntPathMatcher} is configured.
@@ -172,6 +164,7 @@ public class MessageBrokerRegistry {
 	 * <p>When the simple broker is enabled, the PathMatcher configured here is
 	 * also used to match message destinations when brokering messages.
 	 * @since 4.1
+	 * @see org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry#setPathMatcher
 	 */
 	public MessageBrokerRegistry setPathMatcher(PathMatcher pathMatcher) {
 		this.pathMatcher = pathMatcher;
@@ -182,6 +175,18 @@ public class MessageBrokerRegistry {
 		return this.pathMatcher;
 	}
 
+	/**
+	 * Configure the cache limit to apply for registrations with the broker.
+	 * <p>This is currently only applied for the destination cache in the
+	 * subscription registry. The default cache limit there is 1024.
+	 * @since 4.3.2
+	 * @see org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry#setCacheLimit
+	 */
+	public MessageBrokerRegistry setCacheLimit(int cacheLimit) {
+		this.cacheLimit = cacheLimit;
+		return this;
+	}
+
 
 	protected SimpleBrokerMessageHandler getSimpleBroker(SubscribableChannel brokerChannel) {
 		if (this.simpleBrokerRegistration == null && this.brokerRelayRegistration == null) {
@@ -190,6 +195,7 @@ public class MessageBrokerRegistry {
 		if (this.simpleBrokerRegistration != null) {
 			SimpleBrokerMessageHandler handler = this.simpleBrokerRegistration.getMessageHandler(brokerChannel);
 			handler.setPathMatcher(this.pathMatcher);
+			handler.setCacheLimit(this.cacheLimit);
 			return handler;
 		}
 		return null;

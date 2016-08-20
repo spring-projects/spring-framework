@@ -67,7 +67,7 @@ public class ResourceArrayPropertyEditorTests {
 		}
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testStrictSystemPropertyReplacement() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor(
 				new PathMatchingResourcePatternResolver(), new StandardEnvironment(),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -314,7 +314,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 		Class<?>[] paramTypes = exceptionConstructor.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
 		for (int i = 0; i < paramTypes.length; i++) {
-			if (paramTypes[i].equals(String.class)) {
+			if (String.class == paramTypes[i]) {
 				args[i] = cause.getMessage();
 			}
 			else if (paramTypes[i].isInstance(cause)) {
@@ -409,7 +409,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 			Class<?> serviceLocatorReturnType = interfaceMethod.getReturnType();
 
 			// Check whether the method is a valid service locator.
-			if (paramTypes.length > 1 || void.class.equals(serviceLocatorReturnType)) {
+			if (paramTypes.length > 1 || void.class == serviceLocatorReturnType) {
 				throw new UnsupportedOperationException(
 						"May only call methods with signature '<type> xxx()' or '<type> xxx(<idtype> id)' " +
 						"on factory interface, but tried to call: " + interfaceMethod);

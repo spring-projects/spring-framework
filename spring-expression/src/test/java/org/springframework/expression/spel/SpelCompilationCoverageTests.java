@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.junit.Test;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -123,7 +124,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(String.class,expression.getValue());
 		assertCanCompile(expression);
 		assertEquals(String.class,expression.getValue());
-	
+
 		expression = parse("T(java.io.IOException)");
 		assertEquals(IOException.class,expression.getValue());
 		assertCanCompile(expression);
@@ -197,7 +198,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertEquals(false,expression.getValue());
 
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		expression = parse("#root instanceof T(java.util.List)");
 		assertEquals(true,expression.getValue(list));
 		assertCanCompile(expression);
@@ -234,6 +235,53 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(true,expression.getValue(root));
 	}
 
+	@Test
+	public void operatorInstanceOf_SPR14250() throws Exception {
+		// primitive left operand - should get boxed, return true
+		expression = parse("3 instanceof T(Integer)");
+		assertEquals(true,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(true,expression.getValue());
+
+		// primitive left operand - should get boxed, return false
+		expression = parse("3 instanceof T(String)");
+		assertEquals(false,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(false,expression.getValue());
+		
+		// double slot left operand - should get boxed, return false
+		expression = parse("3.0d instanceof T(Integer)");
+		assertEquals(false,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(false,expression.getValue());
+
+		// double slot left operand - should get boxed, return true
+		expression = parse("3.0d instanceof T(Double)");
+		assertEquals(true,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(true,expression.getValue());
+		
+		// Only when the right hand operand is a direct type reference
+		// will it be compilable.
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		ctx.setVariable("foo", String.class);
+		expression = parse("3 instanceof #foo");
+		assertEquals(false,expression.getValue(ctx));
+		assertCantCompile(expression);
+
+		// use of primitive as type for instanceof check - compilable
+		// but always false
+		expression = parse("3 instanceof T(int)");
+		assertEquals(false,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(false,expression.getValue());
+		
+		expression = parse("3 instanceof T(long)");
+		assertEquals(false,expression.getValue());
+		assertCanCompile(expression);
+		assertEquals(false,expression.getValue());
+	}
+	
 	@Test
 	public void stringLiteral() throws Exception {
 		expression = parser.parseExpression("'abcde'");
@@ -1040,7 +1088,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			assertEquals(42,expression.getValue(ctx));
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
 
@@ -1055,7 +1104,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			assertEquals('4',expression.getValue(ctx));
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
 	}
@@ -1168,7 +1218,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertFalse((Boolean)expression.getValue());
 	}
-
 
 	@Test
 	public void opGt() throws Exception {
@@ -1315,7 +1364,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertTrue((Boolean)expression.getValue(tc7));
 		assertCanCompile(expression);
 		assertTrue((Boolean)expression.getValue(tc7));
-
 
 		expression = parse("3.0d == 4.0d");
 		assertCanCompile(expression);
@@ -1666,43 +1714,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(3L,expression.getValue());
 		assertCanCompile(expression);
 		assertEquals(3L,expression.getValue());
-	}
-
-	public class PayloadX {
-		public int valueI = 120;
-		public Integer valueIB = 120;
-		public Integer valueIB58 = 58;
-		public Integer valueIB60 = 60;
-		public long valueJ = 120L;
-		public Long valueJB = 120L;
-		public Long valueJB58 = 58L;
-		public Long valueJB60 = 60L;
-		public double valueD = 120D;
-		public Double valueDB = 120D;
-		public Double valueDB58 = 58D;
-		public Double valueDB60 = 60D;
-		public float valueF = 120F;
-		public Float valueFB = 120F;
-		public Float valueFB58 = 58F;
-		public Float valueFB60 = 60F;
-		public byte valueB = (byte)120;
-		public byte valueB18 = (byte)18;
-		public byte valueB20 = (byte)20;
-		public Byte valueBB = (byte)120;
-		public Byte valueBB18 = (byte)18;
-		public Byte valueBB20 = (byte)20;
-		public char valueC = (char)120;
-		public Character valueCB = (char)120;
-		public short valueS = (short)120;
-		public short valueS18 = (short)18;
-		public short valueS20 = (short)20;
-		public Short valueSB = (short)120;
-		public Short valueSB18 = (short)18;
-		public Short valueSB20 = (short)20;
-		public PayloadX payload;
-		public PayloadX() {
-			payload = this;
-		}
 	}
 
 	@Test
@@ -2151,16 +2162,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("objectobject",expression.getValue(new Greeter()));
 		assertCanCompile(expression);
 		assertEquals("objectobject",expression.getValue(new Greeter()));
-	}
-
-	public static class Greeter {
-		public String getWorld() {
-			return "world";
-		}
-
-		public Object getObject() {
-			return "object";
-		}
 	}
 
 	@Test
@@ -2922,11 +2923,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(0,expression.getValue());
 
 		expression = parse("payload%2==0");
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.TYPE));
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(5),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(5),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.TYPE));
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(5),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(5),Boolean.TYPE));
 
 		expression = parse("8%3");
 		assertEquals(2,expression.getValue());
@@ -2991,17 +2992,114 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@Test
 	public void failsWhenSettingContextForExpression_SPR12326() {
-	    SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, this
-	            .getClass().getClassLoader()));
-	    Person3 person = new Person3("foo", 1);
-	    SpelExpression expression = parser.parseRaw("#it?.age?.equals([0])");
-	    StandardEvaluationContext context = new StandardEvaluationContext(new Object[] { 1 });
-	    context.setVariable("it", person);
-	    expression.setEvaluationContext(context);
-	    assertTrue(expression.getValue(Boolean.class));
-	    assertTrue(expression.getValue(Boolean.class));	   
-	    assertCanCompile(expression);
-	    assertTrue(expression.getValue(Boolean.class));
+		SpelExpressionParser parser = new SpelExpressionParser(
+				new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, getClass().getClassLoader()));
+		Person3 person = new Person3("foo", 1);
+		SpelExpression expression = parser.parseRaw("#it?.age?.equals([0])");
+		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] { 1 });
+		context.setVariable("it", person);
+		expression.setEvaluationContext(context);
+		assertTrue(expression.getValue(Boolean.class));
+		assertTrue(expression.getValue(Boolean.class));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(Boolean.class));
+	}
+
+
+	/**
+	 * Test variants of using T(...) and static/non-static method/property/field references.
+	 */
+	@Test
+	public void constructorReference_SPR13781() {
+		// Static field access on a T() referenced type
+		expression = parser.parseExpression("T(java.util.Locale).ENGLISH");
+		assertEquals("en",expression.getValue().toString());
+		assertCanCompile(expression);
+		assertEquals("en",expression.getValue().toString());
+
+		// The actual expression from the bug report. It fails if the ENGLISH reference fails
+		// to pop the type reference for Locale off the stack (if it isn't popped then
+		// toLowerCase() will be called with a Locale parameter). In this situation the
+		// code generation for ENGLISH should notice there is something on the stack that
+		// is not required and pop it off.
+		expression = parser.parseExpression("#userId.toString().toLowerCase(T(java.util.Locale).ENGLISH)");
+		StandardEvaluationContext context =
+				new StandardEvaluationContext();
+		context.setVariable("userId", "RoDnEy");
+		assertEquals("rodney",expression.getValue(context));
+		assertCanCompile(expression);
+		assertEquals("rodney",expression.getValue(context));
+
+		// Property access on a class object
+		expression = parser.parseExpression("T(String).name");
+		assertEquals("java.lang.String",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("java.lang.String",expression.getValue());
+
+		// Now the type reference isn't on the stack, and needs loading
+		context = new StandardEvaluationContext(String.class);
+		expression = parser.parseExpression("name");
+		assertEquals("java.lang.String",expression.getValue(context));
+		assertCanCompile(expression);
+		assertEquals("java.lang.String",expression.getValue(context));
+
+		expression = parser.parseExpression("T(String).getName()");
+		assertEquals("java.lang.String",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("java.lang.String",expression.getValue());
+	
+		// These tests below verify that the chain of static accesses (either method/property or field)
+		// leave the right thing on top of the stack for processing by any outer consuming code.
+		// Here the consuming code is the String.valueOf() function.  If the wrong thing were on
+		// the stack (for example if the compiled code for static methods wasn't popping the
+		// previous thing off the stack) the valueOf() would operate on the wrong value.
+
+		String shclass = StaticsHelper.class.getName();
+		// Basic chain: property access then method access
+		expression = parser.parseExpression("T(String).valueOf(T(String).name.valueOf(1))");
+		assertEquals("1",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("1",expression.getValue());
+
+		// chain of statics ending with static method
+		expression = parser.parseExpression("T(String).valueOf(T("+shclass+").methoda().methoda().methodb())");
+		assertEquals("mb",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("mb",expression.getValue());
+
+		// chain of statics ending with static field
+		expression = parser.parseExpression("T(String).valueOf(T("+shclass+").fielda.fielda.fieldb)");
+		assertEquals("fb",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("fb",expression.getValue());
+
+		// chain of statics ending with static property access
+		expression = parser.parseExpression("T(String).valueOf(T("+shclass+").propertya.propertya.propertyb)");
+		assertEquals("pb",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("pb",expression.getValue());
+
+		// variety chain
+		expression = parser.parseExpression("T(String).valueOf(T("+shclass+").fielda.methoda().propertya.fieldb)");
+		assertEquals("fb",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("fb",expression.getValue());
+
+		expression = parser.parseExpression("T(String).valueOf(fielda.fieldb)");
+		assertEquals("fb",expression.getValue(StaticsHelper.sh));
+		assertCanCompile(expression);
+		assertEquals("fb",expression.getValue(StaticsHelper.sh));
+	
+		expression = parser.parseExpression("T(String).valueOf(propertya.propertyb)");
+		assertEquals("pb",expression.getValue(StaticsHelper.sh));
+		assertCanCompile(expression);
+		assertEquals("pb",expression.getValue(StaticsHelper.sh));
+
+		expression = parser.parseExpression("T(String).valueOf(methoda().methodb())");
+		assertEquals("mb",expression.getValue(StaticsHelper.sh));
+		assertCanCompile(expression);
+		assertEquals("mb",expression.getValue(StaticsHelper.sh));
+	
 	}
 
 	@Test
@@ -3107,40 +3205,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		context.setVariable("it", person2);
 		assertTrue((Boolean)ex.getValue(context));
 		assertTrue((Boolean)ex.getValue(context));
-	}
-	
-	public class Person {
-
-	    private int age;
-
-	    public Person(int age) {
-	        this.age = age;
-	    }
-
-	    public int getAge() {
-	        return age;
-	    }
-
-	    public void setAge(int age) {
-	        this.age = age;
-	    }
-	}
-
-	public class Person3 {
-	
-	    private int age;
-
-	    public Person3(String name, int age) {
-	        this.age = age;
-	    }
-
-	    public int getAge() {
-	        return age;
-	    }
-
-	    public void setAge(int age) {
-	        this.age = age;
-	    }
 	}
 
 	@Test
@@ -3665,7 +3729,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCantCompile(expression); // method takes a string and we are passing an Integer
 	}
 
-
 	@Test
 	public void errorHandling() throws Exception {
 		TestClass5 tc = new TestClass5();
@@ -3683,7 +3746,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			assertEquals(2,expression.getValue(strings));
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
 		SpelCompiler.revertToInterpreted(expression);
@@ -3714,7 +3778,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			expression.getValue(tc);
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
 
@@ -3726,7 +3791,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			expression.getValue(new Integer(42));
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			// java.lang.Integer cannot be cast to java.lang.String
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
@@ -3829,10 +3895,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("D",getAst().getExitDescriptor());
 	}
 
-
 	@Test
 	public void mixingItUp_indexerOpEqTernary() throws Exception {
-		Map<String, String> m = new HashMap<String,String>();
+		Map<String, String> m = new HashMap<>();
 		m.put("andy","778");
 
 		expression = parse("['andy']==null?1:2");
@@ -3899,7 +3964,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		float[] fs = new float[]{6.0f,7.0f,8.0f};
 		byte[] bs = new byte[]{(byte)2,(byte)3,(byte)4};
 		char[] cs = new char[]{'a','b','c'};
-		
+
 		// Access String (reference type) array
 		expression = parser.parseExpression("[0]");
 		assertEquals("a",expression.getValue(sss));
@@ -3963,7 +4028,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("C",getAst().getExitDescriptor());
 
 		// Collections
-		List<String> strings = new ArrayList<String>();
+		List<String> strings = new ArrayList<>();
 		strings.add("aaa");
 		strings.add("bbb");
 		strings.add("ccc");
@@ -3973,7 +4038,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("bbb",expression.getValue(strings));
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 
-		List<Integer> ints = new ArrayList<Integer>();
+		List<Integer> ints = new ArrayList<>();
 		ints.add(123);
 		ints.add(456);
 		ints.add(789);
@@ -3984,7 +4049,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 
 		// Maps
-		Map<String,Integer> map1 = new HashMap<String,Integer>();
+		Map<String,Integer> map1 = new HashMap<>();
 		map1.put("aaa", 111);
 		map1.put("bbb", 222);
 		map1.put("ccc", 333);
@@ -4017,7 +4082,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// list of arrays
 
-		List<String[]> listOfStringArrays = new ArrayList<String[]>();
+		List<String[]> listOfStringArrays = new ArrayList<>();
 		listOfStringArrays.add(new String[]{"a","b","c"});
 		listOfStringArrays.add(new String[]{"d","e","f"});
 		expression = parser.parseExpression("[1]");
@@ -4032,7 +4097,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("d",stringify(expression.getValue(listOfStringArrays)));
 		assertEquals("Ljava/lang/String",getAst().getExitDescriptor());
 
-		List<Integer[]> listOfIntegerArrays = new ArrayList<Integer[]>();
+		List<Integer[]> listOfIntegerArrays = new ArrayList<>();
 		listOfIntegerArrays.add(new Integer[]{1,2,3});
 		listOfIntegerArrays.add(new Integer[]{4,5,6});
 		expression = parser.parseExpression("[0]");
@@ -4049,11 +4114,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// array of lists
 		List<String>[] stringArrayOfLists = new ArrayList[2];
-		stringArrayOfLists[0] = new ArrayList<String>();
+		stringArrayOfLists[0] = new ArrayList<>();
 		stringArrayOfLists[0].add("a");
 		stringArrayOfLists[0].add("b");
 		stringArrayOfLists[0].add("c");
-		stringArrayOfLists[1] = new ArrayList<String>();
+		stringArrayOfLists[1] = new ArrayList<>();
 		stringArrayOfLists[1].add("d");
 		stringArrayOfLists[1].add("e");
 		stringArrayOfLists[1].add("f");
@@ -4098,13 +4163,13 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("I",getAst().getExitDescriptor());
 
 		// list of lists of reference types
-		List<List<String>> listOfListOfStrings = new ArrayList<List<String>>();
-		List<String> list = new ArrayList<String>();
+		List<List<String>> listOfListOfStrings = new ArrayList<>();
+		List<String> list = new ArrayList<>();
 		list.add("a");
 		list.add("b");
 		list.add("c");
 		listOfListOfStrings.add(list);
-		list = new ArrayList<String>();
+		list = new ArrayList<>();
 		list.add("d");
 		list.add("e");
 		list.add("f");
@@ -4124,8 +4189,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 
 		// Map of lists
-		Map<String,List<String>> mapToLists = new HashMap<String,List<String>>();
-		list = new ArrayList<String>();
+		Map<String,List<String>> mapToLists = new HashMap<>();
+		list = new ArrayList<>();
 		list.add("a");
 		list.add("b");
 		list.add("c");
@@ -4144,7 +4209,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 
 		// Map to array
-		Map<String,int[]> mapToIntArray = new HashMap<String,int[]>();
+		Map<String,int[]> mapToIntArray = new HashMap<>();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 		ctx.addPropertyAccessor(new CompilableMapAccessor());
 		mapToIntArray.put("foo",new int[]{1,2,3});
@@ -4179,7 +4244,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		// Map array
 		Map<String,String>[] mapArray = new Map[1];
-		mapArray[0] = new HashMap<String,String>();
+		mapArray[0] = new HashMap<>();
 		mapArray[0].put("key", "value1");
 		expression = parser.parseExpression("[0]");
 		assertEquals("{key=value1}",stringify(expression.getValue(mapArray)));
@@ -4193,6 +4258,21 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCanCompile(expression);
 		assertEquals("value1",stringify(expression.getValue(mapArray)));
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
+	}
+
+	@Test
+	public void plusNeedingCheckcast_SPR12426() {
+		expression = parser.parseExpression("object + ' world'");
+		Object v = expression.getValue(new FooObject());
+		assertEquals("hello world",v);
+		assertCanCompile(expression);
+		assertEquals("hello world",v);
+
+		expression = parser.parseExpression("object + ' world'");
+		v = expression.getValue(new FooString());
+		assertEquals("hello world",v);
+		assertCanCompile(expression);
+		assertEquals("hello world",v);
 	}
 
 	@Test
@@ -4234,7 +4314,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 //		// time it interpreted
 //		long stime = System.currentTimeMillis();
-//		for (int i=0;i<100000;i++) {
+//		for (int i = 0;i<100000;i++) {
 //			v = expression.getValue(ctx,holder);
 //		}
 //		System.out.println((System.currentTimeMillis()-stime));
@@ -4245,7 +4325,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 //
 //		// time it compiled
 //		stime = System.currentTimeMillis();
-//		for (int i=0;i<100000;i++) {
+//		for (int i = 0;i<100000;i++) {
 //			v = expression.getValue(ctx,holder);
 //		}
 //		System.out.println((System.currentTimeMillis()-stime));
@@ -4254,197 +4334,197 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	@Test
 	public void compilerWithGenerics_12040() {
 		expression = parser.parseExpression("payload!=2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("2!=payload");
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("payload!=6L");
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Long>(4L),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(4L),Boolean.class));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Long>(6L),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(6L),Boolean.class));
 
 		expression = parser.parseExpression("payload==2");
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("2==payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("payload==6L");
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Long>(4L),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(4L),Boolean.class));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Long>(6L),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(6L),Boolean.class));
 
 		expression = parser.parseExpression("2==payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper<Integer>(4),Boolean.class));
+		assertFalse(expression.getValue(new GenericMessageTestHelper<>(4),Boolean.class));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper<Integer>(2),Boolean.class));
+		assertTrue(expression.getValue(new GenericMessageTestHelper<>(2),Boolean.class));
 
 		expression = parser.parseExpression("payload/2");
-		assertEquals(2,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(3,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper<>(6)));
 
 		expression = parser.parseExpression("100/payload");
-		assertEquals(25,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(25,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(10,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		assertEquals(10,expression.getValue(new GenericMessageTestHelper<>(10)));
 
 		expression = parser.parseExpression("payload+2");
-		assertEquals(6,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(6,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(8,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper<>(6)));
 
 		expression = parser.parseExpression("100+payload");
-		assertEquals(104,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(104,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(110,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		assertEquals(110,expression.getValue(new GenericMessageTestHelper<>(10)));
 
 		expression = parser.parseExpression("payload-2");
-		assertEquals(2,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(4,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		assertEquals(4,expression.getValue(new GenericMessageTestHelper<>(6)));
 
 		expression = parser.parseExpression("100-payload");
-		assertEquals(96,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(96,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(90,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		assertEquals(90,expression.getValue(new GenericMessageTestHelper<>(10)));
 
 		expression = parser.parseExpression("payload*2");
-		assertEquals(8,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(12,expression.getValue(new GenericMessageTestHelper<Integer>(6)));
+		assertEquals(12,expression.getValue(new GenericMessageTestHelper<>(6)));
 
 		expression = parser.parseExpression("100*payload");
-		assertEquals(400,expression.getValue(new GenericMessageTestHelper<Integer>(4)));
+		assertEquals(400,expression.getValue(new GenericMessageTestHelper<>(4)));
 		assertCanCompile(expression);
-		assertEquals(1000,expression.getValue(new GenericMessageTestHelper<Integer>(10)));
+		assertEquals(1000,expression.getValue(new GenericMessageTestHelper<>(10)));
 
 		expression = parser.parseExpression("payload/2L");
-		assertEquals(2L,expression.getValue(new GenericMessageTestHelper<Long>(4L)));
+		assertEquals(2L,expression.getValue(new GenericMessageTestHelper<>(4L)));
 		assertCanCompile(expression);
-		assertEquals(3L,expression.getValue(new GenericMessageTestHelper<Long>(6L)));
+		assertEquals(3L,expression.getValue(new GenericMessageTestHelper<>(6L)));
 
 		expression = parser.parseExpression("100L/payload");
-		assertEquals(25L,expression.getValue(new GenericMessageTestHelper<Long>(4L)));
+		assertEquals(25L,expression.getValue(new GenericMessageTestHelper<>(4L)));
 		assertCanCompile(expression);
-		assertEquals(10L,expression.getValue(new GenericMessageTestHelper<Long>(10L)));
+		assertEquals(10L,expression.getValue(new GenericMessageTestHelper<>(10L)));
 
 		expression = parser.parseExpression("payload/2f");
-		assertEquals(2f,expression.getValue(new GenericMessageTestHelper<Float>(4f)));
+		assertEquals(2f,expression.getValue(new GenericMessageTestHelper<>(4f)));
 		assertCanCompile(expression);
-		assertEquals(3f,expression.getValue(new GenericMessageTestHelper<Float>(6f)));
+		assertEquals(3f,expression.getValue(new GenericMessageTestHelper<>(6f)));
 
 		expression = parser.parseExpression("100f/payload");
-		assertEquals(25f,expression.getValue(new GenericMessageTestHelper<Float>(4f)));
+		assertEquals(25f,expression.getValue(new GenericMessageTestHelper<>(4f)));
 		assertCanCompile(expression);
-		assertEquals(10f,expression.getValue(new GenericMessageTestHelper<Float>(10f)));
+		assertEquals(10f,expression.getValue(new GenericMessageTestHelper<>(10f)));
 
 		expression = parser.parseExpression("payload/2d");
-		assertEquals(2d,expression.getValue(new GenericMessageTestHelper<Double>(4d)));
+		assertEquals(2d,expression.getValue(new GenericMessageTestHelper<>(4d)));
 		assertCanCompile(expression);
-		assertEquals(3d,expression.getValue(new GenericMessageTestHelper<Double>(6d)));
+		assertEquals(3d,expression.getValue(new GenericMessageTestHelper<>(6d)));
 
 		expression = parser.parseExpression("100d/payload");
-		assertEquals(25d,expression.getValue(new GenericMessageTestHelper<Double>(4d)));
+		assertEquals(25d,expression.getValue(new GenericMessageTestHelper<>(4d)));
 		assertCanCompile(expression);
-		assertEquals(10d,expression.getValue(new GenericMessageTestHelper<Double>(10d)));
+		assertEquals(10d,expression.getValue(new GenericMessageTestHelper<>(10d)));
 	}
 
 	// The new helper class here uses an upper bound on the generic
 	@Test
 	public void compilerWithGenerics_12040_2() {
 		expression = parser.parseExpression("payload/2");
-		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<>(6)));
 
 		expression = parser.parseExpression("9/payload");
-		assertEquals(1,expression.getValue(new GenericMessageTestHelper2<Integer>(9)));
+		assertEquals(1,expression.getValue(new GenericMessageTestHelper2<>(9)));
 		assertCanCompile(expression);
-		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<Integer>(3)));
+		assertEquals(3,expression.getValue(new GenericMessageTestHelper2<>(3)));
 
 		expression = parser.parseExpression("payload+2");
-		assertEquals(6,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(6,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<>(6)));
 
 		expression = parser.parseExpression("100+payload");
-		assertEquals(104,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(104,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(110,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+		assertEquals(110,expression.getValue(new GenericMessageTestHelper2<>(10)));
 
 		expression = parser.parseExpression("payload-2");
-		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(2,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(4,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		assertEquals(4,expression.getValue(new GenericMessageTestHelper2<>(6)));
 
 		expression = parser.parseExpression("100-payload");
-		assertEquals(96,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(96,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(90,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+		assertEquals(90,expression.getValue(new GenericMessageTestHelper2<>(10)));
 
 		expression = parser.parseExpression("payload*2");
-		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(8,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(12,expression.getValue(new GenericMessageTestHelper2<Integer>(6)));
+		assertEquals(12,expression.getValue(new GenericMessageTestHelper2<>(6)));
 
 		expression = parser.parseExpression("100*payload");
-		assertEquals(400,expression.getValue(new GenericMessageTestHelper2<Integer>(4)));
+		assertEquals(400,expression.getValue(new GenericMessageTestHelper2<>(4)));
 		assertCanCompile(expression);
-		assertEquals(1000,expression.getValue(new GenericMessageTestHelper2<Integer>(10)));
+		assertEquals(1000,expression.getValue(new GenericMessageTestHelper2<>(10)));
 	}
 
 	// The other numeric operators
 	@Test
 	public void compilerWithGenerics_12040_3() {
 		expression = parser.parseExpression("payload >= 2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(4),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(4),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 
 		expression = parser.parseExpression("2 >= payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(5),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(5),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 
 		expression = parser.parseExpression("payload > 2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(4),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(4),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 
 		expression = parser.parseExpression("2 > payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(5),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(5),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 
 		expression = parser.parseExpression("payload <=2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(6),Boolean.TYPE));
 
 		expression = parser.parseExpression("2 <= payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(6),Boolean.TYPE));
 
 		expression = parser.parseExpression("payload < 2");
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(6),Boolean.TYPE));
 
 		expression = parser.parseExpression("2 < payload");
-		assertFalse(expression.getValue(new GenericMessageTestHelper2<Integer>(1),Boolean.TYPE));
+		assertFalse(expression.getValue(new GenericMessageTestHelper2<>(1),Boolean.TYPE));
 		assertCanCompile(expression);
-		assertTrue(expression.getValue(new GenericMessageTestHelper2<Integer>(6),Boolean.TYPE));
+		assertTrue(expression.getValue(new GenericMessageTestHelper2<>(6),Boolean.TYPE));
 	}
 
 	@Test
@@ -4474,23 +4554,90 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(3,expression.getValue(root));
 	}
 
-	// ---
 
-	public static interface Message<T> {
+	// helper methods
+
+	private SpelNodeImpl getAst() {
+		SpelExpression spelExpression = (SpelExpression)expression;
+		SpelNode ast = spelExpression.getAST();
+		return (SpelNodeImpl)ast;
+	}
+
+	private String stringify(Object object) {
+		StringBuilder s = new StringBuilder();
+		if (object instanceof List) {
+			List<?> ls = (List<?>)object;
+			for (Object l: ls) {
+				s.append(l);
+				s.append(" ");
+			}
+		}
+		else if (object instanceof Object[]) {
+			Object[] os = (Object[])object;
+			for (Object o: os) {
+				s.append(o);
+				s.append(" ");
+			}
+		}
+		else if (object instanceof int[]) {
+			int[] is = (int[])object;
+			for (int i: is) {
+				s.append(i);
+				s.append(" ");
+			}
+		}
+		else {
+			s.append(object.toString());
+		}
+		return s.toString().trim();
+	}
+
+	private void assertCanCompile(Expression expression) {
+		assertTrue(SpelCompiler.compile(expression));
+	}
+
+	private void assertCantCompile(Expression expression) {
+		assertFalse(SpelCompiler.compile(expression));
+	}
+
+	private Expression parse(String expression) {
+		return parser.parseExpression(expression);
+	}
+
+	private void assertGetValueFail(Expression expression) {
+		try {
+			Object o = expression.getValue();
+			fail("Calling getValue on the expression should have failed but returned "+o);
+		}
+		catch (Exception ex) {
+			// success!
+		}
+	}
+
+
+	// helper classes
+
+	public interface Message<T> {
+
 		MessageHeaders getHeaders();
+
 		@SuppressWarnings("rawtypes")
 		List getList();
+
 		int[] getIa();
 	}
 
 	public static class MyMessage implements Message<String> {
+
 		public MessageHeaders getHeaders() {
 			MessageHeaders mh = new MessageHeaders();
 			mh.put("command", "wibble");
 			mh.put("command2", "wobble");
 			return mh;
 		}
+
 		public int[] getIa() { return new int[]{5,3}; }
+
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public List getList() {
 			List l = new ArrayList();
@@ -4509,9 +4656,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	@SuppressWarnings("serial")
-	public static class MessageHeaders extends HashMap<String,Object> {	}
+	public static class MessageHeaders extends HashMap<String,Object> {
+	}
 
 	public static class GenericMessageTestHelper<T> {
+
 		private T payload;
 
 		GenericMessageTestHelper(T value) {
@@ -4525,6 +4674,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	// This test helper has a bound on the type variable
 	public static class GenericMessageTestHelper2<T extends Number> {
+
 		private T payload;
 
 		GenericMessageTestHelper2(T value) {
@@ -4593,7 +4743,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
-
 	static class CompilableMapAccessor implements CompilablePropertyAccessor {
 
 		@Override
@@ -4647,26 +4796,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			}
 			mv.visitLdcInsn(propertyName);
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
-
-//			if (method == null) {
-//				try {
-//					method = Payload2.class.getDeclaredMethod("getField", String.class);
-//				} catch (Exception e) {}
-//			}
-//			String descriptor = codeflow.lastDescriptor();
-//			String memberDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
-//			if (descriptor == null) {
-//				codeflow.loadTarget(mv);
-//			}
-//			if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
-//				mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
-//			}
-//			mv.visitLdcInsn(propertyReference.getName());
-//			mv.visitMethodInsn(INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, method.getName(),CodeFlow.createDescriptor(method));
-//			   6:	invokeinterface	#6,  2; //InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
 		}
 	}
-
 
 	/**
 	 * Exception thrown from {@code read} in order to reset a cached
@@ -4689,68 +4820,33 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	// helpers
-
-	private SpelNodeImpl getAst() {
-		SpelExpression spelExpression = (SpelExpression)expression;
-		SpelNode ast = spelExpression.getAST();
-		return (SpelNodeImpl)ast;
-	}
-
-	private String stringify(Object object) {
-		StringBuilder s = new StringBuilder();
-		if (object instanceof List) {
-			List<?> ls = (List<?>)object;
-			for (Object l: ls) {
-				s.append(l);
-				s.append(" ");
-			}
-		}
-		else if (object instanceof Object[]) {
-			Object[] os = (Object[])object;
-			for (Object o: os) {
-				s.append(o);
-				s.append(" ");
-			}
-		}
-		else if (object instanceof int[]) {
-			int[] is = (int[])object;
-			for (int i: is) {
-				s.append(i);
-				s.append(" ");
-			}
-		}
-		else {
-			s.append(object.toString());
-		}
-		return s.toString().trim();
-	}
-
-	private void assertCanCompile(Expression expression) {
-		assertTrue(SpelCompiler.compile(expression));
-	}
-
-	private void assertCantCompile(Expression expression) {
-		assertFalse(SpelCompiler.compile(expression));
-	}
-
-	private Expression parse(String expression) {
-		return parser.parseExpression(expression);
-	}
-
-	private void assertGetValueFail(Expression expression) {
-		try {
-			Object o = expression.getValue();
-			fail("Calling getValue on the expression should have failed but returned "+o);
-		} catch (Exception ex) {
-			// success!
-		}
-	}
-
 	// test classes
 
+	public static class Greeter {
+
+		public String getWorld() {
+			return "world";
+		}
+
+		public Object getObject() {
+			return "object";
+		}
+	}
+
+	public static class FooObject {
+
+		public Object getObject() { return "hello"; }
+	}
+
+	public static class FooString {
+
+		public String getObject() { return "hello"; }
+	}
+
 	public static class Payload {
+
 		Two[] DR = new Two[]{new Two()};
+
 		public Two holder = new Two();
 
 		public Two[] getDR() {
@@ -4759,12 +4855,15 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class Payload2 {
+
 		String var1 = "abc";
 		String var2 = "def";
+
 		public Object getField(String name) {
 			if (name.equals("var1")) {
 				return var1;
-			} else if (name.equals("var2")) {
+			}
+			else if (name.equals("var2")) {
 				return var2;
 			}
 			return null;
@@ -4772,11 +4871,48 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class Payload2Holder {
+
 		public Payload2 payload2 = new Payload2();
 	}
 
+	public class Person {
+
+		private int age;
+
+		public Person(int age) {
+			this.age = age;
+		}
+
+		public int getAge() {
+			return age;
+		}
+
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
+	public class Person3 {
+
+		private int age;
+
+		public Person3(String name, int age) {
+			this.age = age;
+		}
+
+		public int getAge() {
+			return age;
+		}
+
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
 	public static class Two {
+
 		Three three = new Three();
+
 		public Three getThree() {
 			return three;
 		}
@@ -4786,19 +4922,61 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class Three {
+
 		double four = 0.04d;
+
 		public double getFour() {
 			return four;
 		}
 	}
 
+	public class PayloadX {
+
+		public int valueI = 120;
+		public Integer valueIB = 120;
+		public Integer valueIB58 = 58;
+		public Integer valueIB60 = 60;
+		public long valueJ = 120L;
+		public Long valueJB = 120L;
+		public Long valueJB58 = 58L;
+		public Long valueJB60 = 60L;
+		public double valueD = 120D;
+		public Double valueDB = 120D;
+		public Double valueDB58 = 58D;
+		public Double valueDB60 = 60D;
+		public float valueF = 120F;
+		public Float valueFB = 120F;
+		public Float valueFB58 = 58F;
+		public Float valueFB60 = 60F;
+		public byte valueB = (byte)120;
+		public byte valueB18 = (byte)18;
+		public byte valueB20 = (byte)20;
+		public Byte valueBB = (byte)120;
+		public Byte valueBB18 = (byte)18;
+		public Byte valueBB20 = (byte)20;
+		public char valueC = (char)120;
+		public Character valueCB = (char)120;
+		public short valueS = (short)120;
+		public short valueS18 = (short)18;
+		public short valueS20 = (short)20;
+		public Short valueSB = (short)120;
+		public Short valueSB18 = (short)18;
+		public Short valueSB20 = (short)20;
+		public PayloadX payload;
+		public PayloadX() {
+			payload = this;
+		}
+	}
+
 	public static class TestClass1 {
+
 		public int index1 = 1;
 		public int index2 = 3;
 		public String word = "abcd";
 	}
 
 	public static class TestClass4 {
+
 		public boolean a,b;
 		public boolean gettrue() { return true; }
 		public boolean getfalse() { return false; }
@@ -4807,6 +4985,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass10 {
+
 		public String s = null;
 
 		public void reset() {
@@ -4847,6 +5026,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass5 {
+
 		public int i = 0;
 		public String s = null;
 		public static int _i = 0;
@@ -4881,7 +5061,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public void reset() {
 			i = 0;
-			_i=0;
+			_i = 0;
 			s = null;
 			_s = null;
 			field = null;
@@ -5022,7 +5202,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				for (String[] varg: vargs) {
 					s+="{";
 					for (String v: varg) {
-						s+=v;				
+						s+=v;
 					}
 					s+="}";
 				}
@@ -5038,7 +5218,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				for (int[] varg: vargs) {
 					s+="{";
 					for (int v: varg) {
-						s+=Integer.toString(v);				
+						s+=Integer.toString(v);
 					}
 					s+="}";
 				}
@@ -5056,10 +5236,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				}
 			}
 		}
-
 	}
 
 	public static class TestClass6 {
+
 		public String orange = "value1";
 		public static String apple = "value2";
 
@@ -5075,7 +5255,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass7 {
+
 		public static String property;
+
 		static {
 			String s = "UK 123";
 			StringTokenizer st = new StringTokenizer(s);
@@ -5091,6 +5273,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass8 {
+
 		public int i;
 		public String s;
 		public double d;
@@ -5104,7 +5287,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 
 		public TestClass8() {
-	
+
 		}
 
 		public TestClass8(Integer i) {
@@ -5117,68 +5300,69 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
-    public static class Obj {
+	public static class Obj {
 
-        private final String param1;
+		private final String param1;
 
-        public Obj(String param1){
-            this.param1 = param1;
-        }
-    }
+		public Obj(String param1){
+			this.param1 = param1;
+		}
+	}
 
-    public static class Obj2 {
+	public static class Obj2 {
 
-        public final String output;
+		public final String output;
 
-        public Obj2(String... params){
-        	StringBuilder b = new StringBuilder();
-        	for (String param: params) {
-        		b.append(param);
-        	}
-        	output = b.toString();
-        }
-    }
+		public Obj2(String... params){
+			StringBuilder b = new StringBuilder();
+			for (String param: params) {
+				b.append(param);
+			}
+			output = b.toString();
+		}
+	}
 
-    public static class Obj3 {
+	public static class Obj3 {
 
-        public final String output;
+		public final String output;
 
-        public Obj3(int... params) {
-        	StringBuilder b = new StringBuilder();
-        	for (int param: params) {
-        		b.append(Integer.toString(param));
-        	}
-        	output = b.toString();
-        }
-      
-        public Obj3(String s, Float f, int... ints) {
-        	StringBuilder b = new StringBuilder();
-        	b.append(s);
-        	b.append(":");
-        	b.append(Float.toString(f));
-        	b.append(":");
-        	for (int param: ints) {
-        		b.append(Integer.toString(param));
-        	}
-        	output = b.toString();
-        }
-    }
-  
-    public static class Obj4 {
-    
-        public final String output;
+		public Obj3(int... params) {
+			StringBuilder b = new StringBuilder();
+			for (int param: params) {
+				b.append(Integer.toString(param));
+			}
+			output = b.toString();
+		}
 
-        public Obj4(int[] params) {
-        	StringBuilder b = new StringBuilder();
-        	for (int param: params) {
-        		b.append(Integer.toString(param));
-        	}
-        	output = b.toString();
-        }
-    }
+		public Obj3(String s, Float f, int... ints) {
+			StringBuilder b = new StringBuilder();
+			b.append(s);
+			b.append(":");
+			b.append(Float.toString(f));
+			b.append(":");
+			for (int param: ints) {
+				b.append(Integer.toString(param));
+			}
+			output = b.toString();
+		}
+	}
+
+	public static class Obj4 {
+
+		public final String output;
+
+		public Obj4(int[] params) {
+			StringBuilder b = new StringBuilder();
+			for (int param: params) {
+				b.append(Integer.toString(param));
+			}
+			output = b.toString();
+		}
+	}
 
 	@SuppressWarnings("unused")
 	private static class TestClass9 {
+
 		public TestClass9(int i) {}
 	}
 
@@ -5187,13 +5371,14 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	// final class HttpServlet3RequestFactory implements HttpServletRequestFactory
 	static class HttpServlet3RequestFactory {
 
-	  static Servlet3SecurityContextHolderAwareRequestWrapper getOne() {
-		  HttpServlet3RequestFactory outer = new HttpServlet3RequestFactory();
-		  return outer.new Servlet3SecurityContextHolderAwareRequestWrapper();
-	  }
-	  // private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper
-	  private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper {
-	  }
+		static Servlet3SecurityContextHolderAwareRequestWrapper getOne() {
+			HttpServlet3RequestFactory outer = new HttpServlet3RequestFactory();
+			return outer.new Servlet3SecurityContextHolderAwareRequestWrapper();
+		}
+
+		// private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper
+		private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper {
+		}
 	}
 
 	// public class SecurityContextHolderAwareRequestWrapper extends HttpServletRequestWrapper
@@ -5201,6 +5386,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class HttpServletRequestWrapper {
+
 		public String getServletPath() {
 			return "wibble";
 		}
@@ -5221,6 +5407,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class SomeCompareMethod2 {
+
 		public static int negate(int i1) {
 			return -i1;
 		}
@@ -5289,13 +5476,38 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			}
 			return total;
 		}
-
 	}
 
 	public static class DelegatingStringFormat {
+
 		public static String format(String s, Object... args) {
 			return String.format(s, args);
 		}
 	}
 
+	public static class StaticsHelper {
+		static StaticsHelper sh = new StaticsHelper();
+		public static StaticsHelper methoda() {
+			return sh;
+		}
+		public static String methodb() {
+			return "mb";
+		}
+	
+		public static StaticsHelper getPropertya() {
+			return sh;
+		}
+
+		public static String getPropertyb() {
+			return "pb";
+		}
+	
+
+		public static StaticsHelper fielda = sh;
+		public static String fieldb = "fb";
+	
+		public String toString() {
+			return "sh";
+		}
+	}
 }

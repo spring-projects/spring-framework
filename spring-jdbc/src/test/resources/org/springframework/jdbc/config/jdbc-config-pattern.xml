@@ -9,5 +9,5 @@
 		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema.sql"/>
 		<jdbc:script location="classpath*:org/springframework/jdbc/config/*-data.sql"/>
 	</jdbc:embedded-database>
-		
+	
 </beans>

@@ -228,25 +228,6 @@ public class CommonsPool2TargetSourceTests {
 		targetSource.releaseTarget(second);
 	}
 
-	@Test
-	public void objectIdentityReleaseWithSeveralEqualInstances() throws Exception{
-		CommonsPool2TargetSource targetSource = new CommonsPool2TargetSource();
-		targetSource.setUseObjectEquality(true);
-		targetSource.setMaxWait(1);
-		prepareTargetSource(targetSource);
-
-		Object first = targetSource.getTarget();
-		Object second = targetSource.getTarget();
-		assertTrue(first instanceof SerializablePerson);
-		assertTrue(second instanceof SerializablePerson);
-		assertEquals(first, second);
-
-		targetSource.releaseTarget(first);
-		thrown.expect(IllegalStateException.class); // Only one object in pool
-		targetSource.releaseTarget(second);
-
-	}
-
 	private void prepareTargetSource(CommonsPool2TargetSource targetSource) {
 		String beanName = "target";
 

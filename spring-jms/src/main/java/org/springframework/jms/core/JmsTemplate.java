@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.util.ReflectionUtils;
  * domain.
  *
  * <p>Default settings for JMS Sessions are "not transacted" and "auto-acknowledge".
- * As defined by the J2EE specification, the transaction and acknowledgement
+ * As defined by the Java EE specification, the transaction and acknowledgement
  * parameters are ignored when a JMS Session is created inside an active
  * transaction, no matter if a JTA transaction or a Spring-managed transaction.
  * To configure them for native JMS usage, specify appropriate values for
@@ -71,7 +71,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link org.springframework.jms.connection.SingleConnectionFactory} as a
  * decorator for your target {@code ConnectionFactory}, reusing a single
  * JMS Connection in a thread-safe fashion; this is often good enough for the
- * purpose of sending messages via this template. In a J2EE environment,
+ * purpose of sending messages via this template. In a Java EE environment,
  * make sure that the {@code ConnectionFactory} is obtained from the
  * application's environment naming context via JNDI; application servers
  * typically expose pooled, transaction-aware factories there.
@@ -89,18 +89,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations {
 
-	/**
-	 * Timeout value indicating that a receive operation should
-	 * check if a message is immediately available without blocking.
-	 */
-	public static final long RECEIVE_TIMEOUT_NO_WAIT = -1;
-
-	/**
-	 * Timeout value indicating a blocking receive without timeout.
-	 */
-	public static final long RECEIVE_TIMEOUT_INDEFINITE_WAIT = 0;
-
-
+	/** The JMS 2.0 MessageProducer.setDeliveryDelay method, if available */
 	private static final Method setDeliveryDelayMethod =
 			ClassUtils.getMethodIfAvailable(MessageProducer.class, "setDeliveryDelay", long.class);
 
@@ -314,11 +303,13 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Set the timeout to use for receive calls (in milliseconds).
 	 * <p>The default is {@link #RECEIVE_TIMEOUT_INDEFINITE_WAIT}, which indicates
 	 * a blocking receive without timeout.
-	 * <p>Specify {@link #RECEIVE_TIMEOUT_NO_WAIT} to inidicate that a receive operation
-	 * should check if a message is immediately available without blocking.
+	 * <p>Specify {@link #RECEIVE_TIMEOUT_NO_WAIT} (or any other negative value)
+	 * to indicate that a receive operation should check if a message is
+	 * immediately available without blocking.
+	 * @see #receiveFromConsumer(MessageConsumer, long)
 	 * @see javax.jms.MessageConsumer#receive(long)
-	 * @see javax.jms.MessageConsumer#receive()
 	 * @see javax.jms.MessageConsumer#receiveNoWait()
+	 * @see javax.jms.MessageConsumer#receive()
 	 */
 	public void setReceiveTimeout(long receiveTimeout) {
 		this.receiveTimeout = receiveTimeout;
@@ -799,7 +790,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			if (resourceHolder != null && resourceHolder.hasTimeout()) {
 				timeout = Math.min(timeout, resourceHolder.getTimeToLiveInMillis());
 			}
-			Message message = doReceive(consumer, timeout);
+			Message message = receiveFromConsumer(consumer, timeout);
 			if (session.getTransacted()) {
 				// Commit necessary - but avoid commit call within a JTA transaction.
 				if (isSessionLocallyTransacted(session)) {
@@ -817,25 +808,6 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 		}
 		finally {
 			JmsUtils.closeMessageConsumer(consumer);
-		}
-	}
-
-	/**
-	 * Actually receive a message from the given consumer.
-	 * @param consumer the JMS MessageConsumer to receive with
-	 * @param timeout the receive timeout
-	 * @return the JMS Message received, or {@code null} if none
-	 * @throws JMSException if thrown by JMS API methods
-	 */
-	private Message doReceive(MessageConsumer consumer, long timeout) throws JMSException {
-		if (timeout == RECEIVE_TIMEOUT_NO_WAIT) {
-			return consumer.receiveNoWait();
-		}
-		else if (timeout > 0) {
-			return consumer.receive(timeout);
-		}
-		else {
-			return consumer.receive();
 		}
 	}
 
@@ -951,7 +923,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 				logger.debug("Sending created message: " + requestMessage);
 			}
 			doSend(producer, requestMessage);
-			return doReceive(consumer, getReceiveTimeout());
+			return receiveFromConsumer(consumer, getReceiveTimeout());
 		}
 		finally {
 			JmsUtils.closeMessageConsumer(consumer);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	private MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
 
-	private final List<ObjectError> errors = new LinkedList<ObjectError>();
+	private final List<ObjectError> errors = new LinkedList<>();
 
-	private final Set<String> suppressedFields = new HashSet<String>();
+	private final Set<String> suppressedFields = new HashSet<>();
 
 
 	/**
@@ -155,7 +155,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public List<ObjectError> getGlobalErrors() {
-		List<ObjectError> result = new LinkedList<ObjectError>();
+		List<ObjectError> result = new LinkedList<>();
 		for (ObjectError objectError : this.errors) {
 			if (!(objectError instanceof FieldError)) {
 				result.add(objectError);
@@ -176,7 +176,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public List<FieldError> getFieldErrors() {
-		List<FieldError> result = new LinkedList<FieldError>();
+		List<FieldError> result = new LinkedList<>();
 		for (ObjectError objectError : this.errors) {
 			if (objectError instanceof FieldError) {
 				result.add((FieldError) objectError);
@@ -197,7 +197,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 
 	@Override
 	public List<FieldError> getFieldErrors(String field) {
-		List<FieldError> result = new LinkedList<FieldError>();
+		List<FieldError> result = new LinkedList<>();
 		String fixedField = fixedField(field);
 		for (ObjectError objectError : this.errors) {
 			if (objectError instanceof FieldError && isMatchingFieldError(fixedField, (FieldError) objectError)) {
@@ -270,7 +270,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	 */
 	@Override
 	public Map<String, Object> getModel() {
-		Map<String, Object> model = new LinkedHashMap<String, Object>(2);
+		Map<String, Object> model = new LinkedHashMap<>(2);
 		// Mapping from name to target object.
 		model.put(getObjectName(), getTarget());
 		// Errors instance, even if no errors.

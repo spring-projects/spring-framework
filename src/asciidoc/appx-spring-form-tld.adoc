@@ -1,5 +1,5 @@
 [[spring-form-tld]]
-= spring-form.tld
+= spring-form JSP Tag Library
 
 
 [[spring-form.tld-intro]]
@@ -15,6 +15,7 @@ http://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict[DTD].
 
 This appendix describes the `spring-form.tld` tag library.
 
+* <<spring-form.tld.button>>
 * <<spring-form.tld.checkbox>>
 * <<spring-form.tld.checkboxes>>
 * <<spring-form.tld.errors>>
@@ -33,8 +34,43 @@ This appendix describes the `spring-form.tld` tag library.
 
 
 
+[[spring-form.tld.button]]
+== The button tag
+
+Renders a form field label in an HTML 'button' tag.
+
+[[spring-form.tld.button.table]]
+[cols="1,1,1,3"]
+.Attributes
+|===
+| Attribute| Required?| Runtime Expression?| Description
+
+| disabled
+| false
+| true
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
+
+| id
+| false
+| true
+| HTML Standard Attribute
+
+| name
+| false
+| true
+| The name attribute for the HTML button tag
+
+| value
+| false
+| true
+| The name attribute for the HTML button tag
+|===
+
+
+
+
 [[spring-form.tld.checkbox]]
-== the checkbox tag
+== The checkbox tag
 
 Renders an HTML 'input' tag with type 'checkbox'.
 
@@ -72,8 +108,7 @@ Renders an HTML 'input' tag with type 'checkbox'.
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | htmlEscape
 | false
@@ -185,7 +220,7 @@ Renders an HTML 'input' tag with type 'checkbox'.
 
 
 [[spring-form.tld.checkboxes]]
-== the checkboxes tag
+== The checkboxes tag
 
 Renders multiple HTML 'input' tags with type 'checkbox'.
 
@@ -218,8 +253,7 @@ Renders multiple HTML 'input' tags with type 'checkbox'.
 | delimiter
 | false
 | true
-| Delimiter to use between each 'input' tag with type 'checkbox'. There is no delimiter
-  by default.
+| Delimiter to use between each 'input' tag with type 'checkbox'. There is no delimiter by default.
 
 | dir
 | false
@@ -229,14 +263,12 @@ Renders multiple HTML 'input' tags with type 'checkbox'.
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | element
 | false
 | true
-| Specifies the HTML element that is used to enclose each 'input' tag with type
-  'checkbox'. Defaults to 'span'.
+| Specifies the HTML element that is used to enclose each 'input' tag with type 'checkbox'. Defaults to 'span'.
 
 | htmlEscape
 | false
@@ -256,14 +288,12 @@ Renders multiple HTML 'input' tags with type 'checkbox'.
 | items
 | true
 | true
-| The Collection, Map or array of objects used to generate the 'input' tags with type
-  'checkbox'
+| The Collection, Map or array of objects used to generate the 'input' tags with type 'checkbox'
 
 | itemValue
 | false
 | true
-| Name of the property mapped to 'value' attribute of the 'input' tags with type
-  'checkbox'
+| Name of the property mapped to 'value' attribute of the 'input' tags with type 'checkbox'
 
 | lang
 | false
@@ -355,7 +385,7 @@ Renders multiple HTML 'input' tags with type 'checkbox'.
 
 
 [[spring-form.tld.errors]]
-== the errors tag
+== The errors tag
 
 Renders field errors in an HTML 'span' tag.
 
@@ -475,7 +505,7 @@ Renders field errors in an HTML 'span' tag.
 
 
 [[spring-form.tld.form]]
-== the form tag
+== The form tag
 
 Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 
@@ -490,19 +520,13 @@ Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 | true
 | Specifies the list of character encodings for input data that is accepted by the
   server processing this form. The value is a space- and/or comma-delimited list of
-  charset values. The client must interpret this list as an exclusive-or list, i.e., the
-  server is able to accept any single character encoding per entity received.
+  charset values. The client must interpret this list as an exclusive-or list, i.e.,
+  the server is able to accept any single character encoding per entity received.
 
 | action
 | false
 | true
 | HTML Required Attribute
-
-| commandName
-| false
-| true
-| Name of the model attribute under which the form object is exposed. Defaults to
-  'command'.
 
 | cssClass
 | false
@@ -544,11 +568,15 @@ Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 | true
 | HTML Optional Attribute
 
+| methodParam
+| false
+| true
+| The parameter name used for HTTP methods other then GET and POST. Default is '_method'.
+
 | modelAttribute
 | false
 | true
-| Name of the model attribute under which the form object is exposed. Defaults to
-  'command'.
+| Name of the model attribute under which the form object is exposed. Defaults to 'command'.
 
 | name
 | false
@@ -615,6 +643,11 @@ Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 | true
 | HTML Event Attribute
 
+| servletRelativeAction
+| false
+| true
+| Action reference to be appended to the current servlet path
+
 | target
 | false
 | true
@@ -630,7 +663,7 @@ Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 
 
 [[spring-form.tld.hidden]]
-== the hidden tag
+== The hidden tag
 
 Renders an HTML 'input' tag with type 'hidden' using the bound value.
 
@@ -660,7 +693,7 @@ Renders an HTML 'input' tag with type 'hidden' using the bound value.
 
 
 [[spring-form.tld.input]]
-== the input tag
+== The input tag
 
 Renders an HTML 'input' tag with type 'text' using the bound value.
 
@@ -708,8 +741,7 @@ Renders an HTML 'input' tag with type 'text' using the bound value.
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | htmlEscape
 | false
@@ -809,8 +841,7 @@ Renders an HTML 'input' tag with type 'text' using the bound value.
 | readonly
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will make the HTML element readonly.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will make the HTML element readonly.
 
 | size
 | false
@@ -832,7 +863,7 @@ Renders an HTML 'input' tag with type 'text' using the bound value.
 
 
 [[spring-form.tld.label]]
-== the label tag
+== The label tag
 
 Renders a form field label in an HTML 'label' tag.
 
@@ -952,7 +983,7 @@ Renders a form field label in an HTML 'label' tag.
 
 
 [[spring-form.tld.option]]
-== the option tag
+== The option tag
 
 Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound value.
 
@@ -985,8 +1016,7 @@ Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound va
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | htmlEscape
 | false
@@ -1078,7 +1108,7 @@ Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound va
 
 
 [[spring-form.tld.options]]
-== the options tag
+== The options tag
 
 Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bound value.
 
@@ -1111,8 +1141,7 @@ Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bo
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | htmlEscape
 | false
@@ -1209,7 +1238,7 @@ Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bo
 
 
 [[spring-form.tld.password]]
-== the password tag
+== The password tag
 
 Renders an HTML 'input' tag with type 'password' using the bound value.
 
@@ -1257,8 +1286,7 @@ Renders an HTML 'input' tag with type 'password' using the bound value.
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | htmlEscape
 | false
@@ -1358,8 +1386,7 @@ Renders an HTML 'input' tag with type 'password' using the bound value.
 | readonly
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will make the HTML element readonly.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will make the HTML element readonly.
 
 | showPassword
 | false
@@ -1386,7 +1413,7 @@ Renders an HTML 'input' tag with type 'password' using the bound value.
 
 
 [[spring-form.tld.radiobutton]]
-== the radiobutton tag
+== The radiobutton tag
 
 Renders an HTML 'input' tag with type 'radio'.
 
@@ -1424,8 +1451,7 @@ Renders an HTML 'input' tag with type 'radio'.
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | htmlEscape
 | false
@@ -1537,7 +1563,7 @@ Renders an HTML 'input' tag with type 'radio'.
 
 
 [[spring-form.tld.radiobuttons]]
-== the radiobuttons tag
+== The radiobuttons tag
 
 Renders multiple HTML 'input' tags with type 'radio'.
 
@@ -1570,8 +1596,7 @@ Renders multiple HTML 'input' tags with type 'radio'.
 | delimiter
 | false
 | true
-| Delimiter to use between each 'input' tag with type 'radio'. There is no delimiter by
-  default.
+| Delimiter to use between each 'input' tag with type 'radio'. There is no delimiter by default.
 
 | dir
 | false
@@ -1581,14 +1606,12 @@ Renders multiple HTML 'input' tags with type 'radio'.
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | element
 | false
 | true
-| Specifies the HTML element that is used to enclose each 'input' tag with type 'radio'.
-  Defaults to 'span'.
+| Specifies the HTML element that is used to enclose each 'input' tag with type 'radio'. Defaults to 'span'.
 
 | htmlEscape
 | false
@@ -1608,8 +1631,7 @@ Renders multiple HTML 'input' tags with type 'radio'.
 | items
 | true
 | true
-| The Collection, Map or array of objects used to generate the 'input' tags with type
-  'radio'
+| The Collection, Map or array of objects used to generate the 'input' tags with type 'radio'
 
 | itemValue
 | false
@@ -1706,7 +1728,7 @@ Renders multiple HTML 'input' tags with type 'radio'.
 
 
 [[spring-form.tld.select]]
-== the select tag
+== The select tag
 
 Renders an HTML 'select' element. Supports databinding to the selected option.
 
@@ -1744,8 +1766,7 @@ Renders an HTML 'select' element. Supports databinding to the selected option.
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | htmlEscape
 | false
@@ -1872,7 +1893,7 @@ Renders an HTML 'select' element. Supports databinding to the selected option.
 
 
 [[spring-form.tld.textarea]]
-== the textarea tag
+== The textarea tag
 
 Renders an HTML 'textarea'.
 
@@ -1915,8 +1936,7 @@ Renders an HTML 'textarea'.
 | disabled
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will disable the HTML element.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will disable the HTML element.
 
 | htmlEscape
 | false
@@ -2011,8 +2031,7 @@ Renders an HTML 'textarea'.
 | readonly
 | false
 | true
-| HTML Optional Attribute. Setting the value of this attribute to 'true' (without the
-  quotes) will make the HTML element readonly.
+| HTML Optional Attribute. Setting the value of this attribute to 'true' will make the HTML element readonly.
 
 | rows
 | false

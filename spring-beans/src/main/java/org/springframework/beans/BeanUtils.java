@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,17 +58,19 @@ public abstract class BeanUtils {
 	private static final Log logger = LogFactory.getLog(BeanUtils.class);
 
 	private static final Set<Class<?>> unknownEditorTypes =
-			Collections.newSetFromMap(new ConcurrentReferenceHashMap<Class<?>, Boolean>(64));
+			Collections.newSetFromMap(new ConcurrentReferenceHashMap<>(64));
 
 
 	/**
 	 * Convenience method to instantiate a class using its no-arg constructor.
-	 * As this method doesn't try to load classes by name, it should avoid
-	 * class-loading issues.
 	 * @param clazz class to instantiate
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
+	 * @deprecated as of Spring 5.0, following the deprecation of
+	 * {@link Class#newInstance()} in JDK 9
+	 * @see Class#newInstance()
 	 */
+	@Deprecated
 	public static <T> T instantiate(Class<T> clazz) throws BeanInstantiationException {
 		Assert.notNull(clazz, "Class must not be null");
 		if (clazz.isInterface()) {
@@ -87,13 +89,12 @@ public abstract class BeanUtils {
 
 	/**
 	 * Instantiate a class using its no-arg constructor.
-	 * As this method doesn't try to load classes by name, it should avoid
-	 * class-loading issues.
 	 * <p>Note that this method tries to set the constructor accessible
 	 * if given a non-accessible (that is, non-public) constructor.
 	 * @param clazz class to instantiate
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
+	 * @see Constructor#newInstance
 	 */
 	public static <T> T instantiateClass(Class<T> clazz) throws BeanInstantiationException {
 		Assert.notNull(clazz, "Class must not be null");
@@ -110,18 +111,16 @@ public abstract class BeanUtils {
 
 	/**
 	 * Instantiate a class using its no-arg constructor and return the new instance
-	 * as the the specified assignable type.
-	 * <p>Useful in cases where
-	 * the type of the class to instantiate (clazz) is not available, but the type
-	 * desired (assignableTo) is known.
-	 * <p>As this method doesn't try to load classes by name, it should avoid
-	 * class-loading issues.
-	 * <p>Note that this method tries to set the constructor accessible
-	 * if given a non-accessible (that is, non-public) constructor.
+	 * as the specified assignable type.
+	 * <p>Useful in cases where the type of the class to instantiate (clazz) is not
+	 * available, but the type desired (assignableTo) is known.
+	 * <p>Note that this method tries to set the constructor accessible if given a
+	 * non-accessible (that is, non-public) constructor.
 	 * @param clazz class to instantiate
 	 * @param assignableTo type that clazz must be assignableTo
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
+	 * @see Constructor#newInstance
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T instantiateClass(Class<?> clazz, Class<T> assignableTo) throws BeanInstantiationException {
@@ -131,14 +130,13 @@ public abstract class BeanUtils {
 
 	/**
 	 * Convenience method to instantiate a class using the given constructor.
-	 * As this method doesn't try to load classes by name, it should avoid
-	 * class-loading issues.
-	 * <p>Note that this method tries to set the constructor accessible
-	 * if given a non-accessible (that is, non-public) constructor.
+	 * <p>Note that this method tries to set the constructor accessible if given a
+	 * non-accessible (that is, non-public) constructor.
 	 * @param ctor the constructor to instantiate
 	 * @param args the constructor arguments to apply
 	 * @return the new instance
 	 * @throws BeanInstantiationException if the bean cannot be instantiated
+	 * @see Constructor#newInstance
 	 */
 	public static <T> T instantiateClass(Constructor<T> ctor, Object... args) throws BeanInstantiationException {
 		Assert.notNull(ctor, "Constructor must not be null");
@@ -147,20 +145,16 @@ public abstract class BeanUtils {
 			return ctor.newInstance(args);
 		}
 		catch (InstantiationException ex) {
-			throw new BeanInstantiationException(ctor.getDeclaringClass(),
-					"Is it an abstract class?", ex);
+			throw new BeanInstantiationException(ctor, "Is it an abstract class?", ex);
 		}
 		catch (IllegalAccessException ex) {
-			throw new BeanInstantiationException(ctor.getDeclaringClass(),
-					"Is the constructor accessible?", ex);
+			throw new BeanInstantiationException(ctor, "Is the constructor accessible?", ex);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new BeanInstantiationException(ctor.getDeclaringClass(),
-					"Illegal arguments for constructor", ex);
+			throw new BeanInstantiationException(ctor, "Illegal arguments for constructor", ex);
 		}
 		catch (InvocationTargetException ex) {
-			throw new BeanInstantiationException(ctor.getDeclaringClass(),
-					"Constructor threw exception", ex.getTargetException());
+			throw new BeanInstantiationException(ctor, "Constructor threw exception", ex.getTargetException());
 		}
 	}
 
@@ -273,13 +267,17 @@ public abstract class BeanUtils {
 		int numMethodsFoundWithCurrentMinimumArgs = 0;
 		for (Method method : methods) {
 			if (method.getName().equals(methodName)) {
-				int numParams = method.getParameterTypes().length;
-				if (targetMethod == null || numParams < targetMethod.getParameterTypes().length) {
+				int numParams = method.getParameterCount();
+				if (targetMethod == null || numParams < targetMethod.getParameterCount()) {
 					targetMethod = method;
 					numMethodsFoundWithCurrentMinimumArgs = 1;
 				}
-				else {
-					if (targetMethod.getParameterTypes().length == numParams) {
+				else if (!method.isBridge() && targetMethod.getParameterCount() == numParams) {
+					if (targetMethod.isBridge()) {
+						// Prefer regular method over bridge...
+						targetMethod = method;
+					}
+					else {
 						// Additional candidate with same length
 						numMethodsFoundWithCurrentMinimumArgs++;
 					}
@@ -289,7 +287,7 @@ public abstract class BeanUtils {
 		if (numMethodsFoundWithCurrentMinimumArgs > 1) {
 			throw new IllegalArgumentException("Cannot resolve method '" + methodName +
 					"' to a unique method. Attempted to resolve to overloaded method with " +
-					"the least number of parameters, but there were " +
+					"the least number of parameters but there were " +
 					numMethodsFoundWithCurrentMinimumArgs + " candidates.");
 		}
 		return targetMethod;
@@ -517,12 +515,12 @@ public abstract class BeanUtils {
 	 * @return whether the given type represents a "simple" value type
 	 */
 	public static boolean isSimpleValueType(Class<?> clazz) {
-		return ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.isEnum() ||
+		return (ClassUtils.isPrimitiveOrWrapper(clazz) || clazz.isEnum() ||
 				CharSequence.class.isAssignableFrom(clazz) ||
 				Number.class.isAssignableFrom(clazz) ||
 				Date.class.isAssignableFrom(clazz) ||
-				clazz.equals(URI.class) || clazz.equals(URL.class) ||
-				clazz.equals(Locale.class) || clazz.equals(Class.class);
+				URI.class == clazz || URL.class == clazz ||
+				Locale.class == clazz || Class.class == clazz);
 	}
 
 

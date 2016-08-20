@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Map;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -105,7 +105,7 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 			urlMap = (Map<String, BeanDefinition>) hm.getPropertyValues().getPropertyValue("urlMap").getValue();
 		}
 		else {
-			urlMap = new ManagedMap<String, BeanDefinition>();
+			urlMap = new ManagedMap<>();
 			hm.getPropertyValues().add("urlMap", urlMap);
 		}
 		urlMap.put(element.getAttribute("path"), controller);
@@ -126,26 +126,32 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.getPropertyValues().add("order", "1");
 		beanDef.getPropertyValues().add("pathMatcher", MvcNamespaceUtils.registerPathMatcher(null, context, source));
 		beanDef.getPropertyValues().add("urlPathHelper", MvcNamespaceUtils.registerUrlPathHelper(null, context, source));
+		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
+		beanDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
 
 		return beanDef;
 	}
 
 	private RootBeanDefinition getRedirectView(Element element, HttpStatus status, Object source) {
-		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
-		cavs.addIndexedArgumentValue(0, element.getAttribute("redirect-url"));
-		RootBeanDefinition redirectView = new RootBeanDefinition(RedirectView.class, cavs, null);
+		RootBeanDefinition redirectView = new RootBeanDefinition(RedirectView.class);
 		redirectView.setSource(source);
+		redirectView.getConstructorArgumentValues().addIndexedArgumentValue(0, element.getAttribute("redirect-url"));
+
 		if (status != null) {
 			redirectView.getPropertyValues().add("statusCode", status);
 		}
+
 		if (element.hasAttribute("context-relative")) {
 			redirectView.getPropertyValues().add("contextRelative", element.getAttribute("context-relative"));
-		} else {
+		}
+		else {
 			redirectView.getPropertyValues().add("contextRelative", true);
 		}
+
 		if (element.hasAttribute("keep-query-params")) {
 			redirectView.getPropertyValues().add("propagateQueryParams", element.getAttribute("keep-query-params"));
 		}
+
 		return redirectView;
 	}
 

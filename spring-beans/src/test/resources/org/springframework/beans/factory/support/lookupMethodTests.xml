@@ -9,6 +9,14 @@
 		<lookup-method name="getTwoArguments" bean="testBean"/>
 	</bean>
 
+	<bean id="extendedBean" parent="abstractBean">
+		<lookup-method name="getOneArgument" bean="jedi"/>
+	</bean>
+
 	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
+
+	<bean id="jedi" class="org.springframework.tests.sample.beans.TestBean" scope="prototype" autowire-candidate="false">
+		<property name="jedi" value="true"/>
+	</bean>
 
 </beans>

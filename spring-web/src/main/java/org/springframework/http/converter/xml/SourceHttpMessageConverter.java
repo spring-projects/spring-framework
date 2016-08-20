@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -66,7 +65,7 @@ import org.springframework.util.StreamUtils;
  */
 public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMessageConverter<T> {
 
-	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<Class<?>>(5);
+	private static final Set<Class<?>> SUPPORTED_CLASSES = new HashSet<>(5);
 
 	static {
 		SUPPORTED_CLASSES.add(DOMSource.class);
@@ -78,6 +77,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+
+	private boolean supportDtd = false;
 
 	private boolean processExternalEntities = false;
 
@@ -92,11 +93,31 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 
 	/**
+	 * Indicates whether DTD parsing should be supported.
+	 * <p>Default is {@code false} meaning that DTD is disabled.
+	 */
+	public void setSupportDtd(boolean supportDtd) {
+		this.supportDtd = supportDtd;
+	}
+
+	/**
+	 * Whether DTD parsing is supported.
+	 */
+	public boolean isSupportDtd() {
+		return this.supportDtd;
+	}
+
+	/**
 	 * Indicates whether external XML entities are processed when converting to a Source.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 * <p><strong>Note:</strong> setting this option to {@code true} also
+	 * automatically sets {@link #setSupportDtd} to {@code true}.
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
+		if (processExternalEntities) {
+			setSupportDtd(true);
+		}
 	}
 
 	/**
@@ -118,16 +139,16 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			throws IOException, HttpMessageNotReadableException {
 
 		InputStream body = inputMessage.getBody();
-		if (DOMSource.class.equals(clazz)) {
+		if (DOMSource.class == clazz) {
 			return (T) readDOMSource(body);
 		}
-		else if (SAXSource.class.equals(clazz)) {
+		else if (SAXSource.class == clazz) {
 			return (T) readSAXSource(body);
 		}
-		else if (StAXSource.class.equals(clazz)) {
+		else if (StAXSource.class == clazz) {
 			return (T) readStAXSource(body);
 		}
-		else if (StreamSource.class.equals(clazz) || Source.class.equals(clazz)) {
+		else if (StreamSource.class == clazz || Source.class == clazz) {
 			return (T) readStreamSource(body);
 		}
 		else {
@@ -141,6 +162,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			documentBuilderFactory.setNamespaceAware(true);
 			documentBuilderFactory.setFeature(
+					"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			documentBuilderFactory.setFeature(
 					"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 			if (!isProcessExternalEntities()) {
@@ -148,6 +171,13 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			}
 			Document document = documentBuilder.parse(body);
 			return new DOMSource(document);
+		}
+		catch (NullPointerException ex) {
+			if (!isSupportDtd()) {
+				throw new HttpMessageNotReadableException("NPE while unmarshalling: " +
+						"This can happen due to the presence of DTD declarations which are disabled.", ex);
+			}
+			throw ex;
 		}
 		catch (ParserConfigurationException ex) {
 			throw new HttpMessageNotReadableException("Could not set feature: " + ex.getMessage(), ex);
@@ -157,15 +187,17 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 		}
 	}
 
+	@SuppressWarnings("deprecation")  // on JDK 9
 	private SAXSource readSAXSource(InputStream body) throws IOException {
 		try {
-			XMLReader reader = XMLReaderFactory.createXMLReader();
-			reader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
-			byte[] bytes = StreamUtils.copyToByteArray(body);
+			XMLReader xmlReader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			xmlReader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {
-				reader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
+				xmlReader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 			}
-			return new SAXSource(reader, new InputSource(new ByteArrayInputStream(bytes)));
+			byte[] bytes = StreamUtils.copyToByteArray(body);
+			return new SAXSource(xmlReader, new InputSource(new ByteArrayInputStream(bytes)));
 		}
 		catch (SAXException ex) {
 			throw new HttpMessageNotReadableException("Could not parse document: " + ex.getMessage(), ex);
@@ -174,7 +206,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 	private Source readStAXSource(InputStream body) {
 		try {
-			XMLInputFactory inputFactory = XMLInputFactory.newFactory();
+			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, isSupportDtd());
 			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {
 				inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
@@ -255,7 +288,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
 		@Override
 		public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-			return new ByteArrayInputStream(new byte[0]);
+			return StreamUtils.emptyInput();
 		}
 	};
 

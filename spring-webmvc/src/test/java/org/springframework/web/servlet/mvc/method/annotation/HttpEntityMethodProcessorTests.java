@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,40 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} delegating to
@@ -50,6 +59,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("unused")
 public class HttpEntityMethodProcessorTests {
 
 	private MethodParameter paramList;
@@ -64,18 +74,23 @@ public class HttpEntityMethodProcessorTests {
 
 	private ServletWebRequest webRequest;
 
+	private MockHttpServletResponse servletResponse;
+
 
 	@Before
 	public void setUp() throws Exception {
-		Method method = getClass().getMethod("handle", HttpEntity.class, HttpEntity.class);
+		Method method = getClass().getDeclaredMethod("handle", HttpEntity.class, HttpEntity.class);
 		paramList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
 
 		mavContainer = new ModelAndViewContainer();
 		binderFactory = new ValidatingBinderFactory();
 		servletRequest = new MockHttpServletRequest();
-		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
+		servletResponse = new MockHttpServletResponse();
+		servletRequest.setMethod("POST");
+		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
+
 
 	@Test
 	public void resolveArgument() throws Exception {
@@ -83,7 +98,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -102,7 +117,8 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = Arrays.asList(new MappingJackson2HttpMessageConverter());
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		HttpEntity<?> result = (HttpEntity<?>) processor.resolveArgument(this.paramSimpleBean,
@@ -118,7 +134,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -141,7 +157,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -153,9 +169,51 @@ public class HttpEntityMethodProcessorTests {
 		assertEquals("Jad", result.getBody().getName());
 	}
 
+	@Test  // SPR-12811
+	public void jacksonTypeInfoList() throws Exception {
+		Method method = JacksonController.class.getMethod("handleList");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
+		MethodParameter methodReturnType = handlerMethod.getReturnType();
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+
+		Object returnValue = new JacksonController().handleList();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
+		assertTrue(content.contains("\"type\":\"foo\""));
+		assertTrue(content.contains("\"type\":\"bar\""));
+	}
+
+	// SPR-13423
+
+	@Test
+	public void handleReturnValueCharSequence() throws Exception {
+		List<HttpMessageConverter<?>>converters = new ArrayList<>();
+		converters.add(new ByteArrayHttpMessageConverter());
+		converters.add(new StringHttpMessageConverter());
+
+		Method method = getClass().getDeclaredMethod("handle");
+		MethodParameter returnType = new MethodParameter(method, -1);
+		ResponseEntity<StringBuilder> returnValue = ResponseEntity.ok(new StringBuilder("Foo"));
+
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+		processor.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
+
+		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
+		assertEquals("Foo", servletResponse.getContentAsString());
+	}
+
+
 
 	@SuppressWarnings("unused")
-	public void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
+	private void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
+	}
+
+	private ResponseEntity<CharSequence> handle() {
+		return null;
 	}
 
 	@SuppressWarnings("unused")
@@ -171,9 +229,9 @@ public class HttpEntityMethodProcessorTests {
 
 	private interface Identifiable extends Serializable {
 
-		public Long getId();
+		Long getId();
 
-		public void setId(Long id);
+		void setId(Long id);
 	}
 
 
@@ -214,6 +272,61 @@ public class HttpEntityMethodProcessorTests {
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
 			dataBinder.setValidator(validator);
 			return dataBinder;
+		}
+	}
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+	private static class ParentClass {
+
+		private String parentProperty;
+
+		public ParentClass() {
+		}
+
+		public ParentClass(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+
+		public String getParentProperty() {
+			return parentProperty;
+		}
+
+		public void setParentProperty(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+	}
+
+	@JsonTypeName("foo")
+	private static class Foo extends ParentClass {
+
+		public Foo() {
+		}
+
+		public Foo(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	@JsonTypeName("bar")
+	private static class Bar extends ParentClass {
+
+		public Bar() {
+		}
+
+		public Bar(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	private static class JacksonController {
+
+		@RequestMapping
+		@ResponseBody
+		public HttpEntity<List<ParentClass>> handleList() {
+			List<ParentClass> list = new ArrayList<>();
+			list.add(new Foo("foo"));
+			list.add(new Bar("bar"));
+			return new HttpEntity<>(list);
 		}
 	}
 

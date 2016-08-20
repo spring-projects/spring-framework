@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.http.server;
 
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.Before;
@@ -64,6 +64,18 @@ public class ServletServerHttpRequestTests {
 		assertEquals("Invalid uri", uri, request.getURI());
 	}
 
+	@Test  // SPR-13876
+	public void getUriWithEncoding() throws Exception {
+        URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87" +
+				"?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
+        mockRequest.setScheme(uri.getScheme());
+        mockRequest.setServerName(uri.getHost());
+        mockRequest.setServerPort(uri.getPort());
+        mockRequest.setRequestURI(uri.getRawPath());
+        mockRequest.setQueryString(uri.getRawQuery());
+        assertEquals("Invalid uri", uri, request.getURI());
+    }
+
 	@Test
 	public void getHeaders() throws Exception {
 		String headerName = "MyHeader";
@@ -81,7 +93,7 @@ public class ServletServerHttpRequestTests {
 		assertEquals("Invalid header values returned", 2, headerValues.size());
 		assertTrue("Invalid header values returned", headerValues.contains(headerValue1));
 		assertTrue("Invalid header values returned", headerValues.contains(headerValue2));
-		assertEquals("Invalid Content-Type", new MediaType("text", "plain", Charset.forName("UTF-8")),
+		assertEquals("Invalid Content-Type", new MediaType("text", "plain", StandardCharsets.UTF_8),
 				headers.getContentType());
 	}
 

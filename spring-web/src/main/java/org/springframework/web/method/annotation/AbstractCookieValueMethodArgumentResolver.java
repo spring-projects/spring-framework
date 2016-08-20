@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,14 +63,14 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
 		throw new ServletRequestBindingException("Missing cookie '" + name +
-				"' for method parameter of type " + parameter.getParameterType().getSimpleName());
+				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
 	}
 
 
 	private static class CookieValueNamedValueInfo extends NamedValueInfo {
 
 		private CookieValueNamedValueInfo(CookieValue annotation) {
-			super(annotation.value(), annotation.required(), annotation.defaultValue());
+			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
 
