@@ -160,6 +160,7 @@ configure(allprojects) { project ->
 		// classes with the "$" pattern; otherwise, using -Dtest.single=MyTests to
 		// run MyTests by itself will fail if MyTests contains any inner classes.
 		exclude(["**/Abstract*.class", '**/*$*'])
+		reports.junitXml.destination = file("$buildDir/test-reports")
 	}
 
 	repositories {
