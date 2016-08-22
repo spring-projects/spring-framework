@@ -1034,6 +1034,7 @@ project("spring-test") {
 		// Show STD_OUT & STD_ERR of the test JVM(s) on the console:
 		// testLogging.showStandardStreams = true
 		// forkEvery 1
+		reports.junitXml.destination = file("$buildDir/test-results")
 	}
 
 	test {
@@ -1045,6 +1046,7 @@ project("spring-test") {
 		exclude(['**/testng/**/*.*'])
 		// Java Util Logging for JUnit 5.
 		// systemProperty('java.util.logging.manager', 'org.apache.logging.log4j.jul.LogManager')
+		reports.junitXml.destination = file("$buildDir/test-results")
 	}
 
 	task aggregateTestReports(type: TestReport) {
