@@ -33,14 +33,13 @@ import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for
- * {@link org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver}.
+ * Unit tests for {@link MessageMethodArgumentResolver}.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class MessageMethodArgumentResolverTests {
 
@@ -56,10 +55,8 @@ public class MessageMethodArgumentResolverTests {
 
 	@Before
 	public void setup() throws Exception {
-
 		this.method = MessageMethodArgumentResolverTests.class.getDeclaredMethod("handle",
-				Message.class, Message.class, Message.class, Message.class,
-				ErrorMessage.class);
+				Message.class, Message.class, Message.class, Message.class, ErrorMessage.class);
 
 		this.converter = mock(MessageConverter.class);
 		this.resolver = new MessageMethodArgumentResolver(this.converter);
@@ -85,7 +82,7 @@ public class MessageMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithPayloadTypeSubClass() throws Exception {
+	public void resolveWithPayloadTypeSubclass() throws Exception {
 		Message<Integer> message = MessageBuilder.withPayload(123).build();
 		MethodParameter parameter = new MethodParameter(this.method, 2);
 
@@ -155,7 +152,7 @@ public class MessageMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveMessageSubClassMatch() throws Exception {
+	public void resolveMessageSubclassMatch() throws Exception {
 		ErrorMessage message = new ErrorMessage(new UnsupportedOperationException());
 		MethodParameter parameter = new MethodParameter(this.method, 4);
 
@@ -164,7 +161,7 @@ public class MessageMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveWithMessageSubClassAndPayloadWildcard() throws Exception {
+	public void resolveWithMessageSubclassAndPayloadWildcard() throws Exception {
 		ErrorMessage message = new ErrorMessage(new UnsupportedOperationException());
 		MethodParameter parameter = new MethodParameter(this.method, 0);
 
@@ -183,6 +180,46 @@ public class MessageMethodArgumentResolverTests {
 		thrown.expectMessage(ErrorMessage.class.getName());
 		thrown.expectMessage(GenericMessage.class.getName());
 		assertSame(message, this.resolver.resolveArgument(parameter, message));
+	}
+
+	@Test
+	public void resolveWithPayloadTypeAsWildcardAndNoConverter() throws Exception {
+		this.resolver = new MessageMethodArgumentResolver();
+
+		Message<String> message = MessageBuilder.withPayload("test").build();
+		MethodParameter parameter = new MethodParameter(this.method, 0);
+
+		assertTrue(this.resolver.supportsParameter(parameter));
+		assertSame(message, this.resolver.resolveArgument(parameter, message));
+	}
+
+	@Test
+	public void resolveWithConversionNeededButNoConverter() throws Exception {
+		this.resolver = new MessageMethodArgumentResolver();
+
+		Message<String> message = MessageBuilder.withPayload("test").build();
+		MethodParameter parameter = new MethodParameter(this.method, 1);
+
+		assertTrue(this.resolver.supportsParameter(parameter));
+		thrown.expect(MessageConversionException.class);
+		thrown.expectMessage(Integer.class.getName());
+		thrown.expectMessage(String.class.getName());
+		this.resolver.resolveArgument(parameter, message);
+	}
+
+	@Test
+	public void resolveWithConversionEmptyPayloadButNoConverter() throws Exception {
+		this.resolver = new MessageMethodArgumentResolver();
+
+		Message<String> message = MessageBuilder.withPayload("").build();
+		MethodParameter parameter = new MethodParameter(this.method, 1);
+
+		assertTrue(this.resolver.supportsParameter(parameter));
+		thrown.expect(MessageConversionException.class);
+		thrown.expectMessage("the payload is empty");
+		thrown.expectMessage(Integer.class.getName());
+		thrown.expectMessage(String.class.getName());
+		this.resolver.resolveArgument(parameter, message);
 	}
 
 
