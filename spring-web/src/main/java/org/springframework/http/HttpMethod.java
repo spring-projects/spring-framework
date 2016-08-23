@@ -30,10 +30,10 @@ import java.util.Map;
  */
 public enum HttpMethod {
 
-	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
+	GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE, REPORT;
 
 
-	private static final Map<String, HttpMethod> mappings = new HashMap<>(8);
+	private static final Map<String, HttpMethod> mappings = new HashMap<>(9);
 
 	static {
 		for (HttpMethod httpMethod : values()) {

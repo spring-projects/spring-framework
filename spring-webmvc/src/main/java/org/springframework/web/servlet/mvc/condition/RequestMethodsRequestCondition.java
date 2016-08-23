@@ -142,7 +142,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 					return new RequestMethodsRequestCondition(method);
 				}
 			}
-			if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
+			if ((httpMethod == HttpMethod.HEAD || httpMethod == HttpMethod.REPORT) && getMethods().contains(RequestMethod.GET)) {
 				return GET_CONDITION;
 			}
 		}
