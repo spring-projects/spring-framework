@@ -26,7 +26,6 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -38,6 +37,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class MessageMethodArgumentResolver implements HandlerMethodArgumentResolver {
@@ -46,12 +46,18 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 
 
 	/**
-	 * Create a new instance with the given {@link MessageConverter}.
-	 * @param converter the MessageConverter to use (required)
-	 * @since 4.1
+	 * Create a default resolver instance without message conversion.
+	 */
+	public MessageMethodArgumentResolver() {
+		this(null);
+	}
+
+	/**
+	 * Create a resolver instance with the given {@link MessageConverter}.
+	 * @param converter the MessageConverter to use (may be {@code null})
+	 * @since 4.3
 	 */
 	public MessageMethodArgumentResolver(MessageConverter converter) {
-		Assert.notNull(converter, "MessageConverter must not be null");
 		this.converter = converter;
 	}
 
@@ -63,7 +69,6 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
 		Class<?> targetMessageType = parameter.getParameterType();
 		Class<?> targetPayloadType = getPayloadType(parameter);
 
@@ -117,20 +122,20 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	}
 
 	private Object convertPayload(Message<?> message, MethodParameter parameter, Class<?> targetPayloadType) {
-		Object result;
+		Object result = null;
 		if (this.converter instanceof SmartMessageConverter) {
 			SmartMessageConverter smartConverter = (SmartMessageConverter) this.converter;
 			result = smartConverter.fromMessage(message, targetPayloadType, parameter);
 		}
-		else {
+		else if (this.converter != null) {
 			result = this.converter.fromMessage(message, targetPayloadType);
 		}
 
 		if (result == null) {
 			String actual = ClassUtils.getQualifiedName(targetPayloadType);
 			String expected = ClassUtils.getQualifiedName(message.getPayload().getClass());
-			throw new MessageConversionException(message, "No converter found to convert payload " +
-					"type [" + actual + "] to expected payload type [" + expected + "].");
+			throw new MessageConversionException(message, "No converter found to convert payload type [" +
+					actual + "] to expected payload type [" + expected + "]");
 		}
 		return result;
 	}
