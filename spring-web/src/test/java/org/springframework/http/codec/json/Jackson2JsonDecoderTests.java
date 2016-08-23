@@ -105,6 +105,18 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 				});
 	}
 
+	@Test
+	public void decodeEmptyBodyToMono() throws Exception {
+		Flux<DataBuffer> source = Flux.empty();
+		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
+		Mono<Object> flux = new Jackson2JsonDecoder().decodeToMono(source, elementType, null);
+
+		TestSubscriber.subscribe(flux)
+				.assertNoError()
+				.assertComplete()
+				.assertValueCount(0);
+	}
+
 
 	void handle(List<Pojo> list) {
 	}

@@ -87,7 +87,7 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 			MimeType mimeType, Object... hints) {
 
 		JsonObjectDecoder objectDecoder = this.monoObjectDecoder;
-		return decodeInternal(objectDecoder, inputStream, elementType, mimeType, hints).single();
+		return decodeInternal(objectDecoder, inputStream, elementType, mimeType, hints).singleOrEmpty();
 	}
 
 	private Flux<Object> decodeInternal(JsonObjectDecoder objectDecoder, Publisher<DataBuffer> inputStream,
