@@ -1009,12 +1009,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		else if (candidateNames.length > 1) {
 			Map<String, Object> candidates = new LinkedHashMap<String, Object>(candidateNames.length);
-			for (String candidateName : candidateNames) {
-				if (containsSingleton(candidateName)) {
-					candidates.put(candidateName, getBean(candidateName, requiredType, args));
+			for (String beanName : candidateNames) {
+				if (containsSingleton(beanName)) {
+					candidates.put(beanName, getBean(beanName, requiredType, args));
 				}
 				else {
-					candidates.put(candidateName, getType(candidateName));
+					candidates.put(beanName, getType(beanName));
 				}
 			}
 			String candidateName = determinePrimaryCandidate(candidates, requiredType);
