@@ -976,38 +976,47 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> NamedBeanHolder<T> resolveNamedBean(Class<T> requiredType, Object... args) throws BeansException {
 		Assert.notNull(requiredType, "Required type must not be null");
-		String[] beanNames = getBeanNamesForType(requiredType);
+		String[] candidateNames = getBeanNamesForType(requiredType);
 
-		if (beanNames.length > 1) {
+		if (candidateNames.length > 1) {
 			ArrayList<String> autowireCandidates = new ArrayList<>();
-			for (String beanName : beanNames) {
+			for (String beanName : candidateNames) {
 				if (!containsBeanDefinition(beanName) || getBeanDefinition(beanName).isAutowireCandidate()) {
 					autowireCandidates.add(beanName);
 				}
 			}
 			if (!autowireCandidates.isEmpty()) {
-				beanNames = autowireCandidates.toArray(new String[autowireCandidates.size()]);
+				candidateNames = autowireCandidates.toArray(new String[autowireCandidates.size()]);
 			}
 		}
 
-		if (beanNames.length == 1) {
-			String beanName = beanNames[0];
+		if (candidateNames.length == 1) {
+			String beanName = candidateNames[0];
 			return new NamedBeanHolder<>(beanName, getBean(beanName, requiredType, args));
 		}
-		else if (beanNames.length > 1) {
-			Map<String, Object> candidates = new LinkedHashMap<>();
-			for (String beanName : beanNames) {
-				candidates.put(beanName, getBean(beanName, requiredType, args));
+		else if (candidateNames.length > 1) {
+			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length);
+			for (String candidateName : candidateNames) {
+				if (containsSingleton(candidateName)) {
+					candidates.put(candidateName, getBean(candidateName, requiredType, args));
+				}
+				else {
+					candidates.put(candidateName, getType(candidateName));
+				}
 			}
-			String primaryCandidate = determinePrimaryCandidate(candidates, requiredType);
-			if (primaryCandidate != null) {
-				return new NamedBeanHolder<>(primaryCandidate, getBean(primaryCandidate, requiredType, args));
+			String candidateName = determinePrimaryCandidate(candidates, requiredType);
+			if (candidateName == null) {
+				candidateName = determineHighestPriorityCandidate(candidates, requiredType);
 			}
-			String priorityCandidate = determineHighestPriorityCandidate(candidates, requiredType);
-			if (priorityCandidate != null) {
-				return new NamedBeanHolder<>(priorityCandidate, getBean(priorityCandidate, requiredType, args));
+			if (candidateName != null) {
+				Object beanInstance = candidates.get(candidateName);
+				if (beanInstance instanceof Class) {
+					beanInstance = getBean(candidateName, requiredType, args);
+				}
+				return new NamedBeanHolder<>(candidateName, (T) beanInstance);
 			}
 			throw new NoUniqueBeanDefinitionException(requiredType, candidates.keySet());
 		}
@@ -1076,9 +1085,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 				return null;
 			}
+
+			String autowiredBeanName;
+			Object instanceCandidate;
+
 			if (matchingBeans.size() > 1) {
-				String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
-				if (primaryBeanName == null) {
+				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
+				if (autowiredBeanName == null) {
 					if (descriptor.isRequired() || !indicatesMultipleBeans(type)) {
 						return descriptor.resolveNotUnique(type, matchingBeans);
 					}
@@ -1089,17 +1102,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						return null;
 					}
 				}
-				if (autowiredBeanNames != null) {
-					autowiredBeanNames.add(primaryBeanName);
-				}
-				return matchingBeans.get(primaryBeanName);
+				instanceCandidate = matchingBeans.get(autowiredBeanName);
 			}
-			// We have exactly one match.
-			Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
+			else {
+				// We have exactly one match.
+				Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
+				autowiredBeanName = entry.getKey();
+				instanceCandidate = entry.getValue();
+			}
+
 			if (autowiredBeanNames != null) {
-				autowiredBeanNames.add(entry.getKey());
+				autowiredBeanNames.add(autowiredBeanName);
 			}
-			return entry.getValue();
+			return (instanceCandidate instanceof Class ?
+					descriptor.resolveCandidate(autowiredBeanName, type, this) : instanceCandidate);
 		}
 		finally {
 			ConstructorResolver.setCurrentInjectionPoint(previousInjectionPoint);
@@ -1112,9 +1128,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		Class<?> type = descriptor.getDependencyType();
 		if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
-			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
-			targetDesc.increaseNestingLevel();
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType, targetDesc);
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType,
+					new MultiElementDependencyDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1133,9 +1148,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (elementType == null) {
 				return null;
 			}
-			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
-			targetDesc.increaseNestingLevel();
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType, targetDesc);
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType,
+					new MultiElementDependencyDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1158,9 +1172,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (valueType == null) {
 				return null;
 			}
-			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
-			targetDesc.increaseNestingLevel();
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType, targetDesc);
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType,
+					new MultiElementDependencyDescriptor(descriptor));
 			if (matchingBeans.isEmpty()) {
 				return null;
 			}
@@ -1229,7 +1242,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		for (String candidateName : candidateNames) {
 			if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, descriptor)) {
-				result.put(candidateName, descriptor.resolveCandidate(candidateName, requiredType, this));
+				addCandidateEntry(result, candidateName, descriptor, requiredType);
 			}
 		}
 		if (result.isEmpty() && !indicatesMultipleBeans(requiredType)) {
@@ -1237,14 +1250,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
 			for (String candidateName : candidateNames) {
 				if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
-					result.put(candidateName, descriptor.resolveCandidate(candidateName, requiredType, this));
+					addCandidateEntry(result, candidateName, descriptor, requiredType);
 				}
 			}
 			if (result.isEmpty()) {
 				// Consider self references before as a final pass
 				for (String candidateName : candidateNames) {
 					if (isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
-						result.put(candidateName, descriptor.resolveCandidate(candidateName, requiredType, this));
+						addCandidateEntry(result, candidateName, descriptor, requiredType);
 					}
 				}
 			}
@@ -1253,30 +1266,45 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
+	 * Add an entry to the candidate map: a bean instance if available or just the resolved
+	 * type, preventing early bean initialization ahead of primary candidate selection.
+	 */
+	private void addCandidateEntry(Map<String, Object> candidates, String candidateName,
+			DependencyDescriptor descriptor, Class<?> requiredType) {
+
+		if (descriptor instanceof MultiElementDependencyDescriptor || containsSingleton(candidateName)) {
+			candidates.put(candidateName, descriptor.resolveCandidate(candidateName, requiredType, this));
+		}
+		else {
+			candidates.put(candidateName, getType(candidateName));
+		}
+	}
+
+	/**
 	 * Determine the autowire candidate in the given set of beans.
 	 * <p>Looks for {@code @Primary} and {@code @Priority} (in that order).
-	 * @param candidateBeans a Map of candidate names and candidate instances
+	 * @param candidates a Map of candidate names and candidate instances
 	 * that match the required type, as returned by {@link #findAutowireCandidates}
 	 * @param descriptor the target dependency to match against
 	 * @return the name of the autowire candidate, or {@code null} if none found
 	 */
-	protected String determineAutowireCandidate(Map<String, Object> candidateBeans, DependencyDescriptor descriptor) {
+	protected String determineAutowireCandidate(Map<String, Object> candidates, DependencyDescriptor descriptor) {
 		Class<?> requiredType = descriptor.getDependencyType();
-		String primaryCandidate = determinePrimaryCandidate(candidateBeans, requiredType);
+		String primaryCandidate = determinePrimaryCandidate(candidates, requiredType);
 		if (primaryCandidate != null) {
 			return primaryCandidate;
 		}
-		String priorityCandidate = determineHighestPriorityCandidate(candidateBeans, requiredType);
+		String priorityCandidate = determineHighestPriorityCandidate(candidates, requiredType);
 		if (priorityCandidate != null) {
 			return priorityCandidate;
 		}
 		// Fallback
-		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
-			String candidateBeanName = entry.getKey();
+		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
+			String candidateName = entry.getKey();
 			Object beanInstance = entry.getValue();
 			if ((beanInstance != null && this.resolvableDependencies.containsValue(beanInstance)) ||
-					matchesBeanName(candidateBeanName, descriptor.getDependencyName())) {
-				return candidateBeanName;
+					matchesBeanName(candidateName, descriptor.getDependencyName())) {
+				return candidateName;
 			}
 		}
 		return null;
@@ -1284,15 +1312,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 * Determine the primary candidate in the given set of beans.
-	 * @param candidateBeans a Map of candidate names and candidate instances
-	 * that match the required type
+	 * @param candidates a Map of candidate names and candidate instances
+	 * (or candidate classes if not created yet) that match the required type
 	 * @param requiredType the target dependency type to match against
 	 * @return the name of the primary candidate, or {@code null} if none found
 	 * @see #isPrimary(String, Object)
 	 */
-	protected String determinePrimaryCandidate(Map<String, Object> candidateBeans, Class<?> requiredType) {
+	protected String determinePrimaryCandidate(Map<String, Object> candidates, Class<?> requiredType) {
 		String primaryBeanName = null;
-		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
+		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateBeanName = entry.getKey();
 			Object beanInstance = entry.getValue();
 			if (isPrimary(candidateBeanName, beanInstance)) {
@@ -1300,8 +1328,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					boolean candidateLocal = containsBeanDefinition(candidateBeanName);
 					boolean primaryLocal = containsBeanDefinition(primaryBeanName);
 					if (candidateLocal && primaryLocal) {
-						throw new NoUniqueBeanDefinitionException(requiredType, candidateBeans.size(),
-								"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
+						throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
+								"more than one 'primary' bean found among candidates: " + candidates.keySet());
 					}
 					else if (candidateLocal) {
 						primaryBeanName = candidateBeanName;
@@ -1316,29 +1344,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Determine the candidate with the highest priority in the given set of beans. As
-	 * defined by the {@link org.springframework.core.Ordered} interface, the lowest
-	 * value has the highest priority.
-	 * @param candidateBeans a Map of candidate names and candidate instances
-	 * that match the required type
+	 * Determine the candidate with the highest priority in the given set of beans.
+	 * <p>Based on {@code @javax.annotation.Priority}. As defined by the related
+	 * {@link org.springframework.core.Ordered} interface, the lowest value has
+	 * the highest priority.
+	 * @param candidates a Map of candidate names and candidate instances
+	 * (or candidate classes if not created yet) that match the required type
 	 * @param requiredType the target dependency type to match against
 	 * @return the name of the candidate with the highest priority,
 	 * or {@code null} if none found
 	 * @see #getPriority(Object)
 	 */
-	protected String determineHighestPriorityCandidate(Map<String, Object> candidateBeans, Class<?> requiredType) {
+	protected String determineHighestPriorityCandidate(Map<String, Object> candidates, Class<?> requiredType) {
 		String highestPriorityBeanName = null;
 		Integer highestPriority = null;
-		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
+		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateBeanName = entry.getKey();
 			Object beanInstance = entry.getValue();
 			Integer candidatePriority = getPriority(beanInstance);
 			if (candidatePriority != null) {
 				if (highestPriorityBeanName != null) {
 					if (candidatePriority.equals(highestPriority)) {
-						throw new NoUniqueBeanDefinitionException(requiredType, candidateBeans.size(),
-								"Multiple beans found with the same priority ('" + highestPriority + "') " +
-										"among candidates: " + candidateBeans.keySet());
+						throw new NoUniqueBeanDefinitionException(requiredType, candidates.size(),
+								"Multiple beans found with the same priority ('" + highestPriority +
+								"') among candidates: " + candidates.keySet());
 					}
 					else if (candidatePriority < highestPriority) {
 						highestPriorityBeanName = candidateBeanName;
@@ -1453,7 +1482,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Create an {@link Optional} wrapper for the specified dependency.
 	 */
 	private Optional<?> createOptionalDependency(DependencyDescriptor descriptor, String beanName, final Object... args) {
-		DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+		DependencyDescriptor descriptorToUse = new NestedDependencyDescriptor(descriptor) {
 			@Override
 			public boolean isRequired() {
 				return false;
@@ -1464,7 +1493,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						super.resolveCandidate(beanName, requiredType, beanFactory));
 			}
 		};
-		descriptorToUse.increaseNestingLevel();
 		return Optional.ofNullable(doResolveDependency(descriptorToUse, beanName, null, null));
 	}
 
@@ -1543,8 +1571,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		private final String beanName;
 
 		public DependencyObjectProvider(DependencyDescriptor descriptor, String beanName) {
-			this.descriptor = new DependencyDescriptor(descriptor);
-			this.descriptor.increaseNestingLevel();
+			this.descriptor = new NestedDependencyDescriptor(descriptor);
 			this.optional = (this.descriptor.getDependencyType() == Optional.class);
 			this.beanName = beanName;
 		}
@@ -1681,6 +1708,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 			return null;
+		}
+	}
+
+
+	private static class NestedDependencyDescriptor extends DependencyDescriptor {
+
+		public NestedDependencyDescriptor(DependencyDescriptor original) {
+			super(original);
+			increaseNestingLevel();
+		}
+	}
+
+
+	private static class MultiElementDependencyDescriptor extends NestedDependencyDescriptor {
+
+		public MultiElementDependencyDescriptor(DependencyDescriptor original) {
+			super(original);
 		}
 	}
 
