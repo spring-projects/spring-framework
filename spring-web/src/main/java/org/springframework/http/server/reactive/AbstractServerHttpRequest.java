@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
@@ -60,13 +61,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return this.uri;
 	}
 
-	/**
-	 * Initialize a URI that represents the request. Invoked lazily on the first
-	 * call to {@link #getURI()} and then cached.
-	 * @throws URISyntaxException
-	 */
-	protected abstract URI initUri() throws URISyntaxException;
-
 	@Override
 	public MultiValueMap<String, String> getQueryParams() {
 		if (this.queryParams == null) {
@@ -99,12 +93,6 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return this.headers;
 	}
 
-	/**
-	 * Initialize the headers from the underlying request. Invoked lazily on the
-	 * first call to {@link #getHeaders()} and then cached.
-	 */
-	protected abstract HttpHeaders initHeaders();
-
 	@Override
 	public MultiValueMap<String, HttpCookie> getCookies() {
 		if (this.cookies == null) {
@@ -113,9 +101,24 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		return this.cookies;
 	}
 
+
 	/**
-	 * Initialize the cookies from the underlying request. Invoked lazily on the
-	 * first access to cookies via {@link #getHeaders()} and then cached.
+	 * Initialize a URI that represents the request.
+	 * <p>Invoked lazily on the first call to {@link #getURI()} and then cached.
+	 * @throws URISyntaxException
+	 */
+	protected abstract URI initUri() throws URISyntaxException;
+
+	/**
+	 * Initialize the headers from the underlying request.
+	 * <p>Invoked lazily on the first call to {@link #getHeaders()} and then cached.
+	 */
+	protected abstract HttpHeaders initHeaders();
+
+	/**
+	 * Initialize the cookies from the underlying request.
+	 * <p>Invoked lazily on the first access to cookies via {@link #getHeaders()}
+	 * and then cached.
 	 */
 	protected abstract MultiValueMap<String, HttpCookie> initCookies();
 

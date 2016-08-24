@@ -36,7 +36,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-
 /**
  * Base class for {@link ServerHttpResponse} implementations.
  *
@@ -46,8 +45,6 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
-	private Log logger = LogFactory.getLog(getClass());
-
 	private static final int STATE_NEW = 1;
 
 	private static final int STATE_COMMITTING = 2;
@@ -55,10 +52,9 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	private static final int STATE_COMMITTED = 3;
 
 
+	private final Log logger = LogFactory.getLog(getClass());
+
 	private final DataBufferFactory dataBufferFactory;
-
-
-	private HttpStatus statusCode;
 
 	private final HttpHeaders headers;
 
@@ -67,6 +63,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	private final List<Supplier<? extends Mono<Void>>> beforeCommitActions = new ArrayList<>(4);
 
 	private final AtomicInteger state = new AtomicInteger(STATE_NEW);
+
+	private HttpStatus statusCode;
 
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
@@ -82,7 +80,6 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	public final DataBufferFactory bufferFactory() {
 		return this.dataBufferFactory;
 	}
-
 
 	@Override
 	public boolean setStatusCode(HttpStatus statusCode) {
@@ -139,6 +136,11 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 				.then(() -> writeAndFlushWithInternal(writePublisher)));
 	}
 
+	@Override
+	public Mono<Void> setComplete() {
+		return applyBeforeCommit();
+	}
+
 	protected Mono<Void> applyBeforeCommit() {
 		Mono<Void> mono = Mono.empty();
 		if (this.state.compareAndSet(STATE_NEW, STATE_COMMITTING)) {
@@ -160,6 +162,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		return mono;
 	}
 
+
 	/**
 	 * Implement this method to write to the underlying the response.
 	 * @param body the publisher to write with
@@ -171,8 +174,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * each {@code Publisher<DataBuffer>}.
 	 * @param body the publisher to write and flush with
 	 */
-	protected abstract Mono<Void> writeAndFlushWithInternal(
-			Publisher<Publisher<DataBuffer>> body);
+	protected abstract Mono<Void> writeAndFlushWithInternal(Publisher<Publisher<DataBuffer>> body);
 
 	/**
 	 * Implement this method to write the status code to the underlying response.
@@ -191,11 +193,5 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * underlying response. This method is called once only.
 	 */
 	protected abstract void writeCookies();
-
-
-	@Override
-	public Mono<Void> setComplete() {
-		return applyBeforeCommit();
-	}
 
 }

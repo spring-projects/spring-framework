@@ -46,12 +46,12 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final AtomicReference<State> state =
-			new AtomicReference<>(State.UNSUBSCRIBED);
+	private final AtomicReference<State> state = new AtomicReference<>(State.UNSUBSCRIBED);
 
 	private final AtomicLong demand = new AtomicLong();
 
 	private Subscriber<? super DataBuffer> subscriber;
+
 
 	@Override
 	public void subscribe(Subscriber<? super DataBuffer> subscriber) {
@@ -126,13 +126,13 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 	protected abstract DataBuffer read() throws IOException;
 
 	private boolean hasDemand() {
-		return this.demand.get() > 0;
+		return (this.demand.get() > 0);
 	}
 
-	private boolean changeState(AbstractRequestBodyPublisher.State oldState,
-			AbstractRequestBodyPublisher.State newState) {
+	private boolean changeState(State oldState, State newState) {
 		return this.state.compareAndSet(oldState, newState);
 	}
+
 
 	private static final class RequestBodySubscription implements Subscription {
 
@@ -158,11 +158,11 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 			state().cancel(this.publisher);
 		}
 
-		private AbstractRequestBodyPublisher.State state() {
+		private State state() {
 			return this.publisher.state.get();
 		}
-
 	}
+
 
 	/**
 	 * Represents a state for the {@link Publisher} to be in. The following figure
@@ -182,8 +182,8 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 	 * </pre>
 	 * Refer to the individual states for more information.
 	 */
-
 	private enum State {
+
 		/**
 		 * The initial unsubscribed state. Will respond to {@link
 		 * #subscribe(AbstractRequestBodyPublisher, Subscriber)} by
@@ -191,12 +191,10 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 		 */
 		UNSUBSCRIBED {
 			@Override
-			void subscribe(AbstractRequestBodyPublisher publisher,
-					Subscriber<? super DataBuffer> subscriber) {
+			void subscribe(AbstractRequestBodyPublisher publisher, Subscriber<? super DataBuffer> subscriber) {
 				Objects.requireNonNull(subscriber);
 				if (publisher.changeState(this, NO_DEMAND)) {
-					Subscription subscription = new RequestBodySubscription(
-									publisher);
+					Subscription subscription = new RequestBodySubscription(publisher);
 					publisher.subscriber = subscriber;
 					subscriber.onSubscribe(subscription);
 				}
@@ -205,6 +203,7 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 				}
 			}
 		},
+
 		/**
 		 * State that gets entered when there is no demand. Responds to {@link
 		 * #request(AbstractRequestBodyPublisher, long)} by increasing the demand,
@@ -222,6 +221,7 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 				}
 			}
 		},
+
 		/**
 		 * State that gets entered when there is demand. Responds to
 		 * {@link #onDataAvailable(AbstractRequestBodyPublisher)} by
@@ -237,15 +237,18 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 						if (demandAvailable) {
 							publisher.changeState(READING, DEMAND);
 							publisher.checkOnDataAvailable();
-						} else {
+						}
+						else {
 							publisher.changeState(READING, NO_DEMAND);
 						}
-					} catch (IOException ex) {
+					}
+					catch (IOException ex) {
 						publisher.onError(ex);
 					}
 				}
 			}
 		},
+
 		READING {
 			@Override
 			void request(AbstractRequestBodyPublisher publisher, long n) {
@@ -254,34 +257,30 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 				}
 			}
 		},
+
 		/**
 		 * The terminal completed state. Does not respond to any events.
 		 */
 		COMPLETED {
-
 			@Override
 			void request(AbstractRequestBodyPublisher publisher, long n) {
 				// ignore
 			}
-
 			@Override
 			void cancel(AbstractRequestBodyPublisher publisher) {
 				// ignore
 			}
-
 			@Override
 			void onAllDataRead(AbstractRequestBodyPublisher publisher) {
 				// ignore
 			}
-
 			@Override
 			void onError(AbstractRequestBodyPublisher publisher, Throwable t) {
 				// ignore
 			}
 		};
 
-		void subscribe(AbstractRequestBodyPublisher publisher,
-				Subscriber<? super DataBuffer> subscriber) {
+		void subscribe(AbstractRequestBodyPublisher publisher, Subscriber<? super DataBuffer> subscriber) {
 			throw new IllegalStateException(toString());
 		}
 
@@ -312,6 +311,6 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 				}
 			}
 		}
-
 	}
+
 }

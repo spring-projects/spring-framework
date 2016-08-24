@@ -49,26 +49,28 @@ import org.springframework.util.StringUtils;
  */
 public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
-	private final Object bodyPublisherMonitor = new Object();
-
-	private volatile RequestBodyPublisher bodyPublisher;
-
 	private final HttpServletRequest request;
 
 	private final DataBufferFactory dataBufferFactory;
 
 	private final int bufferSize;
 
+	private final Object bodyPublisherMonitor = new Object();
+
+	private volatile RequestBodyPublisher bodyPublisher;
+
+
 	public ServletServerHttpRequest(HttpServletRequest request,
 			DataBufferFactory dataBufferFactory, int bufferSize) {
-		Assert.notNull(request, "'request' must not be null.");
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
-		Assert.isTrue(bufferSize > 0);
 
+		Assert.notNull(request, "HttpServletRequest must not be null");
+		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
+		Assert.isTrue(bufferSize > 0, "Buffer size must be higher than 0");
 		this.request = request;
 		this.dataBufferFactory = dataBufferFactory;
 		this.bufferSize = bufferSize;
 	}
+
 
 	public HttpServletRequest getServletRequest() {
 		return this.request;
@@ -151,7 +153,8 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 				synchronized (this.bodyPublisherMonitor) {
 					bodyPublisher = this.bodyPublisher;
 					if (bodyPublisher == null) {
-						this.bodyPublisher = bodyPublisher = createBodyPublisher();
+						bodyPublisher = createBodyPublisher();
+						this.bodyPublisher = bodyPublisher;
 					}
 				}
 			}
@@ -163,12 +166,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	private RequestBodyPublisher createBodyPublisher() throws IOException {
-		RequestBodyPublisher bodyPublisher =
-				new RequestBodyPublisher(request.getInputStream(), this.dataBufferFactory,
-						this.bufferSize);
+		RequestBodyPublisher bodyPublisher = new RequestBodyPublisher(
+				this.request.getInputStream(), this.dataBufferFactory, this.bufferSize);
 		bodyPublisher.registerListener();
 		return bodyPublisher;
 	}
+
 
 	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
 
@@ -183,6 +186,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 		public RequestBodyPublisher(ServletInputStream inputStream,
 				DataBufferFactory dataBufferFactory, int bufferSize) {
+
 			this.inputStream = inputStream;
 			this.dataBufferFactory = dataBufferFactory;
 			this.buffer = new byte[bufferSize];
@@ -216,6 +220,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			return null;
 		}
 
+
 		private class RequestBodyReadListener implements ReadListener {
 
 			@Override
@@ -235,4 +240,5 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 			}
 		}
 	}
+
 }

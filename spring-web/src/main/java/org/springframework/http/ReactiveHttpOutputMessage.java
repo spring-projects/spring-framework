@@ -37,6 +37,13 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 public interface ReactiveHttpOutputMessage extends HttpMessage {
 
 	/**
+	 * Return a {@link DataBufferFactory} that can be used for creating the body.
+	 * @return a buffer factory
+	 * @see #writeWith(Publisher)
+	 */
+	DataBufferFactory bufferFactory();
+
+	/**
 	 * Register an action to be applied just before the message is committed.
 	 * @param action the action
 	 */
@@ -45,7 +52,6 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	/**
 	 * Use the given {@link Publisher} to write the body of the message to the underlying
 	 * HTTP layer.
-	 *
 	 * @param body the body content publisher
 	 * @return a publisher that indicates completion or error.
 	 */
@@ -55,18 +61,10 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * Use the given {@link Publisher} of {@code Publishers} to write the body of the
 	 * message to the underlying HTTP layer, flushing after each
 	 * {@code Publisher<DataBuffer>}.
-	 *
 	 * @param body the body content publisher
 	 * @return a publisher that indicates completion or error.
 	 */
 	Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body);
-
-	/**
-	 * Returns a {@link DataBufferFactory} that can be used for creating the body.
-	 * @return a buffer factory
-	 * @see #writeWith(Publisher)
-	 */
-	DataBufferFactory bufferFactory();
 
 	/**
 	 * Indicate that message handling is complete, allowing for any cleanup or

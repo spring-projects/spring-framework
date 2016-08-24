@@ -46,23 +46,22 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 	private final ResponseBodyWriteListener writeListener = new ResponseBodyWriteListener();
 
-	private volatile ResponseBodyProcessor bodyProcessor;
-
 	private final HttpServletResponse response;
 
 	private final int bufferSize;
 
 	private volatile boolean flushOnNext;
 
+	private volatile ResponseBodyProcessor bodyProcessor;
+
 
 	public ServletServerHttpResponse(HttpServletResponse response,
 			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
 
 		super(dataBufferFactory);
-		Assert.notNull(response, "'response' must not be null");
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
-		Assert.isTrue(bufferSize > 0);
-
+		Assert.notNull(response, "HttpServletResponse must not be null");
+		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
+		Assert.isTrue(bufferSize > 0, "Buffer size must be higher than 0");
 		this.response = response;
 		this.bufferSize = bufferSize;
 	}
@@ -159,12 +158,10 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 		private final int bufferSize;
 
-
 		public ResponseBodyProcessor(ServletOutputStream outputStream, int bufferSize) {
 			this.outputStream = outputStream;
 			this.bufferSize = bufferSize;
 		}
-
 
 		@Override
 		protected boolean isWritePossible() {
@@ -179,13 +176,10 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 				}
 				flush();
 			}
-
 			boolean ready = this.outputStream.isReady();
-
 			if (this.logger.isTraceEnabled()) {
 				this.logger.trace("write: " + dataBuffer + " ready: " + ready);
 			}
-
 			if (ready) {
 				int total = dataBuffer.readableByteCount();
 				int written = writeDataBuffer(dataBuffer);
@@ -202,20 +196,17 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 		private int writeDataBuffer(DataBuffer dataBuffer) throws IOException {
 			InputStream input = dataBuffer.asInputStream();
-
 			int bytesWritten = 0;
 			byte[] buffer = new byte[this.bufferSize];
 			int bytesRead = -1;
-
 			while (this.outputStream.isReady() && (bytesRead = input.read(buffer)) != -1) {
 				this.outputStream.write(buffer, 0, bytesRead);
 				bytesWritten += bytesRead;
 			}
-
 			return bytesWritten;
 		}
-
 	}
+
 
 	private class ResponseBodyWriteListener implements WriteListener {
 
@@ -234,6 +225,7 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			}
 		}
 	}
+
 
 	private class ResponseBodyFlushProcessor extends AbstractResponseBodyFlushProcessor {
 
@@ -255,7 +247,6 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 			}
 			ServletServerHttpResponse.this.flush();
 		}
-
 	}
 
 }

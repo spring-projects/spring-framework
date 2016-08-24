@@ -47,6 +47,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
+
 	private static Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
 
 	private final HttpHandler handler;
@@ -57,14 +58,16 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
+
 	/**
 	 * Create a new {@code ServletHttpHandlerAdapter} with the given HTTP handler.
 	 * @param handler the handler
      */
 	public ServletHttpHandlerAdapter(HttpHandler handler) {
-		Assert.notNull(handler, "'handler' must not be null");
+		Assert.notNull(handler, "HttpHandler must not be null");
 		this.handler = handler;
 	}
+
 
 	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
@@ -76,25 +79,20 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		this.bufferSize = bufferSize;
 	}
 
+
 	@Override
-	protected void service(HttpServletRequest servletRequest,
-			HttpServletResponse servletResponse) throws ServletException, IOException {
+	protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
+			throws ServletException, IOException {
 
 		AsyncContext asyncContext = servletRequest.startAsync();
-
-		ServletServerHttpRequest request =
-				new ServletServerHttpRequest(servletRequest, this.dataBufferFactory,
-						this.bufferSize);
-
-		ServletServerHttpResponse response =
-				new ServletServerHttpResponse(servletResponse, this.dataBufferFactory,
-						this.bufferSize);
-
-		HandlerResultSubscriber resultSubscriber =
-				new HandlerResultSubscriber(asyncContext);
-
+		ServletServerHttpRequest request = new ServletServerHttpRequest(
+				servletRequest, this.dataBufferFactory, this.bufferSize);
+		ServletServerHttpResponse response = new ServletServerHttpResponse(
+				servletResponse, this.dataBufferFactory, this.bufferSize);
+		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(asyncContext);
 		this.handler.handle(request, response).subscribe(resultSubscriber);
 	}
+
 
 	private static class HandlerResultSubscriber implements Subscriber<Void> {
 
@@ -117,8 +115,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		@Override
 		public void onError(Throwable ex) {
 			logger.error("Error from request handling. Completing the request.", ex);
-			HttpServletResponse response =
-					(HttpServletResponse) this.asyncContext.getResponse();
+			HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			this.asyncContext.complete();
 		}
@@ -128,6 +125,5 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 			this.asyncContext.complete();
 		}
 	}
-
 
 }
