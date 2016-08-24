@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,6 +90,8 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	private final DefaultListableBeanFactory beanFactory;
 
 	private ResourceLoader resourceLoader;
+
+	private boolean customClassLoader = false;
 
 	private final AtomicBoolean refreshed = new AtomicBoolean();
 
@@ -198,6 +200,10 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	}
 
 
+	//---------------------------------------------------------------------
+	// ResourceLoader / ResourcePatternResolver override if necessary
+	//---------------------------------------------------------------------
+
 	/**
 	 * This implementation delegates to this context's ResourceLoader if set,
 	 * falling back to the default superclass behavior else.
@@ -223,6 +229,20 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 			return ((ResourcePatternResolver) this.resourceLoader).getResources(locationPattern);
 		}
 		return super.getResources(locationPattern);
+	}
+
+	@Override
+	public void setClassLoader(ClassLoader classLoader) {
+		super.setClassLoader(classLoader);
+		this.customClassLoader = true;
+	}
+
+	@Override
+	public ClassLoader getClassLoader() {
+		if (this.resourceLoader != null && !this.customClassLoader) {
+			return this.resourceLoader.getClassLoader();
+		}
+		return super.getClassLoader();
 	}
 
 
