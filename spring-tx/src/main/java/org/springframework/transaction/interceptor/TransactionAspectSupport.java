@@ -240,9 +240,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		if (getTransactionManager() == null && getBeanFactory() == null) {
+		if (getTransactionManager() == null && this.beanFactory == null) {
 			throw new IllegalStateException(
-					"Setting the property 'transactionManager' or running in a BeanFactory is required");
+					"Set the 'transactionManager' property or make sure to run within a BeanFactory " +
+					"containing a PlatformTransactionManager bean!");
 		}
 		if (getTransactionAttributeSource() == null) {
 			throw new IllegalStateException(
