@@ -546,8 +546,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Set the (new) value of the {@code Access-Control-Request-Method} request header.
 	 */
-	public void setAccessControlRequestMethod(HttpMethod requestedMethod) {
-		set(ACCESS_CONTROL_REQUEST_METHOD, requestedMethod.name());
+	public void setAccessControlRequestMethod(HttpMethod requestMethod) {
+		set(ACCESS_CONTROL_REQUEST_METHOD, requestMethod.name());
 	}
 
 	/**
