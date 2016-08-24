@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -86,10 +87,10 @@ public class CorsConfiguration {
 			return this;
 		}
 		CorsConfiguration config = new CorsConfiguration(this);
-		config.setAllowedOrigins(combine(this.getAllowedOrigins(), other.getAllowedOrigins()));
-		config.setAllowedMethods(combine(this.getAllowedMethods(), other.getAllowedMethods()));
-		config.setAllowedHeaders(combine(this.getAllowedHeaders(), other.getAllowedHeaders()));
-		config.setExposedHeaders(combine(this.getExposedHeaders(), other.getExposedHeaders()));
+		config.setAllowedOrigins(combine(getAllowedOrigins(), other.getAllowedOrigins()));
+		config.setAllowedMethods(combine(getAllowedMethods(), other.getAllowedMethods()));
+		config.setAllowedHeaders(combine(getAllowedHeaders(), other.getAllowedHeaders()));
+		config.setExposedHeaders(combine(getExposedHeaders(), other.getExposedHeaders()));
 		Boolean allowCredentials = other.getAllowCredentials();
 		if (allowCredentials != null) {
 			config.setAllowCredentials(allowCredentials);
@@ -137,7 +138,7 @@ public class CorsConfiguration {
 	 */
 	public void addAllowedOrigin(String origin) {
 		if (this.allowedOrigins == null) {
-			this.allowedOrigins = new ArrayList<String>();
+			this.allowedOrigins = new ArrayList<String>(4);
 		}
 		this.allowedOrigins.add(origin);
 	}
@@ -179,7 +180,7 @@ public class CorsConfiguration {
 	public void addAllowedMethod(String method) {
 		if (StringUtils.hasText(method)) {
 			if (this.allowedMethods == null) {
-				this.allowedMethods = new ArrayList<String>();
+				this.allowedMethods = new ArrayList<String>(4);
 			}
 			this.allowedMethods.add(method);
 		}
@@ -213,7 +214,7 @@ public class CorsConfiguration {
 	 */
 	public void addAllowedHeader(String allowedHeader) {
 		if (this.allowedHeaders == null) {
-			this.allowedHeaders = new ArrayList<String>();
+			this.allowedHeaders = new ArrayList<String>(4);
 		}
 		this.allowedHeaders.add(allowedHeader);
 	}
@@ -230,7 +231,7 @@ public class CorsConfiguration {
 		if (exposedHeaders != null && exposedHeaders.contains(ALL)) {
 			throw new IllegalArgumentException("'*' is not a valid exposed header value");
 		}
-		this.exposedHeaders = (exposedHeaders == null ? null : new ArrayList<String>(exposedHeaders));
+		this.exposedHeaders = (exposedHeaders != null ? new ArrayList<String>(exposedHeaders) : null);
 	}
 
 	/**
@@ -251,7 +252,7 @@ public class CorsConfiguration {
 			throw new IllegalArgumentException("'*' is not a valid exposed header value");
 		}
 		if (this.exposedHeaders == null) {
-			this.exposedHeaders = new ArrayList<String>();
+			this.exposedHeaders = new ArrayList<String>(4);
 		}
 		this.exposedHeaders.add(exposedHeader);
 	}
@@ -333,14 +334,18 @@ public class CorsConfiguration {
 		if (requestMethod == null) {
 			return null;
 		}
-		List<String> allowedMethods =
-				(this.allowedMethods != null ? this.allowedMethods : new ArrayList<String>());
-		if (allowedMethods.contains(ALL)) {
-			return Collections.singletonList(requestMethod);
+
+		List<String> allowedMethods = this.allowedMethods;
+		if (!CollectionUtils.isEmpty(allowedMethods)) {
+			if (allowedMethods.contains(ALL)) {
+				return Collections.singletonList(requestMethod);
+			}
 		}
-		if (allowedMethods.isEmpty()) {
+		else {
+			allowedMethods = new ArrayList<String>(1);
 			allowedMethods.add(HttpMethod.GET.name());
 		}
+
 		List<HttpMethod> result = new ArrayList<HttpMethod>(allowedMethods.size());
 		boolean allowed = false;
 		for (String method : allowedMethods) {
