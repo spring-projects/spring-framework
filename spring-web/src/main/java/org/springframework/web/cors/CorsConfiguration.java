@@ -286,7 +286,7 @@ public class CorsConfiguration {
 			throw new IllegalArgumentException("'*' is not a valid exposed header value");
 		}
 		if (this.exposedHeaders == null) {
-			this.exposedHeaders = new ArrayList<String>();
+			this.exposedHeaders = new ArrayList<String>(4);
 		}
 		this.exposedHeaders.add(exposedHeader);
 	}
