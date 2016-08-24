@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec;
 
+import java.time.Duration;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -31,44 +32,43 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.tests.TestSubscriber;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
  */
-public class SseEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTestCase {
+public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAllocatingTestCase {
 
-	private SseEventHttpMessageWriter converter = new SseEventHttpMessageWriter(
+	private ServerSentEventHttpMessageWriter messageWriter = new ServerSentEventHttpMessageWriter(
 			Collections.singletonList(new Jackson2JsonEncoder()));
 
 
 	@Test
 	public void nullMimeType() {
-		assertTrue(converter.canWrite(ResolvableType.forClass(Object.class), null));
+		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class), null));
 	}
 
 	@Test
 	public void unsupportedMimeType() {
-		assertFalse(converter.canWrite(ResolvableType.forClass(Object.class),
+		assertFalse(messageWriter.canWrite(ResolvableType.forClass(Object.class),
 				new MediaType("foo", "bar")));
 	}
 
 	@Test
 	public void supportedMimeType() {
-		assertTrue(converter.canWrite(ResolvableType.forClass(Object.class),
+		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class),
 				new MediaType("text", "event-stream")));
 	}
 
 	@Test
 	public void encodeServerSentEvent() {
-		SseEvent event = new SseEvent();
-		event.setId("c42");
-		event.setName("foo");
-		event.setComment("bla\nbla bla\nbla bla bla");
-		event.setReconnectTime(123L);
-		Mono<SseEvent> source = Mono.just(event);
+		ServerSentEvent<String>
+				event = ServerSentEvent.<String>builder().data("bar").id("c42").event("foo").comment("bla\nbla bla\nbla bla bla")
+				.retry(Duration.ofMillis(123L)).build();
+		Mono<ServerSentEvent<String>> source = Mono.just(event);
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
-		converter.write(source, ResolvableType.forClass(SseEvent.class),
+		messageWriter.write(source, ResolvableType.forClass(ServerSentEvent.class),
 				new MediaType("text", "event-stream"), outputMessage);
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
@@ -77,7 +77,8 @@ public class SseEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 				assertValuesWith(publisher -> {
 					TestSubscriber.subscribe(publisher).assertNoError().assertValuesWith(
 							stringConsumer("id:c42\n" + "event:foo\n" + "retry:123\n" +
-									":bla\n:bla bla\n:bla bla bla\n"),
+									":bla\n:bla bla\n:bla bla bla\n" +
+									"data:bar\n"),
 							stringConsumer("\n"));
 
 				});
@@ -87,7 +88,7 @@ public class SseEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	public void encodeString() {
 		Flux<String> source = Flux.just("foo", "bar");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
-		converter.write(source, ResolvableType.forClass(String.class),
+		messageWriter.write(source, ResolvableType.forClass(String.class),
 				new MediaType("text", "event-stream"), outputMessage);
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
@@ -110,7 +111,7 @@ public class SseEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 	public void encodeMultiLineString() {
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
-		converter.write(source, ResolvableType.forClass(String.class),
+		messageWriter.write(source, ResolvableType.forClass(String.class),
 				new MediaType("text", "event-stream"), outputMessage);
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
@@ -134,7 +135,7 @@ public class SseEventHttpMessageWriterTests extends AbstractDataBufferAllocating
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"),
 				new Pojo("foofoofoo", "barbarbar"));
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
-		converter.write(source, ResolvableType.forClass(Pojo.class),
+		messageWriter.write(source, ResolvableType.forClass(Pojo.class),
 				new MediaType("text", "event-stream"), outputMessage);
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();

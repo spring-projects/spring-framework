@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.SseEvent;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.tests.TestSubscriber;
@@ -135,14 +135,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		}
 
 		@RequestMapping("/sse/event")
-		Flux<SseEvent> sse() {
-			return Flux.interval(Duration.ofMillis(100)).map(l -> {
-				SseEvent event = new SseEvent();
-				event.setId(Long.toString(l));
-				event.setData("foo");
-				event.setComment("bar");
-				return event;
-			}).take(2);
+		Flux<ServerSentEvent<String>> sse() {
+			return Flux.interval(Duration.ofMillis(100)).map(l -> ServerSentEvent.builder("foo")
+					.id(Long.toString(l))
+					.comment("bar")
+					.build()).take(2);
 		}
 
 	}
