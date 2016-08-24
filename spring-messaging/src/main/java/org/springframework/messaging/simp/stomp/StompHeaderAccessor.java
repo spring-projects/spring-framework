@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
@@ -186,7 +186,9 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public StompCommand updateStompCommandAsClientMessage() {
-		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()), "Unexpected message type " + getMessage());
+		if (getMessageType() != SimpMessageType.MESSAGE) {
+			throw new IllegalStateException("Unexpected message type " + getMessageType());
+		}
 		if (getCommand() == null) {
 			setHeader(COMMAND_HEADER, StompCommand.SEND);
 		}
@@ -197,7 +199,9 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public void updateStompCommandAsServerMessage() {
-		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()), "Unexpected message type " + getMessage());
+		if (getMessageType() != SimpMessageType.MESSAGE) {
+			throw new IllegalStateException("Unexpected message type " + getMessageType());
+		}
 		StompCommand command = getCommand();
 		if ((command == null) || StompCommand.SEND.equals(command)) {
 			setHeader(COMMAND_HEADER, StompCommand.MESSAGE);
@@ -435,7 +439,10 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	private String appendPayload(Object payload) {
-		Assert.isInstanceOf(byte[].class, payload);
+		if (payload.getClass() != byte[].class) {
+			throw new IllegalStateException(
+					"Expected byte array payload but got: " + ClassUtils.getQualifiedName(payload.getClass()));
+		}
 		byte[] bytes = (byte[]) payload;
 		String contentType = (getContentType() != null ? " " + getContentType().toString() : "");
 		if (bytes.length == 0 || getContentType() == null || !isReadableContentType()) {
