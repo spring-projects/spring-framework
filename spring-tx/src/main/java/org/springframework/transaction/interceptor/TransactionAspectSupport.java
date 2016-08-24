@@ -18,6 +18,7 @@ package org.springframework.transaction.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
@@ -34,7 +35,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.support.CallbackPreferringPlatformTransactionManager;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -133,7 +133,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	private BeanFactory beanFactory;
 
 	private final ConcurrentMap<Object, PlatformTransactionManager> transactionManagerCache =
-			new ConcurrentReferenceHashMap<Object, PlatformTransactionManager>(4);
+			new ConcurrentHashMap<Object, PlatformTransactionManager>(4);
 
 
 	/**
@@ -242,9 +242,10 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	public void afterPropertiesSet() {
 		if (getTransactionManager() == null && this.beanFactory == null) {
 			throw new IllegalStateException(
-					"Setting the property 'transactionManager' or running in a BeanFactory is required");
+					"Set the 'transactionManager' property or make sure to run within a BeanFactory " +
+					"containing a PlatformTransactionManager bean!");
 		}
-		if (this.transactionAttributeSource == null) {
+		if (getTransactionAttributeSource() == null) {
 			throw new IllegalStateException(
 					"Either 'transactionAttributeSource' or 'transactionAttributes' is required: " +
 					"If there are no transactional methods, then don't use a transaction aspect.");
@@ -567,6 +568,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 		public TransactionInfo(PlatformTransactionManager transactionManager,
 				TransactionAttribute transactionAttribute, String joinpointIdentification) {
+
 			this.transactionManager = transactionManager;
 			this.transactionAttribute = transactionAttribute;
 			this.joinpointIdentification = joinpointIdentification;
