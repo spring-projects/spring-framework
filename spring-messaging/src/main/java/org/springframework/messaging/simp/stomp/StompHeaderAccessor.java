@@ -186,7 +186,9 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public StompCommand updateStompCommandAsClientMessage() {
-		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()), "Unexpected message type " + getMessage());
+		if (!SimpMessageType.MESSAGE.equals(getMessageType())) {
+			throw new IllegalStateException("Unexpected message type " + getMessage());
+		}
 		if (getCommand() == null) {
 			setHeader(COMMAND_HEADER, StompCommand.SEND);
 		}
@@ -197,7 +199,9 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public void updateStompCommandAsServerMessage() {
-		Assert.state(SimpMessageType.MESSAGE.equals(getMessageType()), "Unexpected message type " + getMessage());
+		if (!SimpMessageType.MESSAGE.equals(getMessageType())) {
+			throw new IllegalStateException("Unexpected message type " + getMessage());
+		}
 		StompCommand command = getCommand();
 		if ((command == null) || StompCommand.SEND.equals(command)) {
 			setHeader(COMMAND_HEADER, StompCommand.MESSAGE);
