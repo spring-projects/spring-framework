@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -43,7 +42,6 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompDecoder;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.AbstractMessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
@@ -471,7 +469,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 	private StompHeaderAccessor convertConnectAcktoStompConnected(StompHeaderAccessor connectAckHeaders) {
 		String name = StompHeaderAccessor.CONNECT_MESSAGE_HEADER;
 		Message<?> message = (Message<?>) connectAckHeaders.getHeader(name);
-		Assert.notNull(message, "Original STOMP CONNECT not found in " + connectAckHeaders);
+		Assert.notNull(message, () -> "Original STOMP CONNECT not found in " + connectAckHeaders);
 		StompHeaderAccessor connectHeaders = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 		StompHeaderAccessor connectedHeaders = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Set<String> acceptVersions = connectHeaders.getAcceptVersion();
