@@ -33,24 +33,29 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeTypeUtils;
 
 /**
- * Encoder that supports a stream of {@link SseEvent}s and also plain
- * {@link Object}s which is the same as an {@link SseEvent} with data
+ * Encoder that supports a stream of {@link ServerSentEvent}s and also plain
+ * {@link Object}s which is the same as an {@link ServerSentEvent} with data
  * only.
  *
  * @author Sebastien Deleuze
- * @since 5.0
  * @author Arjen Poutsma
+ * @since 5.0
  */
-public class SseEventHttpMessageWriter implements HttpMessageWriter<Object> {
+public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
 
 	private static final MediaType TEXT_EVENT_STREAM =
 			new MediaType("text", "event-stream");
 
 	private final List<Encoder<?>> dataEncoders;
 
-	public SseEventHttpMessageWriter(List<Encoder<?>> dataEncoders) {
+	public ServerSentEventHttpMessageWriter() {
+		this.dataEncoders = Collections.emptyList();
+	}
+
+	public ServerSentEventHttpMessageWriter(List<Encoder<?>> dataEncoders) {
 		Assert.notNull(dataEncoders, "'dataEncoders' must not be null");
 		this.dataEncoders = dataEncoders;
 	}
@@ -67,7 +72,7 @@ public class SseEventHttpMessageWriter implements HttpMessageWriter<Object> {
 
 	@Override
 	public Mono<Void> write(Publisher<?> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+							MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
 
 		outputMessage.getHeaders().setContentType(TEXT_EVENT_STREAM);
 
@@ -82,68 +87,60 @@ public class SseEventHttpMessageWriter implements HttpMessageWriter<Object> {
 	}
 
 	private Flux<Publisher<DataBuffer>> encode(Publisher<?> inputStream,
-			DataBufferFactory bufferFactory, ResolvableType type) {
+											   DataBufferFactory bufferFactory, ResolvableType type) {
 
-		return Flux.from(inputStream).map(input -> {
-			SseEvent event =
-					(SseEvent.class.equals(type.getRawClass()) ? (SseEvent) input :
-							new SseEvent(input));
+		return Flux.from(inputStream)
+				.map(o -> toSseEvent(o, type))
+				.map(sse -> {
+					StringBuilder sb = new StringBuilder();
+					sse.id().ifPresent(id -> writeField("id", id, sb));
+					sse.event().ifPresent(event -> writeField("event", event, sb));
+					sse.retry().ifPresent(retry -> writeField("retry", retry.toMillis(), sb));
+					sse.comment().ifPresent(comment -> {
+						comment = comment.replaceAll("\\n", "\n:");
+						sb.append(':').append(comment).append("\n");
+					});
+					Flux<DataBuffer> dataBuffer = sse.data()
+							.<Flux<DataBuffer>>map(data -> {
+								sb.append("data:");
+								if (data instanceof String) {
+									String stringData = ((String) data).replaceAll("\\n", "\ndata:");
+									sb.append(stringData).append('\n');
+									return Flux.empty();
+								}
+								else {
+									return applyEncoder(data, bufferFactory);
+								}
+							}).orElse(Flux.empty());
 
-			StringBuilder sb = new StringBuilder();
-
-			if (event.getId() != null) {
-				sb.append("id:");
-				sb.append(event.getId());
-				sb.append("\n");
-			}
-
-			if (event.getName() != null) {
-				sb.append("event:");
-				sb.append(event.getName());
-				sb.append("\n");
-			}
-
-			if (event.getReconnectTime() != null) {
-				sb.append("retry:");
-				sb.append(event.getReconnectTime().toString());
-				sb.append("\n");
-			}
-
-			if (event.getComment() != null) {
-				sb.append(":");
-				sb.append(event.getComment().replaceAll("\\n", "\n:"));
-				sb.append("\n");
-			}
-
-			Object data = event.getData();
-			Flux<DataBuffer> dataBuffer = Flux.empty();
-			MediaType mediaType =
-					(event.getMediaType() == null ? MediaType.ALL : event.getMediaType());
-			if (data != null) {
-				sb.append("data:");
-				if (data instanceof String) {
-					sb.append(((String) data).replaceAll("\\n", "\ndata:")).append("\n");
-				}
-				else {
-					dataBuffer = applyEncoder(data, mediaType, bufferFactory);
-				}
-			}
-
-			return Flux.concat(encodeString(sb.toString(), bufferFactory), dataBuffer,
-					encodeString("\n", bufferFactory));
-		});
+					return Flux.concat(encodeString(sb.toString(), bufferFactory), dataBuffer,
+							encodeString("\n", bufferFactory));
+				});
 
 	}
 
+	private ServerSentEvent<?> toSseEvent(Object data, ResolvableType type) {
+		return ServerSentEvent.class.isAssignableFrom(type.getRawClass())
+				? (ServerSentEvent<?>) data
+				: ServerSentEvent.builder().data(data).build();
+	}
+
+	private void writeField(String fieldName, Object fieldValue, StringBuilder stringBuilder) {
+		stringBuilder.append(fieldName);
+		stringBuilder.append(':');
+		stringBuilder.append(fieldValue.toString());
+		stringBuilder.append("\n");
+	}
+
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> applyEncoder(Object data, MediaType mediaType, DataBufferFactory bufferFactory) {
+	private <T> Flux<DataBuffer> applyEncoder(Object data, DataBufferFactory bufferFactory) {
 		ResolvableType elementType = ResolvableType.forClass(data.getClass());
 		Optional<Encoder<?>> encoder = dataEncoders
-			.stream()
-			.filter(e -> e.canEncode(elementType, mediaType))
-			.findFirst();
+				.stream()
+				.filter(e -> e.canEncode(elementType, MimeTypeUtils.APPLICATION_JSON))
+				.findFirst();
 		return ((Encoder<T>) encoder.orElseThrow(() -> new CodecException("No suitable encoder found!")))
-				.encode(Mono.just((T) data), bufferFactory, elementType, mediaType)
+				.encode(Mono.just((T) data), bufferFactory, elementType, MimeTypeUtils.APPLICATION_JSON)
 				.concatWith(encodeString("\n", bufferFactory));
 	}
 
