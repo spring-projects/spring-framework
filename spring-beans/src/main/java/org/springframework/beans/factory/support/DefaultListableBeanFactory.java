@@ -982,7 +982,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		String[] candidateNames = getBeanNamesForType(requiredType);
 
 		if (candidateNames.length > 1) {
-			ArrayList<String> autowireCandidates = new ArrayList<>();
+			List<String> autowireCandidates = new ArrayList<>(candidateNames.length);
 			for (String beanName : candidateNames) {
 				if (!containsBeanDefinition(beanName) || getBeanDefinition(beanName).isAutowireCandidate()) {
 					autowireCandidates.add(beanName);
@@ -999,12 +999,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		else if (candidateNames.length > 1) {
 			Map<String, Object> candidates = new LinkedHashMap<>(candidateNames.length);
-			for (String candidateName : candidateNames) {
-				if (containsSingleton(candidateName)) {
-					candidates.put(candidateName, getBean(candidateName, requiredType, args));
+			for (String beanName : candidateNames) {
+				if (containsSingleton(beanName)) {
+					candidates.put(beanName, getBean(beanName, requiredType, args));
 				}
 				else {
-					candidates.put(candidateName, getType(candidateName));
+					candidates.put(beanName, getType(beanName));
 				}
 			}
 			String candidateName = determinePrimaryCandidate(candidates, requiredType);
@@ -1688,7 +1688,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (beanDefinition == null) {
 				return null;
 			}
-			List<Object> sources = new ArrayList<>();
+			List<Object> sources = new ArrayList<>(2);
 			Method factoryMethod = beanDefinition.getResolvedFactoryMethod();
 			if (factoryMethod != null) {
 				sources.add(factoryMethod);
