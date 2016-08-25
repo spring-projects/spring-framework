@@ -16,13 +16,22 @@
 
 package org.springframework.test.context.junit4;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -32,6 +41,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.GenericXmlContextLoader;
@@ -227,6 +237,70 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	@Test
 	public final void verifyResourceAnnotationInjectedMethods() {
 		assertEquals("The bar method should have been wired via @Resource.", "Bar", this.bar);
+	}
+
+	@Test
+	public final void verifyMultipleThreadsHaveDifferentTestContextManager() throws Exception {
+
+		final SpringJUnit4ClassRunner runner = new SpringJUnit4ClassRunner(getClass());
+		final Set<TestContextManager> managers = new HashSet<>();
+		class SimpleRunner implements Runnable {
+
+			private volatile TestContextManager tcm;
+
+			@Override
+			public void run() {
+				try {
+					managers.add(runner.getTestContextManager());
+				} catch (Exception e) {
+					fail("Exception not expected.");
+				}
+			}
+		}
+
+		SimpleRunner r1 = new SimpleRunner();
+		SimpleRunner r2 = new SimpleRunner();
+		SimpleRunner r3 = new SimpleRunner();
+
+		runConcurrent("Running tests concurrently.", Arrays.asList(r1, r2, r3), 25);
+
+		assertEquals(3, managers.size());
+
+
+	}
+
+	/*
+	 * This code was borrowed from https://github.com/junit-team/junit4/wiki/multithreaded-code-and-concurrency
+	 */
+	private void runConcurrent(final String message, final List<? extends Runnable> runnables, final int maxTimeoutSeconds) throws InterruptedException {
+		final int numThreads = runnables.size();
+		final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<Throwable>());
+		final ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
+		try {
+			final CountDownLatch allExecutorThreadsReady = new CountDownLatch(numThreads);
+			final CountDownLatch afterInitBlocker = new CountDownLatch(1);
+			final CountDownLatch allDone = new CountDownLatch(numThreads);
+			runnables.forEach(runnable ->
+				threadPool.submit(() -> {
+                    allExecutorThreadsReady.countDown();
+                    try {
+                        afterInitBlocker.await();
+	                    runnable.run();
+                    } catch (final Throwable e) {
+                        exceptions.add(e);
+                    } finally {
+                        allDone.countDown();
+                    }
+                }));
+			// wait until all threads are ready
+			assertTrue("Timeout initializing threads! Perform long lasting initializations before passing runnables to runConcurrent", allExecutorThreadsReady.await(runnables.size() * 10, TimeUnit.MILLISECONDS));
+			// start all test runners
+			afterInitBlocker.countDown();
+			assertTrue(message +" timeout! More than" + maxTimeoutSeconds + "seconds", allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS));
+		} finally {
+			threadPool.shutdownNow();
+		}
+		assertTrue(message + "failed with exception(s)" + exceptions, exceptions.isEmpty());
 	}
 
 }

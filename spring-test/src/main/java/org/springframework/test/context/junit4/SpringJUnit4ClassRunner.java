@@ -110,9 +110,12 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		ReflectionUtils.makeAccessible(withRulesMethod);
 	}
 
-
-	private final TestContextManager testContextManager;
-
+	private final ThreadLocal<TestContextManager> testContextManagerHolder = new ThreadLocal<TestContextManager>() {
+		@Override
+		protected TestContextManager initialValue() {
+			return createTestContextManager(getTestClass().getJavaClass());
+		}
+	};
 
 	private static void ensureSpringRulesAreNotPresent(Class<?> testClass) {
 		for (Field field : testClass.getFields()) {
@@ -130,7 +133,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * {@link TestContextManager} to provide Spring testing functionality to
 	 * standard JUnit tests.
 	 * @param clazz the test class to be run
-	 * @see #createTestContextManager(Class)
 	 */
 	public SpringJUnit4ClassRunner(Class<?> clazz) throws InitializationError {
 		super(clazz);
@@ -138,7 +140,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 			logger.debug("SpringJUnit4ClassRunner constructor called with [" + clazz + "]");
 		}
 		ensureSpringRulesAreNotPresent(clazz);
-		this.testContextManager = createTestContextManager(clazz);
+
 	}
 
 	/**
@@ -154,7 +156,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * Get the {@link TestContextManager} associated with this runner.
 	 */
 	protected final TestContextManager getTestContextManager() {
-		return this.testContextManager;
+		return this.testContextManagerHolder.get();
 	}
 
 	/**
