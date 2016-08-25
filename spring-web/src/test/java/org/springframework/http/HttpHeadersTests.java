@@ -321,6 +321,11 @@ public class HttpHeadersTests {
 		headers.setContentDispositionFormData("name", "filename");
 		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"; filename=\"filename\"",
 				headers.getFirst("Content-Disposition"));
+
+		headers.setContentDispositionFormData("name", "中文.txt", StandardCharsets.UTF_8);
+		assertEquals("Invalid Content-Disposition header",
+				"form-data; name=\"name\"; filename*=UTF-8''%E4%B8%AD%E6%96%87.txt",
+				headers.getFirst("Content-Disposition"));
 	}
 
 	@Test  // SPR-11917

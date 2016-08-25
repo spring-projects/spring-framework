@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
@@ -698,6 +699,21 @@ public class StringUtilsTests {
 		String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Variant containing country code not extracted correctly", variant, locale.getVariant());
+	}
+
+	// SPR-14547
+	@Test
+	public void encodeHttpHeaderFieldParam() {
+		String result = StringUtils.encodeHttpHeaderFieldParam("test.txt", StandardCharsets.US_ASCII);
+		assertEquals("test.txt", result);
+
+		result = StringUtils.encodeHttpHeaderFieldParam("中文.txt", StandardCharsets.UTF_8);
+		assertEquals("UTF-8''%E4%B8%AD%E6%96%87.txt", result);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void encodeHttpHeaderFieldParamInvalidCharset() {
+		StringUtils.encodeHttpHeaderFieldParam("test", StandardCharsets.UTF_16);
 	}
 
 }

@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -672,12 +673,32 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @param filename the filename (may be {@code null})
 	 */
 	public void setContentDispositionFormData(String name, String filename) {
+		setContentDispositionFormData(name, filename, null);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Content-Disposition} header
+	 * for {@code form-data}, optionally encoding the filename using the rfc5987.
+	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
+	 * @param name the control name
+	 * @param filename the filename (may be {@code null})
+	 * @param charset the charset used for the filename (may be {@code null})
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.4">rfc7230 Section 3.2.4</a>
+	 * @since 5.0
+	 */
+	public void setContentDispositionFormData(String name, String filename, Charset charset) {
 		Assert.notNull(name, "'name' must not be null");
 		StringBuilder builder = new StringBuilder("form-data; name=\"");
 		builder.append(name).append('\"');
 		if (filename != null) {
-			builder.append("; filename=\"");
-			builder.append(filename).append('\"');
+			if(charset == null || StandardCharsets.US_ASCII.equals(charset)) {
+				builder.append("; filename=\"");
+				builder.append(filename).append('\"');
+			}
+			else {
+				builder.append("; filename*=");
+				builder.append(StringUtils.encodeHttpHeaderFieldParam(filename, charset));
+			}
 		}
 		set(CONTENT_DISPOSITION, builder.toString());
 	}
