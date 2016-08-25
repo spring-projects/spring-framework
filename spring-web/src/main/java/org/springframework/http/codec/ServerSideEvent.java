@@ -166,7 +166,7 @@ public class ServerSideEvent<T> {
 
         private String event;
 
-        private Duration reconnectTime;
+        private Duration retry;
 
         private String comment;
 
@@ -190,7 +190,7 @@ public class ServerSideEvent<T> {
 
         @Override
         public Builder<T> retry(Duration retry) {
-            this.reconnectTime = retry;
+            this.retry = retry;
             return this;
         }
 
@@ -202,7 +202,7 @@ public class ServerSideEvent<T> {
 
         @Override
         public ServerSideEvent<T> build() {
-            return new ServerSideEvent<T>(this.id, this.event, this.data, this.reconnectTime, this.comment);
+            return new ServerSideEvent<T>(this.id, this.event, this.data, this.retry, this.comment);
         }
     }
 
