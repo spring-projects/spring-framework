@@ -19,6 +19,7 @@ package org.springframework.http.client.support;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
@@ -40,6 +41,7 @@ public abstract class InterceptingHttpAccessor extends HttpAccessor {
 	 * Sets the request interceptors that this accessor should use.
 	 */
 	public void setInterceptors(List<ClientHttpRequestInterceptor> interceptors) {
+		AnnotationAwareOrderComparator.sort(interceptors);
 		this.interceptors = interceptors;
 	}
 
