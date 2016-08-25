@@ -246,14 +246,12 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 		final Set<TestContextManager> managers = new HashSet<>();
 		class SimpleRunner implements Runnable {
 
-			private volatile TestContextManager tcm;
-
 			@Override
 			public void run() {
 				try {
 					managers.add(runner.getTestContextManager());
 				} catch (Exception e) {
-					fail("Exception not expected.");
+					fail("Exception not expected. ("+e.getMessage()+")");
 				}
 			}
 		}
