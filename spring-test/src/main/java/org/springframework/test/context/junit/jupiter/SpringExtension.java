@@ -16,28 +16,39 @@
 
 package org.springframework.test.context.junit.jupiter;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Optional;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ContainerExecutionCondition;
 import org.junit.jupiter.api.extension.ContainerExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.TestExecutionCondition;
 import org.junit.jupiter.api.extension.TestExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.util.Assert;
@@ -50,20 +61,29 @@ import org.springframework.util.Assert;
  * {@code @ExtendWith(SpringExtension.class)}.
  *
  * @author Sam Brannen
+ * @author Tadaya Tsuyukubo
  * @since 5.0
  * @see org.springframework.test.context.junit.jupiter.SpringJUnitConfig
  * @see org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig
  * @see org.springframework.test.context.TestContextManager
+ * @see DisabledIf
  */
 public class SpringExtension implements BeforeAllCallback, AfterAllCallback, TestInstancePostProcessor,
 		BeforeEachCallback, AfterEachCallback, BeforeTestExecutionCallback, AfterTestExecutionCallback,
-		ParameterResolver {
+		ParameterResolver,
+		ContainerExecutionCondition, TestExecutionCondition {
 
 	/**
 	 * {@link Namespace} in which {@code TestContextManagers} are stored, keyed
 	 * by test class.
 	 */
 	private static final Namespace namespace = Namespace.create(SpringExtension.class);
+
+	private static final ConditionEvaluationResult TEST_ENABLED = ConditionEvaluationResult.enabled(
+			"@DisabledIf condition didn't match");
+
+	private static final Log logger = LogFactory.getLog(SpringExtension.class);
+
 
 	/**
 	 * Delegates to {@link TestContextManager#beforeTestClass}.
@@ -173,6 +193,61 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Class<?> testClass = extensionContext.getTestClass().get();
 		ApplicationContext applicationContext = getApplicationContext(extensionContext);
 		return ParameterAutowireUtils.resolveDependency(parameter, testClass, applicationContext);
+	}
+
+	@Override
+	public ConditionEvaluationResult evaluate(ContainerExtensionContext context) {
+		return evaluateDisabledIf(context);
+	}
+
+	@Override
+	public ConditionEvaluationResult evaluate(TestExtensionContext context) {
+		return evaluateDisabledIf(context);
+	}
+
+	private ConditionEvaluationResult evaluateDisabledIf(ExtensionContext extensionContext) {
+		Optional<AnnotatedElement> element = extensionContext.getElement();
+		if (!element.isPresent()) {
+			return TEST_ENABLED;
+		}
+
+		DisabledIf disabledIf = AnnotatedElementUtils.findMergedAnnotation(element.get(), DisabledIf.class);
+		if (disabledIf == null) {
+			return TEST_ENABLED;
+		}
+
+		String condition = disabledIf.condition();
+		if (condition.trim().length() == 0) {
+			return TEST_ENABLED;
+		}
+
+		ApplicationContext applicationContext = getApplicationContext(extensionContext);
+		if (!(applicationContext instanceof ConfigurableApplicationContext)) {
+			return TEST_ENABLED;
+		}
+
+		ConfigurableBeanFactory configurableBeanFactory = ((ConfigurableApplicationContext) applicationContext)
+				.getBeanFactory();
+		BeanExpressionResolver expressionResolver = configurableBeanFactory.getBeanExpressionResolver();
+		BeanExpressionContext beanExpressionContext = new BeanExpressionContext(configurableBeanFactory, null);
+
+		Object result = expressionResolver
+				.evaluate(configurableBeanFactory.resolveEmbeddedValue(condition), beanExpressionContext);
+
+		if (result == null || !Boolean.valueOf(result.toString())) {
+			return TEST_ENABLED;
+		}
+
+		String reason = disabledIf.reason();
+		if (reason.trim().length() == 0) {
+			String testTarget = extensionContext.getTestMethod().map(Method::getName)
+					.orElseGet(() -> extensionContext.getTestClass().get().getSimpleName());
+			reason = String.format("%s is disabled. condition=%s", testTarget, condition);
+		}
+
+		logger.info(String.format("%s is disabled. reason=%s", element.get(), reason));
+		return ConditionEvaluationResult.disabled(reason);
+
 	}
 
 	/**
