@@ -99,6 +99,15 @@ public class ServletWebRequestHttpMethodsTests {
 		assertEquals(dateFormat.format(epochTime), servletResponse.getHeader("Last-Modified"));
 	}
 
+	@Test // SPR-14559
+	public void checkNotModifiedInvalidIfNoneMatchHeader() {
+		String eTag = "\"etagvalue\"";
+		servletRequest.addHeader("If-None-Match", "missingquotes");
+		assertFalse(request.checkNotModified(eTag));
+		assertEquals(200, servletResponse.getStatus());
+		assertEquals(eTag, servletResponse.getHeader("ETag"));
+	}
+
 	@Test
 	public void checkNotModifiedHeaderAlreadySet() {
 		long epochTime = currentDate.getTime();
