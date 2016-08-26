@@ -23,7 +23,7 @@ package org.springframework.cglib.core;
  * <p>This is primarily designed to avoid clashes between a regular CGLIB
  * version (used by some other library) and Spring's embedded variant,
  * in case the same class happens to get proxied for different purposes.
- *
+ * <p>CGLIB's DefaultNamingPolicy通用扩展
  * @author Juergen Hoeller
  * @since 3.2.8
  */

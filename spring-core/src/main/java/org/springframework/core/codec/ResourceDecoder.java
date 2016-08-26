@@ -33,7 +33,7 @@ import org.springframework.util.MimeTypeUtils;
 
 /**
  * Decoder for {@link Resource}s.
- *
+ * <p>Resource的解码器
  * @author Arjen Poutsma
  * @since 5.0
  */

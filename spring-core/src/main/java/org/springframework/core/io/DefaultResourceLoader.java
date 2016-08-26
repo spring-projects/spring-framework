@@ -35,7 +35,8 @@ import org.springframework.util.StringUtils;
  * <p>Will return a {@link UrlResource} if the location value is a URL,
  * and a {@link ClassPathResource} if it is a non-URL path or a
  * "classpath:" pseudo-URL.
- *
+ * <p>ResourceLoader接口的默认实现类型,被ResourceEditor使用,同时作为AbstractApplicationContext的基类
+ *  
  * @author Juergen Hoeller
  * @since 10.03.2004
  * @see FileSystemResourceLoader
@@ -147,6 +148,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * <p>The default implementation supports class path locations. This should
 	 * be appropriate for standalone implementations but can be overridden,
 	 * e.g. for implementations targeted at a Servlet container.
+	 * <p>通过给定的path返回一个Resource处理默认支持class path地址,
 	 * @param path the path to the resource
 	 * @return the corresponding Resource handle
 	 * @see ClassPathResource

@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * <em>hiding</em> the TaskExecutor nature of a given object now,
  * solely exposing the standard Executor interface to a client.
  *
+ * <p> 暴露 Executor接口为任何TaskExecutor
  * @author Juergen Hoeller
  * @since 2.5
  * @see java.util.concurrent.Executor

@@ -31,7 +31,7 @@ import org.springframework.util.MimeType;
 
 /**
  * Encode from a {@code CharSequence} stream to a bytes stream.
- *
+ * 加密一个CharSequence流到字节流
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0

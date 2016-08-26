@@ -27,7 +27,7 @@ import org.springframework.util.MimeType;
 /**
  * Abstract base class for {@link org.springframework.core.codec.Encoder}
  * classes that can only deal with a single value.
- *
+ * <p>Encoder类的子类,只能处理一个单独的值
  * @author Arjen Poutsma
  * @since 5.0
  */

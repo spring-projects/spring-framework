@@ -26,13 +26,13 @@ import org.springframework.util.Assert;
 /**
  * Helper class for loading a localized resource,
  * specified through name, extension and current locale.
- *
+ * <p> 加载本地化资源的helper类,通过name,扩展和当前locale
  * @author Juergen Hoeller
  * @since 1.2.5
  */
 public class LocalizedResourceHelper {
 
-	/** The default separator to use inbetween file name parts: an underscore */
+	/** The default separator to use inbetween file name parts: an underscore 默认分割符 */
 	public static final String DEFAULT_SEPARATOR = "_";
 
 
@@ -80,6 +80,7 @@ public class LocalizedResourceHelper {
 	 * </ul>
 	 * <p>If none of the specific files can be found, a resource
 	 * descriptor for the default location will be returned.
+	 * <p>通过给定name,扩展,locale找到最合适的本地化资源
 	 * @param name the name of the file, without localization part nor extension
 	 * @param extension the file extension (e.g. ".xls")
 	 * @param locale the current locale (may be {@code null})

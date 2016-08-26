@@ -23,7 +23,8 @@ import org.springframework.core.env.PropertySource;
 /**
  * The default implementation for {@link PropertySourceFactory},
  * wrapping every resource in a {@link ResourcePropertySource}.
- *
+ * 
+ * <p> PropertySourceFactory接口的默认实现类,wrapping任何实现ResourcePropertySource接口的资源
  * @author Juergen Hoeller
  * @since 4.3
  * @see PropertySourceFactory

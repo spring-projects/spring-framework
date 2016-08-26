@@ -32,6 +32,8 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * size of the source Collection. Then sets each collection element into the array.
  * Will perform an element conversion from the collection's parameterized type to the
  * array's component type if necessary.
+ * 
+ * <p>转换一个集合到array
  *
  * @author Keith Donald
  * @since 3.0

@@ -33,7 +33,7 @@ import org.springframework.util.StreamUtils;
 
 /**
  * Encoder for {@link Resource}s.
- *
+ * <p>Resource的加密器
  * @author Arjen Poutsma
  * @since 5.0
  */

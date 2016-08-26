@@ -25,6 +25,8 @@ package org.springframework.core;
  * in all environments. Consider using a reflection-based check instead:
  * For example, checking for the presence of a specific Spring 2.0
  * method that you intend to call.
+ * 
+ * <p>这个类暴露sping的版本号,获取Implementation-Version属性通过jar文件
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -34,6 +36,7 @@ public class SpringVersion {
 	/**
 	 * Return the full version string of the present Spring codebase,
 	 * or {@code null} if it cannot be determined.
+	 * 返回spring的版本号
 	 * @see Package#getImplementationVersion()
 	 */
 	public static String getVersion() {

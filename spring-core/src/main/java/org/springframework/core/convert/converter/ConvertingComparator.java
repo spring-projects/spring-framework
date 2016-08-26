@@ -27,6 +27,9 @@ import org.springframework.util.comparator.ComparableComparator;
  * A {@link Comparator} that converts values before they are compared. The specified
  * {@link Converter} will be used to convert each value before it passed to the underlying
  * {@code Comparator}.
+ * 
+ * <p> Comparator 转换值在比较之前
+ *  Converter转换每一个值在传入底层Comparator之前
  *
  * @author Phillip Webb
  * @since 3.2

@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  *
  * where {@code example.MyService} is the name of the interface, and {@code MyServiceImpl1}
  * and {@code MyServiceImpl2} are two implementations.
- *
+ * <p>用于框架内内部使用的通用工厂加载机制
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Sam Brannen

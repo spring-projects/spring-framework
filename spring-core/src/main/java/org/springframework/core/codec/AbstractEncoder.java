@@ -24,7 +24,7 @@ import org.springframework.util.MimeType;
 
 /**
  * Abstract base class for {@link Decoder} implementations.
- *
+ * <p>Decoder实现类
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0

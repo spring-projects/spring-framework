@@ -39,7 +39,7 @@ import org.springframework.util.MimeTypeUtils;
  * <p>By default, this decoder will split the received {@link DataBuffer}s
  * along newline characters ({@code \r\n}), but this can be changed by
  * passing {@code false} as a constructor argument.
- *
+ * <p>加密一个字节流到string流
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Arjen Poutsma

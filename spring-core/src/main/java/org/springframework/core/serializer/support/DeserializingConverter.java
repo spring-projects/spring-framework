@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
  * {@link org.springframework.core.serializer.Deserializer}
  * to convert data in a byte array to an object.
  *
+ * <p> 解析字节数组数据到一个对象
  * @author Gary Russell
  * @author Mark Fisher
  * @author Juergen Hoeller

@@ -30,7 +30,9 @@ import org.springframework.util.ClassUtils;
 /**
  * Implementation of the {@link AnnotationAttributeExtractor} strategy that
  * is backed by a {@link Map}.
- *
+ * 
+ * <p>AnnotationAttributeExtractor策略实现类,
+ * 
  * @author Sam Brannen
  * @since 4.2
  * @see Annotation
@@ -46,6 +48,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	 * <p>The supplied map must contain a key-value pair for every attribute
 	 * defined in the supplied {@code annotationType} that is not aliased or
 	 * does not have a default value.
+	 * <p> 提供的map必须包括所有提供的annotationType属性提供的属性,
 	 * @param attributes the map of annotation attributes; never {@code null}
 	 * @param annotationType the type of annotation to synthesize; never {@code null}
 	 * @param annotatedElement the element that is annotated with the annotation
@@ -82,6 +85,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	 * either to the value of its alias (if an alias exists) or to the
 	 * value of the attribute's default value (if defined), and otherwise
 	 * an {@link IllegalArgumentException} will be thrown.
+	 * 
 	 */
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> enrichAndValidateAttributes(
@@ -94,7 +98,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			String attributeName = attributeMethod.getName();
 			Object attributeValue = attributes.get(attributeName);
 
-			// if attribute not present, check aliases
+			// if attribute not present, check aliases 如果属性不存在，检查别名
 			if (attributeValue == null) {
 				List<String> aliasNames = attributeAliasMap.get(attributeName);
 				if (aliasNames != null) {
@@ -109,7 +113,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 				}
 			}
 
-			// if aliases not present, check default
+			// if aliases not present, check default 如果别名不存在，检查默认
 			if (attributeValue == null) {
 				Object defaultValue = AnnotationUtils.getDefaultValue(annotationType, attributeName);
 				if (defaultValue != null) {
@@ -123,7 +127,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 					"Attributes map %s returned null for required attribute '%s' defined by annotation type [%s].",
 					attributes, attributeName, annotationType.getName()));
 
-			// finally, ensure correct type
+			// finally, ensure correct type 最后确保类型正确
 			Class<?> requiredReturnType = attributeMethod.getReturnType();
 			Class<? extends Object> actualReturnType = attributeValue.getClass();
 

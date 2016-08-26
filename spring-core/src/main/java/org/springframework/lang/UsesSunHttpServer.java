@@ -26,6 +26,7 @@ import java.lang.annotation.Target;
  * Indicates that the annotated element uses the Http Server available in
  * {@code com.sun.*} classes, which is only available on a Sun/Oracle JVM.
  *
+ * <p>指定被标记的属性,在{@code com.sun.*}类里面可以使用http server,只在 Sun/Oracle JVM上可用
  * @author Stephane Nicoll
  * @since 4.1
  */

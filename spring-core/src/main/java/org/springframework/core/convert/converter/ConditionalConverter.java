@@ -31,7 +31,7 @@ import org.springframework.core.convert.TypeDescriptor;
  * <p>As another example, when converting from a String field to an {@code Account} field,
  * an implementation might return {@code true} if the target Account class defines a
  * {@code public static findAccount(String)} method.
- *
+ * <p> Converter有条件的转换器
  * @author Phillip Webb
  * @author Keith Donald
  * @since 3.2

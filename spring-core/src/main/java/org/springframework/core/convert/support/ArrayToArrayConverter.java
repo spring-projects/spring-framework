@@ -31,6 +31,8 @@ import org.springframework.util.ObjectUtils;
  * then delegates to {@link CollectionToArrayConverter} to perform the target
  * array conversion.
  *
+ * <p> 转换一个array到另一个array,首先是否源array到list,
+ *     然后委托CollectionToArrayConverter去操作目标array转换
  * @author Keith Donald
  * @author Phillip Webb
  * @since 3.0

@@ -29,7 +29,7 @@ import org.springframework.util.MimeTypeUtils;
 
 /**
  * Decoder for {@link ByteBuffer}s.
- *
+ * <p>ByteBuffer的解码器
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  * @since 5.0

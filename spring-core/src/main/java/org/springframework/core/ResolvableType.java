@@ -95,26 +95,31 @@ public class ResolvableType implements Serializable {
 
 	/**
 	 * The underlying Java type being managed (only ever {@code null} for {@link #NONE}).
+	 * 管理底层java类型
 	 */
 	private final Type type;
 
 	/**
 	 * Optional provider for the type.
+	 * 可选的类型提供器
 	 */
 	private final TypeProvider typeProvider;
 
 	/**
 	 * The {@code VariableResolver} to use or {@code null} if no resolver is available.
+	 * 变量解析器,null如果没有解析器可用
 	 */
 	private final VariableResolver variableResolver;
 
 	/**
 	 * The component type for an array or {@code null} if the type should be deduced.
+	 * 一个数组类型
 	 */
 	private final ResolvableType componentType;
 
 	/**
 	 * Copy of the resolved value.
+	 * resolved的值的copy
 	 */
 	private final Class<?> resolved;
 
@@ -130,6 +135,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Private constructor used to create a new {@link ResolvableType} for cache key purposes,
 	 * with no upfront resolution.
+	 * 为缓存key创建一个ResolvableType对象,
 	 */
 	private ResolvableType(Type type, TypeProvider typeProvider, VariableResolver variableResolver) {
 		this.type = type;
@@ -187,6 +193,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Return the underling Java {@link Type} being managed. With the exception of
 	 * the {@link #NONE} constant, this method will never return {@code null}.
+	 * 返回底层被管理的java类型
 	 */
 	public Type getType() {
 		return SerializableTypeWrapper.unwrap(this.type);
@@ -195,6 +202,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Return the underlying Java {@link Class} being managed, if available;
 	 * otherwise {@code null}.
+	 * 返回底层被管理的java对象
 	 */
 	public Class<?> getRawClass() {
 		if (this.type == this.resolved) {
@@ -221,6 +229,7 @@ public class ResolvableType implements Serializable {
 
 	/**
 	 * Determine whether the given object is an instance of this {@code ResolvableType}.
+	 * 判断给定对象是否是当前ResolvableType的一个实例
 	 * @param obj the object to check
 	 * @since 4.2
 	 * @see #isAssignableFrom(Class)
@@ -232,6 +241,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Determine whether this {@code ResolvableType} is assignable from the
 	 * specified other type.
+	 * 判断是否ResolvableType是从其他特定类型指定的
 	 * @param other the type to be checked against (as a {@code Class})
 	 * @since 4.2
 	 * @see #isAssignableFrom(ResolvableType)
@@ -258,12 +268,12 @@ public class ResolvableType implements Serializable {
 	private boolean isAssignableFrom(ResolvableType other, Map<Type, Type> matchedBefore) {
 		Assert.notNull(other, "ResolvableType must not be null");
 
-		// If we cannot resolve types, we are not assignable
+		// If we cannot resolve types, we are not assignable 如果不能解析类型，是不被指定的
 		if (this == NONE || other == NONE) {
 			return false;
 		}
 
-		// Deal with array by delegating to the component type
+		// Deal with array by delegating to the component type  处理数组
 		if (isArray()) {
 			return (other.isArray() && getComponentType().isAssignableFrom(other.getComponentType()));
 		}
@@ -272,7 +282,7 @@ public class ResolvableType implements Serializable {
 			return true;
 		}
 
-		// Deal with wildcard bounds
+		// Deal with wildcard bounds  处理统配符
 		WildcardBounds ourBounds = WildcardBounds.get(this);
 		WildcardBounds typeBounds = WildcardBounds.get(other);
 

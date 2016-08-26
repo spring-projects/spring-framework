@@ -39,7 +39,10 @@ import java.util.TreeSet;
  * <p>Consists of a {@linkplain #getType() type} and a {@linkplain #getSubtype() subtype}.
  * Also has functionality to parse media types from a string using
  * {@link #valueOf(String)}. For more parsing options see {@link MimeTypeUtils}.
- *
+ * 
+ * <p> 代表一个MIME类型，最初定义在RFC 2046和随后使用其他互联网协议包括HTTP。
+ *     这个类不支持q-参数在HTTP内容协商里面 可以在spring-web模块MediaType中找到
+ *     
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
@@ -59,7 +62,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	private static final BitSet TOKEN;
 
 	static {
-		// variable names refer to RFC 2616, section 2.2
+		// variable names refer to RFC 2616, section 2.2  变量名
 		BitSet ctl = new BitSet(128);
 		for (int i = 0; i <= 31; i++) {
 			ctl.set(i);
@@ -105,6 +108,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * Create a new {@code MimeType} for the given primary type.
 	 * <p>The {@linkplain #getSubtype() subtype} is set to <code>"&#42;"</code>,
 	 * and the parameters are empty.
+	 * <p> 创建一个MimeType根据给定的类型,subtype设置为 <code>&#42;</code>
 	 * @param type the primary type
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
@@ -114,6 +118,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	/**
 	 * Create a new {@code MimeType} for the given primary type and subtype.
+	 * <p> 创建一个MimeType根据给定的类型和子类型
 	 * <p>The parameters are empty.
 	 * @param type the primary type
 	 * @param subtype the subtype
@@ -189,6 +194,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Checks the given token string for illegal characters, as defined in RFC 2616,
 	 * section 2.2.
+	 * <p> 检查给定的token是否非法,
 	 * @throws IllegalArgumentException in case of illegal characters
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
@@ -233,6 +239,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	/**
 	 * Indicates whether the {@linkplain #getType() type} is the wildcard character
 	 * <code>&#42;</code> or not.
+	 * <p> 检查type是否是统配符 <code>&#42;</code>
 	 */
 	public boolean isWildcardType() {
 		return WILDCARD_TYPE.equals(getType());
@@ -303,6 +310,8 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html},
 	 * and {@code application/*+xml} includes {@code application/soap+xml}, etc. This
 	 * method is <b>not</b> symmetric.
+	 * 
+	 * <p> 判断该MimeType是否包含给定MimeType
 	 * @param other the reference media type with which to compare
 	 * @return {@code true} if this media type includes the given media type;
 	 * {@code false} otherwise
@@ -347,6 +356,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * <p>For instance, {@code text/*} is compatible with {@code text/plain},
 	 * {@code text/html}, and vice versa. In effect, this method is similar to
 	 * {@link #includes}, except that it <b>is</b> symmetric.
+	 * <p> 判断该MimeType是否兼容给定MimeType
 	 * @param other the reference media type with which to compare
 	 * @return {@code true} if this media type is compatible with the given media type;
 	 * {@code false} otherwise

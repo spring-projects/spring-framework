@@ -39,7 +39,7 @@ import org.springframework.util.ClassUtils;
  * <p>By default there are adapters for {@link CompletableFuture}, RxJava 1, and
  * also for a any Reactive Streams {@link Publisher}. Additional adapters can be
  * registered via {@link #registerFluxAdapter} and {@link #registerMonoAdapter}.
- *
+ *  <p> {@link Flux} and {@link Mono} 适配器的注册器
  * @author Rossen Stoyanchev
  * @since 5.0
  */
@@ -53,6 +53,8 @@ public class ReactiveAdapterRegistry {
 
 	/**
 	 * Create a registry and auto-register default adapters.
+	 * 
+	 * 创建一个注册器，自动注册默认的适配器
 	 */
 	public ReactiveAdapterRegistry() {
 		// Flux and Mono ahead of Publisher...

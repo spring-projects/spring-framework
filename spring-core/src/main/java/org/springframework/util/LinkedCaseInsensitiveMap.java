@@ -29,7 +29,7 @@ import java.util.Map;
  * while allowing for contains, get and remove calls with any case of key.
  *
  * <p>Does <i>not</i> support {@code null} keys.
- *
+ * <p> 保存大小写敏感的key
  * @author Juergen Hoeller
  * @since 3.0
  */

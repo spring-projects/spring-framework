@@ -33,7 +33,7 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>Used as an argument for operations that support reading content with
  * a specific encoding, typically via a {@code java.io.Reader}.
- *
+ * <p> 持有组合Resource描述符包含一个指定编码或者用于读取的resource
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.2.6
@@ -125,6 +125,7 @@ public class EncodedResource implements InputStreamSource {
 	 * Open a {@code java.io.Reader} for the specified resource, using the specified
 	 * {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}
 	 * (if any).
+	 * <p> 打开一个Reader为一个特定的资源
 	 * @throws IOException if opening the Reader failed
 	 * @see #requiresReader()
 	 * @see #getInputStream()
@@ -144,6 +145,7 @@ public class EncodedResource implements InputStreamSource {
 	/**
 	 * Open a {@code java.io.InputStream} for the specified resource, ignoring any
 	 * specified {@link #getCharset() Charset} or {@linkplain #getEncoding() encoding}.
+	 * <p> 打开一个InputStream为特定的resource
 	 * @throws IOException if opening the InputStream failed
 	 * @see #requiresReader()
 	 * @see #getReader()

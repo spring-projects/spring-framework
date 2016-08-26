@@ -19,6 +19,8 @@ package org.springframework.util;
 /**
  * Simple strategy interface for resolving a String value.
  * Used by {@link org.springframework.beans.factory.config.ConfigurableBeanFactory}.
+ * 
+ * <p> 简单策略接口为解析一个string值
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -31,6 +33,7 @@ public interface StringValueResolver {
 
 	/**
 	 * Resolve the given String value, for example parsing placeholders.
+	 * 解析给定string值,例如解析占位符
 	 * @param strVal the original String value
 	 * @return the resolved String value
 	 */

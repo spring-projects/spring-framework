@@ -28,7 +28,9 @@ import reactor.core.publisher.Mono;
  *
  * <p>Use the {@link ReactiveAdapterRegistry} to obtain an adapter for a
  * supported adaptee type or to register additional adapters.
- *
+ *  
+ *  <p> {@link Flux} and {@link Mono} 适配器之间的沟通类
+ *     使用ReactiveAdapterRegistry 去获取一个支持视频类型的适配器,或者注册额外的适配器
  * @author Rossen Stoyanchev
  * @since 5.0
  */
@@ -36,11 +38,14 @@ public interface ReactiveAdapter {
 
 	/**
 	 * Return a descriptor with further information about the adaptee.
+	 * 返回adaptee的更多信息的描述符
 	 */
 	Descriptor getDescriptor();
 
 	/**
 	 * Adapt the given Object to a {@link Mono}
+	 * 
+	 * 适配给定对象给{@link Mono}
 	 * @param source the source object to adapt
 	 * @return the resulting {@link Mono} possibly empty
 	 */
@@ -48,6 +53,7 @@ public interface ReactiveAdapter {
 
 	/**
 	 * Adapt the given Object to a {@link Flux}.
+	 * 适配给定对象给{@link Flux}
 	 * @param source the source object to adapt
 	 * @return the resulting {@link Flux} possibly empty
 	 */
@@ -55,6 +61,7 @@ public interface ReactiveAdapter {
 
 	/**
 	 * Adapt the given Object to a Publisher.
+	 * 适配给定对象给Publisher
 	 * @param source the source object to adapt
 	 * @return the resulting {@link Mono} or {@link Flux} possibly empty
 	 */
@@ -62,6 +69,7 @@ public interface ReactiveAdapter {
 
 	/**
 	 * Adapt the given Publisher to the target adaptee.
+	 * 适配给定Publisher到目标对象adaptee
 	 * @param publisher the publisher to adapt
 	 * @return the resulting adaptee
 	 */
@@ -70,6 +78,7 @@ public interface ReactiveAdapter {
 
 	/**
 	 * A descriptor with information about the adaptee stream semantics.
+	 * adaptee对象的描述符
 	 */
 	class Descriptor {
 
@@ -90,6 +99,9 @@ public interface ReactiveAdapter {
 		 * and is therefore a good fit to adapt to {@link Flux}. A {@code false}
 		 * return value implies the adaptee will produce 1 value at most and is
 		 * therefore a good fit for {@link Mono}.
+		 * 
+		 * 如果适配器能生成0..N个值则适合适配给 {@link Flux}返回true
+		 * 如果适配器能生成1个值最多,那么适合适配给{@link Mono}返回false
 		 */
 		public boolean isMultiValue() {
 			return this.isMultiValue;
@@ -97,6 +109,7 @@ public interface ReactiveAdapter {
 
 		/**
 		 * Return {@code true} if the adaptee can complete without values.
+		 * 如果适配器可以不需要值完成操作，返回true
 		 */
 		public boolean supportsEmpty() {
 			return this.supportsEmpty;
@@ -105,6 +118,8 @@ public interface ReactiveAdapter {
 		/**
 		 * Return {@code true} if the adaptee implies no values will be produced,
 		 * i.e. providing only completion or error signal.
+		 * 
+		 * 如果适配器没有值被生成,返回true,
 		 */
 		public boolean isNoValue() {
 			return this.isNoValue;

@@ -26,6 +26,8 @@ package org.springframework.core;
  * when the generic type signature of the class changes in sub-classes. It is always
  * possible to return {@code null} to fallback on a default behaviour.
  *
+ * <p> 提供实际的ResolvableType ,可以用在java不支持的签名时,提供一个通用的签名,
+ *     
  * @author Stephane Nicoll
  * @since 4.2
  */
@@ -34,6 +36,8 @@ public interface ResolvableTypeProvider {
 	/**
 	 * Return the {@link ResolvableType} describing this instance
 	 * (or {@code null} if some sort of default should be applied instead).
+	 * 
+	 * 返回ResolvableType描述的实例,null如果一下默认排序能被处理
 	 */
 	ResolvableType getResolvableType();
 

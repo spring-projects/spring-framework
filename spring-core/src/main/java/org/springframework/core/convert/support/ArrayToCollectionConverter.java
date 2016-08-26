@@ -33,7 +33,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * Then adds each array element to the target collection.
  * Will perform an element conversion from the source component type
  * to the collection's parameterized type if necessary.
- *
+ * <p>转换一个array到集合
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 3.0

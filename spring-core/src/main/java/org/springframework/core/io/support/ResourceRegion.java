@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 /**
  * Region of a {@link Resource} implementation, materialized by a {@code position}
  * within the {@link Resource} and a byte {@code count} for the length of that region.
- *
+ * <p>Resource 区域的实现
  * @author Arjen Poutsma
  * @since 4.3
  */

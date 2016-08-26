@@ -24,6 +24,7 @@ import org.springframework.util.ClassUtils;
  * General utility for determining the order of an object based on its type declaration.
  * Handles Spring's {@link Order} annotation as well as {@link javax.annotation.Priority}.
  *
+ * <p> 通用工具类,判断一个对象的顺序基于他类型定义 ,通用可以处理{@link javax.annotation.Priority}
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @since 4.1
@@ -49,6 +50,7 @@ public abstract class OrderUtils {
 	/**
 	 * Return the order on the specified {@code type}.
 	 * <p>Take care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * <p>返回给定类型的order.
 	 * @param type the type to handle
 	 * @return the order value, or {@code null} if none can be found
 	 */
@@ -60,6 +62,7 @@ public abstract class OrderUtils {
 	 * Return the order on the specified {@code type}, or the specified
 	 * default value if none can be found.
 	 * <p>Take care of {@link Order @Order} and {@code @javax.annotation.Priority}.
+	 * <p>返回给定类型的order.
 	 * @param type the type to handle
 	 * @return the priority value, or the specified default order if none can be found
 	 */
@@ -78,6 +81,7 @@ public abstract class OrderUtils {
 	/**
 	 * Return the value of the {@code javax.annotation.Priority} annotation
 	 * declared on the specified type, or {@code null} if none.
+	 * <p> 返回Priority annotation定义的值
 	 * @param type the type to handle
 	 * @return the priority value if the annotation is declared, or {@code null} if none
 	 */

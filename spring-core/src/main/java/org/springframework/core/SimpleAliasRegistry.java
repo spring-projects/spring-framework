@@ -37,7 +37,7 @@ import org.springframework.util.StringValueResolver;
  */
 public class SimpleAliasRegistry implements AliasRegistry {
 
-	/** Map from alias to canonical name */
+	/** Map from alias to canonical name  别名对应的name */
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
 
 
@@ -133,6 +133,8 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * factory, applying the given StringValueResolver to them.
 	 * <p>The value resolver may for example resolve placeholders
 	 * in target bean names and even in alias names.
+	 * <p> 解析所有别名目标name和注册在该类的别名,提供给定StringValueResolver
+	 *     该值解析器可能解析占位符在目标bean和别名上
 	 * @param valueResolver the StringValueResolver to apply
 	 */
 	public void resolveAliases(StringValueResolver valueResolver) {
@@ -150,7 +152,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 					String existingName = this.aliasMap.get(resolvedAlias);
 					if (existingName != null) {
 						if (existingName.equals(resolvedName)) {
-							// Pointing to existing alias - just remove placeholder
+							// Pointing to existing alias - just remove placeholder 指向存在的别名,移除占位符
 							this.aliasMap.remove(alias);
 							break;
 						}
@@ -174,6 +176,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * Check whether the given name points back to the given alias as an alias
 	 * in the other direction already, catching a circular reference upfront
 	 * and throwing a corresponding IllegalStateException.
+	 * 
+	 * 检测给定名称是否为已经存在的别名
+	 * 
 	 * @param name the candidate name
 	 * @param alias the candidate alias
 	 * @see #registerAlias
@@ -189,6 +194,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 
 	/**
 	 * Determine the raw name, resolving aliases to canonical names.
+	 * 获取别名的name
 	 * @param name the user-specified name
 	 * @return the transformed name
 	 */

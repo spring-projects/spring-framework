@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Indicates that the annotated element uses an API from the {@code sun.misc}
  * package.
- *
+ * <p> 指示被标记的元素,可以使用{@code sun.misc} api
  * @author Stephane Nicoll
  * @since 4.3
  */

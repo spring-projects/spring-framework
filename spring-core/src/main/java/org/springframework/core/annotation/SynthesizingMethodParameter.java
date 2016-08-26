@@ -27,7 +27,7 @@ import org.springframework.core.MethodParameter;
 /**
  * A {@link MethodParameter} variant which synthesizes annotations that
  * declare attribute aliases via {@link AliasFor @AliasFor}.
- *
+ * <p> MethodParameter 
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 4.2

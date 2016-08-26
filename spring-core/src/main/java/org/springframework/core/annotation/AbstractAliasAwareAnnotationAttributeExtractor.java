@@ -29,6 +29,7 @@ import org.springframework.util.ObjectUtils;
  * that transparently enforce attribute alias semantics for annotation
  * attributes that are annotated with {@link AliasFor @AliasFor}.
  *
+ * <p> AnnotationAttributeExtractor虚拟实现类,被AliasFor标记的元素
  * @author Sam Brannen
  * @since 4.2
  * @param <S> the type of source supported by this extractor
