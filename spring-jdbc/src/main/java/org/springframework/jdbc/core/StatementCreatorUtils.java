@@ -79,7 +79,7 @@ public abstract class StatementCreatorUtils {
 	public static final String IGNORE_GETPARAMETERTYPE_PROPERTY_NAME = "spring.jdbc.getParameterType.ignore";
 
 
-	static final boolean shouldIgnoreGetParameterType = SpringProperties.getFlag(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
+	static final Boolean shouldIgnoreGetParameterType;
 
 	static final Set<String> driversWithNoSupportForGetParameterType =
 			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(1));
@@ -89,6 +89,9 @@ public abstract class StatementCreatorUtils {
 	private static final Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<Class<?>, Integer>(32);
 
 	static {
+		String propVal = SpringProperties.getProperty(IGNORE_GETPARAMETERTYPE_PROPERTY_NAME);
+		shouldIgnoreGetParameterType = (propVal != null ? Boolean.valueOf(propVal) : null);
+
 		javaTypeToSqlTypeMap.put(boolean.class, Types.BOOLEAN);
 		javaTypeToSqlTypeMap.put(Boolean.class, Types.BOOLEAN);
 		javaTypeToSqlTypeMap.put(byte.class, Types.TINYINT);
@@ -246,18 +249,29 @@ public abstract class StatementCreatorUtils {
 			Integer sqlTypeToUse = null;
 			DatabaseMetaData dbmd = null;
 			String jdbcDriverName = null;
-			boolean checkGetParameterType = !shouldIgnoreGetParameterType;
-			if (checkGetParameterType && !driversWithNoSupportForGetParameterType.isEmpty()) {
+			boolean tryGetParameterType = true;
+
+			if (shouldIgnoreGetParameterType == null) {
 				try {
 					dbmd = ps.getConnection().getMetaData();
 					jdbcDriverName = dbmd.getDriverName();
-					checkGetParameterType = !driversWithNoSupportForGetParameterType.contains(jdbcDriverName);
+					tryGetParameterType = !driversWithNoSupportForGetParameterType.contains(jdbcDriverName);
+					if (tryGetParameterType && jdbcDriverName.startsWith("Oracle")) {
+						// Avoid getParameterType use with Oracle 12c driver by default:
+						// needs to be explicitly activated through spring.jdbc.getParameterType.ignore=false
+						tryGetParameterType = false;
+						driversWithNoSupportForGetParameterType.add(jdbcDriverName);
+					}
 				}
 				catch (Throwable ex) {
 					logger.debug("Could not check connection metadata", ex);
 				}
 			}
-			if (checkGetParameterType) {
+			else {
+				tryGetParameterType = !shouldIgnoreGetParameterType;
+			}
+
+			if (tryGetParameterType) {
 				try {
 					sqlTypeToUse = ps.getParameterMetaData().getParameterType(paramIndex);
 				}
@@ -267,6 +281,7 @@ public abstract class StatementCreatorUtils {
 					}
 				}
 			}
+
 			if (sqlTypeToUse == null) {
 				// JDBC driver not compliant with JDBC 3.0 -> proceed with database-specific checks
 				sqlTypeToUse = Types.NULL;
@@ -277,8 +292,7 @@ public abstract class StatementCreatorUtils {
 					if (jdbcDriverName == null) {
 						jdbcDriverName = dbmd.getDriverName();
 					}
-					if (checkGetParameterType &&
-							!(jdbcDriverName.startsWith("Oracle") && dbmd.getDriverMajorVersion() >= 12)) {
+					if (shouldIgnoreGetParameterType == null) {
 						// Register JDBC driver with no support for getParameterType, except for the
 						// Oracle 12c driver where getParameterType fails for specific statements only
 						// (so an exception thrown above does not indicate general lack of support).
