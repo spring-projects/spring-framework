@@ -22,8 +22,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -41,12 +45,16 @@ import static org.mockito.BDDMockito.*;
  * Test fixture for {@link HttpMessageConverter}.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
 public class HttpMessageConverterExtractorTests {
 
 	private HttpMessageConverterExtractor<?> extractor;
 
 	private ClientHttpResponse response;
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
 
 	@Before
 	public void createMocks() {
@@ -104,8 +112,6 @@ public class HttpMessageConverterExtractorTests {
 	@SuppressWarnings("unchecked")
 	public void emptyMessageBody() throws IOException {
 		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(converter);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		extractor = new HttpMessageConverterExtractor<>(String.class, createConverterList(converter));
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
@@ -120,13 +126,11 @@ public class HttpMessageConverterExtractorTests {
 	@SuppressWarnings("unchecked")
 	public void normal() throws IOException {
 		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(converter);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		responseHeaders.setContentType(contentType);
 		String expected = "Foo";
-		extractor = new HttpMessageConverterExtractor<>(String.class, converters);
+		extractor = new HttpMessageConverterExtractor<>(String.class, createConverterList(converter));
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
@@ -138,20 +142,19 @@ public class HttpMessageConverterExtractorTests {
 		assertEquals(expected, result);
 	}
 
-	@Test(expected = RestClientException.class)
+	@Test
 	@SuppressWarnings("unchecked")
 	public void cannotRead() throws IOException {
 		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
-		List<HttpMessageConverter<?>> converters = new ArrayList<>();
-		converters.add(converter);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		responseHeaders.setContentType(contentType);
-		extractor = new HttpMessageConverterExtractor<>(String.class, converters);
+		extractor = new HttpMessageConverterExtractor<>(String.class, createConverterList(converter));
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
 		given(converter.canRead(String.class, contentType)).willReturn(false);
+		exception.expect(RestClientException.class);
 
 		extractor.extractData(response);
 	}
@@ -160,14 +163,13 @@ public class HttpMessageConverterExtractorTests {
 	@SuppressWarnings("unchecked")
 	public void generics() throws IOException {
 		GenericHttpMessageConverter<String> converter = mock(GenericHttpMessageConverter.class);
-		List<HttpMessageConverter<?>> converters = createConverterList(converter);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		responseHeaders.setContentType(contentType);
 		String expected = "Foo";
 		ParameterizedTypeReference<List<String>> reference = new ParameterizedTypeReference<List<String>>() {};
 		Type type = reference.getType();
-		extractor = new HttpMessageConverterExtractor<List<String>>(type, converters);
+		extractor = new HttpMessageConverterExtractor<List<String>>(type, createConverterList(converter));
 		given(response.getStatusCode()).willReturn(HttpStatus.OK);
 		given(response.getHeaders()).willReturn(responseHeaders);
 		given(response.getBody()).willReturn(new ByteArrayInputStream(expected.getBytes()));
@@ -177,6 +179,46 @@ public class HttpMessageConverterExtractorTests {
 		Object result = extractor.extractData(response);
 
 		assertEquals(expected, result);
+	}
+
+	@Test // SPR-13592
+	@SuppressWarnings("unchecked")
+	public void converterThrowsIOException() throws IOException {
+		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		MediaType contentType = MediaType.TEXT_PLAIN;
+		responseHeaders.setContentType(contentType);
+		extractor = new HttpMessageConverterExtractor<>(String.class, createConverterList(converter));
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
+		given(converter.canRead(String.class, contentType)).willThrow(IOException.class);
+		exception.expect(RestClientException.class);
+		exception.expectMessage("Error while extracting response for type " +
+				"[class java.lang.String] and content type [text/plain]");
+		exception.expectCause(Matchers.instanceOf(IOException.class));
+
+		extractor.extractData(response);
+	}
+
+	@Test // SPR-13592
+	@SuppressWarnings("unchecked")
+	public void converterThrowsHttpMessageNotReadableException() throws IOException {
+		HttpMessageConverter<String> converter = mock(HttpMessageConverter.class);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		MediaType contentType = MediaType.TEXT_PLAIN;
+		responseHeaders.setContentType(contentType);
+		extractor = new HttpMessageConverterExtractor<>(String.class, createConverterList(converter));
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(responseHeaders);
+		given(response.getBody()).willReturn(new ByteArrayInputStream("Foobar".getBytes()));
+		given(converter.canRead(String.class, contentType)).willThrow(HttpMessageNotReadableException.class);
+		exception.expect(RestClientException.class);
+		exception.expectMessage("Error while extracting response for type " +
+				"[class java.lang.String] and content type [text/plain]");
+		exception.expectCause(Matchers.instanceOf(HttpMessageNotReadableException.class));
+
+		extractor.extractData(response);
 	}
 
 	private List<HttpMessageConverter<?>> createConverterList(
