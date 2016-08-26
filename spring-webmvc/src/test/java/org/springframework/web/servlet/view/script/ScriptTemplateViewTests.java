@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.view.script;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +86,7 @@ public class ScriptTemplateViewTests {
 		this.configurer.setRenderObject("Template");
 		this.configurer.setRenderFunction("render");
 		this.configurer.setContentType(MediaType.TEXT_PLAIN_VALUE);
-		this.configurer.setCharset(StandardCharsets.ISO_8859_1);
+		this.configurer.setCharset(Charset.forName("ISO-8859-1"));
 		this.configurer.setSharedEngine(true);
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
@@ -95,7 +95,7 @@ public class ScriptTemplateViewTests {
 		assertEquals("Template", accessor.getPropertyValue("renderObject"));
 		assertEquals("render", accessor.getPropertyValue("renderFunction"));
 		assertEquals(MediaType.TEXT_PLAIN_VALUE, accessor.getPropertyValue("contentType"));
-		assertEquals(StandardCharsets.ISO_8859_1, accessor.getPropertyValue("charset"));
+		assertEquals(Charset.forName("ISO-8859-1"), accessor.getPropertyValue("charset"));
 		assertEquals(true, accessor.getPropertyValue("sharedEngine"));
 	}
 
@@ -112,7 +112,7 @@ public class ScriptTemplateViewTests {
 		assertEquals("Template", accessor.getPropertyValue("renderObject"));
 		assertEquals("render", accessor.getPropertyValue("renderFunction"));
 		assertEquals(MediaType.TEXT_HTML_VALUE, accessor.getPropertyValue("contentType"));
-		assertEquals(StandardCharsets.UTF_8, accessor.getPropertyValue("charset"));
+		assertEquals(Charset.forName("UTF-8"), accessor.getPropertyValue("charset"));
 	}
 
 	@Test
@@ -128,7 +128,7 @@ public class ScriptTemplateViewTests {
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
 		assertNull(accessor.getPropertyValue("renderObject"));
 		assertEquals("render", accessor.getPropertyValue("renderFunction"));
-		assertEquals(StandardCharsets.UTF_8, accessor.getPropertyValue("charset"));
+		assertEquals(Charset.forName("UTF-8"), accessor.getPropertyValue("charset"));
 	}
 
 	@Test
@@ -252,19 +252,19 @@ public class ScriptTemplateViewTests {
 
 		this.view.render(model, request, response);
 		assertEquals(MediaType.TEXT_HTML_VALUE + ";charset=" +
-				StandardCharsets.UTF_8, response.getHeader(HttpHeaders.CONTENT_TYPE));
+				Charset.forName("UTF-8"), response.getHeader(HttpHeaders.CONTENT_TYPE));
 
 		response = new MockHttpServletResponse();
 		this.view.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		this.view.render(model, request, response);
 		assertEquals(MediaType.TEXT_PLAIN_VALUE + ";charset=" +
-				StandardCharsets.UTF_8, response.getHeader(HttpHeaders.CONTENT_TYPE));
+				Charset.forName("UTF-8"), response.getHeader(HttpHeaders.CONTENT_TYPE));
 
 		response = new MockHttpServletResponse();
-		this.view.setCharset(StandardCharsets.ISO_8859_1);
+		this.view.setCharset(Charset.forName("ISO-8859-1"));
 		this.view.render(model, request, response);
 		assertEquals(MediaType.TEXT_PLAIN_VALUE + ";charset=" +
-				StandardCharsets.ISO_8859_1, response.getHeader(HttpHeaders.CONTENT_TYPE));
+				Charset.forName("ISO-8859-1"), response.getHeader(HttpHeaders.CONTENT_TYPE));
 
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -145,8 +144,8 @@ import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -823,7 +822,7 @@ public class MvcNamespaceTests {
 		assertNotNull(scriptTemplateConfigurer);
 		assertEquals("render", scriptTemplateConfigurer.getRenderFunction());
 		assertEquals(MediaType.TEXT_PLAIN_VALUE, scriptTemplateConfigurer.getContentType());
-		assertEquals(StandardCharsets.ISO_8859_1, scriptTemplateConfigurer.getCharset());
+		assertEquals("ISO-8859-1", scriptTemplateConfigurer.getCharset().name());
 		assertEquals("classpath:", scriptTemplateConfigurer.getResourceLoaderPath());
 		assertFalse(scriptTemplateConfigurer.isSharedEngine());
 		String[] scripts = { "org/springframework/web/servlet/view/script/nashorn/render.js" };
@@ -956,17 +955,20 @@ public class MvcNamespaceTests {
 	public @interface IsoDate {
 	}
 
+
 	@NumberFormat(style = NumberFormat.Style.PERCENT)
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface PercentNumber {
 	}
 
+
 	@Validated(MyGroup.class)
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyValid {
 	}
+
 
 	@Controller
 	public static class TestController {
@@ -978,12 +980,15 @@ public class MvcNamespaceTests {
 		private boolean recordedValidationError;
 
 		@RequestMapping
-		public void testBind(@RequestParam @IsoDate Date date, @RequestParam(required = false) @PercentNumber Double percent, @MyValid TestBean bean, BindingResult result) {
+		public void testBind(@RequestParam @IsoDate Date date,
+				@RequestParam(required = false) @PercentNumber Double percent,
+				@MyValid TestBean bean, BindingResult result) {
 			this.date = date;
 			this.percent = percent;
 			this.recordedValidationError = (result.getErrorCount() == 1);
 		}
 	}
+
 
 	public static class TestValidator implements Validator {
 
@@ -1000,9 +1005,11 @@ public class MvcNamespaceTests {
 		}
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyGroup {
 	}
+
 
 	private static class TestBean {
 
@@ -1020,6 +1027,7 @@ public class MvcNamespaceTests {
 		}
 	}
 
+
 	private static class TestMockServletContext extends MockServletContext {
 
 		@Override
@@ -1033,11 +1041,14 @@ public class MvcNamespaceTests {
 		}
 	}
 
+
 	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter {
 	}
 
+
 	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter {
 	}
+
 
 	public static class TestPathMatcher implements PathMatcher {
 
@@ -1077,8 +1088,10 @@ public class MvcNamespaceTests {
 		}
 	}
 
+
 	public static class TestPathHelper extends UrlPathHelper {
 	}
+
 
 	public static class TestCacheManager implements CacheManager {
 
