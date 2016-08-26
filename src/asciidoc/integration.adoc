@@ -8109,7 +8109,7 @@ of the cache associated with the annotated method:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames = "books")
+	@Cacheable("books")
 	public Book findBook(ISBN isbn) {...}
 ----
 
@@ -8130,7 +8130,7 @@ the cached method was not actually executed.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames = ""books", "isbns"})
+	@Cacheable({"books", "isbns"})
 	public Book findBook(ISBN isbn) {...}
 ----
 
@@ -8177,7 +8177,7 @@ caching (while the rest are used only by the method logic). For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(cacheNames = "books")
+	@Cacheable("books")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 

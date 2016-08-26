@@ -1411,7 +1411,7 @@ type, for example:
 			this.template = template;
 		}
 
-		@RequestMapping(path = "/greetings", method=POST)
+		@RequestMapping(path="/greetings", method=POST)
 		public void greet(String greeting) {
 			String text = "[" + getTimestamp() + "]:" + greeting;
 			this.template.convertAndSend("/topic/greetings", text);

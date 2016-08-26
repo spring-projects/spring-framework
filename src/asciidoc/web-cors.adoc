@@ -43,11 +43,11 @@ it. By default `@CrossOrigin` allows all origins and the HTTP methods specified 
 [subs="verbatim,quotes"]
 ----
 @RestController
-@RequestMapping(path = "/account")
+@RequestMapping("/account")
 public class AccountController {
 
 	@CrossOrigin
-	@RequestMapping(path = "/{id}")
+	@RequestMapping("/{id}")
 	public Account retrieve(@PathVariable Long id) {
 		// ...
 	}
@@ -66,10 +66,10 @@ It is also possible to enable CORS for the whole controller:
 ----
 @CrossOrigin(origins = "http://domain2.com", maxAge = 3600)
 @RestController
-@RequestMapping(path = "/account")
+@RequestMapping("/account")
 public class AccountController {
 
-	@RequestMapping(path = "/{id}")
+	@RequestMapping("/{id}")
 	public Account retrieve(@PathVariable Long id) {
 		// ...
 	}
@@ -93,11 +93,11 @@ then combine attributes from both annotations to create merged CORS configuratio
 ----
 @CrossOrigin(maxAge = 3600)
 @RestController
-@RequestMapping(path = "/account")
+@RequestMapping("/account")
 public class AccountController {
 
-	@CrossOrigin(origins = "http://domain2.com")
-	@RequestMapping(path = "/{id}")
+	@CrossOrigin("http://domain2.com")
+	@RequestMapping("/{id}")
 	public Account retrieve(@PathVariable Long id) {
 		// ...
 	}

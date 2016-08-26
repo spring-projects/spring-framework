@@ -1774,7 +1774,7 @@ handler method being defined like so...
 	@Controller
 	public class XsltController {
 
-		@RequestMapping(path = "/")
+		@RequestMapping("/")
 		public String home(Model model) throws Exception {
 
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
