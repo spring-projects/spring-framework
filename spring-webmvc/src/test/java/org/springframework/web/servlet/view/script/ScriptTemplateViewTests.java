@@ -67,16 +67,16 @@ public class ScriptTemplateViewTests {
 		this.view = new ScriptTemplateView();
 	}
 
+
 	@Test
 	public void missingScriptTemplateConfig() throws Exception {
 		try {
 			this.view.setApplicationContext(new StaticApplicationContext());
+			fail("Should have thrown ApplicationContextException");
 		}
 		catch (ApplicationContextException ex) {
 			assertTrue(ex.getMessage().contains("ScriptTemplateConfig"));
-			return;
 		}
-		fail();
 	}
 
 	@Test
@@ -158,7 +158,6 @@ public class ScriptTemplateViewTests {
 		}
 		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString("instance"));
-			return;
 		}
 	}
 
@@ -199,9 +198,7 @@ public class ScriptTemplateViewTests {
 		}
 		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString("sharedEngine"));
-			return;
 		}
-		fail();
 	}
 
 	@Test // SPR-14210
