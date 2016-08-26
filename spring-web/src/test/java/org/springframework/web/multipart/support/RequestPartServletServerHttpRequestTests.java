@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 package org.springframework.web.multipart.support;
 
 import java.net.URI;
-import java.nio.charset.Charset;
-
+import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -33,9 +32,7 @@ import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
@@ -112,12 +109,12 @@ public class RequestPartServletServerHttpRequestTests {
 			@Override
 			public HttpHeaders getMultipartHeaders(String paramOrFileName) {
 				HttpHeaders headers = new HttpHeaders();
-				headers.setContentType(new MediaType("application", "octet-stream", Charset.forName("iso-8859-1")));
+				headers.setContentType(new MediaType("application", "octet-stream", StandardCharsets.ISO_8859_1));
 				return headers;
 			}
 		};
 		byte[] bytes = {(byte) 0xC4};
-		mockRequest.setParameter("part", new String(bytes, Charset.forName("iso-8859-1")));
+		mockRequest.setParameter("part", new String(bytes, StandardCharsets.ISO_8859_1));
 		ServerHttpRequest request = new RequestPartServletServerHttpRequest(mockRequest, "part");
 
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
@@ -136,7 +133,7 @@ public class RequestPartServletServerHttpRequestTests {
 			}
 		};
 		byte[] bytes = {(byte) 0xC4};
-		mockRequest.setParameter("part", new String(bytes, Charset.forName("iso-8859-1")));
+		mockRequest.setParameter("part", new String(bytes, StandardCharsets.ISO_8859_1));
 		mockRequest.setCharacterEncoding("iso-8859-1");
 		ServerHttpRequest request = new RequestPartServletServerHttpRequest(mockRequest, "part");
 

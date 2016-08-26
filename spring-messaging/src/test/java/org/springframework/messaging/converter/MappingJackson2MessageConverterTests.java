@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.messaging.converter;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -145,15 +144,14 @@ public class MappingJackson2MessageConverterTests {
 	@Test
 	public void toMessageUtf16() {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		Charset utf16 = Charset.forName("UTF-16BE");
-		MimeType contentType = new MimeType("application", "json", utf16);
+		MimeType contentType = new MimeType("application", "json", StandardCharsets.UTF_16BE);
 		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, contentType);
 		MessageHeaders headers = new MessageHeaders(map);
 		String payload = "H\u00e9llo W\u00f6rld";
 		Message<?> message = converter.toMessage(payload, headers);
 
-		assertEquals("\"" + payload + "\"", new String((byte[]) message.getPayload(), utf16));
+		assertEquals("\"" + payload + "\"", new String((byte[]) message.getPayload(), StandardCharsets.UTF_16BE));
 		assertEquals(contentType, message.getHeaders().get(MessageHeaders.CONTENT_TYPE));
 	}
 
@@ -162,8 +160,7 @@ public class MappingJackson2MessageConverterTests {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 		converter.setSerializedPayloadClass(String.class);
 
-		Charset utf16 = Charset.forName("UTF-16BE");
-		MimeType contentType = new MimeType("application", "json", utf16);
+		MimeType contentType = new MimeType("application", "json", StandardCharsets.UTF_16BE);
 		Map<String, Object> map = new HashMap<>();
 		map.put(MessageHeaders.CONTENT_TYPE, contentType);
 		MessageHeaders headers = new MessageHeaders(map);
@@ -194,6 +191,20 @@ public class MappingJackson2MessageConverterTests {
 		assertNull(back.getWithView1());
 		assertEquals("with", back.getWithView2());
 		assertNull(back.getWithoutView());
+	}
+
+
+
+	@JsonView(MyJacksonView1.class)
+	public JacksonViewBean jsonViewResponse() {
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("with");
+		return bean;
+	}
+
+	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
 	}
 
 
@@ -260,8 +271,11 @@ public class MappingJackson2MessageConverterTests {
 		}
 	}
 
+
 	public interface MyJacksonView1 {};
+
 	public interface MyJacksonView2 {};
+
 
 	public static class JacksonViewBean {
 
@@ -296,18 +310,6 @@ public class MappingJackson2MessageConverterTests {
 		public void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
 		}
-	}
-
-	@JsonView(MyJacksonView1.class)
-	public JacksonViewBean jsonViewResponse() {
-		JacksonViewBean bean = new JacksonViewBean();
-		bean.setWithView1("with");
-		bean.setWithView2("with");
-		bean.setWithoutView("with");
-		return bean;
-	}
-
-	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
 	}
 
 }

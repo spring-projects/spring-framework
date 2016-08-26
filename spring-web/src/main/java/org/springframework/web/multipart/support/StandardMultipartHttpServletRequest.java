@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,8 +56,6 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	private static final String FILENAME_KEY = "filename=";
 
 	private static final String FILENAME_WITH_CHARSET_KEY = "filename*=";
-
-	private static final Charset US_ASCII = Charset.forName("us-ascii");
 
 
 	private Set<String> multipartParameterNames;
@@ -161,7 +160,7 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 				filename = filename.substring(index + 1);
 			}
 			if (charset != null) {
-				filename = new String(filename.getBytes(US_ASCII), charset);
+				filename = new String(filename.getBytes(StandardCharsets.US_ASCII), charset);
 			}
 		}
 		return filename;

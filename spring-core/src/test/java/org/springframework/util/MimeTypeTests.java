@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -76,7 +75,7 @@ public class MimeTypeTests {
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "text", mimeType.getType());
 		assertEquals("Invalid subtype", "html", mimeType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("ISO-8859-1"), mimeType.getCharset());
+		assertEquals("Invalid charset", StandardCharsets.ISO_8859_1, mimeType.getCharset());
 	}
 
 	@Test

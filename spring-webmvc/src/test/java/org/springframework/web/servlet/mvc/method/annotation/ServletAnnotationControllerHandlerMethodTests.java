@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1632,7 +1632,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			}
 		}, TextRestController.class);
 
-		byte[] content = "alert('boo')".getBytes(Charset.forName("ISO-8859-1"));
+		byte[] content = "alert('boo')".getBytes(StandardCharsets.ISO_8859_1);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a1.html");
 		request.setContent(content);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -1658,7 +1658,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			}
 		}, TextRestController.class);
 
-		byte[] content = "alert('boo')".getBytes(Charset.forName("ISO-8859-1"));
+		byte[] content = "alert('boo')".getBytes(StandardCharsets.ISO_8859_1);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a2.html");
 		request.setContent(content);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -1684,7 +1684,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			}
 		}, TextRestController.class);
 
-		byte[] content = "alert('boo')".getBytes(Charset.forName("ISO-8859-1"));
+		byte[] content = "alert('boo')".getBytes(StandardCharsets.ISO_8859_1);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a3.html");
 		request.setContent(content);
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -1710,7 +1710,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			}
 		}, TextRestController.class);
 
-		byte[] content = "body".getBytes(Charset.forName("ISO-8859-1"));
+		byte[] content = "body".getBytes(StandardCharsets.ISO_8859_1);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a4.css");
 		request.setContent(content);
 		MockHttpServletResponse response = new MockHttpServletResponse();

@@ -88,7 +88,7 @@ public class HttpHeadersTests {
 	@Test
 	public void acceptCharsets() {
 		Charset charset1 = StandardCharsets.UTF_8;
-		Charset charset2 = Charset.forName("ISO-8859-1");
+		Charset charset2 = StandardCharsets.ISO_8859_1;
 		List<Charset> charsets = new ArrayList<>(2);
 		charsets.add(charset1);
 		charsets.add(charset2);
@@ -100,7 +100,7 @@ public class HttpHeadersTests {
 	@Test
 	public void acceptCharsetWildcard() {
 		headers.set("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-		assertEquals("Invalid Accept header", Arrays.asList(Charset.forName("ISO-8859-1"), StandardCharsets.UTF_8),
+		assertEquals("Invalid Accept header", Arrays.asList(StandardCharsets.ISO_8859_1, StandardCharsets.UTF_8),
 				headers.getAcceptCharset());
 	}
 

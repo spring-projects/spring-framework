@@ -19,7 +19,7 @@ package org.springframework.web.client;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
@@ -50,14 +50,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -185,7 +178,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	@Test
 	public void postForLocation() throws Exception  {
 		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
+		entityHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 		Future<URI> locationFuture = template.postForLocation(baseUrl + "/{method}", entity, "post");
 		URI location = locationFuture.get();
@@ -195,7 +188,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	@Test
 	public void postForLocationCallback() throws Exception  {
 		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
+		entityHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 		final URI expected = new URI(baseUrl + "/post/1");
 		ListenableFuture<URI> locationFuture = template.postForLocation(baseUrl + "/{method}", entity, "post");
@@ -215,7 +208,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	@Test
 	public void postForLocationCallbackWithLambdas() throws Exception  {
 		HttpHeaders entityHeaders = new HttpHeaders();
-		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
+		entityHeaders.setContentType(new MediaType("text", "plain", StandardCharsets.ISO_8859_1));
 		HttpEntity<String> entity = new HttpEntity<>(helloWorld, entityHeaders);
 		final URI expected = new URI(baseUrl + "/post/1");
 		ListenableFuture<URI> locationFuture = template.postForLocation(baseUrl + "/{method}", entity, "post");

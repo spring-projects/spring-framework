@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.converter;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,10 +69,9 @@ public class StringMessageConverterTests {
 
 	@Test
 	public void fromMessageCharset() {
-		Charset iso88591 = Charset.forName("ISO-8859-1");
 		String payload = "H\u00e9llo W\u00f6rld";
-		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(iso88591))
-				.setHeader(MessageHeaders.CONTENT_TYPE, new MimeType("text", "plain", iso88591)).build();
+		Message<byte[]> message = MessageBuilder.withPayload(payload.getBytes(StandardCharsets.ISO_8859_1))
+				.setHeader(MessageHeaders.CONTENT_TYPE, new MimeType("text", "plain", StandardCharsets.ISO_8859_1)).build();
 		assertEquals(payload, this.converter.fromMessage(message, String.class));
 	}
 
