@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.springframework.web.util.NestedServletException;
  * @see GroovyMarkupViewResolver
  * @see GroovyMarkupConfigurer
  * @see <a href="http://groovy-lang.org/templating.html#_the_markuptemplateengine">
- *     Groovy Markup Template engine documentation</a>
+ * Groovy Markup Template engine documentation</a>
  */
 public class GroovyMarkupView extends AbstractTemplateView {
 
@@ -61,17 +61,6 @@ public class GroovyMarkupView extends AbstractTemplateView {
 	 */
 	public void setTemplateEngine(MarkupTemplateEngine engine) {
 		this.engine = engine;
-	}
-
-	@Override
-	public boolean checkResource(Locale locale) throws Exception {
-		try {
-			this.engine.resolveTemplate(getUrl());
-		}
-		catch (IOException exception) {
-			return false;
-		}
-		return true;
 	}
 
 	/**
@@ -108,6 +97,17 @@ public class GroovyMarkupView extends AbstractTemplateView {
 
 
 	@Override
+	public boolean checkResource(Locale locale) throws Exception {
+		try {
+			this.engine.resolveTemplate(getUrl());
+		}
+		catch (IOException ex) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	protected void renderMergedTemplateModel(Map<String, Object> model,
 			HttpServletRequest request, HttpServletResponse response) throws Exception {
 
@@ -125,8 +125,9 @@ public class GroovyMarkupView extends AbstractTemplateView {
 		}
 		catch (ClassNotFoundException ex) {
 			Throwable cause = (ex.getCause() != null ? ex.getCause() : ex);
-			throw new NestedServletException("Could not find class while rendering Groovy Markup view with name '" +
-					getUrl() + "': " + ex.getMessage() +  "'", cause);
+			throw new NestedServletException(
+					"Could not find class while rendering Groovy Markup view with name '" +
+					getUrl() + "': " + ex.getMessage() + "'", cause);
 		}
 	}
 

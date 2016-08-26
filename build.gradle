@@ -123,8 +123,6 @@ configure(allprojects) { project ->
 		}
 	}
 
-	compileJava.options.encoding = 'UTF-8'
-
 	compileJava.options*.compilerArgs = [
 		"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
 		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
@@ -143,11 +141,13 @@ configure(allprojects) { project ->
 	compileJava {
 		sourceCompatibility = 1.8
 		targetCompatibility = 1.8
+		options.encoding = 'UTF-8'
 	}
 
 	compileTestJava {
 		sourceCompatibility = 1.8
 		targetCompatibility = 1.8
+		options.encoding = 'UTF-8'
 		options.compilerArgs += "-parameters"
 	}
 

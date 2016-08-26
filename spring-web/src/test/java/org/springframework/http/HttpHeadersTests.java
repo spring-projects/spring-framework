@@ -150,7 +150,6 @@ public class HttpHeadersTests {
 		headers.setHost(host);
 		assertEquals("Invalid Host header", host, headers.getHost());
 		assertEquals("Invalid Host header", "localhost:8080", headers.getFirst("Host"));
-
 	}
 
 	@Test
@@ -159,7 +158,6 @@ public class HttpHeadersTests {
 		headers.setHost(host);
 		assertEquals("Invalid Host header", host, headers.getHost());
 		assertEquals("Invalid Host header", "localhost", headers.getFirst("Host"));
-
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -427,6 +425,20 @@ public class HttpHeadersTests {
 		assertNull(headers.getAccessControlRequestMethod());
 		headers.setAccessControlRequestMethod(HttpMethod.POST);
 		assertEquals(HttpMethod.POST, headers.getAccessControlRequestMethod());
+	}
+
+	@Test  // SPR-14547
+	public void encodeHeaderFieldParam() {
+		String result = HttpHeaders.encodeHeaderFieldParam("test.txt", StandardCharsets.US_ASCII);
+		assertEquals("test.txt", result);
+
+		result = HttpHeaders.encodeHeaderFieldParam("中文.txt", StandardCharsets.UTF_8);
+		assertEquals("UTF-8''%E4%B8%AD%E6%96%87.txt", result);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void encodeHeaderFieldParamInvalidCharset() {
+		HttpHeaders.encodeHeaderFieldParam("test", StandardCharsets.UTF_16);
 	}
 
 }
