@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2015 the original author or authors.
+ * Copyright 2004-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.core.Is.is;
 
 /**
  * Unit tests for {@link JsonPathExpectationsHelper}.
@@ -222,11 +222,14 @@ public class JsonPathExpectationsHelperTests {
 		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, 5);
 	}
 
-	@Test
-	public void assertValueWithDifferentExpectedType() throws Exception {
-		exception.expect(AssertionError.class);
-		exception.expectMessage(equalTo("At JSON path \"$.num\", type of value expected:<java.lang.String> but was:<java.lang.Integer>"));
-		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, "5");
+	@Test // SPR-14498
+	public void assertValueWithNumberConversion() throws Exception {
+		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, 5.0);
+	}
+
+	@Test // SPR-14498
+	public void assertValueWithNumberConversionAndMatcher() throws Exception {
+		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, is(5.0), Double.class);
 	}
 
 	@Test

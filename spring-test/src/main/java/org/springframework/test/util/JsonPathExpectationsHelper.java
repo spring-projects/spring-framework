@@ -28,9 +28,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.core.IsInstanceOf.*;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.fail;
 
 /**
  * A helper class for applying assertions via JSON path expressions.
@@ -77,6 +79,21 @@ public class JsonPathExpectationsHelper {
 	}
 
 	/**
+	 * An overloaded variant of {@link #assertValue(String, Matcher)} that also
+	 * accepts a target type for the resulting value. This can be useful for
+	 * matching numbers reliably for example coercing an integer into a double.
+	 * @param content the JSON content
+	 * @param matcher the matcher with which to assert the result
+	 * @param targetType a the expected type of the resulting value
+	 * @since 5.0
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> void assertValue(String content, Matcher<T> matcher, Class<T> targetType) throws ParseException {
+		T value = (T) evaluateJsonPath(content, targetType);
+		assertThat("JSON path \"" + this.expression + "\"", value, matcher);
+	}
+
+	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the result is equal to the expected value.
 	 * @param content the JSON content
@@ -96,8 +113,9 @@ public class JsonPathExpectationsHelper {
 			actualValue = actualValueList.get(0);
 		}
 		else if (actualValue != null && expectedValue != null) {
-			assertEquals("At JSON path \"" + this.expression + "\", type of value",
-					expectedValue.getClass().getName(), actualValue.getClass().getName());
+			if (!actualValue.getClass().equals(expectedValue.getClass())) {
+				actualValue = evaluateJsonPath(content, expectedValue.getClass());
+			}
 		}
 		assertEquals("JSON path \"" + this.expression + "\"", expectedValue, actualValue);
 	}
@@ -226,6 +244,16 @@ public class JsonPathExpectationsHelper {
 		String message = "No value at JSON path \"" + this.expression + "\", exception: ";
 		try {
 			return this.jsonPath.read(content);
+		}
+		catch (InvalidPathException | IndexOutOfBoundsException ex) {
+			throw new AssertionError(message + ex.getMessage());
+		}
+	}
+
+	private Object evaluateJsonPath(String content, Class<?> targetType) throws ParseException {
+		String message = "No value at JSON path \"" + this.expression + "\", exception: ";
+		try {
+			return JsonPath.parse(content).read(this.expression, targetType);
 		}
 		catch (InvalidPathException | IndexOutOfBoundsException ex) {
 			throw new AssertionError(message + ex.getMessage());
