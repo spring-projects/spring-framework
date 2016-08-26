@@ -17,6 +17,7 @@
 package org.springframework.context.support;
 
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -170,6 +171,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 						scope = BeanDefinition.SCOPE_SINGLETON;
 					}
 					result.append("\"scope\": \"").append(scope).append("\",\n");
+					result.append("\"aliases\": \"").append(Arrays.toString(bf.getAliases(beanName))).append("\",\n");
 					Class<?> beanType = bf.getType(beanName);
 					if (beanType != null) {
 						result.append("\"type\": \"").append(beanType.getName()).append("\",\n");
