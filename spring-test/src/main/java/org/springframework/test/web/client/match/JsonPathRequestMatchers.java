@@ -70,6 +70,23 @@ public class JsonPathRequestMatchers {
 	}
 
 	/**
+	 * An overloaded variant of (@link {@link #value(Matcher)} that also
+	 * accepts a target type for the resulting value that the matcher can work
+	 * reliably against. This can be useful for matching numbers reliably for
+	 * example coercing an integer into a double.
+	 * @since 4.3.3
+	 */
+	public <T> RequestMatcher value(final Matcher<T> matcher, final Class<T> targetType) {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				String body = request.getBodyAsString();
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValue(body, matcher, targetType);
+			}
+		};
+	}
+
+	/**
 	 * Evaluate the JSON path expression against the request content and
 	 * assert that the result is equal to the supplied value.
 	 */
