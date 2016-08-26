@@ -379,6 +379,21 @@ public class HttpEntityMethodProcessorMockTests {
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 	}
 
+	@Test // SPR-14559
+	public void handleReturnValueEtagInvalidIfNoneMatch() throws Exception {
+		String etagValue = "\"deadb33f8badf00d\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, "unquoted");
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<>("body", responseHeaders, HttpStatus.OK);
+
+		initStringMessageConversion(MediaType.TEXT_PLAIN);
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
+	}
+
 	@Test
 	public void handleReturnValueETagAndLastModified() throws Exception {
 		long currentTime = new Date().getTime();

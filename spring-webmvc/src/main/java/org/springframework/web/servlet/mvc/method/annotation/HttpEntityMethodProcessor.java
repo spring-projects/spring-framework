@@ -223,24 +223,28 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
-		List<String> ifNoneMatch = inputMessage.getHeaders().getIfNoneMatch();
-		long ifModifiedSince = inputMessage.getHeaders().getIfModifiedSince();
-		String eTag = addEtagPadding(outputMessage.getHeaders().getETag());
-		long lastModified = outputMessage.getHeaders().getLastModified();
 		boolean notModified = false;
-
-		if (!ifNoneMatch.isEmpty() && (inputMessage.getHeaders().containsKey(HttpHeaders.IF_UNMODIFIED_SINCE)
-				|| inputMessage.getHeaders().containsKey(HttpHeaders.IF_MATCH))) {
+		try {
+			long ifModifiedSince = inputMessage.getHeaders().getIfModifiedSince();
+			String eTag = addEtagPadding(outputMessage.getHeaders().getETag());
+			long lastModified = outputMessage.getHeaders().getLastModified();
+			List<String> ifNoneMatch = inputMessage.getHeaders().getIfNoneMatch();
+			if (!ifNoneMatch.isEmpty() && (inputMessage.getHeaders().containsKey(HttpHeaders.IF_UNMODIFIED_SINCE)
+					|| inputMessage.getHeaders().containsKey(HttpHeaders.IF_MATCH))) {
+				// invalid conditional request, do not process
+			}
+			else if (lastModified != -1 && StringUtils.hasLength(eTag)) {
+				notModified = isETagNotModified(ifNoneMatch, eTag) && isTimeStampNotModified(ifModifiedSince, lastModified);
+			}
+			else if (lastModified != -1) {
+				notModified = isTimeStampNotModified(ifModifiedSince, lastModified);
+			}
+			else if (StringUtils.hasLength(eTag)) {
+				notModified = isETagNotModified(ifNoneMatch, eTag);
+			}
+		}
+		catch (IllegalArgumentException exc) {
 			// invalid conditional request, do not process
-		}
-		else if (lastModified != -1 && StringUtils.hasLength(eTag)) {
-			notModified = isETagNotModified(ifNoneMatch, eTag) && isTimeStampNotModified(ifModifiedSince, lastModified);
-		}
-		else if (lastModified != -1) {
-			notModified = isTimeStampNotModified(ifModifiedSince, lastModified);
-		}
-		else if (StringUtils.hasLength(eTag)) {
-			notModified = isETagNotModified(ifNoneMatch, eTag);
 		}
 		return notModified;
 	}
