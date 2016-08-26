@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendAndReceive() {
-
 		SubscribableChannel channel = new ExecutorSubscribableChannel(this.executor);
 		channel.subscribe(new MessageHandler() {
 			@Override
@@ -82,7 +81,6 @@ public class GenericMessagingTemplateTests {
 
 	@Test
 	public void sendAndReceiveTimeout() throws InterruptedException {
-
 		final AtomicReference<Throwable> failure = new AtomicReference<Throwable>();
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -118,8 +116,9 @@ public class GenericMessagingTemplateTests {
 		assertNull(this.template.convertSendAndReceive(channel, "request", String.class));
 		assertTrue(latch.await(1000, TimeUnit.MILLISECONDS));
 
-		if (failure.get() != null) {
-			throw new AssertionError(failure.get());
+		Throwable ex = failure.get();
+		if (ex != null) {
+			throw new AssertionError(ex);
 		}
 	}
 
@@ -138,6 +137,7 @@ public class GenericMessagingTemplateTests {
 		assertFalse(accessor.isMutable());
 	}
 
+
 	private class TestDestinationResolver implements DestinationResolver<MessageChannel> {
 
 		@Override
@@ -145,4 +145,5 @@ public class GenericMessagingTemplateTests {
 			return messageChannel;
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,6 +199,20 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 
+
+	@JsonView(MyJacksonView1.class)
+	public JacksonViewBean jsonViewResponse() {
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("with");
+		return bean;
+	}
+
+	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
+	}
+
+
 	public static class MyBean {
 
 		private String string;
@@ -262,8 +276,11 @@ public class MappingJackson2MessageConverterTests {
 		}
 	}
 
+
 	public interface MyJacksonView1 {};
+
 	public interface MyJacksonView2 {};
+
 
 	public static class JacksonViewBean {
 
@@ -298,18 +315,6 @@ public class MappingJackson2MessageConverterTests {
 		public void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
 		}
-	}
-
-	@JsonView(MyJacksonView1.class)
-	public JacksonViewBean jsonViewResponse() {
-		JacksonViewBean bean = new JacksonViewBean();
-		bean.setWithView1("with");
-		bean.setWithView2("with");
-		bean.setWithoutView("with");
-		return bean;
-	}
-
-	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
 	}
 
 }

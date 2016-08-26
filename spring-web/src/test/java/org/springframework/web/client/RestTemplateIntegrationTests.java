@@ -27,6 +27,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -43,8 +44,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import com.fasterxml.jackson.annotation.JsonView;
 
 import static org.junit.Assert.*;
 
@@ -264,8 +263,11 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		assertTrue(content.contains("\"type\":\"bar\""));
 	}
 
+
 	public interface MyJacksonView1 {};
+
 	public interface MyJacksonView2 {};
+
 
 	public static class MySampleBean {
 
@@ -311,6 +313,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 	public static class ParentClass {
 
@@ -332,6 +335,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		}
 	}
 
+
 	@JsonTypeName("foo")
 	public static class Foo extends ParentClass {
 
@@ -342,6 +346,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 			super(parentProperty);
 		}
 	}
+
 
 	@JsonTypeName("bar")
 	public static class Bar extends ParentClass {
