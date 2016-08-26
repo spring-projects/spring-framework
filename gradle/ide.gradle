@@ -36,7 +36,7 @@ eclipse.classpath.file.whenMerged { classpath ->
 eclipse.classpath.defaultOutputDir = file(project.name+"/bin/eclipse")
 eclipse.classpath.file.beforeMerged { classpath ->
 	classpath.entries.findAll{ it instanceof SourceFolder }.each {
-		if(it.output.startsWith("bin/")) {
+		if(it.output !=null && it.output.startsWith("bin/")) {
 			it.output = null
 		}
 	}
