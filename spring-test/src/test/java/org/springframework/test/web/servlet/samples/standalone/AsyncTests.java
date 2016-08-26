@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.samples.standalone;
 
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -39,7 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
@@ -154,10 +154,7 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	/**
-	 * SPR-12597
-	 */
-	@Test
+	@Test  // SPR-12597
 	public void completableFutureWithImmediateValue() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("completableFutureWithImmediateValue", "true"))
 				.andExpect(request().asyncStarted())
@@ -169,10 +166,7 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	/**
-	 * SPR-12735
-	 */
-	@Test
+	@Test  // SPR-12735
 	public void printAsyncResult() throws Exception {
 		StringWriter writer = new StringWriter();
 
@@ -204,7 +198,6 @@ public class AsyncTests {
 
 		private final Collection<ListenableFutureTask<Person>> futureTasks = new CopyOnWriteArrayList<>();
 
-
 		@RequestMapping(params = "callable")
 		public Callable<Person> getCallable() {
 			return () -> new Person("Joe");
@@ -212,7 +205,7 @@ public class AsyncTests {
 
 		@RequestMapping(params = "streaming")
 		public StreamingResponseBody getStreaming() {
-			return os -> os.write("name=Joe".getBytes(UTF_8));
+			return os -> os.write("name=Joe".getBytes(StandardCharsets.UTF_8));
 		}
 
 		@RequestMapping(params = "streamingSlow")
@@ -221,7 +214,7 @@ public class AsyncTests {
 				os.write("name=Joe".getBytes());
 				try {
 					Thread.sleep(200);
-					os.write("&someBoolean=true".getBytes(UTF_8));
+					os.write("&someBoolean=true".getBytes(StandardCharsets.UTF_8));
 				}
 				catch (InterruptedException e) {
 					/* no-op */
@@ -232,7 +225,7 @@ public class AsyncTests {
 		@RequestMapping(params = "streamingJson")
 		public ResponseEntity<StreamingResponseBody> getStreamingJson() {
 			return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON_UTF8)
-					.body(os -> os.write("{\"name\":\"Joe\",\"someDouble\":0.5}".getBytes(UTF_8)));
+					.body(os -> os.write("{\"name\":\"Joe\",\"someDouble\":0.5}".getBytes(StandardCharsets.UTF_8)));
 		}
 
 		@RequestMapping(params = "deferredResult")

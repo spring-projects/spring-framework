@@ -62,6 +62,7 @@ public class GroovyMarkupViewTests {
 		this.servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.webAppContext);
 	}
 
+
 	@Test
 	public void missingGroovyMarkupConfig() throws Exception {
 		GroovyMarkupView view = new GroovyMarkupView();
