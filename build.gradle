@@ -110,11 +110,13 @@ configure(allprojects) { project ->
 	compileJava {
 		sourceCompatibility = 1.6
 		targetCompatibility = 1.6
+		options.encoding = 'UTF-8'
 	}
 
 	compileTestJava {
 		sourceCompatibility = 1.8
 		targetCompatibility = 1.8
+		options.encoding = 'UTF-8'
 		options.compilerArgs += "-parameters"
 	}
 

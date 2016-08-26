@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.util;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1195,44 +1194,4 @@ public abstract class StringUtils {
 		return arrayToDelimitedString(arr, ",");
 	}
 
-	/**
-	 * Encode the given header field param as describe in the rfc5987.
-	 * @param input the header field param
-	 * @param charset the charset of the header field param string
-	 * @return the encoded header field param
-	 * @see <a href="https://tools.ietf.org/html/rfc5987">rfc5987</a>
-	 * @since 5.0
-	 */
-	public static String encodeHttpHeaderFieldParam(String input, Charset charset) {
-		Assert.notNull(charset, "charset should not be null");
-		if(Charset.forName("US-ASCII").equals(charset)) {
-			return input;
-		}
-		Assert.isTrue(Charset.forName("UTF-8").equals(charset) || Charset.forName("ISO-8859-1").equals(charset),
-				"charset should be UTF-8 or ISO-8859-1");
-		final byte[] source = input.getBytes(charset);
-		final int len = source.length;
-		final StringBuilder sb = new StringBuilder(len << 1);
-		sb.append(charset.name());
-		sb.append("''");
-		for (byte b : source) {
-			if (isRFC5987AttrChar(b)) {
-				sb.append((char) b);
-			}
-			else {
-				sb.append('%');
-				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
-				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
-				sb.append(hex1);
-				sb.append(hex2);
-			}
-		}
-		return sb.toString();
-	}
-
-	private static boolean isRFC5987AttrChar(byte c) {
-		return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
-				|| c == '!' || c == '#' || c == '$' || c == '&' || c == '+' || c == '-'
-				|| c == '.' || c == '^' || c == '_' || c == '`' || c == '|' || c == '~';
-	}
 }

@@ -677,13 +677,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the (new) value of the {@code Content-Disposition} header
-	 * for {@code form-data}, optionally encoding the filename using the rfc5987.
+	 * for {@code form-data}, optionally encoding the filename using the RFC 5987.
 	 * <p>Only the US-ASCII, UTF-8 and ISO-8859-1 charsets are supported.
 	 * @param name the control name
 	 * @param filename the filename (may be {@code null})
 	 * @param charset the charset used for the filename (may be {@code null})
-	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.4">rfc7230 Section 3.2.4</a>
-	 * @since 5.0
+	 * @since 4.3.3
+	 * @see #setContentDispositionFormData(String, String)
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.4">RFC 7230 Section 3.2.4</a>
 	 */
 	public void setContentDispositionFormData(String name, String filename, Charset charset) {
 		Assert.notNull(name, "'name' must not be null");
@@ -696,7 +697,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			}
 			else {
 				builder.append("; filename*=");
-				builder.append(StringUtils.encodeHttpHeaderFieldParam(filename, charset));
+				builder.append(encodeHeaderFieldParam(filename, charset));
 			}
 		}
 		set(CONTENT_DISPOSITION, builder.toString());
@@ -1300,6 +1301,47 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static HttpHeaders readOnlyHttpHeaders(HttpHeaders headers) {
 		return new HttpHeaders(headers, true);
+	}
+
+	/**
+	 * Encode the given header field param as describe in RFC 5987.
+	 * @param input the header field param
+	 * @param charset the charset of the header field param string
+	 * @return the encoded header field param
+	 * @see <a href="https://tools.ietf.org/html/rfc5987">RFC 5987</a>
+	 */
+	static String encodeHeaderFieldParam(String input, Charset charset) {
+		Assert.notNull(input, "Input String should not be null");
+		Assert.notNull(charset, "Charset should not be null");
+		if (charset.name().equals("US-ASCII")) {
+			return input;
+		}
+		Assert.isTrue(charset.name().equals("UTF-8") || charset.name().equals("ISO-8859-1"),
+				"Charset should be UTF-8 or ISO-8859-1");
+		byte[] source = input.getBytes(charset);
+		int len = source.length;
+		StringBuilder sb = new StringBuilder(len << 1);
+		sb.append(charset.name());
+		sb.append("''");
+		for (byte b : source) {
+			if (isRFC5987AttrChar(b)) {
+				sb.append((char) b);
+			}
+			else {
+				sb.append('%');
+				char hex1 = Character.toUpperCase(Character.forDigit((b >> 4) & 0xF, 16));
+				char hex2 = Character.toUpperCase(Character.forDigit(b & 0xF, 16));
+				sb.append(hex1);
+				sb.append(hex2);
+			}
+		}
+		return sb.toString();
+	}
+
+	private static boolean isRFC5987AttrChar(byte c) {
+		return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+				c == '!' || c == '#' || c == '$' || c == '&' || c == '+' || c == '-' ||
+				c == '.' || c == '^' || c == '_' || c == '`' || c == '|' || c == '~';
 	}
 
 }

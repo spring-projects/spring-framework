@@ -409,4 +409,18 @@ public class HttpHeadersTests {
 		assertEquals(HttpMethod.POST, headers.getAccessControlRequestMethod());
 	}
 
+	@Test  // SPR-14547
+	public void encodeHeaderFieldParam() {
+		String result = HttpHeaders.encodeHeaderFieldParam("test.txt", Charset.forName("US-ASCII"));
+		assertEquals("test.txt", result);
+
+		result = HttpHeaders.encodeHeaderFieldParam("中文.txt", Charset.forName("UTF-8"));
+		assertEquals("UTF-8''%E4%B8%AD%E6%96%87.txt", result);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void encodeHeaderFieldParamInvalidCharset() {
+		HttpHeaders.encodeHeaderFieldParam("test", Charset.forName("UTF-16"));
+	}
+
 }
