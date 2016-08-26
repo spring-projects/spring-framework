@@ -630,7 +630,6 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 				AsyncClientHttpRequestExecution execution) throws IOException {
 
 			request = new HttpRequestWrapper(request) {
-
 				@Override
 				public URI getURI() {
 					try {

@@ -70,7 +70,7 @@ public class AsyncTests {
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
@@ -98,7 +98,7 @@ public class AsyncTests {
 				.andExpect(request().asyncStarted())
 				.andDo(MvcResult::getAsyncResult)
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.5}"));
 	}
 
@@ -112,7 +112,7 @@ public class AsyncTests {
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
@@ -125,11 +125,11 @@ public class AsyncTests {
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	@Test // SPR-13079
+	@Test  // SPR-13079
 	public void deferredResultWithDelayedError() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithDelayedError", "true"))
 				.andExpect(request().asyncStarted())
@@ -150,7 +150,7 @@ public class AsyncTests {
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
@@ -162,7 +162,7 @@ public class AsyncTests {
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
@@ -183,7 +183,7 @@ public class AsyncTests {
 		this.mockMvc.perform(asyncDispatch(mvcResult))
 				.andDo(print(writer))
 				.andExpect(status().isOk())
-				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 
 		assertTrue(writer.toString().contains("Async started = false"));

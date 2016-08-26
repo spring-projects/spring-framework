@@ -74,6 +74,7 @@ public class JsonPathRequestMatchers {
 	 * accepts a target type for the resulting value that the matcher can work
 	 * reliably against. This can be useful for matching numbers reliably for
 	 * example coercing an integer into a double.
+	 * @since 4.3.3
 	 */
 	public <T> RequestMatcher value(final Matcher<T> matcher, final Class<T> targetType) {
 		return new AbstractJsonPathRequestMatcher() {

@@ -42,7 +42,9 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -54,9 +56,6 @@ import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.springframework.messaging.handler.DestinationPatternsMessageCondition.*;
-import static org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver.*;
-import static org.springframework.messaging.support.MessageHeaderAccessor.*;
 
 /**
  * Test fixture for {@link SendToMethodReturnValueHandlerTests}.
@@ -357,7 +356,8 @@ public class SendToMethodReturnValueHandlerTests {
 		verify(messagingTemplate).convertAndSend(eq("/topic/dest"), eq(PAYLOAD), captor.capture());
 
 		MessageHeaders headers = captor.getValue();
-		SimpMessageHeaderAccessor accessor = getAccessor(headers, SimpMessageHeaderAccessor.class);
+		SimpMessageHeaderAccessor accessor =
+				MessageHeaderAccessor.getAccessor(headers, SimpMessageHeaderAccessor.class);
 		assertNotNull(accessor);
 		assertTrue(accessor.isMutable());
 		assertEquals("sess1", accessor.getSessionId());
@@ -399,7 +399,7 @@ public class SendToMethodReturnValueHandlerTests {
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
 		accessor.setSessionId(sessionId);
 		accessor.setSubscriptionId("sub1");
-		accessor.setHeader(DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
+		accessor.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 		Message<?> message = MessageBuilder.createMessage(PAYLOAD, accessor.getMessageHeaders());
 		this.handler.handleReturnValue(PAYLOAD, this.sendToWithPlaceholdersReturnType, message);
 
@@ -549,7 +549,7 @@ public class SendToMethodReturnValueHandlerTests {
 		headerAccessor.setSubscriptionId(subsId);
 		if (dest != null && destPrefix != null) {
 			headerAccessor.setDestination(destPrefix + dest);
-			headerAccessor.setHeader(LOOKUP_DESTINATION_HEADER, dest);
+			headerAccessor.setHeader(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER, dest);
 		}
 		if (user != null) {
 			headerAccessor.setUser(user);
@@ -560,6 +560,64 @@ public class SendToMethodReturnValueHandlerTests {
 	private SimpMessageHeaderAccessor getCapturedAccessor(int index) {
 		Message<?> message = this.messageCaptor.getAllValues().get(index);
 		return MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
+	}
+
+
+	@SuppressWarnings("unused")
+	String handleNoAnnotations() {
+		return PAYLOAD;
+	}
+
+	@SendTo
+	@SuppressWarnings("unused")
+	String handleAndSendToDefaultDestination() {
+		return PAYLOAD;
+	}
+
+	@SendTo({"/dest1", "/dest2"})
+	@SuppressWarnings("unused")
+	String handleAndSendTo() {
+		return PAYLOAD;
+	}
+
+	@SendTo("/topic/chat.message.filtered.{roomName}")
+	@SuppressWarnings("unused")
+	String handleAndSendToWithPlaceholders() {
+		return PAYLOAD;
+	}
+
+	@SendToUser
+	@SuppressWarnings("unused")
+	String handleAndSendToUserDefaultDestination() {
+		return PAYLOAD;
+	}
+
+	@SendToUser(broadcast = false)
+	@SuppressWarnings("unused")
+	String handleAndSendToUserDefaultDestinationSingleSession() {
+		return PAYLOAD;
+	}
+
+	@SendToUser({"/dest1", "/dest2"})
+	@SuppressWarnings("unused")
+	String handleAndSendToUser() {
+		return PAYLOAD;
+	}
+
+	@SendToUser(destinations = { "/dest1", "/dest2" }, broadcast = false)
+	@SuppressWarnings("unused")
+	String handleAndSendToUserSingleSession() {
+		return PAYLOAD;
+	}
+
+	@JsonView(MyJacksonView1.class)
+	@SuppressWarnings("unused")
+	JacksonViewBean handleAndSendToJsonView() {
+		JacksonViewBean payload = new JacksonViewBean();
+		payload.setWithView1("with");
+		payload.setWithView2("with");
+		payload.setWithoutView("without");
+		return payload;
 	}
 
 
@@ -574,6 +632,7 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 	}
 
+
 	private static class UniqueUser extends TestUser implements DestinationUserNameProvider {
 
 		@Override
@@ -581,6 +640,7 @@ public class SendToMethodReturnValueHandlerTests {
 			return "Me myself and I";
 		}
 	}
+
 
 	@SendTo
 	@Retention(RetentionPolicy.RUNTIME)
@@ -590,62 +650,13 @@ public class SendToMethodReturnValueHandlerTests {
 		String[] dest();
 	}
 
+
 	@SendToUser
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MySendToUser {
 
 		@AliasFor(annotation = SendToUser.class, attribute = "destinations")
 		String[] dest();
-	}
-
-
-	@SuppressWarnings("unused")
-	String handleNoAnnotations() {
-		return PAYLOAD;
-	}
-
-	@SendTo @SuppressWarnings("unused")
-	String handleAndSendToDefaultDestination() {
-		return PAYLOAD;
-	}
-
-	@SendTo({"/dest1", "/dest2"}) @SuppressWarnings("unused")
-	String handleAndSendTo() {
-		return PAYLOAD;
-	}
-
-	@SendTo("/topic/chat.message.filtered.{roomName}") @SuppressWarnings("unused")
-	String handleAndSendToWithPlaceholders() {
-		return PAYLOAD;
-	}
-
-	@SendToUser @SuppressWarnings("unused")
-	String handleAndSendToUserDefaultDestination() {
-		return PAYLOAD;
-	}
-
-	@SendToUser(broadcast = false) @SuppressWarnings("unused")
-	String handleAndSendToUserDefaultDestinationSingleSession() {
-		return PAYLOAD;
-	}
-
-	@SendToUser({"/dest1", "/dest2"}) @SuppressWarnings("unused")
-	String handleAndSendToUser() {
-		return PAYLOAD;
-	}
-
-	@SendToUser(destinations = { "/dest1", "/dest2" }, broadcast = false) @SuppressWarnings("unused")
-	String handleAndSendToUserSingleSession() {
-		return PAYLOAD;
-	}
-
-	@JsonView(MyJacksonView1.class) @SuppressWarnings("unused")
-	JacksonViewBean handleAndSendToJsonView() {
-		JacksonViewBean payload = new JacksonViewBean();
-		payload.setWithView1("with");
-		payload.setWithView2("with");
-		payload.setWithoutView("without");
-		return payload;
 	}
 
 
@@ -667,6 +678,7 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 	}
 
+
 	@MySendToUser(dest = "/dest-default") @SuppressWarnings("unused")
 	private static class SendToUserTestBean {
 
@@ -685,6 +697,7 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 	}
 
+
 	@MySendToUser(dest = "/dest-default") @SuppressWarnings("unused")
 	private static class SendToUserWithSendToOverrideTestBean {
 
@@ -701,7 +714,9 @@ public class SendToMethodReturnValueHandlerTests {
 
 
 	private interface MyJacksonView1 {}
+
 	private interface MyJacksonView2 {}
+
 
 	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
