@@ -165,6 +165,9 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 						result.append(",\n");
 					}
 					result.append("{\n\"bean\": \"").append(beanName).append("\",\n");
+					result.append("\"aliases\": ");
+					appendArray(result, bf.getAliases(beanName));
+					result.append(",\n");
 					String scope = bd.getScope();
 					if (!StringUtils.hasText(scope)) {
 						scope = BeanDefinition.SCOPE_SINGLETON;
@@ -178,16 +181,9 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 						result.append("\"type\": null,\n");
 					}
 					result.append("\"resource\": \"").append(getEscapedResourceDescription(bd)).append("\",\n");
-					result.append("\"dependencies\": [");
-					String[] dependencies = bf.getDependenciesForBean(beanName);
-					if (dependencies.length > 0) {
-						result.append("\"");
-					}
-					result.append(StringUtils.arrayToDelimitedString(dependencies, "\", \""));
-					if (dependencies.length > 0) {
-						result.append("\"");
-					}
-					result.append("]\n}");
+					result.append("\"dependencies\": ");
+					appendArray(result, bf.getDependenciesForBean(beanName));
+					result.append("\n}");
 					elementAppended = true;
 				}
 			}
@@ -239,6 +235,18 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 			}
 		}
 		return result.toString();
+	}
+
+	private void appendArray(StringBuilder result, String[] arr) {
+		result.append('[');
+		if (arr.length > 0) {
+			result.append('\"');
+		}
+		result.append(StringUtils.arrayToDelimitedString(arr, "\", \""));
+		if (arr.length > 0) {
+			result.append('\"');
+		}
+		result.append(']');
 	}
 
 }
