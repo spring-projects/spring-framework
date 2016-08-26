@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.web.servlet.view.script;
 
 import java.net.URLClassLoader;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -47,7 +47,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ScriptTemplateView}.
@@ -56,13 +55,14 @@ import static org.mockito.Mockito.mock;
  */
 public class ScriptTemplateViewTests {
 
+	private static final String RESOURCE_LOADER_PATH = "classpath:org/springframework/web/servlet/view/script/";
+
+
 	private ScriptTemplateView view;
 
 	private ScriptTemplateConfigurer configurer;
 
 	private StaticWebApplicationContext wac;
-
-	private static final String RESOURCE_LOADER_PATH = "classpath:org/springframework/web/servlet/view/script/";
 
 
 	@Before
@@ -74,16 +74,16 @@ public class ScriptTemplateViewTests {
 		this.view.setUrl(RESOURCE_LOADER_PATH + "empty.txt");
 	}
 
+
 	@Test
 	public void missingScriptTemplateConfig() throws Exception {
 		try {
 			this.view.setApplicationContext(new StaticApplicationContext());
+			fail("Should have thrown ApplicationContextException");
 		}
 		catch (ApplicationContextException ex) {
 			assertTrue(ex.getMessage().contains("ScriptTemplateConfig"));
-			return;
 		}
-		fail();
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class ScriptTemplateViewTests {
 		this.configurer.setRenderObject("Template");
 		this.configurer.setRenderFunction("render");
 		this.configurer.setContentType(MediaType.TEXT_PLAIN_VALUE);
-		this.configurer.setCharset(StandardCharsets.ISO_8859_1);
+		this.configurer.setCharset(Charset.forName("ISO-8859-1"));
 		this.configurer.setSharedEngine(true);
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
@@ -102,7 +102,7 @@ public class ScriptTemplateViewTests {
 		assertEquals("Template", accessor.getPropertyValue("renderObject"));
 		assertEquals("render", accessor.getPropertyValue("renderFunction"));
 		assertEquals(MediaType.TEXT_PLAIN_VALUE, accessor.getPropertyValue("contentType"));
-		assertEquals(StandardCharsets.ISO_8859_1, accessor.getPropertyValue("charset"));
+		assertEquals(Charset.forName("ISO-8859-1"), accessor.getPropertyValue("charset"));
 		assertEquals(true, accessor.getPropertyValue("sharedEngine"));
 	}
 
@@ -119,7 +119,7 @@ public class ScriptTemplateViewTests {
 		assertEquals("Template", accessor.getPropertyValue("renderObject"));
 		assertEquals("render", accessor.getPropertyValue("renderFunction"));
 		assertEquals(MediaType.TEXT_HTML_VALUE, accessor.getPropertyValue("contentType"));
-		assertEquals(StandardCharsets.UTF_8, accessor.getPropertyValue("charset"));
+		assertEquals(Charset.forName("UTF-8"), accessor.getPropertyValue("charset"));
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class ScriptTemplateViewTests {
 		DirectFieldAccessor accessor = new DirectFieldAccessor(this.view);
 		assertNull(accessor.getPropertyValue("renderObject"));
 		assertEquals("render", accessor.getPropertyValue("renderFunction"));
-		assertEquals(StandardCharsets.UTF_8, accessor.getPropertyValue("charset"));
+		assertEquals(Charset.forName("UTF-8"), accessor.getPropertyValue("charset"));
 	}
 
 	@Test
@@ -147,11 +147,11 @@ public class ScriptTemplateViewTests {
 		this.view.setApplicationContext(this.wac);
 		ExecutorService executor = Executors.newFixedThreadPool(4);
 		List<Future<Boolean>> results = new ArrayList<>();
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			results.add(executor.submit(() -> view.getEngine() != null));
 		}
 		assertEquals(iterations, results.size());
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			assertTrue(results.get(i).get());
 		}
 		executor.shutdown();
@@ -165,7 +165,6 @@ public class ScriptTemplateViewTests {
 		}
 		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString("instance"));
-			return;
 		}
 	}
 
@@ -206,9 +205,7 @@ public class ScriptTemplateViewTests {
 		}
 		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString("sharedEngine"));
-			return;
 		}
-		fail();
 	}
 
 	@Test
@@ -223,6 +220,7 @@ public class ScriptTemplateViewTests {
 		assertThat(Arrays.asList(urlClassLoader.getURLs()), Matchers.hasSize(1));
 		assertThat(Arrays.asList(urlClassLoader.getURLs()).get(0).toString(),
 				Matchers.endsWith("org/springframework/web/servlet/view/script/"));
+
 		this.view.setResourceLoaderPath(RESOURCE_LOADER_PATH + ",classpath:org/springframework/web/servlet/view/");
 		classLoader = this.view.createClassLoader();
 		assertNotNull(classLoader);
@@ -248,19 +246,19 @@ public class ScriptTemplateViewTests {
 
 		this.view.render(model, request, response);
 		assertEquals(MediaType.TEXT_HTML_VALUE + ";charset=" +
-				StandardCharsets.UTF_8, response.getHeader(HttpHeaders.CONTENT_TYPE));
+				Charset.forName("UTF-8"), response.getHeader(HttpHeaders.CONTENT_TYPE));
 
 		response = new MockHttpServletResponse();
 		this.view.setContentType(MediaType.TEXT_PLAIN_VALUE);
 		this.view.render(model, request, response);
 		assertEquals(MediaType.TEXT_PLAIN_VALUE + ";charset=" +
-				StandardCharsets.UTF_8, response.getHeader(HttpHeaders.CONTENT_TYPE));
+				Charset.forName("UTF-8"), response.getHeader(HttpHeaders.CONTENT_TYPE));
 
 		response = new MockHttpServletResponse();
-		this.view.setCharset(StandardCharsets.ISO_8859_1);
+		this.view.setCharset(Charset.forName("ISO-8859-1"));
 		this.view.render(model, request, response);
 		assertEquals(MediaType.TEXT_PLAIN_VALUE + ";charset=" +
-				StandardCharsets.ISO_8859_1, response.getHeader(HttpHeaders.CONTENT_TYPE));
+				Charset.forName("ISO-8859-1"), response.getHeader(HttpHeaders.CONTENT_TYPE));
 
 	}
 

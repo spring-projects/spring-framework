@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,10 +98,7 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	/**
-	 * SPR-13079
-	 */
-	@Test
+	@Test  // SPR-13079
 	public void deferredResultWithDelayedError() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithDelayedError", "true"))
 				.andExpect(request().asyncStarted())
@@ -126,10 +123,7 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	/**
-	 * SPR-12597
-	 */
-	@Test
+	@Test  // SPR-12597
 	public void completableFutureWithImmediateValue() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("completableFutureWithImmediateValue", "true"))
 				.andExpect(request().asyncStarted())
@@ -141,10 +135,7 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	/**
-	 * SPR-12735
-	 */
-	@Test
+	@Test  // SPR-12735
 	public void printAsyncResult() throws Exception {
 		StringWriter writer = new StringWriter();
 
@@ -172,12 +163,9 @@ public class AsyncTests {
 	@RequestMapping(path = "/{id}", produces = "application/json")
 	private static class AsyncController {
 
-		private final Collection<DeferredResult<Person>> deferredResults =
-				new CopyOnWriteArrayList<DeferredResult<Person>>();
+		private final Collection<DeferredResult<Person>> deferredResults = new CopyOnWriteArrayList<>();
 
-		private final Collection<ListenableFutureTask<Person>> futureTasks =
-				new CopyOnWriteArrayList<ListenableFutureTask<Person>>();
-
+		private final Collection<ListenableFutureTask<Person>> futureTasks = new CopyOnWriteArrayList<>();
 
 		@RequestMapping(params = "callable")
 		public Callable<Person> getCallable() {
@@ -186,21 +174,21 @@ public class AsyncTests {
 
 		@RequestMapping(params = "deferredResult")
 		public DeferredResult<Person> getDeferredResult() {
-			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			DeferredResult<Person> deferredResult = new DeferredResult<>();
 			this.deferredResults.add(deferredResult);
 			return deferredResult;
 		}
 
 		@RequestMapping(params = "deferredResultWithImmediateValue")
 		public DeferredResult<Person> getDeferredResultWithImmediateValue() {
-			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			DeferredResult<Person> deferredResult = new DeferredResult<>();
 			deferredResult.setResult(new Person("Joe"));
 			return deferredResult;
 		}
 
 		@RequestMapping(params = "deferredResultWithDelayedError")
 		public DeferredResult<Person> getDeferredResultWithDelayedError() {
-			final DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			final DeferredResult<Person> deferredResult = new DeferredResult<>();
 			new Thread() {
 				public void run() {
 					try {
@@ -217,14 +205,14 @@ public class AsyncTests {
 
 		@RequestMapping(params = "listenableFuture")
 		public ListenableFuture<Person> getListenableFuture() {
-			ListenableFutureTask<Person> futureTask = new ListenableFutureTask<Person>(() -> new Person("Joe"));
+			ListenableFutureTask<Person> futureTask = new ListenableFutureTask<>(() -> new Person("Joe"));
 			this.futureTasks.add(futureTask);
 			return futureTask;
 		}
 
 		@RequestMapping(params = "completableFutureWithImmediateValue")
 		public CompletableFuture<Person> getCompletableFutureWithImmediateValue() {
-			CompletableFuture<Person> future = new CompletableFuture<Person>();
+			CompletableFuture<Person> future = new CompletableFuture<>();
 			future.complete(new Person("Joe"));
 			return future;
 		}
@@ -235,7 +223,7 @@ public class AsyncTests {
 			return e.getMessage();
 		}
 
-		public void onMessage(String name) {
+		void onMessage(String name) {
 			for (DeferredResult<Person> deferredResult : this.deferredResults) {
 				deferredResult.setResult(new Person(name));
 				this.deferredResults.remove(deferredResult);

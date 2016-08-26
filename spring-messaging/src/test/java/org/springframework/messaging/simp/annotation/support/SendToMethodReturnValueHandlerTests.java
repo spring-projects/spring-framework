@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.messaging.simp.annotation.support;
 
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,6 +41,7 @@ import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -53,8 +53,6 @@ import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver.*;
-import static org.springframework.messaging.support.MessageHeaderAccessor.*;
 
 /**
  * Test fixture for {@link SendToMethodReturnValueHandlerTests}.
@@ -103,31 +101,31 @@ public class SendToMethodReturnValueHandlerTests {
 		jsonMessagingTemplate.setMessageConverter(new MappingJackson2MessageConverter());
 		this.jsonHandler = new SendToMethodReturnValueHandler(jsonMessagingTemplate, true);
 
-		Method method = this.getClass().getDeclaredMethod("handleNoAnnotations");
+		Method method = getClass().getDeclaredMethod("handleNoAnnotations");
 		this.noAnnotationsReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndSendToDefaultDestination");
+		method = getClass().getDeclaredMethod("handleAndSendToDefaultDestination");
 		this.sendToDefaultDestReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndSendTo");
+		method = getClass().getDeclaredMethod("handleAndSendTo");
 		this.sendToReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndSendToWithPlaceholders");
+		method = getClass().getDeclaredMethod("handleAndSendToWithPlaceholders");
 		this.sendToWithPlaceholdersReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndSendToUser");
+		method = getClass().getDeclaredMethod("handleAndSendToUser");
 		this.sendToUserReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndSendToUserSingleSession");
+		method = getClass().getDeclaredMethod("handleAndSendToUserSingleSession");
 		this.sendToUserSingleSessionReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestination");
+		method = getClass().getDeclaredMethod("handleAndSendToUserDefaultDestination");
 		this.sendToUserDefaultDestReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestinationSingleSession");
+		method = getClass().getDeclaredMethod("handleAndSendToUserDefaultDestinationSingleSession");
 		this.sendToUserSingleSessionDefaultDestReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = this.getClass().getDeclaredMethod("handleAndSendToJsonView");
+		method = getClass().getDeclaredMethod("handleAndSendToJsonView");
 		this.jsonViewReturnType = new SynthesizingMethodParameter(method, -1);
 	}
 
@@ -226,7 +224,8 @@ public class SendToMethodReturnValueHandlerTests {
 		verify(messagingTemplate).convertAndSend(eq("/topic/dest"), eq(PAYLOAD), captor.capture());
 
 		MessageHeaders messageHeaders = captor.getValue();
-		SimpMessageHeaderAccessor accessor = getAccessor(messageHeaders, SimpMessageHeaderAccessor.class);
+		SimpMessageHeaderAccessor accessor =
+				MessageHeaderAccessor.getAccessor(messageHeaders, SimpMessageHeaderAccessor.class);
 		assertNotNull(accessor);
 		assertTrue(accessor.isMutable());
 		assertEquals("sess1", accessor.getSessionId());
@@ -267,7 +266,7 @@ public class SendToMethodReturnValueHandlerTests {
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
 		accessor.setSessionId(sessionId);
 		accessor.setSubscriptionId("sub1");
-		accessor.setHeader(DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
+		accessor.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);
 		Message<?> message = MessageBuilder.createMessage(PAYLOAD, accessor.getMessageHeaders());
 		this.handler.handleReturnValue(PAYLOAD, this.sendToWithPlaceholdersReturnType, message);
 
@@ -403,7 +402,7 @@ public class SendToMethodReturnValueHandlerTests {
 		Message<?> message = this.messageCaptor.getValue();
 		assertNotNull(message);
 
-		assertEquals("{\"withView1\":\"with\"}", new String((byte[]) message.getPayload(), StandardCharsets.UTF_8));
+		assertEquals("{\"withView1\":\"with\"}", new String((byte[]) message.getPayload(), Charset.forName("UTF-8")));
 	}
 
 
@@ -428,25 +427,6 @@ public class SendToMethodReturnValueHandlerTests {
 		return MessageHeaderAccessor.getAccessor(message, SimpMessageHeaderAccessor.class);
 	}
 
-
-	private static class TestUser implements Principal {
-
-		public String getName() {
-			return "joe";
-		}
-
-		public boolean implies(Subject subject) {
-			return false;
-		}
-	}
-
-	private static class UniqueUser extends TestUser implements DestinationUserNameProvider {
-
-		@Override
-		public String getDestinationUserName() {
-			return "Me myself and I";
-		}
-	}
 
 	public String handleNoAnnotations() {
 		return PAYLOAD;
@@ -498,8 +478,31 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 
+	private static class TestUser implements Principal {
+
+		public String getName() {
+			return "joe";
+		}
+
+		public boolean implies(Subject subject) {
+			return false;
+		}
+	}
+
+
+	private static class UniqueUser extends TestUser implements DestinationUserNameProvider {
+
+		@Override
+		public String getDestinationUserName() {
+			return "Me myself and I";
+		}
+	}
+
+
 	private interface MyJacksonView1 {}
+
 	private interface MyJacksonView2 {}
+
 
 	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
@@ -516,23 +519,23 @@ public class SendToMethodReturnValueHandlerTests {
 			return withView1;
 		}
 
-		public void setWithView1(String withView1) {
+		void setWithView1(String withView1) {
 			this.withView1 = withView1;
 		}
 
-		public String getWithView2() {
+		String getWithView2() {
 			return withView2;
 		}
 
-		public void setWithView2(String withView2) {
+		void setWithView2(String withView2) {
 			this.withView2 = withView2;
 		}
 
-		public String getWithoutView() {
+		String getWithoutView() {
 			return withoutView;
 		}
 
-		public void setWithoutView(String withoutView) {
+		void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
 		}
 	}
