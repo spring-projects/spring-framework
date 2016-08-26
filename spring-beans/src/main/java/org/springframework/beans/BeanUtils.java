@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Mainly for use within the framework, but to some degree also
  * useful for application classes.
- *
+ * 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop

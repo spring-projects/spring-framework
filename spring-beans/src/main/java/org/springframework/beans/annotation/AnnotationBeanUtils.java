@@ -29,6 +29,8 @@ import org.springframework.util.StringValueResolver;
 
 /**
  * General utility methods for working with annotations in JavaBeans style.
+ * 
+ * <p>通用工具方法,工作在有annotation的JavaBeans style类
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -39,6 +41,8 @@ public abstract class AnnotationBeanUtils {
 	/**
 	 * Copy the properties of the supplied {@link Annotation} to the supplied target bean.
 	 * Any properties defined in {@code excludedProperties} will not be copied.
+	 * 
+	 * <p>根据提供的Annotation负责属性给目标对象bean,排除excludedProperties包括的属性
 	 * @param ann the annotation to copy from
 	 * @param bean the bean instance to copy to
 	 * @param excludedProperties the names of excluded properties, if any
