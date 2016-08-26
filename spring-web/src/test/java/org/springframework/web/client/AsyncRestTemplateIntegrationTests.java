@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,14 +49,14 @@ import static org.junit.Assert.*;
  */
 public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 
-	private final AsyncRestTemplate template = new AsyncRestTemplate(new HttpComponentsAsyncClientHttpRequestFactory());
+	private final AsyncRestTemplate template = new AsyncRestTemplate(
+			new HttpComponentsAsyncClientHttpRequestFactory());
 
 
 	@Test
 	public void getEntity() throws Exception {
-		Future<ResponseEntity<String>> futureEntity =
-				template.getForEntity(baseUrl + "/{method}", String.class, "get");
-		ResponseEntity<String> entity = futureEntity.get();
+		Future<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/{method}", String.class, "get");
+		ResponseEntity<String> entity = future.get();
 		assertEquals("Invalid content", helloWorld, entity.getBody());
 		assertFalse("No headers", entity.getHeaders().isEmpty());
 		assertEquals("Invalid content-type", textContentType, entity.getHeaders().getContentType());
@@ -65,10 +65,9 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 
 	@Test
 	public void multipleFutureGets() throws Exception {
-		Future<ResponseEntity<String>> futureEntity =
-				template.getForEntity(baseUrl + "/{method}", String.class, "get");
-		futureEntity.get();
-		futureEntity.get();
+		Future<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/{method}", String.class, "get");
+		future.get();
+		future.get();
 	}
 
 	@Test

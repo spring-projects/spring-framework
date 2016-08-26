@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -116,6 +115,13 @@ public class RequestPartIntegrationTests {
 		baseUrl = "http://localhost:" + connector.getLocalPort();
 	}
 
+	@AfterClass
+	public static void stopServer() throws Exception {
+		if (server != null) {
+			server.stop();
+		}
+	}
+
 	@Before
 	public void setUp() {
 		ByteArrayHttpMessageConverter emptyBodyConverter = new ByteArrayHttpMessageConverter();
@@ -132,13 +138,6 @@ public class RequestPartIntegrationTests {
 
 		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 		restTemplate.setMessageConverters(Collections.singletonList(converter));
-	}
-
-	@AfterClass
-	public static void stopServer() throws Exception {
-		if (server != null) {
-			server.stop();
-		}
 	}
 
 
@@ -172,7 +171,7 @@ public class RequestPartIntegrationTests {
 		RequestEntity<byte[]> requestEntity =
 				RequestEntity.post(new URI(baseUrl + "/standard-resolver/spr13319"))
 						.contentType(new MediaType(MediaType.MULTIPART_FORM_DATA, params))
-						.body(content.getBytes(Charset.forName("us-ascii")));
+						.body(content.getBytes(Charset.forName("US-ASCII")));
 
 		ByteArrayHttpMessageConverter converter = new ByteArrayHttpMessageConverter();
 		converter.setSupportedMediaTypes(Collections.singletonList(MediaType.MULTIPART_FORM_DATA));

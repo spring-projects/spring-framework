@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -37,8 +38,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import com.fasterxml.jackson.annotation.JsonView;
 
 import static org.junit.Assert.*;
 
@@ -235,16 +234,17 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		assertFalse(s.contains("\"without\":\"without\""));
 	}
 
-	// SPR-12123
-
-	@Test
+	@Test  // SPR-12123
 	public void serverPort() {
 		String s = template.getForObject("http://localhost:{port}/get", String.class, port);
 		assertEquals("Invalid content", helloWorld, s);
 	}
 
+
 	public interface MyJacksonView1 {};
+
 	public interface MyJacksonView2 {};
+
 
 	public static class MySampleBean {
 

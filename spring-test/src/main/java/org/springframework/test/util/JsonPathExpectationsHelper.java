@@ -22,6 +22,8 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
+import com.jayway.jsonpath.InvalidPathException;
+import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
 
 import org.springframework.util.Assert;
@@ -29,14 +31,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.jayway.jsonpath.InvalidPathException;
-import com.jayway.jsonpath.JsonPath;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
-import static org.springframework.test.util.AssertionErrors.fail;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.core.IsInstanceOf.*;
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * A helper class for applying assertions via JSON path expressions.
@@ -255,9 +252,6 @@ public class JsonPathExpectationsHelper {
 			return this.jsonPath.read(content);
 		}
 		catch (InvalidPathException ex) {
-			throw new AssertionError(message + ex.getMessage());
-		}
-		catch (ArrayIndexOutOfBoundsException ex) {
 			throw new AssertionError(message + ex.getMessage());
 		}
 		catch (IndexOutOfBoundsException ex) {
