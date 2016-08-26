@@ -497,7 +497,7 @@ and others.
 	@Controller
 	public class HelloWorldController {
 
-		@RequestMapping("/helloWorld")
+		@RequestMapping(path = "/helloWorld")
 		public String helloWorld(Model model) {
 			model.addAttribute("message", "Hello World!");
 			return "helloWorld";
@@ -575,7 +575,7 @@ application that uses this annotation:
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	**@RequestMapping("/appointments")**
+	**@RequestMapping(path = "/appointments")**
 	public class AppointmentsController {
 
 		private final AppointmentBook appointmentBook;
@@ -639,11 +639,11 @@ application shows a multi-action controller using `@RequestMapping`:
 			this.clinic = clinic;
 		}
 
-		**@RequestMapping("/")**
+		**@RequestMapping(path = "/")**
 		public void welcomeHandler() {
 		}
 
-		**@RequestMapping("/vets")**
+		**@RequestMapping(path = "/vets")**
 		public ModelMap vetsHandler() {
 			return new ModelMap(this.clinic.getVets());
 		}
@@ -676,7 +676,7 @@ previous section that has been simplified with _composed_ `@RequestMapping` anno
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	**@RequestMapping("/appointments")**
+	**@RequestMapping(path = "/appointments")**
 	public class AppointmentsController {
 
 		private final AppointmentBook appointmentBook;
@@ -691,12 +691,12 @@ previous section that has been simplified with _composed_ `@RequestMapping` anno
 			return appointmentBook.getAppointmentsForToday();
 		}
 
-		**@GetMapping("/{day}")**
+		**@GetMapping(path = "/{day}")**
 		public Map<String, Appointment> getForDay(@PathVariable @DateTimeFormat(iso=ISO.DATE) Date day, Model model) {
 			return appointmentBook.getAppointmentsForDay(day);
 		}
 
-		**@GetMapping("/new")**
+		**@GetMapping(path = "/new")**
 		public AppointmentForm getNewForm() {
 			return new AppointmentForm();
 		}
@@ -785,7 +785,7 @@ to the value of a URI template variable:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping("/owners/{ownerId}")
+	@GetMapping(path = "/owners/{ownerId}")
 	public String findOwner(**@PathVariable** String ownerId, Model model) {
 		Owner owner = ownerService.findOwner(ownerId);
 		model.addAttribute("owner", owner);
@@ -807,7 +807,7 @@ template variable by name. You can specify it in the annotation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping("/owners/{ownerId}")
+	@GetMapping(path = "/owners/{ownerId}")
 	public String findOwner(**@PathVariable("ownerId")** String theOwner, Model model) {
 		// implementation omitted
 	}
@@ -821,7 +821,7 @@ template variable name:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping("/owners/{ownerId}")
+	@GetMapping(path = "/owners/{ownerId}")
 	public String findOwner(**@PathVariable** String ownerId, Model model) {
 		// implementation omitted
 	}
@@ -833,7 +833,7 @@ A method can have any number of `@PathVariable` annotations:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	@GetMapping(path = "/owners/{ownerId}/pets/{petId}")
 	public String findPet(**@PathVariable** String ownerId, **@PathVariable** String petId, Model model) {
 		Owner owner = ownerService.findOwner(ownerId);
 		Pet pet = owner.getPet(petId);
@@ -882,7 +882,7 @@ name and the second - the regular expression. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{extension:\\.[a-z]+}")
+	@RequestMapping(path = "/spring-web/{symbolicName:[a-z-]+}-{version:\\d\\.\\d\\.\\d}{extension:\\.[a-z]+}")
 	public void handle(@PathVariable String version, @PathVariable String extension) {
 		// ...
 	}
@@ -1031,7 +1031,7 @@ Below is an example of extracting the matrix variable "q":
 ----
 	// GET /pets/42;q=11;r=22
 
-	@GetMapping("/pets/{petId}")
+	@GetMapping(path = "/pets/{petId}")
 	public void findPet(@PathVariable String petId, @MatrixVariable int q) {
 
 		// petId == 42
@@ -1048,7 +1048,7 @@ specific to identify where the variable is expected to be:
 ----
 	// GET /owners/42;q=11/pets/21;q=22
 
-	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	@GetMapping(path = "/owners/{ownerId}/pets/{petId}")
 	public void findPet(
 			@MatrixVariable(name="q", pathVar="ownerId") int q1,
 			@MatrixVariable(name="q", pathVar="petId") int q2) {
@@ -1066,7 +1066,7 @@ A matrix variable may be defined as optional and a default value specified:
 ----
 	// GET /pets/42
 
-	@GetMapping("/pets/{petId}")
+	@GetMapping(path = "/pets/{petId}")
 	public void findPet(@MatrixVariable(required=false, defaultValue="1") int q) {
 
 		// q == 1
@@ -1081,7 +1081,7 @@ All matrix variables may be obtained in a Map:
 ----
 	// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
 
-	@GetMapping("/owners/{ownerId}/pets/{petId}")
+	@GetMapping(path = "/owners/{ownerId}/pets/{petId}")
 	public void findPet(
 			@MatrixVariable MultiValueMap<String, String> matrixVars,
 			@MatrixVariable(pathVar="petId"") MultiValueMap<String, String> petMatrixVars) {
@@ -1208,7 +1208,7 @@ example with a request parameter value condition:
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@RequestMapping("/owners/{ownerId}")
+	@RequestMapping(path = "/owners/{ownerId}")
 	public class RelativePathUriTemplateController {
 
 		@GetMapping(path = "/pets/{petId}", **params = "myParam=myValue"**)
@@ -1226,7 +1226,7 @@ specific request header value:
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@RequestMapping("/owners/{ownerId}")
+	@RequestMapping(path = "/owners/{ownerId}")
 	public class RelativePathUriTemplateController {
 
 		@GetMapping(path = "/pets", **headers = "myHeader=myValue"**)
@@ -1380,7 +1380,7 @@ sample won't work:
 [subs="verbatim,quotes"]
 ----
 	@PostMapping
-	public String processSubmit(**@ModelAttribute("pet") Pet pet**, Model model, **BindingResult result**) { ... }
+	public String processSubmit(**@ModelAttribute(name = "pet") Pet pet**, Model model, **BindingResult result**) { ... }
 ----
 
 Note, that there is a `Model` parameter in between `Pet` and `BindingResult`. To get
@@ -1390,7 +1390,7 @@ this working you have to reorder the parameters as follows:
 [subs="verbatim,quotes"]
 ----
 	@PostMapping
-	public String processSubmit(**@ModelAttribute("pet") Pet pet**, **BindingResult result**, Model model) { ... }
+	public String processSubmit(**@ModelAttribute(name = "pet") Pet pet**, **BindingResult result**, Model model) { ... }
 ----
 
 [NOTE]
@@ -1463,14 +1463,14 @@ The following code snippet shows the usage:
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@RequestMapping("/pets")
-	@SessionAttributes("pet")
+	@RequestMapping(path = "/pets")
+	@SessionAttributes(names = "pet")
 	public class EditPetForm {
 
 		// ...
 
 		@GetMapping
-		public String setupForm(**@RequestParam("petId") int petId**, ModelMap model) {
+		public String setupForm(**@RequestParam(name = "petId") int petId**, ModelMap model) {
 			Pet pet = this.clinic.loadPet(petId);
 			model.addAttribute("pet", pet);
 			return "petForm";
@@ -1501,7 +1501,7 @@ be bound to the value of the HTTP request body. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PutMapping("/something")
+	@PutMapping(path = "/something")
 	public void handle(@RequestBody String body, Writer writer) throws IOException {
 		writer.write(body);
 	}
@@ -1580,7 +1580,7 @@ response body (and not placed in a Model, or interpreted as a view name). For ex
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping("/something")
+	@GetMapping(path = "/something")
 	@ResponseBody
 	public String helloWorld() {
 		return "Hello World";
@@ -1622,7 +1622,7 @@ so:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/something")
+	@RequestMapping(path = "/something")
 	public ResponseEntity<String> handle(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
 		String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader");
 		byte[] requestBody = requestEntity.getBody();
@@ -1662,7 +1662,7 @@ couple of examples:
 ----
 	// Add one attribute
 	// The return value of the method is added to the model under the name "account"
-	// You can customize the name via @ModelAttribute("myAccount")
+	// You can customize the name via @ModelAttribute(name = "myAccount")
 
 	@ModelAttribute
 	public Account addAccount(@RequestParam String number) {
@@ -1728,7 +1728,7 @@ form field individually.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
+	@PostMapping(path = "/owners/{ownerId}/pets/{petId}/edit")
 	public String processSubmit(**@ModelAttribute Pet pet**) { }
 ----
 
@@ -1750,8 +1750,8 @@ using an URI template variable and a type converter. Here is an example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PutMapping("/accounts/{account}")
-	public String save(@ModelAttribute("account") Account account) {
+	@PutMapping(path = "/accounts/{account}")
+	public String save(@ModelAttribute(name = "account") Account account) {
 		// ...
 	}
 ----
@@ -1775,8 +1775,8 @@ following the `@ModelAttribute` argument:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(**@ModelAttribute("pet") Pet pet**, BindingResult result) {
+	@PostMapping(path = "/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(**@ModelAttribute(name = "pet") Pet pet**, BindingResult result) {
 
 		if (result.hasErrors()) {
 			return "petForm";
@@ -1808,7 +1808,7 @@ public Account findAccount(@PathVariable String accountId) {
     return accountRepository.findOne(accountId);
 }
 
-@PostMapping("update")
+@PostMapping(path = "update")
 public String update(@Valid AccountUpdateForm form, BindingResult result,
         **@ModelAttribute(binding=false)** Account account) {
 
@@ -1824,8 +1824,8 @@ subsequently reported back to the user:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(**@ModelAttribute("pet") Pet pet**, BindingResult result) {
+	@PostMapping(path = "/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(**@ModelAttribute(name = "pet") Pet pet**, BindingResult result) {
 
 		new PetValidator().validate(pet, result);
 		if (result.hasErrors()) {
@@ -1843,8 +1843,8 @@ annotation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/owners/{ownerId}/pets/{petId}/edit")
-	public String processSubmit(**@Valid @ModelAttribute("pet") Pet pet**, BindingResult result) {
+	@PostMapping(path = "/owners/{ownerId}/pets/{petId}/edit")
+	public String processSubmit(**@Valid @ModelAttribute(name = "pet") Pet pet**, BindingResult result) {
 
 		if (result.hasErrors()) {
 			return "petForm";
@@ -1875,8 +1875,8 @@ attribute name:
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@RequestMapping("/editPet.do")
-	**@SessionAttributes("pet")**
+	@RequestMapping(path = "/editPet.do")
+	**@SessionAttributes(names = "pet")**
 	public class EditPetForm {
 		// ...
 	}
@@ -1893,7 +1893,7 @@ use the `@SessionAttribute` annotation on a method parameter:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/")
+	@RequestMapping(path = "/")
 	public String handle(**@SessionAttribute** User user) {
 		// ...
 	}
@@ -1917,7 +1917,7 @@ access pre-existing request attributes created by a filter or interceptor:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/")
+	@RequestMapping(path = "/")
 	public String handle(**@RequestAttribute** Client client) {
 		// ...
 	}
@@ -1991,8 +1991,8 @@ The following code sample demonstrates how to get the value of the `JSESSIONID` 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/displayHeaderInfo.do")
-	public void displayHeaderInfo(**@CookieValue("JSESSIONID")** String cookie) {
+	@RequestMapping(path = "/displayHeaderInfo.do")
+	public void displayHeaderInfo(**@CookieValue(name = "JSESSIONID")** String cookie) {
 		//...
 	}
 ----
@@ -2027,9 +2027,9 @@ The following code sample demonstrates how to get the value of the `Accept-Encod
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/displayHeaderInfo.do")
-	public void displayHeaderInfo(**@RequestHeader("Accept-Encoding")** String encoding,
-			**@RequestHeader("Keep-Alive")** long keepAlive) {
+	@RequestMapping(path = "/displayHeaderInfo.do")
+	public void displayHeaderInfo(**@RequestHeader(name = "Accept-Encoding")** String encoding,
+			**@RequestHeader(name = "Keep-Alive")** long keepAlive) {
 		//...
 	}
 ----
@@ -2046,7 +2046,7 @@ with all header values.
 ====
 Built-in support is available for converting a comma-separated string into an
 array/collection of strings or other types known to the type conversion system. For
-example a method parameter annotated with `@RequestHeader("Accept")` may be of type
+example a method parameter annotated with `@RequestHeader(name = "Accept")` may be of type
 `String` but also `String[]` or `List<String>`.
 ====
 
@@ -2181,7 +2181,7 @@ Both `@ControllerAdvice` and `@RestControllerAdvice` can target a subset of cont
 	public class AnnotationAdvice {}
 
 	// Target all Controllers within specific packages
-	@ControllerAdvice("org.example.controllers")
+	@ControllerAdvice(basePackages = "org.example.controllers")
 	public class BasePackageAdvice {}
 
 	// Target all Controllers assignable to specific classes
@@ -2210,7 +2210,7 @@ the view class or interface to be used:
 	@RestController
 	public class UserController {
 
-		@GetMapping("/user")
+		@GetMapping(path = "/user")
 		@JsonView(User.WithoutPasswordView.class)
 		public User getUser() {
 			return new User("eric", "7!jd#h23");
@@ -2262,7 +2262,7 @@ to the model:
 	@Controller
 	public class UserController extends AbstractController {
 
-		@GetMapping("/user")
+		@GetMapping(path = "/user")
 		public String getUser(Model model) {
 			model.addAttribute("user", new User("eric", "7!jd#h23"));
 			model.addAttribute(JsonView.class.getName(), User.WithoutPasswordView.class);
@@ -2332,7 +2332,7 @@ of such a controller method:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/quotes")
+	@RequestMapping(path = "/quotes")
 	@ResponseBody
 	public DeferredResult<String> quotes() {
 		DeferredResult<String> deferredResult = new DeferredResult<String>();
@@ -2444,7 +2444,7 @@ Here is an example of that:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/events")
+	@RequestMapping(path = "/events")
 	public ResponseBodyEmitter handle() {
 		ResponseBodyEmitter emitter = new ResponseBodyEmitter();
 		// Save the emitter somewhere..
@@ -2503,7 +2503,7 @@ Here is an example of that:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RequestMapping("/download")
+	@RequestMapping(path = "/download")
 	public StreamingResponseBody handle() {
 		return new StreamingResponseBody() {
 			@Override
@@ -3007,7 +3007,7 @@ through `Model` nor `RedirectAttributes`. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/files/{path}")
+	@PostMapping(path = "/files/{path}")
 	public String upload(...) {
 		// ...
 		return "redirect:files/{path}";
@@ -3179,7 +3179,7 @@ application/atom+xml is shown below.
 
 		private List<SampleContent> contentList = new ArrayList<SampleContent>();
 
-		@GetMapping("/content")
+		@GetMapping(path = "/content")
 		public ModelAndView getContent() {
 			ModelAndView mav = new ModelAndView();
 			mav.setViewName("content");
@@ -3324,10 +3324,10 @@ Spring MVC also provides a mechanism for building links to controller methods. F
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@RequestMapping("/hotels/{hotel}")
+	@RequestMapping(path = "/hotels/{hotel}")
 	public class BookingController {
 
-		@GetMapping("/bookings/{booking}")
+		@GetMapping(path = "/bookings/{booking}")
 		public String getBooking(@PathVariable Long booking) {
 
 		// ...
@@ -3418,10 +3418,10 @@ For example given:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-    @RequestMapping("/people/{id}/addresses")
+    @RequestMapping(path = "/people/{id}/addresses")
     public class PersonAddressController {
 
-        @RequestMapping("/{country}")
+        @RequestMapping(path = "/{country}")
         public HttpEntity getAddress(@PathVariable String country) { ... }
     }
 ----
@@ -3792,9 +3792,9 @@ use `MultipartHttpServletRequest` or `MultipartFile` in the method parameters:
 	@Controller
 	public class FileUploadController {
 
-		@PostMapping("/form")
-		public String handleFormUpload(@RequestParam("name") String name,
-				@RequestParam("file") MultipartFile file) {
+		@PostMapping(path = "/form")
+		public String handleFormUpload(@RequestParam(name = "name") String name,
+				@RequestParam(name = "file") MultipartFile file) {
 
 			if (!file.isEmpty()) {
 				byte[] bytes = file.getBytes();
@@ -3821,9 +3821,9 @@ the method parameter:
 	@Controller
 	public class FileUploadController {
 
-		@PostMapping("/form")
-		public String handleFormUpload(@RequestParam("name") String name,
-				@RequestParam("file") Part file) {
+		@PostMapping(path = "/form")
+		public String handleFormUpload(@RequestParam(name = "name") String name,
+				@RequestParam(name = "file") Part file) {
 
 			InputStream inputStream = file.getInputStream();
 			// store bytes from uploaded file somewhere
@@ -3865,7 +3865,7 @@ Content-Transfer-Encoding: 8bit
 ... File Data ...
 ----
 
-You could access the part named "meta-data" with a `@RequestParam("meta-data") String
+You could access the part named "meta-data" with a `@RequestParam(name = "meta-data") String
 metadata` controller method argument. However, you would probably prefer to accept a
 strongly typed object initialized from the JSON formatted data in the body of the
 request part, very similar to the way `@RequestBody` converts the body of a
@@ -3879,9 +3879,9 @@ multipart:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/someUrl")
-	public String onSubmit(**@RequestPart("meta-data") MetaData metadata,
-			@RequestPart("file-data") MultipartFile file**) {
+	@PostMapping(path = "/someUrl")
+	public String onSubmit(**@RequestPart(name = "meta-data") MetaData metadata,
+			@RequestPart(name = "file-data") MultipartFile file**) {
 
 		// ...
 
@@ -3889,7 +3889,7 @@ multipart:
 ----
 
 Notice how `MultipartFile` method arguments can be accessed with `@RequestParam` or with
-`@RequestPart` interchangeably. However, the `@RequestPart("meta-data") MetaData` method
+`@RequestPart` interchangeably. However, the `@RequestPart(name = "meta-data") MetaData` method
 argument in this case is read as JSON content based on its `'Content-Type'` header and
 converted with the help of the `MappingJackson2HttpMessageConverter`.
 
@@ -4493,7 +4493,7 @@ in responses like this:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@GetMapping("/book/{id}")
+	@GetMapping(path = "/book/{id}")
 	public ResponseEntity<Book> showBook(@PathVariable Long id) {
 
 		Book book = findBook(id);

@@ -1358,10 +1358,10 @@ example, using the qualifier notation, the following Java code
 ----
 	public class TransactionalService {
 
-		@Transactional("order")
+		@Transactional(transactionManager = "order")
 		public void setSomething(String name) { ... }
 
-		@Transactional("account")
+		@Transactional(transactionManager = "account")
 		public void doSomething() { ... }
 	}
 ----
@@ -1403,13 +1403,13 @@ defining the following annotations
 ----
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional("order")
+	@Transactional(transactionManager = "order")
 	public @interface OrderTx {
 	}
 
 	@Target({ElementType.METHOD, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
-	@Transactional("account")
+	@Transactional(transactionManager = "account")
 	public @interface AccountTx {
 	}
 ----

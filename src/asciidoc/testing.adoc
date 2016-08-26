@@ -446,8 +446,8 @@ used within a test class hierarchy.
 [subs="verbatim,quotes"]
 ----
 	@ContextHierarchy({
-		@ContextConfiguration("/parent-config.xml"),
-		@ContextConfiguration("/child-config.xml")
+		@ContextConfiguration(locations = "/parent-config.xml"),
+		@ContextConfiguration(locations = "/child-config.xml")
 	})
 	public class ContextHierarchyTests {
 		// class body...
@@ -673,8 +673,8 @@ specified instead, as seen below.
 [subs="verbatim,quotes"]
 ----
 	@ContextHierarchy({
-		@ContextConfiguration("/parent-config.xml"),
-		@ContextConfiguration("/child-config.xml")
+		@ContextConfiguration(locations = "/parent-config.xml"),
+		@ContextConfiguration(locations = "/child-config.xml")
 	})
 	public class BaseTests {
 		// class body...
@@ -829,7 +829,7 @@ container annotation.
 	@Test
 	**@SqlGroup**({
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
-		@Sql("/test-user-data.sql")
+		@Sql(scripts = "/test-user-data.sql")
 	)}
 	public void userTest {
 		// execute code that uses the test schema and test data
@@ -1009,14 +1009,14 @@ across our JUnit 4 based test suite...
 [subs="verbatim,quotes"]
 ----
 	@RunWith(SpringRunner.class)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
-	@ActiveProfiles("dev")
+	@ContextConfiguration(locations = ""/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles(profiles = "dev")
 	@Transactional
 	public class OrderRepositoryTests { }
 
 	@RunWith(SpringRunner.class)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
-	@ActiveProfiles("dev")
+	@ContextConfiguration(locations = ""/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles(profiles = "dev")
 	@Transactional
 	public class UserRepositoryTests { }
 ----
@@ -1029,8 +1029,8 @@ that centralizes the common test configuration like this:
 ----
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
-	@ActiveProfiles("dev")
+	@ContextConfiguration(locations = ""/app-config.xml", "/test-data-access-config.xml"})
+	@ActiveProfiles(profiles = "dev")
 	@Transactional
 	public @interface TransactionalDevTest { }
 ----
@@ -1406,7 +1406,7 @@ demonstrated in the following example.
 [subs="verbatim,quotes"]
 ----
 	@RunWith(SpringRunner.class)
-	**@ContextConfiguration({"/app-config.xml", "/test-config.xml"})**
+	**@ContextConfiguration(locations = ""/app-config.xml", "/test-config.xml"})**
 	public class MyTest {
 		// class body...
 	}
@@ -1457,7 +1457,7 @@ TestContext Framework is enabled automatically if Groovy is on the classpath.
 	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from "/AppConfig.groovy" and
 	// "/TestConfig.groovy" in the root of the classpath
-	**@ContextConfiguration({"/AppConfig.groovy", "/TestConfig.Groovy"})**
+	**@ContextConfiguration(locations = ""/AppConfig.groovy", "/TestConfig.Groovy"})**
 	public class MyTest {
 		// class body...
 	}
@@ -1500,7 +1500,7 @@ The following listing demonstrates how to combine both in an integration test.
 	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from
 	// "/app-config.xml" and "/TestConfig.groovy"
-	@ContextConfiguration({ "/app-config.xml", "/TestConfig.groovy" })
+	@ContextConfiguration(locations = " "/app-config.xml", "/TestConfig.groovy" })
 	public class MyTest {
 		// class body...
 	}
@@ -1691,14 +1691,14 @@ therefore __override__ (i.e., replace) those defined in __"base-config.xml"__.
 	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from "/base-config.xml"
 	// in the root of the classpath
-	**@ContextConfiguration("/base-config.xml")**
+	**@ContextConfiguration(locations = "/base-config.xml")**
 	public class BaseTest {
 		// class body...
 	}
 
 	// ApplicationContext will be loaded from "/base-config.xml" and
 	// "/extended-config.xml" in the root of the classpath
-	**@ContextConfiguration("/extended-config.xml")**
+	**@ContextConfiguration(locations = "/extended-config.xml")**
 	public class ExtendedTest extends BaseTest {
 		// class body...
 	}
@@ -1822,8 +1822,8 @@ Let's take a look at some examples with XML configuration and `@Configuration` c
 
 	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from "classpath:/app-config.xml"
-	@ContextConfiguration("/app-config.xml")
-	@ActiveProfiles("dev")
+	@ContextConfiguration(locations = "/app-config.xml")
+	@ActiveProfiles(profiles = "dev")
 	public class TransferServiceTest {
 
 		@Autowired
@@ -1843,7 +1843,7 @@ When `TransferServiceTest` is run, its `ApplicationContext` will be loaded from 
 `dataSource` is defined three times: in the __production__ profile, the
 __dev__ profile, and the __default__ profile.
 
-By annotating `TransferServiceTest` with `@ActiveProfiles("dev")` we instruct the Spring
+By annotating `TransferServiceTest` with `@ActiveProfiles(profiles = "dev")` we instruct the Spring
 TestContext Framework to load the `ApplicationContext` with the active profiles set to
 `{"dev"}`. As a result, an embedded database will be created and populated with test data,
 and the `accountRepository` bean will be wired with a reference to the development
@@ -1945,7 +1945,7 @@ integration test but using `@Configuration` classes instead of XML.
 			StandaloneDataConfig.class,
 			JndiDataConfig.class,
 			DefaultDataConfig.class})
-	@ActiveProfiles("dev")
+	@ActiveProfiles(profiles = "dev")
 	public class TransferServiceTest {
 
 		@Autowired
@@ -1971,7 +1971,7 @@ In this variation, we have split the XML configuration into four independent
   no profile is active
 
 As with the XML-based configuration example, we still annotate `TransferServiceTest`
-with `@ActiveProfiles("dev")`, but this time we specify all four configuration classes
+with `@ActiveProfiles(profiles = "dev")`, but this time we specify all four configuration classes
 via the `@ContextConfiguration` annotation. The body of the test class itself remains
 completely unchanged.
 
@@ -1993,7 +1993,7 @@ annotations) has been moved to an abstract superclass, `AbstractIntegrationTest`
 			StandaloneDataConfig.class,
 			JndiDataConfig.class,
 			DefaultDataConfig.class})
-	@ActiveProfiles("dev")
+	@ActiveProfiles(profiles = "dev")
 	public abstract class AbstractIntegrationTest {
 	}
 ----
@@ -2121,7 +2121,7 @@ be loaded using the specified resource protocol. Resource location wildcards (e.
 [subs="verbatim,quotes"]
 ----
 	@ContextConfiguration
-	@TestPropertySource("/test.properties")
+	@TestPropertySource(locations = "/test.properties")
 	public class MyIntegrationTests {
 		// class body...
 	}
@@ -2211,13 +2211,13 @@ only the `"base.properties"` file as a test property source. In contrast, the
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@TestPropertySource("base.properties")
+	@TestPropertySource(locations = "base.properties")
 	@ContextConfiguration
 	public class BaseTest {
 		// ...
 	}
 
-	@TestPropertySource("extended.properties")
+	@TestPropertySource(locations = "extended.properties")
 	@ContextConfiguration
 	public class ExtendedTest extends BaseTest {
 		// ...
@@ -2311,7 +2311,7 @@ nested `@Configuration` classes).
 	@WebAppConfiguration("webapp")
 
 	// classpath resource
-	@ContextConfiguration("/spring/test-servlet-config.xml")
+	@ContextConfiguration(locations = "/spring/test-servlet-config.xml")
 
 	public class WacTests {
 		//...
@@ -2334,7 +2334,7 @@ whereas, `@ContextConfiguration` resource locations are classpath based.
 	@WebAppConfiguration("classpath:test-web-resources")
 
 	// file system resource
-	@ContextConfiguration("file:src/main/webapp/WEB-INF/servlet-config.xml")
+	@ContextConfiguration(locations = "file:src/main/webapp/WEB-INF/servlet-config.xml")
 
 	public class WacTests {
 		//...
@@ -2554,13 +2554,13 @@ for the concrete subclasses.
 ----
 	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
-	@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
+	@ContextConfiguration(locations = "file:src/main/webapp/WEB-INF/applicationContext.xml")
 	public abstract class AbstractWebTests {}
 
-	@ContextHierarchy(@ContextConfiguration("/spring/soap-ws-config.xml")
+	@ContextHierarchy(@ContextConfiguration(locations = "/spring/soap-ws-config.xml")
 	public class SoapWebServiceTests extends AbstractWebTests {}
 
-	@ContextHierarchy(@ContextConfiguration("/spring/rest-ws-config.xml")
+	@ContextHierarchy(@ContextConfiguration(locations = "/spring/rest-ws-config.xml")
 	public class RestWebServiceTests extends AbstractWebTests {}
 ----
 --
@@ -2693,7 +2693,7 @@ The first code listing shows a JUnit 4 based implementation of the test class th
 ----
 	@RunWith(SpringRunner.class)
 	// specifies the Spring configuration to load for this test fixture
-	**@ContextConfiguration("repository-config.xml")**
+	**@ContextConfiguration(locations= " repository-config.xml")**
 	public class HibernateTitleRepositoryTests {
 
 		// this instance will be dependency injected by type
@@ -2716,7 +2716,7 @@ seen below.
 ----
 	@RunWith(SpringRunner.class)
 	// specifies the Spring configuration to load for this test fixture
-	**@ContextConfiguration("repository-config.xml")**
+	**@ContextConfiguration(locations= " repository-config.xml")**
 	public class HibernateTitleRepositoryTests {
 
 		// this instance will be dependency injected by type
@@ -3097,7 +3097,7 @@ to run within a transaction.
 `TransactionalTestExecutionListener` expects a `PlatformTransactionManager` bean to be
 defined in the Spring `ApplicationContext` for the test. In case there are multiple
 instances of `PlatformTransactionManager` within the test's `ApplicationContext`, a
-_qualifier_ may be declared via `@Transactional("myTxMgr")` or
+_qualifier_ may be declared via `@Transactional(transactionManager = "myTxMgr")` or
 `@Transactional(transactionManager = "myTxMgr")`, or `TransactionManagementConfigurer`
 can be implemented by an `@Configuration` class. Consult the javadocs for
 `TestContextTransactionUtils.retrieveTransactionManager()` for details on the algorithm
@@ -3320,7 +3320,7 @@ level within a JUnit 4 based integration test class.
 ----
 	@RunWith(SpringRunner.class)
 	@ContextConfiguration
-	@Sql("/test-schema.sql")
+	@Sql(scripts = "/test-schema.sql")
 	public class DatabaseTests {
 
 		@Test
@@ -3329,7 +3329,7 @@ level within a JUnit 4 based integration test class.
 		}
 
 		@Test
-		@Sql({"/test-schema.sql", "/test-user-data.sql"})
+		@Sql(scripts = ""/test-schema.sql", "/test-user-data.sql"})
 		public void userTest {
 			// execute code that uses the test schema and test data
 		}
@@ -3366,7 +3366,7 @@ single-line comments.
 ----
 	@Test
 	@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`"))
-	@Sql("/test-user-data.sql")
+	@Sql(scripts = "/test-user-data.sql")
 	public void userTest {
 		// execute code that uses the test schema and test data
 	}
@@ -3381,7 +3381,7 @@ grouped together within `@SqlGroup` for compatibility with Java 6 and Java 7.
 	@Test
 	@SqlGroup({
 		@Sql(scripts = "/test-schema.sql", config = @SqlConfig(commentPrefix = "`")),
-		@Sql("/test-user-data.sql")
+		@Sql(scripts = "/test-user-data.sql")
 	)}
 	public void userTest {
 		// execute code that uses the test schema and test data
@@ -3482,7 +3482,7 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 		}
 
 		@Test
-		@Sql("/test-data.sql")
+		@Sql(scripts = "/test-data.sql")
 		public void usersTest() {
 			// verify state in test database:
 			assertNumUsers(2);
@@ -3719,7 +3719,7 @@ JUnit 4 based example of using Spring MVC Test:
 
 	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
-	@ContextConfiguration("test-servlet-context.xml")
+	@ContextConfiguration(locations= " test-servlet-context.xml")
 	public class ExampleTests {
 
 		@Autowired
@@ -3779,7 +3779,7 @@ into the test to use to build a `MockMvc` instance:
 ----
 	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
-	@ContextConfiguration("my-servlet-context.xml")
+	@ContextConfiguration(locations= " my-servlet-context.xml")
 	public class MyWebTests {
 
 		@Autowired
@@ -3844,7 +3844,7 @@ expectations:
 ----
 	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
-	@ContextConfiguration("test-servlet-context.xml")
+	@ContextConfiguration(locations= " test-servlet-context.xml")
 	public class AccountTests {
 
 		@Autowired
