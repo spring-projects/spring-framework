@@ -18,27 +18,27 @@ package org.springframework.test.context.junit.jupiter;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Integration tests which demonstrate usage of {@link DisabledIf @DisabledIf}
- * enabled by {@link SpringExtension} in a JUnit 5 (Jupiter) environment.
+ * Integration tests which verify support for {@link DisabledIf @DisabledIf}
+ * in conjunction with the {@link SpringExtension} in a JUnit 5 (Jupiter)
+ * environment.
  *
  * @author Tadaya Tsuyukubo
+ * @author Sam Brannen
  * @since 5.0
  * @see DisabledIf
  * @see SpringExtension
  */
 class DisabledIfTestCase {
 
-	@ExtendWith(SpringExtension.class)
-	@ContextConfiguration(classes = Config.class)
+	@SpringJUnitConfig(Config.class)
 	@TestPropertySource(properties = "foo = true")
 	@Nested
 	class DisabledIfOnMethodTestCase {
@@ -74,6 +74,18 @@ class DisabledIfTestCase {
 		}
 
 		@Test
+		@DisabledIf("#{6 * 7 == 42}")
+		void disabledBySpelMathematicalComparison() {
+			fail("This test must be disabled");
+		}
+
+		@Test
+		@DisabledOnMac
+		void disabledBySpelOsCheckInCustomComposedAnnotation() {
+			assertFalse(System.getProperty("os.name").contains("Mac"), "This test must be disabled on Mac OS");
+		}
+
+		@Test
 		@DisabledIf("#{@booleanTrueBean}")
 		void disabledBySpelBooleanTrueBean() {
 			fail("This test must be disabled");
@@ -87,8 +99,7 @@ class DisabledIfTestCase {
 
 	}
 
-	@ExtendWith(SpringExtension.class)
-	@ContextConfiguration(classes = Config.class)
+	@SpringJUnitConfig(Config.class)
 	@Nested
 	@DisabledIf("true")
 	class DisabledIfOnClassTestCase {
@@ -98,7 +109,8 @@ class DisabledIfTestCase {
 			fail("This test must be disabled");
 		}
 
-		// Even though method level condition is not disabling test, class level condition should take precedence
+		// Even though method level condition is not disabling test, class level condition
+		// should take precedence
 		@Test
 		@DisabledIf("false")
 		void bar() {
@@ -109,6 +121,7 @@ class DisabledIfTestCase {
 
 	@Configuration
 	static class Config {
+
 		@Bean
 		Boolean booleanTrueBean() {
 			return Boolean.TRUE;
