@@ -16,11 +16,6 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.messaging.simp.SimpMessageType;
 
 /**
@@ -32,62 +27,55 @@ import org.springframework.messaging.simp.SimpMessageType;
 public enum StompCommand {
 
 	// client
-	CONNECT,
-	STOMP,
-	DISCONNECT,
-	SUBSCRIBE,
-	UNSUBSCRIBE,
-	SEND,
-	ACK,
-	NACK,
-	BEGIN,
-	COMMIT,
-	ABORT,
+	CONNECT(SimpMessageType.CONNECT, 0),
+	STOMP(SimpMessageType.CONNECT, 0),
+	DISCONNECT(SimpMessageType.DISCONNECT, 0),
+	SUBSCRIBE(SimpMessageType.SUBSCRIBE, 3),
+	UNSUBSCRIBE(SimpMessageType.UNSUBSCRIBE, 2),
+	SEND(SimpMessageType.MESSAGE, 13),
+	ACK(SimpMessageType.OTHER, 0),
+	NACK(SimpMessageType.OTHER, 0),
+	BEGIN(SimpMessageType.OTHER, 0),
+	COMMIT(SimpMessageType.OTHER, 0),
+	ABORT(SimpMessageType.OTHER, 0),
 
 	// server
-	CONNECTED,
-	MESSAGE,
-	RECEIPT,
-	ERROR;
+	CONNECTED(SimpMessageType.OTHER, 0),
+	MESSAGE(SimpMessageType.MESSAGE, 15),
+	RECEIPT(SimpMessageType.OTHER, 0),
+	ERROR(SimpMessageType.OTHER, 12);
 
+	private static final int DESTINATION_REQUIRED = 1;
+	private static final int SUBSCRIPTION_ID_REQUIRED = 2;
+	private static final int CONTENT_LENGTH_REQUIRED = 4;
+	private static final int BODY_ALLOWED = 8;
 
-	private static Map<StompCommand, SimpMessageType> messageTypes = new HashMap<>();
-	static {
-		messageTypes.put(StompCommand.CONNECT, SimpMessageType.CONNECT);
-		messageTypes.put(StompCommand.STOMP, SimpMessageType.CONNECT);
-		messageTypes.put(StompCommand.SEND, SimpMessageType.MESSAGE);
-		messageTypes.put(StompCommand.MESSAGE, SimpMessageType.MESSAGE);
-		messageTypes.put(StompCommand.SUBSCRIBE, SimpMessageType.SUBSCRIBE);
-		messageTypes.put(StompCommand.UNSUBSCRIBE, SimpMessageType.UNSUBSCRIBE);
-		messageTypes.put(StompCommand.DISCONNECT, SimpMessageType.DISCONNECT);
+	private final SimpMessageType simpMessageType;
+	private final int flags;
+
+	StompCommand(final SimpMessageType simpMessageType, final int flags) {
+		this.simpMessageType = simpMessageType;
+		this.flags = flags;
 	}
 
-	private static Collection<StompCommand> destinationRequired = Arrays.asList(SEND, SUBSCRIBE, MESSAGE);
-	private static Collection<StompCommand> subscriptionIdRequired = Arrays.asList(SUBSCRIBE, UNSUBSCRIBE, MESSAGE);
-	private static Collection<StompCommand> contentLengthRequired = Arrays.asList(SEND, MESSAGE, ERROR);
-	private static Collection<StompCommand> bodyAllowed = Arrays.asList(SEND, MESSAGE, ERROR);
-
-
-
 	public SimpMessageType getMessageType() {
-		SimpMessageType type = messageTypes.get(this);
-		return (type != null) ? type : SimpMessageType.OTHER;
+		return simpMessageType;
 	}
 
 	public boolean requiresDestination() {
-		return destinationRequired.contains(this);
+		return (flags & DESTINATION_REQUIRED) != 0;
 	}
 
 	public boolean requiresSubscriptionId() {
-		return subscriptionIdRequired.contains(this);
+		return (flags & SUBSCRIPTION_ID_REQUIRED) != 0;
 	}
 
 	public boolean requiresContentLength() {
-		return contentLengthRequired.contains(this);
+		return (flags & CONTENT_LENGTH_REQUIRED) != 0;
 	}
 
 	public boolean isBodyAllowed() {
-		return bodyAllowed.contains(this);
+		return (flags & BODY_ALLOWED) != 0;
 	}
 
 }
