@@ -27,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import org.springframework.util.MimeType.SpecificityComparator;
 
@@ -187,6 +188,10 @@ public abstract class MimeTypeUtils {
 	 */
 	public final static String TEXT_XML_VALUE = "text/xml";
 
+	/**
+	 * Pattern that is used to split mime types.
+	 */
+	private static final Pattern MIME_TYPE_SPLIT_PATTERN = Pattern.compile(",\\s*");
 
 	static {
 		ALL = MimeType.valueOf(ALL_VALUE);
@@ -274,7 +279,7 @@ public abstract class MimeTypeUtils {
 		if (!StringUtils.hasLength(mimeTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = mimeTypes.split(",\\s*");
+		String[] tokens = MIME_TYPE_SPLIT_PATTERN.split(mimeTypes);
 		List<MimeType> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMimeType(token));

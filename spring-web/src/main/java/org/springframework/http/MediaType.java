@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
@@ -222,6 +223,10 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public final static String TEXT_XML_VALUE = "text/xml";
 
+	/**
+	 * Pattern that is used to split media types.
+	 */
+	private static final Pattern MEDIA_TYPE_SPLIT_PATTERN = Pattern.compile(",\\s*");
 
 	private static final String PARAM_QUALITY_FACTOR = "q";
 
@@ -439,7 +444,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = mediaTypes.split(",\\s*");
+		String[] tokens = MEDIA_TYPE_SPLIT_PATTERN.split(mediaTypes);
 		List<MediaType> result = new ArrayList<>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMediaType(token));
