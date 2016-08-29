@@ -248,37 +248,38 @@ public class ResourceHttpRequestHandlerTests {
 		ContentNegotiationManager manager = factory.getObject();
 
 		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
-		this.handler = new ResourceHttpRequestHandler();
-		this.handler.setLocations(paths);
-		this.handler.setContentNegotiationManager(manager);
-		this.handler.afterPropertiesSet();
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setServletContext(new MockServletContext());
+		handler.setLocations(paths);
+		handler.setContentNegotiationManager(manager);
+		handler.afterPropertiesSet();
 
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
-		this.handler.handleRequest(this.request, this.response);
+		handler.handleRequest(this.request, this.response);
 
 		assertEquals("foo/bar", this.response.getContentType());
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
-	@Test // SPR-13658
-	public void getResourceWithRegisteredMediaTypeDefaultStrategy() throws Exception {
+	@Test // SPR-14577
+	public void getMediaTypeWithFavorPathExtensionOff() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.setFavorPathExtension(false);
-		factory.setDefaultContentType(new MediaType("foo", "bar"));
 		factory.afterPropertiesSet();
 		ContentNegotiationManager manager = factory.getObject();
 
 		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
-		this.handler = new ResourceHttpRequestHandler();
-		this.handler.setLocations(paths);
-		this.handler.setContentNegotiationManager(manager);
-		this.handler.afterPropertiesSet();
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setServletContext(new MockServletContext());
+		handler.setLocations(paths);
+		handler.setContentNegotiationManager(manager);
+		handler.afterPropertiesSet();
 
-		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
-		this.handler.handleRequest(this.request, this.response);
+		this.request.addHeader("Accept", "application/json,text/plain,*/*");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.html");
+		handler.handleRequest(this.request, this.response);
 
-		assertEquals("foo/bar", this.response.getContentType());
-		assertEquals("h1 { color:red; }", this.response.getContentAsString());
+		assertEquals("text/html", this.response.getContentType());
 	}
 
 	@Test // SPR-14368
@@ -297,13 +298,13 @@ public class ResourceHttpRequestHandlerTests {
 		};
 
 		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
-		this.handler = new ResourceHttpRequestHandler();
-		this.handler.setServletContext(servletContext);
-		this.handler.setLocations(paths);
-		this.handler.afterPropertiesSet();
+		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
+		handler.setServletContext(servletContext);
+		handler.setLocations(paths);
+		handler.afterPropertiesSet();
 
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
-		this.handler.handleRequest(this.request, this.response);
+		handler.handleRequest(this.request, this.response);
 
 		assertEquals("foo/bar", this.response.getContentType());
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
@@ -412,6 +413,7 @@ public class ResourceHttpRequestHandlerTests {
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
 		handler.setResourceResolvers(Collections.singletonList(pathResolver));
+		handler.setServletContext(new MockServletContext());
 		handler.setLocations(Arrays.asList(location1, location2));
 		handler.afterPropertiesSet();
 

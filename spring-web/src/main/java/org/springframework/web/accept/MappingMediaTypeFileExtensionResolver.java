@@ -67,6 +67,10 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	}
 
 
+	public Map<String, MediaType> getMediaTypes() {
+		return this.mediaTypes;
+	}
+
 	protected List<MediaType> getAllMediaTypes() {
 		return new ArrayList<MediaType>(this.mediaTypes.values());
 	}

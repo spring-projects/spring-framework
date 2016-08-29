@@ -19,7 +19,9 @@ package org.springframework.web.servlet.resource;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
@@ -51,6 +53,7 @@ import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
+import org.springframework.web.accept.ServletPathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -111,7 +114,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private final ContentNegotiationManagerFactoryBean cnmFactoryBean = new ContentNegotiationManagerFactoryBean();
+	private ServletPathExtensionContentNegotiationStrategy pathExtensionStrategy;
+
+	private ServletContext servletContext;
 
 	private CorsConfiguration corsConfiguration;
 
@@ -254,7 +259,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	@Override
 	protected void initServletContext(ServletContext servletContext) {
-		this.cnmFactoryBean.setServletContext(servletContext);
+		this.servletContext = servletContext;
 	}
 
 
@@ -268,16 +273,13 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
 		initAllowedLocations();
-		if (this.contentNegotiationManager == null) {
-			this.cnmFactoryBean.afterPropertiesSet();
-			this.contentNegotiationManager = this.cnmFactoryBean.getObject();
-		}
 		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
 		}
 		if (this.resourceRegionHttpMessageConverter == null) {
 			this.resourceRegionHttpMessageConverter = new ResourceRegionHttpMessageConverter();
 		}
+		this.pathExtensionStrategy = initPathExtensionStrategy();
 	}
 
 	/**
@@ -299,6 +301,19 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			}
 		}
 	}
+
+	protected ServletPathExtensionContentNegotiationStrategy initPathExtensionStrategy() {
+		Map<String, MediaType> mediaTypes = null;
+		if (getContentNegotiationManager() != null) {
+			PathExtensionContentNegotiationStrategy strategy =
+					getContentNegotiationManager().getStrategy(PathExtensionContentNegotiationStrategy.class);
+			if (strategy != null) {
+				mediaTypes = new HashMap<String, MediaType>(strategy.getMediaTypes());
+			}
+		}
+		return new ServletPathExtensionContentNegotiationStrategy(this.servletContext, mediaTypes);
+	}
+
 
 	/**
 	 * Processes a resource request.
@@ -512,32 +527,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	@SuppressWarnings("deprecation")
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
-		// For backwards compatibility
-		MediaType mediaType = getMediaType(resource);
-		if (mediaType != null) {
-			return mediaType;
-		}
-
-		Class<PathExtensionContentNegotiationStrategy> clazz = PathExtensionContentNegotiationStrategy.class;
-		PathExtensionContentNegotiationStrategy strategy = this.contentNegotiationManager.getStrategy(clazz);
-		if (strategy != null) {
-			mediaType = strategy.getMediaTypeForResource(resource);
-		}
-
-		if (mediaType == null) {
-			ServletWebRequest webRequest = new ServletWebRequest(request);
-			try {
-				List<MediaType> mediaTypes = getContentNegotiationManager().resolveMediaTypes(webRequest);
-				if (!mediaTypes.isEmpty()) {
-					mediaType = mediaTypes.get(0);
-				}
-			}
-			catch (HttpMediaTypeNotAcceptableException ex) {
-				// Ignore
-			}
-		}
-
-		return mediaType;
+		return this.pathExtensionStrategy.getMediaTypeForResource(resource);
 	}
 
 	/**
