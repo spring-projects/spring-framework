@@ -48,10 +48,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.accept.ServletPathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -216,17 +214,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Configure a {@code ContentNegotiationManager} to determine the media types
-	 * for resources being served. If the manager contains a path
-	 * extension strategy it will be used to look up the file extension
-	 * of resources being served via
-	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource
-	 * getMediaTypeForResource}. If that fails the check is then expanded
-	 * to use any configured content negotiation strategy against the request.
-	 * <p>By default a {@link ContentNegotiationManagerFactoryBean} with default
-	 * settings is used to create the manager. See the Javadoc of
-	 * {@code ContentNegotiationManagerFactoryBean} for details
-	 * @param contentNegotiationManager the manager to use
+	 * Configure a {@code ContentNegotiationManager} to help determine the
+	 * media types for resources being served. If the manager contains a path
+	 * extension strategy it will be checked for registered file extension.
+	 * @param contentNegotiationManager the manager in use
 	 * @since 4.3
 	 */
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
@@ -234,7 +225,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Return the specified content negotiation manager.
+	 * Return the configured content negotiation manager.
 	 * @since 4.3
 	 */
 	public ContentNegotiationManager getContentNegotiationManager() {
@@ -516,17 +507,20 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	/**
 	 * Determine the media type for the given request and the resource matched
-	 * to it. This implementation first tries to determine the MediaType based
-	 * strictly on the file extension of the Resource via
-	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource}
-	 * and then expands to check against the request via
-	 * {@link ContentNegotiationManager#resolveMediaTypes}.
+	 * to it. This implementation tries to determine the MediaType based on the
+	 * file extension of the Resource via
+	 * {@link ServletPathExtensionContentNegotiationStrategy#getMediaTypeForResource}.
 	 * @param request the current request
 	 * @param resource the resource to check
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
 	@SuppressWarnings("deprecation")
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
+		// For backwards compatibility
+		MediaType mediaType = getMediaType(resource);
+		if (mediaType != null) {
+			return mediaType;
+		}
 		return this.pathExtensionStrategy.getMediaTypeForResource(resource);
 	}
 
