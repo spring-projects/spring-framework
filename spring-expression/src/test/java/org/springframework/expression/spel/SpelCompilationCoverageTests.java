@@ -248,7 +248,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(false,expression.getValue());
 		assertCanCompile(expression);
 		assertEquals(false,expression.getValue());
-		
+	
 		// double slot left operand - should get boxed, return false
 		expression = parse("3.0d instanceof T(Integer)");
 		assertEquals(false,expression.getValue());
@@ -260,7 +260,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(true,expression.getValue());
 		assertCanCompile(expression);
 		assertEquals(true,expression.getValue());
-		
+	
 		// Only when the right hand operand is a direct type reference
 		// will it be compilable.
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
@@ -275,13 +275,13 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(false,expression.getValue());
 		assertCanCompile(expression);
 		assertEquals(false,expression.getValue());
-		
+	
 		expression = parse("3 instanceof T(long)");
 		assertEquals(false,expression.getValue());
 		assertCanCompile(expression);
 		assertEquals(false,expression.getValue());
 	}
-	
+
 	@Test
 	public void stringLiteral() throws Exception {
 		expression = parser.parseExpression("'abcde'");
@@ -3047,7 +3047,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("java.lang.String",expression.getValue());
 		assertCanCompile(expression);
 		assertEquals("java.lang.String",expression.getValue());
-	
+
 		// These tests below verify that the chain of static accesses (either method/property or field)
 		// leave the right thing on top of the stack for processing by any outer consuming code.
 		// Here the consuming code is the String.valueOf() function.  If the wrong thing were on
@@ -3089,7 +3089,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("fb",expression.getValue(StaticsHelper.sh));
 		assertCanCompile(expression);
 		assertEquals("fb",expression.getValue(StaticsHelper.sh));
-	
+
 		expression = parser.parseExpression("T(String).valueOf(propertya.propertyb)");
 		assertEquals("pb",expression.getValue(StaticsHelper.sh));
 		assertCanCompile(expression);
@@ -3099,7 +3099,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("mb",expression.getValue(StaticsHelper.sh));
 		assertCanCompile(expression);
 		assertEquals("mb",expression.getValue(StaticsHelper.sh));
-	
+
 	}
 
 	@Test
@@ -5493,7 +5493,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public static String methodb() {
 			return "mb";
 		}
-	
+
 		public static StaticsHelper getPropertya() {
 			return sh;
 		}
@@ -5501,11 +5501,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public static String getPropertyb() {
 			return "pb";
 		}
-	
+
 
 		public static StaticsHelper fielda = sh;
 		public static String fieldb = "fb";
-	
+
 		public String toString() {
 			return "sh";
 		}

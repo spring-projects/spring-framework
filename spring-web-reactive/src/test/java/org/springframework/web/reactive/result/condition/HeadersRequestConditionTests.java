@@ -57,7 +57,7 @@ public class HeadersRequestConditionTests {
 	public void headerPresent() throws Exception {
 		ServerWebExchange exchange = createExchange("Accept", "");
 		HeadersRequestCondition condition = new HeadersRequestCondition("accept");
-		
+	
 		assertNotNull(condition.getMatchingCondition(exchange));
 	}
 

@@ -72,7 +72,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 			{ AlwaysFailingAfterTestExecutionTestCase.class.getSimpleName(), 1, 0, 1, 0 },
 			{ AlwaysFailingAfterTestMethodTestCase.class.getSimpleName(), 1, 1, 0, 1 },
 			{ FailingBeforeTransactionTestCase.class.getSimpleName(), 1, 0, 0, 1 },
-			{ FailingAfterTransactionTestCase.class.getSimpleName(), 1, 1, 0, 1 } 
+			{ FailingAfterTransactionTestCase.class.getSimpleName(), 1, 1, 0, 1 }
 		};
 		// @formatter:on
 	}

@@ -36,7 +36,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	
+
 	/**
 	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;

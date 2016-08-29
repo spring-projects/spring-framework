@@ -124,7 +124,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	We should revisit this code once
 	https://github.com/ReactiveX/RxNetty/issues/194 has been fixed.
-	
+
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {

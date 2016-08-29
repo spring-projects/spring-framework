@@ -102,7 +102,7 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 				.assertValuesWith(stringConsumer("{\"withView1\":\"with\"}"));
 	}
 
-	
+
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 	private static class ParentClass {
 	}

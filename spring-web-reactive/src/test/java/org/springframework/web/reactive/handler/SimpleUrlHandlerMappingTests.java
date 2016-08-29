@@ -129,7 +129,7 @@ public class SimpleUrlHandlerMappingTests {
 
 	@Configuration
 	static class WebConfig {
-		
+	
 		@Bean @SuppressWarnings("unused")
 		public SimpleUrlHandlerMapping handlerMapping() {
 			SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();

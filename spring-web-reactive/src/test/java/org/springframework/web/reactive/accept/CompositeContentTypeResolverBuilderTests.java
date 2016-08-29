@@ -192,5 +192,5 @@ public class CompositeContentTypeResolverBuilderTests {
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
-	
+
 }
