@@ -96,7 +96,7 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 		Mono<DataBuffer> endArray = Mono.just(bufferFactory.wrap(END_ARRAY_BUFFER));
 
 		Flux<DataBuffer> array = Flux.from(inputStream)
-				.flatMap(value -> {
+				.concatMap(value -> {
 					DataBuffer arraySeparator = bufferFactory.wrap(SEPARATOR_BUFFER);
 					return Flux.just(encodeValue(value, bufferFactory, elementType), arraySeparator);
 				});
