@@ -252,7 +252,7 @@ public class JsonPathRequestMatchers {
 				matchInternal(mockRequest);
 			}
 			catch (ParseException ex) {
-				throw new AssertionError("Failed to parse JSON request content: " + ex.getMessage());
+				throw new AssertionError("Failed to parse JSON request content", ex);
 			}
 		}
 
