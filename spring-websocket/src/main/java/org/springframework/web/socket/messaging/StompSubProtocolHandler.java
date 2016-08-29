@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -449,8 +450,15 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 				stompAccessor = convertConnectAcktoStompConnected(stompAccessor);
 			}
 			else if (SimpMessageType.DISCONNECT_ACK.equals(messageType)) {
-				stompAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
-				stompAccessor.setMessage("Session closed.");
+				String receipt = getDisconnectReceipt(stompAccessor);
+				if (receipt != null) {
+					stompAccessor = StompHeaderAccessor.create(StompCommand.RECEIPT);
+					stompAccessor.setReceiptId(receipt);
+				}
+				else {
+					stompAccessor = StompHeaderAccessor.create(StompCommand.ERROR);
+					stompAccessor.setMessage("Session closed.");
+				}
 			}
 			else if (SimpMessageType.HEARTBEAT.equals(messageType)) {
 				stompAccessor = StompHeaderAccessor.createForHeartbeat();
@@ -501,6 +509,16 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 
 		return connectedHeaders;
+	}
+
+	private String getDisconnectReceipt(SimpMessageHeaderAccessor simpHeaders) {
+		String name = StompHeaderAccessor.DISCONNECT_MESSAGE_HEADER;
+		Message<?> message = (Message<?>) simpHeaders.getHeader(name);
+		if (message != null) {
+			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+			return accessor.getReceipt();
+		}
+		return null;
 	}
 
 	protected StompHeaderAccessor toMutableAccessor(StompHeaderAccessor headerAccessor, Message<?> message) {
