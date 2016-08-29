@@ -51,6 +51,12 @@ class DisabledIfTestCase {
 		}
 
 		@Test
+		@DisabledIf("   true   ")
+		void disabledByStringTrueWithSurroundingWhitespace() {
+			fail("This test must be disabled");
+		}
+
+		@Test
 		@DisabledIf("TrUe")
 		void disabledByStringTrueIgnoreCase() {
 			fail("This test must be disabled");
@@ -63,8 +69,20 @@ class DisabledIfTestCase {
 		}
 
 		@Test
+		@DisabledIf("\t${foo}   ")
+		void disabledByPropertyPlaceholderWithSurroundingWhitespace() {
+			fail("This test must be disabled");
+		}
+
+		@Test
 		@DisabledIf("#{T(java.lang.Boolean).TRUE}")
 		void disabledBySpelBoolean() {
+			fail("This test must be disabled");
+		}
+
+		@Test
+		@DisabledIf("   #{T(java.lang.Boolean).TRUE}   ")
+		void disabledBySpelBooleanWithSurroundingWhitespace() {
 			fail("This test must be disabled");
 		}
 

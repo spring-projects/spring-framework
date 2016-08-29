@@ -82,9 +82,11 @@ public class DisabledIfCondition implements ContainerExecutionCondition, TestExe
 		Optional<DisabledIf> disabledIf = findMergedAnnotation(element, DisabledIf.class);
 		Assert.state(disabledIf.isPresent(), () -> "@DisabledIf must be present on " + element);
 
-		String expression = disabledIf.map(DisabledIf::expression).filter(StringUtils::hasText).orElseThrow(
-			() -> new IllegalStateException(
-				String.format("The expression in @DisabledIf on [%s] must not be blank", element)));
+		// @formatter:off
+		String expression = disabledIf.map(DisabledIf::expression).map(String::trim).filter(StringUtils::hasLength)
+				.orElseThrow(() -> new IllegalStateException(String.format(
+						"The expression in @DisabledIf on [%s] must not be blank", element)));
+		// @formatter:on
 
 		if (isDisabled(expression, extensionContext)) {
 			String reason = disabledIf.map(DisabledIf::reason).filter(StringUtils::hasText).orElseGet(
