@@ -250,7 +250,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 		else if (SimpMessageType.DISCONNECT.equals(messageType)) {
 			logMessage(message);
-			handleDisconnect(sessionId, user);
+			handleDisconnect(sessionId, user, message);
 		}
 		else if (SimpMessageType.SUBSCRIBE.equals(messageType)) {
 			logMessage(message);
@@ -285,12 +285,15 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
-	private void handleDisconnect(String sessionId, Principal user) {
+	private void handleDisconnect(String sessionId, Principal user, Message<?> origMessage) {
 		this.sessions.remove(sessionId);
 		this.subscriptionRegistry.unregisterAllSubscriptions(sessionId);
 		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.DISCONNECT_ACK);
 		accessor.setSessionId(sessionId);
 		accessor.setUser(user);
+		if (origMessage != null) {
+			accessor.setHeader(SimpMessageHeaderAccessor.DISCONNECT_MESSAGE_HEADER, origMessage);
+		}
 		initHeaders(accessor);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
 		getClientOutboundChannel().send(message);
@@ -407,7 +410,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			long now = System.currentTimeMillis();
 			for (SessionInfo info : sessions.values()) {
 				if (info.getReadInterval() > 0 && (now - info.getLastReadTime()) > info.getReadInterval()) {
-					handleDisconnect(info.getSessiondId(), info.getUser());
+					handleDisconnect(info.getSessiondId(), info.getUser(), null);
 				}
 				if (info.getWriteInterval() > 0 && (now - info.getLastWriteTime()) > info.getWriteInterval()) {
 					SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.HEARTBEAT);
