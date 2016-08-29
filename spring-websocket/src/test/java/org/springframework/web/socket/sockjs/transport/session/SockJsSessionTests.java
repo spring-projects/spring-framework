@@ -270,6 +270,7 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 	@Test
 	public void sendHeartbeatWhenDisabled() throws Exception {
 		this.session.disableHeartbeat();
+		this.session.setActive(true);
 		this.session.sendHeartbeat();
 
 		assertEquals(Collections.emptyList(), this.session.getSockJsFramesWritten());
@@ -292,7 +293,6 @@ public class SockJsSessionTests extends AbstractSockJsSessionTests<TestSockJsSes
 
 		this.session.cancelHeartbeat();
 
-		verify(task).isCancelled();
 		verify(task).cancel(false);
 		verifyNoMoreInteractions(task);
 	}
