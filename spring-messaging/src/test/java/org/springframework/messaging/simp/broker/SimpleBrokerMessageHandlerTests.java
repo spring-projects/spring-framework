@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.springframework.messaging.simp.broker;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -40,6 +37,21 @@ import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.TaskScheduler;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for SimpleBrokerMessageHandler.
@@ -72,7 +84,7 @@ public class SimpleBrokerMessageHandlerTests {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.messageHandler = new SimpleBrokerMessageHandler(this.clientInboundChannel,
-				this.clientOutboundChannel, this.brokerChannel, Collections.<String>emptyList());
+				this.clientOutboundChannel, this.brokerChannel, Collections.emptyList());
 	}
 
 
@@ -130,6 +142,7 @@ public class SimpleBrokerMessageHandlerTests {
 
 		Message<?> captured = this.messageCaptor.getAllValues().get(0);
 		assertEquals(SimpMessageType.DISCONNECT_ACK, SimpMessageHeaderAccessor.getMessageType(captured.getHeaders()));
+		assertSame(message, captured.getHeaders().get(SimpMessageHeaderAccessor.DISCONNECT_MESSAGE_HEADER));
 		assertEquals(sess1, SimpMessageHeaderAccessor.getSessionId(captured.getHeaders()));
 		assertEquals("joe", SimpMessageHeaderAccessor.getUser(captured.getHeaders()).getName());
 
