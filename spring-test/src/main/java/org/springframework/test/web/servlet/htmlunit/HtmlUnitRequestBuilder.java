@@ -50,6 +50,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -213,8 +214,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	private void authType(MockHttpServletRequest request) {
 		String authorization = header("Authorization");
 		if (authorization != null) {
-			String[] authzParts = authorization.split(": ");
-			request.setAuthType(authzParts[0]);
+			request.setAuthType(StringUtils.split(authorization, ": ")[0]);
 		}
 	}
 
@@ -349,9 +349,9 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			request.addPreferredLocale(Locale.getDefault());
 		}
 		else {
-			String[] locales = locale.split(", ");
-			for (int i = locales.length - 1; i >= 0; i--) {
-				request.addPreferredLocale(parseLocale(locales[i]));
+			String[] tokens = StringUtils.tokenizeToStringArray(locale, ",");
+			for (int i = tokens.length - 1; i >= 0; i--) {
+				request.addPreferredLocale(parseLocale(tokens[i]));
 			}
 		}
 	}

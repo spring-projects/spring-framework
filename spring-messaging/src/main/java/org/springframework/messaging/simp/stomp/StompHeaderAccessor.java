@@ -229,10 +229,10 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public long[] getHeartbeat() {
 		String rawValue = getFirstNativeHeader(STOMP_HEARTBEAT_HEADER);
-		if (!StringUtils.hasText(rawValue)) {
+		String[] rawValues = StringUtils.split(rawValue, ",");
+		if (rawValues == null) {
 			return Arrays.copyOf(DEFAULT_HEARTBEAT, 2);
 		}
-		String[] rawValues = StringUtils.commaDelimitedListToStringArray(rawValue);
 		return new long[] {Long.valueOf(rawValues[0]), Long.valueOf(rawValues[1])};
 	}
 
@@ -298,7 +298,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public void setHeartbeat(long cx, long cy) {
-		setNativeHeader(STOMP_HEARTBEAT_HEADER, StringUtils.arrayToCommaDelimitedString(new Object[]{cx, cy}));
+		setNativeHeader(STOMP_HEARTBEAT_HEADER, cx + "," + cy);
 	}
 
 	public void setAck(String ack) {
