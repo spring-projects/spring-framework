@@ -19,8 +19,6 @@ package org.springframework.http.server.reactive.bootstrap;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
 import org.springframework.util.Assert;
 
@@ -31,19 +29,13 @@ public class UndertowHttpServer extends HttpServerSupport implements HttpServer 
 
 	private Undertow server;
 
-	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-
 	private boolean running;
 
-	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
-		this.dataBufferFactory = dataBufferFactory;
-	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(getHttpHandler());
-		HttpHandler handler =
-				new UndertowHttpHandlerAdapter(getHttpHandler(), dataBufferFactory);
+		HttpHandler handler = new UndertowHttpHandlerAdapter(getHttpHandler());
 		this.server = Undertow.builder().addHttpListener(getPort(), getHost())
 				.setHandler(handler).build();
 	}

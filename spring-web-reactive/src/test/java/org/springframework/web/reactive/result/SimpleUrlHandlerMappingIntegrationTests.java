@@ -61,10 +61,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		wac.register(WebConfig.class);
 		wac.refresh();
 
-		DispatcherHandler dispatcherHandler = new DispatcherHandler();
-		dispatcherHandler.setApplicationContext(wac);
-
-		return WebHttpHandlerBuilder.webHandler(dispatcherHandler)
+		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(wac))
 				.exceptionHandlers(new ResponseStatusExceptionHandler())
 				.build();
 	}

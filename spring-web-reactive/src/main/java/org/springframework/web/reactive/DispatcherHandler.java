@@ -71,6 +71,14 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	private List<HandlerResultHandler> resultHandlers;
 
 
+	public DispatcherHandler() {
+	}
+
+	public DispatcherHandler(ApplicationContext applicationContext) {
+		initStrategies(applicationContext);
+	}
+
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		initStrategies(applicationContext);

@@ -44,9 +44,9 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 	@Override
 	protected HttpHandler createHttpHandler() {
 		this.applicationContext = initApplicationContext();
-		DispatcherHandler handler = new DispatcherHandler();
-		handler.setApplicationContext(this.applicationContext);
-		return WebHttpHandlerBuilder.webHandler(handler).build();
+		return WebHttpHandlerBuilder
+				.webHandler(new DispatcherHandler(this.applicationContext))
+				.build();
 	}
 
 	protected abstract ApplicationContext initApplicationContext();

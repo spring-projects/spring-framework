@@ -23,6 +23,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.util.Assert;
 
 /**
@@ -40,16 +41,19 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	private final HttpHandler delegate;
 
-	private final DataBufferFactory dataBufferFactory;
+	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
 
 
-	public UndertowHttpHandlerAdapter(HttpHandler delegate, DataBufferFactory dataBufferFactory) {
+	public UndertowHttpHandlerAdapter(HttpHandler delegate) {
 		Assert.notNull(delegate, "'delegate' is required");
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
 		this.delegate = delegate;
-		this.dataBufferFactory = dataBufferFactory;
 	}
 
+
+	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
+		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		this.dataBufferFactory = dataBufferFactory;
+	}
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {

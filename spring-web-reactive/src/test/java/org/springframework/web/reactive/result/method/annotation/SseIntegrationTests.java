@@ -65,10 +65,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		this.wac.register(TestConfiguration.class);
 		this.wac.refresh();
 
-		DispatcherHandler webHandler = new DispatcherHandler();
-		webHandler.setApplicationContext(this.wac);
-
-		return WebHttpHandlerBuilder.webHandler(webHandler).build();
+		return WebHttpHandlerBuilder.webHandler(new DispatcherHandler(this.wac)).build();
 	}
 
 	@Test

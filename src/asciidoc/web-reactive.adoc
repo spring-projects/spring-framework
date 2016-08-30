@@ -153,8 +153,10 @@ Single<Account> response = webClient
 [[web-reactive-getting-started-boot]]
 === Spring Boot Starter
 
-The experimental Spring Boot Web Reactive starter available via http://start.spring.io
-is the quickest way to get started. It does all the work so you can start
+The
+https://github.com/bclozel/spring-boot-web-reactive#spring-boot-web-reactive-starter[Spring Boot Web Reactive starter]
+available via http://start.spring.io
+is the fastest way to get started. It does all that's necessary so you can start
 writing `@Controller` classes. By default it runs on Tomcat but the dependencies can
 be changed as usual with Spring Boot to switch to a different runtime.
 
@@ -162,38 +164,56 @@ be changed as usual with Spring Boot to switch to a different runtime.
 [[web-reactive-getting-started-manual]]
 === Manual Bootstrapping
 
-It is also easy to get started by writing a few lines of code:
+This section outlines the steps to get up and running without Spring Boot.
+
+For dependencies start with `spring-web-reactive` and `spring-context`.
+Then add `jackson-databind` and `io.netty:netty-buffer:4.1.3.Final`
+(temporarily see https://jira.spring.io/browse/SPR-14528[SPR-14528]) for JSON support.
+Lastly add the dependencies for one of the supported runtimes:
+
+* Tomcat -- `org.apache.tomcat.embed:tomcat-embed-core`
+* Jetty -- `org.eclipse.jetty:jetty-server` and `org.eclipse.jetty:jetty-servlet`
+* Reactor Netty -- `io.projectreactor.ipc:reactor-netty`
+* RxNetty -- `io.reactivex:rxnetty-common` and `io.reactivex:rxnetty-http`
+* Undertow -- `io.undertow:undertow-core`
+
+For the bootstrap code start with:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+context.register(WebReactiveConfiguration.class); 	// (1)
+context.refresh();
+
+DispatcherHandler dispatcherHandler = new DispatcherHandler(context);	// (2)
+HttpHandler httpHandler = WebHttpHandlerBuilder.webHandler(dispatcherHandler).build();
+----
+
+The above loads default Spring Web Reactive config (1), then creates a
+`DispatcherHandler`, the main class driving request processing (2), and adapts
+it to `HttpHandler`, the lowest level Spring abstraction for reactive HTTP request handling.
+An `HttpHandler` can then be installed in each supported runtime:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-AnnotationConfigApplicationContext context;
-context = new AnnotationConfigApplicationContext();
-context.register(WebReactiveConfiguration.class); 	// (1)
-context.refresh();
+// Tomcat and Jetty
+HttpServlet servlet = new ServletHttpHandlerAdapter(httpHandler);
+...
 
-DispatcherHandler handler = new DispatcherHandler();	// (2)
-handler.setApplicationContext(context);
-HttpHandler httpHandler = WebHttpHandlerBuilder.webHandler(handler).build();
+// Reactor Netty
+HttpServer server = HttpServer.create(host, port)
+server.startAndAwait(new ServletHttpHandlerAdapter(httpHandler));
 
-HttpServer server = new TomcatHttpServer();	// (3)
-server.setPort(8080);
-server.setHandler(httpHandler);
-server.afterPropertiesSet();
-server.start();
+// RxNetty
+HttpServer server = HttpServer.newServer(new InetSocketAddress(host, port))
+server.startAndAwait(new RxNettyHttpHandlerAdapter(httpHandler));
+
+// Undertow
+Undertow.builder().addHttpListener(port, host)
+	.setHandler(new UndertowHttpHandlerAdapter(httpHandler))
+	.build()
 ----
-
-The `WebReactiveConfiguration` at (1) is the Java config from `spring-web-reactive`
-and is similar in purpose to the MVC Java config from `spring-webmvc`. It provides the
-web framework configuration required to get started leaving you only to
-declare your own `@Controller` beans.
-
-The `DispatcherHandler` at (2) is the equivalent of the `DispatcherServlet` in Spring MVC.
-
-The `HttpServer` at (3) is an abstraction from the
-https://github.com/spring-projects/spring-framework/tree/master/spring-web/src/test/java/org/springframework/http/server/reactive/bootstrap[test sources]
-of `spring-web-reactive` used for Spring Framework's own integration tests.
-The abstraction comes with basic implementations for each supported runtime.
 
 
 [[web-reactive-getting-started-M1]]

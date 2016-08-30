@@ -87,8 +87,7 @@ public class DispatcherHandlerErrorTests {
 		appContext.register(TestConfig.class);
 		appContext.refresh();
 
-		this.dispatcherHandler = new DispatcherHandler();
-		this.dispatcherHandler.setApplicationContext(appContext);
+		this.dispatcherHandler = new DispatcherHandler(appContext);
 
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
