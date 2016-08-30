@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@ public interface HandlerAdapter {
 
 	/**
 	 * Whether this {@code HandlerAdapter} supports the given {@code handler}.
-	 *
 	 * @param handler handler object to check
 	 * @return whether or not the handler is supported
 	 */
@@ -42,17 +41,14 @@ public interface HandlerAdapter {
 
 	/**
 	 * Handle the request with the given handler.
-	 *
 	 * <p>Implementations are encouraged to handle exceptions resulting from the
 	 * invocation of a handler in order and if necessary to return an alternate
 	 * result that represents an error response.
-	 *
 	 * <p>Furthermore since an async {@code HandlerResult} may produce an error
 	 * later during result handling implementations are also encouraged to
 	 * {@link HandlerResult#setExceptionHandler(Function) set an exception
 	 * handler} on the {@code HandlerResult} so that may also be applied later
 	 * after result handling.
-	 *
 	 * @param exchange current server exchange
 	 * @param handler the selected handler which must have been previously
 	 * checked via {@link #supports(Object)}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server.adapter;
 
 import org.apache.commons.logging.Log;
@@ -24,9 +25,9 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.WebHandlerDecorator;
-import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
@@ -42,7 +43,6 @@ import org.springframework.web.server.session.WebSessionManager;
 public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
 
 	private static Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
-
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
@@ -60,7 +60,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 	 * @param sessionManager the session manager to use
 	 */
 	public void setSessionManager(WebSessionManager sessionManager) {
-		Assert.notNull(sessionManager, "'sessionManager' must not be null.");
+		Assert.notNull(sessionManager, "WebSessionManager must not be null");
 		this.sessionManager = sessionManager;
 	}
 

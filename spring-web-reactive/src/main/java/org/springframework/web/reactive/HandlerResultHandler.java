@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ public interface HandlerResultHandler {
 
 	/**
 	 * Whether this handler supports the given {@link HandlerResult}.
-	 *
 	 * @param result result object to check
 	 * @return whether or not this object can use the given result
 	 */
@@ -40,7 +39,6 @@ public interface HandlerResultHandler {
 	/**
 	 * Process the given result modifying response headers and/or writing data
 	 * to the response.
-	 *
 	 * @param exchange current server exchange
 	 * @param result the result from the handling
 	 * @return {@code Mono<Void>} to indicate when request handling is complete.

@@ -66,7 +66,7 @@ public class WebHttpHandlerBuilder {
 	 * See factory method {@link #webHandler(WebHandler)}.
 	 */
 	private WebHttpHandlerBuilder(WebHandler targetHandler) {
-		Assert.notNull(targetHandler, "'targetHandler' must not be null");
+		Assert.notNull(targetHandler, "WebHandler must not be null");
 		this.targetHandler = targetHandler;
 	}
 
