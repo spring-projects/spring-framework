@@ -515,11 +515,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
-		// For backwards compatibility
-		MediaType mediaType = getMediaType(resource);
-		if (mediaType != null) {
-			return mediaType;
-		}
 		return this.pathExtensionStrategy.getMediaTypeForResource(resource);
 	}
 
