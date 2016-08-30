@@ -139,7 +139,7 @@ public class WebSocketExtension {
 		if (StringUtils.hasText(extensions)) {
 			String[] tokens = StringUtils.tokenizeToStringArray(extensions, ",");
 			List<WebSocketExtension> result = new ArrayList<WebSocketExtension>(tokens.length);
-			for (String token : StringUtils.tokenizeToStringArray(extensions, ",")) {
+			for (String token : tokens) {
 				result.add(parseExtension(token));
 			}
 			return result;
