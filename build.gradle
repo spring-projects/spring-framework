@@ -53,7 +53,7 @@ configure(allprojects) { project ->
 	ext.httpasyncVersion       = "4.1.2"
 	ext.httpclientVersion      = "4.5.2"
 	ext.interceptorApiVersion  = "1.2"
-	ext.jackson2Version        = "2.8.1"
+	ext.jackson2Version        = "2.8.2"
 	ext.javamailVersion        = "1.5.5"
 	ext.jaxbVersion            = "2.2.11"
 	ext.jaxwsVersion           = "2.2.11"
@@ -67,7 +67,7 @@ configure(allprojects) { project ->
 	ext.junitJupiterVersion    = '5.0.0-M2'
 	ext.junitPlatformVersion   = '1.0.0-M2'
 	ext.log4jVersion           = '2.6.2'
-	ext.nettyVersion           = "4.1.4.Final"
+	ext.nettyVersion           = "4.1.5.Final"
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.1"
 	ext.poiVersion             = "3.14"
