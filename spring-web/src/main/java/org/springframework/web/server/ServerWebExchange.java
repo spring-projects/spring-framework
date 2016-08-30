@@ -16,6 +16,7 @@
 
 package org.springframework.web.server;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,5 +67,43 @@ public interface ServerWebExchange {
 	 * for more details.
 	 */
 	Mono<WebSession> getSession();
+
+	/**
+	 * An overloaded variant of {@link #checkNotModified(String, Instant)} with
+	 * a last-modified timestamp only.
+	 * @param lastModified the last-modified time
+	 * @return whether the request qualifies as not modified
+	 */
+	boolean checkNotModified(Instant lastModified);
+
+	/**
+	 * An overloaded variant of {@link #checkNotModified(String, Instant)} with
+	 * an {@code ETag} (entity tag) value only.
+	 * @param etag the entity tag for the underlying resource.
+	 * @return true if the request does not require further processing.
+	 */
+	boolean checkNotModified(String etag);
+
+	/**
+	 * Check whether the requested resource has been modified given the supplied
+	 * {@code ETag} (entity tag) and last-modified timestamp as determined by
+	 * the application. Also transparently prepares the response, setting HTTP
+	 * status, and adding "ETag" and "Last-Modified" headers when applicable.
+	 * This method works with conditional GET/HEAD requests as well as with
+	 * conditional POST/PUT/DELETE requests.
+	 *
+	 * <p><strong>Note:</strong> The HTTP specification recommends setting both
+	 * ETag and Last-Modified values, but you can also use
+	 * {@code #checkNotModified(String)} or
+	 * {@link #checkNotModified(Instant)}.
+	 *
+	 * @param etag the entity tag that the application determined for the
+	 * underlying resource. This parameter will be padded with quotes (")
+	 * if necessary.
+	 * @param lastModified the last-modified timestamp that the application
+	 * determined for the underlying resource
+	 * @return true if the request does not require further processing.
+	 */
+	boolean checkNotModified(String etag, Instant lastModified);
 
 }
