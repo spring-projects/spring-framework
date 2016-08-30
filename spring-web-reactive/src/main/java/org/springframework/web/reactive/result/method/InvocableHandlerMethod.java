@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						try {
 							return resolver.resolveArgument(param, model, exchange)
 									.defaultIfEmpty(NO_VALUE)
-									.otherwise(ex -> Mono.error(getArgError("Error resolving ", param, ex)))
+									.doOnError(cause -> {
+										if(logger.isDebugEnabled()) {
+											logger.debug(getDetailedErrorMessage("Error resolving ", param), cause);
+										}
+									})
 									.log("reactor.unresolved");
 						}
 						catch (Exception ex) {
@@ -148,10 +152,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	private IllegalStateException getArgError(String message, MethodParameter param, Throwable cause) {
-		return new IllegalStateException(message +
-				"argument [" + param.getParameterIndex() + "] " +
-				"of type [" + param.getParameterType().getName() + "] " +
-				"on method [" + getBridgedMethod().toGenericString() + "]", cause);
+		return new IllegalStateException(getDetailedErrorMessage(message, param), cause);
+	}
+
+	private String getDetailedErrorMessage(String message, MethodParameter param) {
+		StringBuilder sb = new StringBuilder(message);
+		sb.append("argument [" + param.getParameterIndex() + "] ");
+		sb.append("of type [" + param.getParameterType().getName() + "] ");
+		sb.append("on method [" + getBridgedMethod().toGenericString() + "]");
+		return sb.toString();
 	}
 
 	private Object doInvoke(Object[] args) throws Exception {
