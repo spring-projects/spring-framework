@@ -277,7 +277,7 @@ public abstract class MimeTypeUtils {
 		if (!StringUtils.hasLength(mimeTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = mimeTypes.split(",\\s*");
+		String[] tokens = StringUtils.tokenizeToStringArray(mimeTypes, ",");
 		List<MimeType> result = new ArrayList<MimeType>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMimeType(token));

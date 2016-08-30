@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * e.g. extensions "foo, bar" will be executed as "bar(foo(message))".</p>
  *
  * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 4.0
  * @see <a href="https://tools.ietf.org/html/rfc6455#section-9">WebSocket Protocol Extensions, RFC 6455 - Section 9</a>
  */
@@ -68,54 +69,90 @@ public class WebSocketExtension {
 	 * @param parameters the parameters
 	 */
 	public WebSocketExtension(String name, Map<String, String> parameters) {
-		Assert.hasLength(name, "extension name must not be empty");
+		Assert.hasLength(name, "Extension name must not be empty");
 		this.name = name;
 		if (!CollectionUtils.isEmpty(parameters)) {
-			Map<String, String> m = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
-			m.putAll(parameters);
-			this.parameters = Collections.unmodifiableMap(m);
+			Map<String, String> map = new LinkedCaseInsensitiveMap<String>(parameters.size(), Locale.ENGLISH);
+			map.putAll(parameters);
+			this.parameters = Collections.unmodifiableMap(map);
 		}
 		else {
 			this.parameters = Collections.emptyMap();
 		}
 	}
 
+
 	/**
-	 * @return the name of the extension
+	 * Return the name of the extension (never {@code null) or empty}.
 	 */
 	public String getName() {
 		return this.name;
 	}
 
 	/**
-	 * @return the parameters of the extension, never {@code null}
+	 * Return the parameters of the extension (never {@code null}).
 	 */
 	public Map<String, String> getParameters() {
 		return this.parameters;
 	}
 
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other == null || getClass() != other.getClass()) {
+			return false;
+		}
+		WebSocketExtension otherExt = (WebSocketExtension) other;
+		return (this.name.equals(otherExt.name) && this.parameters.equals(otherExt.parameters));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.name.hashCode() * 31 + this.parameters.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder str = new StringBuilder();
+		str.append(this.name);
+		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
+			str.append(';');
+			str.append(entry.getKey());
+			str.append('=');
+			str.append(entry.getValue());
+		}
+		return str.toString();
+	}
+
+
 	/**
 	 * Parse the given, comma-separated string into a list of {@code WebSocketExtension} objects.
-	 * <p>This method can be used to parse a "Sec-WebSocket-Extension" extensions.
+	 * <p>This method can be used to parse a "Sec-WebSocket-Extension" header.
 	 * @param extensions the string to parse
 	 * @return the list of extensions
 	 * @throws IllegalArgumentException if the string cannot be parsed
 	 */
 	public static List<WebSocketExtension> parseExtensions(String extensions) {
-		if (extensions == null || !StringUtils.hasText(extensions)) {
-			return Collections.emptyList();
-		}
-		else {
-			List<WebSocketExtension> result = new ArrayList<WebSocketExtension>();
-			for (String token : extensions.split(",")) {
+		if (StringUtils.hasText(extensions)) {
+			String[] tokens = StringUtils.tokenizeToStringArray(extensions, ",");
+			List<WebSocketExtension> result = new ArrayList<WebSocketExtension>(tokens.length);
+			for (String token : StringUtils.tokenizeToStringArray(extensions, ",")) {
 				result.add(parseExtension(token));
 			}
 			return result;
 		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	private static WebSocketExtension parseExtension(String extension) {
-		Assert.doesNotContain(extension, ",", "Expected a single extension value: " + extension);
+		if (extension.contains(",")) {
+			throw new IllegalArgumentException("Expected single extension value: [" + extension + "]");
+		}
 		String[] parts = StringUtils.tokenizeToStringArray(extension, ";");
 		String name = parts[0].trim();
 
@@ -134,44 +171,6 @@ public class WebSocketExtension {
 		}
 
 		return new WebSocketExtension(name, parameters);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		}
-		if ((o == null) || (getClass() != o.getClass())) {
-			return false;
-		}
-		WebSocketExtension that = (WebSocketExtension) o;
-		if (!name.equals(that.name)) {
-			return false;
-		}
-		if (!parameters.equals(that.parameters)) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = name.hashCode();
-		result = 31 * result + parameters.hashCode();
-		return result;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append(this.name);
-		for (String param : parameters.keySet()) {
-			str.append(';');
-			str.append(param);
-			str.append('=');
-			str.append(this.parameters.get(param));
-		}
-		return str.toString();
 	}
 
 }

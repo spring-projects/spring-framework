@@ -438,7 +438,7 @@ public class MediaType extends MimeType implements Serializable {
 		if (!StringUtils.hasLength(mediaTypes)) {
 			return Collections.emptyList();
 		}
-		String[] tokens = mediaTypes.split(",\\s*");
+		String[] tokens = StringUtils.tokenizeToStringArray(mediaTypes, ",");
 		List<MediaType> result = new ArrayList<MediaType>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseMediaType(token));

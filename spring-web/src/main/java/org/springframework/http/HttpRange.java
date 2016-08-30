@@ -132,7 +132,7 @@ public abstract class HttpRange {
 		}
 		ranges = ranges.substring(BYTE_RANGE_PREFIX.length());
 
-		String[] tokens = ranges.split(",\\s*");
+		String[] tokens = StringUtils.tokenizeToStringArray(ranges, ",");
 		List<HttpRange> result = new ArrayList<HttpRange>(tokens.length);
 		for (String token : tokens) {
 			result.add(parseRange(token));

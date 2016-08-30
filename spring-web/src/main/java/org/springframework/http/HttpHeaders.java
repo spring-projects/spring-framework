@@ -474,7 +474,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		List<HttpMethod> result = new ArrayList<HttpMethod>();
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
-			String[] tokens = StringUtils.tokenizeToStringArray(value, ",", true, true);
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
 				if (resolved != null) {
@@ -578,10 +578,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * as specified by the {@code Accept-Charset} header.
 	 */
 	public List<Charset> getAcceptCharset() {
-		List<Charset> result = new ArrayList<Charset>();
 		String value = getFirst(ACCEPT_CHARSET);
 		if (value != null) {
-			String[] tokens = value.split(",\\s*");
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+			List<Charset> result = new ArrayList<Charset>(tokens.length);
 			for (String token : tokens) {
 				int paramIdx = token.indexOf(';');
 				String charsetName;
@@ -595,8 +595,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 					result.add(Charset.forName(charsetName));
 				}
 			}
+			return result;
 		}
-		return result;
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**
@@ -615,8 +618,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
 		if (!StringUtils.isEmpty(value)) {
-			List<HttpMethod> result = new LinkedList<HttpMethod>();
-			String[] tokens = value.split(",\\s*");
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+			List<HttpMethod> result = new ArrayList<HttpMethod>(tokens.length);
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
 				if (resolved != null) {
@@ -691,7 +694,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		StringBuilder builder = new StringBuilder("form-data; name=\"");
 		builder.append(name).append('\"');
 		if (filename != null) {
-			if(charset == null || Charset.forName("US-ASCII").equals(charset)) {
+			if (charset == null || charset.name().equals("US-ASCII")) {
 				builder.append("; filename=\"");
 				builder.append(filename).append('\"');
 			}

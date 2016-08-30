@@ -673,7 +673,7 @@ public class UriComponentsBuilder implements Cloneable {
 	UriComponentsBuilder adaptFromForwardedHeaders(HttpHeaders headers) {
 		String forwardedHeader = headers.getFirst("Forwarded");
 		if (StringUtils.hasText(forwardedHeader)) {
-			String forwardedToUse = StringUtils.commaDelimitedListToStringArray(forwardedHeader)[0];
+			String forwardedToUse = StringUtils.tokenizeToStringArray(forwardedHeader, ",")[0];
 			Matcher matcher = FORWARDED_HOST_PATTERN.matcher(forwardedToUse);
 			if (matcher.find()) {
 				host(matcher.group(1).trim());
@@ -686,10 +686,9 @@ public class UriComponentsBuilder implements Cloneable {
 		else {
 			String hostHeader = headers.getFirst("X-Forwarded-Host");
 			if (StringUtils.hasText(hostHeader)) {
-				String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
-				String hostToUse = hosts[0];
-				if (hostToUse.contains(":")) {
-					String[] hostAndPort = StringUtils.split(hostToUse, ":");
+				String hostToUse = StringUtils.tokenizeToStringArray(hostHeader, ",")[0];
+				String[] hostAndPort = StringUtils.split(hostToUse, ":");
+				if (hostAndPort != null) {
 					host(hostAndPort[0]);
 					port(Integer.parseInt(hostAndPort[1]));
 				}
@@ -701,14 +700,12 @@ public class UriComponentsBuilder implements Cloneable {
 
 			String portHeader = headers.getFirst("X-Forwarded-Port");
 			if (StringUtils.hasText(portHeader)) {
-				String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
-				port(Integer.parseInt(ports[0]));
+				port(Integer.parseInt(StringUtils.tokenizeToStringArray(portHeader, ",")[0]));
 			}
 
 			String protocolHeader = headers.getFirst("X-Forwarded-Proto");
 			if (StringUtils.hasText(protocolHeader)) {
-				String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
-				scheme(protocols[0]);
+				scheme(StringUtils.tokenizeToStringArray(protocolHeader, ",")[0]);
 			}
 		}
 
