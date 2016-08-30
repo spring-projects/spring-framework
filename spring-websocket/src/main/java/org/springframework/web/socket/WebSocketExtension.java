@@ -118,11 +118,11 @@ public class WebSocketExtension {
 	public String toString() {
 		StringBuilder str = new StringBuilder();
 		str.append(this.name);
-		for (String param : parameters.keySet()) {
+		for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
 			str.append(';');
-			str.append(param);
+			str.append(entry.getKey());
 			str.append('=');
-			str.append(this.parameters.get(param));
+			str.append(entry.getValue());
 		}
 		return str.toString();
 	}
@@ -136,15 +136,16 @@ public class WebSocketExtension {
 	 * @throws IllegalArgumentException if the string cannot be parsed
 	 */
 	public static List<WebSocketExtension> parseExtensions(String extensions) {
-		if (!StringUtils.hasText(extensions)) {
-			return Collections.emptyList();
-		}
-		else {
-			List<WebSocketExtension> result = new ArrayList<>();
-			for (String token : StringUtils.tokenizeToStringArray(extensions, ",")) {
+		if (StringUtils.hasText(extensions)) {
+			String[] tokens = StringUtils.tokenizeToStringArray(extensions, ",");
+			List<WebSocketExtension> result = new ArrayList<WebSocketExtension>(tokens.length);
+			for (String token : tokens) {
 				result.add(parseExtension(token));
 			}
 			return result;
+		}
+		else {
+			return Collections.emptyList();
 		}
 	}
 

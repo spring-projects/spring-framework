@@ -114,11 +114,13 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/pdf}.
+	 * @since 4.3
 	 */
 	public final static MediaType APPLICATION_PDF;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_PDF}.
+	 * @since 4.3
 	 */
 	public final static String APPLICATION_PDF_VALUE = "application/pdf";
 
@@ -194,11 +196,13 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code text/markdown}.
+	 * @since 4.3
 	 */
 	public final static MediaType TEXT_MARKDOWN;
 
 	/**
 	 * A String equivalent of {@link MediaType#TEXT_MARKDOWN}.
+	 * @since 4.3
 	 */
 	public final static String TEXT_MARKDOWN_VALUE = "text/markdown";
 
@@ -296,6 +300,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @param other the other media type
 	 * @param charset the character set
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @since 4.3
 	 */
 	public MediaType(MediaType other, Charset charset) {
 		super(other, charset);

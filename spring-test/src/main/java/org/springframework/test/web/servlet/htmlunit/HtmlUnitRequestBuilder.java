@@ -213,8 +213,9 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private void authType(MockHttpServletRequest request) {
 		String authorization = header("Authorization");
-		if (authorization != null) {
-			request.setAuthType(StringUtils.split(authorization, ": ")[0]);
+		String[] authSplit = StringUtils.split(authorization, ": ");
+		if (authSplit != null) {
+			request.setAuthType(authSplit[0]);
 		}
 	}
 
@@ -434,20 +435,19 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	@Override
 	public Object merge(Object parent) {
-		if (parent == null) {
-			return this;
+		if (parent instanceof RequestBuilder) {
+			if (parent instanceof MockHttpServletRequestBuilder) {
+				MockHttpServletRequestBuilder copiedParent = MockMvcRequestBuilders.get("/");
+				copiedParent.merge(parent);
+				this.parentBuilder = copiedParent;
+			}
+			else {
+				this.parentBuilder = (RequestBuilder) parent;
+			}
+			if (parent instanceof SmartRequestBuilder) {
+				this.parentPostProcessor = (SmartRequestBuilder) parent;
+			}
 		}
-		if (parent instanceof MockHttpServletRequestBuilder) {
-			MockHttpServletRequestBuilder copiedParent = MockMvcRequestBuilders.get("/");
-			copiedParent.merge(parent);
-			this.parentBuilder = copiedParent;
-		} else if (parent instanceof RequestBuilder) {
-			this.parentBuilder = (RequestBuilder) parent;
-		}
-		if (parent instanceof SmartRequestBuilder) {
-			this.parentPostProcessor = (SmartRequestBuilder) parent;
-		}
-
 		return this;
 	}
 

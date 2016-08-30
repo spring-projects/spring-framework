@@ -808,13 +808,14 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	/**
 	 * Set the (new) value of the {@code Host} header.
-	 * <p>If the given {@linkplain InetSocketAddress#getPort() port} is {@code 0}, the host header
-	 * will only contain the {@linkplain InetSocketAddress#getHostString() hostname}.
+	 * <p>If the given {@linkplain InetSocketAddress#getPort() port} is {@code 0},
+	 * the host header will only contain the
+	 * {@linkplain InetSocketAddress#getHostString() hostname}.
+	 * @since 5.0
 	 */
 	public void setHost(InetSocketAddress host) {
-		String value =
-				host.getPort() != 0 ? String.format("%s:%d", host.getHostString(), host.getPort()) :
-						host.getHostString();
+		String value = (host.getPort() != 0 ?
+				String.format("%s:%d", host.getHostString(), host.getPort()) : host.getHostString());
 		set(HOST, value);
 	}
 
@@ -822,6 +823,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the required {@code Host} header.
 	 * <p>If the header value does not contain a port, the returned
 	 * {@linkplain InetSocketAddress#getPort() port} will be {@code 0}.
+	 * @since 5.0
 	 */
 	public InetSocketAddress getHost() {
 		String value = getFirst(HOST);
