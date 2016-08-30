@@ -77,7 +77,7 @@ public class AnnotationDrivenEventListenerTests {
 
 	private EventCollector eventCollector;
 
-	private CountDownLatch countDownLatch; // 1 call by default
+	private CountDownLatch countDownLatch;  // 1 call by default
 
 
 	@After
@@ -93,7 +93,13 @@ public class AnnotationDrivenEventListenerTests {
 		load(TestEventListener.class);
 		TestEvent event = new TestEvent(this, "test");
 		TestEventListener listener = this.context.getBean(TestEventListener.class);
+
 		this.eventCollector.assertNoEventReceived(listener);
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(listener, event);
+		this.eventCollector.assertTotalEventsCount(1);
+
+		this.eventCollector.clear();
 		this.context.publishEvent(event);
 		this.eventCollector.assertEvent(listener, event);
 		this.eventCollector.assertTotalEventsCount(1);
@@ -103,6 +109,7 @@ public class AnnotationDrivenEventListenerTests {
 	public void simpleEventXmlConfig() {
 		this.context = new ClassPathXmlApplicationContext(
 				"org/springframework/context/event/simple-event-configuration.xml");
+
 		TestEvent event = new TestEvent(this, "test");
 		TestEventListener listener = this.context.getBean(TestEventListener.class);
 		this.eventCollector = getEventCollector(this.context);
@@ -116,7 +123,6 @@ public class AnnotationDrivenEventListenerTests {
 	@Test
 	public void metaAnnotationIsDiscovered() {
 		load(MetaAnnotationListenerTestBean.class);
-
 		MetaAnnotationListenerTestBean bean = this.context.getBean(MetaAnnotationListenerTestBean.class);
 		this.eventCollector.assertNoEventReceived(bean);
 
