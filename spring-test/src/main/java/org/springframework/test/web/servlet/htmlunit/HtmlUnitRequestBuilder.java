@@ -196,7 +196,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	 * {@link HttpServletRequest#getContextPath()} which states it can be
 	 * an empty string, or it must start with a "/" and not end with a "/".
 	 * @param contextPath a valid contextPath
-	 * @throws IllegalArgumentException if the contextPath is not a valid {@link HttpServletRequest#getContextPath()}
+	 * @throws IllegalArgumentException if the contextPath is not a valid
+	 * {@link HttpServletRequest#getContextPath()}
 	 */
 	public void setContextPath(String contextPath) {
 		MockMvcWebConnection.validateContextPath(contextPath);
@@ -210,8 +211,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	private void authType(MockHttpServletRequest request) {
 		String authorization = header("Authorization");
 		if (authorization != null) {
-			String[] authzParts = authorization.split(": ");
-			request.setAuthType(authzParts[0]);
+			request.setAuthType(authorization.split(": ")[0]);
 		}
 	}
 
@@ -261,8 +261,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			while (tokens.hasMoreTokens()) {
 				String cookieName = tokens.nextToken().trim();
 				if (!tokens.hasMoreTokens()) {
-					throw new IllegalArgumentException("Expected value for cookie name '" + cookieName
-							+ "'. Full cookie was " + cookieHeaderValue);
+					throw new IllegalArgumentException("Expected value for cookie name '" + cookieName +
+							"'. Full cookie was " + cookieHeaderValue);
 				}
 				String cookieValue = tokens.nextToken().trim();
 				processCookie(request, cookies, new Cookie(cookieName, cookieValue));
@@ -437,16 +437,12 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	@Override
 	public Object merge(Object parent) {
-		if (parent == null) {
-			return this;
-		}
 		if (parent instanceof RequestBuilder) {
 			this.parentBuilder = (RequestBuilder) parent;
+			if (parent instanceof SmartRequestBuilder) {
+				this.parentPostProcessor = (SmartRequestBuilder) parent;
+			}
 		}
-		if (parent instanceof SmartRequestBuilder) {
-			this.parentPostProcessor = (SmartRequestBuilder) parent;
-		}
-
 		return this;
 	}
 

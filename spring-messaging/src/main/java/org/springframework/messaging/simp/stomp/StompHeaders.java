@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,9 +223,14 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Applies to the CONNECT and CONNECTED frames.
 	 */
 	public void setHeartbeat(long[] heartbeat) {
-		Assert.notNull(heartbeat);
+		if (heartbeat == null || heartbeat.length != 2) {
+			throw new IllegalArgumentException("Heart-beat array must be of length 2, not " +
+					(heartbeat != null ? heartbeat.length : "null"));
+		}
 		String value = heartbeat[0] + "," + heartbeat[1];
-		Assert.isTrue(heartbeat[0] >= 0 && heartbeat[1] >= 0, "Heart-beat values cannot be negative: "  + value);
+		if (heartbeat[0] < 0 || heartbeat[1] < 0) {
+			throw new IllegalArgumentException("Heart-beat values cannot be negative: " + value);
+		}
 		set(HEARTBEAT, value);
 	}
 
@@ -497,14 +502,8 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof StompHeaders)) {
-			return false;
-		}
-		StompHeaders otherHeaders = (StompHeaders) other;
-		return this.headers.equals(otherHeaders.headers);
+		return (this == other || (other instanceof StompHeaders &&
+				this.headers.equals(((StompHeaders) other).headers)));
 	}
 
 	@Override

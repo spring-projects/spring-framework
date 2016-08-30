@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,9 +77,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private EventExpressionEvaluator evaluator;
 
-	private String condition;
-
 	private EventListener eventListener;
+
+	private String condition;
 
 
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
@@ -88,7 +88,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		this.targetClass = targetClass;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.declaredEventTypes = resolveDeclaredEventTypes();
-		this.methodKey = new AnnotatedElementKey(this.method, this.targetClass);
+		this.methodKey = new AnnotatedElementKey(method, targetClass);
 	}
 
 
@@ -165,8 +165,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (this.method.getParameterTypes().length == 0) {
 			return new Object[0];
 		}
-		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass())
-				&& event instanceof PayloadApplicationEvent) {
+		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass()) &&
+				event instanceof PayloadApplicationEvent) {
 			return new Object[] {((PayloadApplicationEvent) event).getPayload()};
 		}
 		else {
@@ -213,10 +213,6 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return true;
 	}
 
-	protected <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
-		return AnnotationUtils.findAnnotation(this.method, annotationType);
-	}
-
 	/**
 	 * Invoke the event listener method with the given argument values.
 	 */
@@ -254,6 +250,10 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		return this.applicationContext.getBean(this.beanName);
 	}
 
+	protected <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
+		return AnnotationUtils.findAnnotation(this.method, annotationType);
+	}
+
 	protected EventListener getEventListener() {
 		if (this.eventListener == null) {
 			this.eventListener = AnnotatedElementUtils.findMergedAnnotation(this.method, EventListener.class);
@@ -269,7 +269,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 */
 	protected String getCondition() {
 		if (this.condition == null) {
-			EventListener eventListener = AnnotatedElementUtils.findMergedAnnotation(this.method, EventListener.class);
+			EventListener eventListener = getEventListener();
 			if (eventListener != null) {
 				this.condition = eventListener.condition();
 			}

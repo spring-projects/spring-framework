@@ -297,7 +297,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public void setHeartbeat(long cx, long cy) {
-		setNativeHeader(STOMP_HEARTBEAT_HEADER, StringUtils.arrayToCommaDelimitedString(new Object[]{cx, cy}));
+		setNativeHeader(STOMP_HEARTBEAT_HEADER, cx + "," + cy);
 	}
 
 	public void setAck(String ack) {

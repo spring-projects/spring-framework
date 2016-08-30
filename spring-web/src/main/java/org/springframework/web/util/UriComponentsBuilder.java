@@ -686,8 +686,7 @@ public class UriComponentsBuilder implements Cloneable {
 		else {
 			String hostHeader = headers.getFirst("X-Forwarded-Host");
 			if (StringUtils.hasText(hostHeader)) {
-				String[] hosts = StringUtils.commaDelimitedListToStringArray(hostHeader);
-				String hostToUse = hosts[0];
+				String hostToUse = StringUtils.commaDelimitedListToStringArray(hostHeader)[0];
 				if (hostToUse.contains(":")) {
 					String[] hostAndPort = StringUtils.split(hostToUse, ":");
 					host(hostAndPort[0]);
@@ -701,14 +700,12 @@ public class UriComponentsBuilder implements Cloneable {
 
 			String portHeader = headers.getFirst("X-Forwarded-Port");
 			if (StringUtils.hasText(portHeader)) {
-				String[] ports = StringUtils.commaDelimitedListToStringArray(portHeader);
-				port(Integer.parseInt(ports[0]));
+				port(Integer.parseInt(StringUtils.commaDelimitedListToStringArray(portHeader)[0]));
 			}
 
 			String protocolHeader = headers.getFirst("X-Forwarded-Proto");
 			if (StringUtils.hasText(protocolHeader)) {
-				String[] protocols = StringUtils.commaDelimitedListToStringArray(protocolHeader);
-				scheme(protocols[0]);
+				scheme(StringUtils.commaDelimitedListToStringArray(protocolHeader)[0]);
 			}
 		}
 
