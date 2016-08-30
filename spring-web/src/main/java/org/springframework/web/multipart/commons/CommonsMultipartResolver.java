@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,8 +160,11 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		catch (FileUploadBase.SizeLimitExceededException ex) {
 			throw new MaxUploadSizeExceededException(fileUpload.getSizeMax(), ex);
 		}
+		catch (FileUploadBase.FileSizeLimitExceededException ex) {
+			throw new MaxUploadSizeExceededException(fileUpload.getFileSizeMax(), ex);
+		}
 		catch (FileUploadException ex) {
-			throw new MultipartException("Could not parse multipart servlet request", ex);
+			throw new MultipartException("Failed to parse multipart servlet request", ex);
 		}
 	}
 
