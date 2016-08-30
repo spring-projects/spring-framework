@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
@@ -91,7 +91,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @since 3.0.4
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator
-		implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
+		implements HttpRequestHandler, InitializingBean, SmartInitializingSingleton, CorsConfigurationSource {
 
 	// Servlet 3.1 setContentLengthLong(long) available?
 	private static final boolean contentLengthLongAvailable =
@@ -112,9 +112,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private ServletPathExtensionContentNegotiationStrategy pathExtensionStrategy;
-
-	private ServletContext servletContext;
+	private PathExtensionContentNegotiationStrategy pathExtensionStrategy;
 
 	private CorsConfiguration corsConfiguration;
 
@@ -248,11 +246,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		return this.corsConfiguration;
 	}
 
-	@Override
-	protected void initServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
-
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -270,7 +263,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (this.resourceRegionHttpMessageConverter == null) {
 			this.resourceRegionHttpMessageConverter = new ResourceRegionHttpMessageConverter();
 		}
-		this.pathExtensionStrategy = initPathExtensionStrategy();
 	}
 
 	/**
@@ -293,7 +285,12 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 	}
 
-	protected ServletPathExtensionContentNegotiationStrategy initPathExtensionStrategy() {
+	@Override
+	public void afterSingletonsInstantiated() {
+		this.pathExtensionStrategy = initContentNegotiationStrategy();
+	}
+
+	protected PathExtensionContentNegotiationStrategy initContentNegotiationStrategy() {
 		Map<String, MediaType> mediaTypes = null;
 		if (getContentNegotiationManager() != null) {
 			PathExtensionContentNegotiationStrategy strategy =
@@ -302,7 +299,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				mediaTypes = new HashMap<>(strategy.getMediaTypes());
 			}
 		}
-		return new ServletPathExtensionContentNegotiationStrategy(this.servletContext, mediaTypes);
+		return (getServletContext() != null) ?
+			new ServletPathExtensionContentNegotiationStrategy(getServletContext(), mediaTypes) :
+			new PathExtensionContentNegotiationStrategy(mediaTypes);
 	}
 
 

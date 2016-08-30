@@ -79,6 +79,8 @@ public class ResourceHandlerRegistryTests {
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/testStylesheet.css");
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
+		handler.afterPropertiesSet();
+		handler.afterSingletonsInstantiated();
 		handler.handleRequest(request, this.response);
 
 		assertEquals("test stylesheet content", this.response.getContentAsString());
