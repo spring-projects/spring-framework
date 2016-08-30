@@ -4829,6 +4829,12 @@ is present on the classpath.
 .. `MappingJackson2XmlHttpMessageConverter` converts to/from XML -- added if
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson 2 XML extension] is present
 on the classpath.
+.. `MappingJackson2SmileHttpMessageConverter` converts to/from Smile (binary JSON) -- added if
+https://github.com/FasterXML/jackson-dataformats-binary/tree/master/smile[Jackson 2 Smile extension]
+is present on the classpath.
+.. `MappingJackson2CborHttpMessageConverter` converts to/from CBOR -- added if
+https://github.com/FasterXML/jackson-dataformats-binary/tree/master/cbor[Jackson 2 CBOR extension]
+is present on the classpath.
 .. `AtomFeedHttpMessageConverter` converts Atom feeds -- added if Rome is present on the
 classpath.
 .. `RssChannelHttpMessageConverter` converts RSS feeds -- added if Rome is present on

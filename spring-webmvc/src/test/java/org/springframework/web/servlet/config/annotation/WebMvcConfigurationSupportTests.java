@@ -175,7 +175,7 @@ public class WebMvcConfigurationSupportTests {
 		ApplicationContext context = initContext(WebConfig.class);
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
-		assertEquals(9, converters.size());
+		assertEquals(11, converters.size());
 		converters.stream()
 				.filter(converter -> converter instanceof AbstractJackson2HttpMessageConverter)
 				.forEach(converter -> {

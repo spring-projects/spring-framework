@@ -733,6 +733,8 @@ project("spring-web") {
 		optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
+		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
+		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
 		optional("com.rometools:rome:${romeVersion}")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
@@ -855,6 +857,8 @@ project("spring-webmvc") {
 		optional("com.lowagie:itext:2.1.7")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
+		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jackson2Version}")
+		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jackson2Version}")
 		optional("com.rometools:rome:${romeVersion}")
 		optional("javax.el:javax.el-api:${elApiVersion}")
 		optional("org.apache.tiles:tiles-api:${tiles3Version}")

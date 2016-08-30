@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -389,6 +390,16 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		assertNotNull(this.factory.getObject());
 		assertTrue(this.factory.isSingleton());
 		assertEquals(XmlMapper.class, this.factory.getObjectType());
+	}
+
+	@Test  // SPR-14435
+	public void setFactory() {
+		this.factory.setFactory(new SmileFactory());
+		this.factory.afterPropertiesSet();
+
+		assertNotNull(this.factory.getObject());
+		assertTrue(this.factory.isSingleton());
+		assertEquals(SmileFactory.class, this.factory.getObject().getFactory().getClass());
 	}
 
 
