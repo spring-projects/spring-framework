@@ -1022,6 +1022,8 @@ project("spring-test") {
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("javax.cache:cache-api:1.0.0")
+		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
+
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
 		testRuntime("org.apache.logging.log4j:log4j-jul:${log4jVersion}")  // Java Util Logging for JUnit 5
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
