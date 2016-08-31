@@ -34,7 +34,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -61,10 +60,8 @@ class DisabledIfConditionTestCase {
 
 	@Test
 	void missingDisabledIf() {
-		IllegalStateException exception = expectThrows(IllegalStateException.class,
-			() -> condition.evaluate(buildExtensionContext("missingDisabledIf")));
-
-		assertThat(exception.getMessage(), startsWith("@DisabledIf must be present"));
+		assertResult(condition.evaluate(buildExtensionContext("missingDisabledIf")), false,
+			endsWith("missingDisabledIf() is enabled since @DisabledIf is not present"));
 	}
 
 	@Test

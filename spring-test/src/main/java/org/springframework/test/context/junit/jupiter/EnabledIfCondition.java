@@ -24,44 +24,43 @@ import org.junit.jupiter.api.extension.TestExecutionCondition;
 import org.junit.jupiter.api.extension.TestExtensionContext;
 
 /**
- * {@code DisabledIfCondition} is a composite {@link ContainerExecutionCondition}
- * and {@link TestExecutionCondition} that supports the {@link DisabledIf @DisabledIf}
+ * {@code EnabledIfCondition} is a composite {@link ContainerExecutionCondition}
+ * and {@link TestExecutionCondition} that supports the {@link EnabledIf @EnabledIf}
  * annotation when using the <em>Spring TestContext Framework</em> in conjunction
  * with JUnit 5's <em>Jupiter</em> programming model.
  *
- * <p>Any attempt to use the {@code DisabledIfCondition} without the presence of
- * {@link DisabledIf @DisabledIf} will result in an <em>enabled</em>
+ * <p>Any attempt to use the {@code EnabledIfCondition} without the presence of
+ * {@link EnabledIf @EnabledIf} will result in an <em>enabled</em>
  * {@link ConditionEvaluationResult}.
  *
  * @author Sam Brannen
- * @author Tadaya Tsuyukubo
  * @since 5.0
- * @see DisabledIf
  * @see EnabledIf
+ * @see DisabledIf
  * @see SpringExtension
  */
-public class DisabledIfCondition extends AbstractExpressionEvaluatingCondition {
+public class EnabledIfCondition extends AbstractExpressionEvaluatingCondition {
 
 	/**
-	 * Containers are disabled if {@code @DisabledIf} is present on the test class
+	 * Containers are enabled if {@code @EnabledIf} is present on the test class
 	 * and the configured expression evaluates to {@code true}.
 	 */
 	@Override
 	public ConditionEvaluationResult evaluate(ContainerExtensionContext context) {
-		return evaluateDisabledIf(context);
+		return evaluateEnabledIf(context);
 	}
 
 	/**
-	 * Tests are disabled if {@code @DisabledIf} is present on the test method
+	 * Tests are enabled if {@code @EnabledIf} is present on the test method
 	 * and the configured expression evaluates to {@code true}.
 	 */
 	@Override
 	public ConditionEvaluationResult evaluate(TestExtensionContext context) {
-		return evaluateDisabledIf(context);
+		return evaluateEnabledIf(context);
 	}
 
-	private ConditionEvaluationResult evaluateDisabledIf(ExtensionContext context) {
-		return evaluateAnnotation(DisabledIf.class, DisabledIf::expression, DisabledIf::reason, false, context);
+	private ConditionEvaluationResult evaluateEnabledIf(ExtensionContext context) {
+		return evaluateAnnotation(EnabledIf.class, EnabledIf::expression, EnabledIf::reason, true, context);
 	}
 
 }

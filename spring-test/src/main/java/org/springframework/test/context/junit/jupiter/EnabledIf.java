@@ -27,41 +27,40 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * {@code @DisabledIf} is used to signal that the annotated test class or test
- * method is <em>disabled</em> and should not be executed if the supplied
+ * {@code @EnabledIf} is used to signal that the annotated test class or test
+ * method is <em>enabled</em> and should be executed if the supplied
  * {@link #expression} evaluates to {@code true}.
  *
  * <p>When applied at the class level, all test methods within that class
- * are automatically disabled as well.
+ * are automatically enabled by default as well.
  *
  * <p>For basic examples, see the Javadoc for {@link #expression}.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create
  * custom <em>composed annotations</em>. For example, a custom
- * {@code @DisabledOnMac} annotation can be created as follows.
+ * {@code @EnabledOnMac} annotation can be created as follows.
  *
  * <pre style="code">
  * {@literal @}Target({ ElementType.TYPE, ElementType.METHOD })
  * {@literal @}Retention(RetentionPolicy.RUNTIME)
- * {@literal @}DisabledIf(
+ * {@literal @}EnabledIf(
  *     expression = "#{systemProperties['os.name'].toLowerCase().contains('mac')}",
- *     reason = "Disabled on Mac OS"
+ *     reason = "Enabled on Mac OS"
  * )
- * public {@literal @}interface DisabledOnMac {}
+ * public {@literal @}interface EnabledOnMac {}
  * </pre>
  *
  * @author Sam Brannen
- * @author Tadaya Tsuyukubo
  * @since 5.0
  * @see SpringExtension
- * @see EnabledIf
+ * @see DisabledIf
  * @see org.junit.jupiter.api.Disabled
  */
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@ExtendWith(DisabledIfCondition.class)
-public @interface DisabledIf {
+@ExtendWith(EnabledIfCondition.class)
+public @interface EnabledIf {
 
 	/**
 	 * Alias for {@link #expression}; only intended to be used if an
@@ -74,27 +73,27 @@ public @interface DisabledIf {
 
 	/**
 	 * The expression that will be evaluated to determine if the annotated test
-	 * class or test method is <em>disabled</em>.
+	 * class or test method is <em>enabled</em>.
 	 *
 	 * <p>If the expression evaluates to {@link Boolean#TRUE} or a {@link String}
-	 * equal to {@code "true"} (ignoring case), the test will be disabled.
+	 * equal to {@code "true"} (ignoring case), the test will be enabled.
 	 *
 	 * <p>Expressions can be any of the following.
 	 *
 	 * <ul>
 	 * <li>Spring Expression Language (SpEL) expression &mdash; for example:
-	 * <pre style="code">@DisabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")</pre>
+	 * <pre style="code">@EnabledIf("#{systemProperties['os.name'].toLowerCase().contains('mac')}")</pre>
 	 * <li>Placeholder for a property available in the Spring
 	 * {@link org.springframework.core.env.Environment Environment} &mdash; for example:
-	 * <pre style="code">@DisabledIf("${smoke.tests.enabled}")</pre>
+	 * <pre style="code">@EnabledIf("${smoke.tests.enabled}")</pre>
 	 * <li>Text literal &mdash; for example:
-	 * <pre style="code">@DisabledIf("true")</pre>
+	 * <pre style="code">@EnabledIf("true")</pre>
 	 * </ul>
 	 *
 	 * <p>Note, however, that a <em>text literal</em> which is not the result of
 	 * dynamic resolution of a property placeholder is of zero practical value
-	 * since {@code @DisabledIf("true")} is equivalent to {@code @Disabled}
-	 * and {@code @DisabledIf("false")} is logically meaningless.
+	 * since {@code @EnabledIf("false")} is equivalent to {@code @Disabled}
+	 * and {@code @EnabledIf("true")} is logically meaningless.
 	 *
 	 * @see #reason
 	 * @see #value
@@ -103,7 +102,7 @@ public @interface DisabledIf {
 	String expression() default "";
 
 	/**
-	 * The reason this test is disabled.
+	 * The reason this test is enabled.
 	 *
 	 * @see #expression
 	 */

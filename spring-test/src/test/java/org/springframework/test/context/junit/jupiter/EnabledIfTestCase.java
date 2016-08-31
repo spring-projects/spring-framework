@@ -18,110 +18,112 @@ package org.springframework.test.context.junit.jupiter;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Integration tests which verify support for {@link DisabledIf @DisabledIf}
+ * Integration tests which verify support for {@link EnabledIf @EnabledIf}
  * in conjunction with the {@link SpringExtension} in a JUnit 5 (Jupiter)
  * environment.
  *
  * @author Tadaya Tsuyukubo
  * @author Sam Brannen
  * @since 5.0
- * @see DisabledIfConditionTestCase
- * @see DisabledIf
+ * @see EnabledIfConditionTestCase
+ * @see EnabledIf
  * @see SpringExtension
  */
-class DisabledIfTestCase {
+class EnabledIfTestCase {
 
 	@SpringJUnitConfig(Config.class)
-	@TestPropertySource(properties = "foo = true")
+	@TestPropertySource(properties = "foo = false")
 	@Nested
-	class DisabledIfOnMethodTestCase {
+	class EnabledIfOnMethodTestCase {
 
 		@Test
-		@DisabledIf("true")
-		void disabledIfWithStringTrue() {
+		@EnabledIf("false")
+		void enabledIfWithStringFalse() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("   true   ")
-		void disabledIfWithStringTrueWithSurroundingWhitespace() {
+		@EnabledIf("   false   ")
+		void enabledIfWithStringFalseWithSurroundingWhitespace() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("TrUe")
-		void disabledIfWithStringTrueIgnoreCase() {
+		@EnabledIf("FaLsE")
+		void enabledIfWithStringFalseIgnoreCase() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("${foo}")
-		void disabledIfWithPropertyPlaceholder() {
+		@EnabledIf("${foo}")
+		void enabledIfWithPropertyPlaceholder() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("\t${foo}   ")
-		void disabledIfWithPropertyPlaceholderWithSurroundingWhitespace() {
+		@EnabledIf("\t${foo}   ")
+		void enabledIfWithPropertyPlaceholderWithSurroundingWhitespace() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("#{T(Boolean).TRUE}")
-		void disabledIfWithSpelBoolean() {
+		@EnabledIf("#{T(Boolean).FALSE}")
+		void enabledIfWithSpelBoolean() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("   #{T(Boolean).TRUE}   ")
-		void disabledIfWithSpelBooleanWithSurroundingWhitespace() {
+		@EnabledIf("   #{T(Boolean).FALSE}   ")
+		void enabledIfWithSpelBooleanWithSurroundingWhitespace() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("#{'tr' + 'ue'}")
-		void disabledIfWithSpelStringConcatenation() {
+		@EnabledIf("#{'fal' + 'se'}")
+		void enabledIfWithSpelStringConcatenation() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("#{6 * 7 == 42}")
-		void disabledIfWithSpelArithmeticComparison() {
+		@EnabledIf("#{1 + 2 == 4}")
+		void enabledIfWithSpelArithmeticComparison() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledOnMac
-		void disabledIfWithSpelOsCheckInCustomComposedAnnotation() {
-			assertFalse(System.getProperty("os.name").contains("Mac"), "This test must be disabled on Mac OS");
+		@EnabledOnMac
+		void enabledIfWithSpelOsCheckInCustomComposedAnnotation() {
+			String os = System.getProperty("os.name").toLowerCase();
+			assertTrue(os.contains("mac"), "This test must be enabled on Mac OS");
+			assertFalse(os.contains("win"), "This test must be disabled on Windows");
 		}
 
 		@Test
-		@DisabledIf("#{@booleanTrueBean}")
-		void disabledIfWithSpelBooleanTrueBean() {
+		@EnabledIf("#{@booleanFalseBean}")
+		void enabledIfWithSpelBooleanFalseBean() {
 			fail("This test must be disabled");
 		}
 
 		@Test
-		@DisabledIf("#{@stringTrueBean}")
-		void disabledIfWithSpelStringTrueBean() {
+		@EnabledIf("#{@stringFalseBean}")
+		void enabledIfWithSpelStringFalseBean() {
 			fail("This test must be disabled");
 		}
-
 	}
 
 	@SpringJUnitConfig(Config.class)
 	@Nested
-	@DisabledIf("true")
-	class DisabledIfOnClassTestCase {
+	@EnabledIf("false")
+	class EnabledIfOnClassTestCase {
 
 		@Test
 		void foo() {
@@ -129,24 +131,23 @@ class DisabledIfTestCase {
 		}
 
 		@Test
-		@DisabledIf("false")
+		@EnabledIf("true")
 		void bar() {
 			fail("This test must be disabled due to class-level condition");
 		}
-
 	}
 
 	@Configuration
 	static class Config {
 
 		@Bean
-		Boolean booleanTrueBean() {
-			return Boolean.TRUE;
+		Boolean booleanFalseBean() {
+			return Boolean.FALSE;
 		}
 
 		@Bean
-		String stringTrueBean() {
-			return "true";
+		String stringFalseBean() {
+			return "false";
 		}
 	}
 
