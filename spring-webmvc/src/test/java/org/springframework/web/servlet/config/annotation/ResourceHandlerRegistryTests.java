@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,6 @@ public class ResourceHandlerRegistryTests {
 		request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "/testStylesheet.css");
 
 		ResourceHttpRequestHandler handler = getHandler("/resources/**");
-		handler.afterPropertiesSet();
-		handler.afterSingletonsInstantiated();
 		handler.handleRequest(request, this.response);
 
 		assertEquals("test stylesheet content", this.response.getContentAsString());

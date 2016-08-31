@@ -142,6 +142,7 @@ public class ResourceHandlerRegistry {
 				handler.setContentNegotiationManager(this.contentNegotiationManager);
 				try {
 					handler.afterPropertiesSet();
+					handler.afterSingletonsInstantiated();
 				}
 				catch (Exception ex) {
 					throw new BeanInitializationException("Failed to init ResourceHttpRequestHandler", ex);
