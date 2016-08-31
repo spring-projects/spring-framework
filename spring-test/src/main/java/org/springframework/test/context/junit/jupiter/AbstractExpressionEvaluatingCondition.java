@@ -104,9 +104,9 @@ abstract class AbstractExpressionEvaluatingCondition implements ContainerExecuti
 						"The expression in @%s on [%s] must not be blank", annotationType.getSimpleName(), element)));
 		// @formatter:on
 
-		boolean result = evaluateExpression(expression, annotationType, context);
+		boolean evaluatedToTrue = evaluateExpression(expression, annotationType, context);
 
-		if (result) {
+		if (evaluatedToTrue) {
 			String adjective = (enabledOnTrue ? "enabled" : "disabled");
 			String reason = annotation.map(reasonExtractor).filter(StringUtils::hasText).orElseGet(
 					() -> String.format("%s is %s because @%s(\"%s\") evaluated to true", element, adjective,
