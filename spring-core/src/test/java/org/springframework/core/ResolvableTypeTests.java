@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -1084,7 +1085,6 @@ public class ResolvableTypeTests {
 
 	@Test
 	public void isAssignableFromForWildcards() throws Exception {
-
 		ResolvableType object = ResolvableType.forClass(Object.class);
 		ResolvableType charSequence = ResolvableType.forClass(CharSequence.class);
 		ResolvableType string = ResolvableType.forClass(String.class);
@@ -1287,6 +1287,15 @@ public class ResolvableTypeTests {
 		assertThat(((ParameterizedType) type).getActualTypeArguments()[0], is(equalTo(String.class)));
 	}
 
+	@Test
+	public void testSpr14648() throws Exception {
+		ResolvableType collectionClass = ResolvableType.forRawClass(Collection.class);
+		ResolvableType setClass = ResolvableType.forRawClass(Set.class);
+		ResolvableType fromReturnType = ResolvableType.forMethodReturnType(Methods.class.getMethod("wildcardSet"));
+		assertTrue(collectionClass.isAssignableFrom(fromReturnType));
+		assertTrue(setClass.isAssignableFrom(fromReturnType));
+	}
+
 
 	private ResolvableType testSerialization(ResolvableType type) throws Exception {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -1385,7 +1394,7 @@ public class ResolvableTypeTests {
 	}
 
 
-	static interface Methods<T> {
+	interface Methods<T> {
 
 		List<CharSequence> charSequenceReturn();
 
@@ -1398,6 +1407,8 @@ public class ResolvableTypeTests {
 		void typedParameter(T p);
 
 		T typedReturn();
+
+		Set<?> wildcardSet();
 	}
 
 
@@ -1453,7 +1464,7 @@ public class ResolvableTypeTests {
 	}
 
 
-	static interface TypedMethods extends Methods<String> {
+	interface TypedMethods extends Methods<String> {
 	}
 
 
@@ -1526,19 +1537,19 @@ public class ResolvableTypeTests {
 	}
 
 
-	static interface Wildcard<T extends Number> extends List<T> {
+	interface Wildcard<T extends Number> extends List<T> {
 	}
 
 
-	static interface RawExtendsWildcard extends Wildcard {
+	interface RawExtendsWildcard extends Wildcard {
 	}
 
 
-	static interface VariableNameSwitch<V, K> extends MultiValueMap<K, V> {
+	interface VariableNameSwitch<V, K> extends MultiValueMap<K, V> {
 	}
 
 
-	static interface ListOfGenericArray extends List<List<String>[]> {
+	interface ListOfGenericArray extends List<List<String>[]> {
 	}
 
 
