@@ -48,11 +48,11 @@ import org.springframework.web.server.ServerWebExchange;
  * {@link Converter}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 5.0
  * @see PathVariableMapMethodArgumentResolver
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
-
 
 	public PathVariableMethodArgumentResolver(ConversionService conversionService,
 			ConfigurableBeanFactory beanFactory) {
@@ -108,7 +108,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	private static class PathVariableNamedValueInfo extends NamedValueInfo {
 
 		public PathVariableNamedValueInfo(PathVariable annotation) {
-			super(annotation.value(), true, ValueConstants.DEFAULT_NONE);
+			super(annotation.name(), annotation.required(), ValueConstants.DEFAULT_NONE);
 		}
 	}
 

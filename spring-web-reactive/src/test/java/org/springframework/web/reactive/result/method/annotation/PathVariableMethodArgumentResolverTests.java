@@ -20,12 +20,14 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.HttpMethod;
@@ -34,6 +36,7 @@ import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.ServerErrorException;
@@ -42,14 +45,13 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link PathVariableMethodArgumentResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class PathVariableMethodArgumentResolverTests {
 
@@ -58,7 +60,12 @@ public class PathVariableMethodArgumentResolverTests {
 	private ServerWebExchange exchange;
 
 	private MethodParameter paramNamedString;
+
 	private MethodParameter paramString;
+
+	private MethodParameter paramNotRequired;
+
+	private MethodParameter paramOptional;
 
 
 	@Before
@@ -70,9 +77,11 @@ public class PathVariableMethodArgumentResolverTests {
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
-		Method method = getClass().getMethod("handle", String.class, String.class);
-		this.paramNamedString = new MethodParameter(method, 0);
-		this.paramString = new MethodParameter(method, 1);
+		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
+		paramNamedString = new SynthesizingMethodParameter(method, 0);
+		paramString = new SynthesizingMethodParameter(method, 1);
+		paramNotRequired = new SynthesizingMethodParameter(method, 2);
+		paramOptional = new SynthesizingMethodParameter(method, 3);
 	}
 
 
@@ -90,9 +99,29 @@ public class PathVariableMethodArgumentResolverTests {
 
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, new ModelMap(), this.exchange);
 		Object result = mono.block();
-
-		assertTrue(result instanceof String);
 		assertEquals("value", result);
+	}
+
+	@Test
+	public void resolveArgumentNotRequired() throws Exception {
+		Map<String, String> uriTemplateVars = new HashMap<>();
+		uriTemplateVars.put("name", "value");
+		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, new ModelMap(), this.exchange);
+		Object result = mono.block();
+		assertEquals("value", result);
+	}
+
+	@Test
+	public void resolveArgumentWrappedAsOptional() throws Exception {
+		Map<String, String> uriTemplateVars = new HashMap<>();
+		uriTemplateVars.put("name", "value");
+		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, new ModelMap(), this.exchange);
+		Object result = mono.block();
+		assertEquals(Optional.of("value"), result);
 	}
 
 	@Test
@@ -103,8 +132,29 @@ public class PathVariableMethodArgumentResolverTests {
 				.assertError(ServerErrorException.class);
 	}
 
+	@Test
+	public void nullIfNotRequired() throws Exception {
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, new ModelMap(), this.exchange);
+		TestSubscriber
+				.subscribe(mono)
+				.assertComplete()
+				.assertNoValues();
+	}
+
+	@Test
+	public void wrapEmptyWithOptional() throws Exception {
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, new ModelMap(), this.exchange);
+		Object result = mono.block();
+		TestSubscriber
+				.subscribe(mono)
+				.assertValues(Optional.empty());
+	}
+
+
 	@SuppressWarnings("unused")
-	public void handle(@PathVariable(value = "name") String param1, String param2) {
+	public void handle(@PathVariable(value = "name") String param1, String param2,
+			@PathVariable(name="name", required = false) String param3,
+			@PathVariable("name") Optional<String> param4) {
 	}
 
 }
