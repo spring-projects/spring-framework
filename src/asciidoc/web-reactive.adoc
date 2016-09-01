@@ -100,8 +100,9 @@ in any one of the following ways:
 * `Mono<Account>` -- serialize without blocking the given Account when the `Mono` completes.
 * `Single<Account>` -- same but using RxJava.
 * `Flux<Account>` -- streaming scenario, possibly SSE depending on the requested content type.
-* `Flux<SseEvent>` -- SSE streaming.
-* `Observable<SseEvent>` -- same but using RxJava.
+* `Observable<Account>` -- same but using RxJava `Observable` type.
+* `Flowable<Account>` -- same but using RxJava 2 `Flowable` type.
+* `Flux<ServerSentEvent>` -- SSE streaming.
 * `Mono<Void>` -- request handling completes when the `Mono` completes.
 * `void` -- request handling completes when the method returns;
 implies a synchronous, non-blocking controller method.
