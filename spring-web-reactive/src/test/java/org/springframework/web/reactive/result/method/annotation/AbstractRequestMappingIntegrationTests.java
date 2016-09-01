@@ -56,6 +56,10 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 		return this.applicationContext;
 	}
 
+	RestTemplate getRestTemplate() {
+		return this.restTemplate;
+	}
+
 
 	<T> ResponseEntity<T> performGet(String url, MediaType out,
 			Class<T> type) throws Exception {

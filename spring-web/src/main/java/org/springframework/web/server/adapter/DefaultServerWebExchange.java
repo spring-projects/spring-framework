@@ -105,6 +105,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	}
 
 	@Override
+	public boolean isNotModified() {
+		return this.notModified;
+	}
+
+	@Override
 	public boolean checkNotModified(Instant lastModified) {
 		return checkNotModified(null, lastModified);
 	}

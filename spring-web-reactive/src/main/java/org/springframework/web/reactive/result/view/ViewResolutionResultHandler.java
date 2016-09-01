@@ -230,6 +230,9 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 	}
 
 	private Mono<Object> getDefaultViewNameMono(ServerWebExchange exchange, HandlerResult result) {
+		if (exchange.isNotModified()) {
+			return Mono.empty();
+		}
 		String defaultViewName = getDefaultViewName(result, exchange);
 		if (defaultViewName != null) {
 			return Mono.just(defaultViewName);

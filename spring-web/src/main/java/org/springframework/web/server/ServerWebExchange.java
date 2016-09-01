@@ -69,6 +69,12 @@ public interface ServerWebExchange {
 	Mono<WebSession> getSession();
 
 	/**
+	 * Returns {@code true} if the one of the {@code checkNotModified} methods
+	 * in this contract were used and they returned true.
+	 */
+	boolean isNotModified();
+
+	/**
 	 * An overloaded variant of {@link #checkNotModified(String, Instant)} with
 	 * a last-modified timestamp only.
 	 * @param lastModified the last-modified time
