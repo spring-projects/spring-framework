@@ -2946,7 +2946,6 @@ to perform certain actions upon initialization and destruction of your beans.
 
 [TIP]
 ====
-
 The JSR-250 `@PostConstruct` and `@PreDestroy` annotations are generally considered best
 practice for receiving lifecycle callbacks in a modern Spring application. Using these
 annotations means that your beans are not coupled to Spring specific interfaces. For
@@ -6715,13 +6714,17 @@ The behavior could be different according to the scope of your bean. We are talk
 about singletons here.
 ====
 
-[NOTE]
+[TIP]
 ====
 There are a few restrictions due to the fact that CGLIB dynamically adds features at
-startup-time:
+startup-time, in particular that configuration classes must not be final. However, as
+of 4.3, any constructors are allowed on configuration classes, including the use of
+`@Autowired` or a single non-default constructor declaration for default injection.
 
-* Configuration classes should not be final
-* They should have a constructor with no arguments
+If you prefer to avoid any CGLIB-imposed limitations, consider declaring your `@Bean`
+methods on non-`@Configuration` classes, e.g. on plain `@Component` classes instead.
+Cross-method calls between `@Bean` methods won't get intercepted then, so you'll have
+to exclusively rely on dependency injection at the constructor or method level there.
 ====
 
 
@@ -6780,6 +6783,14 @@ instantiating the context, only `ConfigB` needs to be supplied explicitly:
 This approach simplifies container instantiation, as only one class needs to be dealt
 with, rather than requiring the developer to remember a potentially large number of
 `@Configuration` classes during construction.
+
+[TIP]
+====
+As of Spring Framework 4.2, `@Import` also supports references to regular component
+classes, analogous to the `AnnotationConfigApplicationContext.register` method.
+This is particularly useful if you'd like to avoid component scanning, using a few
+configuration classes as entry points for explicitly defining all your components.
+====
 
 [[beans-java-injecting-imported-beans]]
 ===== Injecting dependencies on imported @Bean definitions
