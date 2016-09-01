@@ -61,6 +61,7 @@ configure(allprojects) { project ->
 	ext.jettyVersion           = "9.4.0.M1"
 	ext.jodaVersion            = "2.9.4"
 	ext.jpaVersion             = "2.1.1"
+	ext.jsfVersion             = "2.2"
 	ext.jspVersion             = "2.3.2-b02"
 	ext.jtaVersion             = "1.2"
 	ext.junitVersion           = "4.12"
@@ -72,6 +73,7 @@ configure(allprojects) { project ->
 	ext.okhttp3Version         = "3.4.1"
 	ext.poiVersion             = "3.14"
 	ext.protobufVersion        = "3.0.0"
+	ext.quartzVersion          = "2.2.3"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.1.BUILD-SNAPSHOT'
@@ -233,9 +235,9 @@ configure(allprojects) { project ->
 		"http://ehcache.org/apidocs/${ehcacheVersion}",
 		"http://ehcache.org/apidocs/${ehcache3Version}",
 		"http://quartz-scheduler.org/api/2.2.1/",
-		"http://fasterxml.github.io/jackson-core/javadoc/2.7/",
-		"http://fasterxml.github.io/jackson-databind/javadoc/2.7/",
-		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.7/",
+		"http://fasterxml.github.io/jackson-core/javadoc/2.8/",
+		"http://fasterxml.github.io/jackson-databind/javadoc/2.8/",
+		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.8/",
 		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
 	] as String[]
 }
@@ -502,7 +504,7 @@ project("spring-context") {
 		optional("javax.ejb:javax.ejb-api:${ejbApiVersion}")
 		optional("javax.interceptor:javax.interceptor-api:${interceptorApiVersion}")
 		optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api:1.0")
-		optional("javax.money:money-api:1.0")
+		optional("javax.money:money-api:1.0.1")
 		optional("org.eclipse.persistence:javax.persistence:${jpaVersion}")
 		optional("javax.validation:validation-api:${beanvalVersion}")
 		optional("org.hibernate:hibernate-validator:${hibval5Version}")
@@ -665,7 +667,7 @@ project("spring-context-support") {
 		optional("javax.cache:cache-api:1.0.0")
 		optional("com.github.ben-manes.caffeine:caffeine:${caffeineVersion}")
 		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
-		optional("org.quartz-scheduler:quartz:2.2.3")
+		optional("org.quartz-scheduler:quartz:${quartzVersion}")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional("com.lowagie:itext:2.1.7")
@@ -706,7 +708,7 @@ project("spring-web") {
 		optional(project(":spring-oxm"))  // for MarshallingHttpMessageConverter
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:${jspVersion}")
 		optional("javax.el:javax.el-api:${elApiVersion}")
-		optional("javax.faces:javax.faces-api:2.2")
+		optional("javax.faces:javax.faces-api:${jsfVersion}")
 		optional("javax.validation:validation-api:${beanvalVersion}")
 		optional("javax.activation:activation:${activationApiVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
