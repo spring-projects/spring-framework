@@ -57,7 +57,6 @@ import org.springframework.context.index.sample.type.SmartRepo;
 import org.springframework.context.index.sample.type.SpecializedRepo;
 import org.springframework.context.index.test.TestCompiler;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
