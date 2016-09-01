@@ -23,7 +23,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 
 /**
  * Representation for a Server-Sent Event for use with Spring's reactive Web
- * support. {@code Flux<SseEvent>} or {@code Observable<SseEvent>} is the
+ * support. {@code Flux<ServerSentEvent>} or {@code Observable<ServerSentEvent>} is the
  * reactive equivalent to Spring MVC's {@code SseEmitter}.
  *
  * @param <T> the type of data that this event contains
@@ -44,6 +44,7 @@ public class ServerSentEvent<T> {
     private final Duration retry;
 
     private final String comment;
+
 
     private ServerSentEvent(String id, String event, T data, Duration retry, String comment) {
         this.id = id;
