@@ -81,9 +81,6 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", WebReactiveConfiguration.class.getClassLoader());
 
-	private static final boolean rxJava1Present =
-			ClassUtils.isPresent("rx.Observable", WebReactiveConfiguration.class.getClassLoader());
-
 
 	private PathMatchConfigurer pathMatchConfigurer;
 

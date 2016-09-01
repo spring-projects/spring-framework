@@ -20,14 +20,10 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import rx.Observable;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -170,18 +166,6 @@ public class WebReactiveConfigurationTests {
 
 		assertHasMessageReader(messageReaders, String.class, TEXT_PLAIN);
 		assertHasMessageReader(messageReaders, TestBean.class, APPLICATION_XML);
-	}
-
-	@Test
-	public void mvcConversionService() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfiguration.class);
-
-		String name = "mvcConversionService";
-		ConversionService service = context.getBean(name, ConversionService.class);
-		assertNotNull(service);
-
-		service.canConvert(CompletableFuture.class, Mono.class);
-		service.canConvert(Observable.class, Flux.class);
 	}
 
 	@Test
