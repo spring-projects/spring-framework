@@ -15,6 +15,8 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +28,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.HttpMessageWriter;
@@ -46,6 +49,8 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ResponseEntityResultHandler extends AbstractMessageWriterResultHandler
 		implements HandlerResultHandler {
+
+	private static final List<HttpMethod> SAFE_METHODS = Arrays.asList(HttpMethod.GET, HttpMethod.HEAD);
 
 
 	/**
@@ -143,6 +148,14 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 				entityHeaders.entrySet().stream()
 						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
+			}
+
+			String etag = entityHeaders.getETag();
+			Instant lastModified = Instant.ofEpochMilli(entityHeaders.getLastModified());
+			HttpMethod httpMethod = exchange.getRequest().getMethod();
+			if (SAFE_METHODS.contains(httpMethod) && exchange.checkNotModified(etag, lastModified)) {
+				exchange.getResponse().setComplete();
+				return Mono.empty();
 			}
 
 			return writeBody(httpEntity.getBody(), bodyType, exchange);
