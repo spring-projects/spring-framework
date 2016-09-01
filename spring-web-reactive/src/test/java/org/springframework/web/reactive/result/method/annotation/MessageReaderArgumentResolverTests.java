@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import io.reactivex.Flowable;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -145,6 +146,16 @@ public class MessageReaderArgumentResolverTests {
 	}
 
 	@Test
+	public void rxJava2SingleTestBean() throws Exception {
+		String body = "{\"bar\":\"b1\",\"foo\":\"f1\"}";
+		ResolvableType type = forClassWithGenerics(io.reactivex.Single.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		io.reactivex.Single<TestBean> single = resolveValue(param, body);
+
+		assertEquals(new TestBean("f1", "b1"), single.blockingGet());
+	}
+
+	@Test
 	public void observableTestBean() throws Exception {
 		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
 		ResolvableType type = forClassWithGenerics(Observable.class, TestBean.class);
@@ -153,6 +164,28 @@ public class MessageReaderArgumentResolverTests {
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
 				observable.toList().toBlocking().first());
+	}
+
+	@Test
+	public void rxJava2ObservableTestBean() throws Exception {
+		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
+		ResolvableType type = forClassWithGenerics(io.reactivex.Observable.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		io.reactivex.Observable<?> observable = resolveValue(param, body);
+
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
+				observable.toList().blockingFirst());
+	}
+
+	@Test
+	public void flowableTestBean() throws Exception {
+		String body = "[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]";
+		ResolvableType type = forClassWithGenerics(Flowable.class, TestBean.class);
+		MethodParameter param = this.testMethod.resolveParam(type);
+		Flowable<?> flowable = resolveValue(param, body);
+
+		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
+				flowable.toList().blockingFirst());
 	}
 
 	@Test
@@ -288,7 +321,10 @@ public class MessageReaderArgumentResolverTests {
 			@Validated Mono<TestBean> monoTestBean,
 			@Validated Flux<TestBean> fluxTestBean,
 			Single<TestBean> singleTestBean,
+			io.reactivex.Single<TestBean> rxJava2SingleTestBean,
 			Observable<TestBean> observableTestBean,
+			io.reactivex.Observable<TestBean> rxJava2ObservableTestBean,
+			Flowable<TestBean> flowableTestBean,
 			CompletableFuture<TestBean> futureTestBean,
 			TestBean testBean,
 			Map<String, String> map,

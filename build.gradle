@@ -80,6 +80,7 @@ configure(allprojects) { project ->
 	ext.reactorNettyVersion    = '0.6.0.BUILD-SNAPSHOT'
 	ext.romeVersion            = "1.6.0"
 	ext.rxjavaVersion          = '1.1.9'
+	ext.rxjava2Version         = '2.0.0-RC1'
 	ext.rxnettyVersion         = '0.5.2-rc.3'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.21"
@@ -389,6 +390,7 @@ project("spring-core") {
 		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
 		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
 		optional "io.reactivex:rxjava:${rxjavaVersion}"
+		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.netty:netty-buffer:${nettyVersion}")
 		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
@@ -721,6 +723,7 @@ project("spring-web") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
 		optional("io.reactivex:rxjava:${rxjavaVersion}")
+		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.undertow:undertow-core:${undertowVersion}")
 		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
 		optional("io.netty:netty-buffer:${nettyVersion}") // Temporarily for JsonObjectDecoder
@@ -797,6 +800,7 @@ project("spring-web-reactive") {
 			exclude group: 'io.reactivex', module: 'rxjava'
 		}
 		testCompile("io.reactivex:rxjava:${rxjavaVersion}")
+		testCompile "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		testCompile("io.undertow:undertow-core:${undertowVersion}")
 		testCompile("org.jboss.xnio:xnio-api:${xnioVersion}")
 		testCompile("com.fasterxml:aalto-xml:1.0.0")

@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import io.reactivex.Flowable;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -101,6 +102,18 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	public void byteBufferResponseBodyWithObservable() throws Exception {
 		String expected = "Hello!";
 		assertEquals(expected, performGet("/raw-response/observable", null, String.class).getBody());
+	}
+
+	@Test
+	public void byteBufferResponseBodyWithRxJava2Observable() throws Exception {
+		String expected = "Hello!";
+		assertEquals(expected, performGet("/raw-response/rxjava2-observable", null, String.class).getBody());
+	}
+
+	@Test
+	public void byteBufferResponseBodyWithFlowable() throws Exception {
+		String expected = "Hello!";
+		assertEquals(expected, performGet("/raw-response/flowable", null, String.class).getBody());
 	}
 
 	@Test
@@ -197,6 +210,13 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@Test
+	public void personTransformWithRxJava2Single() throws Exception {
+		assertEquals(new Person("ROBERT"),
+				performPost("/person-transform/rxjava2-single", JSON, new Person("Robert"),
+						JSON, Person.class).getBody());
+	}
+
+	@Test
 	public void personTransformWithPublisher() throws Exception {
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
 		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
@@ -215,6 +235,20 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		List<?> req = asList(new Person("Robert"), new Person("Marie"));
 		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
 		assertEquals(res, performPost("/person-transform/observable", JSON, req, JSON, PERSON_LIST).getBody());
+	}
+
+	@Test
+	public void personTransformWithRxJava2Observable() throws Exception {
+		List<?> req = asList(new Person("Robert"), new Person("Marie"));
+		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
+		assertEquals(res, performPost("/person-transform/rxjava2-observable", JSON, req, JSON, PERSON_LIST).getBody());
+	}
+
+	@Test
+	public void personTransformWithFlowable() throws Exception {
+		List<?> req = asList(new Person("Robert"), new Person("Marie"));
+		List<?> res = asList(new Person("ROBERT"), new Person("MARIE"));
+		assertEquals(res, performPost("/person-transform/flowable", JSON, req, JSON, PERSON_LIST).getBody());
 	}
 
 	@Test
@@ -254,6 +288,15 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@Test
+	public void personCreateWithRxJava2Single() throws Exception {
+		ResponseEntity<Void> entity = performPost(
+				"/person-create/rxjava2-single", JSON, new Person("Robert"), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(1, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
 	public void personCreateWithFluxJson() throws Exception {
 		ResponseEntity<Void> entity = performPost("/person-create/flux", JSON,
 				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
@@ -281,9 +324,45 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	}
 
 	@Test
+	public void personCreateWithRxJava2ObservableJson() throws Exception {
+		ResponseEntity<Void> entity = performPost("/person-create/rxjava2-observable", JSON,
+				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
 	public void personCreateWithObservableXml() throws Exception {
 		People people = new People(new Person("Robert"), new Person("Marie"));
 		ResponseEntity<Void> response = performPost("/person-create/observable", APPLICATION_XML, people, null, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
+	public void personCreateWithRxJava2ObservableXml() throws Exception {
+		People people = new People(new Person("Robert"), new Person("Marie"));
+		ResponseEntity<Void> response = performPost("/person-create/rxjava2-observable", APPLICATION_XML, people, null, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
+	public void personCreateWithFlowableJson() throws Exception {
+		ResponseEntity<Void> entity = performPost("/person-create/flowable", JSON,
+				asList(new Person("Robert"), new Person("Marie")), null, Void.class);
+
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
+		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
+	}
+
+	@Test
+	public void personCreateWithFlowableXml() throws Exception {
+		People people = new People(new Person("Robert"), new Person("Marie"));
+		ResponseEntity<Void> response = performPost("/person-create/flowable", APPLICATION_XML, people, null, Void.class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(2, getApplicationContext().getBean(PersonCreateController.class).persons.size());
@@ -318,6 +397,16 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		@GetMapping("/observable")
 		public Observable<ByteBuffer> getObservable() {
 			return Observable.just(ByteBuffer.wrap("Hello!".getBytes()));
+		}
+
+		@GetMapping("/rxjava2-observable")
+		public io.reactivex.Observable<ByteBuffer> getRxJava2Observable() {
+			return io.reactivex.Observable.just(ByteBuffer.wrap("Hello!".getBytes()));
+		}
+
+		@GetMapping("/flowable")
+		public Flowable<ByteBuffer> getFlowable() {
+			return Flowable.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 	}
 
@@ -409,6 +498,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
+		@PostMapping("/rxjava2-single")
+		public io.reactivex.Single<Person> transformRxJava2Single(@RequestBody io.reactivex.Single<Person> personFuture) {
+			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
+		}
+
 		@PostMapping("/publisher")
 		public Publisher<Person> transformPublisher(@RequestBody Publisher<Person> persons) {
 			return Flux
@@ -423,6 +517,16 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 		@PostMapping("/observable")
 		public Observable<Person> transformObservable(@RequestBody Observable<Person> persons) {
+			return persons.map(person -> new Person(person.getName().toUpperCase()));
+		}
+
+		@PostMapping("/rxjava2-observable")
+		public io.reactivex.Observable<Person> transformObservable(@RequestBody io.reactivex.Observable<Person> persons) {
+			return persons.map(person -> new Person(person.getName().toUpperCase()));
+		}
+
+		@PostMapping("/flowable")
+		public Flowable<Person> transformFlowable(@RequestBody Flowable<Person> persons) {
 			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 	}
@@ -449,6 +553,11 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			return single.map(persons::add).toCompletable();
 		}
 
+		@PostMapping("/rxjava2-single")
+		public io.reactivex.Completable createWithRxJava2Single(@RequestBody io.reactivex.Single<Person> single) {
+			return single.map(persons::add).toCompletable();
+		}
+
 		@PostMapping("/flux")
 		public Mono<Void> createWithFlux(@RequestBody Flux<Person> flux) {
 			return flux.doOnNext(persons::add).then();
@@ -457,6 +566,16 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		@PostMapping("/observable")
 		public Observable<Void> createWithObservable(@RequestBody Observable<Person> observable) {
 			return observable.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
+		}
+
+		@PostMapping("/rxjava2-observable")
+		public io.reactivex.Observable<Void> createWithRxJava2Observable(@RequestBody io.reactivex.Observable<Person> observable) {
+			return observable.toList().doOnNext(persons::addAll).flatMap(document -> io.reactivex.Observable.empty());
+		}
+
+		@PostMapping("/flowable")
+		public Flowable<Void> createWithFlowable(@RequestBody Flowable<Person> flowable) {
+			return flowable.toList().doOnNext(persons::addAll).flatMap(document -> Flowable.empty());
 		}
 	}
 

@@ -250,13 +250,17 @@ public class RequestBodyArgumentResolverTests {
 			@RequestBody Mono<String> mono,
 			@RequestBody Flux<String> flux,
 			@RequestBody Single<String> single,
+			@RequestBody io.reactivex.Single<String> rxJava2Single,
 			@RequestBody Observable<String> obs,
+			@RequestBody io.reactivex.Observable<String> rxjava2Obs,
 			@RequestBody CompletableFuture<String> future,
 			@RequestBody(required = false) String stringNotRequired,
 			@RequestBody(required = false) Mono<String> monoNotRequired,
 			@RequestBody(required = false) Flux<String> fluxNotRequired,
 			@RequestBody(required = false) Single<String> singleNotRequired,
+			@RequestBody(required = false) io.reactivex.Single<String> rxJava2SingleNotRequired,
 			@RequestBody(required = false) Observable<String> obsNotRequired,
+			@RequestBody(required = false) io.reactivex.Observable<String> rxjava2ObsNotRequired,
 			@RequestBody(required = false) CompletableFuture<String> futureNotRequired,
 			String notAnnotated) {}
 

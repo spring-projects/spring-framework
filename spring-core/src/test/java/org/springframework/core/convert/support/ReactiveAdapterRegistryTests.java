@@ -17,6 +17,7 @@ package org.springframework.core.convert.support;
 
 import java.util.concurrent.CompletableFuture;
 
+import io.reactivex.Flowable;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -55,6 +56,10 @@ public class ReactiveAdapterRegistryTests {
 		testFluxAdapter(Observable.class);
 		testMonoAdapter(Single.class);
 		testMonoAdapter(Completable.class);
+		testFluxAdapter(Flowable.class);
+		testFluxAdapter(io.reactivex.Observable.class);
+		testMonoAdapter(io.reactivex.Single.class);
+		testMonoAdapter(io.reactivex.Completable.class);
 	}
 
 	private void testFluxAdapter(Class<?> adapteeType) {

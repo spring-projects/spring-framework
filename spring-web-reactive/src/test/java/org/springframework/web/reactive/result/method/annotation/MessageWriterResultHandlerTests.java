@@ -29,6 +29,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import io.reactivex.Flowable;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -112,8 +113,11 @@ public class MessageWriterResultHandlerTests {
 		testVoidReturnType(null, ResolvableType.forType(void.class));
 		testVoidReturnType(Mono.empty(), ResolvableType.forClassWithGenerics(Mono.class, Void.class));
 		testVoidReturnType(Completable.complete(), ResolvableType.forClass(Completable.class));
+		testVoidReturnType(io.reactivex.Completable.complete(), ResolvableType.forClass(io.reactivex.Completable.class));
 		testVoidReturnType(Flux.empty(), ResolvableType.forClassWithGenerics(Flux.class, Void.class));
 		testVoidReturnType(Observable.empty(), ResolvableType.forClassWithGenerics(Observable.class, Void.class));
+		testVoidReturnType(io.reactivex.Observable.empty(), ResolvableType.forClassWithGenerics(io.reactivex.Observable.class, Void.class));
+		testVoidReturnType(Flowable.empty(), ResolvableType.forClassWithGenerics(Flowable.class, Void.class));
 	}
 
 	private void testVoidReturnType(Object body, ResolvableType type) {
@@ -273,9 +277,15 @@ public class MessageWriterResultHandlerTests {
 
 		Completable completable() { return null; }
 
+		io.reactivex.Completable rxJava2Completable() { return null; }
+
 		Flux<Void> fluxVoid() { return null; }
 
 		Observable<Void> observableVoid() { return null; }
+
+		io.reactivex.Observable<Void> rxJava2ObservableVoid() { return null; }
+
+		Flowable<Void> flowableVoid() { return null; }
 
 		OutputStream outputStream() { return null; }
 

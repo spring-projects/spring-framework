@@ -23,8 +23,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
 import org.reactivestreams.Publisher;
 import reactor.adapter.RxJava1Adapter;
+import reactor.adapter.RxJava2Adapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Completable;
@@ -47,6 +50,9 @@ public class ReactiveAdapterRegistry {
 
 	private static final boolean rxJava1Present =
 			ClassUtils.isPresent("rx.Observable", ReactiveAdapterRegistry.class.getClassLoader());
+
+	private static final boolean rxJava2Present =
+			ClassUtils.isPresent("io.reactivex.Flowable", ReactiveAdapterRegistry.class.getClassLoader());
 
 	private final Map<Class<?>, ReactiveAdapter> adapterMap = new LinkedHashMap<>(4);
 
@@ -71,6 +77,9 @@ public class ReactiveAdapterRegistry {
 
 		if (rxJava1Present) {
 			new RxJava1AdapterRegistrar().register(this);
+		}
+		if (rxJava2Present) {
+			new RxJava2AdapterRegistrar().register(this);
 		}
 	}
 
@@ -264,6 +273,30 @@ public class ReactiveAdapterRegistry {
 			registry.registerMonoAdapter(Completable.class,
 					source -> RxJava1Adapter.completableToMono((Completable) source),
 					RxJava1Adapter::publisherToCompletable,
+					new ReactiveAdapter.Descriptor(false, true, true)
+			);
+		}
+	}
+
+	private static class RxJava2AdapterRegistrar {
+
+		public void register(ReactiveAdapterRegistry registry) {
+			registry.registerFluxAdapter(Flowable.class,
+					source -> RxJava2Adapter.flowableToFlux((Flowable<?>) source),
+					RxJava2Adapter::fluxToFlowable
+			);
+			registry.registerFluxAdapter(io.reactivex.Observable.class,
+					source -> RxJava2Adapter.observableToFlux((io.reactivex.Observable<?>) source, BackpressureStrategy.BUFFER),
+					RxJava2Adapter::fluxToObservable
+			);
+			registry.registerMonoAdapter(io.reactivex.Single.class,
+					source -> RxJava2Adapter.singleToMono((io.reactivex.Single<?>) source),
+					RxJava2Adapter::monoToSingle,
+					new ReactiveAdapter.Descriptor(false, false, false)
+			);
+			registry.registerMonoAdapter(io.reactivex.Completable.class,
+					source -> RxJava2Adapter.completableToMono((io.reactivex.Completable) source),
+					RxJava2Adapter::monoToCompletable,
 					new ReactiveAdapter.Descriptor(false, true, true)
 			);
 		}
