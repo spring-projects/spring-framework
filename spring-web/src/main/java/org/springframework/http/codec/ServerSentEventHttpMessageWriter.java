@@ -79,10 +79,6 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
 		Flux<Publisher<DataBuffer>> body = encode(inputStream, bufferFactory, type);
 
-		//  Keep the SSE connection open even for cold stream in order to avoid
-		// unexpected browser reconnection
-		body = body.concatWith(Flux.never());
-
 		return outputMessage.writeAndFlushWith(body);
 	}
 
