@@ -202,9 +202,9 @@ configure(allprojects) { project ->
 		"http://ehcache.org/apidocs/${ehcacheVersion}",
 		"http://ehcache.org/apidocs/${ehcache3Version}",
 		"http://quartz-scheduler.org/api/2.2.1/",
-		"http://fasterxml.github.io/jackson-core/javadoc/2.7/",
-		"http://fasterxml.github.io/jackson-databind/javadoc/2.7/",
-		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.7/",
+		"http://fasterxml.github.io/jackson-core/javadoc/2.8/",
+		"http://fasterxml.github.io/jackson-databind/javadoc/2.8/",
+		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.8/",
 		"http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/"
 	] as String[]
 }
@@ -479,7 +479,7 @@ project("spring-context") {
 		optional("javax.inject:javax.inject:1")
 		optional("javax.ejb:ejb-api:${ejbVersion}")
 		optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api:1.0")
-		optional("javax.money:money-api:1.0")
+		optional("javax.money:money-api:1.0.1")
 		optional("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("org.hibernate:hibernate-validator:${hibval4Version}")
