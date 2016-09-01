@@ -210,14 +210,7 @@ public class SpringClassRule implements TestRule {
 	 */
 	static TestContextManager getTestContextManager(Class<?> testClass) {
 		Assert.notNull(testClass, "testClass must not be null");
-		synchronized (testContextManagerCache) {
-			TestContextManager testContextManager = testContextManagerCache.get(testClass);
-			if (testContextManager == null) {
-				testContextManager = new TestContextManager(testClass);
-				testContextManagerCache.put(testClass, testContextManager);
-			}
-			return testContextManager;
-		}
+		return testContextManagerCache.computeIfAbsent(testClass, TestContextManager::new);
 	}
 
 
