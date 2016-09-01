@@ -217,6 +217,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		// Type-based argument resolution
 		resolvers.add(new HttpEntityArgumentResolver(getMessageReaders(), getValidator(), adapterRegistry));
 		resolvers.add(new ModelArgumentResolver());
+		resolvers.add(new ServerWebExchangeArgumentResolver());
 
 		// Custom resolvers
 		if (getCustomArgumentResolvers() != null) {
