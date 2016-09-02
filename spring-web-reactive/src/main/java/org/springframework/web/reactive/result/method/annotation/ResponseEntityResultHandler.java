@@ -149,6 +149,10 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
+			if(httpEntity.getBody() == null) {
+				exchange.getResponse().setComplete();
+				return Mono.empty();
+			}
 
 			String etag = entityHeaders.getETag();
 			Instant lastModified = Instant.ofEpochMilli(entityHeaders.getLastModified());

@@ -65,6 +65,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 import static org.springframework.http.ResponseEntity.ok;
+import static org.springframework.http.ResponseEntity.notFound;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
@@ -165,6 +166,16 @@ public class ResponseEntityResultHandlerTests {
 		assertEquals(HttpStatus.CREATED, this.response.getStatusCode());
 		assertEquals(1, this.response.getHeaders().size());
 		assertEquals(location, this.response.getHeaders().getLocation());
+		assertNull(this.response.getBody());
+	}
+
+	@Test
+	public void handleResponseEntityWithNullBody() throws Exception {
+		Object returnValue = Mono.just(notFound().build());
+		ResolvableType returnType = forClassWithGenerics(Mono.class, responseEntity(String.class));
+		HandlerResult result = handlerResult(returnValue, returnType);
+		this.resultHandler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
+		assertEquals(HttpStatus.NOT_FOUND, this.response.getStatusCode());
 		assertNull(this.response.getBody());
 	}
 
