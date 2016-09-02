@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package org.springframework.test.context.support;
 
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
@@ -33,11 +34,14 @@ import org.springframework.util.Assert;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Rob Harrop
  * @since 4.0
  */
-public class DefaultTestContext extends AttributeAccessorSupport implements TestContext {
+public class DefaultTestContext implements TestContext {
 
 	private static final long serialVersionUID = -5827157174866681233L;
+
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>(0);
 
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
@@ -45,11 +49,11 @@ public class DefaultTestContext extends AttributeAccessorSupport implements Test
 
 	private final Class<?> testClass;
 
-	private Object testInstance;
+	private volatile Object testInstance;
 
-	private Method testMethod;
+	private volatile Method testMethod;
 
-	private Throwable testException;
+	private volatile Throwable testException;
 
 
 	/**
@@ -84,7 +88,7 @@ public class DefaultTestContext extends AttributeAccessorSupport implements Test
 		if (context instanceof ConfigurableApplicationContext) {
 			@SuppressWarnings("resource")
 			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
-			Assert.state(cac.isActive(), "The ApplicationContext loaded for [" + mergedContextConfiguration
+			Assert.state(cac.isActive(), () -> "The ApplicationContext loaded for [" + mergedContextConfiguration
 					+ "] is not active. Ensure that the context has not been closed programmatically.");
 		}
 		return context;
@@ -124,6 +128,40 @@ public class DefaultTestContext extends AttributeAccessorSupport implements Test
 		this.testException = testException;
 	}
 
+	@Override
+	public void setAttribute(String name, Object value) {
+		Assert.notNull(name, "Name must not be null");
+		if (value != null) {
+			this.attributes.put(name, value);
+		}
+		else {
+			removeAttribute(name);
+		}
+	}
+
+	@Override
+	public Object getAttribute(String name) {
+		Assert.notNull(name, "Name must not be null");
+		return this.attributes.get(name);
+	}
+
+	@Override
+	public Object removeAttribute(String name) {
+		Assert.notNull(name, "Name must not be null");
+		return this.attributes.remove(name);
+	}
+
+	@Override
+	public boolean hasAttribute(String name) {
+		Assert.notNull(name, "Name must not be null");
+		return this.attributes.containsKey(name);
+	}
+
+	@Override
+	public String[] attributeNames() {
+		return this.attributes.keySet().stream().toArray(String[]::new);
+	}
+
 
 	/**
 	 * Provide a String representation of this test context's state.
@@ -136,6 +174,7 @@ public class DefaultTestContext extends AttributeAccessorSupport implements Test
 				.append("testMethod", this.testMethod)
 				.append("testException", this.testException)
 				.append("mergedContextConfiguration", this.mergedContextConfiguration)
+				.append("attributes", this.attributes)
 				.toString();
 	}
 
