@@ -35,6 +35,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * Mock implementation of {@link ServerHttpResponse}.
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class MockServerHttpResponse implements ServerHttpResponse {
 
