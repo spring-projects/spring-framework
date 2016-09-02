@@ -25,10 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
@@ -41,18 +39,13 @@ import org.springframework.tests.TestSubscriber;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MimeType;
-import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 
 /**
@@ -63,16 +56,7 @@ public class HttpMessageWriterViewTests {
 
 	private HttpMessageWriterView view = new HttpMessageWriterView(new Jackson2JsonEncoder());
 
-	private HandlerResult result;
-
 	private ModelMap model = new ExtendedModelMap();
-
-
-	@Before
-	public void setup() throws Exception {
-		MethodParameter param = ResolvableMethod.onClass(this.getClass()).name("handle").resolveReturnType();
-		this.result = new HandlerResult(this, null, param, this.model);
-	}
 
 
 	@Test
@@ -91,7 +75,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo2", "bar2");
 		this.model.addAttribute("foo3", "bar3");
 
-		assertEquals("bar2", this.view.extractObjectToRender(this.result));
+		assertEquals("bar2", this.view.extractObjectToRender(this.model));
 	}
 
 	@Test
@@ -99,7 +83,7 @@ public class HttpMessageWriterViewTests {
 		this.view.setModelKeys(Collections.singleton("foo2"));
 		this.model.addAttribute("foo1", "bar1");
 
-		assertNull(this.view.extractObjectToRender(this.result));
+		assertNull(this.view.extractObjectToRender(this.model));
 	}
 
 	@Test
@@ -109,7 +93,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo2", "bar2");
 		this.model.addAttribute("foo3", "bar3");
 
-		Object value = this.view.extractObjectToRender(this.result);
+		Object value = this.view.extractObjectToRender(this.model);
 		assertNotNull(value);
 		assertEquals(HashMap.class, value.getClass());
 
@@ -127,7 +111,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo2", "bar2");
 
 		try {
-			view.extractObjectToRender(this.result);
+			view.extractObjectToRender(this.model);
 			fail();
 		}
 		catch (IllegalStateException ex) {
@@ -143,7 +127,7 @@ public class HttpMessageWriterViewTests {
 		this.model.addAttribute("foo1", "bar1");
 
 		try {
-			view.extractObjectToRender(this.result);
+			view.extractObjectToRender(this.model);
 			fail();
 		}
 		catch (IllegalStateException ex) {
@@ -165,7 +149,7 @@ public class HttpMessageWriterViewTests {
 		WebSessionManager manager = new DefaultWebSessionManager();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
 
-		this.view.render(result, MediaType.APPLICATION_JSON, exchange);
+		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange);
 
 		TestSubscriber
 				.subscribe(response.getBody())

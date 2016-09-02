@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.List;
+import java.util.Map;
 
 import reactor.core.publisher.Mono;
 
@@ -48,12 +50,13 @@ public interface View {
 	/**
 	 * Render the view based on the given {@link HandlerResult}. Implementations
 	 * can access and use the model or only a specific attribute in it.
-	 * @param result the result from handler execution
+	 * @param model Map with name Strings as keys and corresponding model
+	 * objects as values (Map can also be {@code null} in case of empty model)
 	 * @param contentType the content type selected to render with which should
 	 * match one of the {@link #getSupportedMediaTypes() supported media types}.
 	 * @param exchange the current exchange
 	 * @return {@code Mono} to represent when and if rendering succeeds
 	 */
-	Mono<Void> render(HandlerResult result, MediaType contentType, ServerWebExchange exchange);
+	Mono<Void> render(Map<String, ?> model, MediaType contentType, ServerWebExchange exchange);
 
 }

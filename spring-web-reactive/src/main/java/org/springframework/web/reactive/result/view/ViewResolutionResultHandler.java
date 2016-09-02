@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.lang.reflect.Method;
@@ -205,15 +206,15 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 					.defaultIfEmpty(result.getModel())
 					.then(model -> getDefaultViewNameMono(exchange, result));
 		}
-
+		Map<String, ?> model = result.getModel();
 		return viewMono.then(view -> {
 			if (view instanceof View) {
-				return ((View) view).render(result, null, exchange);
+				return ((View) view).render(model, null, exchange);
 			}
 			else if (view instanceof CharSequence) {
 				String viewName = view.toString();
 				Locale locale = Locale.getDefault(); // TODO
-				return resolveAndRender(viewName, locale, result, exchange);
+				return resolveAndRender(viewName, locale, model, exchange);
 
 			}
 			else {
@@ -305,7 +306,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 	}
 
 	private Mono<? extends Void> resolveAndRender(String viewName, Locale locale,
-			HandlerResult result, ServerWebExchange exchange) {
+			Map<String, ?> model, ServerWebExchange exchange) {
 
 		return Flux.fromIterable(getViewResolvers())
 				.concatMap(resolver -> resolver.resolveViewName(viewName, locale))
@@ -323,7 +324,7 @@ public class ViewResolutionResultHandler extends ContentNegotiatingResultHandler
 						for (View view : views) {
 							for (MediaType supported : view.getSupportedMediaTypes()) {
 								if (supported.isCompatibleWith(bestMediaType)) {
-									return view.render(result, bestMediaType, exchange);
+									return view.render(model, bestMediaType, exchange);
 								}
 							}
 						}
