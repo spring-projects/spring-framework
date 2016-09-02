@@ -1016,6 +1016,8 @@ project("spring-test") {
 		}
 		optional("org.skyscreamer:jsonassert:1.3.0")
 		optional("com.jayway.jsonpath:json-path:2.2.0")
+		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
+		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")

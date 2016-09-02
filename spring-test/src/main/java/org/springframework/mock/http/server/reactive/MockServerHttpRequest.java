@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.mock.http.server.reactive.test;
+package org.springframework.mock.http.server.reactive;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
