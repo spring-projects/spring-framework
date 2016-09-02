@@ -11,7 +11,7 @@ _Within your locally cloned spring-framework working directory:_
 
 ## Known issues
 
-1. `spring-core` and ``spring-oxm` should be pre-compiled due to repackaged dependencies.
+1. `spring-core` and `spring-oxm` should be pre-compiled due to repackaged dependencies.
 See `*RepackJar` tasks in the build and https://youtrack.jetbrains.com/issue/IDEA-160605).
 2. `spring-aspects` does not compile due to references to aspect types unknown to
 IntelliJ IDEA. See http://youtrack.jetbrains.com/issue/IDEA-64446 for details. In the meantime, the
