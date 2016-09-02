@@ -253,6 +253,13 @@ abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 		 */
 		DEMAND {
 			@Override
+			void request(AbstractRequestBodyPublisher publisher, long n) {
+				if (Operators.checkRequest(n, publisher.subscriber)) {
+					Operators.addAndGet(publisher.demand, n);
+				}
+			}
+
+			@Override
 			void onDataAvailable(AbstractRequestBodyPublisher publisher) {
 				if (publisher.changeState(this, READING)) {
 					try {
