@@ -347,8 +347,9 @@ public class ViewResolutionResultHandlerTests {
 		}
 
 		@Override
-		public Mono<Void> render(HandlerResult result, MediaType mediaType, ServerWebExchange exchange) {
-			String value = this.name + ": " + result.getModel().toString();
+		public Mono<Void> render(Map<String, ?> model, MediaType mediaType,
+				ServerWebExchange exchange) {
+			String value = this.name + ": " + model.toString();
 			assertNotNull(value);
 			ServerHttpResponse response = exchange.getResponse();
 			if (mediaType != null) {
