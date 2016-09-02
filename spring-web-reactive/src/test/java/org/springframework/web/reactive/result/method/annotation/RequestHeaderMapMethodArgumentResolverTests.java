@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 
@@ -71,7 +70,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		paramHttpHeaders = new SynthesizingMethodParameter(method, 2);
 		paramUnsupported = new SynthesizingMethodParameter(method, 3);
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}

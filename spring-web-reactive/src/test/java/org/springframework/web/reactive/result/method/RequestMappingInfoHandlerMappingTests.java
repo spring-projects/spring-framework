@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -345,7 +344,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 
 	private ServerWebExchange createExchange(HttpMethod method, String url) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(method, new URI(url));
+		ServerHttpRequest request = new MockServerHttpRequest(method, url);
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 

@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 
@@ -162,7 +161,7 @@ public class HeadersRequestConditionTests {
 	}
 
 	private ServerWebExchange createExchange(String headerName, String headerValue) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		if (headerName != null) {
 			request.getHeaders().add(headerName, headerValue);
 		}

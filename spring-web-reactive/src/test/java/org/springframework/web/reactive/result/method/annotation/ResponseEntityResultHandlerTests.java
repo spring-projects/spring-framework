@@ -89,7 +89,7 @@ public class ResponseEntityResultHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = createHandler();
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		WebSessionManager manager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(this.request, this.response, manager);
 	}

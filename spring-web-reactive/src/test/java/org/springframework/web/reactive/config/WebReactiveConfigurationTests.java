@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.config;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
@@ -65,8 +64,16 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.IMAGE_PNG;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
  * Unit tests for {@link WebReactiveConfiguration}.
@@ -81,7 +88,7 @@ public class WebReactiveConfigurationTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
@@ -105,11 +112,11 @@ public class WebReactiveConfigurationTests {
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
-		this.request.setUri(new URI("/path.json"));
+		this.request.setUri("/path.json");
 		List<MediaType> list = Collections.singletonList(MediaType.APPLICATION_JSON);
 		assertEquals(list, resolver.resolveMediaTypes(this.exchange));
 
-		this.request.setUri(new URI("/path.xml"));
+		this.request.setUri("/path.xml");
 		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(this.exchange));
 	}
 

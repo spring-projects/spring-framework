@@ -15,8 +15,6 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
-
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -56,7 +54,7 @@ public class ServerWebExchangeArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		ServerHttpResponse response = new MockServerHttpResponse();
 
 		WebSession session = mock(WebSession.class);

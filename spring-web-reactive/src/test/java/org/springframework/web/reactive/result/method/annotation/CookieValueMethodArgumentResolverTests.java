@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
-import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,7 +67,7 @@ public class CookieValueMethodArgumentResolverTests {
 		ConversionService cs = new DefaultConversionService();
 		this.resolver = new CookieValueMethodArgumentResolver(cs, context.getBeanFactory());
 
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 

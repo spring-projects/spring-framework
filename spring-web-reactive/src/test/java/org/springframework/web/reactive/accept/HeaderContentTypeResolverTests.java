@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.accept;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -71,7 +70,7 @@ public class HeaderContentTypeResolverTests {
 
 
 	private ServerWebExchange createExchange(String accept) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		if (accept != null) {
 			request.getHeaders().add("Accept", accept);
 		}

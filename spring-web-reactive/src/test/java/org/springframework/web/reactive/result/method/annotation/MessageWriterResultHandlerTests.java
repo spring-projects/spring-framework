@@ -19,7 +19,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -62,9 +61,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.web.reactive.HandlerMapping.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.web.reactive.HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 
 /**
  * Unit tests for {@link AbstractMessageWriterResultHandler}.
@@ -82,7 +83,7 @@ public class MessageWriterResultHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = createResultHandler();
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		this.exchange = new DefaultServerWebExchange(request, this.response, new MockWebSessionManager());
 	}
 

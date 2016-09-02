@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -78,7 +77,7 @@ public class ResponseBodyResultHandlerTests {
 	@Before
 	public void setUp() throws Exception {
 		this.resultHandler = createHandler();
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		this.exchange = new DefaultServerWebExchange(request, this.response, new MockWebSessionManager());
 	}
 

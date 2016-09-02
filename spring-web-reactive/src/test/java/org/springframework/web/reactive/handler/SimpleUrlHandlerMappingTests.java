@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.handler;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.Test;
@@ -121,7 +120,7 @@ public class SimpleUrlHandlerMappingTests {
 	}
 
 	private ServerWebExchange createExchange(String path) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, path);
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}

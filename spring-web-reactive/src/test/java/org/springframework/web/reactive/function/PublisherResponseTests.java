@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function;
 
-import java.net.URI;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -53,7 +52,7 @@ public class PublisherResponseTests {
 
 	@Test
 	public void writeTo() throws Exception {
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, URI.create("http://localhost"));
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, new MockWebSessionManager());
 		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE, Collections

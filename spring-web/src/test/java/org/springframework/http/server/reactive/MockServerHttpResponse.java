@@ -39,15 +39,15 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private HttpStatus status;
 
-	private HttpHeaders headers = new HttpHeaders();
+	private final HttpHeaders headers = new HttpHeaders();
 
-	private MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
+	private final MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
 	private Publisher<DataBuffer> body;
 
 	private Publisher<Publisher<DataBuffer>> bodyWithFlushes;
 
-	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
+	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	@Override
@@ -101,6 +101,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		return this.dataBufferFactory;
+		return this.bufferFactory;
 	}
+
 }

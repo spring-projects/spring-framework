@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
@@ -149,7 +148,7 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	private ServerWebExchange createExchange(String method) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.resolve(method), new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.resolve(method), "/");
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}

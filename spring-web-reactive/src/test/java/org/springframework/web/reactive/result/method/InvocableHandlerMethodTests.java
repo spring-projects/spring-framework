@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.result.method;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -57,7 +56,7 @@ public class InvocableHandlerMethodTests {
 	@Before
 	public void setUp() throws Exception {
 		this.exchange = new DefaultServerWebExchange(
-				new MockServerHttpRequest(HttpMethod.GET, new URI("http://localhost:8080/path")),
+				new MockServerHttpRequest(HttpMethod.GET, "http://localhost:8080/path"),
 				new MockServerHttpResponse(),
 				new MockWebSessionManager());
 	}

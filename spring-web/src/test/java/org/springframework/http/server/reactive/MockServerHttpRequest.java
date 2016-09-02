@@ -16,17 +16,21 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
 
 /**
  * Mock implementation of {@link ServerHttpRequest}.
@@ -36,46 +40,73 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 
 	private HttpMethod httpMethod;
 
-	private URI uri;
+	private URI url;
 
-	private MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
-	private HttpHeaders headers = new HttpHeaders();
+	private final HttpHeaders headers = new HttpHeaders();
 
-	private MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
+	private final MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
-	private Flux<DataBuffer> body;
+	private Flux<DataBuffer> body = Flux.empty();
 
 
-	public MockServerHttpRequest(HttpMethod httpMethod, URI uri) {
+	/**
+	 * Create a new instance where the HTTP method and/or URL can be set later
+	 * via {@link #setHttpMethod(HttpMethod)} and {@link #setUri(URI)}.
+	 */
+	public MockServerHttpRequest() {
+	}
+
+	/**
+	 * Convenience alternative to {@link #MockServerHttpRequest(HttpMethod, URI)}
+	 * that accepts a String URL.
+	 */
+	public MockServerHttpRequest(HttpMethod httpMethod, String url) {
+		this(httpMethod, (url != null ? URI.create(url) : null));
+	}
+
+	/**
+	 * Create a new instance with the given HTTP method and URL.
+	 */
+	public MockServerHttpRequest(HttpMethod httpMethod, URI url) {
 		this.httpMethod = httpMethod;
-		this.uri = uri;
+		this.url = url;
 	}
 
-	public MockServerHttpRequest(Publisher<DataBuffer> body, HttpMethod httpMethod,
-			URI uri) {
-		this.body = Flux.from(body);
-		this.httpMethod = httpMethod;
-		this.uri = uri;
-	}
-
-
-	@Override
-	public HttpMethod getMethod() {
-		return this.httpMethod;
-	}
 
 	public void setHttpMethod(HttpMethod httpMethod) {
 		this.httpMethod = httpMethod;
 	}
 
 	@Override
-	public URI getURI() {
-		return this.uri;
+	public HttpMethod getMethod() {
+		return this.httpMethod;
 	}
 
-	public void setUri(URI uri) {
-		this.uri = uri;
+	public MockServerHttpRequest setUri(String url) {
+		this.url = URI.create(url);
+		return this;
+	}
+
+	public MockServerHttpRequest setUri(URI uri) {
+		this.url = uri;
+		return this;
+	}
+
+	@Override
+	public URI getURI() {
+		return this.url;
+	}
+
+	public MockServerHttpRequest addHeader(String name, String value) {
+		getHeaders().add(name, value);
+		return this;
+	}
+
+	public MockServerHttpRequest setHeader(String name, String value) {
+		getHeaders().set(name, value);
+		return this;
 	}
 
 	@Override
@@ -93,13 +124,32 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 		return this.cookies;
 	}
 
+	public MockServerHttpRequest setBody(Publisher<DataBuffer> body) {
+		this.body = Flux.from(body);
+		return this;
+	}
+
+	public MockServerHttpRequest setBody(String body) {
+		DataBuffer buffer = toDataBuffer(body, StandardCharsets.UTF_8);
+		this.body = Flux.just(buffer);
+		return this;
+	}
+
+	public MockServerHttpRequest setBody(String body, Charset charset) {
+		DataBuffer buffer = toDataBuffer(body, charset);
+		this.body = Flux.just(buffer);
+		return this;
+	}
+
+	private DataBuffer toDataBuffer(String body, Charset charset) {
+		byte[] bytes = body.getBytes(charset);
+		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+		return new DefaultDataBufferFactory().wrap(byteBuffer);
+	}
+
 	@Override
 	public Flux<DataBuffer> getBody() {
 		return this.body;
 	}
 
-	public Mono<Void> writeWith(Publisher<DataBuffer> body) {
-		this.body = Flux.from(body);
-		return this.body.then();
-	}
 }

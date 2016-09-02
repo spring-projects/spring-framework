@@ -16,8 +16,6 @@
 package org.springframework.web.server.handler;
 
 
-import java.net.URI;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -56,7 +54,7 @@ public class FilteringWebHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("http://localhost"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
 		this.response = new MockServerHttpResponse();
 	}
 

@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -41,14 +40,13 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.ui.ExtendedModelMap;
 import org.springframework.tests.TestSubscriber;
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
@@ -85,7 +83,7 @@ public class HttpEntityArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.POST, new URI("/path"));
+		this.request = new MockServerHttpRequest(HttpMethod.POST, "/path");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
@@ -302,10 +300,8 @@ public class HttpEntityArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(ResolvableType type, String body) {
-
-		this.request.getHeaders().add("foo", "bar");
-		this.request.getHeaders().setContentType(MediaType.TEXT_PLAIN);
-		this.request.writeWith(Flux.just(dataBuffer(body)));
+		this.request.setHeader("foo", "bar").setHeader("Content-Type", "text/plain");
+		this.request.setBody(body);
 
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
@@ -320,7 +316,6 @@ public class HttpEntityArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> HttpEntity<T> resolveValueWithEmptyBody(ResolvableType type) {
-		this.request.writeWith(Flux.empty());
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
 		HttpEntity<String> httpEntity = (HttpEntity<String>) result.block(Duration.ofSeconds(5));

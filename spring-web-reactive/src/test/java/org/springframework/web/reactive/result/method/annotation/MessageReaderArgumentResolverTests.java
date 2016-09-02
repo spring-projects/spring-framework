@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -45,7 +44,6 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -63,8 +61,12 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
-import static org.springframework.core.ResolvableType.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.core.ResolvableType.forClass;
+import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -83,7 +85,7 @@ public class MessageReaderArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.POST, new URI("/path"));
+		this.request = new MockServerHttpRequest(HttpMethod.POST, "/path");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
@@ -91,8 +93,7 @@ public class MessageReaderArgumentResolverTests {
 
 	@Test
 	public void missingContentType() throws Exception {
-		String body = "{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}";
-		this.request.writeWith(Flux.just(dataBuffer(body)));
+		this.request.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}");
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
@@ -105,8 +106,7 @@ public class MessageReaderArgumentResolverTests {
 
 	@Test @SuppressWarnings("unchecked") // SPR-9942
 	public void emptyBody() throws Exception {
-		this.request.writeWith(Flux.empty());
-		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		this.request.setHeader("Content-Type", "application/json");
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(param, true, this.exchange).block();
@@ -288,10 +288,7 @@ public class MessageReaderArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
-
-		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		this.request.writeWith(Flux.just(dataBuffer(body)));
-
+		this.request.setHeader("Content-Type", "application/json").setBody(body);
 		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 

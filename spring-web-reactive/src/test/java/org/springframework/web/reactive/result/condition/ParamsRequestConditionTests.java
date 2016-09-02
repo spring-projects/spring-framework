@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 
@@ -134,7 +133,7 @@ public class ParamsRequestConditionTests {
 	}
 
 	private ServerWebExchange createExchange(String paramName, String paramValue) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		if (paramName != null) {
 			request.getQueryParams().add(paramName, paramValue);
 		}

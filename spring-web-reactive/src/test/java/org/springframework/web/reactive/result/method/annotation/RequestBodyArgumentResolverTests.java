@@ -16,9 +16,6 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +33,6 @@ import rx.Single;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.StringDecoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
@@ -82,7 +77,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.POST, new URI("/path"));
+		this.request = new MockServerHttpRequest(HttpMethod.POST, "/path");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
 	}
@@ -203,7 +198,7 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
-		this.request.writeWith(Flux.just(dataBuffer(body)));
+		this.request.setBody(body);
 		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
@@ -217,7 +212,6 @@ public class RequestBodyArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValueWithEmptyBody(ResolvableType bodyType, boolean isRequired) {
-		this.request.writeWith(Flux.empty());
 		MethodParameter param = this.testMethod.resolveParam(bodyType, requestBody(isRequired));
 		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
@@ -238,13 +232,8 @@ public class RequestBodyArgumentResolverTests {
 		};
 	}
 
-	private DataBuffer dataBuffer(String body) {
-		byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		return new DefaultDataBufferFactory().wrap(byteBuffer);
-	}
 
-
+	@SuppressWarnings("unused")
 	void handle(
 			@RequestBody String string,
 			@RequestBody Mono<String> mono,

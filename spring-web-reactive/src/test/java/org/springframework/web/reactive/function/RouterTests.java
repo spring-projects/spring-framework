@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.function;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -39,8 +38,13 @@ import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
@@ -136,10 +140,9 @@ public class RouterTests {
 		HttpHandler result = Router.toHttpHandler(routingFunction, configuration);
 		assertNotNull(result);
 
-		MockServerHttpRequest serverHttpRequest = new MockServerHttpRequest(HttpMethod.GET,
-				URI.create("http://localhost"));
+		MockServerHttpRequest httpRequest = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
 		MockServerHttpResponse serverHttpResponse = new MockServerHttpResponse();
-		result.handle(serverHttpRequest, serverHttpResponse);
+		result.handle(httpRequest, serverHttpResponse);
 	}
 
 	@Test

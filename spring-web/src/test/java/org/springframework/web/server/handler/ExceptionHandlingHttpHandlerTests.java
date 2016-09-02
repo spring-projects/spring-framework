@@ -16,8 +16,6 @@
 
 package org.springframework.web.server.handler;
 
-import java.net.URI;
-
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -50,9 +48,8 @@ public class ExceptionHandlingHttpHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		URI uri = new URI("http://localhost:8080");
 		WebSessionManager sessionManager = new MockWebSessionManager();
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, uri);
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost:8080");
 		this.response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(request, this.response, sessionManager);
 		this.targetHandler = new StubWebHandler(new IllegalStateException("boo"));

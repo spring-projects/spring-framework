@@ -89,7 +89,7 @@ public class ContentNegotiatingResultHandlerSupportTests {
 
 	@Test  // SPR-9160
 	public void sortsByQuality() throws Exception {
-		this.request.getHeaders().add("Accept", "text/plain; q=0.5, application/json");
+		this.request.setHeader("Accept", "text/plain; q=0.5, application/json");
 
 		List<MediaType> mediaTypes = Arrays.asList(TEXT_PLAIN, APPLICATION_JSON_UTF8);
 		MediaType actual = this.resultHandler.selectMediaType(this.exchange, mediaTypes);

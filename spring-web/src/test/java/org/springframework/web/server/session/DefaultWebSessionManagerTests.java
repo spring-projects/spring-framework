@@ -15,7 +15,6 @@
  */
 package org.springframework.web.server.session;
 
-import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -57,7 +56,7 @@ public class DefaultWebSessionManagerTests {
 	public void setUp() throws Exception {
 		this.manager.setSessionIdResolver(this.idResolver);
 
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(request, response, this.manager);
 	}

@@ -16,7 +16,6 @@
 
 package org.springframework.web.server.handler;
 
-import java.net.URI;
 import java.time.Duration;
 
 import org.junit.Before;
@@ -33,7 +32,8 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 /**
  * Unit tests for {@link ResponseStatusExceptionHandler}.
@@ -54,8 +54,7 @@ public class ResponseStatusExceptionHandlerTests {
 		this.handler = new ResponseStatusExceptionHandler();
 		this.response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(
-				new MockServerHttpRequest(HttpMethod.GET, new URI("/path")),
-				this.response,
+				new MockServerHttpRequest(HttpMethod.GET, "/path"), this.response,
 				new MockWebSessionManager());
 	}
 

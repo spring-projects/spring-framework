@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.function;
 
-import java.net.URI;
-
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -55,7 +53,7 @@ public class ServerSentEventResponseTests {
 
 	@Test
 	public void writeTo() throws Exception {
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, URI.create("http://localhost"));
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, new MockWebSessionManager());
 

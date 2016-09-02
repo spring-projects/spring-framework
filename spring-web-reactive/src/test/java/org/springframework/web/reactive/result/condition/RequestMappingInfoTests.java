@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -25,7 +24,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
@@ -62,7 +60,7 @@ public class RequestMappingInfoTests {
 	@Before
 	public void setUp() throws Exception {
 		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/foo"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "/foo");
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}
 
@@ -331,9 +329,9 @@ public class RequestMappingInfoTests {
 	@Test
 	@Ignore
 	public void preFlightRequest() throws Exception {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.OPTIONS, new URI("/foo"));
-		request.getHeaders().add(HttpHeaders.ORIGIN, "http://domain.com");
-		request.getHeaders().add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST");
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.OPTIONS, "/foo");
+		request.getHeaders().setOrigin("http://domain.com");
+		request.getHeaders().setAccessControlRequestMethod(HttpMethod.POST);
 
 		WebSessionManager manager = new MockWebSessionManager();
 		MockServerHttpResponse response = new MockServerHttpResponse();

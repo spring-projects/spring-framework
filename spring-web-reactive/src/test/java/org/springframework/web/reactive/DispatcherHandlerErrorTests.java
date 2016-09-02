@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive;
 
-import java.net.URI;
 import java.time.Duration;
 import java.util.Collections;
 
@@ -29,11 +28,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
@@ -89,7 +85,7 @@ public class DispatcherHandlerErrorTests {
 
 		this.dispatcherHandler = new DispatcherHandler(appContext);
 
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		MockWebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(this.request, response, sessionManager);
@@ -98,7 +94,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void noHandler() throws Exception {
-		this.request.setUri(new URI("/does-not-exist"));
+		this.request.setUri("/does-not-exist");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		TestSubscriber.subscribe(publisher)
@@ -108,7 +104,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void unknownMethodArgumentType() throws Exception {
-		this.request.setUri(new URI("/unknown-argument-type"));
+		this.request.setUri("/unknown-argument-type");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		TestSubscriber.subscribe(publisher)
@@ -118,7 +114,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void controllerReturnsMonoError() throws Exception {
-		this.request.setUri(new URI("/error-signal"));
+		this.request.setUri("/error-signal");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		TestSubscriber.subscribe(publisher)
@@ -127,7 +123,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void controllerThrowsException() throws Exception {
-		this.request.setUri(new URI("/raise-exception"));
+		this.request.setUri("/raise-exception");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		TestSubscriber.subscribe(publisher)
@@ -136,7 +132,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void unknownReturnType() throws Exception {
-		this.request.setUri(new URI("/unknown-return-type"));
+		this.request.setUri("/unknown-return-type");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		TestSubscriber.subscribe(publisher)
@@ -146,11 +142,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void responseBodyMessageConversionError() throws Exception {
-		DataBuffer dataBuffer = new DefaultDataBufferFactory().allocateBuffer();
-		this.request.setUri(new URI("/request-body"));
-		this.request.getHeaders().add("Accept", MediaType.APPLICATION_JSON_VALUE);
-		this.request.writeWith(Mono.just(dataBuffer.write("body".getBytes("UTF-8"))));
-
+		this.request.setUri("/request-body").setHeader("Accept", "application/json").setBody("body");
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		TestSubscriber.subscribe(publisher)
@@ -159,8 +151,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void requestBodyError() throws Exception {
-		this.request.setUri(new URI("/request-body"));
-		this.request.writeWith(Mono.error(EXCEPTION));
+		this.request.setUri("/request-body").setBody(Mono.error(EXCEPTION));
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 
 		TestSubscriber.subscribe(publisher)
@@ -170,7 +161,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void webExceptionHandler() throws Exception {
-		this.request.setUri(new URI("/unknown-argument-type"));
+		this.request.setUri("/unknown-argument-type");
 
 		WebExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);

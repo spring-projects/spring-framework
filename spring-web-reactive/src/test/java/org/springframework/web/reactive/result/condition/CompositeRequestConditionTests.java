@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URI;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,7 +56,7 @@ public class CompositeRequestConditionTests {
 	@Before
 	public void setup() throws Exception {
 		WebSessionManager sessionManager = new MockWebSessionManager();
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 
 		this.param1 = new ParamsRequestCondition("param1");

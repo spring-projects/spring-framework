@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.accept;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
@@ -188,7 +187,7 @@ public class CompositeContentTypeResolverBuilderTests {
 
 
 	private ServerWebExchange createExchange(String path) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI(path));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, path);
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 	}

@@ -16,7 +16,6 @@
 
 package org.springframework.web.server.adapter;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -80,7 +79,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 		currentDate = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		request = new MockServerHttpRequest(method, new URI("http://example.org"));
+		request = new MockServerHttpRequest(method, "http://example.org");
 		response = new MockServerHttpResponse();
 		exchange = new DefaultServerWebExchange(request, response, new MockWebSessionManager());
 	}
@@ -287,7 +286,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	public void checkNotModifiedTimestampWithLengthPart() throws Exception {
 		long epochTime = dateFormat.parse(CURRENT_TIME).getTime();
 		request.setHttpMethod(HttpMethod.GET);
-		request.getHeaders().add("If-Modified-Since", "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
+		request.setHeader("If-Modified-Since", "Wed, 09 Apr 2014 09:57:42 GMT; length=13774");
 
 		assertTrue(exchange.checkNotModified(Instant.ofEpochMilli(epochTime)));
 
@@ -299,7 +298,7 @@ public class DefaultServerWebExchangeCheckNotModifiedTests {
 	public void checkModifiedTimestampWithLengthPart() throws Exception {
 		long epochTime = dateFormat.parse(CURRENT_TIME).getTime();
 		request.setHttpMethod(HttpMethod.GET);
-		request.getHeaders().add("If-Modified-Since", "Tue, 08 Apr 2014 09:57:42 GMT; length=13774");
+		request.setHeader("If-Modified-Since", "Tue, 08 Apr 2014 09:57:42 GMT; length=13774");
 
 		assertFalse(exchange.checkNotModified(Instant.ofEpochMilli(epochTime)));
 

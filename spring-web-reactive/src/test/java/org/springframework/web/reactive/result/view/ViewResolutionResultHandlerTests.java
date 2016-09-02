@@ -84,7 +84,7 @@ public class ViewResolutionResultHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		this.request = new MockServerHttpRequest(HttpMethod.GET, "/path");
 		WebSessionManager manager = new DefaultWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(this.request, this.response, manager);
 	}
@@ -183,15 +183,15 @@ public class ViewResolutionResultHandlerTests {
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), model);
 		ViewResolutionResultHandler handler =  createResultHandler(new TestViewResolver("account"));
 
-		this.request.setUri(new URI("/account"));
+		this.request.setUri("/account");
 		handler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody("account: {id=123}");
 
-		this.request.setUri(new URI("/account/"));
+		this.request.setUri("/account/");
 		handler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody("account: {id=123}");
 
-		this.request.setUri(new URI("/account.123"));
+		this.request.setUri("/account.123");
 		handler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody("account: {id=123}");
 	}
@@ -202,7 +202,7 @@ public class ViewResolutionResultHandlerTests {
 		ResolvableType type = ResolvableType.forClass(String.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), returnValue, returnType(type), this.model);
 
-		this.request.setUri(new URI("/path"));
+		this.request.setUri("/path");
 		Mono<Void> mono = createResultHandler().handleResult(this.exchange, handlerResult);
 
 		TestSubscriber.subscribe(mono).assertErrorMessage("Could not resolve view with name 'account'.");
@@ -214,8 +214,8 @@ public class ViewResolutionResultHandlerTests {
 		ResolvableType type = ResolvableType.forClass(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), this.model);
 
-		this.request.getHeaders().setAccept(Collections.singletonList(APPLICATION_JSON));
-		this.request.setUri(new URI("/account"));
+		this.request.setHeader("Accept", "application/json");
+		this.request.setUri("/account");
 
 		TestView defaultView = new TestView("jsonView", APPLICATION_JSON);
 
@@ -233,8 +233,8 @@ public class ViewResolutionResultHandlerTests {
 		ResolvableType type = ResolvableType.forClass(TestBean.class);
 		HandlerResult handlerResult = new HandlerResult(new Object(), value, returnType(type), this.model);
 
-		this.request.getHeaders().setAccept(Collections.singletonList(APPLICATION_JSON));
-		this.request.setUri(new URI("/account"));
+		this.request.setHeader("Accept", "application/json");
+		this.request.setUri("/account");
 
 		ViewResolutionResultHandler resultHandler = createResultHandler(new TestViewResolver("account"));
 		Mono<Void> mono = resultHandler.handleResult(this.exchange, handlerResult);
@@ -282,7 +282,7 @@ public class ViewResolutionResultHandlerTests {
 		ModelMap model = new ExtendedModelMap().addAttribute("id", "123");
 		MethodParameter returnType = resolvableMethod.resolveReturnType();
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType, model);
-		this.request.setUri(new URI(path));
+		this.request.setUri(path);
 		createResultHandler(resolvers).handleResult(this.exchange, result).block(Duration.ofSeconds(5));
 		assertResponseBody(responseBody);
 	}

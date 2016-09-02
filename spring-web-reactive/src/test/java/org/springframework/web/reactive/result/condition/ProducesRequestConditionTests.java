@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result.condition;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Collections;
@@ -314,7 +313,7 @@ public class ProducesRequestConditionTests {
 
 
 	private ServerWebExchange createExchange(String... accept) throws URISyntaxException {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		if (accept != null) {
 			for (String value : accept) {
 				request.getHeaders().add("Accept", value);
