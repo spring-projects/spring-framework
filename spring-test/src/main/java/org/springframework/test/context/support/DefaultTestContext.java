@@ -57,6 +57,19 @@ public class DefaultTestContext implements TestContext {
 
 
 	/**
+	 * <em>Copy constructor</em> for creating a new {@code DefaultTestContext}
+	 * based on the immutable state and <em>attributes</em> of the supplied context.
+	 *
+	 * <p><em>Immutable state</em> includes all arguments supplied to
+	 * {@link #DefaultTestContext(Class, MergedContextConfiguration, CacheAwareContextLoaderDelegate)}.
+	 */
+	public DefaultTestContext(DefaultTestContext testContext) {
+		this(testContext.testClass, testContext.mergedContextConfiguration,
+			testContext.cacheAwareContextLoaderDelegate);
+		testContext.attributes.forEach(this.attributes::put);
+	}
+
+	/**
 	 * Construct a new {@code DefaultTestContext} from the supplied arguments.
 	 * @param testClass the test class for this test context; never {@code null}
 	 * @param mergedContextConfiguration the merged application context
