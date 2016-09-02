@@ -4,16 +4,18 @@ The following has been tested against IntelliJ IDEA 2016.2.2
 
 _Within your locally cloned spring-framework working directory:_
 
-1. Import into IntelliJ IDEA (File -> New -> Project from Existing Sources -> Select directory -> Select Gradle -> Use gradle wrapper task configuration 
-2. Set the Project JDK as appropriate (1.8+)
-3. Code away
+1. Precompile `spring-oxm` with `./gradlew cleanIdea :spring-oxm:compileTestJava`
+2. Import into IntelliJ IDEA (File -> New -> Project from Existing Sources -> Select directory -> Select Gradle -> Use gradle wrapper task configuration)
+3. Set the Project JDK as appropriate (1.8+)
+4. Exclude `spring-aspects` from project. (File-> Project Structure -> Modules)
+4. Code away
 
-## Known issues for IntelliJ IDEA 13.1
+## Known issues
 
-1. `spring-oxm` should be pre-compiled since it's using repackaged dependencies (see *RepackJar tasks). You can precompile `spring-oxm` with `./gradlew cleanIdea :spring-oxm:compileTestJava`
+1. `spring-oxm` should be pre-compiled since it's using repackaged dependencies (see *RepackJar tasks)
 2. `spring-aspects` does not compile out of the box due to references to aspect types unknown to
 IntelliJ IDEA. See http://youtrack.jetbrains.com/issue/IDEA-64446 for details. In the meantime, the
-'spring-aspects' should be excluded from the overall project to avoid compilation errors. To exclude go to File-> Project Structure -> Modules
+'spring-aspects' should be excluded from the overall project to avoid compilation errors.
 3. While all JUnit tests pass from the command line with Gradle, many will fail when run from
 IntelliJ IDEA. Resolving this is a work in progress. If attempting to run all JUnit tests from within
 IntelliJ IDEA, you will likely need to set the following VM options to avoid out of memory errors:
