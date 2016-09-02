@@ -16,7 +16,10 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
+
 import io.netty.buffer.ByteBuf;
+import io.reactivex.netty.protocol.http.server.HttpServer;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
@@ -51,6 +54,23 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response, bufferFactory);
 		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
 		return RxJava1Adapter.publisherToObservable(result);
+	}
+
+	/**
+	 * Create and start a RxNetty {@link HttpServer} on the given {@code host} and {@code port},
+	 * handling requests with the given {@code handler}.
+	 * @param address the IP Socket Address to listen on
+	 * @param handler the handler for incoming requests
+	 * @return the created and started server
+	 */
+	public static HttpServer<ByteBuf, ByteBuf> start(InetSocketAddress address,
+			HttpHandler handler) {
+		Assert.notNull(address, "'address' must not be null");
+		Assert.notNull(handler, "'handler' must not be null");
+
+		RxNettyHttpHandlerAdapter handlerAdapter = new RxNettyHttpHandlerAdapter(handler);
+		HttpServer<ByteBuf, ByteBuf> server = HttpServer.newServer(address);
+		return server.start(handlerAdapter);
 	}
 
 }
