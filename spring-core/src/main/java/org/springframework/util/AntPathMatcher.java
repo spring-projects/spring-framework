@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
  * <li>{@code ?} matches one character</li>
  * <li>{@code *} matches zero or more characters</li>
  * <li>{@code **} matches zero or more <em>directories</em> in a path</li>
+ * <li>{@code {spring:[a-z]+}} matches the regexp {@code [a-z]+} as a path variable named "spring"</li>
  * </ul>
  *
  * <h3>Examples</h3>
@@ -50,6 +51,8 @@ import java.util.regex.Pattern;
  * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> &mdash; matches
  * {@code org/springframework/servlet/bla.jsp} but also
  * {@code org/springframework/testing/servlet/bla.jsp} and {@code org/servlet/bla.jsp}</li>
+ * <li>{@code com/{filename:\\w+}.jsp} will match {@code com/test.jsp} and assign the value {@code test}
+ * to the {@code filename} variable</li>
  * </ul>
  *
  * <p><strong>Note:</strong> a pattern and a path must both be absolute or must
