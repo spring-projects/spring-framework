@@ -203,17 +203,19 @@ HttpServlet servlet = new ServletHttpHandlerAdapter(httpHandler);
 ...
 
 // Reactor Netty
-HttpServer server = HttpServer.create(host, port)
-server.startAndAwait(new ServletHttpHandlerAdapter(httpHandler));
+ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(httpHandler);
+HttpServer server = HttpServer.create(host, port);
+server.startAndAwait(adapter);
 
 // RxNetty
-HttpServer server = HttpServer.newServer(new InetSocketAddress(host, port))
-server.startAndAwait(new RxNettyHttpHandlerAdapter(httpHandler));
+RxNettyHttpHandlerAdapter handlerAdapter = new RxNettyHttpHandlerAdapter(httpHandler);
+HttpServer server = HttpServer.newServer(new InetSocketAddress(host, port));
+server.startAndAwait(adapter);
 
 // Undertow
-Undertow.builder().addHttpListener(port, host)
-	.setHandler(new UndertowHttpHandlerAdapter(httpHandler))
-	.build()
+HttpHandler handler = new UndertowHttpHandlerAdapter(httpHandler);
+Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(httpHandler).build();
+server.start();
 ----
 
 
