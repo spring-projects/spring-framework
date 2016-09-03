@@ -77,7 +77,7 @@ public class ParameterContentTypeResolver extends AbstractMappingContentTypeReso
 
 	@Override
 	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
-		throw new NotAcceptableStatusException(getMediaTypes());
+		throw new NotAcceptableStatusException(getAllMediaTypes());
 	}
 
 }

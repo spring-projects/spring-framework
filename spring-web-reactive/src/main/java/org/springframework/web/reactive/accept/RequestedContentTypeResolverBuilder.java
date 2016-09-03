@@ -218,7 +218,7 @@ public class RequestedContentTypeResolverBuilder {
 	}
 
 
-	public RequestedContentTypeResolver build() {
+	public CompositeContentTypeResolver build() {
 		List<RequestedContentTypeResolver> resolvers = new ArrayList<>();
 
 		if (this.favorPathExtension) {

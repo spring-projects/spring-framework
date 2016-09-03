@@ -801,6 +801,7 @@ project("spring-web-reactive") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional "org.apache.httpcomponents:httpclient:${httpclientVersion}"
+		optional('org.webjars:webjars-locator:0.32')
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.apache.tomcat:tomcat-util:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
@@ -822,6 +823,7 @@ project("spring-web-reactive") {
 		testRuntime("javax.activation:activation:${activationApiVersion}")
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
+		testRuntime("org.webjars:underscorejs:1.8.3")
 	}
 }
 

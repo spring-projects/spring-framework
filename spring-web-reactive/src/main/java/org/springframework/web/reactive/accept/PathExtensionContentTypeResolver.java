@@ -97,7 +97,7 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 			}
 		}
 		if (!this.ignoreUnknownExtensions) {
-			throw new NotAcceptableStatusException(getMediaTypes());
+			throw new NotAcceptableStatusException(getAllMediaTypes());
 		}
 		return null;
 	}
