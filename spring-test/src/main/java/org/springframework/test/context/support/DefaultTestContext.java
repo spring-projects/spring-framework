@@ -41,7 +41,7 @@ public class DefaultTestContext implements TestContext {
 
 	private static final long serialVersionUID = -5827157174866681233L;
 
-	private final Map<String, Object> attributes = new ConcurrentHashMap<>(0);
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>(4);
 
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 
@@ -58,15 +58,17 @@ public class DefaultTestContext implements TestContext {
 
 	/**
 	 * <em>Copy constructor</em> for creating a new {@code DefaultTestContext}
-	 * based on the immutable state and <em>attributes</em> of the supplied context.
-	 *
-	 * <p><em>Immutable state</em> includes all arguments supplied to
-	 * {@link #DefaultTestContext(Class, MergedContextConfiguration, CacheAwareContextLoaderDelegate)}.
+	 * based on the <em>attributes</em> and immutable state of the supplied context.
+	 * <p><em>Immutable state</em> includes all arguments supplied to the
+	 * {@linkplain #DefaultTestContext(Class, MergedContextConfiguration,
+	 * CacheAwareContextLoaderDelegate) standard constructor}.
+	 * @throws NullPointerException if the supplied {@code DefaultTestContext}
+	 * is {@code null}
 	 */
 	public DefaultTestContext(DefaultTestContext testContext) {
 		this(testContext.testClass, testContext.mergedContextConfiguration,
 			testContext.cacheAwareContextLoaderDelegate);
-		testContext.attributes.forEach(this.attributes::put);
+		this.attributes.putAll(testContext.attributes);
 	}
 
 	/**
@@ -144,11 +146,13 @@ public class DefaultTestContext implements TestContext {
 	@Override
 	public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "Name must not be null");
-		if (value != null) {
-			this.attributes.put(name, value);
-		}
-		else {
-			removeAttribute(name);
+		synchronized (this.attributes) {
+			if (value != null) {
+				this.attributes.put(name, value);
+			}
+			else {
+				this.attributes.remove(name);
+			}
 		}
 	}
 
@@ -172,7 +176,9 @@ public class DefaultTestContext implements TestContext {
 
 	@Override
 	public String[] attributeNames() {
-		return this.attributes.keySet().stream().toArray(String[]::new);
+		synchronized (this.attributes) {
+			return this.attributes.keySet().stream().toArray(String[]::new);
+		}
 	}
 
 
