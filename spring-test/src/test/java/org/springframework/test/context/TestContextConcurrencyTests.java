@@ -41,6 +41,7 @@ import static org.junit.Assert.assertThat;
  *
  * @author Sam Brannen
  * @since 5.0
+ * @see org.springframework.test.context.junit4.concurrency.SpringJUnit4ConcurrencyTests
  */
 public class TestContextConcurrencyTests {
 
