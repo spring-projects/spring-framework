@@ -3502,7 +3502,7 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 ----
 
 
-[[testcontext-support-classes]]
+[[testcontext-parallel-test-execution]]
 ==== Parallel test execution
 
 Spring Framework 5.0 introduces basic support for executing tests in parallel within a
