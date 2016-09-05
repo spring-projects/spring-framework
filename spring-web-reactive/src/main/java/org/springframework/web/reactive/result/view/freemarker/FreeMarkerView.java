@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view.freemarker;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
@@ -37,6 +40,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.MediaType;
 import org.springframework.web.reactive.result.view.AbstractUrlBasedView;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -158,7 +162,8 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 	}
 
 	@Override
-	protected Mono<Void> renderInternal(Map<String, Object> renderAttributes, ServerWebExchange exchange) {
+	protected Mono<Void> renderInternal(Map<String, Object> renderAttributes, MediaType contentType,
+			ServerWebExchange exchange) {
 		// Expose all standard FreeMarker hash models.
 		SimpleHash freeMarkerModel = getTemplateModel(renderAttributes, exchange);
 		if (logger.isDebugEnabled()) {
@@ -167,8 +172,8 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 		Locale locale = Locale.getDefault(); // TODO
 		DataBuffer dataBuffer = exchange.getResponse().bufferFactory().allocateBuffer();
 		try {
-			// TODO: pass charset
-			Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream());
+			Charset charset = getCharset(contentType).orElse(getDefaultCharset());
+			Writer writer = new OutputStreamWriter(dataBuffer.asOutputStream(), charset);
 			getTemplate(locale).process(freeMarkerModel, writer);
 		}
 		catch (IOException ex) {
@@ -179,6 +184,10 @@ public class FreeMarkerView extends AbstractUrlBasedView {
 			return Mono.error(ex);
 		}
 		return exchange.getResponse().writeWith(Flux.just(dataBuffer));
+	}
+
+	private static Optional<Charset> getCharset(MediaType mediaType) {
+		return mediaType != null ? Optional.ofNullable(mediaType.getCharset()) : Optional.empty();
 	}
 
 	/**

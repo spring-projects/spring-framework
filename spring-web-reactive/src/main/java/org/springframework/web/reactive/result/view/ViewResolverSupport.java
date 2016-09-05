@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,8 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 
 
 	private List<MediaType> mediaTypes = new ArrayList<>(4);
+
+	private Charset defaultCharset = StandardCharsets.UTF_8;
 
 	private ApplicationContext applicationContext;
 
@@ -66,6 +70,25 @@ public abstract class ViewResolverSupport implements ApplicationContextAware, Or
 	public List<MediaType> getSupportedMediaTypes() {
 		return this.mediaTypes;
 	}
+
+	/**
+	 * Set the default charset for this view, used when the
+	 * {@linkplain #setSupportedMediaTypes(List) content type} does not contain one.
+	 * Default is {@linkplain StandardCharsets#UTF_8 UTF 8}.
+	 */
+	public void setDefaultCharset(Charset defaultCharset) {
+		Assert.notNull(defaultCharset, "'defaultCharset' must not be null");
+		this.defaultCharset = defaultCharset;
+	}
+
+	/**
+	 * Return the default charset, used when the
+	 * {@linkplain #setSupportedMediaTypes(List) content type} does not contain one.
+	 */
+	public Charset getDefaultCharset() {
+		return this.defaultCharset;
+	}
+
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
