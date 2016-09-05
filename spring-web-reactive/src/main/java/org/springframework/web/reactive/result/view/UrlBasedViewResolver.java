@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.Locale;
@@ -194,6 +195,7 @@ public class UrlBasedViewResolver extends ViewResolverSupport implements ViewRes
 	protected AbstractUrlBasedView createUrlBasedView(String viewName) {
 		AbstractUrlBasedView view = (AbstractUrlBasedView) BeanUtils.instantiateClass(getViewClass());
 		view.setSupportedMediaTypes(getSupportedMediaTypes());
+		view.setDefaultCharset(getDefaultCharset());
 		view.setUrl(getPrefix() + viewName + getSuffix());
 		return view;
 	}

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view;
 
 import java.util.Locale;
@@ -22,6 +23,7 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.http.MediaType;
 import org.springframework.web.server.ServerWebExchange;
 
 import static org.junit.Assert.assertNotNull;
@@ -61,7 +63,8 @@ public class UrlBasedViewResolverTests {
 		}
 
 		@Override
-		protected Mono<Void> renderInternal(Map<String, Object> attributes, ServerWebExchange exchange) {
+		protected Mono<Void> renderInternal(Map<String, Object> attributes, MediaType contentType,
+				ServerWebExchange exchange) {
 			return Mono.empty();
 		}
 	}
