@@ -1098,13 +1098,15 @@ the test instance for which it is responsible. The `TestContext` also delegates 
 `SmartContextLoader` to load an `ApplicationContext` if requested.
 
 ===== TestContextManager
-`TestContextManager` is the main entry point into the __Spring TestContext Framework__,
-which manages a single `TestContext` and signals events to each registered
-`TestExecutionListener` at well-defined test execution points:
+`TestContextManager` is the main entry point into the __Spring TestContext Framework__
+and is responsible for managing a single `TestContext` and signaling events to each
+registered `TestExecutionListener` at well-defined test execution points:
 
 * prior to any __before class__ or __before all__ methods of a particular testing framework
 * test instance post-processing
 * prior to any __before__ or __before each__ methods of a particular testing framework
+* immediately before execution of the test method but after test setup
+* immediately after execution of the test method but before test tear down
 * after any __after__ or __after each__ methods of a particular testing framework
 * after any __after class__ or __after all__ methods of a particular testing framework
 
