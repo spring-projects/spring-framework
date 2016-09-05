@@ -3503,6 +3503,58 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 
 
 [[testcontext-support-classes]]
+==== Parallel test execution
+
+Spring Framework 5.0 introduces basic support for executing tests in parallel within a
+single JVM when using the _Spring TestContext Framework_. In general this means that most
+test classes or test methods can be executed in parallel without any changes to test code
+or configuration.
+
+[TIP]
+====
+For details on how to set up parallel test execution, consult the documentation for your
+testing framework, build tool, or IDE.
+====
+
+Keep in mind that the introduction of concurrency into your test suite can result in
+unexpected side effects, strange runtime behavior, and tests that only fail intermittently
+or seemingly randomly. The Spring Team therefore provides the following general guidelines
+for when __not__ to execute tests in parallel.
+
+__Do not execute tests in parallel if:__
+
+* Tests make use of Spring's `@DirtiesContext` support.
+* Tests make use of JUnit 4's `@FixMethodOrder` support or any testing framework feature
+  that is designed to ensure that test methods execute in a particular order. Note,
+  however, that this does not apply if entire test classes are executed in parallel.
+* Tests change the state of shared services or systems such as a database, message broker,
+  filesystem, etc. This applies to both in-memory and external systems.
+
+[TIP]
+====
+If parallel test execution fails with an exception stating that the `ApplicationContext`
+for the current test is no longer active, this typically means that the
+`ApplicationContext` was removed from the `ContextCache` in a different thread.
+
+This may be due to the use of `@DirtiesContext` or due to automatic eviction from the
+`ContextCache`. If `@DirtiesContext` is the culprit, you will either need to find a way
+to avoid using `@DirtiesContext` or exclude such tests from parallel execution. If the
+maximum size of the `ContextCache` has been exceeded, you can increase the maximum size
+of the cache. See the discussion on <<testcontext-ctx-management-caching,context
+caching>> for details.
+====
+
+[WARNING]
+====
+Parallel test execution in the Spring TestContext Framework is only possible if the
+underlying `TestContext` implementation provides a _copy constructor_ as explained in the
+javadocs for `TestContext`. The `DefaultTestContext` used in Spring provides such a
+constructor; however, if you use a third-party library that provides a custom
+`TestContext` implementation, you will need to verify if it is suitable for parallel test
+execution.
+====
+
+[[testcontext-support-classes]]
 ==== TestContext Framework support classes
 
 
