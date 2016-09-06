@@ -171,7 +171,7 @@ Java EE Servlet configuration in a Servlet 3.0+ environment:
 
 		@Override
 		public void onStartup(ServletContext container) {
-			ServletRegistration.Dynamic registration = container.addServlet("dispatcher", new DispatcherServlet());
+			ServletRegistration.Dynamic registration = container.addServlet("example", new DispatcherServlet());
 			registration.setLoadOnStartup(1);
 			registration.addMapping("/example/*");
 		}
