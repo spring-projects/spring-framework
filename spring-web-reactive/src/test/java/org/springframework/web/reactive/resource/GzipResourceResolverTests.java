@@ -16,8 +16,12 @@
 
 package org.springframework.web.reactive.resource;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,14 +78,12 @@ public class GzipResourceResolverTests {
 	private static void createGzFile(String filePath) throws IOException {
 		Resource location = new ClassPathResource("test/", GzipResourceResolverTests.class);
 		Resource fileResource = new FileSystemResource(location.createRelative(filePath).getFile());
-		Resource gzFileResource = location.createRelative(filePath + ".gz");
-
-		if (gzFileResource.getFile().createNewFile()) {
-			GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzFileResource.getFile()));
-			FileCopyUtils.copy(fileResource.getInputStream(), out);
-		}
-
-		assertTrue(gzFileResource.exists());
+		Path gzFilePath = Paths.get(fileResource.getFile().getAbsolutePath() + ".gz");
+		Files.deleteIfExists(gzFilePath);
+		File gzFile = Files.createFile(gzFilePath).toFile();
+		GZIPOutputStream out = new GZIPOutputStream(new FileOutputStream(gzFile));
+		FileCopyUtils.copy(fileResource.getInputStream(), out);
+		gzFile.deleteOnExit();
 	}
 
 	@Before
