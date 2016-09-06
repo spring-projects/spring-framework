@@ -258,7 +258,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			// Can't check response.getStatus() - let's assume we're good
 			return true;
 		}
-		return HttpStatus.OK.value() == 200;
+		return response.getStatus() == 200;
 	}
 
 	private boolean isHeaderAbsent(HttpServletResponse response, String header) {
