@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
@@ -52,8 +54,10 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
-import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
@@ -62,6 +66,7 @@ import org.springframework.web.reactive.result.method.annotation.ResponseBodyRes
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * The main class for Spring Web Reactive configuration.
@@ -135,7 +140,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	}
 
 	@Bean
-	public RequestedContentTypeResolver mvcContentTypeResolver() {
+	public CompositeContentTypeResolver mvcContentTypeResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.mediaTypes(getDefaultMediaTypeMappings());
 		configureRequestedContentTypeResolver(builder);
@@ -176,6 +181,39 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * Override to configure path matching options.
 	 */
 	public void configurePathMatching(PathMatchConfigurer configurer) {
+	}
+
+	/**
+	 * Return a handler mapping ordered at Integer.MAX_VALUE-1 with mapped
+	 * resource handlers. To configure resource handling, override
+	 * {@link #addResourceHandlers}.
+	 */
+	@Bean
+	public HandlerMapping resourceHandlerMapping() {
+		ResourceHandlerRegistry registry =
+				new ResourceHandlerRegistry(this.applicationContext, mvcContentTypeResolver());
+		addResourceHandlers(registry);
+
+		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
+		if (handlerMapping != null) {
+			if (getPathMatchConfigurer() != null) {
+				handlerMapping.setPathMatcher(getPathMatchConfigurer().getPathMatcher());
+			}
+			if (getPathMatchConfigurer() != null) {
+				handlerMapping.setPathHelper(getPathMatchConfigurer().getPathHelper());
+			}
+		}
+		else {
+			handlerMapping = new EmptyHandlerMapping();
+		}
+		return handlerMapping;
+	}
+
+	/**
+	 * Override this method to add resource handlers for serving static resources.
+	 * @see ResourceHandlerRegistry
+	 */
+	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
 	}
 
 	@Bean
@@ -396,6 +434,14 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
 	}
 
+
+	private static final class EmptyHandlerMapping extends AbstractHandlerMapping {
+
+		@Override
+		public Mono<Object> getHandler(ServerWebExchange exchange) {
+			return Mono.empty();
+		}
+	}
 
 	private static final class NoOpValidator implements Validator {
 
