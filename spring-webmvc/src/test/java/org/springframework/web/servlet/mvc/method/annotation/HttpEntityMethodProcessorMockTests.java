@@ -476,8 +476,7 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
 		assertResponseOkWithBody("body");
-		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
-		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+		assertEquals(0, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 	}
 
 	// SPR-13626
@@ -511,7 +510,7 @@ public class HttpEntityMethodProcessorMockTests {
 		initStringMessageConversion(MediaType.TEXT_PLAIN);
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertResponseOkWithBody("body");
+		assertResponseNotModified();
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 	}
@@ -529,7 +528,7 @@ public class HttpEntityMethodProcessorMockTests {
 		initStringMessageConversion(MediaType.TEXT_PLAIN);
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertResponseOkWithBody("body");
+		assertResponseNotModified();
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 	}

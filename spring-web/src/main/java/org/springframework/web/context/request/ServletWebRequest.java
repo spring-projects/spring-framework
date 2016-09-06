@@ -17,12 +17,18 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
-import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -45,25 +51,17 @@ import org.springframework.web.util.WebUtils;
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {
 
-	private static final String HEADER_ETAG = "ETag";
+	private static final String ETAG = "ETag";
 
-	private static final String HEADER_IF_MODIFIED_SINCE = "If-Modified-Since";
+	private static final String IF_MODIFIED_SINCE = "If-Modified-Since";
 
-	private static final String HEADER_IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
+	private static final String IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
 
-	private static final String HEADER_IF_NONE_MATCH = "If-None-Match";
+	private static final String IF_NONE_MATCH = "If-None-Match";
 
-	private static final String HEADER_LAST_MODIFIED = "Last-Modified";
+	private static final String LAST_MODIFIED = "Last-Modified";
 
-	private static final String METHOD_GET = "GET";
-
-	private static final String METHOD_HEAD = "HEAD";
-
-	private static final String METHOD_POST = "POST";
-
-	private static final String METHOD_PUT = "PUT";
-
-	private static final String METHOD_DELETE = "DELETE";
+	private static final List<String> SAFE_METHODS = Arrays.asList("GET", "HEAD");
 
 	/**
 	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match"
@@ -71,6 +69,17 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 */
 	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
 
+	/**
+	 * Date formats as specified in the HTTP RFC
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
+	private static final String[] DATE_FORMATS = new String[] {
+			"EEE, dd MMM yyyy HH:mm:ss zzz",
+			"EEE, dd-MMM-yy HH:mm:ss zzz",
+			"EEE MMM dd HH:mm:ss yyyy"
+	};
+
+	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 	/** Checking for Servlet 3.0+ HttpServletResponse.getHeader(String) */
 	private static final boolean servlet3Present =
@@ -194,103 +203,62 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	@Override
 	public boolean checkNotModified(long lastModifiedTimestamp) {
-		HttpServletResponse response = getResponse();
-		if (lastModifiedTimestamp >= 0 && !this.notModified) {
-			if (isCompatibleWithConditionalRequests(response)) {
-				this.notModified = isTimestampNotModified(lastModifiedTimestamp);
-				if (response != null) {
-					if (supportsNotModifiedStatus()) {
-						if (this.notModified) {
-							response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-						}
-						if (isHeaderAbsent(response, HEADER_LAST_MODIFIED)) {
-							response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
-						}
-					}
-					else if (supportsConditionalUpdate()) {
-						if (this.notModified) {
-							response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-						}
-					}
-				}
-			}
-		}
-		return this.notModified;
+		return checkNotModified(null, lastModifiedTimestamp);
 	}
 
 	@Override
 	public boolean checkNotModified(String etag) {
-		HttpServletResponse response = getResponse();
-		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (isCompatibleWithConditionalRequests(response)) {
-				etag = addEtagPadding(etag);
-				if (hasRequestHeader(HEADER_IF_NONE_MATCH)) {
-					this.notModified = isEtagNotModified(etag);
-				}
-				if (response != null) {
-					if (this.notModified && supportsNotModifiedStatus()) {
-						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-					}
-					if (isHeaderAbsent(response, HEADER_ETAG)) {
-						response.setHeader(HEADER_ETAG, etag);
-					}
-				}
-			}
-		}
-		return this.notModified;
+		return checkNotModified(etag, -1);
 	}
 
 	@Override
 	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
-		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (isCompatibleWithConditionalRequests(response)) {
-				etag = addEtagPadding(etag);
-				if (hasRequestHeader(HEADER_IF_NONE_MATCH)) {
-					this.notModified = isEtagNotModified(etag);
-				}
-				else if (hasRequestHeader(HEADER_IF_MODIFIED_SINCE)) {
-					this.notModified = isTimestampNotModified(lastModifiedTimestamp);
-				}
-				if (response != null) {
-					if (supportsNotModifiedStatus()) {
-						if (this.notModified) {
-							response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-						}
-						if (isHeaderAbsent(response, HEADER_ETAG)) {
-							response.setHeader(HEADER_ETAG, etag);
-						}
-						if (isHeaderAbsent(response, HEADER_LAST_MODIFIED)) {
-							response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
-						}
-					}
-					else if (supportsConditionalUpdate()) {
-						if (this.notModified) {
-							response.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);
-						}
-					}
-				}
+		if (this.notModified || !isStatusOK(response)) {
+			return this.notModified;
+		}
+
+		// Evaluate conditions in order of precedence.
+		// See https://tools.ietf.org/html/rfc7232#section-6
+
+		if (validateIfUnmodifiedSince(lastModifiedTimestamp)) {
+			if (this.notModified) {
+				response.setStatus(HttpStatus.PRECONDITION_FAILED.value());
+			}
+			return this.notModified;
+		}
+
+		boolean validated = validateIfNoneMatch(etag);
+
+		if (!validated) {
+			validateIfModifiedSince(lastModifiedTimestamp);
+		}
+
+		// Update response
+
+		boolean isHttpGetOrHead = SAFE_METHODS.contains(getRequest().getMethod());
+		if (this.notModified) {
+			response.setStatus(isHttpGetOrHead ?
+					HttpStatus.NOT_MODIFIED.value() : HttpStatus.PRECONDITION_FAILED.value());
+		}
+		if (isHttpGetOrHead) {
+			if(lastModifiedTimestamp > 0 && isHeaderAbsent(response, LAST_MODIFIED)) {
+				response.setDateHeader(LAST_MODIFIED, lastModifiedTimestamp);
+			}
+			if (StringUtils.hasLength(etag) && isHeaderAbsent(response, ETAG)) {
+				response.setHeader(ETAG, padEtagIfNecessary(etag));
 			}
 		}
+
 		return this.notModified;
 	}
 
-	public boolean isNotModified() {
-		return this.notModified;
-	}
-
-
-	private boolean isCompatibleWithConditionalRequests(HttpServletResponse response) {
-		try {
-			if (response == null || !servlet3Present) {
-				// Can't check response.getStatus() - let's assume we're good
-				return true;
-			}
-			return HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
-		}
-		catch (IllegalArgumentException ex) {
+	private boolean isStatusOK(HttpServletResponse response) {
+		if (response == null || !servlet3Present) {
+			// Can't check response.getStatus() - let's assume we're good
 			return true;
 		}
+		return HttpStatus.OK.value() == 200;
 	}
 
 	private boolean isHeaderAbsent(HttpServletResponse response, String header) {
@@ -301,34 +269,78 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return (response.getHeader(header) == null);
 	}
 
-	private boolean hasRequestHeader(String headerName) {
-		return StringUtils.hasLength(getHeader(headerName));
-	}
-
-	private boolean supportsNotModifiedStatus() {
-		String method = getRequest().getMethod();
-		return (METHOD_GET.equals(method) || METHOD_HEAD.equals(method));
-	}
-
-	private boolean supportsConditionalUpdate() {
-		String method = getRequest().getMethod();
-		return (METHOD_POST.equals(method) || METHOD_PUT.equals(method) || METHOD_DELETE.equals(method))
-				&& hasRequestHeader(HEADER_IF_UNMODIFIED_SINCE);
-	}
-
-	private boolean isTimestampNotModified(long lastModifiedTimestamp) {
-		long ifModifiedSince = parseDateHeader(HEADER_IF_MODIFIED_SINCE);
-		if (ifModifiedSince != -1) {
-			return (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
+	private boolean validateIfUnmodifiedSince(long lastModifiedTimestamp) {
+		if (lastModifiedTimestamp < 0) {
+			return false;
 		}
-		long ifUnmodifiedSince = parseDateHeader(HEADER_IF_UNMODIFIED_SINCE);
-		if (ifUnmodifiedSince != -1) {
-			return (ifUnmodifiedSince < (lastModifiedTimestamp / 1000 * 1000));
+		long ifUnmodifiedSince = parseDateHeader(IF_UNMODIFIED_SINCE);
+		if (ifUnmodifiedSince == -1) {
+			return false;
 		}
-		return false;
+		// We will perform this validation...
+		this.notModified = (ifUnmodifiedSince < (lastModifiedTimestamp / 1000 * 1000));
+		return true;
 	}
 
-	@SuppressWarnings("deprecation")
+	private boolean validateIfNoneMatch(String etag) {
+		if (!StringUtils.hasLength(etag)) {
+			return false;
+		}
+		Enumeration<String> ifNoneMatch;
+		try {
+			ifNoneMatch = getRequest().getHeaders(IF_NONE_MATCH);
+		}
+		catch (IllegalArgumentException ex) {
+			return false;
+		}
+		if (!ifNoneMatch.hasMoreElements()) {
+			return false;
+		}
+		// We will perform this validation...
+		etag = padEtagIfNecessary(etag);
+		while (ifNoneMatch.hasMoreElements()) {
+			String clientETags = ifNoneMatch.nextElement();
+
+			Matcher eTagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(clientETags);
+			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
+			while (eTagMatcher.find()) {
+				if (StringUtils.hasLength(eTagMatcher.group())
+						&& etag.replaceFirst("^W/", "").equals(eTagMatcher.group(3))) {
+					this.notModified = true;
+					break;
+				}
+			}
+		}
+		return true;
+	}
+
+	private String padEtagIfNecessary(String etag) {
+		if (!StringUtils.hasLength(etag)) {
+			return etag;
+		}
+		if ((etag.startsWith("\"") || etag.startsWith("W/\"")) && etag.endsWith("\"")) {
+			return etag;
+		}
+		return "\"" + etag + "\"";
+	}
+
+	private boolean validateIfModifiedSince(long lastModifiedTimestamp) {
+		if (lastModifiedTimestamp < 0) {
+			return false;
+		}
+		long ifModifiedSince = parseDateHeader(IF_MODIFIED_SINCE);
+		if (ifModifiedSince == -1) {
+			return false;
+		}
+		// We will perform this validation...
+		this.notModified = ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000);
+		return true;
+	}
+
+	public boolean isNotModified() {
+		return this.notModified;
+	}
+
 	private long parseDateHeader(String headerName) {
 		long dateValue = -1;
 		try {
@@ -340,36 +352,32 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			int separatorIndex = headerValue.indexOf(';');
 			if (separatorIndex != -1) {
 				String datePart = headerValue.substring(0, separatorIndex);
-				try {
-					dateValue = Date.parse(datePart);
-				}
-				catch (IllegalArgumentException ex2) {
-					// Giving up
-				}
+				dateValue = parseDateValue(datePart);
 			}
 		}
 		return dateValue;
 	}
 
-	private boolean isEtagNotModified(String etag) {
-		String ifNoneMatch = getHeader(HEADER_IF_NONE_MATCH);
-		// compare weak/strong ETag as per https://tools.ietf.org/html/rfc7232#section-2.3
-		String serverETag = etag.replaceFirst("^W/", "");
-		Matcher eTagMatcher = ETAG_HEADER_VALUE_PATTERN.matcher(ifNoneMatch);
-		while (eTagMatcher.find()) {
-			if ("*".equals(eTagMatcher.group())
-					|| serverETag.equals(eTagMatcher.group(3))) {
-				return true;
+	private long parseDateValue(String headerValue) {
+		if (headerValue == null) {
+			// No header value sent at all
+			return -1;
+		}
+		if (headerValue.length() >= 3) {
+			// Short "0" or "-1" like values are never valid HTTP date headers...
+			// Let's only bother with SimpleDateFormat parsing for long enough values.
+			for (String dateFormat : DATE_FORMATS) {
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+				simpleDateFormat.setTimeZone(GMT);
+				try {
+					return simpleDateFormat.parse(headerValue).getTime();
+				}
+				catch (ParseException ex) {
+					// ignore
+				}
 			}
 		}
-		return false;
-	}
-
-	private String addEtagPadding(String etag) {
-		if (!(etag.startsWith("\"") || etag.startsWith("W/\"")) || !etag.endsWith("\"")) {
-			etag = "\"" + etag + "\"";
-		}
-		return etag;
+		return -1;
 	}
 
 	@Override
