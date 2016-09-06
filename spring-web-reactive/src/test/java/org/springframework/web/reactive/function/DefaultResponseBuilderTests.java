@@ -19,6 +19,7 @@ package org.springframework.web.reactive.function;
 import java.net.URI;
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -32,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Arjen Poutsma
  */
-public class ResponseTests {
+public class DefaultResponseBuilderTests {
 
 	@Test
 	public void from() throws Exception {
@@ -121,6 +122,7 @@ public class ResponseTests {
 		Response<Void> result = Response.ok().eTag("foo").build();
 		assertEquals("\"foo\"", result.headers().getETag());
 	}
+
 	@Test
 	public void lastModified() throws Exception {
 		ZonedDateTime now = ZonedDateTime.now();
@@ -141,7 +143,13 @@ public class ResponseTests {
 	}
 
 	@Test
-	public void writeTo() throws Exception {
+	public void renderObjectArray() throws Exception {
+		Response<Rendering> result =
+				Response.ok().render("name", this, Collections.emptyList(), "foo");
+		Map<String, Object> model = result.body().model();
+		assertEquals(2, model.size());
+		assertEquals(this, model.get("defaultResponseBuilderTests"));
+		assertEquals("foo", model.get("string"));
 	}
 
 }

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -45,6 +46,7 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 import org.springframework.web.reactive.function.support.HandlerFunctionAdapter;
 import org.springframework.web.reactive.function.support.ResponseResultHandler;
+import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -127,6 +129,11 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 						@Override
 						public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 							return () -> getMessageWriters().stream();
+						}
+
+						@Override
+						public Supplier<Stream<ViewResolver>> viewResolvers() {
+							return () -> Collections.<ViewResolver>emptySet().stream();
 						}
 					});
 		}

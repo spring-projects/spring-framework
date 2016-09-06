@@ -34,6 +34,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.reactive.result.view.ViewResolver;
 
 /**
  * A default implementation of configuration.
@@ -53,6 +54,8 @@ class DefaultConfiguration implements Router.Configuration {
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
 
 	private final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+
+	private final List<ViewResolver> viewResolvers = new ArrayList<>();
 
 	public DefaultConfiguration() {
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
@@ -77,5 +80,10 @@ class DefaultConfiguration implements Router.Configuration {
 	@Override
 	public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 		return this.messageWriters::stream;
+	}
+
+	@Override
+	public Supplier<Stream<ViewResolver>> viewResolvers() {
+		return this.viewResolvers::stream;
 	}
 }

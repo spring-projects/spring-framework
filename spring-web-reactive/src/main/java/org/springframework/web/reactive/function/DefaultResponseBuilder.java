@@ -21,10 +21,15 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.core.Conventions;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -169,4 +174,27 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		return ServerSentEventResponse
 				.fromPublisher(this.statusCode, this.headers, eventsPublisher, eventClass);
 	}
+
+	@Override
+	public Response<Rendering> render(String name, Object... modelAttributes) {
+		Map<String, Object> modelMap = Arrays.stream(modelAttributes)
+				.filter(o -> !isEmptyCollection(o))
+				.collect(Collectors.toMap(Conventions::getVariableName, o -> o));
+		return new RenderingResponse(this.statusCode, this.headers, name, modelMap);
+	}
+
+	@Override
+	public Response<Rendering> render(String name, Map<String, ?> model) {
+		Assert.hasLength(name, "'name' must not be empty");
+		Map<String, Object> modelMap = new LinkedHashMap<>();
+		if (model != null) {
+			modelMap.putAll(model);
+		}
+		return new RenderingResponse(this.statusCode, this.headers, name, modelMap);
+	}
+
+	private static boolean isEmptyCollection(Object o) {
+		return o instanceof Collection && ((Collection<?>) o).isEmpty();
+	}
+
 }

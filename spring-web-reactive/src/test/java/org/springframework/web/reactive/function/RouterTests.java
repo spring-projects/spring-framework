@@ -37,15 +37,11 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
+import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Arjen Poutsma
@@ -137,6 +133,8 @@ public class RouterTests {
 				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
 		when(configuration.messageWriters()).thenReturn(
 				() -> Collections.<HttpMessageWriter<?>>emptyList().stream());
+		when(configuration.viewResolvers()).thenReturn(
+				() -> Collections.<ViewResolver>emptyList().stream());
 
 		HttpHandler result = Router.toHttpHandler(routingFunction, configuration);
 		assertNotNull(result);

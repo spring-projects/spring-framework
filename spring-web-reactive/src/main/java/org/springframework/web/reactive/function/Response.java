@@ -18,6 +18,8 @@ package org.springframework.web.reactive.function;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import org.reactivestreams.Publisher;
@@ -170,6 +172,7 @@ public interface Response<T> {
 	 */
 	Mono<Void> writeTo(ServerWebExchange exchange);
 
+
 	/**
 	 * Defines a builder that adds headers to the response.
 	 *
@@ -277,6 +280,7 @@ public interface Response<T> {
 		<T extends Publisher<Void>> Response<T> build(T voidPublisher);
 	}
 
+
 	/**
 	 * Defines a builder that adds a body to the response.
 	 */
@@ -347,6 +351,27 @@ public interface Response<T> {
 		 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 		 */
 		<T, S extends Publisher<T>> Response<S> sse(S eventsPublisher, Class<T> eventClass);
+
+		/**
+		 * Render the template with the given {@code name} using the given {@code modelAttributes}.
+		 * The model attributes are mapped under a
+		 * {@linkplain org.springframework.core.Conventions#getVariableName generated name}.
+		 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
+		 * the model when using this method because we cannot correctly determine
+		 * the true convention name.</emphasis>
+		 * @param name the name of the template to be rendered
+		 * @param modelAttributes the modelAttributes used to render the template
+		 * @return the built response
+		 */
+		Response<Rendering> render(String name, Object... modelAttributes);
+
+		/**
+		 * Render the template with the given {@code name} using the given {@code model}.
+		 * @param name the name of the template to be rendered
+		 * @param model the model used to render the template
+		 * @return the built response
+		 */
+		Response<Rendering> render(String name, Map<String, ?> model);
 
 	}
 

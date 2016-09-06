@@ -29,6 +29,7 @@ import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 
@@ -81,6 +82,13 @@ public abstract class Router {
 	 * templates map, mapping variable names to values.
 	 */
 	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Router.class.getName() + ".uriTemplateVariables";
+
+	/**
+	 * Name of the {@link ServerWebExchange} attribute that contains the {@link Supplier} to the
+	 * {@linkplain Stream stream} of {@link ViewResolver}s obtained
+	 * from the {@linkplain Configuration#viewResolvers() configuration}.
+	 */
+	public static final String VIEW_RESOLVERS_ATTRIBUTE = Router.class.getName() + ".viewResolvers";
 
 
 	/**
@@ -215,6 +223,7 @@ public abstract class Router {
 		attributes.put(REQUEST_ATTRIBUTE, request);
 		attributes.put(HTTP_MESSAGE_READERS_ATTRIBUTE, configuration.messageReaders());
 		attributes.put(HTTP_MESSAGE_WRITERS_ATTRIBUTE, configuration.messageWriters());
+		attributes.put(VIEW_RESOLVERS_ATTRIBUTE, configuration.viewResolvers());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -251,6 +260,11 @@ public abstract class Router {
 				return () -> applicationContext.getBeansOfType(HttpMessageWriter.class).values().stream()
 						.map(CastingUtils::cast);
 			}
+
+			@Override
+			public Supplier<Stream<ViewResolver>> viewResolvers() {
+				return () -> applicationContext.getBeansOfType(ViewResolver.class).values().stream();
+			}
 		};
 	}
 
@@ -273,6 +287,13 @@ public abstract class Router {
 		 * @return the stream of message writers
 		 */
 		Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+
+		/**
+		 * Supply a {@linkplain Stream stream} of {@link ViewResolver}s to be used for view name
+		 * resolution.
+		 * @return the stream of view resolvers
+		 */
+		Supplier<Stream<ViewResolver>> viewResolvers();
 	}
 
 }
