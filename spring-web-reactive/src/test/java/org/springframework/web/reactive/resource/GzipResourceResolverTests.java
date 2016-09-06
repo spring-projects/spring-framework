@@ -123,8 +123,8 @@ public class GzipResourceResolverTests {
 		Resource resource = new ClassPathResource("test/" + gzFile, getClass());
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
-		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
-				resolved instanceof EncodedResource);
+		assertTrue("Expected " + resolved + " to be of type " + ResolvedResource.class,
+				resolved instanceof ResolvedResource);
 	}
 
 	@Test
@@ -137,8 +137,8 @@ public class GzipResourceResolverTests {
 		Resource resource = new ClassPathResource("test/" + gzFile, getClass());
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/"+file).getFilename(), resolved.getFilename());
-		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
-				resolved instanceof EncodedResource);
+		assertTrue("Expected " + resolved + " to be of type " + ResolvedResource.class,
+				resolved instanceof ResolvedResource);
 	}
 
 	@Test
@@ -151,8 +151,8 @@ public class GzipResourceResolverTests {
 		Resource gzResource = new ClassPathResource("test/"+gzFile, getClass());
 		assertEquals(gzResource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
-		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
-				resolved instanceof EncodedResource);
+		assertTrue("Expected " + resolved + " to be of type " + ResolvedResource.class,
+				resolved instanceof ResolvedResource);
 
 		// resolved resource is now cached in CachingResourceResolver
 
@@ -165,8 +165,8 @@ public class GzipResourceResolverTests {
 		Resource resource = new ClassPathResource("test/"+file, getClass());
 		assertEquals(resource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
-		assertFalse("Expected " + resolved + " to *not* be of type " + EncodedResource.class,
-				resolved instanceof EncodedResource);
+		assertFalse("Expected " + resolved + " to *not* be of type " + ResolvedResource.class,
+				resolved instanceof ResolvedResource);
 	}
 
 	@Test // SPR-13149
@@ -178,7 +178,7 @@ public class GzipResourceResolverTests {
 		Resource gzResource = new ClassPathResource("test/" + gzFile, getClass());
 		assertEquals(gzResource.getDescription(), resolved.getDescription());
 		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
-		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
-				resolved instanceof EncodedResource);
+		assertTrue("Expected " + resolved + " to be of type " + ResolvedResource.class,
+				resolved instanceof ResolvedResource);
 	}
 }

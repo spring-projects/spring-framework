@@ -22,10 +22,12 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 
 /**
  * A {@code ResourceResolver} that delegates to the chain to locate a resource
@@ -76,7 +78,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 	}
 
 
-	private static final class GzippedResource extends AbstractResource implements EncodedResource {
+	private static final class GzippedResource extends AbstractResource implements ResolvedResource {
 
 		private final Resource original;
 
@@ -140,9 +142,19 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			return this.gzipped.getDescription();
 		}
 
-		public String getContentEncoding() {
-			return "gzip";
+		@Override
+		public HttpHeaders getResponseHeaders() {
+			HttpHeaders headers;
+			if(this.original instanceof ResolvedResource) {
+				headers = ((ResolvedResource) this.original).getResponseHeaders();
+			}
+			else {
+				headers = new HttpHeaders();
+			}
+			headers.add(HttpHeaders.CONTENT_ENCODING, "gzip");
+			return headers;
 		}
+
 	}
 
 }

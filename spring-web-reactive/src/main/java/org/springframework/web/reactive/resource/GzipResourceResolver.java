@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -74,7 +75,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 	}
 
 
-	private static final class GzippedResource extends AbstractResource implements EncodedResource {
+	private static final class GzippedResource extends AbstractResource implements ResolvedResource {
 
 		private final Resource original;
 
@@ -138,8 +139,17 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 			return this.gzipped.getDescription();
 		}
 
-		public String getContentEncoding() {
-			return "gzip";
+		@Override
+		public HttpHeaders getResponseHeaders() {
+			HttpHeaders headers;
+			if(this.original instanceof ResolvedResource) {
+				headers = ((ResolvedResource) this.original).getResponseHeaders();
+			}
+			else {
+				headers = new HttpHeaders();
+			}
+			headers.add(HttpHeaders.CONTENT_ENCODING, "gzip");
+			return headers;
 		}
 	}
 

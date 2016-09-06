@@ -542,11 +542,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
-		if (resource instanceof EncodedResource) {
-			response.setHeader(HttpHeaders.CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
-		}
-		if (resource instanceof VersionedResource) {
-			response.setHeader(HttpHeaders.ETAG, "\"" + ((VersionedResource) resource).getVersion() + "\"");
+		if (resource instanceof ResolvedResource) {
+			HttpHeaders resourceHeaders = ((ResolvedResource) resource).getResponseHeaders();
+			resourceHeaders.toSingleValueMap().entrySet()
+					.stream().forEach(entry -> response.setHeader(entry.getKey(), entry.getValue()));
 		}
 		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}

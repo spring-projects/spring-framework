@@ -482,11 +482,9 @@ public class ResourceWebHandler
 		if (mediaType != null) {
 			headers.setContentType(mediaType);
 		}
-		if (resource instanceof EncodedResource) {
-			headers.set(HttpHeaders.CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
-		}
-		if (resource instanceof VersionedResource) {
-			headers.setETag("\"" + ((VersionedResource) resource).getVersion() + "\"");
+		if (resource instanceof ResolvedResource) {
+			HttpHeaders resourceHeaders = ((ResolvedResource) resource).getResponseHeaders();
+			exchange.getResponse().getHeaders().putAll(resourceHeaders);
 		}
 		headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}
