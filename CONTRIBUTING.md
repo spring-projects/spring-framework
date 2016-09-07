@@ -295,7 +295,7 @@ Note that you can always force push (`git push -f`) reworked / rebased commits
 against the branch used to submit your pull request. In other words, you do not
 need to issue a new pull request when asked to make changes.
 
-[help documentation]: http://help.github.com/send-pull-requests
+[help documentation]: https://help.github.com/categories/collaborating-on-projects-using-issues-and-pull-requests/
 [JIRA issue tracker]: https://jira.spring.io/browse/SPR
 [Contributor License Agreement]: https://cla.pivotal.io/sign/spring
 [fork-and-edit]: https://github.com/blog/844-forking-with-the-edit-button
