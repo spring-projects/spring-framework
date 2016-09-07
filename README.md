@@ -92,7 +92,7 @@ The Spring Framework is released under version 2.0 of the [Apache License][].
 [Git]: http://help.github.com/set-up-git-redirect
 [JDK8 build]: http://www.oracle.com/technetwork/java/javase/downloads
 [Gradle build and release FAQ]: https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ
-[Pull requests]: http://help.github.com/send-pull-requests
+[Pull requests]: https://help.github.com/categories/collaborating-on-projects-using-issues-and-pull-requests/
 [contributor guidelines]: https://github.com/spring-projects/spring-framework/blob/master/CONTRIBUTING.md
 [@SpringFramework]: https://twitter.com/springframework
 [@SpringCentral]: https://twitter.com/springcentral
