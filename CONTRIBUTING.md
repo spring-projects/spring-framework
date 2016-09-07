@@ -74,15 +74,14 @@ present in the framework.
 1. Preserve existing formatting; i.e. do not reformat code for its own sake
 1. Search the codebase using `git grep` and other tools to discover common
     naming conventions, etc.
-1. Latin-1 (ISO-8859-1) encoding for Java sources; use `native2ascii` to convert
-    if necessary
+1. UTF-8 encoding for Java sources
 
 
 ### Add Apache license header to all new classes
 
 ```java
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,11 +109,11 @@ modified a file in 2015 whose header still reads:
  * Copyright 2002-2011 the original author or authors.
 ```
 
-Then be sure to update it to 2015 accordingly:
+Then be sure to update it to 2016 accordingly:
 
 ```java
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
 ```
 
 ### Use @since tags for newly-added public API types and methods
