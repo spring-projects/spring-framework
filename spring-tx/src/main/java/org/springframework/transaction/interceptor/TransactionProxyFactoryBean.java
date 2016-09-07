@@ -129,7 +129,7 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 		this.transactionInterceptor.setTransactionManager(transactionManager);
 	}
 	
-        /**
+	/**
 	 * Specify the name of the default transaction manager bean.
 	 * @see TransactionAspectSupport#setTransactionManagerBeanName
 	 */
