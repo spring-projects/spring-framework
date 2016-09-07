@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -200,8 +201,9 @@ class DefaultRequest implements Request {
 		}
 
 		private Stream<HttpMessageReader<?>> messageReaderStream(ServerWebExchange exchange) {
-			return exchange.<Stream<HttpMessageReader<?>>>getAttribute(Router.HTTP_MESSAGE_READERS_ATTRIBUTE)
-					.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageReaders in ServerWebExchange"));
+			return exchange.<Supplier<Stream<HttpMessageReader<?>>>>getAttribute(Router.HTTP_MESSAGE_READERS_ATTRIBUTE)
+					.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageReaders in ServerWebExchange"))
+					.get();
 		}
 
 		@SuppressWarnings("unchecked")

@@ -26,22 +26,22 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * @author Arjen Poutsma
  */
-class PublisherResponse<T> extends AbstractHttpMessageWriterResponse<Publisher<T>> {
+class PublisherResponse<T, S extends Publisher<T>> extends AbstractHttpMessageWriterResponse<S> {
 
-	private final Publisher<T> body;
+	private final S body;
 
 	private final ResolvableType bodyType;
 
 
 	public PublisherResponse(int statusCode, HttpHeaders headers,
-									 Publisher<T> body, Class<T> aClass) {
+									 S body, Class<T> aClass) {
 		super(statusCode, headers);
 		this.body = body;
 		this.bodyType = ResolvableType.forClass(aClass);
 	}
 
 	@Override
-	public Publisher<T> body() {
+	public S body() {
 		return this.body;
 	}
 

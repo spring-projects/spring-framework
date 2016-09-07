@@ -63,14 +63,14 @@ public abstract class Router {
 	public static final String REQUEST_ATTRIBUTE = Router.class.getName() + ".request";
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the
+	 * Name of the {@link ServerWebExchange} attribute that contains a {@link Supplier} to the
 	 * {@linkplain Stream stream} of {@link HttpMessageReader}s obtained
 	 * from the {@linkplain Configuration#messageReaders() configuration}.
 	 */
 	public static final String HTTP_MESSAGE_READERS_ATTRIBUTE = Router.class.getName() + ".httpMessageReaders";
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the
+	 * Name of the {@link ServerWebExchange} attribute that contains a {@link Supplier} to the
 	 * {@linkplain Stream stream} of {@link HttpMessageWriter}s obtained
 	 * from the {@linkplain Configuration#messageWriters()  configuration}.
 	 */
@@ -213,8 +213,8 @@ public abstract class Router {
 			Configuration configuration) {
 		Map<String, Object> attributes = exchange.getAttributes();
 		attributes.put(REQUEST_ATTRIBUTE, request);
-		attributes.put(HTTP_MESSAGE_READERS_ATTRIBUTE, configuration.messageReaders().get());
-		attributes.put(HTTP_MESSAGE_WRITERS_ATTRIBUTE, configuration.messageWriters().get());
+		attributes.put(HTTP_MESSAGE_READERS_ATTRIBUTE, configuration.messageReaders());
+		attributes.put(HTTP_MESSAGE_WRITERS_ATTRIBUTE, configuration.messageWriters());
 	}
 
 	@SuppressWarnings("unchecked")

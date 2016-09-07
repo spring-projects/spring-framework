@@ -137,7 +137,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public <T> Response<Publisher<T>> stream(Publisher<T> publisher, Class<T> elementClass) {
+	public <T, S extends Publisher<T>> Response<S> stream(S publisher, Class<T> elementClass) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 		return new PublisherResponse<>(this.statusCode, this.headers, publisher, elementClass);

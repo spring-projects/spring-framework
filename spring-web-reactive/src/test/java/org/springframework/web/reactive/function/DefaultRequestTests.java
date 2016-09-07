@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +44,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.DecoderHttpMessageReader;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
@@ -155,14 +159,16 @@ public class DefaultRequestTests {
 		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
 		when(mockRequest.getBody()).thenReturn(body);
 
+		Set<HttpMessageReader<?>> messageReaders = Collections
+				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
 		when(mockExchange.getAttribute(Router.HTTP_MESSAGE_READERS_ATTRIBUTE))
-				.thenReturn(Optional.of(Collections
-						.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()))
-						.stream()));
+				.thenReturn(Optional.of(
+						(Supplier<Stream<HttpMessageReader<?>>>) messageReaders::stream));
 
 		assertEquals(body, defaultRequest.body().stream());
 
 		Mono<String> resultMono = defaultRequest.body().convertToMono(String.class);
 		assertEquals("foo", resultMono.block());
 	}
+
 }

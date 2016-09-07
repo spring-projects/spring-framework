@@ -308,7 +308,7 @@ public interface Response<T> {
 		 * @param <T> the type of the elements contained in the publisher
 		 * @return the built response
 		 */
-		<T> Response<Publisher<T>> stream(Publisher<T> publisher, Class<T> elementClass);
+		<T, S extends Publisher<T>> Response<S> stream(S publisher, Class<T> elementClass);
 
 		/**
 		 * Set the body of the response to the given {@link Resource} and return it.

@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
@@ -56,8 +57,9 @@ abstract class AbstractHttpMessageWriterResponse<T> extends AbstractResponse<T> 
 	}
 
 	private Stream<HttpMessageWriter<?>> messageWriterStream(ServerWebExchange exchange) {
-		return exchange.<Stream<HttpMessageWriter<?>>>getAttribute(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE)
-				.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageWriters in ServerWebExchange"));
+		return exchange.<Supplier<Stream<HttpMessageWriter<?>>>>getAttribute(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE)
+				.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageWriters in ServerWebExchange"))
+				.get();
 	}
 
 }

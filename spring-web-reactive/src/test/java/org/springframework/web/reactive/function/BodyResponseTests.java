@@ -17,6 +17,9 @@
 package org.springframework.web.reactive.function;
 
 import java.util.Collections;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
@@ -24,6 +27,7 @@ import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.server.ServerWebExchange;
@@ -53,8 +57,9 @@ public class BodyResponseTests {
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE, Collections
-				.singleton(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder())).stream());
+		Set<HttpMessageWriter<?>> messageWriters = Collections.singleton(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
+		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE,
+				(Supplier<Stream<HttpMessageWriter<?>>>) messageWriters::stream);
 
 
 		publisherResponse.writeTo(exchange).block();

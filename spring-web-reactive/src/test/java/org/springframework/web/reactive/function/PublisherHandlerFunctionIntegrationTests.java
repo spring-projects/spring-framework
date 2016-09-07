@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.net.URI;
 import java.util.List;
 
 import org.junit.Before;
@@ -27,10 +28,13 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.web.reactive.function.RequestPredicates.GET;
+import static org.springframework.web.reactive.function.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.Router.route;
 
 /**
@@ -49,8 +53,9 @@ public class PublisherHandlerFunctionIntegrationTests
 	@Override
 	protected RoutingFunction<?> routingFunction() {
 		PersonHandler personHandler = new PersonHandler();
-		return route(RequestPredicates.GET("/mono"), personHandler::mono)
-				.and(route(RequestPredicates.GET("/flux"), personHandler::flux));
+		return route(GET("/mono"), personHandler::mono)
+				.and(route(POST("/mono"), personHandler::postMono))
+				.and(route(GET("/flux"), personHandler::flux));
 	}
 
 
@@ -76,12 +81,28 @@ public class PublisherHandlerFunctionIntegrationTests
 		assertEquals("Jane", body.get(1).getName());
 	}
 
+	@Test
+	public void postMono() {
+		URI uri = URI.create("http://localhost:" + port + "/mono");
+		Person person = new Person("Jack");
+		RequestEntity<Person> requestEntity = RequestEntity.post(uri).body(person);
+		ResponseEntity<Person> result = restTemplate.exchange(requestEntity, Person.class);
+
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals("Jack", result.getBody().getName());
+	}
+
 
 	private static class PersonHandler {
 
 		public Response<Publisher<Person>> mono(Request request) {
 			Person person = new Person("John");
 			return Response.ok().stream(Mono.just(person), Person.class);
+		}
+
+		public Response<Publisher<Person>> postMono(Request request) {
+			Mono<Person> personMono = request.body().convertToMono(Person.class);
+			return Response.ok().stream(personMono, Person.class);
 		}
 
 		public Response<Publisher<Person>> flux(Request request) {
