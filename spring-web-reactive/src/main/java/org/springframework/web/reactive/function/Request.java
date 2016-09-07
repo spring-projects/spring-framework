@@ -78,11 +78,6 @@ public interface Request {
 	<T> Optional<T> attribute(String name);
 
 	/**
-	 * Return a mutable map of attributes for this request.
-	 */
-	Map<String, Object> attributes();
-
-	/**
 	 * Return the first query parameter with the given name, if present.
 	 * @param name the parameter name
 	 * @return the parameter value
@@ -168,7 +163,7 @@ public interface Request {
 		List<String> header(String headerName);
 
 		/**
-		 * Return the headers as a "live" {@link HttpHeaders} instance.
+		 * Return the headers as a {@link HttpHeaders} instance.
 		 */
 		HttpHeaders asHttpHeaders();
 

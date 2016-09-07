@@ -96,11 +96,6 @@ public class RequestWrapper implements Request {
 	}
 
 	@Override
-	public Map<String, Object> attributes() {
-		return this.request.attributes();
-	}
-
-	@Override
 	public Optional<String> queryParam(String name) {
 		return this.request.queryParam(name);
 	}

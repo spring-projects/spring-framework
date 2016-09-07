@@ -22,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -94,11 +93,10 @@ public class DefaultRequestTests {
 	}
 
 	@Test
-	public void attributes() throws Exception {
-		Map<String, Object> attributes = new LinkedHashMap<>();
-		when(mockExchange.getAttributes()).thenReturn(attributes);
+	public void attribute() throws Exception {
+		when(mockExchange.getAttribute("foo")).thenReturn(Optional.of("bar"));
 
-		assertEquals(attributes, defaultRequest.attributes());
+		assertEquals(Optional.of("bar"), defaultRequest.attribute("foo"));
 	}
 
 	@Test

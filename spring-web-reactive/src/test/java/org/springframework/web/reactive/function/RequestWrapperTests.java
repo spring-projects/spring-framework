@@ -103,14 +103,6 @@ public class RequestWrapperTests {
 	}
 
 	@Test
-	public void attributes() throws Exception {
-		Map<String, Object> attributes = Collections.singletonMap("foo", "bar");
-		when(mockRequest.attributes()).thenReturn(attributes);
-
-		assertSame(attributes, wrapper.attributes());
-	}
-
-	@Test
 	public void queryParam() throws Exception {
 		String name = "foo";
 		String value = "bar";

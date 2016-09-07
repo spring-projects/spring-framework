@@ -246,8 +246,11 @@ public abstract class RequestPredicates {
 		public boolean test(Request request) {
 			String path = request.path();
 			if (this.pathMatcher.match(this.pattern, path)) {
-				Map<String, String> uriTemplateVariables = this.pathMatcher.extractUriTemplateVariables(this.pattern, path);
-				request.attributes().put(Router.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+				if (request instanceof DefaultRequest) {
+					DefaultRequest defaultRequest = (DefaultRequest) request;
+					Map<String, String> uriTemplateVariables = this.pathMatcher.extractUriTemplateVariables(this.pattern, path);
+					defaultRequest.exchange().getAttributes().put(Router.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+				}
 				return true;
 			}
 			else {

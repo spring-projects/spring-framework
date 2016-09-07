@@ -104,11 +104,6 @@ public class MockRequest implements Request {
 	}
 
 	@Override
-	public Map<String, Object> attributes() {
-		return this.attributes;
-	}
-
-	@Override
 	public List<String> queryParams(String name) {
 		return Collections.unmodifiableList(this.queryParams.get(name));
 	}

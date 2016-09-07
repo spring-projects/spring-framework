@@ -87,11 +87,6 @@ class DefaultRequest implements Request {
 	}
 
 	@Override
-	public Map<String, Object> attributes() {
-		return this.exchange.getAttributes();
-	}
-
-	@Override
 	public List<String> queryParams(String name) {
 		List<String> queryParams = request().getQueryParams().get(name);
 		return queryParams != null ? queryParams : Collections.emptyList();
@@ -105,6 +100,10 @@ class DefaultRequest implements Request {
 
 	private ServerHttpRequest request() {
 		return this.exchange.getRequest();
+	}
+
+	ServerWebExchange exchange() {
+		return this.exchange;
 	}
 
 
