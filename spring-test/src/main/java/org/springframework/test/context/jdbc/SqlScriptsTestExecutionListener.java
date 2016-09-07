@@ -40,11 +40,10 @@ import org.springframework.test.context.transaction.TestContextTransactionUtils;
 import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -203,16 +202,12 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		final boolean newTxRequired = mergedSqlConfig.getTransactionMode() == TransactionMode.ISOLATED;
 
 		if (transactionManager == null) {
-			if (newTxRequired) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "cannot execute SQL scripts using Transaction Mode "
-						+ "[%s] without a PlatformTransactionManager.", testContext, TransactionMode.ISOLATED));
-			}
+			Assert.state(!newTxRequired, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+					"cannot execute SQL scripts using Transaction Mode " +
+					"[%s] without a PlatformTransactionManager.", testContext, TransactionMode.ISOLATED));
 
-			if (dataSource == null) {
-				throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-						+ "supply at least a DataSource or PlatformTransactionManager.", testContext));
-			}
+			Assert.state(dataSource != null, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+					"supply at least a DataSource or PlatformTransactionManager.", testContext));
 
 			// Execute scripts directly against the DataSource
 			populator.execute(dataSource);
@@ -230,11 +225,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 			if (dataSource == null) {
 				dataSource = dataSourceFromTxMgr;
-				if (dataSource == null) {
-					throw new IllegalStateException(String.format("Failed to execute SQL scripts for test context %s: "
-							+ "could not obtain DataSource from transaction manager [%s] (named '%s').", testContext,
+				Assert.state(dataSource != null, () -> String.format("Failed to execute SQL scripts for test context %s: " +
+						"could not obtain DataSource from transaction manager [%s] (named '%s').", testContext,
 						transactionManager.getClass().getName(), tmName));
-				}
 			}
 
 			final DataSource finalDataSource = dataSource;
@@ -244,12 +237,9 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 			TransactionAttribute transactionAttribute = TestContextTransactionUtils.createDelegatingTransactionAttribute(
 				testContext, new DefaultTransactionAttribute(propagation));
 
-			new TransactionTemplate(transactionManager, transactionAttribute).execute(new TransactionCallbackWithoutResult() {
-
-				@Override
-				public void doInTransactionWithoutResult(TransactionStatus status) {
-					populator.execute(finalDataSource);
-				}
+			new TransactionTemplate(transactionManager, transactionAttribute).execute(status -> {
+				populator.execute(finalDataSource);
+				return null;
 			});
 		}
 	}

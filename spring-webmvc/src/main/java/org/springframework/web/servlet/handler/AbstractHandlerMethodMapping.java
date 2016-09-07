@@ -231,7 +231,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				new MethodIntrospector.MetadataLookup<T>() {
 					@Override
 					public T inspect(Method method) {
-						return getMappingForMethod(method, userType);
+						try {
+							return getMappingForMethod(method, userType);
+						}
+						catch (Throwable ex) {
+							throw new IllegalStateException("Invalid mapping on handler class [" +
+									handlerType.getName() + "]: " + method, ex);
+						}
 					}
 				});
 

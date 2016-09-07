@@ -18,6 +18,7 @@ include "spring-test"
 include "spring-tx"
 include "spring-web"
 include "spring-webmvc"
+include "spring-web-reactive"
 include "spring-websocket"
 include "spring-framework-bom"
 

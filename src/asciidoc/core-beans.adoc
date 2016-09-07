@@ -6486,7 +6486,7 @@ resulting bean. This functionality can be overridden, however, with the `name` a
 ==== Bean aliasing
 
 As discussed in <<beans-beanname>>, it is sometimes desirable to give a single bean
-multiple names, otherwise known as__bean aliasing__. The `name` attribute of the `@Bean`
+multiple names, otherwise known as __bean aliasing__. The `name` attribute of the `@Bean`
 annotation accepts a String array for this purpose.
 
 [source,java,indent=0]
@@ -6670,7 +6670,7 @@ where the magic comes in: All `@Configuration` classes are subclassed at startup
 with `CGLIB`. In the subclass, the child method checks the container first for any
 cached (scoped) beans before it calls the parent method and creates a new instance. Note
 that as of Spring 3.2, it is no longer necessary to add CGLIB to your classpath because
-CGLIB classes have been repackaged under org.springframework and included directly
+CGLIB classes have been repackaged under `org.springframework.cglib` and included directly
 within the spring-core JAR.
 
 [NOTE]

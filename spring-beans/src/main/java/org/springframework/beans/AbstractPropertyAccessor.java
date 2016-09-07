@@ -148,7 +148,7 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't writable
 	 * @throws PropertyAccessException if the property was valid but the
-	 * accessor method failed or a type mismatch occured
+	 * accessor method failed or a type mismatch occurred
 	 */
 	@Override
 	public abstract void setPropertyValue(String propertyName, Object value) throws BeansException;

@@ -152,7 +152,7 @@ class ComponentScanAnnotationParser {
 			switch (filterType) {
 				case ANNOTATION:
 					Assert.isAssignable(Annotation.class, filterClass,
-							"An error occured while processing a @ComponentScan ANNOTATION type filter: ");
+							"An error occurred while processing a @ComponentScan ANNOTATION type filter: ");
 					@SuppressWarnings("unchecked")
 					Class<Annotation> annotationType = (Class<Annotation>) filterClass;
 					typeFilters.add(new AnnotationTypeFilter(annotationType));
@@ -162,7 +162,7 @@ class ComponentScanAnnotationParser {
 					break;
 				case CUSTOM:
 					Assert.isAssignable(TypeFilter.class, filterClass,
-							"An error occured while processing a @ComponentScan CUSTOM type filter: ");
+							"An error occurred while processing a @ComponentScan CUSTOM type filter: ");
 					TypeFilter filter = BeanUtils.instantiateClass(filterClass, TypeFilter.class);
 					invokeAwareMethods(filter);
 					typeFilters.add(filter);

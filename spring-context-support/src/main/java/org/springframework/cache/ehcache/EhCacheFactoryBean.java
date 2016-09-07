@@ -50,7 +50,7 @@ import org.springframework.beans.factory.InitializingBean;
  * <p>Note: If the named Cache instance is found, the properties will be ignored and the
  * Cache instance will be retrieved from the CacheManager.
  *
- * <p>Note: As of Spring 4.1, Spring's EhCache support requires EhCache 2.5 or higher.
+ * <p>Note: As of Spring 5.0, Spring's EhCache support requires EhCache 2.10 or higher.
  *
  * @author Juergen Hoeller
  * @author Dmitriy Kopylenko
@@ -84,10 +84,9 @@ public class EhCacheFactoryBean extends CacheConfiguration implements FactoryBea
 	private Ehcache cache;
 
 
-	@SuppressWarnings("deprecation")
 	public EhCacheFactoryBean() {
 		setMaxEntriesLocalHeap(10000);
-		setMaxElementsOnDisk(10000000);
+		setMaxEntriesLocalDisk(10000000);
 		setTimeToLiveSeconds(120);
 		setTimeToIdleSeconds(120);
 	}

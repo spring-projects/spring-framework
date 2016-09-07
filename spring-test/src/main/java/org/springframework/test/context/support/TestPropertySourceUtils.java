@@ -118,7 +118,7 @@ public abstract class TestPropertySourceUtils {
 			}
 			String[] locationsArray = TestContextResourceUtils.convertToClasspathResourcePaths(
 					attrs.getDeclaringClass(), attrs.getLocations());
-			locations.addAll(0, Arrays.<String> asList(locationsArray));
+			locations.addAll(0, Arrays.asList(locationsArray));
 			if (!attrs.isInheritLocations()) {
 				break;
 			}

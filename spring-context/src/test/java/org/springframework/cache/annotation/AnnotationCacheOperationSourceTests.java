@@ -75,7 +75,7 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Test
 	public void emptyCaching() throws Exception {
-		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "emptyCaching", 0);
+		getOps(AnnotatedClass.class, "emptyCaching", 0);
 	}
 
 	@Test
@@ -155,7 +155,7 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Test
 	public void keyAndKeyGeneratorCannotBeSetTogether() {
-		exception.expect(IllegalStateException.class);
+		this.exception.expect(IllegalStateException.class);
 		getOps(AnnotatedClass.class, "invalidKeyAndKeyGeneratorSet");
 	}
 
@@ -189,7 +189,7 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Test
 	public void cacheResolverAndCacheManagerCannotBeSetTogether() {
-		exception.expect(IllegalStateException.class);
+		this.exception.expect(IllegalStateException.class);
 		getOps(AnnotatedClass.class, "invalidCacheResolverAndCacheManagerSet");
 	}
 
@@ -275,7 +275,7 @@ public class AnnotationCacheOperationSourceTests {
 	private Collection<CacheOperation> getOps(Class<?> target, String name) {
 		try {
 			Method method = target.getMethod(name);
-			return source.getCacheOperations(method, target);
+			return this.source.getCacheOperations(method, target);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new IllegalStateException(ex);

@@ -196,7 +196,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	 * {@link HttpServletRequest#getContextPath()} which states it can be
 	 * an empty string, or it must start with a "/" and not end with a "/".
 	 * @param contextPath a valid contextPath
-	 * @throws IllegalArgumentException if the contextPath is not a valid {@link HttpServletRequest#getContextPath()}
+	 * @throws IllegalArgumentException if the contextPath is not a valid
+	 * {@link HttpServletRequest#getContextPath()}
 	 */
 	public void setContextPath(String contextPath) {
 		MockMvcWebConnection.validateContextPath(contextPath);
@@ -244,10 +245,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			}
 		}
 		else {
-			if (!uriComponents.getPath().startsWith(this.contextPath)) {
-				throw new IllegalArgumentException(uriComponents.getPath() + " should start with contextPath " +
-						this.contextPath);
-			}
+			Assert.isTrue(uriComponents.getPath().startsWith(this.contextPath),
+					() -> uriComponents.getPath() + " should start with contextPath " + this.contextPath);
 			request.setContextPath(this.contextPath);
 		}
 	}
@@ -260,10 +259,8 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			StringTokenizer tokens = new StringTokenizer(cookieHeaderValue, "=;");
 			while (tokens.hasMoreTokens()) {
 				String cookieName = tokens.nextToken().trim();
-				if (!tokens.hasMoreTokens()) {
-					throw new IllegalArgumentException("Expected value for cookie name '" + cookieName
-							+ "'. Full cookie was " + cookieHeaderValue);
-				}
+				Assert.isTrue(tokens.hasMoreTokens(),
+						() -> "Expected value for cookie name '" + cookieName + "'. Full cookie was " + cookieHeaderValue);
 				String cookieValue = tokens.nextToken().trim();
 				processCookie(request, cookies, new Cookie(cookieName, cookieValue));
 			}
@@ -382,9 +379,7 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 
 	private Locale parseLocale(String locale) {
 		Matcher matcher = LOCALE_PATTERN.matcher(locale);
-		if (!matcher.matches()) {
-			throw new IllegalArgumentException("Invalid locale " + locale);
-		}
+		Assert.isTrue(matcher.matches(), () -> "Invalid locale " + locale);
 		String language = matcher.group(1);
 		String country = matcher.group(2);
 		if (country == null) {

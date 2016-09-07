@@ -151,7 +151,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	@Override
 	public void processContextConfiguration(final ContextConfigurationAttributes configAttributes) {
 		Assert.notNull(configAttributes, "configAttributes must not be null");
-		Assert.isTrue(!(configAttributes.hasLocations() && configAttributes.hasClasses()), String.format(
+		Assert.isTrue(!(configAttributes.hasLocations() && configAttributes.hasClasses()), () -> String.format(
 			"Cannot process locations AND classes for context configuration %s: "
 					+ "configure one or the other, but not both.", configAttributes));
 
@@ -178,11 +178,9 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 				}
 			}
 
-			if (configAttributes.hasClasses()) {
-				throw new IllegalStateException(String.format(
+			Assert.state(!configAttributes.hasClasses(), () -> String.format(
 					"%s should NOT have detected default configuration classes for context configuration %s.",
 					name(getXmlLoader()), configAttributes));
-			}
 
 			// Now let the annotation config loader process the configuration.
 			delegateProcessing(getAnnotationConfigLoader(), configAttributes);
@@ -195,11 +193,9 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 				}
 			}
 
-			if (!xmlLoaderDetectedDefaults && configAttributes.hasLocations()) {
-				throw new IllegalStateException(String.format(
+			Assert.state(xmlLoaderDetectedDefaults || !configAttributes.hasLocations(), () -> String.format(
 					"%s should NOT have detected default locations for context configuration %s.",
 					name(getAnnotationConfigLoader()), configAttributes));
-			}
 
 			if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
 				String message = String.format(
@@ -237,12 +233,10 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 		Assert.notNull(mergedConfig, "mergedConfig must not be null");
 		List<SmartContextLoader> candidates = Arrays.asList(getXmlLoader(), getAnnotationConfigLoader());
 
-		if (mergedConfig.hasLocations() && mergedConfig.hasClasses()) {
-			throw new IllegalStateException(String.format(
+		Assert.state(!(mergedConfig.hasLocations() && mergedConfig.hasClasses()), () -> String.format(
 				"Neither %s nor %s supports loading an ApplicationContext from %s: "
 						+ "declare either 'locations' or 'classes' but not both.", name(getXmlLoader()),
 				name(getAnnotationConfigLoader()), mergedConfig));
-		}
 
 		for (SmartContextLoader loader : candidates) {
 			// Determine if each loader can load a context from the mergedConfig. If it

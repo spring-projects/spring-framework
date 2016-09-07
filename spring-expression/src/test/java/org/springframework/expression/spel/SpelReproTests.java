@@ -1905,7 +1905,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		StandardEvaluationContext sec = new StandardEvaluationContext();
 		sec.setVariable("iterable", Collections.emptyList());
 		SpelExpressionParser parser = new SpelExpressionParser();
-		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.GuavaLists).newArrayList(#iterable)");
+		Expression expression = parser.parseExpression("T(org.springframework.expression.spel.SpelReproTests.FooLists).newArrayList(#iterable)");
 		assertTrue(expression.getValue(sec) instanceof ArrayList);
 	}
 
@@ -2408,7 +2408,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 
-	public static class GuavaLists {
+	public static class FooLists {
 
 		public static <T> List<T> newArrayList(Iterable<T> iterable) {
 			return new ArrayList<>();

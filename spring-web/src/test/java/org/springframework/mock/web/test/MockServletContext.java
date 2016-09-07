@@ -545,6 +545,11 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
+	@Override
+	public String getVirtualServerName() {
+		throw new UnsupportedOperationException();
+	}
+
 	public Set<String> getDeclaredRoles() {
 		return Collections.unmodifiableSet(this.declaredRoles);
 	}

@@ -111,12 +111,8 @@ public final class MockMvcWebConnection implements WebConnection {
 		if (contextPath == null || "".equals(contextPath)) {
 			return;
 		}
-		if (!contextPath.startsWith("/")) {
-			throw new IllegalArgumentException("contextPath '" + contextPath + "' must start with '/'.");
-		}
-		if (contextPath.endsWith("/")) {
-			throw new IllegalArgumentException("contextPath '" + contextPath + "' must not end with '/'.");
-		}
+		Assert.isTrue(contextPath.startsWith("/"), () -> "contextPath '" + contextPath + "' must start with '/'.");
+		Assert.isTrue(!contextPath.endsWith("/"), () -> "contextPath '" + contextPath + "' must not end with '/'.");
 	}
 
 

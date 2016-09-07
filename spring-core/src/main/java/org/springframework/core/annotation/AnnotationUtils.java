@@ -17,6 +17,7 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Repeatable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
@@ -110,8 +111,6 @@ public abstract class AnnotationUtils {
 	 * The attribute name for annotations with a single element.
 	 */
 	public static final String VALUE = "value";
-
-	private static final String REPEATABLE_CLASS_NAME = "java.lang.annotation.Repeatable";
 
 	private static final Map<AnnotationCacheKey, Annotation> findAnnotationCache =
 			new ConcurrentReferenceHashMap<>(256);
@@ -1703,19 +1702,9 @@ public abstract class AnnotationUtils {
 	 * {@code null}.
 	 * @since 4.2
 	 */
-	@SuppressWarnings("unchecked")
 	static Class<? extends Annotation> resolveContainerAnnotationType(Class<? extends Annotation> annotationType) {
-		try {
-			Annotation repeatable = getAnnotation(annotationType, REPEATABLE_CLASS_NAME);
-			if (repeatable != null) {
-				Object value = getValue(repeatable);
-				return (Class<? extends Annotation>) value;
-			}
-		}
-		catch (Exception ex) {
-			handleIntrospectionFailure(annotationType, ex);
-		}
-		return null;
+		Repeatable repeatable = getAnnotation(annotationType, Repeatable.class);
+		return (repeatable != null ? repeatable.value() : null);
 	}
 
 	/**

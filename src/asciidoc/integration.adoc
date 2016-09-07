@@ -8063,10 +8063,9 @@ materialized by the `org.springframework.cache.Cache` and
 There are <<cache-store-configuration,a few implementations>> of that abstraction
 available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
 http://ehcache.org/[EhCache], Gemfire cache,
-https://github.com/ben-manes/caffeine/wiki[Caffeine],
-https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
-JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
-other cache stores/providers.
+https://github.com/ben-manes/caffeine/wiki[Caffeine] and JSR-107 compliant
+caches. See <<cache-plug>> for more information on plugging in other cache
+stores/providers.
 
 [IMPORTANT]
 ====
@@ -9018,41 +9017,6 @@ will be made available by the manager:
 The Caffeine `CacheManager` also supports customs `Caffeine` and `CacheLoader`. See
 the https://github.com/ben-manes/caffeine/wiki[Caffeine documentation] for more
 information about those.
-
-[[cache-store-configuration-guava]]
-==== Guava Cache
-
-The Guava implementation is located under `org.springframework.cache.guava` package and
-provides access to several features of Guava.
-
-Configuring a `CacheManager` that creates the cache on demand is straightforward:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="cacheManager"
-	      class="org.springframework.cache.guava.GuavaCacheManager"/>
-----
-
-It is also possible to provide the caches to use explicitly. In that case, only those
-will be made available by the manager:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<bean id="cacheManager" class="org.springframework.cache.guava.GuavaCacheManager">
-		<property name="caches">
-			<set>
-				<value>default</value>
-				<value>books</value>
-			</set>
-		</property>
-	</bean>
-----
-
-The Guava `CacheManager` also supports customs `CacheBuilder` and `CacheLoader`. See
-the https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava documentation]
-for more information about those.
 
 [[cache-store-configuration-gemfire]]
 ==== GemFire-based Cache

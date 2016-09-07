@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import static org.springframework.core.annotation.AnnotationUtils.*;
@@ -120,11 +121,9 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			}
 
 			// if still null
-			if (attributeValue == null) {
-				throw new IllegalArgumentException(String.format(
-						"Attributes map %s returned null for required attribute '%s' defined by annotation type [%s].",
-						attributes, attributeName, annotationType.getName()));
-			}
+			Assert.notNull(attributeValue, () -> String.format(
+					"Attributes map %s returned null for required attribute '%s' defined by annotation type [%s].",
+					attributes, attributeName, annotationType.getName()));
 
 			// finally, ensure correct type
 			Class<?> requiredReturnType = attributeMethod.getReturnType();
@@ -162,13 +161,11 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 					converted = true;
 				}
 
-				if (!converted) {
-					throw new IllegalArgumentException(String.format(
-							"Attributes map %s returned a value of type [%s] for attribute '%s', " +
-							"but a value of type [%s] is required as defined by annotation type [%s].",
-							attributes, actualReturnType.getName(), attributeName, requiredReturnType.getName(),
-							annotationType.getName()));
-				}
+				Assert.isTrue(converted, () -> String.format(
+						"Attributes map %s returned a value of type [%s] for attribute '%s', " +
+						"but a value of type [%s] is required as defined by annotation type [%s].",
+						attributes, actualReturnType.getName(), attributeName, requiredReturnType.getName(),
+						annotationType.getName()));
 			}
 		}
 

@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -165,6 +166,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 		return this.cachedContent.toByteArray();
 	}
 
+	// TODO: this is no longer usable in Servlet 3.0 environment
 
 	private class ContentCachingInputStream extends ServletInputStream {
 
@@ -181,6 +183,21 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 				cachedContent.write(ch);
 			}
 			return ch;
+		}
+
+		@Override
+		public boolean isFinished() {
+			return this.is.isFinished();
+		}
+
+		@Override
+		public boolean isReady() {
+			return this.is.isReady();
+		}
+
+		@Override
+		public void setReadListener(ReadListener readListener) {
+			this.setReadListener(readListener);
 		}
 	}
 

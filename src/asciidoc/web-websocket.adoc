@@ -1512,7 +1512,8 @@ it acts as a "relay" that forwards messages in both directions.
 
 [NOTE]
 ====
-Please add a dependency on `org.projectreactor:reactor-net` for TCP connection management.
+Please `org.projectreactor:reactor-net` and `io.netty:netty-all`
+dependencies to your project for TCP connection management.
 ====
 
 Furthermore, application components (e.g. HTTP request handling methods,

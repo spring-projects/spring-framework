@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,16 @@ import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * Extension of {@link DefaultRollbackTrueTransactionalTests} which
- * tests method-level <em>rollback override</em> behavior via the
+ * Extension of {@link DefaultRollbackTrueRollbackAnnotationTransactionalTests}
+ * which tests method-level <em>rollback override</em> behavior via the
  * {@link Rollback @Rollback} annotation.
  *
  * @author Sam Brannen
  * @since 2.5
  * @see Rollback
  */
-public class RollbackOverrideDefaultRollbackTrueTransactionalTests extends DefaultRollbackTrueTransactionalTests {
+public class RollbackOverrideDefaultRollbackTrueTransactionalTests
+		extends DefaultRollbackTrueRollbackAnnotationTransactionalTests {
 
 	private static JdbcTemplate jdbcTemplate;
 

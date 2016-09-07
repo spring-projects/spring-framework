@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.InvalidMimeTypeException;
@@ -443,6 +444,22 @@ public class MediaType extends MimeType implements Serializable {
 			result.add(parseMediaType(token));
 		}
 		return result;
+	}
+
+	/**
+	 * Re-create the given mime types as media types.
+	 * @since 5.0
+	 */
+	public static List<MediaType> toMediaTypes(List<MimeType> mimeTypes) {
+		return mimeTypes.stream().map(MediaType::toMediaType).collect(Collectors.toList());
+	}
+
+	/**
+	 * Re-create the given mime type as a media type.
+	 * @since 5.0
+	 */
+	public static MediaType toMediaType(MimeType mimeType) {
+		return new MediaType(mimeType.getType(), mimeType.getSubtype(), mimeType.getParameters());
 	}
 
 	/**

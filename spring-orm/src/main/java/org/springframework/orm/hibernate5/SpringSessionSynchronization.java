@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate5;
 
 import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -83,13 +82,7 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 
 	@Override
 	public void flush() {
-		try {
-			SessionFactoryUtils.logger.debug("Flushing Hibernate Session on explicit request");
-			getCurrentSession().flush();
-		}
-		catch (HibernateException ex) {
-			throw SessionFactoryUtils.convertHibernateAccessException(ex);
-		}
+		SessionFactoryUtils.flush(getCurrentSession(), false);
 	}
 
 	@Override
@@ -99,13 +92,7 @@ public class SpringSessionSynchronization implements TransactionSynchronization,
 			// Read-write transaction -> flush the Hibernate Session.
 			// Further check: only flush when not FlushMode.MANUAL.
 			if (!FlushMode.MANUAL.equals(SessionFactoryUtils.getFlushMode(session))) {
-				try {
-					SessionFactoryUtils.logger.debug("Flushing Hibernate Session on transaction synchronization");
-					session.flush();
-				}
-				catch (HibernateException ex) {
-					throw SessionFactoryUtils.convertHibernateAccessException(ex);
-				}
+				SessionFactoryUtils.flush(getCurrentSession(), true);
 			}
 		}
 	}

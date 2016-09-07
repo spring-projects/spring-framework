@@ -19,6 +19,7 @@ package org.springframework.mock.web.test;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import org.springframework.util.Assert;
 
@@ -71,4 +72,13 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 		this.targetStream.close();
 	}
 
+	@Override
+	public boolean isReady() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setWriteListener(WriteListener writeListener) {
+		throw new UnsupportedOperationException();
+	}
 }

@@ -34,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  * </ol>
  *
  * @author Stephane Nicoll
+ * @author Sergey Podgurskiy
  * @since 4.2
  */
 public class MethodBasedEvaluationContext extends StandardEvaluationContext {
@@ -89,7 +90,7 @@ public class MethodBasedEvaluationContext extends StandardEvaluationContext {
 		String[] parameterNames = this.paramDiscoverer.getParameterNames(this.method);
 		// save parameter names (if discovered)
 		if (parameterNames != null) {
-			for (int i = 0; i < parameterNames.length; i++) {
+			for (int i = 0; i < this.args.length; i++) {
 				setVariable(parameterNames[i], this.args[i]);
 			}
 		}

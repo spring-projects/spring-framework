@@ -196,10 +196,8 @@ public abstract class TestContextTransactionUtils {
 				// look up single TransactionManagementConfigurer
 				Map<String, TransactionManagementConfigurer> configurers = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					lbf, TransactionManagementConfigurer.class);
-				if (configurers.size() > 1) {
-					throw new IllegalStateException(
+				Assert.state(configurers.size() <= 1,
 						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
-				}
 				if (configurers.size() == 1) {
 					return configurers.values().iterator().next().annotationDrivenTransactionManager();
 				}

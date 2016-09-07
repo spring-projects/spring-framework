@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * A filter that wraps the {@link HttpServletResponse} and overrides its
@@ -96,13 +97,14 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 		private void initLookupPath(ResourceUrlProvider urlProvider) {
 			if (this.indexLookupPath == null) {
-				String requestUri = urlProvider.getPathHelper().getRequestUri(this.request);
-				String lookupPath = urlProvider.getPathHelper().getLookupPathForRequest(this.request);
+				UrlPathHelper pathHelper = urlProvider.getUrlPathHelper();
+				String requestUri = pathHelper.getRequestUri(this.request);
+				String lookupPath = pathHelper.getLookupPathForRequest(this.request);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
 
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
-					String contextPath = urlProvider.getPathHelper().getContextPath(this.request);
+					String contextPath = pathHelper.getContextPath(this.request);
 					if (requestUri.equals(contextPath)) {
 						this.indexLookupPath = requestUri.length();
 						this.prefixLookupPath = requestUri;

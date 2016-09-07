@@ -579,7 +579,7 @@ public class MethodParameter {
 		if (this == other) {
 			return true;
 		}
-		if (other == null || getClass() != other.getClass()) {
+		if (!(other instanceof MethodParameter)) {
 			return false;
 		}
 		MethodParameter otherParam = (MethodParameter) other;
@@ -668,9 +668,7 @@ public class MethodParameter {
 
 	private static int validateIndex(Executable executable, int parameterIndex) {
 		int count = executable.getParameterCount();
-		if (parameterIndex >= count) {
-			throw new IllegalArgumentException("Parameter index needs to be between 0 and " + (count - 1));
-		}
+		Assert.isTrue(parameterIndex < count, () -> "Parameter index needs to be between -1 and " + (count - 1));
 		return parameterIndex;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
  * Unit tests for {@link MethodBasedEvaluationContext}.
  *
  * @author Stephane Nicoll
+ * @author Sergey Podgurskiy
  */
 public class MethodBasedEvaluationContextTests {
 
@@ -62,6 +63,43 @@ public class MethodBasedEvaluationContextTests {
 		assertNull(context.lookupVariable("p0"));
 	}
 
+	@Test
+	public void varArgEmpty() {
+		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
+		MethodBasedEvaluationContext context = createEvaluationContext(method, new Object[] {null});
+
+		assertNull(context.lookupVariable("p0"));
+		assertNull(context.lookupVariable("p1"));
+	}
+
+	@Test
+	public void varArgNull() {
+		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
+		MethodBasedEvaluationContext context = createEvaluationContext(method, new Object[] {null, null});
+
+		assertNull(context.lookupVariable("p0"));
+		assertNull(context.lookupVariable("p1"));
+	}
+
+	@Test
+	public void varArgSingle() {
+		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
+		MethodBasedEvaluationContext context = createEvaluationContext(method, new Object[] {null, "hello"});
+
+		assertNull(context.lookupVariable("p0"));
+		assertEquals("hello", context.lookupVariable("p1"));
+	}
+
+	@Test
+	public void varArgMultiple() {
+		Method method = ReflectionUtils.findMethod(SampleMethods.class, "hello", Boolean.class, String[].class);
+		MethodBasedEvaluationContext context = createEvaluationContext(method,
+				new Object[] {null, new String[]{"hello", "hi"}});
+
+		assertNull(context.lookupVariable("p0"));
+		assertArrayEquals(new String[]{"hello", "hi"}, (String[]) context.lookupVariable("p1"));
+	}
+
 	private MethodBasedEvaluationContext createEvaluationContext(Method method, Object[] args) {
 		return new MethodBasedEvaluationContext(this, method, args, this.paramDiscover);
 	}
@@ -71,6 +109,10 @@ public class MethodBasedEvaluationContextTests {
 	private static class SampleMethods {
 
 		private void hello(String foo, Boolean flag) {
+		}
+
+		private void hello(Boolean flag, String... vararg){
+
 		}
 
 	}

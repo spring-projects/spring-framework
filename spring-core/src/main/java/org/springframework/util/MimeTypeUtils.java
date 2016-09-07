@@ -16,6 +16,8 @@
 
 package org.springframework.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
@@ -26,8 +28,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
+import javax.activation.FileTypeMap;
+import javax.activation.MimetypesFileTypeMap;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.util.MimeType.SpecificityComparator;
 
 /**
@@ -49,6 +56,11 @@ public abstract class MimeTypeUtils {
 
 	private static Charset US_ASCII = Charset.forName("US-ASCII");
 
+	private static final FileTypeMap fileTypeMap;
+
+	static {
+		fileTypeMap = initFileTypeMap();
+	}
 
 	/**
 	 * Public constant mime type that includes all media ranges (i.e. "&#42;/&#42;").
@@ -208,6 +220,31 @@ public abstract class MimeTypeUtils {
 		TEXT_XML = MimeType.valueOf(TEXT_XML_VALUE);
 	}
 
+	private static FileTypeMap initFileTypeMap() {
+		// See if we can find the extended mime.types from the context-support module...
+		Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
+		if (mappingLocation.exists()) {
+			InputStream inputStream = null;
+			try {
+				inputStream = mappingLocation.getInputStream();
+				return new MimetypesFileTypeMap(inputStream);
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+			finally {
+				if (inputStream != null) {
+					try {
+						inputStream.close();
+					}
+					catch (IOException ex) {
+						// ignore
+					}
+				}
+			}
+		}
+		return FileTypeMap.getDefaultFileTypeMap();
+	}
 
 	/**
 	 * Parse the given String into a single {@code MimeType}.
@@ -283,6 +320,23 @@ public abstract class MimeTypeUtils {
 			result.add(parseMimeType(token));
 		}
 		return result;
+	}
+
+	/**
+	 * Returns the {@code MimeType} of the given file name, using the Java Activation
+	 * Framework.
+	 * @param filename the filename whose mime type is to be found
+	 * @return the mime type, if any
+	 * @since 5.0
+	 */
+	public static Optional<MimeType> getMimeType(String filename) {
+		if (filename != null) {
+			String mimeType = fileTypeMap.getContentType(filename);
+			if (StringUtils.hasText(mimeType)) {
+				return Optional.of(parseMimeType(mimeType));
+			}
+		}
+		return Optional.empty();
 	}
 
 	/**
