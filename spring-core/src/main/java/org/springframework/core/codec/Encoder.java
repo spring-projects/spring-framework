@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -50,7 +51,9 @@ public interface Encoder<T> {
 	/**
 	 * Encode a stream of Objects of type {@code T} into a {@link DataBuffer}
 	 * output stream.
-	 * @param inputStream the input stream of Objects to encode
+	 * @param inputStream the input stream of Objects to encode. If the input should be
+	 * encoded as a single value rather than as a stream of elements, an instance of
+	 * {@link Mono} should be used.
 	 * @param bufferFactory for creating output stream {@code DataBuffer}'s
 	 * @param elementType the expected type of elements in the input stream;
 	 * this type must have been previously passed to the {@link #canEncode}
