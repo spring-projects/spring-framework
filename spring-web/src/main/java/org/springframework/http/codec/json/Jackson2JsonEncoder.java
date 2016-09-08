@@ -19,7 +19,9 @@ package org.springframework.http.codec.json;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
@@ -68,7 +70,7 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 		if (mimeType == null) {
 			return true;
 		}
@@ -82,14 +84,14 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, MimeType mimeType, Object... hints) {
+			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 
 		if (inputStream instanceof Mono) {
-			return Flux.from(inputStream).map(value -> encodeValue(value, bufferFactory, elementType));
+			return Flux.from(inputStream).map(value -> encodeValue(value, bufferFactory, elementType, hints));
 		}
 
 		Mono<DataBuffer> startArray = Mono.just(bufferFactory.wrap(START_ARRAY_BUFFER));
@@ -98,31 +100,23 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 		Flux<DataBuffer> array = Flux.from(inputStream)
 				.concatMap(value -> {
 					DataBuffer arraySeparator = bufferFactory.wrap(SEPARATOR_BUFFER);
-					return Flux.just(encodeValue(value, bufferFactory, elementType), arraySeparator);
+					return Flux.just(encodeValue(value, bufferFactory, elementType, hints), arraySeparator);
 				});
 
 		return Flux.concat(startArray, array.skipLast(1), endArray);
 	}
 
-	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType type) {
+	private DataBuffer encodeValue(Object value, DataBufferFactory bufferFactory, ResolvableType type, Map<String, Object> hints) {
 		TypeFactory typeFactory = this.mapper.getTypeFactory();
 		JavaType javaType = typeFactory.constructType(type.getType());
-		MethodParameter returnType =
-				(type.getSource() instanceof MethodParameter ? (MethodParameter) type.getSource() : null);
-
 		if (type.isInstance(value)) {
 			javaType = getJavaType(type.getType(), null);
 		}
 
 		ObjectWriter writer;
-		JsonView jsonView = (returnType != null ? returnType.getMethodAnnotation(JsonView.class) : null);
+		Class<?> jsonView = (Class<?>)hints.get(AbstractJackson2Codec.JSON_VIEW_HINT);
 		if (jsonView != null) {
-			Class<?>[] classes = jsonView.value();
-			if (classes.length != 1) {
-				throw new IllegalArgumentException("@JsonView only supported for response body advice " +
-						"with exactly 1 class argument: " + returnType);
-			}
-			writer = this.mapper.writerWithView(classes[0]);
+			writer = this.mapper.writerWithView(jsonView);
 		}
 		else {
 			writer = this.mapper.writer();
@@ -144,4 +138,8 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 		return buffer;
 	}
 
+	@Override
+	public List<String> getSupportedEncodingHints() {
+		return Collections.singletonList(AbstractJackson2Codec.JSON_VIEW_HINT);
+	}
 }

@@ -18,6 +18,7 @@ package org.springframework.http.codec.xml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBElement;
@@ -75,7 +76,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 		if (super.canDecode(elementType, mimeType, hints)) {
 			Class<?> outputClass = elementType.getRawClass();
 			return outputClass.isAnnotationPresent(XmlRootElement.class) ||
@@ -88,7 +89,7 @@ public class Jaxb2XmlDecoder extends AbstractDecoder<Object> {
 
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		Class<?> outputClass = elementType.getRawClass();
 		Flux<XMLEvent> xmlEventFlux =
