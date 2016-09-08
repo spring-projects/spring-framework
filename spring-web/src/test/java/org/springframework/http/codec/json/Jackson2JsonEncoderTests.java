@@ -16,6 +16,9 @@
 
 package org.springframework.http.codec.json;
 
+import java.util.Collections;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -87,14 +90,15 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
-	public void jsonView() throws Exception {
+	public void jsonView() {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");
 		bean.setWithoutView("without");
 
-		ResolvableType type =  ResolvableType.forMethodReturnType(JacksonController.class.getMethod("foo"));
-		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null);
+		ResolvableType type =  ResolvableType.forClass(JacksonViewBean.class);
+		Map<String, Object> hints = Collections.singletonMap(AbstractJackson2Codec.JSON_VIEW_HINT, MyJacksonView1.class);
+		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null, hints);
 
 		TestSubscriber.subscribe(output)
 				.assertComplete()
@@ -154,15 +158,6 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 		public void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
-		}
-	}
-
-
-	private static class JacksonController {
-
-		@JsonView(MyJacksonView1.class)
-		public JacksonViewBean foo() {
-			return null;
 		}
 	}
 
