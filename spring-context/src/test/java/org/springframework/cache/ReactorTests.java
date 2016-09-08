@@ -19,6 +19,7 @@ package org.springframework.cache;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import reactor.core.publisher.Mono;
@@ -31,6 +32,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.tests.TestSubscriber;
+
+import java.util.Optional;
 
 
 /**
@@ -119,6 +122,73 @@ public class ReactorTests {
 		assertNull(valueWrapper);
 	}
 
+	@Test
+	public void sync() {
+		Cache cache = context.getBean(CacheManager.class).getCache("sync");
+		Object obj = bean.sync();
+
+		Cache.ValueWrapper valueWrapper = cache.get(SimpleKey.EMPTY);
+
+		assertSame(obj, valueWrapper.get());
+	}
+
+	@Test
+	@Ignore
+	public void monoOptionalFilled() {
+		Mono<Optional<Object>> optionalMono1 = bean.monoOptionalFilled();
+		Optional<Object> optional1 = optionalMono1.block();
+
+		Mono<Optional<Object>> optionalMono2 = bean.monoOptionalFilled();
+		Optional<Object> optional2 = optionalMono1.block();
+
+		assertNotSame(optionalMono1, optionalMono2);
+		assertNotSame(optional1, optional2);
+
+		assertSame(optional1.get(), optional2.get());
+	}
+
+	@Test
+	@Ignore
+	public void monoOptionalEmpty() {
+		Mono<Optional<Object>> optionalMono1 = bean.monoOptionalEmpty();
+		Optional<Object> optional1 = optionalMono1.block();
+
+		Mono<Optional<Object>> optionalMono2 = bean.monoOptionalEmpty();
+		Optional<Object> optional2 = optionalMono1.block();
+
+		assertNotSame(optionalMono1, optionalMono2);
+		assertNotSame(optional1, optional2);
+
+		assertFalse(optional1.isPresent());
+		assertFalse(optional2.isPresent());
+	}
+
+	@Test
+	public void syncHitsCache() {
+		assertSame(bean.sync(), bean.sync());
+	}
+
+	@Test
+	public void doestBlockToCache() {
+		Mono<Object> res1 = bean.single();
+		Mono<Object> res2 = bean.single();
+
+		assertNotSame(res1, res2);
+		assertNotSame(res1.block(), res2.block());
+	}
+
+	@Test
+	public void itCachesWhenEmits() {
+		Mono<Object> res1 = bean.single();
+		Object val1 = res1.block();
+
+		Mono<Object> res2 = bean.single();
+		Object val2 = res2.block();
+
+		assertNotSame(res1, res2);
+		assertSame(val1, val2);
+	}
+
 	@Configuration
 	@EnableCaching
 	public static class BasicTestConfig {
@@ -146,6 +216,16 @@ public class ReactorTests {
 
 		Mono<Object> neverFinish();
 
+		Object sync();
+
+		@Cacheable("createMono")
+		Mono<Object> createMono(Object value);
+
+		@Cacheable("monoOptionalFilled")
+		Mono<Optional<Object>> monoOptionalFilled();
+
+		@Cacheable("monoOptionalEmpty")
+		Mono<Optional<Object>> monoOptionalEmpty();
 	}
 
 
@@ -180,8 +260,28 @@ public class ReactorTests {
 			return Mono.never();
 		}
 
-		private Mono<Object> createMono(Object value) {
+		@Cacheable("sync")
+		@Override
+		public Object sync() {
+			return new TestBean(2);
+		}
+
+		@Cacheable("createMono")
+		@Override
+		public Mono<Object> createMono(Object value) {
 			return Mono.fromCallable(() -> value);
+		}
+
+		@Cacheable("monoOptionalFilled")
+		@Override
+		public Mono<Optional<Object>> monoOptionalFilled() {
+			return Mono.fromCallable(() -> Optional.of(new TestBean(3)));
+		}
+
+		@Cacheable("monoOptionalEmpty")
+		@Override
+		public Mono<Optional<Object>> monoOptionalEmpty() {
+			return Mono.fromCallable(Optional::empty);
 		}
 	}
 

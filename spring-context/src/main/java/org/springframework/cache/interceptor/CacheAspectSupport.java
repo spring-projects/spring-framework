@@ -50,6 +50,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
+
 /**
  * Base class for caching aspects, such as the {@link CacheInterceptor}
  * or an AspectJ aspect.
@@ -381,24 +382,15 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		if (cacheHit != null && cachePutRequests.isEmpty() && !hasCachePut(contexts)) {
 			// If there are no put requests, just use the cache hit
 			cacheValue = cacheHit.get();
-			returnValue = cacheResultWrapperManager.wrap(method.getReturnType(), cacheValue);
+			returnValue = cacheResultWrapperManager.wrap(cacheValue, method.getReturnType());
 			updateCache(cacheValue, contexts, cachePutRequests);
 		}
 		else {
 			// Invoke the method if we don't have a cache hit
 			Object originalReturnValue = invokeOperation(invoker);
 
-			returnValue = cacheResultWrapperManager.asyncUnwrap(originalReturnValue, method.getReturnType(), new AsyncWrapResult(new AsyncWrapResult.CallBack() {
-				@Override
-				public void onValue(Object cacheValue) {
-					updateCache(cacheValue, contexts, cachePutRequests);
-				}
-
-				@Override
-				public void onError(Throwable throwable) {
-					// Exceptions are not cached
-				}
-			}));
+			returnValue = cacheResultWrapperManager.asyncUnwrap(originalReturnValue, method.getReturnType(),
+					unwrappedValue -> updateCache(unwrappedValue, contexts, cachePutRequests));
 		}
 
 		return returnValue;

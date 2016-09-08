@@ -15,162 +15,151 @@
  */
 package org.springframework.cache.interceptor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
 
+import java.util.*;
+import java.util.function.Consumer;
+
+import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Mono;
-
-import rx.Single;
 
 import org.springframework.core.ReactiveAdapter;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
 
 
 /**
- * Manages the {@link CacheResultWrapper} instances to apply only the appropriate.
+ * Manages the {@link ReactiveResultWrapper} instances to apply only the appropriate.
  * @author Pablo Diaz-Lopez
  */
 public class CacheResultWrapperManager {
-	private Map<Class<?>, CacheResultWrapper> unwrapperByClass;
+	private ReactiveResultWrapper reactiveResultWrapper;
 
 	public CacheResultWrapperManager() {
-		unwrapperByClass = new HashMap<>();
-
-		unwrapperByClass.put(Optional.class, new OptionalUnWrapper());
-		registerReactiveWrappers();
+		tryRegisterReactiveAdapterResultWrapper();
 	}
 
-	private void registerReactiveWrappers() {
-		if(tryRegisterResultWrapper("reactor.core.publisher.Mono", MonoReactiveWrapper::new)) {
-			ReactiveAdapterRegistry adapterRegistry = new ReactiveAdapterRegistry();
+	private void tryRegisterReactiveAdapterResultWrapper() {
+		boolean monoIsPresent = ClassUtils.isPresent("reactor.core.publisher.Mono", CacheAspectSupport.class.getClassLoader());
 
-			tryRegisterResultWrapper("rx.Single", () -> new SingleReactiveWrapper(adapterRegistry));
-		}
-	}
-
-	private boolean tryRegisterResultWrapper(String className, Supplier<CacheResultWrapper> cacheResultWrapperSupplier) {
-		try {
-			Class<?> clazz = ClassUtils.forName(className, CacheAspectSupport.class.getClassLoader());
-			CacheResultWrapper cacheResultWrapper = cacheResultWrapperSupplier.get();
-			unwrapperByClass.put(clazz, cacheResultWrapper);
-			return true;
-		} catch (ClassNotFoundException e) {
-			// Cannot register wrapper
-			return false;
+		if (monoIsPresent) {
+			reactiveResultWrapper = new ReactiveAdapterResultWrapper();
+		} else {
+			reactiveResultWrapper = new DoNothingReactiveResultWrapper();
 		}
 	}
 
 	/**
 	 * Wraps a value
 	 *
-	 * @param clazz the target class wanted
 	 * @param value the value to be wrapped
+	 * @param clazz the target class wanted
 	 * @return the value wrapped if it can, or the same value if it cannot handle it
 	 */
-	public Object wrap(Class<?> clazz, Object value) {
-		if (value != null) {
-			CacheResultWrapper unwrapper = unwrapperByClass.get(clazz);
-
-			if (unwrapper != null) {
-				return unwrapper.wrap(value);
-			}
+	public Object wrap(Object value, Class<?> clazz) {
+		if (clazz.equals(Optional.class)) {
+			return Optional.ofNullable(value);
 		}
 
-		return value;
+		return reactiveResultWrapper.tryToWrap(value, clazz);
 	}
 
 	/**
-	 * Unwraps the value asynchronously
+	 * Unwraps the value asynchronously, if it can (or needs to) be unwrapped
 	 *
-	 * @param valueWrapped the value wrapped to be unwrapped
+	 * @param value the value wrapped to be unwrapped
 	 * @param asyncResult  where the result will be notified
 	 * @return the same value wrapped or decorated in order to notify when it finish.
 	 */
-	public Object asyncUnwrap(Object valueWrapped, Class<?> classWrapped, AsyncWrapResult asyncResult) {
-		if (valueWrapped != null) {
-			CacheResultWrapper unwrapper = unwrapperByClass.get(classWrapped);
+	public Object asyncUnwrap(Object value, Class<?> clazz, Consumer<Object> asyncResult) {
+		if (clazz.equals(Optional.class)) {
+			asyncResult.accept(ObjectUtils.unwrapOptional(value));
 
-			if (unwrapper != null) {
-				return unwrapper.notifyResult(valueWrapped, asyncResult);
-			}
+			return value;
 		}
 
-		asyncResult.complete(valueWrapped);
-
-		return valueWrapped;
-	}
-
-	private class SingleReactiveWrapper extends MonoReactiveAdapterWrapper {
-		public SingleReactiveWrapper(ReactiveAdapterRegistry registry) {
-			super(registry, Single.class);
-		}
-	}
-
-	private class MonoReactiveWrapper implements CacheResultWrapper {
-		@Override
-		public Mono<?> wrap(Object value) {
-			return Mono.justOrEmpty(value);
-		}
-
-		@Override
-		public Mono<?> notifyResult(Object objectWrapped, AsyncWrapResult asyncResult) {
-			Mono<?> monoWrapped = (Mono<?>) objectWrapped;
-
-			return monoWrapped
-					.doOnSuccess(asyncResult::complete)
-					.doOnError(asyncResult::error);
-		}
-	}
-
-
-	private abstract class MonoReactiveAdapterWrapper implements CacheResultWrapper {
-		private ReactiveAdapter adapter;
-		private MonoReactiveWrapper monoReactiveWrapper;
-
-		MonoReactiveAdapterWrapper(ReactiveAdapterRegistry registry, Class<?> wrapperClass) {
-			this.adapter = registry.getAdapterFrom(wrapperClass);
-			this.monoReactiveWrapper = new MonoReactiveWrapper();
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public Object wrap(Object value) {
-			return adapter.fromPublisher(monoReactiveWrapper.wrap(value));
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public Object notifyResult(Object valueWrapped, AsyncWrapResult asyncResult) {
-			Mono<?> monoWrapped = adapter.toMono(valueWrapped);
-			Mono<?> monoCacheWrapped = monoReactiveWrapper.notifyResult(monoWrapped, asyncResult);
-
-			return adapter.fromPublisher(monoCacheWrapped);
-		}
+		return reactiveResultWrapper.notifyResult(value, clazz, asyncResult);
 	}
 
 	/**
-	 * Inner class to avoid a hard dependency on Java 8.
+	 * Wrapper/Unwrapper, it allows to notifyResult values to be cached and wraps it back
+	 * in order to be consumed.
+	 * @author Pablo Diaz-Lopez
 	 */
-	private class OptionalUnWrapper implements CacheResultWrapper {
+	interface ReactiveResultWrapper {
+		/**
+		 * Wraps to the wrapping target class
+		 * @param value the value to wrap
+		 * @return the value wrapped
+		 */
+		Object tryToWrap(Object value, Class<?> clazz);
 
+		/**
+		 * Unwraps a value and returns it decorated if it needs in order to
+		 * notify the result, this will be the case if the wrapped value is not
+		 * available at the moment (it is calculated asynchronously)
+		 * @param value the value wrapped
+		 * @param clazz class to be wrapped into
+		 * @param asyncResult it will call it when the value it's available
+		 * @return the same value wrapped or a version decorated.
+		 */
+		Object notifyResult(Object value, Class<?> clazz, Consumer<Object> asyncResult);
+
+	}
+
+	private class DoNothingReactiveResultWrapper implements ReactiveResultWrapper {
 		@Override
-		public Optional<?> notifyResult(Object optionalObject, AsyncWrapResult asyncResult) {
-			Optional<?> optional = (Optional<?>) optionalObject;
-
-			Object value = ObjectUtils.unwrapOptional(optional);
-
-			asyncResult.complete(value);
-
-			return optional;
+		public Object tryToWrap(Object value, Class<?> clazz) {
+			return value;
 		}
 
 		@Override
-		public Optional<?> wrap(Object value) {
-			return Optional.ofNullable(value);
+		public Object notifyResult(Object value, Class<?> valueClass, Consumer<Object> asyncResult) {
+			asyncResult.accept(value);
+			return value;
+		}
+	}
+
+	private class ReactiveAdapterResultWrapper implements ReactiveResultWrapper {
+		private ReactiveAdapterRegistry registry;
+
+		public ReactiveAdapterResultWrapper() {
+			this.registry = new ReactiveAdapterRegistry();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object tryToWrap(Object value, Class<?> clazz) {
+			ReactiveAdapter adapterToWrapped = registry.getAdapterTo(clazz);
+
+			if (isValid(adapterToWrapped)) {
+				Mono<?> monoWrapped = Mono.justOrEmpty(value);
+				return adapterToWrapped.fromPublisher(monoWrapped);
+
+			} else {
+				return value;
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public Object notifyResult(Object value, Class<?> valueClass, Consumer<Object> asyncResult) {
+			ReactiveAdapter adapter = registry.getAdapterFrom(valueClass);
+
+			if (isValid(adapter)) {
+				Mono<?> monoWrapped = adapter.toMono(value)
+						.doOnSuccess(asyncResult);
+
+				return adapter.fromPublisher(monoWrapped);
+			} else {
+				asyncResult.accept(value);
+
+				return value;
+			}
+
+		}
+
+		private boolean isValid(ReactiveAdapter adapter) {
+			return adapter != null && !adapter.getDescriptor().isMultiValue();
 		}
 	}
 }
