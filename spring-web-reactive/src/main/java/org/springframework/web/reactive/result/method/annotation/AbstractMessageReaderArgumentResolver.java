@@ -16,7 +16,9 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,6 +32,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.MediaType;
+import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
@@ -63,17 +66,19 @@ public abstract class AbstractMessageReaderArgumentResolver {
 
 	private final ReactiveAdapterRegistry adapterRegistry;
 
+	private final RequestBodyAdviceChain bodyAdvice;
+
 	private final List<MediaType> supportedMediaTypes;
 
 
 	/**
 	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
-	 * @param readers readers to convert from the request body
+	 * @param messageReaders readers to convert from the request body
 	 * @param validator validator to validate decoded objects with
 	 */
-	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator) {
+	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders, Validator validator) {
 
-		this(readers, validator, new ReactiveAdapterRegistry());
+		this(messageReaders, validator, new ReactiveAdapterRegistry(), Collections.emptyList());
 	}
 
 	/**
@@ -85,11 +90,26 @@ public abstract class AbstractMessageReaderArgumentResolver {
 	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
 			Validator validator, ReactiveAdapterRegistry adapterRegistry) {
 
+		this(messageReaders, validator, adapterRegistry, Collections.emptyList());
+	}
+
+	/**
+	 * Constructor that also accepts a {@link ReactiveAdapterRegistry} and a list of {@link RequestBodyAdvice}.
+	 * @param messageReaders readers to convert from the request body
+	 * @param validator validator to validate decoded objects with
+	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
+	 * @param bodyAdvice body advice to customize the request
+	 */
+	protected AbstractMessageReaderArgumentResolver(List<HttpMessageReader<?>> messageReaders,
+			Validator validator, ReactiveAdapterRegistry adapterRegistry, List<RequestBodyAdvice> bodyAdvice) {
+
 		Assert.notEmpty(messageReaders, "At least one HttpMessageReader is required.");
 		Assert.notNull(adapterRegistry, "'adapterRegistry' is required");
+		Assert.notNull(bodyAdvice, "'bodyAdvice' is required");
 		this.messageReaders = messageReaders;
 		this.validator = validator;
 		this.adapterRegistry = adapterRegistry;
+		this.bodyAdvice = new RequestBodyAdviceChain(bodyAdvice);
 		this.supportedMediaTypes = messageReaders.stream()
 				.flatMap(converter -> converter.getReadableMediaTypes().stream())
 				.collect(Collectors.toList());
@@ -111,6 +131,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	protected Mono<Object> readBody(MethodParameter bodyParameter, boolean isBodyRequired,
 			ServerWebExchange exchange) {
 
@@ -129,10 +150,18 @@ public abstract class AbstractMessageReaderArgumentResolver {
 		}
 
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
+			Class<HttpMessageReader<?>> readerType = (Class<HttpMessageReader<?>>) reader.getClass();
+
 			if (reader.canRead(elementType, mediaType)) {
+				ReactiveHttpInputMessage inputMessage = this.bodyAdvice.beforeRead(request,
+						bodyParameter, elementType, readerType, reader.getSupportedReadingHints());
+				Map<String, Object> hints = this.bodyAdvice.getHints(bodyParameter, elementType, readerType, reader.getSupportedReadingHints());
+
 				if (adapter != null && adapter.getDescriptor().isMultiValue()) {
-					Flux<?> flux = reader.read(elementType, request)
+					Flux<Object> flux = (Flux<Object>)reader.read(elementType, inputMessage, hints)
 							.onErrorResumeWith(ex -> Flux.error(getReadError(ex, bodyParameter)));
+					flux = this.bodyAdvice.afterRead(flux, inputMessage, bodyParameter, elementType,
+							readerType, reader.getSupportedReadingHints());
 					if (checkRequired(adapter, isBodyRequired)) {
 						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
 					}
@@ -142,8 +171,10 @@ public abstract class AbstractMessageReaderArgumentResolver {
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
-					Mono<?> mono = reader.readMono(elementType, request)
+					Mono<Object> mono = (Mono<Object>)reader.readMono(elementType, inputMessage, hints)
 							.otherwise(ex -> Mono.error(getReadError(ex, bodyParameter)));
+					mono = bodyAdvice.afterReadMono(mono, inputMessage, bodyParameter, elementType,
+						readerType, reader.getSupportedReadingHints());
 					if (checkRequired(adapter, isBodyRequired)) {
 						mono = mono.otherwiseIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));
 					}

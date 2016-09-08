@@ -15,7 +15,9 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
@@ -45,6 +47,8 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 
 	private final List<HttpMessageWriter<?>> messageWriters;
 
+	private final ResponseBodyAdviceChain bodyAdvice;
+
 
 	/**
 	 * Constructor with {@link HttpMessageWriter}s and a
@@ -56,9 +60,7 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			RequestedContentTypeResolver contentTypeResolver) {
 
-		super(contentTypeResolver);
-		Assert.notEmpty(messageWriters, "At least one message writer is required.");
-		this.messageWriters = messageWriters;
+		this(messageWriters, contentTypeResolver, new ReactiveAdapterRegistry());
 	}
 
 	/**
@@ -73,9 +75,28 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 			RequestedContentTypeResolver contentTypeResolver,
 			ReactiveAdapterRegistry adapterRegistry) {
 
+		this(messageWriters, contentTypeResolver, adapterRegistry, Collections.emptyList());
+	}
+
+	/**
+	 * Constructor with additional {@link ReactiveAdapterRegistry} and {@link ResponseBodyAdvice}.
+	 *
+	 * @param messageWriters for serializing Objects to the response body stream
+	 * @param contentTypeResolver for resolving the requested content type
+	 * @param adapterRegistry for adapting other reactive types (e.g. rx.Observable,
+	 * rx.Single, etc.) to Flux or Mono
+	 * @param bodyAdvice body advice to customize the response
+	 */
+	protected AbstractMessageWriterResultHandler(List<HttpMessageWriter<?>> messageWriters,
+			RequestedContentTypeResolver contentTypeResolver,
+			ReactiveAdapterRegistry adapterRegistry, List<ResponseBodyAdvice> bodyAdvice) {
+
 		super(contentTypeResolver, adapterRegistry);
 		Assert.notEmpty(messageWriters, "At least one message writer is required.");
+		Assert.notNull(adapterRegistry, "'adapterRegistry' is required");
+		Assert.notNull(bodyAdvice, "'bodyAdvice' is required");
 		this.messageWriters = messageWriters;
+		this.bodyAdvice = new ResponseBodyAdviceChain(bodyAdvice);
 	}
 
 
@@ -85,7 +106,6 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 	public List<HttpMessageWriter<?>> getMessageWriters() {
 		return this.messageWriters;
 	}
-
 
 	@SuppressWarnings("unchecked")
 	protected Mono<Void> writeBody(Object body, MethodParameter bodyType, ServerWebExchange exchange) {
@@ -119,10 +139,14 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 		MediaType bestMediaType = selectMediaType(exchange, producibleTypes);
 
 		if (bestMediaType != null) {
-			for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
-				if (messageWriter.canWrite(elementType, bestMediaType)) {
+			for (HttpMessageWriter<?> writer : getMessageWriters()) {
+				if (writer.canWrite(elementType, bestMediaType)) {
+					Class<HttpMessageWriter<?>> writerType = (Class<HttpMessageWriter<?>>) writer.getClass();
+					Map<String, Object> hints = this.bodyAdvice.getHints(bodyType, elementType, writerType, writer.getSupportedWritingHints());
 					ServerHttpResponse response = exchange.getResponse();
-					return messageWriter.write((Publisher) publisher, elementType, bestMediaType, response);
+					publisher = this.bodyAdvice.beforeBodyWrite((Publisher) publisher, bodyType,
+						bestMediaType, writerType, response, writer.getSupportedWritingHints());
+					return writer.write((Publisher) publisher, elementType, bestMediaType, response, hints);
 				}
 			}
 		}
