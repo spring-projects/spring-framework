@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -59,8 +60,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 
 	@Override
-	public boolean canWrite(ResolvableType type, MediaType mediaType) {
-		return this.encoder != null && this.encoder.canEncode(type, mediaType);
+	public boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
+		return this.encoder != null && this.encoder.canEncode(type, mediaType, hints);
 	}
 
 	@Override
@@ -71,7 +72,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 	@Override
 	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage,
+			Map<String, Object> hints) {
 
 		if (this.encoder == null) {
 			return Mono.error(new IllegalStateException("No decoder set"));
@@ -99,7 +101,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		}
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
-		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, type, contentType);
+		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, type, contentType, hints);
 		return outputMessage.writeWith(body);
 	}
 
@@ -117,4 +119,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		return (!this.writableMediaTypes.isEmpty() ? this.writableMediaTypes.get(0) : null);
 	}
 
+	@Override
+	public List<String> getSupportedWritingHints() {
+		return this.encoder.getSupportedEncodingHints();
+	}
 }

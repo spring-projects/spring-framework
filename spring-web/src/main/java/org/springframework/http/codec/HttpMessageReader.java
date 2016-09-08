@@ -16,7 +16,9 @@
 
 package org.springframework.http.codec;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -40,9 +42,53 @@ public interface HttpMessageReader<T> {
 	 * @param type the type to test for readability
 	 * @param mediaType the media type to read, can be {@code null} if not specified.
 	 * Typically the value of a {@code Content-Type} header.
+	 * @param hints additional information about how to do read
 	 * @return {@code true} if readable; {@code false} otherwise
 	 */
-	boolean canRead(ResolvableType type, MediaType mediaType);
+	boolean canRead(ResolvableType type, MediaType mediaType, Map<String, Object> hints);
+
+	/**
+	 * @see #canRead(ResolvableType, MediaType, Map)
+	 */
+	default boolean canRead(ResolvableType type, MediaType mediaType) {
+		return canRead(type, mediaType, Collections.emptyMap());
+	}
+
+	/**
+	 * Read a {@link Flux} of the given type form the given input message, and returns it.
+	 * @param type the type of object to return. This type must have previously been
+	 * passed to the {@link #canRead canRead} method of this interface, which must have
+	 * returned {@code true}.
+	 * @param inputMessage the HTTP input message to read from
+	 * @param hints additional information about how to do read
+	 * @return the converted {@link Flux} of elements
+	 */
+	Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints);
+
+	/**
+	 * @see #read(ResolvableType, ReactiveHttpInputMessage, Map)
+	 */
+	default Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
+		return read(type, inputMessage, Collections.emptyMap());
+	}
+
+	/**
+	 * Read a {@link Mono} of the given type form the given input message, and returns it.
+	 * @param type the type of object to return. This type must have previously been
+	 * passed to the {@link #canRead canRead} method of this interface, which must have
+	 * returned {@code true}.
+	 * @param inputMessage the HTTP input message to read from
+	 * @param hints additional information about how to do read
+	 * @return the converted {@link Mono} of object
+	 */
+	Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints);
+
+	/**
+	 * @see #readMono(ResolvableType, ReactiveHttpInputMessage, Map)
+	 */
+	default Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
+		return readMono(type, inputMessage, Collections.emptyMap());
+	}
 
 	/**
 	 * Return the list of {@link MediaType} objects that can be read by this converter.
@@ -51,23 +97,10 @@ public interface HttpMessageReader<T> {
 	List<MediaType> getReadableMediaTypes();
 
 	/**
-	 * Read a {@link Flux} of the given type form the given input message, and returns it.
-	 * @param type the type of object to return. This type must have previously been
-	 * passed to the {@link #canRead canRead} method of this interface, which must have
-	 * returned {@code true}.
-	 * @param inputMessage the HTTP input message to read from
-	 * @return the converted {@link Flux} of elements
+	 * Return the list of hints keys this reader supports.
 	 */
-	Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage);
-
-	/**
-	 * Read a {@link Mono} of the given type form the given input message, and returns it.
-	 * @param type the type of object to return. This type must have previously been
-	 * passed to the {@link #canRead canRead} method of this interface, which must have
-	 * returned {@code true}.
-	 * @param inputMessage the HTTP input message to read from
-	 * @return the converted {@link Mono} of object
-	 */
-	Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage);
+	default List<String> getSupportedReadingHints() {
+		return Collections.emptyList();
+	}
 
 }

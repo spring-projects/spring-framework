@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -55,8 +56,8 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 
 
 	@Override
-	public boolean canRead(ResolvableType type, MediaType mediaType) {
-		return this.decoder != null && this.decoder.canDecode(type, mediaType);
+	public boolean canRead(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
+		return this.decoder != null && this.decoder.canDecode(type, mediaType, hints);
 	}
 
 	@Override
@@ -66,21 +67,21 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 
 
 	@Override
-	public Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
+	public Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
 		if (this.decoder == null) {
 			return Flux.error(new IllegalStateException("No decoder set"));
 		}
 		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decode(inputMessage.getBody(), type, contentType);
+		return this.decoder.decode(inputMessage.getBody(), type, contentType, hints);
 	}
 
 	@Override
-	public Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
+	public Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
 		if (this.decoder == null) {
 			return Mono.error(new IllegalStateException("No decoder set"));
 		}
 		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decodeToMono(inputMessage.getBody(), type, contentType);
+		return this.decoder.decodeToMono(inputMessage.getBody(), type, contentType, hints);
 	}
 
 	private MediaType getContentType(ReactiveHttpInputMessage inputMessage) {
@@ -88,4 +89,8 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 		return (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 	}
 
+	@Override
+	public List<String> getSupportedReadingHints() {
+		return this.decoder.getSupportedDecodingHints();
+	}
 }

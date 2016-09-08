@@ -16,7 +16,9 @@
 
 package org.springframework.http.codec;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -40,15 +42,17 @@ public interface HttpMessageWriter<T> {
 	 * @param type the class to test for writability
 	 * @param mediaType the media type to write, can be {@code null} if not specified.
 	 * Typically the value of an {@code Accept} header.
+	 * @param hints additional information about how to do write
 	 * @return {@code true} if writable; {@code false} otherwise
 	 */
-	boolean canWrite(ResolvableType type, MediaType mediaType);
+	boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints);
 
 	/**
-	 * Return the list of {@link MediaType} objects that can be written by this converter.
-	 * @return the list of supported readable media types
+	 * @see #canWrite(ResolvableType, MediaType, Map)
 	 */
-	List<MediaType> getWritableMediaTypes();
+	default boolean canWrite(ResolvableType type, MediaType mediaType) {
+		return canWrite(type, mediaType, Collections.emptyMap());
+	}
 
 	/**
 	 * Write an given object to the given output message.
@@ -57,9 +61,31 @@ public interface HttpMessageWriter<T> {
 	 * @param contentType the content type to use when writing. May be {@code null} to
 	 * indicate that the default content type of the converter must be used.
 	 * @param outputMessage the message to write to
+	 * @param hints additional information about how to do write
 	 * @return the converted {@link Mono} of object
 	 */
 	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage);
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints);
+
+	/**
+	 * @see #write(Publisher, ResolvableType, MediaType, ReactiveHttpOutputMessage, Map)
+	 */
+	default Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+		return write(inputStream, type, contentType, outputMessage, Collections.emptyMap());
+	}
+
+	/**
+	 * Return the list of {@link MediaType} objects that can be written by this converter.
+	 * @return the list of supported readable media types
+	 */
+	List<MediaType> getWritableMediaTypes();
+
+	/**
+	 * Return the list of hints keys this writer supports.
+	 */
+	default List<String> getSupportedWritingHints() {
+		return Collections.emptyList();
+	}
 
 }
