@@ -5,6 +5,7 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.3")
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.4"
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 	}
 }
@@ -70,6 +71,7 @@ configure(allprojects) { project ->
 	ext.junitPlatformVersion   = '1.0.0-M2'
 	ext.log4jVersion           = '2.7'
 	ext.nettyVersion           = "4.1.6.Final"
+	ext.kotlinVersion          = "1.0.4"
 	ext.okhttpVersion          = "2.7.5"
 	ext.okhttp3Version         = "3.4.2"
 	ext.poiVersion             = "3.15"
@@ -324,6 +326,8 @@ project("spring-build-src") {
 project("spring-core") {
 	description = "Spring Core"
 
+	apply plugin: "kotlin"
+
 	// As of Spring 4.0.3, spring-core includes asm 5.x and repackages cglib 3.2, inlining
 	// both into the spring-core jar. cglib 3.2 itself depends on asm 5.x and is therefore
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
@@ -389,6 +393,8 @@ project("spring-core") {
 		compile("commons-logging:commons-logging:1.2")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("net.sf.jopt-simple:jopt-simple:5.0.2")
+		optional("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+		optional("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
 		optional("org.reactivestreams:reactive-streams:${reactivestreamsVersion}")
 		optional("io.projectreactor:reactor-core:${reactorCoreVersion}")
 		optional "io.reactivex:rxjava:${rxjavaVersion}"

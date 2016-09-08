@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.util.Assert;
+import org.springframework.util.KotlinUtils;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
@@ -329,6 +330,16 @@ public class MethodParameter {
 		return (isOptional() ? nested() : this);
 	}
 
+	/**
+	 * Return whether this method parameter is declared as a "nullable" value, if supported by
+	 * the underlying language. Currently the only supported language is Kotlin.
+	 * @since 5.0
+	 */
+	public boolean isNullable() {
+		return KotlinUtils.isKotlinPresent() &&
+				KotlinUtils.isKotlinClass(getContainingClass()) &&
+				KotlinUtils.isNullable(this.parameterIndex, this.method, this.constructor);
+	}
 
 	/**
 	 * Set a containing class to resolve the parameter type against.

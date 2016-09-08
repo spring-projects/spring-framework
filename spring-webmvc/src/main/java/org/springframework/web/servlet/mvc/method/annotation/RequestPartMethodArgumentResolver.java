@@ -113,7 +113,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
-		boolean isRequired = ((requestPart == null || requestPart.required()) && !parameter.isOptional());
+		boolean isRequired = ((requestPart == null || requestPart.required()) && !parameter.isOptional() &&
+				!parameter.isNullable());
 
 		String name = getPartName(parameter, requestPart);
 		parameter = parameter.nestedIfOptional();
