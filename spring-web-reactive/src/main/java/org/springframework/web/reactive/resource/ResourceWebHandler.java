@@ -482,8 +482,8 @@ public class ResourceWebHandler
 		if (mediaType != null) {
 			headers.setContentType(mediaType);
 		}
-		if (resource instanceof ResolvedResource) {
-			HttpHeaders resourceHeaders = ((ResolvedResource) resource).getResponseHeaders();
+		if (resource instanceof HttpResource) {
+			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
 			exchange.getResponse().getHeaders().putAll(resourceHeaders);
 		}
 		headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");

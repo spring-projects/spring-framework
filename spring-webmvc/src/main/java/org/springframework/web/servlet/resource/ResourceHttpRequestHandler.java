@@ -542,8 +542,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
-		if (resource instanceof ResolvedResource) {
-			HttpHeaders resourceHeaders = ((ResolvedResource) resource).getResponseHeaders();
+		if (resource instanceof HttpResource) {
+			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
 			resourceHeaders.toSingleValueMap().entrySet()
 					.stream().forEach(entry -> response.setHeader(entry.getKey(), entry.getValue()));
 		}

@@ -239,7 +239,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	}
 
 
-	private class FileNameVersionedResource extends AbstractResource implements ResolvedResource {
+	private class FileNameVersionedResource extends AbstractResource implements HttpResource {
 
 		private final Resource original;
 
@@ -318,8 +318,8 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		@Override
 		public HttpHeaders getResponseHeaders() {
 			HttpHeaders headers;
-			if(this.original instanceof ResolvedResource) {
-				headers = ((ResolvedResource) this.original).getResponseHeaders();
+			if(this.original instanceof HttpResource) {
+				headers = ((HttpResource) this.original).getResponseHeaders();
 			}
 			else {
 				headers = new HttpHeaders();

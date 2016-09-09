@@ -75,7 +75,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 	}
 
 
-	private static final class GzippedResource extends AbstractResource implements ResolvedResource {
+	private static final class GzippedResource extends AbstractResource implements HttpResource {
 
 		private final Resource original;
 
@@ -142,8 +142,8 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 		@Override
 		public HttpHeaders getResponseHeaders() {
 			HttpHeaders headers;
-			if(this.original instanceof ResolvedResource) {
-				headers = ((ResolvedResource) this.original).getResponseHeaders();
+			if(this.original instanceof HttpResource) {
+				headers = ((HttpResource) this.original).getResponseHeaders();
 			}
 			else {
 				headers = new HttpHeaders();
