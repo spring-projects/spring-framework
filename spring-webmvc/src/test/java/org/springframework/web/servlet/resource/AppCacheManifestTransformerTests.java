@@ -66,7 +66,7 @@ public class AppCacheManifestTransformerTests {
 
 	@Test
 	public void syntaxErrorInManifest() throws Exception {
-		Resource resource = new ClassPathResource("test/error.manifest", getClass());
+		Resource resource = new ClassPathResource("test/error.appcache", getClass());
 		given(this.chain.transform(this.request, resource)).willReturn(resource);
 
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
@@ -89,7 +89,7 @@ public class AppCacheManifestTransformerTests {
 		transformers.add(new CssLinkResourceTransformer());
 		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
 
-		Resource resource = new ClassPathResource("test/appcache.manifest", getClass());
+		Resource resource = new ClassPathResource("test/test.appcache", getClass());
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
 		byte[] bytes = FileCopyUtils.copyToByteArray(result.getInputStream());
 		String content = new String(bytes, "UTF-8");

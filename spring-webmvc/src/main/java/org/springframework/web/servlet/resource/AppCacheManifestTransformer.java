@@ -47,7 +47,7 @@ import org.springframework.util.StringUtils;
  * thus changing the content of the manifest in order to trigger an appcache reload in the browser.
  * </ul>
  *
- * All files that have the ".manifest" file extension, or the extension given in the constructor,
+ * All files that have the ".appcache" file extension, or the extension given in the constructor,
  * will be transformed by this class.
  *
  * <p>This hash is computed using the content of the appcache manifest and the content of the linked resources;
@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Brian Clozel
  * @since 4.1
- * @see <a href="http://www.whatwg.org/specs/web-apps/current-work/multipage/offline.html#offline">HTML5 offline applications spec</a>
+ * @see <a href="https://html.spec.whatwg.org/multipage/browsers.html#offline">HTML5 offline applications spec</a>
  */
 public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
@@ -72,10 +72,10 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 
 	/**
-	 * Create an AppCacheResourceTransformer that transforms files with extension ".manifest".
+	 * Create an AppCacheResourceTransformer that transforms files with extension ".appcache".
 	 */
 	public AppCacheManifestTransformer() {
-		this("manifest");
+		this("appcache");
 	}
 
 	/**
