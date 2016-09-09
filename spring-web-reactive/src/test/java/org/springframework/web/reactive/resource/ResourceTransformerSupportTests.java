@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -85,7 +86,9 @@ public class ResourceTransformerSupportTests {
 		this.request.setUri("/resources/main.css");
 		String resourcePath = "/resources/bar.css";
 		Resource css = new ClassPathResource("test/main.css", getClass());
-		String actual = this.transformer.resolveUrlPath(resourcePath, this.exchange, css, this.transformerChain);
+		String actual = this.transformer.resolveUrlPath(
+				resourcePath, this.exchange, css, this.transformerChain).blockMillis(5000);
+
 		assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 		assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
@@ -93,14 +96,18 @@ public class ResourceTransformerSupportTests {
 	@Test
 	public void resolveUrlPathWithRelativePath() throws Exception {
 		Resource css = new ClassPathResource("test/main.css", getClass());
-		String actual = this.transformer.resolveUrlPath("bar.css", this.exchange, css, this.transformerChain);
+		String actual = this.transformer.resolveUrlPath(
+				"bar.css", this.exchange, css, this.transformerChain).blockMillis(5000);
+
 		assertEquals("bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
 	@Test
 	public void resolveUrlPathWithRelativePathInParentDirectory() throws Exception {
 		Resource imagePng = new ClassPathResource("test/images/image.png", getClass());
-		String actual = this.transformer.resolveUrlPath("../bar.css", this.exchange, imagePng, this.transformerChain);
+		String actual = this.transformer.resolveUrlPath(
+				"../bar.css", this.exchange, imagePng, this.transformerChain).blockMillis(5000);
+
 		assertEquals("../bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
 	}
 
@@ -108,8 +115,10 @@ public class ResourceTransformerSupportTests {
 	private static class TestResourceTransformerSupport extends ResourceTransformerSupport {
 
 		@Override
-		public Resource transform(ServerWebExchange exchange, Resource resource, ResourceTransformerChain chain) {
-			throw new IllegalStateException("Should never be called");
+		public Mono<Resource> transform(ServerWebExchange exchange, Resource resource,
+				ResourceTransformerChain chain) {
+
+			return Mono.error(new IllegalStateException("Should never be called"));
 		}
 	}
 

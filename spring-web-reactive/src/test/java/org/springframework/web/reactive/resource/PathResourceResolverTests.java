@@ -16,6 +16,7 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -43,7 +44,8 @@ public class PathResourceResolverTests {
 	public void resolveFromClasspath() throws IOException {
 		Resource location = new ClassPathResource("test/", PathResourceResolver.class);
 		String path = "bar.css";
-		Resource actual = this.resolver.resolveResource(null, path, singletonList(location), null);
+		List<Resource> locations = singletonList(location);
+		Resource actual = this.resolver.resolveResource(null, path, locations, null).blockMillis(5000);
 		assertEquals(location.createRelative(path), actual);
 	}
 
@@ -51,7 +53,8 @@ public class PathResourceResolverTests {
 	public void resolveFromClasspathRoot() throws IOException {
 		Resource location = new ClassPathResource("/");
 		String path = "org/springframework/web/reactive/resource/test/bar.css";
-		Resource actual = this.resolver.resolveResource(null, path, singletonList(location), null);
+		List<Resource> locations = singletonList(location);
+		Resource actual = this.resolver.resolveResource(null, path, locations, null).blockMillis(5000);
 		assertNotNull(actual);
 	}
 
@@ -75,7 +78,8 @@ public class PathResourceResolverTests {
 	}
 
 	private void testCheckResource(Resource location, String requestPath) throws IOException {
-		Resource actual = this.resolver.resolveResource(null, requestPath, singletonList(location), null);
+		List<Resource> locations = singletonList(location);
+		Resource actual = this.resolver.resolveResource(null, requestPath, locations, null).blockMillis(5000);
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
 			fail(requestPath + " doesn't actually exist as a relative path");
 		}
@@ -90,7 +94,9 @@ public class PathResourceResolverTests {
 		);
 
 		Resource location = new ClassPathResource("test/main.css", PathResourceResolver.class);
-		String actual = this.resolver.resolveUrlPath("../testalternatepath/bar.css", singletonList(location), null);
+		String actual = this.resolver.resolveUrlPath("../testalternatepath/bar.css",
+				singletonList(location), null).blockMillis(5000);
+
 		assertEquals("../testalternatepath/bar.css", actual);
 	}
 
@@ -98,7 +104,8 @@ public class PathResourceResolverTests {
 	public void checkRelativeLocation() throws Exception {
 		String locationUrl= new UrlResource(getClass().getResource("./test/")).getURL().toExternalForm();
 		Resource location = new UrlResource(locationUrl.replace("/springframework","/../org/springframework"));
-		assertNotNull(this.resolver.resolveResource(null, "main.css", singletonList(location), null));
+		List<Resource> locations = singletonList(location);
+		assertNotNull(this.resolver.resolveResource(null, "main.css", locations, null).blockMillis(5000));
 	}
 
 	@Test // SPR-12747
@@ -110,7 +117,9 @@ public class PathResourceResolverTests {
 	@Test // SPR-13241
 	public void resolvePathRootResource() throws Exception {
 		Resource webjarsLocation = new ClassPathResource("/META-INF/resources/webjars/", PathResourceResolver.class);
-		String path = this.resolver.resolveUrlPathInternal("", singletonList(webjarsLocation), null);
+		String path = this.resolver.resolveUrlPathInternal(
+				"", singletonList(webjarsLocation), null).blockMillis(5000);
+
 		assertNull(path);
 	}
 }

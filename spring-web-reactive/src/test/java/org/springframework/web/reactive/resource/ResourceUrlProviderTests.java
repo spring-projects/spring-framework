@@ -74,7 +74,7 @@ public class ResourceUrlProviderTests {
 
 	@Test
 	public void getStaticResourceUrl() {
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
+		String url = this.urlProvider.getForLookupPath("/resources/foo.css").blockMillis(5000);
 		assertEquals("/resources/foo.css", url);
 	}
 
@@ -86,7 +86,7 @@ public class ResourceUrlProviderTests {
 		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, manager);
 
 		String url = "/resources/foo.css?foo=bar&url=http://example.org";
-		String resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url);
+		String resolvedUrl = this.urlProvider.getForRequestUrl(exchange, url).blockMillis(5000);
 		assertEquals(url, resolvedUrl);
 	}
 
@@ -102,7 +102,7 @@ public class ResourceUrlProviderTests {
 		resolvers.add(new PathResourceResolver());
 		this.handler.setResourceResolvers(resolvers);
 
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
+		String url = this.urlProvider.getForLookupPath("/resources/foo.css").blockMillis(5000);
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 
@@ -123,7 +123,7 @@ public class ResourceUrlProviderTests {
 		this.handlerMap.put("/resources/*.css", otherHandler);
 		this.urlProvider.setHandlerMap(this.handlerMap);
 
-		String url = this.urlProvider.getForLookupPath("/resources/foo.css");
+		String url = this.urlProvider.getForLookupPath("/resources/foo.css").blockMillis(5000);
 		assertEquals("/resources/foo-e36d2e05253c6c7085a91522ce43a0b4.css", url);
 	}
 

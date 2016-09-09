@@ -117,7 +117,7 @@ public class GzipResourceResolverTests {
 	public void resolveGzippedFile() throws IOException {
 		this.request.addHeader("Accept-Encoding", "gzip");
 		String file = "js/foo.js";
-		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations);
+		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
 
 		String gzFile = file+".gz";
 		Resource resource = new ClassPathResource("test/" + gzFile, getClass());
@@ -131,7 +131,7 @@ public class GzipResourceResolverTests {
 	public void resolveFingerprintedGzippedFile() throws IOException {
 		this.request.addHeader("Accept-Encoding", "gzip");
 		String file = "foo-e36d2e05253c6c7085a91522ce43a0b4.css";
-		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations);
+		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
 
 		String gzFile = file + ".gz";
 		Resource resource = new ClassPathResource("test/" + gzFile, getClass());
@@ -145,7 +145,7 @@ public class GzipResourceResolverTests {
 	public void resolveFromCacheWithEncodingVariants() throws IOException {
 		this.request.addHeader("Accept-Encoding", "gzip");
 		String file = "js/foo.js";
-		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations);
+		Resource resolved = this.resolver.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
 
 		String gzFile = file+".gz";
 		Resource gzResource = new ClassPathResource("test/"+gzFile, getClass());
@@ -160,7 +160,7 @@ public class GzipResourceResolverTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new DefaultWebSessionManager());
 
-		resolved = this.resolver.resolveResource(this.exchange, file, this.locations);
+		resolved = this.resolver.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
 
 		Resource resource = new ClassPathResource("test/"+file, getClass());
 		assertEquals(resource.getDescription(), resolved.getDescription());
@@ -172,7 +172,7 @@ public class GzipResourceResolverTests {
 	@Test // SPR-13149
 	public void resolveWithNullRequest() throws IOException {
 		String file = "js/foo.js";
-		Resource resolved = this.resolver.resolveResource(null, file, this.locations);
+		Resource resolved = this.resolver.resolveResource(null, file, this.locations).blockMillis(5000);
 
 		String gzFile = file+".gz";
 		Resource gzResource = new ClassPathResource("test/" + gzFile, getClass());

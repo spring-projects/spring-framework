@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.IOException;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.server.ServerWebExchange;
@@ -36,9 +36,8 @@ public interface ResourceTransformer {
 	 * @param resource the resource to transform
 	 * @param transformerChain the chain of remaining transformers to delegate to
 	 * @return the transformed resource (never {@code null})
-	 * @throws IOException if the transformation fails
 	 */
-	Resource transform(ServerWebExchange exchange, Resource resource,
-			ResourceTransformerChain transformerChain) throws IOException;
+	Mono<Resource> transform(ServerWebExchange exchange, Resource resource,
+			ResourceTransformerChain transformerChain);
 
 }

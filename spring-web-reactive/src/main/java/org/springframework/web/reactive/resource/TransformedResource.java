@@ -55,7 +55,7 @@ public class TransformedResource extends ByteArrayResource {
 	}
 
 	@Override
-	public long lastModified() throws IOException {
+	public long lastModified() {
 		return this.lastModified;
 	}
 

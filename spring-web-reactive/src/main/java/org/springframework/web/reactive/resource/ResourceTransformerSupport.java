@@ -18,6 +18,8 @@ package org.springframework.web.reactive.resource;
 
 import java.util.Collections;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.Resource;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -64,7 +66,7 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 	 * @param transformerChain the transformer chain
 	 * @return the resolved URL or null
 	 */
-	protected String resolveUrlPath(String resourcePath, ServerWebExchange exchange,
+	protected Mono<String> resolveUrlPath(String resourcePath, ServerWebExchange exchange,
 			Resource resource, ResourceTransformerChain transformerChain) {
 
 		if (resourcePath.startsWith("/")) {

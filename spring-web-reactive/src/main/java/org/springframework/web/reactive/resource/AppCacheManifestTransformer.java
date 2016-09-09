@@ -21,13 +21,18 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.DigestUtils;
@@ -62,14 +67,17 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
+	private static final Collection<String> MANIFEST_SECTION_HEADERS =
+			Arrays.asList("CACHE MANIFEST", "NETWORK:", "FALLBACK:", "CACHE:");
+
 	private static final String MANIFEST_HEADER = "CACHE MANIFEST";
+
+	private static final String CACHE_HEADER = "CACHE:";
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	private static final Log logger = LogFactory.getLog(AppCacheManifestTransformer.class);
 
-
-	private final Map<String, SectionTransformer> sectionTransformers = new HashMap<>();
 
 	private final String fileExtension;
 
@@ -87,144 +95,198 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 	 */
 	public AppCacheManifestTransformer(String fileExtension) {
 		this.fileExtension = fileExtension;
-
-		SectionTransformer noOpSection = new NoOpSection();
-		this.sectionTransformers.put(MANIFEST_HEADER, noOpSection);
-		this.sectionTransformers.put("NETWORK:", noOpSection);
-		this.sectionTransformers.put("FALLBACK:", noOpSection);
-		this.sectionTransformers.put("CACHE:", new CacheSection());
 	}
 
 
 	@Override
-	public Resource transform(ServerWebExchange exchange, Resource resource,
-			ResourceTransformerChain transformerChain) throws IOException {
+	public Mono<Resource> transform(ServerWebExchange exchange, Resource inputResource,
+			ResourceTransformerChain chain) {
 
-		resource = transformerChain.transform(exchange, resource);
-		if (!this.fileExtension.equals(StringUtils.getFilenameExtension(resource.getFilename()))) {
-			return resource;
-		}
-
-		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-		String content = new String(bytes, DEFAULT_CHARSET);
-
-		if (!content.startsWith(MANIFEST_HEADER)) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("AppCache manifest does not start with 'CACHE MANIFEST', skipping: " + resource);
-			}
-			return resource;
-		}
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Transforming resource: " + resource);
-		}
-
-		StringWriter contentWriter = new StringWriter();
-		HashBuilder hashBuilder = new HashBuilder(content.length());
-
-		Scanner scanner = new Scanner(content);
-		SectionTransformer currentTransformer = this.sectionTransformers.get(MANIFEST_HEADER);
-		while (scanner.hasNextLine()) {
-			String line = scanner.nextLine();
-			if (this.sectionTransformers.containsKey(line.trim())) {
-				currentTransformer = this.sectionTransformers.get(line.trim());
-				contentWriter.write(line + "\n");
-				hashBuilder.appendString(line);
-			}
-			else {
-				contentWriter.write(
-						currentTransformer.transform(
-								line, hashBuilder, resource, transformerChain, exchange)  + "\n");
-			}
-		}
-
-		String hash = hashBuilder.build();
-		contentWriter.write("\n" + "# Hash: " + hash);
-		if (logger.isTraceEnabled()) {
-			logger.trace("AppCache file: [" + resource.getFilename()+ "] hash: [" + hash + "]");
-		}
-
-		return new TransformedResource(resource, contentWriter.toString().getBytes(DEFAULT_CHARSET));
+		return chain.transform(exchange, inputResource)
+				.then(resource -> {
+					String name = resource.getFilename();
+					if (!this.fileExtension.equals(StringUtils.getFilenameExtension(name))) {
+						return Mono.just(resource);
+					}
+					String content = new String(getResourceBytes(resource), DEFAULT_CHARSET);
+					if (!content.startsWith(MANIFEST_HEADER)) {
+						if (logger.isTraceEnabled()) {
+							logger.trace("Manifest should start with 'CACHE MANIFEST', skip: " + resource);
+						}
+						return Mono.just(resource);
+					}
+					if (logger.isTraceEnabled()) {
+						logger.trace("Transforming resource: " + resource);
+					}
+					return Flux.generate(new LineGenerator(content))
+							.concatMap(info -> processLine(info, exchange, resource, chain))
+							.collect(() -> new LineAggregator(resource, content), LineAggregator::add)
+							.then(aggregator -> Mono.just(aggregator.createResource()));
+				});
 	}
 
-
-	@FunctionalInterface
-	private interface SectionTransformer {
-
-		/**
-		 * Transforms a line in a section of the manifest.
-		 * <p>The actual transformation depends on the chosen transformation strategy
-		 * for the current manifest section (CACHE, NETWORK, FALLBACK, etc).
-		 */
-		String transform(String line, HashBuilder builder, Resource resource,
-				ResourceTransformerChain transformerChain, ServerWebExchange exchange) throws IOException;
-	}
-
-
-	private static class NoOpSection implements SectionTransformer {
-
-		public String transform(String line, HashBuilder builder, Resource resource,
-				ResourceTransformerChain transformerChain, ServerWebExchange exchange) throws IOException {
-
-			builder.appendString(line);
-			return line;
+	private static byte[] getResourceBytes(Resource resource) {
+		try {
+			return FileCopyUtils.copyToByteArray(resource.getInputStream());
+		}
+		catch (IOException ex) {
+			throw Exceptions.propagate(ex);
 		}
 	}
 
+	private Mono<LineOutput> processLine(LineInfo info, ServerWebExchange exchange,
+			Resource resource, ResourceTransformerChain chain) {
 
-	private class CacheSection implements SectionTransformer {
+		if (!info.isLink()) {
+			return Mono.just(new LineOutput(info.getLine(), null));
+		}
 
-		private static final String COMMENT_DIRECTIVE = "#";
+		Mono<String> pathMono = resolveUrlPath(info.getLine(), exchange, resource, chain)
+				.doOnNext(path -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Link modified: " + path + " (original: " + info.getLine() + ")");
+					}
+				});
+
+		Mono<Resource> resourceMono = chain.getResolverChain()
+				.resolveResource(null, info.getLine(), Collections.singletonList(resource));
+
+		return Flux.zip(pathMono, resourceMono, LineOutput::new).next();
+	}
+
+
+	private static class LineGenerator implements Consumer<SynchronousSink<LineInfo>> {
+
+		private final Scanner scanner;
+
+		private LineInfo previous;
+
+
+		public LineGenerator(String content) {
+			this.scanner = new Scanner(content);
+		}
+
 
 		@Override
-		public String transform(String line, HashBuilder builder, Resource resource,
-				ResourceTransformerChain transformerChain, ServerWebExchange exchange) throws IOException {
-
-			if (isLink(line) && !hasScheme(line)) {
-				ResourceResolverChain resolverChain = transformerChain.getResolverChain();
-				Resource appCacheResource =
-						resolverChain.resolveResource(null, line, Collections.singletonList(resource));
-				String path = resolveUrlPath(line, exchange, resource, transformerChain);
-				builder.appendResource(appCacheResource);
-				if (logger.isTraceEnabled()) {
-					logger.trace("Link modified: " + path + " (original: " + line + ")");
-				}
-				return path;
+		public void accept(SynchronousSink<LineInfo> sink) {
+			if (this.scanner.hasNext()) {
+				String line = this.scanner.nextLine();
+				LineInfo current = new LineInfo(line, this.previous);
+				sink.next(current);
+				this.previous = current;
 			}
-			builder.appendString(line);
-			return line;
-		}
-
-		private boolean hasScheme(String link) {
-			int schemeIndex = link.indexOf(":");
-			return (link.startsWith("//") || (schemeIndex > 0 && !link.substring(0, schemeIndex).contains("/")));
-		}
-
-		private boolean isLink(String line) {
-			return (StringUtils.hasText(line) && !line.startsWith(COMMENT_DIRECTIVE));
+			else {
+				sink.complete();
+			}
 		}
 	}
 
+	private static class LineInfo {
 
-	private static class HashBuilder {
+		private final String line;
+
+		private final boolean cacheSection;
+
+		private final boolean link;
+
+
+		public LineInfo(String line, LineInfo previousLine) {
+			this.line = line;
+			this.cacheSection = initCacheSectionFlag(line, previousLine);
+			this.link = iniLinkFlag(line, this.cacheSection);
+		}
+
+		private static boolean initCacheSectionFlag(String line, LineInfo previousLine) {
+			if (MANIFEST_SECTION_HEADERS.contains(line.trim())) {
+				return line.trim().equals(CACHE_HEADER);
+			}
+			else if (previousLine != null) {
+				return previousLine.isCacheSection();
+			}
+			throw new IllegalStateException(
+					"Manifest does not start with " + MANIFEST_HEADER + ": " + line);
+		}
+
+		private static boolean iniLinkFlag(String line, boolean isCacheSection) {
+			return (isCacheSection && StringUtils.hasText(line) && !line.startsWith("#")
+					&& !line.startsWith("//") && !hasScheme(line));
+		}
+
+		private static boolean hasScheme(String line) {
+			int index = line.indexOf(":");
+			return (line.startsWith("//") || (index > 0 && !line.substring(0, index).contains("/")));
+		}
+
+
+		public String getLine() {
+			return this.line;
+		}
+
+		public boolean isCacheSection() {
+			return this.cacheSection;
+		}
+
+		public boolean isLink() {
+			return this.link;
+		}
+	}
+
+	private static class LineOutput {
+
+		private final String line;
+
+		private final Resource resource;
+
+
+		public LineOutput(String line, Resource resource) {
+			this.line = line;
+			this.resource = resource;
+		}
+
+		public String getLine() {
+			return this.line;
+		}
+
+		public Resource getResource() {
+			return this.resource;
+		}
+	}
+
+	private static class LineAggregator {
+
+		private final StringWriter writer = new StringWriter();
 
 		private final ByteArrayOutputStream baos;
 
-		public HashBuilder(int initialSize) {
-			this.baos = new ByteArrayOutputStream(initialSize);
+		private final Resource resource;
+
+
+		public LineAggregator(Resource resource, String content) {
+			this.resource = resource;
+			this.baos = new ByteArrayOutputStream(content.length());
 		}
 
-		public void appendResource(Resource resource) throws IOException {
-			byte[] content = FileCopyUtils.copyToByteArray(resource.getInputStream());
-			this.baos.write(DigestUtils.md5Digest(content));
+		public void add(LineOutput lineOutput) {
+			this.writer.write(lineOutput.getLine() + "\n");
+			try {
+				byte[] bytes = (lineOutput.getResource() != null ?
+						DigestUtils.md5Digest(getResourceBytes(lineOutput.getResource())) :
+						lineOutput.getLine().getBytes(DEFAULT_CHARSET));
+				this.baos.write(bytes);
+			}
+			catch (IOException ex) {
+				throw Exceptions.propagate(ex);
+			}
 		}
 
-		public void appendString(String content) throws IOException {
-			this.baos.write(content.getBytes(DEFAULT_CHARSET));
-		}
-
-		public String build() {
-			return DigestUtils.md5DigestAsHex(this.baos.toByteArray());
+		public TransformedResource createResource() {
+			String hash = DigestUtils.md5DigestAsHex(this.baos.toByteArray());
+			this.writer.write("\n" + "# Hash: " + hash);
+			if (logger.isTraceEnabled()) {
+				logger.trace("AppCache file: [" + resource.getFilename()+ "] hash: [" + hash + "]");
+			}
+			byte[] bytes = this.writer.toString().getBytes(DEFAULT_CHARSET);
+			return new TransformedResource(this.resource, bytes);
 		}
 	}
 

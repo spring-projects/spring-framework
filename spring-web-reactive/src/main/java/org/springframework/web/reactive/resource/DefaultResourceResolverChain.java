@@ -19,6 +19,8 @@ package org.springframework.web.reactive.resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
@@ -45,7 +47,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 
 
 	@Override
-	public Resource resolveResource(ServerWebExchange exchange, String requestPath,
+	public Mono<Resource> resolveResource(ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations) {
 
 		ResourceResolver resolver = getNext();
@@ -62,7 +64,7 @@ class DefaultResourceResolverChain implements ResourceResolverChain {
 	}
 
 	@Override
-	public String resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
+	public Mono<String> resolveUrlPath(String resourcePath, List<? extends Resource> locations) {
 		ResourceResolver resolver = getNext();
 		if (resolver == null) {
 			return null;

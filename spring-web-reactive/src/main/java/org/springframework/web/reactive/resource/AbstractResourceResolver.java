@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.server.ServerWebExchange;
@@ -36,7 +37,7 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 
 
 	@Override
-	public Resource resolveResource(ServerWebExchange exchange, String requestPath,
+	public Mono<Resource> resolveResource(ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		if (logger.isTraceEnabled()) {
@@ -46,7 +47,7 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 	}
 
 	@Override
-	public String resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
+	public Mono<String> resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
 		if (logger.isTraceEnabled()) {
@@ -57,10 +58,10 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 	}
 
 
-	protected abstract Resource resolveResourceInternal(ServerWebExchange exchange, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain);
+	protected abstract Mono<Resource> resolveResourceInternal(ServerWebExchange exchange,
+			String requestPath, List<? extends Resource> locations, ResourceResolverChain chain);
 
-	protected abstract String resolveUrlPathInternal(String resourceUrlPath,
+	protected abstract Mono<String> resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain);
 
 }

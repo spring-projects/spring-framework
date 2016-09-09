@@ -74,7 +74,9 @@ public class CssLinkResourceTransformerTests {
 	@Test
 	public void transform() throws Exception {
 		Resource css = new ClassPathResource("test/main.css", getClass());
-		TransformedResource actual = (TransformedResource) this.transformerChain.transform(this.exchange, css);
+		TransformedResource actual =
+				(TransformedResource) this.transformerChain.transform(this.exchange, css)
+						.blockMillis(5000);
 
 		String expected = "\n" +
 				"@import url(\"bar-11e16cf79faee7ac698c805cf28248d2.css\");\n" +
@@ -92,7 +94,7 @@ public class CssLinkResourceTransformerTests {
 	@Test
 	public void transformNoLinks() throws Exception {
 		Resource expected = new ClassPathResource("test/foo.css", getClass());
-		Resource actual = this.transformerChain.transform(this.exchange, expected);
+		Resource actual = this.transformerChain.transform(this.exchange, expected).blockMillis(5000);
 		assertSame(expected, actual);
 	}
 
@@ -103,7 +105,7 @@ public class CssLinkResourceTransformerTests {
 				Collections.singletonList(new CssLinkResourceTransformer()));
 
 		Resource externalCss = new ClassPathResource("test/external.css", getClass());
-		Resource resource = transformerChain.transform(this.exchange, externalCss);
+		Resource resource = transformerChain.transform(this.exchange, externalCss).blockMillis(5000);
 		TransformedResource transformedResource = (TransformedResource) resource;
 
 		String expected = "@import url(\"http://example.org/fonts/css\");\n" +
@@ -124,7 +126,7 @@ public class CssLinkResourceTransformerTests {
 	@Test
 	public void transformWithNonCssResource() throws Exception {
 		Resource expected = new ClassPathResource("test/images/image.png", getClass());
-		Resource actual = this.transformerChain.transform(this.exchange, expected);
+		Resource actual = this.transformerChain.transform(this.exchange, expected).blockMillis(5000);
 		assertSame(expected, actual);
 	}
 

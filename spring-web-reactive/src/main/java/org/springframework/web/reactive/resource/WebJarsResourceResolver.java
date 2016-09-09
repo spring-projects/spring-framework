@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.webjars.MultipleMatchesException;
 import org.webjars.WebJarAssetLocator;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.server.ServerWebExchange;
@@ -70,31 +71,35 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Resource resolveResourceInternal(ServerWebExchange exchange, String requestPath,
+	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		Resource resolved = chain.resolveResource(exchange, requestPath, locations);
-		if (resolved == null) {
-			String webJarResourcePath = findWebJarResourcePath(requestPath);
-			if (webJarResourcePath != null) {
-				return chain.resolveResource(exchange, webJarResourcePath, locations);
-			}
-		}
-		return resolved;
+		return chain.resolveResource(exchange, requestPath, locations)
+				.otherwiseIfEmpty(Mono.defer(() -> {
+					String webJarsResourcePath = findWebJarResourcePath(requestPath);
+					if (webJarsResourcePath != null) {
+						return chain.resolveResource(exchange, webJarsResourcePath, locations);
+					}
+					else {
+						return Mono.empty();
+					}
+				}));
 	}
 
 	@Override
-	protected String resolveUrlPathInternal(String resourceUrlPath,
+	protected Mono<String> resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		String path = chain.resolveUrlPath(resourceUrlPath, locations);
-		if (path == null) {
-			String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
-			if (webJarResourcePath != null) {
-				return chain.resolveUrlPath(webJarResourcePath, locations);
-			}
-		}
-		return path;
+		return chain.resolveUrlPath(resourceUrlPath, locations)
+				.otherwiseIfEmpty(Mono.defer(() -> {
+					String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
+					if (webJarResourcePath != null) {
+						return chain.resolveUrlPath(webJarResourcePath, locations);
+					}
+					else {
+						return Mono.empty();
+					}
+				}));
 	}
 
 	protected String findWebJarResourcePath(String path) {

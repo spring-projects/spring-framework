@@ -16,9 +16,10 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -57,10 +58,10 @@ class DefaultResourceTransformerChain implements ResourceTransformerChain {
 
 
 	@Override
-	public Resource transform(ServerWebExchange exchange, Resource resource) throws IOException {
+	public Mono<Resource> transform(ServerWebExchange exchange, Resource resource) {
 		ResourceTransformer transformer = getNext();
 		if (transformer == null) {
-			return resource;
+			return Mono.just(resource);
 		}
 		try {
 			return transformer.transform(exchange, resource, this);

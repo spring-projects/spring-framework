@@ -16,10 +16,9 @@
 
 package org.springframework.web.reactive.resource;
 
-import java.io.IOException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Mono;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -61,25 +60,24 @@ public class CachingResourceTransformer implements ResourceTransformer {
 
 
 	@Override
-	public Resource transform(ServerWebExchange exchange, Resource resource,
-			ResourceTransformerChain transformerChain) throws IOException {
+	public Mono<Resource> transform(ServerWebExchange exchange, Resource resource,
+			ResourceTransformerChain transformerChain) {
 
-		Resource transformed = this.cache.get(resource, Resource.class);
-		if (transformed != null) {
+		Resource cachedResource = this.cache.get(resource, Resource.class);
+		if (cachedResource != null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Found match: " + transformed);
+				logger.trace("Found match: " + cachedResource);
 			}
-			return transformed;
+			return Mono.just(cachedResource);
 		}
 
-		transformed = transformerChain.transform(exchange, resource);
-
-		if (logger.isTraceEnabled()) {
-			logger.trace("Putting transformed resource in cache: " + transformed);
-		}
-		this.cache.put(resource, transformed);
-
-		return transformed;
+		return transformerChain.transform(exchange, resource)
+				.doOnNext(transformed -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Putting transformed resource in cache: " + transformed);
+					}
+					this.cache.put(resource, transformed);
+				});
 	}
 
 }

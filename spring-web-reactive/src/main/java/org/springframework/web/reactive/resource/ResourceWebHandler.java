@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.resource;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -276,84 +278,92 @@ public class ResourceWebHandler
 	 */
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange) {
-		try {
-			// For very general mappings (e.g. "/") we need to check 404 first
-			Resource resource = getResource(exchange);
-			if (resource == null) {
-				logger.trace("No matching resource found - returning 404");
-				exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
-				return Mono.empty();
-			}
 
-			if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
-				exchange.getResponse().getHeaders().add("Allow", "GET,HEAD,OPTIONS");
-				return Mono.empty();
-			}
+		return getResource(exchange)
+				.otherwiseIfEmpty(Mono.defer(() -> {
+					logger.trace("No matching resource found - returning 404");
+					exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
+					return Mono.empty();
+				}))
+				.then(resource -> {
+					try {
+						if (HttpMethod.OPTIONS.equals(exchange.getRequest().getMethod())) {
+							exchange.getResponse().getHeaders().add("Allow", "GET,HEAD,OPTIONS");
+							return Mono.empty();
+						}
 
-			// Supported methods and required session
-			String httpMehtod = exchange.getRequest().getMethod().name();
-			if (!SUPPORTED_METHODS.contains(httpMehtod)) {
-				return Mono.error(new MethodNotAllowedException(httpMehtod, SUPPORTED_METHODS));
-			}
+						// Supported methods and required session
+						String httpMehtod = exchange.getRequest().getMethod().name();
+						if (!SUPPORTED_METHODS.contains(httpMehtod)) {
+							return Mono.error(new MethodNotAllowedException(httpMehtod, SUPPORTED_METHODS));
+						}
 
-			// Header phase
-			if (exchange.checkNotModified(Instant.ofEpochMilli(resource.lastModified()))) {
-				logger.trace("Resource not modified - returning 304");
-				return Mono.empty();
-			}
+						// Header phase
+						if (exchange.checkNotModified(Instant.ofEpochMilli(resource.lastModified()))) {
+							logger.trace("Resource not modified - returning 304");
+							return Mono.empty();
+						}
 
-			// Apply cache settings, if any
-			if (getCacheControl() != null) {
-				String value = getCacheControl().getHeaderValue();
-				if (value != null) {
-					exchange.getResponse().getHeaders().setCacheControl(value);
-				}
-			}
+						// Apply cache settings, if any
+						if (getCacheControl() != null) {
+							String value = getCacheControl().getHeaderValue();
+							if (value != null) {
+								exchange.getResponse().getHeaders().setCacheControl(value);
+							}
+						}
 
-			// Check the media type for the resource
-			MediaType mediaType = getMediaType(exchange, resource);
-			if (mediaType != null) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Determined media type '" + mediaType + "' for " + resource);
-				}
-			}
-			else {
-				if (logger.isTraceEnabled()) {
-					logger.trace("No media type found for " + resource + " - not sending a content-type header");
-				}
-			}
+						// Check the media type for the resource
+						MediaType mediaType = getMediaType(exchange, resource);
+						if (mediaType != null) {
+							if (logger.isTraceEnabled()) {
+								logger.trace("Determined media type '" + mediaType + "' for " + resource);
+							}
+						}
+						else {
+							if (logger.isTraceEnabled()) {
+								logger.trace("No media type found " +
+										"for " + resource + " - not sending a content-type header");
+							}
+						}
 
-			// Content phase
-			if (HttpMethod.HEAD.equals(exchange.getRequest().getMethod())) {
-				setHeaders(exchange, resource, mediaType);
-				logger.trace("HEAD request - skipping content");
-				return Mono.empty();
-			}
+						// Content phase
+						if (HttpMethod.HEAD.equals(exchange.getRequest().getMethod())) {
+							setHeaders(exchange, resource, mediaType);
+							logger.trace("HEAD request - skipping content");
+							return Mono.empty();
+						}
 
-			// TODO: range requests
+						// TODO: range requests
 
-			setHeaders(exchange, resource, mediaType);
-			return this.resourceHttpMessageWriter.write(Mono.just(resource),
-					ResolvableType.forClass(Resource.class), mediaType, exchange.getResponse(), Collections.emptyMap());
-		}
-		catch (IOException ex) {
-			return Mono.error(ex);
-		}
+						setHeaders(exchange, resource, mediaType);
+
+						return this.resourceHttpMessageWriter.write(
+								Mono.just(resource), ResolvableType.forClass(Resource.class),
+								mediaType, exchange.getResponse(), Collections.emptyMap());
+					}
+					catch (IOException ex) {
+						return Mono.error(ex);
+					}
+				});
 	}
 
-	protected Resource getResource(ServerWebExchange exchange) throws IOException {
-		String attrName = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
-		Optional<String> optional = exchange.getAttribute(attrName);
+	protected Mono<Resource> getResource(ServerWebExchange exchange) {
+
+		String attributeName = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
+		Optional<String> optional = exchange.getAttribute(attributeName);
 		if (!optional.isPresent()) {
-			throw new IllegalStateException("Required request attribute '" + attrName + "' is not set");
+			return Mono.error(new IllegalStateException(
+					"Required request attribute '" + attributeName + "' is not set"));
 		}
+
 		String path = processPath(optional.get());
 		if (!StringUtils.hasText(path) || isInvalidPath(path)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Ignoring invalid resource path [" + path + "]");
 			}
-			return null;
+			return Mono.empty();
 		}
+
 		if (path.contains("%")) {
 			try {
 				// Use URLDecoder (vs UriUtils) to preserve potentially decoded UTF-8 chars
@@ -361,23 +371,23 @@ public class ResourceWebHandler
 					if (logger.isTraceEnabled()) {
 						logger.trace("Ignoring invalid resource path with escape sequences [" + path + "].");
 					}
-					return null;
+					return Mono.empty();
 				}
 			}
 			catch (IllegalArgumentException ex) {
 				// ignore
 			}
-		}
-		ResourceResolverChain resolveChain = new DefaultResourceResolverChain(getResourceResolvers());
-		Resource resource = resolveChain.resolveResource(exchange, path, getLocations());
-		if (resource == null || getResourceTransformers().isEmpty()) {
-			return resource;
+			catch (UnsupportedEncodingException ex) {
+				return Mono.error(Exceptions.propagate(ex));
+			}
 		}
 
-		ResourceTransformerChain transformChain =
-				new DefaultResourceTransformerChain(resolveChain, getResourceTransformers());
-		resource = transformChain.transform(exchange, resource);
-		return resource;
+		ResourceResolverChain resolveChain = createResolverChain();
+		return resolveChain.resolveResource(exchange, path, getLocations())
+				.then(resource -> {
+					ResourceTransformerChain transformerChain = createTransformerChain(resolveChain);
+					return transformerChain.transform(exchange, resource);
+				});
 	}
 
 	/**
@@ -452,6 +462,14 @@ public class ResourceWebHandler
 		return false;
 	}
 
+	private ResourceResolverChain createResolverChain() {
+		return new DefaultResourceResolverChain(getResourceResolvers());
+	}
+
+	private ResourceTransformerChain createTransformerChain(ResourceResolverChain resolverChain) {
+		return new DefaultResourceTransformerChain(resolverChain, getResourceTransformers());
+	}
+
 	/**
 	 * Determine the media type for the given request and the resource matched
 	 * to it. This implementation tries to determine the MediaType based on the
@@ -470,7 +488,6 @@ public class ResourceWebHandler
 	 * @param exchange current exchange
 	 * @param resource the identified resource (never {@code null})
 	 * @param mediaType the resource's media type (never {@code null})
-	 * @throws IOException in case of errors while setting the headers
 	 */
 	protected void setHeaders(ServerWebExchange exchange, Resource resource, MediaType mediaType)
 			throws IOException {

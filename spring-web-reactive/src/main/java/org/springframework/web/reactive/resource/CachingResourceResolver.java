@@ -18,6 +18,8 @@ package org.springframework.web.reactive.resource;
 
 import java.util.List;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.Resource;
@@ -61,28 +63,26 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Resource resolveResourceInternal(ServerWebExchange exchange, String requestPath,
+	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		String key = computeKey(exchange, requestPath);
-		Resource resource = this.cache.get(key, Resource.class);
+		Resource cachedResource = this.cache.get(key, Resource.class);
 
-		if (resource != null) {
+		if (cachedResource != null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Found match: " + resource);
+				logger.trace("Found match: " + cachedResource);
 			}
-			return resource;
+			return Mono.just(cachedResource);
 		}
 
-		resource = chain.resolveResource(exchange, requestPath, locations);
-		if (resource != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Putting resolved resource in cache: " + resource);
-			}
-			this.cache.put(key, resource);
-		}
-
-		return resource;
+		return chain.resolveResource(exchange, requestPath, locations)
+				.doOnNext(resource -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Putting resolved resource in cache: " + resource);
+					}
+					this.cache.put(key, resource);
+				});
 	}
 
 	protected String computeKey(ServerWebExchange exchange, String requestPath) {
@@ -98,28 +98,26 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	protected String resolveUrlPathInternal(String resourceUrlPath,
+	protected Mono<String> resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		String key = RESOLVED_URL_PATH_CACHE_KEY_PREFIX + resourceUrlPath;
-		String resolvedUrlPath = this.cache.get(key, String.class);
+		String cachedUrlPath = this.cache.get(key, String.class);
 
-		if (resolvedUrlPath != null) {
+		if (cachedUrlPath != null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Found match: \"" + resolvedUrlPath + "\"");
+				logger.trace("Found match: \"" + cachedUrlPath + "\"");
 			}
-			return resolvedUrlPath;
+			return Mono.just(cachedUrlPath);
 		}
 
-		resolvedUrlPath = chain.resolveUrlPath(resourceUrlPath, locations);
-		if (resolvedUrlPath != null) {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Putting resolved resource URL path in cache: \"" + resolvedUrlPath + "\"");
-			}
-			this.cache.put(key, resolvedUrlPath);
-		}
-
-		return resolvedUrlPath;
+		return chain.resolveUrlPath(resourceUrlPath, locations)
+				.doOnNext(resolvedPath -> {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Putting resolved resource URL path in cache: \"" + resolvedPath + "\"");
+					}
+					this.cache.put(key, resolvedPath);
+				});
 	}
 
 }

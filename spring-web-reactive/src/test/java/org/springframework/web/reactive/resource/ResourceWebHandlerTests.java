@@ -243,7 +243,7 @@ public class ResourceWebHandlerTests {
 
 		this.request.addHeader("Accept", "application/json,text/plain,*/*");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.html");
-		handler.handle(this.exchange);
+		handler.handle(this.exchange).blockMillis(5000);
 
 		assertEquals(MediaType.TEXT_HTML, this.response.getHeaders().getContentType());
 	}

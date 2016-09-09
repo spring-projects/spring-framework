@@ -24,6 +24,7 @@ import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -74,18 +75,18 @@ public class AppCacheManifestTransformerTests {
 	public void noTransformIfExtensionNoMatch() throws Exception {
 		Resource resource = mock(Resource.class);
 		given(resource.getFilename()).willReturn("foobar.file");
-		given(this.chain.transform(this.exchange, resource)).willReturn(resource);
+		given(this.chain.transform(this.exchange, resource)).willReturn(Mono.just(resource));
 
-		Resource result = this.transformer.transform(this.exchange, resource, this.chain);
+		Resource result = this.transformer.transform(this.exchange, resource, this.chain).blockMillis(5000);
 		assertEquals(resource, result);
 	}
 
 	@Test
 	public void syntaxErrorInManifest() throws Exception {
 		Resource resource = new ClassPathResource("test/error.appcache", getClass());
-		given(this.chain.transform(this.exchange, resource)).willReturn(resource);
+		given(this.chain.transform(this.exchange, resource)).willReturn(Mono.just(resource));
 
-		Resource result = this.transformer.transform(this.exchange, resource, this.chain);
+		Resource result = this.transformer.transform(this.exchange, resource, this.chain).blockMillis(5000);
 		assertEquals(resource, result);
 	}
 
@@ -106,7 +107,7 @@ public class AppCacheManifestTransformerTests {
 		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
 
 		Resource resource = new ClassPathResource("test/test.appcache", getClass());
-		Resource result = this.transformer.transform(this.exchange, resource, this.chain);
+		Resource result = this.transformer.transform(this.exchange, resource, this.chain).blockMillis(5000);
 		byte[] bytes = FileCopyUtils.copyToByteArray(result.getInputStream());
 		String content = new String(bytes, "UTF-8");
 

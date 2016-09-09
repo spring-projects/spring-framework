@@ -81,7 +81,7 @@ public class CachingResourceResolverTests {
 	public void resolveResourceInternal() {
 		String file = "bar.css";
 		Resource expected = new ClassPathResource("test/" + file, getClass());
-		Resource actual = this.chain.resolveResource(this.exchange, file, this.locations);
+		Resource actual = this.chain.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
 
 		assertEquals(expected, actual);
 	}
@@ -93,20 +93,20 @@ public class CachingResourceResolverTests {
 		this.cache.put(CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + "bar.css", expected);
 
 		String file = "bar.css";
-		Resource actual = this.chain.resolveResource(this.exchange, file, this.locations);
+		Resource actual = this.chain.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
 
 		assertSame(expected, actual);
 	}
 
 	@Test
 	public void resolveResourceInternalNoMatch() {
-		assertNull(this.chain.resolveResource(this.exchange, "invalid.css", this.locations));
+		assertNull(this.chain.resolveResource(this.exchange, "invalid.css", this.locations).blockMillis(5000));
 	}
 
 	@Test
 	public void resolverUrlPath() {
 		String expected = "/foo.css";
-		String actual = this.chain.resolveUrlPath(expected, this.locations);
+		String actual = this.chain.resolveUrlPath(expected, this.locations).blockMillis(5000);
 
 		assertEquals(expected, actual);
 	}
@@ -115,14 +115,14 @@ public class CachingResourceResolverTests {
 	public void resolverUrlPathFromCache() {
 		String expected = "cached-imaginary.css";
 		this.cache.put(CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css", expected);
-		String actual = this.chain.resolveUrlPath("imaginary.css", this.locations);
+		String actual = this.chain.resolveUrlPath("imaginary.css", this.locations).blockMillis(5000);
 
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void resolverUrlPathNoMatch() {
-		assertNull(this.chain.resolveUrlPath("invalid.css", this.locations));
+		assertNull(this.chain.resolveUrlPath("invalid.css", this.locations).blockMillis(5000));
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class CachingResourceResolverTests {
 		String file = "bar.css";
 		this.request.setUri(file).setHeader("Accept-Encoding", "gzip");
 
-		Resource expected = this.chain.resolveResource(this.exchange, file, this.locations);
+		Resource expected = this.chain.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
 		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file + "+encoding=gzip";
 
 		assertEquals(expected, this.cache.get(cacheKey).get());
@@ -141,7 +141,7 @@ public class CachingResourceResolverTests {
 		String file = "bar.css";
 		this.request.setUri(file);
 
-		Resource expected = this.chain.resolveResource(this.exchange, file, this.locations);
+		Resource expected = this.chain.resolveResource(this.exchange, file, this.locations).blockMillis(5000);
 		String cacheKey = CachingResourceResolver.RESOLVED_RESOURCE_CACHE_KEY_PREFIX + file;
 
 		assertEquals(expected, this.cache.get(cacheKey).get());
@@ -156,10 +156,10 @@ public class CachingResourceResolverTests {
 
 		String file = "bar.css";
 		this.request.setUri(file);
-		assertSame(resource, this.chain.resolveResource(this.exchange, file, this.locations));
+		assertSame(resource, this.chain.resolveResource(this.exchange, file, this.locations).blockMillis(5000));
 
 		request.addHeader("Accept-Encoding", "gzip");
-		assertSame(gzResource, this.chain.resolveResource(this.exchange, file, this.locations));
+		assertSame(gzResource, this.chain.resolveResource(this.exchange, file, this.locations).blockMillis(5000));
 	}
 
 }

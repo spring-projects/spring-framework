@@ -23,6 +23,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.List;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -41,25 +43,24 @@ import org.springframework.web.server.ServerWebExchange;
 public class GzipResourceResolver extends AbstractResourceResolver {
 
 	@Override
-	protected Resource resolveResourceInternal(ServerWebExchange exchange, String requestPath,
+	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
-		Resource resource = chain.resolveResource(exchange, requestPath, locations);
-		if ((resource == null) || (exchange != null && !isGzipAccepted(exchange))) {
-			return resource;
-		}
-
-		try {
-			Resource gzipped = new GzippedResource(resource);
-			if (gzipped.exists()) {
-				return gzipped;
-			}
-		}
-		catch (IOException ex) {
-			logger.trace("No gzipped resource for [" + resource.getFilename() + "]", ex);
-		}
-
-		return resource;
+		return chain.resolveResource(exchange, requestPath, locations)
+				.map(resource -> {
+					if (exchange == null || isGzipAccepted(exchange)) {
+						try {
+							Resource gzipped = new GzippedResource(resource);
+							if (gzipped.exists()) {
+								resource = gzipped;
+							}
+						}
+						catch (IOException ex) {
+							logger.trace("No gzipped resource for [" + resource.getFilename() + "]", ex);
+						}
+					}
+					return resource;
+				});
 	}
 
 	private boolean isGzipAccepted(ServerWebExchange exchange) {
@@ -68,8 +69,8 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 	}
 
 	@Override
-	protected String resolveUrlPathInternal(String resourceUrlPath, List<? extends Resource> locations,
-			ResourceResolverChain chain) {
+	protected Mono<String> resolveUrlPathInternal(String resourceUrlPath,
+			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return chain.resolveUrlPath(resourceUrlPath, locations);
 	}

@@ -18,6 +18,8 @@ package org.springframework.web.reactive.resource;
 
 import java.util.List;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.Resource;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -40,10 +42,10 @@ public interface ResourceResolver {
 	 * @param requestPath the portion of the request path to use
 	 * @param locations the locations to search in when looking up resources
 	 * @param chain the chain of remaining resolvers to delegate to
-	 * @return the resolved resource or {@code null} if unresolved
+	 * @return the resolved resource or an empty {@code Mono} if unresolved
 	 */
-	Resource resolveResource(ServerWebExchange exchange, String requestPath, List<? extends Resource> locations,
-			ResourceResolverChain chain);
+	Mono<Resource> resolveResource(ServerWebExchange exchange, String requestPath,
+			List<? extends Resource> locations, ResourceResolverChain chain);
 
 	/**
 	 * Resolve the externally facing <em>public</em> URL path for clients to use
@@ -53,8 +55,9 @@ public interface ResourceResolver {
 	 * @param resourcePath the internal resource path
 	 * @param locations the locations to search in when looking up resources
 	 * @param chain the chain of resolvers to delegate to
-	 * @return the resolved public URL path or {@code null} if unresolved
+	 * @return the resolved public URL path or an empty {@code Mono} if unresolved
 	 */
-	String resolveUrlPath(String resourcePath, List<? extends Resource> locations, ResourceResolverChain chain);
+	Mono<String> resolveUrlPath(String resourcePath, List<? extends Resource> locations,
+			ResourceResolverChain chain);
 
 }

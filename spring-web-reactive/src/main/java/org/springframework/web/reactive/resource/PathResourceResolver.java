@@ -21,6 +21,9 @@ import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -67,41 +70,28 @@ public class PathResourceResolver extends AbstractResourceResolver {
 
 
 	@Override
-	protected Resource resolveResourceInternal(ServerWebExchange exchange, String requestPath,
+	protected Mono<Resource> resolveResourceInternal(ServerWebExchange exchange, String requestPath,
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		return getResource(requestPath, locations);
 	}
 
 	@Override
-	protected String resolveUrlPathInternal(String path, List<? extends Resource> locations,
+	protected Mono<String> resolveUrlPathInternal(String path, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
-		return (StringUtils.hasText(path) && getResource(path, locations) != null ? path : null);
+		if (StringUtils.hasText(path)) {
+			return getResource(path, locations).map(resource -> path);
+		}
+		else {
+			return Mono.empty();
+		}
 	}
 
-	private Resource getResource(String resourcePath, List<? extends Resource> locations) {
-		for (Resource location : locations) {
-			try {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Checking location: " + location);
-				}
-				Resource resource = getResource(resourcePath, location);
-				if (resource != null) {
-					if (logger.isTraceEnabled()) {
-						logger.trace("Found match: " + resource);
-					}
-					return resource;
-				}
-				else if (logger.isTraceEnabled()) {
-					logger.trace("No match for location: " + location);
-				}
-			}
-			catch (IOException ex) {
-				logger.trace("Failure checking for relative resource - trying next location", ex);
-			}
-		}
-		return null;
+	private Mono<Resource> getResource(String resourcePath, List<? extends Resource> locations) {
+		return Flux.fromIterable(locations)
+				.concatMap(location -> getResource(resourcePath, location))
+				.next();
 	}
 
 	/**
@@ -112,20 +102,34 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	 * @param location the location to check
 	 * @return the resource, or {@code null} if none found
 	 */
-	protected Resource getResource(String resourcePath, Resource location) throws IOException {
-		Resource resource = location.createRelative(resourcePath);
-		if (resource.exists() && resource.isReadable()) {
-			if (checkResource(resource, location)) {
-				return resource;
+	protected Mono<Resource> getResource(String resourcePath, Resource location) {
+		try {
+			Resource resource = location.createRelative(resourcePath);
+			if (resource.exists() && resource.isReadable()) {
+				if (checkResource(resource, location)) {
+					if (logger.isTraceEnabled()) {
+						logger.trace("Found match: " + resource);
+					}
+					return Mono.just(resource);
+				}
+				else if (logger.isTraceEnabled()) {
+					logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
+							"but resource=\"" + resource.getURL() + "\" is neither under the " +
+							"current location=\"" + location.getURL() + "\" nor under any of the " +
+							"allowed locations=" + Arrays.asList(getAllowedLocations()));
+				}
 			}
 			else if (logger.isTraceEnabled()) {
-				logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
-						"but resource=\"" +	resource.getURL() + "\" is neither under the " +
-						"current location=\"" + location.getURL() + "\" nor under any of the " +
-						"allowed locations=" + Arrays.asList(getAllowedLocations()));
+				logger.trace("No match for location: " + location);
 			}
+			return Mono.empty();
 		}
-		return null;
+		catch (IOException ex) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Failure checking for relative resource under location + " + location, ex);
+			}
+			return Mono.error(ex);
+		}
 	}
 
 	/**
