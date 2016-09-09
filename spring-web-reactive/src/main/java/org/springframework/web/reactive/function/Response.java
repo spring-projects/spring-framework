@@ -171,7 +171,7 @@ public interface Response<T> {
 	Mono<Void> writeTo(ServerWebExchange exchange);
 
 	/**
-	 * Defines a builder that adds headers to the response entity.
+	 * Defines a builder that adds headers to the response.
 	 *
 	 * @param <B> the builder subclass
 	 */
@@ -263,13 +263,22 @@ public interface Response<T> {
 		/**
 		 * Build the response entity with no body.
 		 *
-		 * @return the response entity
+		 * @return the built response
 		 */
 		Response<Void> build();
+
+		/**
+		 * Build the response entity with no body.
+		 * The response will be committed when the given {@code voidPublisher} completes.
+		 *
+		 * @param voidPublisher publisher publisher to indicate when the response should be committed
+		 * @return the built response
+		 */
+		<T extends Publisher<Void>> Response<T> build(T voidPublisher);
 	}
 
 	/**
-	 * Defines a builder that adds a body to the response entity.
+	 * Defines a builder that adds a body to the response.
 	 */
 	interface BodyBuilder extends HeadersBuilder<BodyBuilder> {
 
@@ -296,7 +305,7 @@ public interface Response<T> {
 		/**
 		 * Set the body of the response to the given object and return it.
 		 *
-		 * @param body the body of the response entity
+		 * @param body the body of the response
 		 * @return the built response
 		 */
 		<T> Response<T> body(T body);

@@ -131,6 +131,12 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
+	public <T extends Publisher<Void>> Response<T> build(T voidPublisher) {
+		Assert.notNull(voidPublisher, "'voidPublisher' must not be null");
+		return new VoidPublisherResponse<>(this.statusCode, this.headers, voidPublisher);
+	}
+
+	@Override
 	public <T> Response<T> body(T body) {
 		Assert.notNull(body, "'body' must not be null");
 		return new BodyResponse<>(this.statusCode, this.headers, body);
