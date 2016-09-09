@@ -32,6 +32,7 @@ import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.util.ClassUtils;
 
+import org.testng.ITestNGListener;
 import org.testng.TestNG;
 
 import static org.junit.Assert.*;
@@ -90,7 +91,7 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 	public void runTestAndAssertCounters() throws Exception {
 		final TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
 		final TestNG testNG = new TestNG();
-		testNG.addListener(listener);
+		testNG.addListener((ITestNGListener) listener);
 		testNG.setTestClasses(new Class<?>[] { this.clazz });
 		testNG.setVerbose(0);
 		testNG.run();

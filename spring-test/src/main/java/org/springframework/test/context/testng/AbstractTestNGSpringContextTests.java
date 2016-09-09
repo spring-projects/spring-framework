@@ -178,7 +178,6 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 			beforeCallbacksExecuted = true;
 		}
 		catch (Throwable ex) {
-			testResult.setThrowable(ex);
 			this.testException = ex;
 		}
 
@@ -192,9 +191,12 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 		}
 		catch (Throwable ex) {
 			if (this.testException == null) {
-				testResult.setThrowable(ex);
 				this.testException = ex;
 			}
+		}
+
+		if (this.testException != null) {
+			throwAsUncheckedException(this.testException);
 		}
 	}
 
@@ -235,6 +237,18 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 			testResultException = ((InvocationTargetException) testResultException).getCause();
 		}
 		return testResultException;
+	}
+
+	private RuntimeException throwAsUncheckedException(Throwable t) {
+		throwAs(t);
+
+		// Appeasing the compiler: the following line will never be executed.
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends Throwable> void throwAs(Throwable t) throws T {
+		throw (T) t;
 	}
 
 }
