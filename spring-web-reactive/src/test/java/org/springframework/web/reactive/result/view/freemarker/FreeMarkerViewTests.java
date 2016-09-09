@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.result.view.freemarker;
 
 import java.nio.ByteBuffer;
@@ -27,7 +28,6 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
@@ -35,7 +35,6 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.tests.TestSubscriber;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
@@ -122,9 +121,7 @@ public class FreeMarkerViewTests {
 
 		ModelMap model = new ExtendedModelMap();
 		model.addAttribute("hello", "hi FreeMarker");
-		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("handle"), -1);
-		HandlerResult result = new HandlerResult(new Object(), "", returnType, model);
-		view.render(result, null, this.exchange);
+		view.render(model, null, this.exchange);
 
 		TestSubscriber
 				.subscribe(this.response.getBody())
