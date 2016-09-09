@@ -43,7 +43,7 @@ public class ServerSentEventResponseTests {
 
 	private final Publisher<ServerSentEvent<String>> body = Mono.just(sse);
 
-	private final ServerSentEventResponse<ServerSentEvent<String>> sseResponse =
+	private final ServerSentEventResponse<Publisher<ServerSentEvent<String>>> sseResponse =
 			ServerSentEventResponse.fromSseEvents(200, new HttpHeaders(), body);
 
 	@Test

@@ -327,7 +327,7 @@ public interface Response<T> {
 		 * @return the built response
 		 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 		 */
-		<T> Response<Publisher<ServerSentEvent<T>>> sse(Publisher<ServerSentEvent<T>> eventsPublisher);
+		<T, S extends Publisher<ServerSentEvent<T>>> Response<S> sse(S eventsPublisher);
 
 		/**
 		 * Set the body of the response to the given Server-Sent Event {@link Publisher} and return it.
@@ -337,7 +337,8 @@ public interface Response<T> {
 		 * @return the built response
 		 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 		 */
-		<T> Response<Publisher<T>> sse(Publisher<T> eventsPublisher, Class<T> eventClass);
+		<T, S extends Publisher<T>> Response<S> sse(S eventsPublisher, Class<T> eventClass);
+
 	}
 
 }

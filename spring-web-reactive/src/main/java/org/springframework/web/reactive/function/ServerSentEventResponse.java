@@ -32,7 +32,7 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * @author Arjen Poutsma
  */
-class ServerSentEventResponse<T> extends AbstractResponse<Publisher<T>> {
+class ServerSentEventResponse<T extends Publisher<?>> extends AbstractResponse<T> {
 
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
@@ -44,12 +44,12 @@ class ServerSentEventResponse<T> extends AbstractResponse<Publisher<T>> {
 
 	private final ServerSentEventHttpMessageWriter messageWriter;
 
-	private final Publisher<T> eventsPublisher;
+	private final T eventsPublisher;
 
 	private final ResolvableType eventType;
 
 
-	private ServerSentEventResponse(int statusCode, HttpHeaders headers, Publisher<T> eventsPublisher, ResolvableType eventType) {
+	private ServerSentEventResponse(int statusCode, HttpHeaders headers, T eventsPublisher, ResolvableType eventType) {
 		super(statusCode, headers);
 		this.eventsPublisher = eventsPublisher;
 		this.eventType = eventType;
@@ -58,17 +58,16 @@ class ServerSentEventResponse<T> extends AbstractResponse<Publisher<T>> {
 						new ServerSentEventHttpMessageWriter();
 	}
 
-	public static <S> ServerSentEventResponse<S> fromPublisher(int statusCode, HttpHeaders headers, Publisher<S> eventsPublisher, Class<? extends S> eventType) {
-		return new ServerSentEventResponse<>(statusCode, headers, eventsPublisher, ResolvableType.forClass(eventType));
+	public static <T, S extends Publisher<T>> ServerSentEventResponse<S> fromPublisher(int statusCode, HttpHeaders headers, S eventsPublisher, Class<? extends T> eventType) {
+		return new ServerSentEventResponse<S>(statusCode, headers, eventsPublisher, ResolvableType.forClass(eventType));
 	}
 
-	public static <S> ServerSentEventResponse<ServerSentEvent<S>> fromSseEvents(int statusCode, HttpHeaders headers, Publisher<ServerSentEvent<S>> eventsPublisher) {
-		return new ServerSentEventResponse<>(statusCode, headers, eventsPublisher,
-				SERVER_SIDE_EVENT_TYPE);
+	public static <T, S extends Publisher<ServerSentEvent<T>>> ServerSentEventResponse<S> fromSseEvents(int statusCode, HttpHeaders headers, S eventsPublisher) {
+		return new ServerSentEventResponse<S>(statusCode, headers, eventsPublisher, SERVER_SIDE_EVENT_TYPE);
 	}
 
 	@Override
-	public Publisher<T> body() {
+	public T body() {
 		return this.eventsPublisher;
 	}
 

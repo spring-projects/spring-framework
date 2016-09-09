@@ -150,15 +150,14 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public <T> Response<Publisher<ServerSentEvent<T>>> sse(
-			Publisher<ServerSentEvent<T>> eventsPublisher) {
+	public <T, S extends Publisher<ServerSentEvent<T>>> Response<S> sse(S eventsPublisher) {
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		return ServerSentEventResponse
 				.fromSseEvents(this.statusCode, this.headers, eventsPublisher);
 	}
 
 	@Override
-	public <T> Response<Publisher<T>> sse(Publisher<T> eventsPublisher, Class<T> eventClass) {
+	public <T, S extends Publisher<T>> Response<S> sse(S eventsPublisher, Class<T> eventClass) {
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventClass, "'eventClass' must not be null");
 		return ServerSentEventResponse
