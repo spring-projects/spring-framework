@@ -491,7 +491,9 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	protected JavaType getJavaTypeForMessage(Message message) throws JMSException {
 		String typeId = message.getStringProperty(this.typeIdPropertyName);
 		if (typeId == null) {
-			throw new MessageConversionException("Could not find type id property [" + this.typeIdPropertyName + "]");
+			throw new MessageConversionException(
+					"Could not find type id property [" + this.typeIdPropertyName + "] on message [" +
+					message.getJMSMessageID() + "] from destination [" + message.getJMSDestination() + "]");
 		}
 		Class<?> mappedClass = this.idClassMappings.get(typeId);
 		if (mappedClass != null) {
