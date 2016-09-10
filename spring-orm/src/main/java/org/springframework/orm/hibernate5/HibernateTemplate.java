@@ -87,11 +87,14 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 	private static final Method createQueryMethod;
 
+	private static final Method getNamedQueryMethod;
+
 	static {
 		// Hibernate 5.2's createQuery method declares a new subtype as return type,
 		// so we need to use reflection for binary compatibility with 5.0/5.1 here.
 		try {
 			createQueryMethod = Session.class.getMethod("createQuery", String.class);
+			getNamedQueryMethod = Session.class.getMethod("getNamedQuery", String.class);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new IllegalStateException("Incompatible Hibernate Session API", ex);
@@ -955,7 +958,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@Override
 			@SuppressWarnings({"rawtypes", "deprecation"})
 			public List<?> doInHibernate(Session session) throws HibernateException {
-				org.hibernate.Query queryObject = session.getNamedQuery(queryName);
+				org.hibernate.Query queryObject = (org.hibernate.Query)
+						ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName);
 				prepareQuery(queryObject);
 				if (values != null) {
 					for (int i = 0; i < values.length; i++) {
@@ -986,7 +990,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@Override
 			@SuppressWarnings({"rawtypes", "deprecation"})
 			public List<?> doInHibernate(Session session) throws HibernateException {
-				org.hibernate.Query queryObject = session.getNamedQuery(queryName);
+				org.hibernate.Query queryObject = (org.hibernate.Query)
+						ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName);
 				prepareQuery(queryObject);
 				if (values != null) {
 					for (int i = 0; i < values.length; i++) {
@@ -1006,7 +1011,8 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@Override
 			@SuppressWarnings({"rawtypes", "deprecation"})
 			public List<?> doInHibernate(Session session) throws HibernateException {
-				org.hibernate.Query queryObject = session.getNamedQuery(queryName);
+				org.hibernate.Query queryObject = (org.hibernate.Query)
+						ReflectionUtils.invokeMethod(getNamedQueryMethod, session, queryName);
 				prepareQuery(queryObject);
 				queryObject.setProperties(valueBean);
 				return queryObject.list();
