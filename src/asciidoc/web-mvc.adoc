@@ -1483,7 +1483,7 @@ The following code snippet shows the usage:
 
 Parameters using this annotation are required by default, but you can specify that a
 parameter is optional by setting ``@RequestParam``'s `required` attribute to `false`
-(e.g., `@RequestParam(path="id", required=false)`).
+(e.g., `@RequestParam(name="id", required=false)`).
 
 Type conversion is applied automatically if the target method parameter type is not
 `String`. See <<mvc-ann-typeconversion>>.
