@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
@@ -59,14 +60,14 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 
 	@Override
 	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 
 		return Mono.from(Flux.from(inputStream).
 				take(1).
 				concatMap(resource -> {
 					HttpHeaders headers = outputMessage.getHeaders();
 					addHeaders(headers, resource, contentType);
-					return writeContent(resource, type, outputMessage);
+					return writeContent(resource, type, outputMessage, hints);
 				}));
 	}
 
@@ -84,7 +85,7 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 		}
 	}
 
-	private Mono<Void> writeContent(Resource resource, ResolvableType type, ReactiveHttpOutputMessage outputMessage) {
+	private Mono<Void> writeContent(Resource resource, ResolvableType type, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 		if (outputMessage instanceof ZeroCopyHttpOutputMessage) {
 			Optional<File> file = getFile(resource);
 			if (file.isPresent()) {
@@ -97,7 +98,7 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 
 		// non-zero copy fallback, using ResourceEncoder
 		return super.write(Mono.just(resource), type,
-				outputMessage.getHeaders().getContentType(), outputMessage);
+				outputMessage.getHeaders().getContentType(), outputMessage, hints);
 	}
 
 	private static Optional<Long> contentLength(Resource resource) {

@@ -16,7 +16,9 @@
 
 package org.springframework.core.codec;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -43,10 +45,17 @@ public interface Encoder<T> {
 	 * type for the output stream.
 	 * @param elementType the type of elements in the source stream
 	 * @param mimeType the MIME type for the output stream
-	 * @param hints additional information about how to do encode, optional
+	 * @param hints additional information about how to do encode
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints);
+	boolean canEncode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints);
+
+	/**
+	 * @see #canEncode(ResolvableType, MimeType, Map)
+	 */
+	default boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+		return canEncode(elementType, mimeType, Collections.emptyMap());
+	}
 
 	/**
 	 * Encode a stream of Objects of type {@code T} into a {@link DataBuffer}
@@ -59,15 +68,30 @@ public interface Encoder<T> {
 	 * this type must have been previously passed to the {@link #canEncode}
 	 * method and it must have returned {@code true}.
 	 * @param mimeType the MIME type for the output stream
-	 * @param hints additional information about how to do encode, optional
+	 * @param hints additional information about how to do encode
 	 * @return the output stream
 	 */
 	Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
-			ResolvableType elementType, MimeType mimeType, Object... hints);
+			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints);
+
+	/**
+	 * @see #encode(Publisher, DataBufferFactory, ResolvableType, MimeType, Map)
+	 */
+	default Flux<DataBuffer> encode(Publisher<? extends T> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType elementType, MimeType mimeType) {
+		return encode(inputStream, bufferFactory, elementType, mimeType, Collections.emptyMap());
+	}
 
 	/**
 	 * Return the list of mime types this encoder supports.
 	 */
 	List<MimeType> getEncodableMimeTypes();
+
+	/**
+	 * Return the list of hints keys this encoder supports.
+	 */
+	default List<String> getSupportedEncodingHints() {
+		return Collections.emptyList();
+	}
 
 }

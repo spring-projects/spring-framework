@@ -18,6 +18,7 @@ package org.springframework.web.reactive.function;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -163,7 +164,7 @@ public class RouterTests {
 	private static class DummyMessageWriter implements HttpMessageWriter<Object> {
 
 		@Override
-		public boolean canWrite(ResolvableType type, MediaType mediaType) {
+		public boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
 			return false;
 		}
 
@@ -175,7 +176,8 @@ public class RouterTests {
 		@Override
 		public Mono<Void> write(Publisher<?> inputStream, ResolvableType type,
 				MediaType contentType,
-				ReactiveHttpOutputMessage outputMessage) {
+				ReactiveHttpOutputMessage outputMessage,
+				Map<String, Object> hints) {
 			return Mono.empty();
 		}
 	}
@@ -183,7 +185,7 @@ public class RouterTests {
 	private static class DummyMessageReader implements HttpMessageReader<Object> {
 
 		@Override
-		public boolean canRead(ResolvableType type, MediaType mediaType) {
+		public boolean canRead(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
 			return false;
 		}
 
@@ -193,12 +195,14 @@ public class RouterTests {
 		}
 
 		@Override
-		public Flux<Object> read(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
+		public Flux<Object> read(ResolvableType type, ReactiveHttpInputMessage inputMessage,
+				Map<String, Object> hints) {
 			return Flux.empty();
 		}
 
 		@Override
-		public Mono<Object> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage) {
+		public Mono<Object> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage,
+				Map<String, Object> hints) {
 			return Mono.empty();
 		}
 	}

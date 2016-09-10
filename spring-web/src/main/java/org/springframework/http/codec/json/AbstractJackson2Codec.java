@@ -38,6 +38,9 @@ import org.springframework.util.MimeType;
  */
 public class AbstractJackson2Codec {
 
+	public static final String JSON_VIEW_HINT = AbstractJackson2Codec.class.getName() + ".jsonView";
+
+
 	protected static final List<MimeType> JSON_MIME_TYPES = Arrays.asList(
 				new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));

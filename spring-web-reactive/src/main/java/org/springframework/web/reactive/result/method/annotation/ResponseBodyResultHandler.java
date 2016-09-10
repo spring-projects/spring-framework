@@ -16,8 +16,8 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -65,7 +65,7 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
 			RequestedContentTypeResolver contentTypeResolver) {
 
-		this(messageWriters, contentTypeResolver, new ReactiveAdapterRegistry());
+		this(messageWriters, contentTypeResolver, new ReactiveAdapterRegistry(), Collections.emptyList());
 	}
 
 	/**
@@ -80,7 +80,23 @@ public class ResponseBodyResultHandler extends AbstractMessageWriterResultHandle
 			RequestedContentTypeResolver contentTypeResolver,
 			ReactiveAdapterRegistry adapterRegistry) {
 
-		super(messageWriters, contentTypeResolver, adapterRegistry);
+		this(messageWriters, contentTypeResolver, adapterRegistry, Collections.emptyList());
+	}
+
+	/**
+	 * Constructor with additional {@link ReactiveAdapterRegistry} and list of {@link ResponseBodyAdvice}
+	 *
+	 * @param messageWriters writers for serializing to the response body stream
+	 * @param contentTypeResolver for resolving the requested content type
+	 * @param adapterRegistry for adapting other reactive types (e.g. rx.Observable,
+	 * rx.Single, etc.) to Flux or Mono
+	 * @param bodyAdvice body advice to customize the response
+	 */
+	public ResponseBodyResultHandler(List<HttpMessageWriter<?>> messageWriters,
+			RequestedContentTypeResolver contentTypeResolver,
+			ReactiveAdapterRegistry adapterRegistry, List<ResponseBodyAdvice> bodyAdvice) {
+
+		super(messageWriters, contentTypeResolver, adapterRegistry, bodyAdvice);
 		setOrder(100);
 	}
 
