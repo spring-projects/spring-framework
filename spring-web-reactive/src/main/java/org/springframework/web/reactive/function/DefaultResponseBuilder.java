@@ -132,47 +132,45 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 
 	@Override
 	public Response<Void> build() {
-		return new EmptyResponse(this.statusCode, this.headers);
+		return DefaultResponses.empty(this.statusCode, this.headers);
 	}
 
 	@Override
 	public <T extends Publisher<Void>> Response<T> build(T voidPublisher) {
 		Assert.notNull(voidPublisher, "'voidPublisher' must not be null");
-		return new VoidPublisherResponse<>(this.statusCode, this.headers, voidPublisher);
+		return DefaultResponses.empty(this.statusCode, this.headers, voidPublisher);
 	}
 
 	@Override
 	public <T> Response<T> body(T body) {
 		Assert.notNull(body, "'body' must not be null");
-		return new BodyResponse<>(this.statusCode, this.headers, body);
+		return DefaultResponses.body(this.statusCode, this.headers, body);
 	}
 
 	@Override
 	public <T, S extends Publisher<T>> Response<S> stream(S publisher, Class<T> elementClass) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
-		return new PublisherResponse<>(this.statusCode, this.headers, publisher, elementClass);
+		return DefaultResponses.stream(this.statusCode, this.headers, publisher, elementClass);
 	}
 
 	@Override
 	public Response<Resource> resource(Resource resource) {
 		Assert.notNull(resource, "'resource' must not be null");
-		return new ResourceResponse(this.statusCode, this.headers, resource);
+		return DefaultResponses.resource(this.statusCode, this.headers, resource);
 	}
 
 	@Override
 	public <T, S extends Publisher<ServerSentEvent<T>>> Response<S> sse(S eventsPublisher) {
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		return ServerSentEventResponse
-				.fromSseEvents(this.statusCode, this.headers, eventsPublisher);
+		return DefaultResponses.sse(this.statusCode, this.headers, eventsPublisher);
 	}
 
 	@Override
 	public <T, S extends Publisher<T>> Response<S> sse(S eventsPublisher, Class<T> eventClass) {
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventClass, "'eventClass' must not be null");
-		return ServerSentEventResponse
-				.fromPublisher(this.statusCode, this.headers, eventsPublisher, eventClass);
+		return DefaultResponses.sse(this.statusCode, this.headers, eventsPublisher, eventClass);
 	}
 
 	@Override
@@ -180,7 +178,11 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		Map<String, Object> modelMap = Arrays.stream(modelAttributes)
 				.filter(o -> !isEmptyCollection(o))
 				.collect(Collectors.toMap(Conventions::getVariableName, o -> o));
-		return new RenderingResponse(this.statusCode, this.headers, name, modelMap);
+		return DefaultResponses.render(this.statusCode, this.headers, name, modelMap);
+	}
+
+	private static boolean isEmptyCollection(Object o) {
+		return o instanceof Collection && ((Collection<?>) o).isEmpty();
 	}
 
 	@Override
@@ -190,11 +192,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		if (model != null) {
 			modelMap.putAll(model);
 		}
-		return new RenderingResponse(this.statusCode, this.headers, name, modelMap);
-	}
-
-	private static boolean isEmptyCollection(Object o) {
-		return o instanceof Collection && ((Collection<?>) o).isEmpty();
+		return DefaultResponses.render(this.statusCode, this.headers, name, modelMap);
 	}
 
 }
