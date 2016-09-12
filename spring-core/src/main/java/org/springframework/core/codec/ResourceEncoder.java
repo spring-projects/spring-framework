@@ -50,7 +50,7 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	}
 
 	public ResourceEncoder(int bufferSize) {
-		super(MimeTypeUtils.ALL);
+		super(MimeTypeUtils.APPLICATION_OCTET_STREAM, MimeTypeUtils.ALL);
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be larger than 0");
 		this.bufferSize = bufferSize;
 	}

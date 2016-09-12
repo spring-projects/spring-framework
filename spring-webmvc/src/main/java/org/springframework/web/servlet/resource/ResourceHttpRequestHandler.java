@@ -187,7 +187,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Return the list of configured resource converters.
+	 * Return the configured resource converter.
 	 * @since 4.3
 	 */
 	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
@@ -204,7 +204,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Return the list of configured resource region converters.
+	 * Return the configured resource region converter.
 	 * @since 4.3
 	 */
 	public ResourceRegionHttpMessageConverter getResourceRegionHttpMessageConverter() {
