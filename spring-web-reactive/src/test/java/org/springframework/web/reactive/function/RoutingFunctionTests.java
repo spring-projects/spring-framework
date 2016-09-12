@@ -29,12 +29,12 @@ import static org.junit.Assert.*;
 public class RoutingFunctionTests {
 
 	@Test
-	public void and() throws Exception {
+	public void andSame() throws Exception {
 		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
 		RoutingFunction<Void> routingFunction1 = request -> Optional.empty();
 		RoutingFunction<Void> routingFunction2 = request -> Optional.of(handlerFunction);
 
-		RoutingFunction<Void> result = routingFunction1.and(routingFunction2);
+		RoutingFunction<Void> result = routingFunction1.andSame(routingFunction2);
 		assertNotNull(result);
 
 		MockRequest request = MockRequest.builder().build();
@@ -44,12 +44,12 @@ public class RoutingFunctionTests {
 	}
 
 	@Test
-	public void andOther() throws Exception {
+	public void and() throws Exception {
 		HandlerFunction<String> handlerFunction = request -> Response.ok().body("42");
 		RoutingFunction<Void> routingFunction1 = request -> Optional.empty();
 		RoutingFunction<String> routingFunction2 = request -> Optional.of(handlerFunction);
 
-		RoutingFunction<?> result = routingFunction1.andOther(routingFunction2);
+		RoutingFunction<?> result = routingFunction1.and(routingFunction2);
 		assertNotNull(result);
 
 		MockRequest request = MockRequest.builder().build();

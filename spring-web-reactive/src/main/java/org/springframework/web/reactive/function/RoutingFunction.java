@@ -38,14 +38,14 @@ public interface RoutingFunction<T> {
 
 	/**
 	 * Return a composed routing function that first invokes this function,
-	 * and then invokes the {@code other} function if this route had
+	 * and then invokes the {@code other} function (of the same type {@code T}) if this route had
 	 * {@linkplain Optional#empty() no result}.
 	 *
-	 * @param other the function to apply when this function has no result
+	 * @param other the function of type {@code T} to apply when this function has no result
 	 * @return a composed function that first routes with this function and then the {@code other} function if this
 	 * function has no result
 	 */
-	default RoutingFunction<T> and(RoutingFunction<T> other) {
+	default RoutingFunction<T> andSame(RoutingFunction<T> other) {
 		return request -> {
 			Optional<HandlerFunction<T>> result = this.route(request);
 			return result.isPresent() ? result : other.route(request);
@@ -54,14 +54,14 @@ public interface RoutingFunction<T> {
 
 	/**
 	 * Return a composed routing function that first invokes this function,
-	 * and then invokes the {@code other} function if this route had
+	 * and then invokes the {@code other} function (of a different type) if this route had
 	 * {@linkplain Optional#empty() no result}.
 	 *
 	 * @param other the function to apply when this function has no result
 	 * @return a composed function that first routes with this function and then the {@code other} function if this
 	 * function has no result
 	 */
-	default <S> RoutingFunction<?> andOther(RoutingFunction<S> other) {
+	default RoutingFunction<?> and(RoutingFunction<?> other) {
 		return request -> {
 			Optional<HandlerFunction<Object>> result = this.route(request).
 					map(CastingUtils::cast);

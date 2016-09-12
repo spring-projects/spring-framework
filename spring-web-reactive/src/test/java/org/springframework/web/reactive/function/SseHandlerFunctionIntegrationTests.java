@@ -51,8 +51,8 @@ public class SseHandlerFunctionIntegrationTests
 	protected RoutingFunction<?> routingFunction() {
 		SseHandler sseHandler = new SseHandler();
 		return route(RequestPredicates.GET("/string"), sseHandler::string)
-				.andOther(route(RequestPredicates.GET("/person"), sseHandler::person))
-				.andOther(route(RequestPredicates.GET("/event"), sseHandler::sse));
+				.and(route(RequestPredicates.GET("/person"), sseHandler::person))
+				.and(route(RequestPredicates.GET("/event"), sseHandler::sse));
 	}
 
 
