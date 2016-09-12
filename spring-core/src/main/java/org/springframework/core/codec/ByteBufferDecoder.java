@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -42,14 +43,14 @@ public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 		Class<?> clazz = elementType.getRawClass();
 		return (super.canDecode(elementType, mimeType, hints) && ByteBuffer.class.isAssignableFrom(clazz));
 	}
 
 	@Override
 	public Flux<ByteBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		return Flux.from(inputStream).map((dataBuffer) -> {
 			ByteBuffer copy = ByteBuffer.allocate(dataBuffer.readableByteCount());

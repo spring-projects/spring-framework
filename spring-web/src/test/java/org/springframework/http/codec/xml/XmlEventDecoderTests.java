@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.xml;
 
+import java.util.Collections;
 import javax.xml.stream.events.XMLEvent;
 
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	public void toXMLEventsAalto() {
 
 		Flux<XMLEvent> events =
-				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null);
+				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null, Collections.emptyMap());
 
 		TestSubscriber
 				.subscribe(events)
@@ -66,7 +67,7 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		decoder.useAalto = false;
 
 		Flux<XMLEvent> events =
-				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null);
+				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null, Collections.emptyMap());
 
 		TestSubscriber
 				.subscribe(events)

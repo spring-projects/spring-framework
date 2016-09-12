@@ -17,6 +17,7 @@
 package org.springframework.http.codec.xml;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -45,18 +46,18 @@ public class Jaxb2XmlEncoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void canEncode() {
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_XML));
+				MediaType.APPLICATION_XML, Collections.emptyMap()));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_XML));
+				MediaType.TEXT_XML, Collections.emptyMap()));
 		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_JSON));
+				MediaType.APPLICATION_JSON, Collections.emptyMap()));
 
 		assertTrue(this.encoder.canEncode(
 				ResolvableType.forClass(Jaxb2XmlDecoderTests.TypePojo.class),
-				MediaType.APPLICATION_XML));
+				MediaType.APPLICATION_XML, Collections.emptyMap()));
 
 		assertFalse(this.encoder.canEncode(ResolvableType.forClass(getClass()),
-				MediaType.APPLICATION_XML));
+				MediaType.APPLICATION_XML, Collections.emptyMap()));
 	}
 
 	@Test
@@ -64,7 +65,7 @@ public class Jaxb2XmlEncoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClass(Pojo.class),
-						MediaType.APPLICATION_XML);
+						MediaType.APPLICATION_XML, Collections.emptyMap());
 		TestSubscriber
 				.subscribe(output)
 				.assertValuesWith(dataBuffer -> {

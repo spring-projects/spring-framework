@@ -18,6 +18,7 @@ package org.springframework.core.codec;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 
@@ -56,14 +57,14 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 		Class<?> clazz = elementType.getRawClass();
 		return (super.canEncode(elementType, mimeType, hints) && Resource.class.isAssignableFrom(clazz));
 	}
 
 	@Override
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Object... hints) throws IOException {
+			ResolvableType type, MimeType mimeType, Map<String, Object> hints) throws IOException {
 
 		InputStream is = resource.getInputStream();
 		return DataBufferUtils.read(is, dataBufferFactory, bufferSize);

@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -42,14 +43,14 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canEncode() throws Exception {
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(
-				ResolvableType.forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Resource.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
 	}
 
 	@Test
@@ -61,7 +62,7 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClass(Resource.class),
-						null);
+						null, Collections.emptyMap());
 
 		TestSubscriber
 				.subscribe(output)

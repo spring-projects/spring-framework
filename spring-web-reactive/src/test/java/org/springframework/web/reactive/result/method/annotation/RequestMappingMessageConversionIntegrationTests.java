@@ -19,6 +19,7 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.xml.bind.annotation.XmlElement;
@@ -386,7 +387,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
 			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
 			return encoder.encode(Mono.just(new Person("Robert")), dataBufferFactory,
-					ResolvableType.forClass(Person.class), JSON).map(DataBuffer::asByteBuffer);
+					ResolvableType.forClass(Person.class), JSON, Collections.emptyMap()).map(DataBuffer::asByteBuffer);
 		}
 
 		@GetMapping("/flux")

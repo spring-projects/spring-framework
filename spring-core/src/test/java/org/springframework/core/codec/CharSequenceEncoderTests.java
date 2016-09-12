@@ -16,6 +16,8 @@
 
 package org.springframework.core.codec;
 
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,18 +48,23 @@ public class CharSequenceEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 	@Test
 	public void canWrite() {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuffer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuilder.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(StringBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
 	}
 
 	@Test
 	public void writeString() throws InterruptedException {
 		Flux<String> stringFlux = Flux.just("foo");
 		Flux<DataBuffer> output = Flux.from(
-				this.encoder.encode(stringFlux, this.bufferFactory, null, null));
+				this.encoder.encode(stringFlux, this.bufferFactory, null, null,Collections.emptyMap()));
 		TestSubscriber
 				.subscribe(output)
 				.assertNoError()
@@ -69,7 +76,7 @@ public class CharSequenceEncoderTests extends AbstractDataBufferAllocatingTestCa
 	public void writeStringBuilder() throws InterruptedException {
 		Flux<StringBuilder> stringBuilderFlux = Flux.just(new StringBuilder("foo"));
 		Flux<DataBuffer> output = Flux.from(
-				this.encoder.encode(stringBuilderFlux, this.bufferFactory, null, null));
+				this.encoder.encode(stringBuilderFlux, this.bufferFactory, null, null, Collections.emptyMap()));
 		TestSubscriber
 				.subscribe(output)
 				.assertNoError()

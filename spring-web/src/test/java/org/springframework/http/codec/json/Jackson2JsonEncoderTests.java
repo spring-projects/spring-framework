@@ -16,6 +16,9 @@
 
 package org.springframework.http.codec.json;
 
+import java.util.Collections;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -42,8 +45,8 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(null, MediaType.APPLICATION_JSON));
-		assertFalse(this.encoder.canEncode(null, MediaType.APPLICATION_XML));
+		assertTrue(this.encoder.canEncode(null, MediaType.APPLICATION_JSON, Collections.emptyMap()));
+		assertFalse(this.encoder.canEncode(null, MediaType.APPLICATION_XML, Collections.emptyMap()));
 	}
 
 	@Test
@@ -54,7 +57,7 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 				new Pojo("foofoofoo", "barbarbar")
 		);
 		ResolvableType type = ResolvableType.forClass(Pojo.class);
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
 
 		TestSubscriber.subscribe(output)
 				.assertComplete()
@@ -74,7 +77,7 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 	public void encodeWithType() {
 		Flux<ParentClass> source = Flux.just(new Foo(), new Bar());
 		ResolvableType type = ResolvableType.forClass(ParentClass.class);
-		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null);
+		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory, type, null, Collections.emptyMap());
 
 		TestSubscriber.subscribe(output)
 				.assertComplete()
@@ -93,8 +96,9 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 		bean.setWithView2("with");
 		bean.setWithoutView("without");
 
-		ResolvableType type =  ResolvableType.forMethodReturnType(JacksonController.class.getMethod("foo"));
-		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null);
+		ResolvableType type =  ResolvableType.forClass(JacksonViewBean.class);
+		Map<String, Object> hints = Collections.singletonMap(Jackson2JsonEncoder.JSON_VIEW_HINT, MyJacksonView1.class);
+		Flux<DataBuffer> output = this.encoder.encode(Mono.just(bean), this.bufferFactory, type, null, hints);
 
 		TestSubscriber.subscribe(output)
 				.assertComplete()
@@ -154,15 +158,6 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 		public void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
-		}
-	}
-
-
-	private static class JacksonController {
-
-		@JsonView(MyJacksonView1.class)
-		public JacksonViewBean foo() {
-			return null;
 		}
 	}
 

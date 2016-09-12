@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.result.view;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -123,7 +124,7 @@ public class HttpMessageWriterView implements View {
 		else if (map.size() == 1) {
 			return map.values().iterator().next();
 		}
-		else if (getMessageWriter().canWrite(ResolvableType.forClass(Map.class), null)) {
+		else if (getMessageWriter().canWrite(ResolvableType.forClass(Map.class), null, Collections.emptyMap())) {
 			return map;
 		}
 		else {
@@ -142,10 +143,10 @@ public class HttpMessageWriterView implements View {
 	protected boolean isEligibleAttribute(String attributeName, Object attributeValue) {
 		ResolvableType type = ResolvableType.forClass(attributeValue.getClass());
 		if (getModelKeys().isEmpty()) {
-			return getMessageWriter().canWrite(type, null);
+			return getMessageWriter().canWrite(type, null, Collections.emptyMap());
 		}
 		if (getModelKeys().contains(attributeName)) {
-			if (getMessageWriter().canWrite(type, null)) {
+			if (getMessageWriter().canWrite(type, null, Collections.emptyMap())) {
 				return true;
 			}
 			throw new IllegalStateException(
@@ -163,7 +164,8 @@ public class HttpMessageWriterView implements View {
 		Publisher<? extends T> stream = Mono.just((T) value);
 		ResolvableType type = ResolvableType.forClass(value.getClass());
 		ServerHttpResponse response = exchange.getResponse();
-		return ((HttpMessageWriter<T>) getMessageWriter()).write(stream, type, contentType, response);
+		return ((HttpMessageWriter<T>) getMessageWriter()).write(stream, type, contentType,
+				response, Collections.emptyMap());
 	}
 
 }

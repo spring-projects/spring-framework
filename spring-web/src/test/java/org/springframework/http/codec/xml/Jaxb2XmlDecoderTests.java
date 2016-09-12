@@ -16,6 +16,7 @@
 
 package org.springframework.http.codec.xml;
 
+import java.util.Collections;
 import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.stream.events.XMLEvent;
@@ -71,23 +72,23 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void canDecode() {
 		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_XML));
+				MediaType.APPLICATION_XML, Collections.emptyMap()));
 		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.TEXT_XML));
+				MediaType.TEXT_XML, Collections.emptyMap()));
 		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
-				MediaType.APPLICATION_JSON));
+				MediaType.APPLICATION_JSON, Collections.emptyMap()));
 
 		assertTrue(this.decoder.canDecode(ResolvableType.forClass(TypePojo.class),
-				MediaType.APPLICATION_XML));
+				MediaType.APPLICATION_XML, Collections.emptyMap()));
 
 		assertFalse(this.decoder.canDecode(ResolvableType.forClass(getClass()),
-				MediaType.APPLICATION_XML));
+				MediaType.APPLICATION_XML, Collections.emptyMap()));
 	}
 
 	@Test
 	public void splitOneBranches() {
 		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder
-				.decode(Flux.just(stringBuffer(POJO_ROOT)), null, null);
+				.decode(Flux.just(stringBuffer(POJO_ROOT)), null, null, Collections.emptyMap());
 		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
 		TestSubscriber
@@ -112,7 +113,7 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void splitMultipleBranches() {
 		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder
-				.decode(Flux.just(stringBuffer(POJO_CHILD)), null, null);
+				.decode(Flux.just(stringBuffer(POJO_CHILD)), null, null, Collections.emptyMap());
 		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
 		TestSubscriber
@@ -160,8 +161,8 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeSingleXmlRootElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_ROOT));
-		Flux<Object> output =
-				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
+		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(Pojo.class),
+				null, Collections.emptyMap());
 
 		TestSubscriber
 				.subscribe(output)
@@ -173,8 +174,8 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeSingleXmlTypeElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_ROOT));
-		Flux<Object> output = this.decoder
-				.decode(source, ResolvableType.forClass(TypePojo.class), null);
+		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(TypePojo.class),
+				null, Collections.emptyMap());
 
 		TestSubscriber
 				.subscribe(output)
@@ -186,8 +187,8 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeMultipleXmlRootElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_CHILD));
-		Flux<Object> output =
-				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
+		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(Pojo.class),
+				null, Collections.emptyMap());
 
 		TestSubscriber
 				.subscribe(output)
@@ -199,8 +200,8 @@ public class Jaxb2XmlDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeMultipleXmlTypeElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_CHILD));
-		Flux<Object> output = this.decoder
-				.decode(source, ResolvableType.forClass(TypePojo.class), null);
+		Flux<Object> output = this.decoder.decode(source, ResolvableType.forClass(TypePojo.class),
+				null, Collections.emptyMap());
 
 		TestSubscriber
 				.subscribe(output)

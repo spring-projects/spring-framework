@@ -18,6 +18,7 @@ package org.springframework.core.codec;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,9 +49,12 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
 	}
 
 	@Test
@@ -62,7 +66,7 @@ public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase
 
 		Flux<DataBuffer> output = this.encoder.encode(source, this.bufferFactory,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
-				null);
+				null, Collections.emptyMap());
 		TestSubscriber
 				.subscribe(output)
 				.assertValuesWith(b -> {

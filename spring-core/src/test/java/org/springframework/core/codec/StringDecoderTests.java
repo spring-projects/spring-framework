@@ -16,6 +16,8 @@
 
 package org.springframework.core.codec;
 
+import java.util.Collections;
+
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,18 +43,24 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class), MimeTypeUtils.TEXT_HTML));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class), MimeTypeUtils.APPLICATION_JSON));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Object.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.TEXT_HTML, Collections.emptyMap()));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class),
+				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Object.class),
+				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
 	}
 
 	@Test
 	public void decode() throws InterruptedException {
 		this.decoder = new StringDecoder(false);
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
-		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class), null);
+		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class),
+				null, Collections.emptyMap());
 
 		TestSubscriber.subscribe(output)
 				.assertNoError()
@@ -65,7 +73,8 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		DataBuffer fooBar = stringBuffer("\nfoo\r\nbar\r");
 		DataBuffer baz = stringBuffer("\nbaz");
 		Flux<DataBuffer> source = Flux.just(fooBar, baz);
-		Flux<String> output = decoder.decode(source, ResolvableType.forClass(String.class), null);
+		Flux<String> output = decoder.decode(source, ResolvableType.forClass(String.class),
+				null, Collections.emptyMap());
 
 		TestSubscriber.subscribe(output)
 				.assertNoError()
@@ -75,7 +84,8 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeEmptyFlux() throws InterruptedException {
 		Flux<DataBuffer> source = Flux.empty();
-		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class), null);
+		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class),
+				null, Collections.emptyMap());
 
 		TestSubscriber.subscribe(output)
 				.assertNoError()
@@ -86,7 +96,8 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeEmptyString() throws InterruptedException {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(""));
-		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class), null);
+		Flux<String> output = this.decoder.decode(source,
+				ResolvableType.forClass(String.class), null, Collections.emptyMap());
 
 		TestSubscriber.subscribe(output).assertValues("");
 	}
@@ -95,7 +106,8 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	public void decodeToMono() throws InterruptedException {
 		this.decoder = new StringDecoder(false);
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
-		Mono<String> output = this.decoder.decodeToMono(source, ResolvableType.forClass(String.class), null);
+		Mono<String> output = this.decoder.decodeToMono(source,
+				ResolvableType.forClass(String.class), null, Collections.emptyMap());
 
 		TestSubscriber.subscribe(output)
 				.assertNoError()
@@ -106,7 +118,8 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void decodeToMonoWithEmptyFlux() throws InterruptedException {
 		Flux<DataBuffer> source = Flux.empty();
-		Mono<String> output = this.decoder.decodeToMono(source, ResolvableType.forClass(String.class), null);
+		Mono<String> output = this.decoder.decodeToMono(source,
+				ResolvableType.forClass(String.class), null, Collections.emptyMap());
 
 		TestSubscriber.subscribe(output)
 				.assertNoError()

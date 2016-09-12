@@ -18,8 +18,8 @@ package org.springframework.http.codec.json;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -62,7 +62,7 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Object... hints) {
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 		if (mimeType == null) {
 			return true;
 		}
@@ -76,7 +76,7 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 
 	@Override
 	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		JsonObjectDecoder objectDecoder = this.fluxObjectDecoder;
 		return decodeInternal(objectDecoder, inputStream, elementType, mimeType, hints);
@@ -84,14 +84,14 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 
 	@Override
 	public Mono<Object> decodeToMono(Publisher<DataBuffer> inputStream, ResolvableType elementType,
-			MimeType mimeType, Object... hints) {
+			MimeType mimeType, Map<String, Object> hints) {
 
 		JsonObjectDecoder objectDecoder = this.monoObjectDecoder;
 		return decodeInternal(objectDecoder, inputStream, elementType, mimeType, hints).singleOrEmpty();
 	}
 
 	private Flux<Object> decodeInternal(JsonObjectDecoder objectDecoder, Publisher<DataBuffer> inputStream,
-			ResolvableType elementType, MimeType mimeType, Object[] hints) {
+			ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
 
 		Assert.notNull(inputStream, "'inputStream' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
@@ -102,14 +102,10 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 		JavaType javaType = getJavaType(elementType.getType(), contextClass);
 
 		ObjectReader reader;
-		JsonView jsonView = (methodParam != null ? methodParam.getParameterAnnotation(JsonView.class) : null);
+		Class<?> jsonView = (Class<?>)hints.get(AbstractJackson2Codec.JSON_VIEW_HINT);
+
 		if (jsonView != null) {
-			Class<?>[] classes = jsonView.value();
-			if (classes.length != 1) {
-				throw new IllegalArgumentException("@JsonView only supported for response body advice " +
-						"with exactly 1 class argument: " + methodParam);
-			}
-			reader = this.mapper.readerWithView(classes[0]).forType(javaType);
+			reader = this.mapper.readerWithView(jsonView).forType(javaType);
 		}
 		else {
 			reader = this.mapper.readerFor(javaType);

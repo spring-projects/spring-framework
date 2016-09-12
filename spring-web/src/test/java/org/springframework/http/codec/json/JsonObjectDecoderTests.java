@@ -17,6 +17,7 @@
 package org.springframework.http.codec.json;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -36,7 +37,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<String> output =
-				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
+				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
 		TestSubscriber
 				.subscribe(output)
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
@@ -48,7 +49,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\": \"foofoo\""),
 				stringBuffer(", \"bar\": \"barbar\"}"));
 		Flux<String> output =
-				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
+				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
 		TestSubscriber
 				.subscribe(output)
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
@@ -60,7 +61,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
-				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
+				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
 		TestSubscriber
 				.subscribe(output)
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
@@ -74,7 +75,7 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				Flux.just(stringBuffer("[{\"foo\": \"foofoo\", \"bar\""), stringBuffer(
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
-				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
+				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
 		TestSubscriber
 				.subscribe(output)
 				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",

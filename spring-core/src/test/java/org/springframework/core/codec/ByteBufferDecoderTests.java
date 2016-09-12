@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import java.nio.ByteBuffer;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -40,9 +41,12 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 
 	@Test
 	public void canDecode() {
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
+				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
 	}
 
 	@Test
@@ -52,7 +56,7 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
 		Flux<ByteBuffer> output = this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
-				null);
+				null, Collections.emptyMap());
 		TestSubscriber
 				.subscribe(output)
 				.assertNoError()

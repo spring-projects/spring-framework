@@ -17,6 +17,7 @@
 package org.springframework.core.codec;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -44,14 +45,14 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void canDecode() throws Exception {
-		assertTrue(this.decoder.canDecode(
-				ResolvableType.forClass(InputStreamResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(
-				ResolvableType.forClass(ByteArrayResource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(
-				ResolvableType.forClass(Resource.class), MimeTypeUtils.TEXT_PLAIN));
-		assertTrue(this.decoder.canDecode(
-				ResolvableType.forClass(InputStreamResource.class), MimeTypeUtils.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteArrayResource.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Resource.class),
+				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
+				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
 	}
 
 	@Test
@@ -61,7 +62,7 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
 
 		Flux<Resource> result = this.decoder
-				.decode(source, ResolvableType.forClass(Resource.class), null);
+				.decode(source, ResolvableType.forClass(Resource.class), null, Collections.emptyMap());
 
 		TestSubscriber
 				.subscribe(result)
