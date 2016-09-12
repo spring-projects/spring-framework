@@ -90,7 +90,7 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
-	public void jsonView() throws Exception {
+	public void jsonView() {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");

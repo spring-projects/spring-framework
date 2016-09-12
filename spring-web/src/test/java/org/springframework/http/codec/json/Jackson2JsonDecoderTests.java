@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec.json;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -64,12 +63,11 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
-	public void decodeToList() throws Exception {
+	public void decodeToList() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
 
-		Method method = getClass().getDeclaredMethod("handle", List.class);
-		ResolvableType elementType = ResolvableType.forMethodParameter(method, 0);
+		ResolvableType elementType = ResolvableType.forClassWithGenerics(List.class, Pojo.class);
 		Mono<Object> mono = new Jackson2JsonDecoder().decodeToMono(source, elementType,
 				null, Collections.emptyMap());
 
@@ -78,7 +76,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
-	public void decodeToFlux() throws Exception {
+	public void decodeToFlux() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"bar\":\"b1\",\"foo\":\"f1\"},{\"bar\":\"b2\",\"foo\":\"f2\"}]"));
 
@@ -91,7 +89,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
-	public void jsonView() throws Exception {
+	public void jsonView() {
 		Flux<DataBuffer> source = Flux.just(
 				stringBuffer("{\"withView1\" : \"with\", \"withView2\" : \"with\", \"withoutView\" : \"without\"}"));
 		ResolvableType elementType =  ResolvableType.forClass(JacksonViewBean.class);
@@ -111,7 +109,7 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
-	public void decodeEmptyBodyToMono() throws Exception {
+	public void decodeEmptyBodyToMono() {
 		Flux<DataBuffer> source = Flux.empty();
 		ResolvableType elementType = ResolvableType.forClass(Pojo.class);
 		Mono<Object> flux = new Jackson2JsonDecoder().decodeToMono(source, elementType,
@@ -121,10 +119,6 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 				.assertNoError()
 				.assertComplete()
 				.assertValueCount(0);
-	}
-
-
-	void handle(List<Pojo> list) {
 	}
 
 
