@@ -31,10 +31,11 @@ import reactor.core.publisher.SynchronousSink;
 
 import org.springframework.util.Assert;
 
-/**i
+/**
  * Utility class for working with {@link DataBuffer}s.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 5.0
  */
 public abstract class DataBufferUtils {
@@ -116,6 +117,42 @@ public abstract class DataBufferUtils {
 						int size = (int) (currentCount + dataBuffer.readableByteCount());
 						return dataBuffer.slice(0, size);
 					}
+				});
+	}
+
+	/**
+	 * Skip buffers from the given {@link Publisher} until the total
+	 * {@linkplain DataBuffer#readableByteCount() byte count} reaches
+	 * the given maximum byte count, or until the publisher is complete.
+	 * @param publisher the publisher to filter
+	 * @param maxByteCount the maximum byte count
+	 * @return a flux with the remaining part of the given publisher
+	 */
+	public static Flux<DataBuffer> skipUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
+		Assert.notNull(publisher, "Publisher must not be null");
+		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
+		AtomicLong byteCountDown = new AtomicLong(maxByteCount);
+
+		return Flux.from(publisher).
+				skipUntil(dataBuffer -> {
+					int delta = -dataBuffer.readableByteCount();
+					long currentCount = byteCountDown.addAndGet(delta);
+					if(currentCount < 0) {
+						return true;
+					} else {
+						DataBufferUtils.release(dataBuffer);
+						return false;
+					}
+				}).
+				map(dataBuffer -> {
+					long currentCount = byteCountDown.get();
+					// slice first buffer, then let others flow through
+					if (currentCount < 0) {
+						int skip = (int) (currentCount + dataBuffer.readableByteCount());
+						byteCountDown.set(0);
+						return dataBuffer.slice(skip, dataBuffer.readableByteCount() - skip);
+					}
+					return dataBuffer;
 				});
 	}
 

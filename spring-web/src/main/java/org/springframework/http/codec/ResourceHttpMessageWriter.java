@@ -28,13 +28,13 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.ResourceEncoder;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
+import org.springframework.util.ResourceUtils;
 
 /**
  * Implementation of {@link HttpMessageWriter} that can write
@@ -81,7 +81,7 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 			headers.setContentType(mediaType);
 		}
 		if (headers.getContentLength() < 0) {
-			contentLength(resource).ifPresent(headers::setContentLength);
+			ResourceUtils.contentLength(resource).ifPresent(headers::setContentLength);
 		}
 	}
 
@@ -99,19 +99,6 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 		// non-zero copy fallback, using ResourceEncoder
 		return super.write(Mono.just(resource), type,
 				outputMessage.getHeaders().getContentType(), outputMessage, hints);
-	}
-
-	private static Optional<Long> contentLength(Resource resource) {
-		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
-		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
-		if (InputStreamResource.class != resource.getClass()) {
-			try {
-				return Optional.of(resource.contentLength());
-			}
-			catch (IOException ignored) {
-			}
-		}
-		return Optional.empty();
 	}
 
 	private static Optional<File> getFile(Resource resource) {
