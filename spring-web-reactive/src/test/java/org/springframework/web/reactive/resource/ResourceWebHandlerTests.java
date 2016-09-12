@@ -16,6 +16,10 @@
 
 package org.springframework.web.reactive.resource;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.web.reactive.HandlerMapping.*;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -25,12 +29,17 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
@@ -44,13 +53,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
-
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.HandlerMapping.*;
 
 /**
  * Unit tests for {@link ResourceWebHandler}.
@@ -68,6 +75,8 @@ public class ResourceWebHandlerTests {
 	private MockServerHttpResponse response = new MockServerHttpResponse();
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
+
+	private DataBufferFactory bufferFactory = new DefaultDataBufferFactory();
 
 
 	@Before
@@ -437,7 +446,6 @@ public class ResourceWebHandlerTests {
 	}
 
 	@Test
-	@Ignore
 	public void partialContentByteRange() throws Exception {
 		this.request.addHeader("Range", "bytes=0-1");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
@@ -453,7 +461,6 @@ public class ResourceWebHandlerTests {
 	}
 
 	@Test
-	@Ignore
 	public void partialContentByteRangeNoEnd() throws Exception {
 		this.request.addHeader("Range", "bytes=9-");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
@@ -469,7 +476,6 @@ public class ResourceWebHandlerTests {
 	}
 
 	@Test
-	@Ignore
 	public void partialContentByteRangeLargeEnd() throws Exception {
 		this.request.addHeader("Range", "bytes=9-10000");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
@@ -485,7 +491,6 @@ public class ResourceWebHandlerTests {
 	}
 
 	@Test
-	@Ignore
 	public void partialContentSuffixRange() throws Exception {
 		this.request.addHeader("Range", "bytes=-1");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
@@ -501,7 +506,6 @@ public class ResourceWebHandlerTests {
 	}
 
 	@Test
-	@Ignore
 	public void partialContentSuffixRangeLargeSuffix() throws Exception {
 		this.request.addHeader("Range", "bytes=-11");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
@@ -517,20 +521,19 @@ public class ResourceWebHandlerTests {
 	}
 
 	@Test
-	@Ignore
 	public void partialContentInvalidRangeHeader() throws Exception {
 		this.request.addHeader("Range", "bytes= foo bar");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
-		this.handler.handle(this.exchange).blockMillis(5000);
 
-		assertEquals(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, this.response.getStatusCode());
-		assertEquals("bytes */10", this.response.getHeaders().getFirst("Content-Range"));
-		assertEquals("bytes", this.response.getHeaders().getFirst("Accept-Ranges"));
-		assertEquals(1, this.response.getHeaders().get("Accept-Ranges").size());
+		TestSubscriber.subscribe(this.handler.handle(this.exchange))
+				.assertErrorWith(throwable -> {
+					assertThat(throwable, instanceOf(ResponseStatusException.class));
+					ResponseStatusException exc = (ResponseStatusException) throwable;
+					assertThat(exc.getStatus(), is(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE));
+				});
 	}
 
 	@Test
-	@Ignore
 	public void partialContentMultipleByteRanges() throws Exception {
 		this.request.addHeader("Range", "bytes=0-1, 4-5, 8-9");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
@@ -538,11 +541,18 @@ public class ResourceWebHandlerTests {
 
 		assertEquals(HttpStatus.PARTIAL_CONTENT, this.response.getStatusCode());
 		assertTrue(this.response.getHeaders().getContentType().toString()
-				.startsWith("multipart/byteranges; boundary="));
+				.startsWith("multipart/byteranges;boundary="));
 
-		String boundary = "--" + this.response.getHeaders().getContentType().toString().substring(31);
+		String boundary = "--" + this.response.getHeaders().getContentType().toString().substring(30);
 
-		TestSubscriber.subscribe(this.response.getBody())
+		Mono<DataBuffer> reduced = Flux.from(this.response.getBody())
+				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
+					previous.write(current);
+					DataBufferUtils.release(current);
+					return previous;
+				});
+
+		TestSubscriber.subscribe(reduced)
 				.assertValuesWith(buf -> {
 					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
 					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);

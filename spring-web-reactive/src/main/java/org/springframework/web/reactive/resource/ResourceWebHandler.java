@@ -54,6 +54,7 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.PathExtensionContentTypeResolver;
 import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 
@@ -82,6 +83,7 @@ import org.springframework.web.server.WebHandler;
  * client.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class ResourceWebHandler
@@ -188,7 +190,7 @@ public class ResourceWebHandler
 	}
 
 	/**
-	 * Return the list of configured resource converters.
+	 * Return the configured resource message writer.
 	 */
 	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
 		return this.resourceHttpMessageWriter;
@@ -333,15 +335,12 @@ public class ResourceWebHandler
 							return Mono.empty();
 						}
 
-						// TODO: range requests
-
 						setHeaders(exchange, resource, mediaType);
-
-						return this.resourceHttpMessageWriter.write(
-								Mono.just(resource), ResolvableType.forClass(Resource.class),
-								mediaType, exchange.getResponse(), Collections.emptyMap());
+						return this.resourceHttpMessageWriter.write(Mono.just(resource),
+								null, ResolvableType.forClass(Resource.class), mediaType,
+								exchange.getRequest(), exchange.getResponse(), Collections.emptyMap());
 					}
-					catch (IOException ex) {
+					catch (IOException|ResponseStatusException ex) {
 						return Mono.error(ex);
 					}
 				});
