@@ -18,6 +18,9 @@ package org.springframework.http.codec;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,12 +32,19 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.ResourceEncoder;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRange;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.ResourceUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Implementation of {@link HttpMessageWriter} that can write
@@ -44,19 +54,42 @@ import org.springframework.util.ResourceUtils;
  * {@link DecoderHttpMessageReader}.
  *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 5.0
  */
-public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource> {
+public class ResourceHttpMessageWriter extends AbstractServerHttpMessageWriter<Resource> {
+
+	public static final String HTTP_RANGE_REQUEST_HINT = ResourceHttpMessageWriter.class.getName() + ".httpRange";
+
+	private ResourceRegionHttpMessageWriter resourceRegionHttpMessageWriter;
 
 
 	public ResourceHttpMessageWriter() {
-		super(new ResourceEncoder());
+		super(new EncoderHttpMessageWriter<>(new ResourceEncoder()));
+		this.resourceRegionHttpMessageWriter = new ResourceRegionHttpMessageWriter();
 	}
 
 	public ResourceHttpMessageWriter(int bufferSize) {
-		super(new ResourceEncoder(bufferSize));
+		super(new EncoderHttpMessageWriter<>(new ResourceEncoder(bufferSize)));
+		this.resourceRegionHttpMessageWriter = new ResourceRegionHttpMessageWriter(bufferSize);
 	}
 
+	@Override
+	protected Map<String, Object> beforeWrite(ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+		try {
+			List<HttpRange> httpRanges = request.getHeaders().getRange();
+			if (!httpRanges.isEmpty()) {
+				response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
+				return Collections.singletonMap(ResourceHttpMessageWriter.HTTP_RANGE_REQUEST_HINT, httpRanges);
+			}
+		}
+		catch (IllegalArgumentException ex) {
+			throw new ResponseStatusException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
+					"Could not parse Range request header", ex);
+		}
+		return Collections.emptyMap();
+	}
 
 	@Override
 	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType elementType,
@@ -69,6 +102,31 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 					addHeaders(headers, resource, mediaType);
 					return writeContent(resource, elementType, outputMessage, hints);
 				}));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType streamType,
+			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
+			ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> mergedHints = new HashMap<>(hints);
+		mergedHints.putAll(beforeWrite(streamType, elementType, mediaType, request, response));
+		if (mergedHints.containsKey(HTTP_RANGE_REQUEST_HINT)) {
+			List<HttpRange> httpRanges = (List<HttpRange>) mergedHints.get(HTTP_RANGE_REQUEST_HINT);
+			if (httpRanges.size() > 1) {
+				final String boundary = MimeTypeUtils.generateMultipartBoundaryString();
+				mergedHints.put(ResourceRegionHttpMessageWriter.BOUNDARY_STRING_HINT, boundary);
+			}
+			Flux<ResourceRegion> regions = Flux.from(inputStream)
+					.flatMap(resource -> Flux.fromIterable(HttpRange.toResourceRegions(httpRanges, resource)));
+
+			return this.resourceRegionHttpMessageWriter
+					.write(regions, ResolvableType.forClass(ResourceRegion.class), mediaType, response, mergedHints);
+		}
+		else {
+			return write(inputStream, elementType, mediaType, response, mergedHints);
+		}
 	}
 
 	protected void addHeaders(HttpHeaders headers, Resource resource, MediaType mediaType) {
@@ -85,7 +143,8 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 		}
 	}
 
-	private Mono<Void> writeContent(Resource resource, ResolvableType type, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+	private Mono<Void> writeContent(Resource resource, ResolvableType type,
+			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 		if (outputMessage instanceof ZeroCopyHttpOutputMessage) {
 			Optional<File> file = getFile(resource);
 			if (file.isPresent()) {
