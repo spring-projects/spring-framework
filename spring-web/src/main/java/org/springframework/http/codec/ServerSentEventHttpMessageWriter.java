@@ -19,6 +19,7 @@ package org.springframework.http.codec;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.reactivestreams.Publisher;
@@ -61,7 +62,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType type, MediaType mediaType) {
+	public boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
 		return mediaType == null || TEXT_EVENT_STREAM.isCompatibleWith(mediaType);
 	}
 
@@ -71,19 +72,19 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@Override
-	public Mono<Void> write(Publisher<?> inputStream, ResolvableType type,
-							MediaType contentType, ReactiveHttpOutputMessage outputMessage) {
+	public Mono<Void> write(Publisher<?> inputStream, ResolvableType type, MediaType contentType,
+			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 
 		outputMessage.getHeaders().setContentType(TEXT_EVENT_STREAM);
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
-		Flux<Publisher<DataBuffer>> body = encode(inputStream, bufferFactory, type);
+		Flux<Publisher<DataBuffer>> body = encode(inputStream, bufferFactory, type, hints);
 
 		return outputMessage.writeAndFlushWith(body);
 	}
 
-	private Flux<Publisher<DataBuffer>> encode(Publisher<?> inputStream,
-											   DataBufferFactory bufferFactory, ResolvableType type) {
+	private Flux<Publisher<DataBuffer>> encode(Publisher<?> inputStream, DataBufferFactory bufferFactory,
+			ResolvableType type, Map<String, Object> hints) {
 
 		return Flux.from(inputStream)
 				.map(o -> toSseEvent(o, type))
@@ -105,7 +106,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 									return Flux.empty();
 								}
 								else {
-									return applyEncoder(data, bufferFactory);
+									return applyEncoder(data, bufferFactory, hints);
 								}
 							}).orElse(Flux.empty());
 
@@ -129,14 +130,14 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Flux<DataBuffer> applyEncoder(Object data, DataBufferFactory bufferFactory) {
+	private <T> Flux<DataBuffer> applyEncoder(Object data, DataBufferFactory bufferFactory, Map<String, Object> hints) {
 		ResolvableType elementType = ResolvableType.forClass(data.getClass());
 		Optional<Encoder<?>> encoder = dataEncoders
 				.stream()
-				.filter(e -> e.canEncode(elementType, MimeTypeUtils.APPLICATION_JSON))
+				.filter(e -> e.canEncode(elementType, MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()))
 				.findFirst();
 		return ((Encoder<T>) encoder.orElseThrow(() -> new CodecException("No suitable encoder found!")))
-				.encode(Mono.just((T) data), bufferFactory, elementType, MimeTypeUtils.APPLICATION_JSON)
+				.encode(Mono.just((T) data), bufferFactory, elementType, MimeTypeUtils.APPLICATION_JSON, hints)
 				.concatWith(encodeString("\n", bufferFactory));
 	}
 

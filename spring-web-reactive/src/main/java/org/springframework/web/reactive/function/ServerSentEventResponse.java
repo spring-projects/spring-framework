@@ -74,7 +74,8 @@ class ServerSentEventResponse<T extends Publisher<?>> extends AbstractResponse<T
 	@Override
 	public Mono<Void> writeTo(ServerWebExchange exchange) {
 		writeStatusAndHeaders(exchange);
-		return this.messageWriter.write(this.eventsPublisher, this.eventType, null, exchange.getResponse());
+		return this.messageWriter.write(this.eventsPublisher, this.eventType, null,
+				exchange.getResponse(), Collections.emptyMap());
 	}
 
 }

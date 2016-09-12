@@ -16,7 +16,9 @@
 
 package org.springframework.http.codec;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -31,6 +33,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 5.0
  */
 public interface HttpMessageWriter<T> {
@@ -40,15 +43,10 @@ public interface HttpMessageWriter<T> {
 	 * @param type the class to test for writability
 	 * @param mediaType the media type to write, can be {@code null} if not specified.
 	 * Typically the value of an {@code Accept} header.
+	 * @param hints additional information about how to do write
 	 * @return {@code true} if writable; {@code false} otherwise
 	 */
-	boolean canWrite(ResolvableType type, MediaType mediaType);
-
-	/**
-	 * Return the list of {@link MediaType} objects that can be written by this converter.
-	 * @return the list of supported readable media types
-	 */
-	List<MediaType> getWritableMediaTypes();
+	boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints);
 
 	/**
 	 * Write an given object to the given output message.
@@ -57,9 +55,16 @@ public interface HttpMessageWriter<T> {
 	 * @param contentType the content type to use when writing. May be {@code null} to
 	 * indicate that the default content type of the converter must be used.
 	 * @param outputMessage the message to write to
+	 * @param hints additional information about how to do write
 	 * @return the converted {@link Mono} of object
 	 */
 	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage);
+			MediaType contentType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints);
+
+	/**
+	 * Return the list of {@link MediaType} objects that can be written by this converter.
+	 * @return the list of supported readable media types
+	 */
+	List<MediaType> getWritableMediaTypes();
 
 }

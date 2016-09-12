@@ -21,6 +21,7 @@ import java.net.URLDecoder;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -333,7 +334,7 @@ public class ResourceWebHandler
 
 			setHeaders(exchange, resource, mediaType);
 			return this.resourceHttpMessageWriter.write(Mono.just(resource),
-					ResolvableType.forClass(Resource.class), mediaType, exchange.getResponse());
+					ResolvableType.forClass(Resource.class), mediaType, exchange.getResponse(), Collections.emptyMap());
 		}
 		catch (IOException ex) {
 			return Mono.error(ex);

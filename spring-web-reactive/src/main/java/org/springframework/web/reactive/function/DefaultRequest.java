@@ -173,13 +173,13 @@ class DefaultRequest implements Request {
 		@Override
 		public <T> Flux<T> convertTo(Class<? extends T> aClass) {
 			ResolvableType elementType = ResolvableType.forClass(aClass);
-			return convertTo(aClass, reader -> reader.read(elementType, request()));
+			return convertTo(aClass, reader -> reader.read(elementType, request(), Collections.emptyMap()));
 		}
 
 		@Override
 		public <T> Mono<T> convertToMono(Class<? extends T> aClass) {
 			ResolvableType elementType = ResolvableType.forClass(aClass);
-			return convertTo(aClass, reader -> reader.readMono(elementType, request()));
+			return convertTo(aClass, reader -> reader.readMono(elementType, request(), Collections.emptyMap()));
 		}
 
 		private <T, S extends Publisher<T>> S convertTo(Class<? extends T> targetClass,
@@ -187,7 +187,7 @@ class DefaultRequest implements Request {
 			ResolvableType elementType = ResolvableType.forClass(targetClass);
 			MediaType contentType = headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
 			return messageReaderStream(exchange)
-					.filter(r -> r.canRead(elementType, contentType))
+					.filter(r -> r.canRead(elementType, contentType, Collections.emptyMap()))
 					.findFirst()
 					.map(CastingUtils::<T>cast)
 					.map(readerFunction)

@@ -46,19 +46,20 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 	@Test
 	public void nullMimeType() {
-		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class), null));
+		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class), null,
+				Collections.emptyMap()));
 	}
 
 	@Test
 	public void unsupportedMimeType() {
 		assertFalse(messageWriter.canWrite(ResolvableType.forClass(Object.class),
-				new MediaType("foo", "bar")));
+				new MediaType("foo", "bar"), Collections.emptyMap()));
 	}
 
 	@Test
 	public void supportedMimeType() {
 		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class),
-				new MediaType("text", "event-stream")));
+				new MediaType("text", "event-stream"), Collections.emptyMap()));
 	}
 
 	@Test
@@ -69,7 +70,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Mono<ServerSentEvent<String>> source = Mono.just(event);
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(ServerSentEvent.class),
-				new MediaType("text", "event-stream"), outputMessage);
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
 		TestSubscriber.subscribe(result).
@@ -89,7 +90,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Flux<String> source = Flux.just("foo", "bar");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(String.class),
-				new MediaType("text", "event-stream"), outputMessage);
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
 		TestSubscriber.subscribe(result).
@@ -112,7 +113,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 		Flux<String> source = Flux.just("foo\nbar", "foo\nbaz");
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(String.class),
-				new MediaType("text", "event-stream"), outputMessage);
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
 		TestSubscriber.subscribe(result).
@@ -136,7 +137,7 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 				new Pojo("foofoofoo", "barbarbar"));
 		MockServerHttpResponse outputMessage = new MockServerHttpResponse();
 		messageWriter.write(source, ResolvableType.forClass(Pojo.class),
-				new MediaType("text", "event-stream"), outputMessage);
+				new MediaType("text", "event-stream"), outputMessage, Collections.emptyMap());
 
 		Publisher<Publisher<DataBuffer>> result = outputMessage.getBodyWithFlush();
 		TestSubscriber.subscribe(result).

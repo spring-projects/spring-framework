@@ -16,6 +16,7 @@
 
 package org.springframework.web.client.reactive.support;
 
+import java.util.Collections;
 import java.util.List;
 
 import reactor.adapter.RxJava1Adapter;
@@ -193,7 +194,7 @@ public class RxJava1ResponseExtractors {
 
 		MediaType contentType = response.getHeaders().getContentType();
 		HttpMessageReader<?> converter = resolveMessageReader(messageReaders, responseType, contentType);
-		return (Flux<T>) converter.read(responseType, response);
+		return (Flux<T>) converter.read(responseType, response, Collections.emptyMap());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -202,14 +203,14 @@ public class RxJava1ResponseExtractors {
 
 		MediaType contentType = response.getHeaders().getContentType();
 		HttpMessageReader<?> converter = resolveMessageReader(messageReaders, responseType, contentType);
-		return (Mono<T>) converter.readMono(responseType, response);
+		return (Mono<T>) converter.readMono(responseType, response, Collections.emptyMap());
 	}
 
 	protected static HttpMessageReader<?> resolveMessageReader(List<HttpMessageReader<?>> messageReaders,
 			ResolvableType responseType, MediaType contentType) {
 
 		return messageReaders.stream()
-				.filter(e -> e.canRead(responseType, contentType))
+				.filter(e -> e.canRead(responseType, contentType, Collections.emptyMap()))
 				.findFirst()
 				.orElseThrow(() ->
 						new WebClientException(

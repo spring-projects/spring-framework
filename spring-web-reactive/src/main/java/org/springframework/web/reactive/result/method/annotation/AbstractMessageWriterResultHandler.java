@@ -15,6 +15,7 @@
  */
 package org.springframework.web.reactive.result.method.annotation;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,9 +121,10 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 
 		if (bestMediaType != null) {
 			for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
-				if (messageWriter.canWrite(elementType, bestMediaType)) {
+				if (messageWriter.canWrite(elementType, bestMediaType, Collections.emptyMap())) {
 					ServerHttpResponse response = exchange.getResponse();
-					return messageWriter.write((Publisher) publisher, elementType, bestMediaType, response);
+					return messageWriter.write((Publisher) publisher, elementType,
+							bestMediaType, response, Collections.emptyMap());
 				}
 			}
 		}
@@ -132,7 +134,7 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 
 	private List<MediaType> getProducibleMediaTypes(ResolvableType elementType) {
 		return getMessageWriters().stream()
-				.filter(converter -> converter.canWrite(elementType, null))
+				.filter(converter -> converter.canWrite(elementType, null, Collections.emptyMap()))
 				.flatMap(converter -> converter.getWritableMediaTypes().stream())
 				.collect(Collectors.toList());
 	}

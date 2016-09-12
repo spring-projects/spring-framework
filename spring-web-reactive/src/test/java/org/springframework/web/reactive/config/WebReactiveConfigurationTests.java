@@ -250,7 +250,7 @@ public class WebReactiveConfigurationTests {
 	private void assertHasMessageReader(List<HttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
 		assertTrue(readers.stream()
-				.filter(c -> mediaType == null || c.canRead(type, mediaType))
+				.filter(c -> mediaType == null || c.canRead(type, mediaType, Collections.emptyMap()))
 				.findAny()
 				.isPresent());
 	}
@@ -258,7 +258,7 @@ public class WebReactiveConfigurationTests {
 	private void assertHasMessageWriter(List<HttpMessageWriter<?>> writers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
 		assertTrue(writers.stream()
-				.filter(c -> mediaType == null || c.canWrite(type, mediaType))
+				.filter(c -> mediaType == null || c.canWrite(type, mediaType, Collections.emptyMap()))
 				.findAny()
 				.isPresent());
 	}

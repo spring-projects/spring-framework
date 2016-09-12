@@ -16,6 +16,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -129,9 +130,9 @@ public abstract class AbstractMessageReaderArgumentResolver {
 		}
 
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
-			if (reader.canRead(elementType, mediaType)) {
+			if (reader.canRead(elementType, mediaType, Collections.emptyMap())) {
 				if (adapter != null && adapter.getDescriptor().isMultiValue()) {
-					Flux<?> flux = reader.read(elementType, request)
+					Flux<?> flux = reader.read(elementType, request, Collections.emptyMap())
 							.onErrorResumeWith(ex -> Flux.error(getReadError(ex, bodyParameter)));
 					if (checkRequired(adapter, isBodyRequired)) {
 						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
@@ -142,7 +143,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
-					Mono<?> mono = reader.readMono(elementType, request)
+					Mono<?> mono = reader.readMono(elementType, request, Collections.emptyMap())
 							.otherwise(ex -> Mono.error(getReadError(ex, bodyParameter)));
 					if (checkRequired(adapter, isBodyRequired)) {
 						mono = mono.otherwiseIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));

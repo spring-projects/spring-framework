@@ -291,13 +291,13 @@ public final class WebClient {
 						"Could not encode request body of type '" + contentType
 								+ "' with target type '" + requestType.toString() + "'"));
 			}
-			return messageWriter.get().write((Publisher) content, requestType, contentType, request);
+			return messageWriter.get().write((Publisher) content, requestType, contentType, request, Collections.emptyMap());
 		}
 
 		protected Optional<HttpMessageWriter<?>> resolveWriter(List<HttpMessageWriter<?>> messageWriters,
 				ResolvableType type, MediaType mediaType) {
 
-			return messageWriters.stream().filter(e -> e.canWrite(type, mediaType)).findFirst();
+			return messageWriters.stream().filter(e -> e.canWrite(type, mediaType, Collections.emptyMap())).findFirst();
 		}
 	}
 

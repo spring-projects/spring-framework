@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.Collections;
+
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
@@ -48,8 +50,8 @@ class ResourceResponse extends AbstractResponse<Resource> {
 	@Override
 	public Mono<Void> writeTo(ServerWebExchange exchange) {
 		writeStatusAndHeaders(exchange);
-		return this.messageWriter
-				.write(Mono.just(this.resource), RESOURCE_TYPE, null, exchange.getResponse());
+		return this.messageWriter.write(Mono.just(this.resource), RESOURCE_TYPE, null,
+				exchange.getResponse(), Collections.emptyMap());
 	}
 
 }

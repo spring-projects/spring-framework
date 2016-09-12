@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import java.util.Collections;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -46,10 +47,10 @@ abstract class AbstractHttpMessageWriterResponse<T> extends AbstractResponse<T> 
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 		ServerHttpResponse response = exchange.getResponse();
 		return messageWriterStream(exchange)
-				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType))
+				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType, Collections.emptyMap()))
 				.findFirst()
 				.map(CastingUtils::cast)
-				.map(messageWriter -> messageWriter.write(body, bodyType, contentType, response))
+				.map(messageWriter -> messageWriter.write(body, bodyType, contentType, response, Collections.emptyMap()))
 				.orElseGet(() -> {
 					response.setStatusCode(HttpStatus.NOT_ACCEPTABLE);
 					return response.setComplete();
