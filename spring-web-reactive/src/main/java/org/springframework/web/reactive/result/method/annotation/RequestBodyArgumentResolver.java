@@ -69,6 +69,19 @@ public class RequestBodyArgumentResolver extends AbstractMessageReaderArgumentRe
 		super(readers, validator, adapterRegistry);
 	}
 
+	/**
+	 * Constructor that also accepts a {@link ReactiveAdapterRegistry} and a list of {@link RequestBodyAdvice}.
+	 * @param readers readers for de-serializing the request body with
+	 * @param validator validator to validate decoded objects with
+	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
+	 * @param bodyAdvice body advice to customize the request
+	 */
+	public RequestBodyArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator,
+			ReactiveAdapterRegistry adapterRegistry, List<RequestBodyAdvice> bodyAdvice) {
+
+		super(readers, validator, adapterRegistry, bodyAdvice);
+	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {

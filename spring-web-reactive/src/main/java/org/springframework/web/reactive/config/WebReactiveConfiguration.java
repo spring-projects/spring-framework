@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -60,8 +61,12 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.JsonViewRequestBodyAdvice;
+import org.springframework.web.reactive.result.method.annotation.JsonViewResponseBodyAdvice;
+import org.springframework.web.reactive.result.method.annotation.RequestBodyAdvice;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.reactive.result.method.annotation.ResponseBodyAdvice;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
@@ -229,8 +234,15 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		adapter.setMessageReaders(getMessageReaders());
 		adapter.setConversionService(mvcConversionService());
 		adapter.setValidator(mvcValidator());
+		adapter.setRequestBodyAdvice(getRequestBodyAdvice());
 
 		return adapter;
+	}
+
+	protected List<RequestBodyAdvice> getRequestBodyAdvice() {
+		List<RequestBodyAdvice> advice = new ArrayList<>();
+		advice.add(new JsonViewRequestBodyAdvice());
+		return advice;
 	}
 
 	/**
@@ -357,12 +369,20 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
-		return new ResponseEntityResultHandler(getMessageWriters(), mvcContentTypeResolver());
+		return new ResponseEntityResultHandler(getMessageWriters(), mvcContentTypeResolver(),
+				new ReactiveAdapterRegistry(), getResponseBodyAdvice());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(getMessageWriters(), mvcContentTypeResolver());
+		return new ResponseBodyResultHandler(getMessageWriters(), mvcContentTypeResolver(),
+				new ReactiveAdapterRegistry(), getResponseBodyAdvice());
+	}
+
+	protected List<ResponseBodyAdvice> getResponseBodyAdvice() {
+		List<ResponseBodyAdvice> advice = new ArrayList<>();
+		advice.add(new JsonViewResponseBodyAdvice());
+		return advice;
 	}
 
 	/**
