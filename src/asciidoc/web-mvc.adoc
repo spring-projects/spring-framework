@@ -565,7 +565,7 @@ snippet:
 You use the `@RequestMapping` annotation to map URLs such as `/appointments` onto an
 entire class or a particular handler method. Typically the class-level annotation maps a
 specific request path (or path pattern) onto a form controller, with additional
-method-level annotations narrowing the primary mapping for a specific HTTP method
+method-level annotations narrowing the primary mapping for a specific HTTP
 request method ("GET", "POST", etc.) or an HTTP request parameter condition.
 
 The following example from the __Petcare__ sample shows a controller in a Spring MVC
