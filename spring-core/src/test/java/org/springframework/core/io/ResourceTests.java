@@ -21,6 +21,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.util.HashSet;
 
 import org.junit.Ignore;
@@ -252,6 +254,24 @@ public class ResourceTests {
 			}
 		};
 		resource.contentLength();
+	}
+
+	@Test
+	public void testGetReadableByteChannel() throws IOException {
+		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
+		ReadableByteChannel channel = null;
+		try {
+			channel = resource.readableChannel();
+			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
+			channel.read(buffer);
+			buffer.rewind();
+			assertTrue(buffer.limit() > 0);
+		}
+		finally {
+			if (channel != null) {
+				channel.close();
+			}
+		}
 	}
 
 }

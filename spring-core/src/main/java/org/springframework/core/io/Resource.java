@@ -18,8 +18,11 @@ package org.springframework.core.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 
 /**
  * Interface for a resource descriptor that abstracts from the actual
@@ -110,6 +113,19 @@ public interface Resource extends InputStreamSource {
 	 * file path, i.e. if the resource is not available in a file system
 	 */
 	File getFile() throws IOException;
+
+	/**
+	 * Return a {@link ReadableByteChannel}.
+	 * <p>It is expected that each call creates a <i>fresh</i> channel.
+	 * <p>The default implementation returns {@link Channels#newChannel(InputStream)} with the
+	 * result of {@link #getInputStream()}.
+	 * @return the byte channel for the underlying resource (must not be {@code null})
+	 * @throws IOException if the channel could not be opened
+	 * @since 5.0
+	 */
+	default ReadableByteChannel readableChannel() throws IOException {
+		return Channels.newChannel(getInputStream());
+	}
 
 	/**
 	 * Determine the content length for this resource.
