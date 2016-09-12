@@ -17,7 +17,7 @@
 package org.springframework.core.codec;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.channels.ReadableByteChannel;
 import java.util.Map;
 
 import reactor.core.publisher.Flux;
@@ -66,8 +66,8 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
 			ResolvableType type, MimeType mimeType, Map<String, Object> hints) throws IOException {
 
-		InputStream is = resource.getInputStream();
-		return DataBufferUtils.read(is, dataBufferFactory, bufferSize);
+		ReadableByteChannel channel = resource.readableChannel();
+		return DataBufferUtils.read(channel, dataBufferFactory, bufferSize);
 	}
 
 }

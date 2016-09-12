@@ -17,12 +17,14 @@
 package org.springframework.core.io;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.channels.ReadableByteChannel;
 
 import org.springframework.util.ResourceUtils;
 
@@ -113,6 +115,22 @@ public abstract class AbstractFileResolvingResource extends AbstractResource {
 			return VfsResourceDelegate.getResource(uri).getFile();
 		}
 		return ResourceUtils.getFile(uri, getDescription());
+	}
+
+	/**
+	 * This implementation returns a FileChannel for the given URI-identified
+	 * resource, provided that it refers to a file in the file system.
+	 * @since 5.0
+	 * @see #getFile(URI)
+	 */
+	@Override
+	public ReadableByteChannel readableChannel() throws IOException {
+		if (isFile()) {
+			return new FileInputStream(getFile()).getChannel();
+		}
+		else {
+			return super.readableChannel();
+		}
 	}
 
 
