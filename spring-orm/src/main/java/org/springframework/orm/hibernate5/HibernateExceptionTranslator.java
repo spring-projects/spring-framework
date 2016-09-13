@@ -48,10 +48,13 @@ public class HibernateExceptionTranslator implements PersistenceExceptionTransla
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);
 		}
-		if (ex instanceof PersistenceException && ex.getCause() instanceof HibernateException) {
-			return convertHibernateAccessException((HibernateException) ex.getCause());
+		if (ex instanceof PersistenceException) {
+			if (ex.getCause() instanceof HibernateException) {
+				return convertHibernateAccessException((HibernateException) ex.getCause());
+			}
+			return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
 		}
-		return EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex);
+		return null;
 	}
 
 	/**
