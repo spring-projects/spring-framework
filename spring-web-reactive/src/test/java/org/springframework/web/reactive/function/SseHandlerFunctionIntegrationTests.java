@@ -32,7 +32,7 @@ import org.springframework.web.client.reactive.WebClient;
 
 import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
 import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
-import static org.springframework.web.reactive.function.Router.route;
+import static org.springframework.web.reactive.function.RoutingFunctions.route;
 
 /**
  * @author Arjen Poutsma

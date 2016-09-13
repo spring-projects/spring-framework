@@ -28,7 +28,7 @@ public abstract class AbstractRoutingFunctionIntegrationTests
 	@Override
 	protected final HttpHandler createHttpHandler() {
 		RoutingFunction<?> routingFunction = routingFunction();
-		return Router.toHttpHandler(routingFunction);
+		return RoutingFunctions.toHttpHandler(routingFunction);
 	}
 
 	protected abstract RoutingFunction<?> routingFunction();

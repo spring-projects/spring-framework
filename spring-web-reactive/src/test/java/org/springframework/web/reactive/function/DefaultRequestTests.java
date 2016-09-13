@@ -115,7 +115,7 @@ public class DefaultRequestTests {
 	@Test
 	public void pathVariables() throws Exception {
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		when(mockExchange.getAttribute(Router.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
+		when(mockExchange.getAttribute(RoutingFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
 
 		assertEquals(pathVariables, defaultRequest.pathVariables());
 	}
@@ -161,9 +161,10 @@ public class DefaultRequestTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		when(mockExchange.getAttribute(Router.HTTP_MESSAGE_READERS_ATTRIBUTE))
-				.thenReturn(Optional.of(
-						(Supplier<Stream<HttpMessageReader<?>>>) messageReaders::stream));
+		Configuration mockConfig = mock(Configuration.class);
+		when(mockConfig.messageReaders()).thenReturn(messageReaders::stream);
+		when(mockExchange.getAttribute(RoutingFunctions.CONFIGURATION_ATTRIBUTE))
+				.thenReturn(Optional.of(mockConfig));
 
 		assertEquals(body, defaultRequest.body().stream());
 

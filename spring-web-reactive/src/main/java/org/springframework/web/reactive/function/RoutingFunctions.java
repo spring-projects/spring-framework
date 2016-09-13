@@ -18,18 +18,12 @@ package org.springframework.web.reactive.function;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 
@@ -54,42 +48,27 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public abstract class Router {
+public abstract class RoutingFunctions {
 
 	private static final HandlerFunction<Void> NOT_FOUND_HANDLER = request -> Response.notFound().build();
 
 	/**
 	 * Name of the {@link ServerWebExchange} attribute that contains the {@link Request}.
 	 */
-	public static final String REQUEST_ATTRIBUTE = Router.class.getName() + ".request";
+	public static final String REQUEST_ATTRIBUTE = RoutingFunctions.class.getName() + ".request";
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains a {@link Supplier} to the
-	 * {@linkplain Stream stream} of {@link HttpMessageReader}s obtained
-	 * from the {@linkplain Configuration#messageReaders() configuration}.
+	 * Name of the {@link ServerWebExchange} attribute that contains the
+	 * {@linkplain Configuration configuration} used throughout the routing and handling of the
+	 * request.
 	 */
-	public static final String HTTP_MESSAGE_READERS_ATTRIBUTE = Router.class.getName() + ".httpMessageReaders";
-
-	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains a {@link Supplier} to the
-	 * {@linkplain Stream stream} of {@link HttpMessageWriter}s obtained
-	 * from the {@linkplain Configuration#messageWriters()  configuration}.
-	 */
-	public static final String HTTP_MESSAGE_WRITERS_ATTRIBUTE = Router.class.getName() + ".httpMessageWriters";
+	public static final String CONFIGURATION_ATTRIBUTE = RoutingFunctions.class.getName() + ".configuration";
 
 	/**
 	 * Name of the {@link ServerWebExchange} attribute that contains the URI
 	 * templates map, mapping variable names to values.
 	 */
-	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = Router.class.getName() + ".uriTemplateVariables";
-
-	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the {@link Supplier} to the
-	 * {@linkplain Stream stream} of {@link ViewResolver}s obtained
-	 * from the {@linkplain Configuration#viewResolvers() configuration}.
-	 */
-	public static final String VIEW_RESOLVERS_ATTRIBUTE = Router.class.getName() + ".viewResolvers";
-
+	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = RoutingFunctions.class.getName() + ".uriTemplateVariables";
 
 	/**
 	 * Route to the given handler function if the given request predicate applies.
@@ -133,7 +112,7 @@ public abstract class Router {
 
 	/**
 	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HttpHandler}.
-	 * This conversion uses the {@linkplain #defaultConfiguration() default configuration}.
+	 * This conversion uses the {@linkplain Configuration#defaultBuilder() default configuration}.
 	 *
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
 	 * {@linkplain org.springframework.http.server.reactive.ServletHttpHandlerAdapter Servlet 3.1+},
@@ -178,7 +157,7 @@ public abstract class Router {
 
 	/**
 	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HandlerMapping}.
-	 * This conversion uses the {@linkplain #defaultConfiguration() default configuration}.
+	 * This conversion uses the {@linkplain Configuration#defaultBuilder() default configuration}.
 	 *
 	 * <p>The returned {@code HttpHandler} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
@@ -217,83 +196,20 @@ public abstract class Router {
 		};
 	}
 
+	private static Configuration defaultConfiguration() {
+		return Configuration.defaultBuilder().build();
+	}
+
 	private static void addAttributes(ServerWebExchange exchange, Request request,
 			Configuration configuration) {
 		Map<String, Object> attributes = exchange.getAttributes();
 		attributes.put(REQUEST_ATTRIBUTE, request);
-		attributes.put(HTTP_MESSAGE_READERS_ATTRIBUTE, configuration.messageReaders());
-		attributes.put(HTTP_MESSAGE_WRITERS_ATTRIBUTE, configuration.messageWriters());
-		attributes.put(VIEW_RESOLVERS_ATTRIBUTE, configuration.viewResolvers());
+		attributes.put(CONFIGURATION_ATTRIBUTE, configuration);
 	}
 
 	@SuppressWarnings("unchecked")
 	private static <T> HandlerFunction<T> notFound() {
 		return (HandlerFunction<T>) NOT_FOUND_HANDLER;
-	}
-
-
-	/**
-	 * Return the default configuration.
-	 */
-	public static Configuration defaultConfiguration() {
-		return new DefaultConfiguration();
-	}
-
-	/**
-	 * Returns a configuration based on the given {@linkplain ApplicationContext application context}.
-	 * This configuration will search for all {@link HttpMessageReader} and {@link HttpMessageWriter}
-	 * instances in the given application context.
-	 * @param applicationContext the application context to base the configuration on
-	 * @return the configuration
-	 */
-	public static Configuration toConfiguration(ApplicationContext applicationContext) {
-		return new Configuration() {
-
-			@Override
-			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-				return () -> applicationContext.getBeansOfType(HttpMessageReader.class).values().stream()
-						.map(CastingUtils::cast);
-			}
-
-			@Override
-			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
-				return () -> applicationContext.getBeansOfType(HttpMessageWriter.class).values().stream()
-						.map(CastingUtils::cast);
-			}
-
-			@Override
-			public Supplier<Stream<ViewResolver>> viewResolvers() {
-				return () -> applicationContext.getBeansOfType(ViewResolver.class).values().stream();
-			}
-		};
-	}
-
-
-	/**
-	 * Defines the configuration to be used by this {@code Router}.
-	 */
-	public interface Configuration {
-
-		/**
-		 * Supply a {@linkplain Stream stream} of {@link HttpMessageReader}s to be used for request
-		 * body conversion.
-		 * @return the stream of message readers
-		 */
-		Supplier<Stream<HttpMessageReader<?>>> messageReaders();
-
-		/**
-		 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s to be used for response
-		 * body conversion.
-		 * @return the stream of message writers
-		 */
-		Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
-
-		/**
-		 * Supply a {@linkplain Stream stream} of {@link ViewResolver}s to be used for view name
-		 * resolution.
-		 * @return the stream of view resolvers
-		 */
-		Supplier<Stream<ViewResolver>> viewResolvers();
 	}
 
 }

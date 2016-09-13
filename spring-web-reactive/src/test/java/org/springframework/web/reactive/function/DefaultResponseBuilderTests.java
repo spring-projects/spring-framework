@@ -18,7 +18,9 @@ package org.springframework.web.reactive.function;
 
 import java.net.URI;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -218,11 +220,13 @@ public class DefaultResponseBuilderTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		ServerWebExchange exchange =
 				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-		Set<HttpMessageWriter<?>>
-				messageWriters = Collections
-				.singleton(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE,
-				(Supplier<Stream<HttpMessageWriter<?>>>) messageWriters::stream);
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
+
+		Configuration mockConfig = mock(Configuration.class);
+		when(mockConfig.messageWriters()).thenReturn(messageWriters::stream);
+		exchange.getAttributes().put(RoutingFunctions.CONFIGURATION_ATTRIBUTE, mockConfig);
 
 		result.writeTo(exchange).block();
 		assertNotNull(response.getBody());
@@ -239,11 +243,13 @@ public class DefaultResponseBuilderTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		ServerWebExchange exchange =
 				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-		Set<HttpMessageWriter<?>>
-				messageWriters = Collections
-				.singleton(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE,
-				(Supplier<Stream<HttpMessageWriter<?>>>) messageWriters::stream);
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
+
+		Configuration mockConfig = mock(Configuration.class);
+		when(mockConfig.messageWriters()).thenReturn(messageWriters::stream);
+		exchange.getAttributes().put(RoutingFunctions.CONFIGURATION_ATTRIBUTE, mockConfig);
 
 		result.writeTo(exchange).block();
 		assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
@@ -259,10 +265,13 @@ public class DefaultResponseBuilderTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		ServerWebExchange exchange =
 				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-		Set<HttpMessageWriter<?>> messageWriters = Collections
-				.singleton(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE,
-				(Supplier<Stream<HttpMessageWriter<?>>>) messageWriters::stream);
+
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
+
+		Configuration mockConfig = mock(Configuration.class);
+		when(mockConfig.messageWriters()).thenReturn(messageWriters::stream);
+		exchange.getAttributes().put(RoutingFunctions.CONFIGURATION_ATTRIBUTE, mockConfig);
 
 		result.writeTo(exchange).block();
 		assertNotNull(response.getBody());
@@ -311,10 +320,13 @@ public class DefaultResponseBuilderTests {
 		View view = mock(View.class);
 		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));
 		when(view.render(model, null, exchange)).thenReturn(Mono.empty());
-		exchange.getAttributes().put(Router.VIEW_RESOLVERS_ATTRIBUTE,
-				(Supplier<Stream<ViewResolver>>) () -> Collections
-						.singleton(viewResolver).stream());
 
+		List<ViewResolver> viewResolvers = new ArrayList<>();
+		viewResolvers.add(viewResolver);
+
+		Configuration mockConfig = mock(Configuration.class);
+		when(mockConfig.viewResolvers()).thenReturn(viewResolvers::stream);
+		exchange.getAttributes().put(RoutingFunctions.CONFIGURATION_ATTRIBUTE, mockConfig);
 
 		result.writeTo(exchange).block();
 	}

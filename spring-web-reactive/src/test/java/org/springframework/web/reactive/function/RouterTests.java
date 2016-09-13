@@ -57,7 +57,7 @@ public class RouterTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RoutingFunction<Void> result = Router.route(requestPredicate, handlerFunction);
+		RoutingFunction<Void> result = RoutingFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -73,7 +73,7 @@ public class RouterTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RoutingFunction<Void> result = Router.route(requestPredicate, handlerFunction);
+		RoutingFunction<Void> result = RoutingFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -89,7 +89,7 @@ public class RouterTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RoutingFunction<Void> result = Router.subroute(requestPredicate, routingFunction);
+		RoutingFunction<Void> result = RoutingFunctions.subroute(requestPredicate, routingFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -106,7 +106,7 @@ public class RouterTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RoutingFunction<Void> result = Router.subroute(requestPredicate, routingFunction);
+		RoutingFunction<Void> result = RoutingFunctions.subroute(requestPredicate, routingFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -128,7 +128,7 @@ public class RouterTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		Router.Configuration configuration = mock(Router.Configuration.class);
+		Configuration configuration = mock(Configuration.class);
 		when(configuration.messageReaders()).thenReturn(
 				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
 		when(configuration.messageWriters()).thenReturn(
@@ -136,72 +136,13 @@ public class RouterTests {
 		when(configuration.viewResolvers()).thenReturn(
 				() -> Collections.<ViewResolver>emptyList().stream());
 
-		HttpHandler result = Router.toHttpHandler(routingFunction, configuration);
+		HttpHandler result = RoutingFunctions.toHttpHandler(routingFunction, configuration);
 		assertNotNull(result);
 
-		MockServerHttpRequest httpRequest = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
+		MockServerHttpRequest httpRequest =
+				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
 		MockServerHttpResponse serverHttpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, serverHttpResponse);
 	}
 
-	@Test
-	public void toConfiguration() throws Exception {
-		StaticApplicationContext applicationContext = new StaticApplicationContext();
-		applicationContext.registerSingleton("messageWriter", DummyMessageWriter.class);
-		applicationContext.registerSingleton("messageReader", DummyMessageReader.class);
-		applicationContext.refresh();
-
-		Router.Configuration configuration = Router.toConfiguration(applicationContext);
-		assertTrue(configuration.messageReaders().get()
-				.allMatch(r -> r instanceof DummyMessageReader));
-		assertTrue(configuration.messageWriters().get()
-				.allMatch(r -> r instanceof DummyMessageWriter));
-
-	}
-
-	private static class DummyMessageWriter implements HttpMessageWriter<Object> {
-
-		@Override
-		public boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
-			return false;
-		}
-
-		@Override
-		public List<MediaType> getWritableMediaTypes() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public Mono<Void> write(Publisher<?> inputStream, ResolvableType elementType,
-				MediaType mediaType,
-				ReactiveHttpOutputMessage outputMessage,
-				Map<String, Object> hints) {
-			return Mono.empty();
-		}
-	}
-
-	private static class DummyMessageReader implements HttpMessageReader<Object> {
-
-		@Override
-		public boolean canRead(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
-			return false;
-		}
-
-		@Override
-		public List<MediaType> getReadableMediaTypes() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
-				Map<String, Object> hints) {
-			return Flux.empty();
-		}
-
-		@Override
-		public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
-				Map<String, Object> hints) {
-			return Mono.empty();
-		}
-	}
 }

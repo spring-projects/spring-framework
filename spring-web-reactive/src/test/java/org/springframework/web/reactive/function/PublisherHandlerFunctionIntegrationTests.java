@@ -35,7 +35,7 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.web.reactive.function.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.RequestPredicates.POST;
-import static org.springframework.web.reactive.function.Router.route;
+import static org.springframework.web.reactive.function.RoutingFunctions.route;
 
 /**
  * @author Arjen Poutsma

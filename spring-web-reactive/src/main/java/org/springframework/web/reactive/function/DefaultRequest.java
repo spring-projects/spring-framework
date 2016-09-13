@@ -95,7 +95,7 @@ class DefaultRequest implements Request {
 
 	@Override
 	public Map<String, String> pathVariables() {
-		return this.exchange.<Map<String, String>>getAttribute(Router.URI_TEMPLATE_VARIABLES_ATTRIBUTE).
+		return this.exchange.<Map<String, String>>getAttribute(RoutingFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE).
 				orElseGet(Collections::emptyMap);
 	}
 
@@ -186,13 +186,14 @@ class DefaultRequest implements Request {
 				Function<HttpMessageReader<T>, S> readerFunction) {
 			ResolvableType elementType = ResolvableType.forClass(targetClass);
 			MediaType contentType = headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
-			return messageReaderStream(exchange)
+			Supplier<Stream<HttpMessageReader<?>>> messageReaderStream = configuration(exchange).messageReaders();
+			return messageReaderStream.get()
 					.filter(r -> r.canRead(elementType, contentType, Collections.emptyMap()))
 					.findFirst()
 					.map(CastingUtils::<T>cast)
 					.map(readerFunction)
 					.orElseGet(() -> {
-						List<MediaType> supportedMediaTypes = messageReaderStream(exchange)
+						List<MediaType> supportedMediaTypes = messageReaderStream.get()
 								.flatMap(messageReader -> messageReader.getReadableMediaTypes().stream())
 								.collect(Collectors.toList());
 						return cast(
@@ -200,10 +201,11 @@ class DefaultRequest implements Request {
 					});
 		}
 
-		private Stream<HttpMessageReader<?>> messageReaderStream(ServerWebExchange exchange) {
-			return exchange.<Supplier<Stream<HttpMessageReader<?>>>>getAttribute(Router.HTTP_MESSAGE_READERS_ATTRIBUTE)
-					.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageReaders in ServerWebExchange"))
-					.get();
+		private Configuration configuration(ServerWebExchange exchange) {
+			return exchange.<Configuration>getAttribute(
+					RoutingFunctions.CONFIGURATION_ATTRIBUTE)
+					.orElseThrow(() -> new IllegalStateException(
+							"Could not find Configuration in ServerWebExchange"));
 		}
 
 		@SuppressWarnings("unchecked")

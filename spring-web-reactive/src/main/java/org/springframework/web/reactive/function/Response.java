@@ -306,6 +306,8 @@ public interface Response<T> {
 		 */
 		BodyBuilder contentType(MediaType contentType);
 
+//		<T> Response<T> body(BodyPopulator<T> populator);
+
 		/**
 		 * Set the body of the response to the given object and return it.
 		 *
@@ -322,6 +324,7 @@ public interface Response<T> {
 		 * @return the built response
 		 */
 		<T, S extends Publisher<T>> Response<S> stream(S publisher, Class<T> elementClass);
+		// ResolvableType
 
 		/**
 		 * Set the body of the response to the given {@link Resource} and return it.
@@ -350,6 +353,7 @@ public interface Response<T> {
 		 * @return the built response
 		 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 		 */
+		// remove?
 		<T, S extends Publisher<T>> Response<S> sse(S eventsPublisher, Class<T> eventClass);
 
 		/**

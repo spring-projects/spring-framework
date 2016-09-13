@@ -50,7 +50,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.web.reactive.function.Router.route;
+import static org.springframework.web.reactive.function.RoutingFunctions.route;
 
 /**
  * Tests the use of {@link HandlerFunction} and {@link RoutingFunction} in a 
@@ -119,8 +119,8 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		@Bean
 		public HandlerMapping handlerMapping(RoutingFunction<?> routingFunction,
 				ApplicationContext applicationContext) {
-			return Router.toHandlerMapping(routingFunction,
-					new Router.Configuration() {
+			return RoutingFunctions.toHandlerMapping(routingFunction,
+					new org.springframework.web.reactive.function.Configuration() {
 						@Override
 						public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 							return () -> getMessageReaders().stream();

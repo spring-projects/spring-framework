@@ -55,9 +55,9 @@ abstract class DefaultResponses {
 
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					DefaultConfiguration.class.getClassLoader()) &&
+					DefaultResponses.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							DefaultConfiguration.class.getClassLoader());
+							DefaultResponses.class.getClassLoader());
 
 
 	public static Response<Void> empty(int statusCode, HttpHeaders headers) {
@@ -134,7 +134,8 @@ abstract class DefaultResponses {
 				exchange -> {
 					MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 					Locale locale = Locale.ENGLISH; // TODO: resolve locale
-					return Flux.fromStream(viewResolverStream(exchange))
+					Stream<ViewResolver> viewResolverStream = configuration(exchange).viewResolvers().get();
+					return Flux.fromStream(viewResolverStream)
 							.concatMap(viewResolver -> viewResolver.resolveViewName(name, locale))
 							.next()
 							.otherwiseIfEmpty(Mono.error(new IllegalArgumentException("Could not resolve view with name '" + name +"'")))
@@ -153,9 +154,12 @@ abstract class DefaultResponses {
 	private static <T> Mono<Void> writeWithMessageWriters(ServerWebExchange exchange,
 			Publisher<T> body,
 			ResolvableType bodyType) {
+
+		// TODO: use ContentNegotiatingResultHandlerSupport
 		MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 		ServerHttpResponse response = exchange.getResponse();
-		return messageWriterStream(exchange)
+		Stream<HttpMessageWriter<?>> messageWriterStream = configuration(exchange).messageWriters().get();
+		return messageWriterStream
 				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType, Collections
 						.emptyMap()))
 				.findFirst()
@@ -168,20 +172,11 @@ abstract class DefaultResponses {
 				});
 	}
 
-	private static Stream<HttpMessageWriter<?>> messageWriterStream(ServerWebExchange exchange) {
-		return exchange.<Supplier<Stream<HttpMessageWriter<?>>>>getAttribute(
-				Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE)
+	private static Configuration configuration(ServerWebExchange exchange) {
+		return exchange.<Configuration>getAttribute(
+				RoutingFunctions.CONFIGURATION_ATTRIBUTE)
 				.orElseThrow(() -> new IllegalStateException(
-						"Could not find HttpMessageWriters in ServerWebExchange"))
-				.get();
-	}
-
-	private static Stream<ViewResolver> viewResolverStream(ServerWebExchange exchange) {
-		return exchange.<Supplier<Stream<ViewResolver>>>getAttribute(
-				Router.VIEW_RESOLVERS_ATTRIBUTE)
-				.orElseThrow(() -> new IllegalStateException(
-						"Could not find ViewResolvers in ServerWebExchange"))
-				.get();
+						"Could not find Configuration in ServerWebExchange"));
 	}
 
 
