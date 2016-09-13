@@ -17,11 +17,15 @@
 package org.springframework.http.server.reactive;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
+
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.adapter.RxJava1Adapter;
+import reactor.core.publisher.Mono;
 import rx.Observable;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -49,7 +53,12 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.unsafeNettyChannel().alloc());
 		RxNettyServerHttpRequest adaptedRequest = new RxNettyServerHttpRequest(request, bufferFactory);
 		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response, bufferFactory);
-		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
+		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse)
+				.otherwise(ex -> {
+					LogFactory.getLog(RxNettyHttpHandlerAdapter.class).error("Could not complete request", ex);
+					response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+					return Mono.empty();
+				});
 		return RxJava1Adapter.publisherToObservable(result);
 	}
 

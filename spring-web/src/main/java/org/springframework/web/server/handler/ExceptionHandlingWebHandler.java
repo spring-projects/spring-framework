@@ -18,12 +18,15 @@ package org.springframework.web.server.handler;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.NestedCheckedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
@@ -37,6 +40,36 @@ import org.springframework.web.server.WebHandler;
  * @since 5.0
  */
 public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
+	/**
+	 * Log category to use on network IO exceptions after a client has gone away.
+	 * <p>The Servlet API does not provide notifications when a client disconnects;
+	 * see <a href="https://java.net/jira/browse/SERVLET_SPEC-44">SERVLET_SPEC-44</a>.
+	 * Therefore network IO failures may occur simply because a client has gone away,
+	 * and that can fill the logs with unnecessary stack traces.
+	 * <p>We make a best effort to identify such network failures, on a per-server
+	 * basis, and log them under a separate log category. A simple one-line message
+	 * is logged at DEBUG level, while a full stack trace is shown at TRACE level.
+	 * @see #disconnectedClientLogger
+	 */
+	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
+			"org.springframework.web.server.handler.DisconnectedClient";
+
+	/**
+	 * Separate logger to use on network IO failure after a client has gone away.
+	 * @see #DISCONNECTED_CLIENT_LOG_CATEGORY
+	 */
+	private static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
+
+	private static final Set<String> disconnectedClientExceptions;
+
+	static {
+		Set<String> set = new HashSet<>(3);
+		set.add("ClientAbortException"); // Tomcat
+		set.add("EOFException"); // Tomcat
+		set.add("EofException"); // Jetty
+		// java.io.IOException "Broken pipe" on WildFly, Glassfish (already covered)
+		disconnectedClientExceptions = Collections.unmodifiableSet(set);
+	}
 
 	private static Log logger = LogFactory.getLog(ExceptionHandlingWebHandler.class);
 
@@ -77,11 +110,32 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 	}
 
 	private Mono<? extends Void> handleUnresolvedException(ServerWebExchange exchange, Throwable ex) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Could not complete request", ex);
-		}
+		logError(ex);
 		exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		return Mono.empty();
+	}
+
+	private void logError(Throwable t) {
+		@SuppressWarnings("serial")
+		NestedCheckedException nestedException = new NestedCheckedException("", t) {};
+
+		if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) ||
+				disconnectedClientExceptions.contains(t.getClass().getSimpleName())) {
+
+			if (disconnectedClientLogger.isTraceEnabled()) {
+				disconnectedClientLogger.trace("Looks like the client has gone away", t);
+			}
+			else if (disconnectedClientLogger.isDebugEnabled()) {
+				disconnectedClientLogger.debug("Looks like the client has gone away: " +
+						nestedException.getMessage() + " (For full stack trace, set the '" +
+						DISCONNECTED_CLIENT_LOG_CATEGORY + "' log category to TRACE level)");
+			}
+		}
+		else {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not complete request", t);
+			}
+		}
 	}
 
 }
