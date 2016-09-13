@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -141,30 +140,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * The origin of this test class is {@link ServletAnnotationControllerHandlerMethodTests}.
  *
  * Tests in this class run against the {@link HandlerMethod} infrastructure:
  * <ul>
- * 	<li>RequestMappingHandlerMapping
- * 	<li>RequestMappingHandlerAdapter
- * 	<li>ExceptionHandlerExceptionResolver
+ * <li>RequestMappingHandlerMapping
+ * <li>RequestMappingHandlerAdapter
+ * <li>ExceptionHandlerExceptionResolver
  * </ul>
  *
  * <p>Rather than against the existing infrastructure:
  * <ul>
- * 	<li>DefaultAnnotationHandlerMapping
- * 	<li>AnnotationMethodHandlerAdapter
- * 	<li>AnnotationMethodHandlerExceptionResolver
+ * <li>DefaultAnnotationHandlerMapping
+ * <li>AnnotationMethodHandlerAdapter
+ * <li>AnnotationMethodHandlerExceptionResolver
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -2789,18 +2781,15 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@Override
 		@SuppressWarnings("rawtypes")
-		public ModelAndView resolveModelAndView(Method handlerMethod,
-				Class handlerType,
-				Object returnValue,
-				ExtendedModelMap implicitModel,
-				NativeWebRequest webRequest) {
+		public ModelAndView resolveModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue,
+				ExtendedModelMap implicitModel, NativeWebRequest webRequest) {
+
 			if (returnValue instanceof MySpecialArg) {
 				return new ModelAndView(new View() {
 					@Override
 					public String getContentType() {
 						return "text/html";
 					}
-
 					@Override
 					public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response)
 							throws Exception {

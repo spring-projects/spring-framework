@@ -67,24 +67,27 @@ import org.springframework.core.ResolvableType;
  * 1. BeanNameAware's {@code setBeanName}<br>
  * 2. BeanClassLoaderAware's {@code setBeanClassLoader}<br>
  * 3. BeanFactoryAware's {@code setBeanFactory}<br>
- * 4. ResourceLoaderAware's {@code setResourceLoader}
+ * 4. EnvironmentAware's {@code setEnvironment}
+ * 5. EmbeddedValueResolverAware's {@code setEmbeddedValueResolver}
+ * 6. ResourceLoaderAware's {@code setResourceLoader}
  * (only applicable when running in an application context)<br>
- * 5. ApplicationEventPublisherAware's {@code setApplicationEventPublisher}
+ * 7. ApplicationEventPublisherAware's {@code setApplicationEventPublisher}
  * (only applicable when running in an application context)<br>
- * 6. MessageSourceAware's {@code setMessageSource}
+ * 8. MessageSourceAware's {@code setMessageSource}
  * (only applicable when running in an application context)<br>
- * 7. ApplicationContextAware's {@code setApplicationContext}
+ * 9. ApplicationContextAware's {@code setApplicationContext}
  * (only applicable when running in an application context)<br>
- * 8. ServletContextAware's {@code setServletContext}
+ * 10. ServletContextAware's {@code setServletContext}
  * (only applicable when running in a web application context)<br>
- * 9. {@code postProcessBeforeInitialization} methods of BeanPostProcessors<br>
- * 10. InitializingBean's {@code afterPropertiesSet}<br>
- * 11. a custom init-method definition<br>
- * 12. {@code postProcessAfterInitialization} methods of BeanPostProcessors
+ * 11. {@code postProcessBeforeInitialization} methods of BeanPostProcessors<br>
+ * 12. InitializingBean's {@code afterPropertiesSet}<br>
+ * 13. a custom init-method definition<br>
+ * 14. {@code postProcessAfterInitialization} methods of BeanPostProcessors
  *
  * <p>On shutdown of a bean factory, the following lifecycle methods apply:<br>
- * 1. DisposableBean's {@code destroy}<br>
- * 2. a custom destroy-method definition
+ * 1. {@code postProcessBeforeDestruction} methods of DestructionAwareBeanPostProcessors
+ * 2. DisposableBean's {@code destroy}<br>
+ * 3. a custom destroy-method definition
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
