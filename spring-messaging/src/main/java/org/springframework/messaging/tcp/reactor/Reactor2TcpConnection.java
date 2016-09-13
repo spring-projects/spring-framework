@@ -29,10 +29,9 @@ import org.springframework.util.concurrent.ListenableFuture;
  * An implementation of {@link org.springframework.messaging.tcp.TcpConnection
  * TcpConnection} based on the TCP client support of the Reactor project.
  *
- * @param <P> the payload type of messages read or written to the TCP stream.
- *
  * @author Rossen Stoyanchev
  * @since 4.2
+ * @param <P> the payload type of messages read or written to the TCP stream.
  */
 public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 
@@ -41,9 +40,7 @@ public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 	private final Promise<Void> closePromise;
 
 
-	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream,
-			Promise<Void> closePromise) {
-
+	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream, Promise<Void> closePromise) {
 		this.channelStream = channelStream;
 		this.closePromise = closePromise;
 	}

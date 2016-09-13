@@ -16,7 +16,7 @@
 
 package org.springframework.messaging.simp.stomp;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -114,7 +114,7 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 			String dispatcherName = "StompClient";
 			DispatcherType dispatcherType = DispatcherType.DISPATCHER_GROUP;
 			DispatcherConfiguration config = new DispatcherConfiguration(dispatcherName, dispatcherType, 128, 0);
-			List<DispatcherConfiguration> configList = Arrays.<DispatcherConfiguration>asList(config);
+			List<DispatcherConfiguration> configList = Collections.<DispatcherConfiguration>singletonList(config);
 			return new ReactorConfiguration(configList, dispatcherName, new Properties());
 		}
 	}
