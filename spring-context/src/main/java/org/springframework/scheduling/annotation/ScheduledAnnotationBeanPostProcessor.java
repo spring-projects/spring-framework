@@ -19,6 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -113,7 +114,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
 
 	private final Map<Object, Set<ScheduledTask>> scheduledTasks =
-			new ConcurrentHashMap<Object, Set<ScheduledTask>>(16);
+			new IdentityHashMap<Object, Set<ScheduledTask>>(16);
 
 
 	@Override
@@ -263,8 +264,8 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 					new MethodIntrospector.MetadataLookup<Set<Scheduled>>() {
 						@Override
 						public Set<Scheduled> inspect(Method method) {
-							Set<Scheduled> scheduledMethods =
-									AnnotatedElementUtils.getMergedRepeatableAnnotations(method, Scheduled.class, Schedules.class);
+							Set<Scheduled> scheduledMethods = AnnotatedElementUtils.getMergedRepeatableAnnotations(
+									method, Scheduled.class, Schedules.class);
 							return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
 						}
 					});
@@ -302,11 +303,7 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
 
-			Set<ScheduledTask> tasks = this.scheduledTasks.get(bean);
-			if (tasks == null) {
-				tasks = new LinkedHashSet<ScheduledTask>(4);
-				this.scheduledTasks.put(bean, tasks);
-			}
+			Set<ScheduledTask> tasks = new LinkedHashSet<ScheduledTask>(4);
 
 			// Determine initial delay
 			long initialDelay = scheduled.initialDelay();
@@ -400,6 +397,16 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 			// Check whether we had any attribute set
 			Assert.isTrue(processedSchedule, errorMessage);
+
+			// Finally register the scheduled tasks
+			synchronized (this.scheduledTasks) {
+				Set<ScheduledTask> registeredTasks = this.scheduledTasks.get(bean);
+				if (registeredTasks == null) {
+					registeredTasks = new LinkedHashSet<ScheduledTask>(4);
+					this.scheduledTasks.put(bean, registeredTasks);
+				}
+				registeredTasks.addAll(tasks);
+			}
 		}
 		catch (IllegalArgumentException ex) {
 			throw new IllegalStateException(
@@ -410,7 +417,10 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
-		Set<ScheduledTask> tasks = this.scheduledTasks.remove(bean);
+		Set<ScheduledTask> tasks;
+		synchronized (this.scheduledTasks) {
+			tasks = this.scheduledTasks.remove(bean);
+		}
 		if (tasks != null) {
 			for (ScheduledTask task : tasks) {
 				task.cancel();
@@ -420,18 +430,22 @@ public class ScheduledAnnotationBeanPostProcessor implements DestructionAwareBea
 
 	@Override
 	public boolean requiresDestruction(Object bean) {
-		return this.scheduledTasks.containsKey(bean);
+		synchronized (this.scheduledTasks) {
+			return this.scheduledTasks.containsKey(bean);
+		}
 	}
 
 	@Override
 	public void destroy() {
-		Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
-		for (Set<ScheduledTask> tasks : allTasks) {
-			for (ScheduledTask task : tasks) {
-				task.cancel();
+		synchronized (this.scheduledTasks) {
+			Collection<Set<ScheduledTask>> allTasks = this.scheduledTasks.values();
+			for (Set<ScheduledTask> tasks : allTasks) {
+				for (ScheduledTask task : tasks) {
+					task.cancel();
+				}
 			}
+			this.scheduledTasks.clear();
 		}
-		this.scheduledTasks.clear();
 		this.registrar.destroy();
 	}
 
