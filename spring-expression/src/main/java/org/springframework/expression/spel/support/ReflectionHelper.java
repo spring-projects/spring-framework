@@ -195,7 +195,7 @@ public class ReflectionHelper {
 			TypeDescriptor varargsDesc = expectedArgTypes.get(expectedArgTypes.size() - 1);
 			Class<?> varargsParamType = varargsDesc.getElementTypeDescriptor().getType();
 
-			// All remaining parameters must be of this type or convertable to this type
+			// All remaining parameters must be of this type or convertible to this type
 			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
 				TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
 				if (suppliedArg == null) {
