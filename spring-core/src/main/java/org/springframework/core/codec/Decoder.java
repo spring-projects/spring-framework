@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

@@ -162,7 +162,7 @@ public class RouterTests {
 	private static class DummyMessageWriter implements HttpMessageWriter<Object> {
 
 		@Override
-		public boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
+		public boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
 			return false;
 		}
 
@@ -172,8 +172,8 @@ public class RouterTests {
 		}
 
 		@Override
-		public Mono<Void> write(Publisher<?> inputStream, ResolvableType type,
-				MediaType contentType,
+		public Mono<Void> write(Publisher<?> inputStream, ResolvableType elementType,
+				MediaType mediaType,
 				ReactiveHttpOutputMessage outputMessage,
 				Map<String, Object> hints) {
 			return Mono.empty();
@@ -183,7 +183,7 @@ public class RouterTests {
 	private static class DummyMessageReader implements HttpMessageReader<Object> {
 
 		@Override
-		public boolean canRead(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
+		public boolean canRead(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
 			return false;
 		}
 
@@ -193,13 +193,13 @@ public class RouterTests {
 		}
 
 		@Override
-		public Flux<Object> read(ResolvableType type, ReactiveHttpInputMessage inputMessage,
+		public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
 				Map<String, Object> hints) {
 			return Flux.empty();
 		}
 
 		@Override
-		public Mono<Object> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage,
+		public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
 				Map<String, Object> hints) {
 			return Mono.empty();
 		}

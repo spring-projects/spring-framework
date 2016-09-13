@@ -60,8 +60,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 
 	@Override
-	public boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
-		return this.encoder != null && this.encoder.canEncode(type, mediaType, hints);
+	public boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
+		return this.encoder != null && this.encoder.canEncode(elementType, mediaType, hints);
 	}
 
 	@Override
@@ -71,8 +71,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 
 	@Override
-	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage,
+	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
+			MediaType mediaType, ReactiveHttpOutputMessage outputMessage,
 			Map<String, Object> hints) {
 
 		if (this.encoder == null) {
@@ -81,19 +81,19 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 		HttpHeaders headers = outputMessage.getHeaders();
 		if (headers.getContentType() == null) {
-			MediaType contentTypeToUse = contentType;
-			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
-				contentTypeToUse = getDefaultContentType(type);
+			MediaType contentTypeToUse = mediaType;
+			if (mediaType == null || mediaType.isWildcardType() || mediaType.isWildcardSubtype()) {
+				contentTypeToUse = getDefaultContentType(elementType);
 			}
-			else if (MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
-				MediaType mediaType = getDefaultContentType(type);
-				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
+			else if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
+				MediaType contentType = getDefaultContentType(elementType);
+				contentTypeToUse = (contentType != null ? contentType : contentTypeToUse);
 			}
 			if (contentTypeToUse != null) {
 				if (contentTypeToUse.getCharset() == null) {
-					MediaType mediaType = getDefaultContentType(type);
-					if (mediaType != null && mediaType.getCharset() != null) {
-						contentTypeToUse = new MediaType(contentTypeToUse, mediaType.getCharset());
+					MediaType contentType = getDefaultContentType(elementType);
+					if (contentType != null && contentType.getCharset() != null) {
+						contentTypeToUse = new MediaType(contentTypeToUse, contentType.getCharset());
 					}
 				}
 				headers.setContentType(contentTypeToUse);
@@ -101,7 +101,7 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 		}
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
-		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, type, contentType, hints);
+		Flux<DataBuffer> body = this.encoder.encode(inputStream, bufferFactory, elementType, mediaType, hints);
 		return outputMessage.writeWith(body);
 	}
 

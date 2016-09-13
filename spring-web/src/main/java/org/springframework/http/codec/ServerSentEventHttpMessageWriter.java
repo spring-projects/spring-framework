@@ -62,7 +62,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
+	public boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
 		return mediaType == null || TEXT_EVENT_STREAM.isCompatibleWith(mediaType);
 	}
 
@@ -72,13 +72,13 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@Override
-	public Mono<Void> write(Publisher<?> inputStream, ResolvableType type, MediaType contentType,
+	public Mono<Void> write(Publisher<?> inputStream, ResolvableType elementType, MediaType mediaType,
 			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 
 		outputMessage.getHeaders().setContentType(TEXT_EVENT_STREAM);
 
 		DataBufferFactory bufferFactory = outputMessage.bufferFactory();
-		Flux<Publisher<DataBuffer>> body = encode(inputStream, bufferFactory, type, hints);
+		Flux<Publisher<DataBuffer>> body = encode(inputStream, bufferFactory, elementType, hints);
 
 		return outputMessage.writeAndFlushWith(body);
 	}

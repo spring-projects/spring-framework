@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,26 +39,29 @@ public interface HttpMessageWriter<T> {
 
 	/**
 	 * Indicates whether the given class can be written by this converter.
-	 * @param type the class to test for writability
+	 * @param elementType the stream element type to test for writability
 	 * @param mediaType the media type to write, can be {@code null} if not specified.
 	 * Typically the value of an {@code Accept} header.
-	 * @param hints additional information about how to do write
+	 * @param hints additional information about how to write
 	 * @return {@code true} if writable; {@code false} otherwise
 	 */
-	boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints);
+	boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints);
 
 	/**
 	 * Write an given object to the given output message.
 	 * @param inputStream the input stream to write
-	 * @param type the stream element type to process.
-	 * @param contentType the content type to use when writing. May be {@code null} to
-	 * indicate that the default content type of the converter must be used.
+	 * @param elementType the stream element type to process. This type must have previously
+	 * been passed to the {@link #canWrite} canWrite} method of this interface, which must
+	 * have returned {@code true}.
+	 * @param mediaType the content type to use when writing, typically the value of an
+	 * {@code Accept} header. May be {@code null} to indicate that the default content
+	 * type of the converter must be used.
 	 * @param outputMessage the message to write to
-	 * @param hints additional information about how to do write
+	 * @param hints additional information about how to write
 	 * @return the converted {@link Mono} of object
 	 */
-	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints);
+	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
+			MediaType mediaType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints);
 
 	/**
 	 * Return the list of {@link MediaType} objects that can be written by this converter.

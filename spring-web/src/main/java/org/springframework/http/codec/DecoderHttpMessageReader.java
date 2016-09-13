@@ -56,8 +56,8 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 
 
 	@Override
-	public boolean canRead(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
-		return this.decoder != null && this.decoder.canDecode(type, mediaType, hints);
+	public boolean canRead(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
+		return this.decoder != null && this.decoder.canDecode(elementType, mediaType, hints);
 	}
 
 	@Override
@@ -67,21 +67,21 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 
 
 	@Override
-	public Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+	public Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
 		if (this.decoder == null) {
 			return Flux.error(new IllegalStateException("No decoder set"));
 		}
 		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decode(inputMessage.getBody(), type, contentType, hints);
+		return this.decoder.decode(inputMessage.getBody(), elementType, contentType, hints);
 	}
 
 	@Override
-	public Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
+	public Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints) {
 		if (this.decoder == null) {
 			return Mono.error(new IllegalStateException("No decoder set"));
 		}
 		MediaType contentType = getContentType(inputMessage);
-		return this.decoder.decodeToMono(inputMessage.getBody(), type, contentType, hints);
+		return this.decoder.decodeToMono(inputMessage.getBody(), elementType, contentType, hints);
 	}
 
 	private MediaType getContentType(ReactiveHttpInputMessage inputMessage) {

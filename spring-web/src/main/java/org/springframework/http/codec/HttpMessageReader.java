@@ -16,7 +16,6 @@
 
 package org.springframework.http.codec;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,35 +39,35 @@ public interface HttpMessageReader<T> {
 
 	/**
 	 * Indicates whether the given class can be read by this converter.
-	 * @param type the type to test for readability
+	 * @param elementType the stream element type to test for readability
 	 * @param mediaType the media type to read, can be {@code null} if not specified.
 	 * Typically the value of a {@code Content-Type} header.
 	 * @param hints additional information about how to do read
 	 * @return {@code true} if readable; {@code false} otherwise
 	 */
-	boolean canRead(ResolvableType type, MediaType mediaType, Map<String, Object> hints);
+	boolean canRead(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints);
 
 	/**
 	 * Read a {@link Flux} of the given type form the given input message, and returns it.
-	 * @param type the type of object to return. This type must have previously been
+	 * @param elementType the stream element type to return. This type must have previously been
 	 * passed to the {@link #canRead canRead} method of this interface, which must have
 	 * returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
 	 * @param hints additional information about how to do read
 	 * @return the converted {@link Flux} of elements
 	 */
-	Flux<T> read(ResolvableType type, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints);
+	Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints);
 
 	/**
 	 * Read a {@link Mono} of the given type form the given input message, and returns it.
-	 * @param type the type of object to return. This type must have previously been
+	 * @param elementType the stream element type to return. This type must have previously been
 	 * passed to the {@link #canRead canRead} method of this interface, which must have
 	 * returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
 	 * @param hints additional information about how to do read
 	 * @return the converted {@link Mono} of object
 	 */
-	Mono<T> readMono(ResolvableType type, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints);
+	Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints);
 
 	/**
 	 * Return the list of {@link MediaType} objects that can be read by this converter.

@@ -59,26 +59,26 @@ public class ResourceHttpMessageWriter extends EncoderHttpMessageWriter<Resource
 
 
 	@Override
-	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType type,
-			MediaType contentType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType elementType,
+			MediaType mediaType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
 
 		return Mono.from(Flux.from(inputStream).
 				take(1).
 				concatMap(resource -> {
 					HttpHeaders headers = outputMessage.getHeaders();
-					addHeaders(headers, resource, contentType);
-					return writeContent(resource, type, outputMessage, hints);
+					addHeaders(headers, resource, mediaType);
+					return writeContent(resource, elementType, outputMessage, hints);
 				}));
 	}
 
-	protected void addHeaders(HttpHeaders headers, Resource resource, MediaType contentType) {
+	protected void addHeaders(HttpHeaders headers, Resource resource, MediaType mediaType) {
 		if (headers.getContentType() == null) {
-			if (contentType == null || !contentType.isConcrete() ||
-					MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
-				contentType = Optional.ofNullable(MediaTypeFactory.getMediaType(resource)).
+			if (mediaType == null || !mediaType.isConcrete() ||
+					MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
+				mediaType = Optional.ofNullable(MediaTypeFactory.getMediaType(resource)).
 						orElse(MediaType.APPLICATION_OCTET_STREAM);
 			}
-			headers.setContentType(contentType);
+			headers.setContentType(mediaType);
 		}
 		if (headers.getContentLength() < 0) {
 			contentLength(resource).ifPresent(headers::setContentLength);
