@@ -21,8 +21,11 @@ import java.util.function.Function;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.HttpChannel;
 
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
  * Adapt {@link HttpHandler} to the Reactor Netty channel handling function.
@@ -46,7 +49,12 @@ public class ReactorHttpHandlerAdapter implements Function<HttpChannel, Mono<Voi
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.delegate().alloc());
 		ReactorServerHttpRequest adaptedRequest = new ReactorServerHttpRequest(channel, bufferFactory);
 		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel, bufferFactory);
-		return this.httpHandler.handle(adaptedRequest, adaptedResponse);
+		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
+				.otherwise(ex -> {
+					LogFactory.getLog(ReactorHttpHandlerAdapter.class).error("Could not complete request", ex);
+					channel.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+					return Mono.empty();
+				});
 	}
 
 }
