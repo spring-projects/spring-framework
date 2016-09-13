@@ -45,8 +45,6 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 	private final Object value;
 
-	private Object source;
-
 	private boolean optional = false;
 
 	private boolean converted = false;
@@ -78,12 +76,12 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		Assert.notNull(original, "Original must not be null");
 		this.name = original.getName();
 		this.value = original.getValue();
-		this.source = original.getSource();
 		this.optional = original.isOptional();
 		this.converted = original.converted;
 		this.convertedValue = original.convertedValue;
 		this.conversionNecessary = original.conversionNecessary;
 		this.resolvedTokens = original.resolvedTokens;
+		setSource(original.getSource());
 		copyAttributesFrom(original);
 	}
 
@@ -97,10 +95,10 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		Assert.notNull(original, "Original must not be null");
 		this.name = original.getName();
 		this.value = newValue;
-		this.source = original;
 		this.optional = original.isOptional();
 		this.conversionNecessary = original.conversionNecessary;
 		this.resolvedTokens = original.resolvedTokens;
+		setSource(original);
 		copyAttributesFrom(original);
 	}
 
@@ -129,16 +127,28 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	 */
 	public PropertyValue getOriginalPropertyValue() {
 		PropertyValue original = this;
-		while (original.source instanceof PropertyValue && original.source != original) {
-			original = (PropertyValue) original.source;
+		Object source = getSource();
+		while (source instanceof PropertyValue && source != original) {
+			original = (PropertyValue) source;
+			source = original.getSource();
 		}
 		return original;
 	}
 
+	/**
+	 * Set whether this is an optional value, that is, to be ignored
+	 * when no corresponding property exists on the target class.
+	 * @since 3.0
+	 */
 	public void setOptional(boolean optional) {
 		this.optional = optional;
 	}
 
+	/**
+	 * Reeurn whether this is an optional value, that is, to be ignored
+	 * when no corresponding property exists on the target class.
+	 * @since 3.0
+	 */
 	public boolean isOptional() {
 		return this.optional;
 	}
@@ -180,7 +190,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		PropertyValue otherPv = (PropertyValue) other;
 		return (this.name.equals(otherPv.name) &&
 				ObjectUtils.nullSafeEquals(this.value, otherPv.value) &&
-				ObjectUtils.nullSafeEquals(this.source, otherPv.source));
+				ObjectUtils.nullSafeEquals(getSource(), otherPv.getSource()));
 	}
 
 	@Override
