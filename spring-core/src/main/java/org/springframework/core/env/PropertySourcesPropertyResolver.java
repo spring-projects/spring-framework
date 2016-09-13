@@ -137,8 +137,10 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	/**
 	 * Log the given key as found in the given {@link PropertySource}, resulting in
 	 * the given value.
-	 * <p>The default implementation writes a debug log message, including the value.
-	 * Subclasses may override this to change the log level and/or the log message.
+	 * <p>The default implementation writes a debug log message with key and source.
+	 * As of 4.3.3, this does not log the value anymore in order to avoid accidental
+	 * logging of sensitive settings. Subclasses may override this method to change
+	 * the log level and/or log message, including the property's value if desired.
 	 * @param key the key found
 	 * @param propertySource the {@code PropertySource} that the key has been found in
 	 * @param value the corresponding value
@@ -146,8 +148,8 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 	 */
 	protected void logKeyFound(String key, PropertySource<?> propertySource, Object value) {
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Found key '%s' in [%s] with type [%s] and value '%s'",
-					key, propertySource.getName(), value.getClass().getSimpleName(), value));
+			logger.debug(String.format("Found key '%s' in [%s] with type [%s]",
+					key, propertySource.getName(), value.getClass().getSimpleName()));
 		}
 	}
 
