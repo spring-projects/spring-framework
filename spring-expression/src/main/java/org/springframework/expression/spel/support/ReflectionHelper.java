@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,7 +219,7 @@ public class ReflectionHelper {
 			// or more other arguments left to pass to it.
 			Class<?> varargsParamType = expectedArgTypes.get(expectedArgTypes.size() - 1).getElementTypeDescriptor().getType();
 
-			// All remaining parameters must be of this type or convertable to this type
+			// All remaining parameters must be of this type or convertible to this type
 			for (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {
 				TypeDescriptor suppliedArg = suppliedArgTypes.get(i);
 				if (suppliedArg == null) {

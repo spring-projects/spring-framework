@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,7 @@ public class DateFormatter implements Formatter<Date> {
 			if (timeStyle != -1) {
 				return DateFormat.getTimeInstance(timeStyle, locale);
 			}
-			throw new IllegalStateException("Unsupported style pattern '"+ this.stylePattern+ "'");
+			throw new IllegalStateException("Unsupported style pattern '" + this.stylePattern + "'");
 
 		}
 		return DateFormat.getDateInstance(this.style, locale);
