@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,15 +151,13 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		try {
 			ioThreadCount = Integer.parseInt(System.getProperty("reactor.tcp.ioThreadCount"));
 		}
-		catch (Exception ex) {
+		catch (Throwable ex) {
 			ioThreadCount = -1;
 		}
-		if (ioThreadCount <= 0l) {
+		if (ioThreadCount <= 0) {
 			ioThreadCount = Runtime.getRuntime().availableProcessors();
 		}
-
-		return new NioEventLoopGroup(ioThreadCount,
-				new NamedDaemonThreadFactory("reactor-tcp-io"));
+		return new NioEventLoopGroup(ioThreadCount, new NamedDaemonThreadFactory("reactor-tcp-io"));
 	}
 
 
