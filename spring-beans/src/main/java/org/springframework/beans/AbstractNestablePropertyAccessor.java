@@ -590,7 +590,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 			throw new ConversionNotSupportedException(pce, requiredType, ex);
 		}
-		catch (Throwable ex) {
+		catch (IllegalArgumentException ex) {
 			PropertyChangeEvent pce =
 					new PropertyChangeEvent(this.rootObject, this.nestedPath + propertyName, oldValue, newValue);
 			throw new TypeMismatchException(pce, requiredType, ex);
@@ -914,9 +914,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				return BeanUtils.instantiate(type);
 			}
 		}
-		catch (Exception ex) {
-			// TODO: Root cause exception context is lost here; just exception message preserved.
-			// Should we throw another exception type that preserves context instead?
+		catch (Throwable ex) {
 			throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + name,
 					"Could not instantiate property type [" + type.getName() + "] to auto-grow nested property path: " + ex);
 		}
