@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,8 +90,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	private DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
-
-	private volatile Boolean commitAfterNoMessageReceived;
 
 
 	@Override
@@ -343,7 +341,6 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				}
 				noMessageReceived(invoker, sessionToUse);
 				// Nevertheless call commit, in order to reset the transaction timeout (if any).
-				// However, don't do this on Tibco since this may lead to a deadlock there.
 				if (shouldCommitAfterNoMessageReceived(sessionToUse)) {
 					commitIfNecessary(sessionToUse, message);
 				}
@@ -377,17 +374,12 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	/**
 	 * Determine whether to trigger a commit after no message has been received.
-	 * This is a good idea on any JMS provider other than Tibco, which is what
-	 * this default implementation checks for.
+	 * This is a good idea on any modern-day JMS provider.
 	 * @param session the current JMS Session which received no message
 	 * @return whether to call {@link #commitIfNecessary} on the given Session
 	 */
 	protected boolean shouldCommitAfterNoMessageReceived(Session session) {
-		if (this.commitAfterNoMessageReceived == null) {
-			Session target = ConnectionFactoryUtils.getTargetSession(session);
-			this.commitAfterNoMessageReceived = !target.getClass().getName().startsWith("com.tibco.tibjms.");
-		}
-		return this.commitAfterNoMessageReceived;
+		return true;
 	}
 
 	/**
