@@ -17,7 +17,6 @@
 package org.springframework.format.support;
 
 import java.lang.annotation.Annotation;
-import java.text.ParseException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -193,11 +192,14 @@ public class FormattingConversionService extends GenericConversionService
 			try {
 				result = this.parser.parse(text, LocaleContextHolder.getLocale());
 			}
-			catch (ParseException ex) {
+			catch (IllegalArgumentException ex) {
+				throw ex;
+			}
+			catch (Throwable ex) {
 				throw new IllegalArgumentException("Parse attempt failed for value [" + text + "]", ex);
 			}
 			if (result == null) {
-				throw new IllegalStateException("Parsers are not allowed to return null");
+				throw new IllegalStateException("Parsers are not allowed to return null: " + this.parser);
 			}
 			TypeDescriptor resultType = TypeDescriptor.valueOf(result.getClass());
 			if (!resultType.isAssignableTo(targetType)) {
