@@ -312,7 +312,6 @@ public class PathResourceTests {
 	@Test
 	public void getReadableByteChannelForDir() throws Exception {
 		PathResource resource = new PathResource(TEST_DIR);
-		thrown.expect(NoSuchFileException.class);
 		resource.readableChannel();
 	}
 
