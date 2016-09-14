@@ -7633,6 +7633,7 @@ but rather completely overridden by a preceding entry.
 
 For a common `StandardServletEnvironment`, the full hierarchy looks as follows, with the
 highest-precedence entries at the top:
+
 * ServletConfig parameters (if applicable, e.g. in case of a `DispatcherServlet` context)
 * ServletContext parameters (web.xml context-param entries)
 * JNDI environment variables ("java:comp/env/" entries)
