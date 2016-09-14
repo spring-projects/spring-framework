@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,5 +39,15 @@ public interface HttpRequest extends HttpMessage {
 	 * @return the URI of the request (never {@code null})
 	 */
 	URI getURI();
+
+	/**
+	 * Return the path of the request.
+	 * <p>Default implementation returns {@link URI#getRawPath()} of the URI provided by
+	 * {@link #getURI()}.
+	 * @return the path of the request
+	 */
+	default String getPath() {
+		return getURI().getRawPath();
+	}
 
 }

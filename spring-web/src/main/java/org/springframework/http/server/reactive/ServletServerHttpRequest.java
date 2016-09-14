@@ -91,6 +91,22 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return new URI(url.toString());
 	}
 
+	/**
+	 * This implementation strips off the {@linkplain HttpServletRequest#getContextPath() context path}
+	 * from the {@link URI#getRawPath()} of the URI provided by {@link #getURI()}.
+	 */
+	@Override
+	public String getPath() {
+		String rawPath = getURI().getRawPath();
+		String contextPath = this.request.getContextPath();
+		if (!StringUtils.isEmpty(contextPath) && rawPath.startsWith(contextPath)) {
+			return rawPath.substring(contextPath.length());
+		}
+		else {
+			return rawPath;
+		}
+	}
+
 	@Override
 	protected HttpHeaders initHeaders() {
 		HttpHeaders headers = new HttpHeaders();
