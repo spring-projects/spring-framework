@@ -768,7 +768,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 		public ListenableFuture<Void> forward(final Message<?> message, final StompHeaderAccessor accessor) {
 			TcpConnection<byte[]> conn = this.tcpConnection;
 
-			if (!this.isStompConnected) {
+			if (!this.isStompConnected || conn == null) {
 				if (this.isRemoteClientSession) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("TCP connection closed already, ignoring " +
