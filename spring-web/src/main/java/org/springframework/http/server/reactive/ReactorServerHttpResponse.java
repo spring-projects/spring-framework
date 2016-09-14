@@ -30,6 +30,7 @@ import reactor.ipc.netty.http.HttpChannel;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ZeroCopyHttpOutputMessage;
@@ -85,6 +86,10 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 	@Override
 	protected void writeHeaders() {
+		// TODO: temporarily, see https://github.com/reactor/reactor-netty/issues/2
+		if(getHeaders().containsKey(HttpHeaders.CONTENT_LENGTH)){
+			this.channel.responseTransfer(false);
+		}
 		for (String name : getHeaders().keySet()) {
 			for (String value : getHeaders().get(name)) {
 				this.channel.responseHeaders().add(name, value);
