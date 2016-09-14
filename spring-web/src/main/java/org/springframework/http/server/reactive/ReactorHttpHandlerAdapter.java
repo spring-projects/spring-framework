@@ -16,10 +16,12 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.HttpChannel;
+import reactor.ipc.netty.http.HttpServer;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
@@ -48,5 +50,24 @@ public class ReactorHttpHandlerAdapter implements Function<HttpChannel, Mono<Voi
 		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel, bufferFactory);
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse);
 	}
+
+	/**
+	 * Create and start a Reactor {@link HttpServer} on the given {@code host} and {@code port},
+	 * handling requests with the given {@code handler}.
+	 * @param address the IP Socket Address to listen on
+	 * @param handler the handler for incoming requests
+	 * @return the created and started server
+	 */
+	public static HttpServer start(InetSocketAddress address, HttpHandler handler)
+			throws InterruptedException {
+		Assert.notNull(address, "'address' must not be null");
+		Assert.notNull(handler, "'handler' must not be null");
+
+		ReactorHttpHandlerAdapter handlerAdapter = new ReactorHttpHandlerAdapter(handler);
+		HttpServer server = HttpServer.create(address.getHostName(), address.getPort());
+		server.startAndAwait(handlerAdapter);
+		return server;
+	}
+
 
 }
