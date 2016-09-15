@@ -16,6 +16,7 @@
 
 package org.springframework.web.client.reactive;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,8 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.StringDecoder;
+import org.springframework.http.HttpMessage;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -47,6 +50,7 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -93,6 +97,8 @@ public final class WebClient {
 			.isPresent("javax.xml.bind.Binder", classLoader);
 
 	private ClientHttpConnector clientHttpConnector;
+
+	private List<ClientHttpRequestInterceptor> interceptors;
 
 	private final DefaultWebClientConfig webClientConfig;
 
@@ -173,6 +179,15 @@ public final class WebClient {
 	}
 
 	/**
+	 * Set the list of {@link ClientHttpRequestInterceptor} to use
+	 * for intercepting client HTTP requests
+	 */
+	public void setInterceptors(List<ClientHttpRequestInterceptor> interceptors) {
+		this.interceptors = (interceptors != null ?
+				Collections.unmodifiableList(interceptors) : Collections.emptyList());
+	}
+
+	/**
 	 * Perform the actual HTTP request/response exchange
 	 *
 	 * <p>
@@ -186,10 +201,12 @@ public final class WebClient {
 	public WebResponseActions perform(ClientWebRequestBuilder builder) {
 
 		ClientWebRequest clientWebRequest = builder.build();
+		DefaultClientHttpRequestInterceptionChain interception =
+				new DefaultClientHttpRequestInterceptionChain(this.clientHttpConnector,
+						this.interceptors, clientWebRequest);
 
-		final Mono<ClientHttpResponse> clientResponse = this.clientHttpConnector
-				.connect(clientWebRequest.getMethod(), clientWebRequest.getUrl(),
-						new DefaultRequestCallback(clientWebRequest))
+		final Mono<ClientHttpResponse> clientResponse = interception
+				.intercept(clientWebRequest.getMethod(), clientWebRequest.getUrl(), null)
 				.log("org.springframework.web.client.reactive", Level.FINE);
 
 		return new WebResponseActions() {
@@ -253,11 +270,14 @@ public final class WebClient {
 
 		private final ClientWebRequest clientWebRequest;
 
+		private final List<Consumer<? super HttpMessage>> requestCustomizers;
 
-		public DefaultRequestCallback(ClientWebRequest clientWebRequest) {
+
+		public DefaultRequestCallback(ClientWebRequest clientWebRequest,
+				List<Consumer<? super HttpMessage>> requestCustomizers) {
 			this.clientWebRequest = clientWebRequest;
+			this.requestCustomizers = requestCustomizers;
 		}
-
 
 		@Override
 		public Mono<Void> apply(ClientHttpRequest clientHttpRequest) {
@@ -269,6 +289,9 @@ public final class WebClient {
 			this.clientWebRequest.getCookies().values()
 					.stream().flatMap(cookies -> cookies.stream())
 					.forEach(cookie -> clientHttpRequest.getCookies().add(cookie.getName(), cookie));
+
+			this.requestCustomizers.forEach(customizer -> customizer.accept(clientHttpRequest));
+
 			if (this.clientWebRequest.getBody() != null) {
 				return writeRequestBody(this.clientWebRequest.getBody(),
 						this.clientWebRequest.getElementType(),
@@ -279,7 +302,7 @@ public final class WebClient {
 			}
 		}
 
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"unchecked", "rawtypes"})
 		protected Mono<Void> writeRequestBody(Publisher<?> content,
 				ResolvableType requestType, ClientHttpRequest request,
 				List<HttpMessageWriter<?>> messageWriters) {
@@ -299,6 +322,49 @@ public final class WebClient {
 
 			return messageWriters.stream().filter(e -> e.canWrite(type, mediaType)).findFirst();
 		}
+	}
+
+	protected class DefaultClientHttpRequestInterceptionChain implements ClientHttpRequestInterceptionChain {
+
+		private final ClientHttpConnector connector;
+
+		private final List<ClientHttpRequestInterceptor> interceptors;
+
+		private final ClientWebRequest clientWebRequest;
+
+		private final List<Consumer<? super HttpMessage>> requestCustomizers;
+
+		private int index;
+
+		public DefaultClientHttpRequestInterceptionChain(ClientHttpConnector connector,
+				List<ClientHttpRequestInterceptor> interceptors,
+				ClientWebRequest clientWebRequest) {
+
+			Assert.notNull(connector, "'connector' should not be null");
+			this.connector = connector;
+			this.interceptors = interceptors;
+			this.clientWebRequest = clientWebRequest;
+			this.requestCustomizers = new ArrayList<>();
+			this.index = 0;
+		}
+
+		@Override
+		public Mono<ClientHttpResponse> intercept(HttpMethod method, URI uri,
+				Consumer<? super HttpMessage> requestCustomizer) {
+
+			if (requestCustomizer != null) {
+				this.requestCustomizers.add(requestCustomizer);
+			}
+			if (this.interceptors != null && this.index < this.interceptors.size()) {
+				ClientHttpRequestInterceptor interceptor = this.interceptors.get(this.index++);
+				return interceptor.intercept(method, uri, this);
+			}
+			else {
+				return this.connector.connect(method, uri,
+						new DefaultRequestCallback(this.clientWebRequest, this.requestCustomizers));
+			}
+		}
+
 	}
 
 }
