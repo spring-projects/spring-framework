@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -51,11 +52,13 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	private BeanDefinitionHolder decoratedDefinition;
 
+	private AnnotatedElement qualifiedElement;
+
 	boolean allowCaching = true;
 
-	volatile ResolvableType targetType;
-
 	boolean isFactoryMethodUnique = false;
+
+	volatile ResolvableType targetType;
 
 	/** Package-visible field for caching the determined Class of a given bean definition */
 	volatile Class<?> resolvedTargetType;
@@ -178,9 +181,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public RootBeanDefinition(RootBeanDefinition original) {
 		super(original);
 		this.decoratedDefinition = original.decoratedDefinition;
+		this.qualifiedElement = original.qualifiedElement;
 		this.allowCaching = original.allowCaching;
-		this.targetType = original.targetType;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
+		this.targetType = original.targetType;
 	}
 
 	/**
@@ -217,6 +221,26 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 */
 	public BeanDefinitionHolder getDecoratedDefinition() {
 		return this.decoratedDefinition;
+	}
+
+	/**
+	 * Specify the {@link AnnotatedElement} defining qualifiers,
+	 * to be used instead of the target class or factory method.
+	 * @since 4.3.3
+	 * @see #setTargetType(ResolvableType)
+	 * @see #getResolvedFactoryMethod()
+	 */
+	public void setQualifiedElement(AnnotatedElement qualifiedElement) {
+		this.qualifiedElement = qualifiedElement;
+	}
+
+	/**
+	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
+	 * Otherwise, the factory method and target class will be checked.
+	 * @since 4.3.3
+	 */
+	public AnnotatedElement getQualifiedElement() {
+		return this.qualifiedElement;
 	}
 
 	/**
