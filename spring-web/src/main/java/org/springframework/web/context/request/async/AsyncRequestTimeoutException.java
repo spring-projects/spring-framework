@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request.async;
 
 /**
@@ -29,6 +30,6 @@ package org.springframework.web.context.request.async;
  * @since 4.2.8
  */
 @SuppressWarnings("serial")
-public class AsyncRequestTimeoutException extends Exception {
+public class AsyncRequestTimeoutException extends RuntimeException {
 
 }
