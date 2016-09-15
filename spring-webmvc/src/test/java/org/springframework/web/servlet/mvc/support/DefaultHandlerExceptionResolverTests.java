@@ -40,6 +40,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -204,6 +205,15 @@ public class DefaultHandlerExceptionResolverTests {
 
 		// SPR-9653
 		assertSame(ex, request.getAttribute("javax.servlet.error.exception"));
+	}
+
+	@Test // SPR-14669
+	public void handleAsyncRequestTimeoutException() throws Exception {
+		Exception ex = new AsyncRequestTimeoutException();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 503, response.getStatus());
 	}
 
 
