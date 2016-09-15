@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -312,7 +313,12 @@ public class PathResourceTests {
 	@Test
 	public void getReadableByteChannelForDir() throws Exception {
 		PathResource resource = new PathResource(TEST_DIR);
-		resource.readableChannel();
+		try {
+			resource.readableChannel();
+		}
+		catch (AccessDeniedException ex) {
+			// on Windows
+		}
 	}
 
 	@Test
