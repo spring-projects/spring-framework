@@ -17,6 +17,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
@@ -28,6 +29,7 @@ import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.ServerHttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -89,10 +91,10 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 
 
 	@SuppressWarnings("unchecked")
-	protected Mono<Void> writeBody(Object body, MethodParameter bodyType, ServerWebExchange exchange) {
+	protected Mono<Void> writeBody(Object body, MethodParameter bodyParameter, ServerWebExchange exchange) {
 
-		Class<?> bodyClass = bodyType.getParameterType();
-		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(bodyClass, body);
+		ResolvableType bodyType = ResolvableType.forMethodParameter(bodyParameter);
+		ReactiveAdapter adapter = getAdapterRegistry().getAdapterFrom(bodyType.resolve(), body);
 
 		Publisher<?> publisher;
 		ResolvableType elementType;
@@ -100,11 +102,11 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 			publisher = adapter.toPublisher(body);
 			elementType = adapter.getDescriptor().isNoValue() ?
 					ResolvableType.forClass(Void.class) :
-					ResolvableType.forMethodParameter(bodyType).getGeneric(0);
+					bodyType.getGeneric(0);
 		}
 		else {
 			publisher = Mono.justOrEmpty(body);
-			elementType = ResolvableType.forMethodParameter(bodyType);
+			elementType = bodyType;
 		}
 
 		if (void.class == elementType.getRawClass() || Void.class == elementType.getRawClass()) {
@@ -121,10 +123,14 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 
 		if (bestMediaType != null) {
 			for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
-				if (messageWriter.canWrite(elementType, bestMediaType, Collections.emptyMap())) {
+				Map<String, Object> hints = (messageWriter instanceof ServerHttpMessageWriter ?
+						((ServerHttpMessageWriter)messageWriter).resolveHints(bodyType, elementType,
+								bestMediaType, exchange.getRequest()) : Collections.emptyMap());
+				if (messageWriter.canWrite(elementType, bestMediaType, hints)) {
+
 					ServerHttpResponse response = exchange.getResponse();
 					return messageWriter.write((Publisher) publisher, elementType,
-							bestMediaType, response, Collections.emptyMap());
+							bestMediaType, response, hints);
 				}
 			}
 		}
