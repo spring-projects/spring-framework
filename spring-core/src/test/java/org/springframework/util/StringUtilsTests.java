@@ -692,4 +692,9 @@ public class StringUtilsTests {
 		assertEquals("Variant containing country code not extracted correctly", variant, locale.getVariant());
 	}
 
+	@Test  // SPR-14718
+	public void testParseJava7Variant() {
+		assertEquals("sr_#LATN", StringUtils.parseLocaleString("sr_#LATN").toString());
+	}
+
 }
