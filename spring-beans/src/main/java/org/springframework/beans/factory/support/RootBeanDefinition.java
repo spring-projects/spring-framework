@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -57,6 +58,8 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	volatile ResolvableType targetType;
 
 	boolean isFactoryMethodUnique = false;
+
+	volatile AnnotatedElement qualifiedElement;
 
 	/** Package-visible field for caching the determined Class of a given bean definition */
 	volatile Class<?> resolvedTargetType;
@@ -182,6 +185,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		this.allowCaching = original.allowCaching;
 		this.targetType = original.targetType;
 		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
+		this.qualifiedElement = original.qualifiedElement;
 	}
 
 	/**
@@ -255,6 +259,22 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		Assert.hasText(name, "Factory method name must not be empty");
 		setFactoryMethodName(name);
 		this.isFactoryMethodUnique = true;
+	}
+
+	/**
+	 * Specify the {@link AnnotatedElement} defining qualifiers.
+	 * @since 4.3.3
+	 */
+	public void setQualifiedElement(AnnotatedElement qualifiedElement) {
+		this.qualifiedElement = qualifiedElement;
+	}
+
+	/**
+	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
+	 * @since 4.3.3
+	 */
+	public AnnotatedElement getQualifiedElement() {
+		return this.qualifiedElement;
 	}
 
 	/**
