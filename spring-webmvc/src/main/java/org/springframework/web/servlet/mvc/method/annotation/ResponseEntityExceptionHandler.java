@@ -44,6 +44,7 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
@@ -114,7 +115,8 @@ public abstract class ResponseEntityExceptionHandler {
 			MethodArgumentNotValidException.class,
 			MissingServletRequestPartException.class,
 			BindException.class,
-			NoHandlerFoundException.class
+			NoHandlerFoundException.class,
+			AsyncRequestTimeoutException.class
 		})
 	public final ResponseEntity<Object> handleException(Exception ex, WebRequest request) {
 		HttpHeaders headers = new HttpHeaders();
@@ -177,6 +179,11 @@ public abstract class ResponseEntityExceptionHandler {
 		else if (ex instanceof NoHandlerFoundException) {
 			HttpStatus status = HttpStatus.NOT_FOUND;
 			return handleNoHandlerFoundException((NoHandlerFoundException) ex, headers, status, request);
+		}
+		else if (ex instanceof AsyncRequestTimeoutException) {
+			HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
+			return handleAsyncRequestTimeoutException(
+					(AsyncRequestTimeoutException) ex, headers, status, request);
 		}
 		else {
 			logger.warn("Unknown exception type: " + ex.getClass().getName());
@@ -443,6 +450,22 @@ public abstract class ResponseEntityExceptionHandler {
 	 */
 	protected ResponseEntity<Object> handleNoHandlerFoundException(
 			NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+		return handleExceptionInternal(ex, null, headers, status, request);
+	}
+
+	/**
+	 * Customize the response for NoHandlerFoundException.
+	 * <p>This method delegates to {@link #handleExceptionInternal}.
+	 * @param ex the exception
+	 * @param headers the headers to be written to the response
+	 * @param status the selected response status
+	 * @param request the current request
+	 * @return a {@code ResponseEntity} instance
+	 * @since 4.2.8
+	 */
+	protected ResponseEntity<Object> handleAsyncRequestTimeoutException(
+			AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		return handleExceptionInternal(ex, null, headers, status, request);
 	}
