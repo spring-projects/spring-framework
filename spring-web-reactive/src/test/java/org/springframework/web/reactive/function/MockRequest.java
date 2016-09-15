@@ -29,10 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -44,7 +40,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * @author Arjen Poutsma
  */
-public class MockRequest implements Request {
+public class MockRequest<T> implements Request {
 
 	private final HttpMethod method;
 
@@ -52,7 +48,7 @@ public class MockRequest implements Request {
 
 	private final MockHeaders headers;
 
-	private final MockBody body;
+	private final T body;
 
 	private final Map<String, Object> attributes;
 
@@ -61,7 +57,7 @@ public class MockRequest implements Request {
 	private final Map<String, String> pathVariables;
 
 	private MockRequest(HttpMethod method, URI uri,
-			MockHeaders headers, MockBody body, Map<String, Object> attributes,
+			MockHeaders headers, T body, Map<String, Object> attributes,
 			MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables) {
 		this.method = method;
@@ -73,8 +69,8 @@ public class MockRequest implements Request {
 		this.pathVariables = pathVariables;
 	}
 
-	public static Builder builder() {
-		return new BuilderImpl();
+	public static <T> Builder<T> builder() {
+		return new BuilderImpl<T>();
 	}
 
 	@Override
@@ -92,15 +88,16 @@ public class MockRequest implements Request {
 		return this.headers;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Body body() {
-		return this.body;
+	public <S> S body(BodyExtractor<S> extractor) {
+		return (S) this.body;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Optional<T> attribute(String name) {
-		return Optional.ofNullable((T) this.attributes.get(name));
+	public <S> Optional<S> attribute(String name) {
+		return Optional.ofNullable((S) this.attributes.get(name));
 	}
 
 	@Override
@@ -113,43 +110,43 @@ public class MockRequest implements Request {
 		return Collections.unmodifiableMap(this.pathVariables);
 	}
 
-	public interface Builder {
+	public interface Builder<T> {
 
-		Builder method(HttpMethod method);
+		Builder<T> method(HttpMethod method);
 
-		Builder uri(URI uri);
+		Builder<T> uri(URI uri);
 
-		Builder header(String key, String value);
+		Builder<T> header(String key, String value);
 
-		Builder headers(HttpHeaders headers);
+		Builder<T> headers(HttpHeaders headers);
 
-		Builder attribute(String name, Object value);
+		Builder<T> attribute(String name, Object value);
 
-		Builder attributes(Map<String, Object> attributes);
+		Builder<T> attributes(Map<String, Object> attributes);
 
-		Builder queryParam(String key, String value);
+		Builder<T> queryParam(String key, String value);
 
-		Builder queryParams(MultiValueMap<String, String> queryParams);
+		Builder<T> queryParams(MultiValueMap<String, String> queryParams);
 
-		Builder pathVariable(String key, String value);
+		Builder<T> pathVariable(String key, String value);
 
-		Builder pathVariables(Map<String, String> pathVariables);
+		Builder<T> pathVariables(Map<String, String> pathVariables);
 
-		<T> MockRequest body(Flux<T> body);
+		MockRequest<T> body(T body);
 
-		<T> MockRequest body(Mono<T> body);
-
-		MockRequest build();
+		MockRequest<Void> build();
 
 	}
 
-	private static class BuilderImpl implements Builder {
+	private static class BuilderImpl<T> implements Builder<T> {
 
 		private HttpMethod method = HttpMethod.GET;
 
 		private URI uri = URI.create("http://localhost");
 
 		private MockHeaders headers = new MockHeaders(new HttpHeaders());
+
+		private T body;
 
 		private Map<String, Object> attributes = new LinkedHashMap<>();
 
@@ -158,21 +155,21 @@ public class MockRequest implements Request {
 		private Map<String, String> pathVariables = new LinkedHashMap<>();
 
 		@Override
-		public Builder method(HttpMethod method) {
+		public Builder<T> method(HttpMethod method) {
 			Assert.notNull(method, "'method' must not be null");
 			this.method = method;
 			return this;
 		}
 
 		@Override
-		public Builder uri(URI uri) {
+		public Builder<T> uri(URI uri) {
 			Assert.notNull(uri, "'uri' must not be null");
 			this.uri = uri;
 			return this;
 		}
 
 		@Override
-		public Builder header(String key, String value) {
+		public Builder<T> header(String key, String value) {
 			Assert.notNull(key, "'key' must not be null");
 			Assert.notNull(value, "'value' must not be null");
 			this.headers.header(key, value);
@@ -180,14 +177,14 @@ public class MockRequest implements Request {
 		}
 
 		@Override
-		public Builder headers(HttpHeaders headers) {
+		public Builder<T> headers(HttpHeaders headers) {
 			Assert.notNull(headers, "'headers' must not be null");
 			this.headers = new MockHeaders(headers);
 			return this;
 		}
 
 		@Override
-		public Builder attribute(String name, Object value) {
+		public Builder<T> attribute(String name, Object value) {
 			Assert.notNull(name, "'name' must not be null");
 			Assert.notNull(value, "'value' must not be null");
 			this.attributes.put(name, value);
@@ -195,14 +192,14 @@ public class MockRequest implements Request {
 		}
 
 		@Override
-		public Builder attributes(Map<String, Object> attributes) {
+		public Builder<T> attributes(Map<String, Object> attributes) {
 			Assert.notNull(attributes, "'attributes' must not be null");
 			this.attributes = attributes;
 			return this;
 		}
 
 		@Override
-		public Builder queryParam(String key, String value) {
+		public Builder<T> queryParam(String key, String value) {
 			Assert.notNull(key, "'key' must not be null");
 			Assert.notNull(value, "'value' must not be null");
 			this.queryParams.add(key, value);
@@ -210,14 +207,14 @@ public class MockRequest implements Request {
 		}
 
 		@Override
-		public Builder queryParams(MultiValueMap<String, String> queryParams) {
+		public Builder<T> queryParams(MultiValueMap<String, String> queryParams) {
 			Assert.notNull(queryParams, "'queryParams' must not be null");
 			this.queryParams = queryParams;
 			return this;
 		}
 
 		@Override
-		public Builder pathVariable(String key, String value) {
+		public Builder<T> pathVariable(String key, String value) {
 			Assert.notNull(key, "'key' must not be null");
 			Assert.notNull(value, "'value' must not be null");
 			this.pathVariables.put(key, value);
@@ -225,45 +222,25 @@ public class MockRequest implements Request {
 		}
 
 		@Override
-		public Builder pathVariables(Map<String, String> pathVariables) {
+		public Builder<T> pathVariables(Map<String, String> pathVariables) {
 			Assert.notNull(pathVariables, "'pathVariables' must not be null");
 			this.pathVariables = pathVariables;
 			return this;
 		}
 
 		@Override
-		public <T> MockRequest body(Flux<T> flux) {
-			MockBody body = new MockBody() {
-				@SuppressWarnings("unchecked")
-				@Override
-				public <S> Flux<S> convertTo(Class<? extends S> aClass) {
-					return (Flux<S>) flux;
-				}
-			};
-			return build(body);
+		public MockRequest<T> body(T body) {
+			this.body = body;
+			return new MockRequest<T>(this.method, this.uri, this.headers, this.body,
+					this.attributes, this.queryParams, this.pathVariables);
 		}
 
 		@Override
-		public <T> MockRequest body(Mono<T> mono) {
-			MockBody body = new MockBody() {
-				@SuppressWarnings("unchecked")
-				@Override
-				public <S> Mono<S> convertToMono(Class<? extends S> aClass) {
-					return (Mono<S>) mono;
-				}
-			};
-			return build(body);
+		public MockRequest<Void> build() {
+			return new MockRequest<Void>(this.method, this.uri, this.headers, null,
+					this.attributes, this.queryParams, this.pathVariables);
 		}
 
-		@Override
-		public MockRequest build() {
-			return build(new MockBody());
-		}
-
-		private MockRequest build(MockBody body) {
-			return new MockRequest(this.method, this.uri, this.headers, body, this.attributes,
-					this.queryParams, this.pathVariables);
-		}
 	}
 
 	private static class MockHeaders implements Headers {
@@ -338,25 +315,5 @@ public class MockRequest implements Request {
 			}
 		}
 	}
-
-	private static class MockBody implements Body {
-
-		@Override
-		public Flux<DataBuffer> stream() {
-			return Flux.empty();
-		}
-
-		@Override
-		public <T> Flux<T> convertTo(Class<? extends T> aClass) {
-			return Flux.empty();
-		}
-
-		@Override
-		public <T> Mono<T> convertToMono(Class<? extends T> aClass) {
-			return Mono.empty();
-		}
-	}
-
-
 
 }

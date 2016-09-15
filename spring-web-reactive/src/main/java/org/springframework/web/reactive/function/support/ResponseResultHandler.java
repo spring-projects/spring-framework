@@ -36,7 +36,7 @@ public class ResponseResultHandler implements HandlerResultHandler {
 	private final Configuration configuration;
 
 	public ResponseResultHandler() {
-		this(Configuration.defaultBuilder().build());
+		this(Configuration.builder().build());
 	}
 
 	public ResponseResultHandler(Configuration configuration) {

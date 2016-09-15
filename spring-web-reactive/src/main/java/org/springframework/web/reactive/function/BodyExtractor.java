@@ -16,24 +16,26 @@
 
 package org.springframework.web.reactive.function;
 
-import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
- * Contract to extract the content of a raw {@link ReactiveHttpInputMessage} decoding
- * the request body and using a target composition API.
+ * A function that can extract data from a {@link Request} body.
  *
- * @author Brian Clozel
+ * @param <T> the type of data to extract
  * @author Arjen Poutsma
  * @since 5.0
+ * @see Request#body(BodyExtractor)
+ * @see BodyExtractors
  */
 @FunctionalInterface
-public interface HttpMessageExtractor<T, R extends ReactiveHttpInputMessage> {
+public interface BodyExtractor<T> {
 
 	/**
-	 * Extract content from the response body
-	 * @param message the raw HTTP message
-	 * @return the extracted content
+	 * Extract from the given request.
+	 * @param request the request to extract from
+	 * @param configuration the configuration to use
+	 * @return the extracted data
 	 */
-	T extract(R message);
+	T extract(ServerHttpRequest request, Configuration configuration);
 
 }

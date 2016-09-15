@@ -24,19 +24,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.reactive.BodyExtractor;
 
 /**
- * Represents an HTTP request, as handled by a {@linkplain HandlerFunction handler function}.
- * Access to headers and body is offered by {@link Headers} and {@link Body} respectively.
+ * Represents an HTTP request, as handled by a {@code HandlerFunction}.
+ * Access to headers and body is offered by {@link Headers} and
+ * {@link #body(BodyExtractor)} respectively.
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -66,10 +62,12 @@ public interface Request {
 	Headers headers();
 
 	/**
-	 * Return the body of this request.
+	 * Extract the body with the given {@code BodyExtractor}.
+	 * @param extractor the {@code BodyExtractor} that reads from the request
+	 * @param <T> the type of the body returned
+	 * @return the extracted body
 	 */
-	Body body();
-//	<T> T body(BodyExtractor<T> extractor);
+	<T> T body(BodyExtractor<T> extractor);
 
 	/**
 	 * Return the request attribute value if present.
@@ -171,33 +169,4 @@ public interface Request {
 
 	}
 
-	/**
-	 * Represents the body of the HTTP request.
-	 * @see Request#body()
-	 */
-	interface Body {
-
-		/**
-		 * Return the request body as a stream of {@linkplain DataBuffer data buffers}.
-		 * @return the request body byte stream
-		 */
-		Flux<DataBuffer> stream();
-
-		/**
-		 * Converts the body into a multiple-element stream of the given type.
-		 * @param aClass the type
-		 * @param <T> the type of the element contained in the flux
-		 * @return a flux that streams element of the given type
-		 */
-		<T> Flux<T> convertTo(Class<? extends T> aClass);
-
-		/**
-		 * Converts the body into a single-element stream of the given type.
-		 * @param aClass the type
-		 * @param <T> the type of the element contained in the mono
-		 * @return a flux that streams element of the given type
-		 */
-		<T> Mono<T> convertToMono(Class<? extends T> aClass);
-
-	}
 }

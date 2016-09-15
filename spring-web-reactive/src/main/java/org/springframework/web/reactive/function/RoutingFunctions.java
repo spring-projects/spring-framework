@@ -112,7 +112,7 @@ public abstract class RoutingFunctions {
 
 	/**
 	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HttpHandler}.
-	 * This conversion uses the {@linkplain Configuration#defaultBuilder() default configuration}.
+	 * This conversion uses the {@linkplain Configuration#builder() default configuration}.
 	 *
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
 	 * {@linkplain org.springframework.http.server.reactive.ServletHttpHandlerAdapter Servlet 3.1+},
@@ -146,8 +146,8 @@ public abstract class RoutingFunctions {
 		Assert.notNull(configuration, "'configuration' must not be null");
 
 		return new HttpWebHandlerAdapter(exchange -> {
-			Request request = new DefaultRequest(exchange);
-			addAttributes(exchange, request, configuration);
+			Request request = new DefaultRequest(exchange, configuration);
+			addAttributes(exchange, request);
 
 			HandlerFunction<?> handlerFunction = routingFunction.route(request).orElse(notFound());
 			Response<?> response = handlerFunction.handle(request);
@@ -157,7 +157,7 @@ public abstract class RoutingFunctions {
 
 	/**
 	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HandlerMapping}.
-	 * This conversion uses the {@linkplain Configuration#defaultBuilder() default configuration}.
+	 * This conversion uses the {@linkplain Configuration#builder() default configuration}.
 	 *
 	 * <p>The returned {@code HttpHandler} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
@@ -188,8 +188,8 @@ public abstract class RoutingFunctions {
 		Assert.notNull(configuration, "'configuration' must not be null");
 
 		return exchange -> {
-			Request request = new DefaultRequest(exchange);
-			addAttributes(exchange, request, configuration);
+			Request request = new DefaultRequest(exchange, configuration);
+			addAttributes(exchange, request);
 
 			Optional<? extends HandlerFunction<?>> route = routingFunction.route(request);
 			return Mono.justOrEmpty(route);
@@ -197,14 +197,12 @@ public abstract class RoutingFunctions {
 	}
 
 	private static Configuration defaultConfiguration() {
-		return Configuration.defaultBuilder().build();
+		return Configuration.builder().build();
 	}
 
-	private static void addAttributes(ServerWebExchange exchange, Request request,
-			Configuration configuration) {
+	private static void addAttributes(ServerWebExchange exchange, Request request) {
 		Map<String, Object> attributes = exchange.getAttributes();
 		attributes.put(REQUEST_ATTRIBUTE, request);
-		attributes.put(CONFIGURATION_ATTRIBUTE, configuration);
 	}
 
 	@SuppressWarnings("unchecked")

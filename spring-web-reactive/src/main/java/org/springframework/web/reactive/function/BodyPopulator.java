@@ -25,10 +25,11 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * A combination of functions that can populate {@link Response#body()}.
+ * A combination of functions that can populate a {@link Response} body.
  *
  * @author Arjen Poutsma
  * @since 5.0
+ * @see Response#body()
  * @see Response.BodyBuilder#body(BodyPopulator)
  * @see BodyPopulators
  */

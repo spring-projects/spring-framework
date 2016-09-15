@@ -86,14 +86,6 @@ public class RequestWrapperTests {
 	}
 
 	@Test
-	public void body() throws Exception {
-		Request.Body body = mock(Request.Body.class);
-		when(mockRequest.body()).thenReturn(body);
-
-		assertEquals(body, wrapper.body());
-	}
-
-	@Test
 	public void attribute() throws Exception {
 		String name = "foo";
 		String value = "bar";

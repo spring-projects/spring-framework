@@ -16,17 +16,12 @@
 
 package org.springframework.web.reactive.function;
 
-import org.springframework.http.codec.HttpMessageReader;
-
 /**
  * @author Arjen Poutsma
  */
 @SuppressWarnings("unchecked")
 abstract class CastingUtils {
 
-	public static <T> HttpMessageReader<T> cast(HttpMessageReader<?> messageReader) {
-		return (HttpMessageReader<T>) messageReader;
-	}
 
 	public static <T> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
 		return (HandlerFunction<T>) handlerFunction;

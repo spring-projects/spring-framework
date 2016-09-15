@@ -40,7 +40,7 @@ public interface Configuration {
 	 * Return a mutable, empty builder for a {@code Configuration}.
 	 * @return the builder
 	 */
-	static Builder builder() {
+	static Builder empty() {
 		return new DefaultConfigurationBuilder();
 	}
 
@@ -48,7 +48,7 @@ public interface Configuration {
 	 * Return a mutable builder for a {@code Configuration} with a default initialization.
 	 * @return the builder
 	 */
-	static Builder defaultBuilder() {
+	static Builder builder() {
 		DefaultConfigurationBuilder builder = new DefaultConfigurationBuilder();
 		builder.defaultConfiguration();
 		return builder;

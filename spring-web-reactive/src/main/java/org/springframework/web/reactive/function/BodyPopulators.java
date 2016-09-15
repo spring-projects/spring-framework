@@ -61,7 +61,7 @@ public abstract class BodyPopulators {
 	 * @param body the body of the response
 	 * @return a {@code BodyPopulator} that writes a single object
 	 */
-	public static <T> BodyPopulator<T> ofObject(T body) {
+	public static <T> BodyPopulator<T> fromObject(T body) {
 		Assert.notNull(body, "'body' must not be null");
 		return BodyPopulator.of(
 				(response, configuration) -> writeWithMessageWriters(response, configuration,
@@ -77,12 +77,12 @@ public abstract class BodyPopulators {
 	 * @param <S> the type of the {@code Publisher}.
 	 * @return a {@code BodyPopulator} that writes a {@code Publisher}
 	 */
-	public static <S extends Publisher<T>, T> BodyPopulator<S> ofPublisher(S publisher,
+	public static <S extends Publisher<T>, T> BodyPopulator<S> fromPublisher(S publisher,
 			Class<T> elementClass) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
-		return ofPublisher(publisher, ResolvableType.forClass(elementClass));
+		return fromPublisher(publisher, ResolvableType.forClass(elementClass));
 	}
 
 	/**
@@ -93,7 +93,7 @@ public abstract class BodyPopulators {
 	 * @param <S> the type of the {@code Publisher}.
 	 * @return a {@code BodyPopulator} that writes a {@code Publisher}
 	 */
-	public static <S extends Publisher<T>, T> BodyPopulator<S> ofPublisher(S publisher,
+	public static <S extends Publisher<T>, T> BodyPopulator<S> fromPublisher(S publisher,
 			ResolvableType elementType) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
@@ -114,7 +114,7 @@ public abstract class BodyPopulators {
 	 * @param <T> the type of the {@code Resource}
 	 * @return a {@code BodyPopulator} that writes a {@code Publisher}
 	 */
-	public static <T extends Resource> BodyPopulator<T> ofResource(T resource) {
+	public static <T extends Resource> BodyPopulator<T> fromResource(T resource) {
 		Assert.notNull(resource, "'resource' must not be null");
 		return BodyPopulator.of(
 				(response, configuration) -> {
@@ -134,7 +134,7 @@ public abstract class BodyPopulators {
 	 * @return a {@code BodyPopulator} that writes a {@code ServerSentEvent} publisher
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyPopulator<S> ofServerSentEvents(
+	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyPopulator<S> fromServerSentEvents(
 			S eventsPublisher) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
@@ -159,12 +159,12 @@ public abstract class BodyPopulators {
 	 * Server-Sent Events
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<T>> BodyPopulator<S> ofServerSentEvents(S eventsPublisher,
+	public static <T, S extends Publisher<T>> BodyPopulator<S> fromServerSentEvents(S eventsPublisher,
 			Class<T> eventClass) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventClass, "'eventClass' must not be null");
-		return ofServerSentEvents(eventsPublisher, ResolvableType.forClass(eventClass));
+		return fromServerSentEvents(eventsPublisher, ResolvableType.forClass(eventClass));
 	}
 
 	/**
@@ -177,7 +177,7 @@ public abstract class BodyPopulators {
 	 * Server-Sent Events
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<T>> BodyPopulator<S> ofServerSentEvents(S eventsPublisher,
+	public static <T, S extends Publisher<T>> BodyPopulator<S> fromServerSentEvents(S eventsPublisher,
 			ResolvableType eventType) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
@@ -222,7 +222,7 @@ public abstract class BodyPopulators {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> HttpMessageWriter<T> cast(HttpMessageWriter<?> messageWriter) {
+	private static <T> HttpMessageWriter<T> cast(HttpMessageWriter<?> messageWriter) {
 		return (HttpMessageWriter<T>) messageWriter;
 	}
 

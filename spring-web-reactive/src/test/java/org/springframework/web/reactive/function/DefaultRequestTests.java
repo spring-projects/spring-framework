@@ -27,8 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +52,7 @@ import org.springframework.web.server.ServerWebExchange;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 
 /**
  * @author Arjen Poutsma
@@ -66,6 +65,8 @@ public class DefaultRequestTests {
 
 	private ServerWebExchange mockExchange;
 
+	private Configuration mockConfiguration;
+
 	private DefaultRequest defaultRequest;
 
 	@Before
@@ -76,8 +77,9 @@ public class DefaultRequestTests {
 		mockExchange = mock(ServerWebExchange.class);
 		when(mockExchange.getRequest()).thenReturn(mockRequest);
 		when(mockExchange.getResponse()).thenReturn(mockResponse);
+		mockConfiguration = mock(Configuration.class);
 
-		defaultRequest = new DefaultRequest(mockExchange);
+		defaultRequest = new DefaultRequest(mockExchange, mockConfiguration);
 	}
 
 	@Test
@@ -110,6 +112,14 @@ public class DefaultRequestTests {
 		when(mockRequest.getQueryParams()).thenReturn(queryParams);
 
 		assertEquals(Optional.of("bar"), defaultRequest.queryParam("foo"));
+	}
+
+	@Test
+	public void pathVariable() throws Exception {
+		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
+		when(mockExchange.getAttribute(RoutingFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
+
+		assertEquals(Optional.of("bar"), defaultRequest.pathVariable("foo"));
 	}
 
 	@Test
@@ -161,14 +171,9 @@ public class DefaultRequestTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		Configuration mockConfig = mock(Configuration.class);
-		when(mockConfig.messageReaders()).thenReturn(messageReaders::stream);
-		when(mockExchange.getAttribute(RoutingFunctions.CONFIGURATION_ATTRIBUTE))
-				.thenReturn(Optional.of(mockConfig));
+		when(mockConfiguration.messageReaders()).thenReturn(messageReaders::stream);
 
-		assertEquals(body, defaultRequest.body().stream());
-
-		Mono<String> resultMono = defaultRequest.body().convertToMono(String.class);
+		Mono<String> resultMono = defaultRequest.body(toMono(String.class));
 		assertEquals("foo", resultMono.block());
 	}
 
