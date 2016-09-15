@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -707,7 +707,7 @@ public abstract class StringUtils {
 	private static void validateLocalePart(String localePart) {
 		for (int i = 0; i < localePart.length(); i++) {
 			char ch = localePart.charAt(i);
-			if (ch != '_' && ch != ' ' && !Character.isLetterOrDigit(ch)) {
+			if (ch != ' ' && ch != '_' && ch != '#' && !Character.isLetterOrDigit(ch)) {
 				throw new IllegalArgumentException(
 						"Locale part \"" + localePart + "\" contains invalid characters");
 			}
