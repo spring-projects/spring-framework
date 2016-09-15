@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -627,8 +627,7 @@ public class StringUtilsTests {
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	// SPR-3671
-	@Test
+	@Test  // SPR-3671
 	public void testParseLocaleWithMultiValuedVariant() throws Exception {
 		final String variant = "proper_northern";
 		final String localeString = "en_GB_" + variant;
@@ -636,8 +635,7 @@ public class StringUtilsTests {
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	// SPR-3671
-	@Test
+	@Test  // SPR-3671
 	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparators() throws Exception {
 		final String variant = "proper northern";
 		final String localeString = "en GB " + variant;
@@ -645,8 +643,7 @@ public class StringUtilsTests {
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	// SPR-3671
-	@Test
+	@Test  // SPR-3671
 	public void testParseLocaleWithMultiValuedVariantUsingMixtureOfUnderscoresAndSpacesAsSeparators() throws Exception {
 		final String variant = "proper northern";
 		final String localeString = "en_GB_" + variant;
@@ -654,8 +651,7 @@ public class StringUtilsTests {
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	// SPR-3671
-	@Test
+	@Test  // SPR-3671
 	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparatorsWithLotsOfLeadingWhitespace() throws Exception {
 		final String variant = "proper northern";
 		final String localeString = "en GB            " + variant; // lots of whitespace
@@ -663,8 +659,7 @@ public class StringUtilsTests {
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	// SPR-3671
-	@Test
+	@Test  // SPR-3671
 	public void testParseLocaleWithMultiValuedVariantUsingUnderscoresAsSeparatorsWithLotsOfLeadingWhitespace() throws Exception {
 		final String variant = "proper_northern";
 		final String localeString = "en_GB_____" + variant; // lots of underscores
@@ -672,8 +667,7 @@ public class StringUtilsTests {
 		assertEquals("Multi-valued variant portion of the Locale not extracted correctly.", variant, locale.getVariant());
 	}
 
-	// SPR-7779
-	@Test
+	@Test  // SPR-7779
 	public void testParseLocaleWithInvalidCharacters() {
 		try {
 			StringUtils.parseLocaleString("%0D%0AContent-length:30%0D%0A%0D%0A%3Cscript%3Ealert%28123%29%3C/script%3E");
@@ -684,20 +678,23 @@ public class StringUtilsTests {
 		}
 	}
 
-	// SPR-9420
-	@Test
+	@Test  // SPR-9420
 	public void testParseLocaleWithSameLowercaseTokenForLanguageAndCountry() {
 		assertEquals("tr_TR", StringUtils.parseLocaleString("tr_tr").toString());
 		assertEquals("bg_BG_vnt", StringUtils.parseLocaleString("bg_bg_vnt").toString());
 	}
 
-	// SPR-11806
-	@Test
+	@Test  // SPR-11806
 	public void testParseLocaleWithVariantContainingCountryCode() {
 		String variant = "GBtest";
 		String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
 		assertEquals("Variant containing country code not extracted correctly", variant, locale.getVariant());
+	}
+
+	@Test  // SPR-14718
+	public void testParseJava7Variant() {
+		assertEquals("sr_#LATN", StringUtils.parseLocaleString("sr_#LATN").toString());
 	}
 
 }
