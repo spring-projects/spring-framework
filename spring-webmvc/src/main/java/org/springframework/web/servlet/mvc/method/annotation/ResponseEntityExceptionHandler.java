@@ -180,7 +180,9 @@ public abstract class ResponseEntityExceptionHandler {
 					(AsyncRequestTimeoutException) ex, headers, status, request);
 		}
 		else {
-			logger.warn("Unknown exception type: " + ex.getClass().getName());
+			if (logger.isWarnEnabled()) {
+				logger.warn("Unknown exception type: " + ex.getClass().getName());
+			}
 			HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
 			return handleExceptionInternal(ex, null, headers, status, request);
 		}
