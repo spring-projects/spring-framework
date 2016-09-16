@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
@@ -54,7 +55,7 @@ public class HttpRequestPathHelper {
 
 
 	public String getLookupPathForRequest(ServerWebExchange exchange) {
-		String path = exchange.getRequest().getURI().getRawPath();
+		String path = exchange.getRequest().getPath();
 		return (this.shouldUrlDecode() ? decode(exchange, path) : path);
 	}
 
