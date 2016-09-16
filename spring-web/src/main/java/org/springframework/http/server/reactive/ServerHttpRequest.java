@@ -25,9 +25,25 @@ import org.springframework.util.MultiValueMap;
  * Represents a reactive server-side HTTP request
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
+
+
+	// TODO: https://jira.spring.io/browse/SPR-14726
+
+	/**
+	 * Returns the portion of the URL path that represents the context path for
+	 * the current {@link HttpHandler}. The context path is always at the
+	 * beginning of the request path. It starts with "/" but but does not end
+	 * with "/". This method may return an empty string if no context path is
+	 * configured.
+	 * @return the context path (not decoded) or an empty string
+	 */
+	default String getContextPath() {
+		return "";
+	}
 
 	/**
 	 * Return a read-only map with parsed and decoded query parameter values.

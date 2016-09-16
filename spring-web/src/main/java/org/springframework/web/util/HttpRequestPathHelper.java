@@ -19,8 +19,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -54,8 +56,17 @@ public class HttpRequestPathHelper {
 
 
 	public String getLookupPathForRequest(ServerWebExchange exchange) {
-		String path = exchange.getRequest().getURI().getRawPath();
+		String path = getPathWithinApplication(exchange.getRequest());
 		return (this.shouldUrlDecode() ? decode(exchange, path) : path);
+	}
+
+	private String getPathWithinApplication(ServerHttpRequest request) {
+		String contextPath = request.getContextPath();
+		String path = request.getURI().getRawPath();
+		if (!StringUtils.hasText(contextPath)) {
+			return path;
+		}
+		return (path.length() > contextPath.length() ? path.substring(contextPath.length()) : "");
 	}
 
 	private String decode(ServerWebExchange exchange, String path) {
