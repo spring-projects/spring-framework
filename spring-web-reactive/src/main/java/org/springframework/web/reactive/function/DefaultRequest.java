@@ -83,7 +83,7 @@ class DefaultRequest implements Request {
 
 	@Override
 	public Map<String, String> pathVariables() {
-		return this.exchange.<Map<String, String>>getAttribute(RoutingFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE).
+		return this.exchange.<Map<String, String>>getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE).
 				orElseGet(Collections::emptyMap);
 	}
 

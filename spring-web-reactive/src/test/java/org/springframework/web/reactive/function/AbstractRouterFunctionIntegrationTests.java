@@ -22,14 +22,14 @@ import org.springframework.http.server.reactive.HttpHandler;
 /**
  * @author Arjen Poutsma
  */
-public abstract class AbstractRoutingFunctionIntegrationTests
+public abstract class AbstractRouterFunctionIntegrationTests
 		extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
 	protected final HttpHandler createHttpHandler() {
-		RoutingFunction<?> routingFunction = routingFunction();
-		return RoutingFunctions.toHttpHandler(routingFunction);
+		RouterFunction<?> routerFunction = routerFunction();
+		return RouterFunctions.toHttpHandler(routerFunction);
 	}
 
-	protected abstract RoutingFunction<?> routingFunction();
+	protected abstract RouterFunction<?> routerFunction();
 }

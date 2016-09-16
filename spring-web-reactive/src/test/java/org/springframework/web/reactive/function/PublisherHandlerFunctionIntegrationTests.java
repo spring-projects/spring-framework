@@ -37,13 +37,13 @@ import static org.springframework.web.reactive.function.BodyExtractors.toMono;
 import static org.springframework.web.reactive.function.BodyPopulators.fromPublisher;
 import static org.springframework.web.reactive.function.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.RequestPredicates.POST;
-import static org.springframework.web.reactive.function.RoutingFunctions.route;
+import static org.springframework.web.reactive.function.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
  */
 public class PublisherHandlerFunctionIntegrationTests
-		extends AbstractRoutingFunctionIntegrationTests {
+		extends AbstractRouterFunctionIntegrationTests {
 
 	private RestTemplate restTemplate;
 
@@ -53,7 +53,7 @@ public class PublisherHandlerFunctionIntegrationTests
 	}
 
 	@Override
-	protected RoutingFunction<?> routingFunction() {
+	protected RouterFunction<?> routerFunction() {
 		PersonHandler personHandler = new PersonHandler();
 		return route(GET("/mono"), personHandler::mono)
 				.and(route(POST("/mono"), personHandler::postMono))

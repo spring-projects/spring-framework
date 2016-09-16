@@ -50,10 +50,10 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.web.reactive.function.RoutingFunctions.route;
+import static org.springframework.web.reactive.function.RouterFunctions.route;
 
 /**
- * Tests the use of {@link HandlerFunction} and {@link RoutingFunction} in a 
+ * Tests the use of {@link HandlerFunction} and {@link RouterFunction} in a
  * {@link DispatcherHandler}.
  * @author Arjen Poutsma
  */
@@ -117,9 +117,9 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		@Bean
-		public HandlerMapping handlerMapping(RoutingFunction<?> routingFunction,
+		public HandlerMapping handlerMapping(RouterFunction<?> routerFunction,
 				ApplicationContext applicationContext) {
-			return RoutingFunctions.toHandlerMapping(routingFunction,
+			return RouterFunctions.toHandlerMapping(routerFunction,
 					new org.springframework.web.reactive.function.Configuration() {
 						@Override
 						public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
@@ -139,7 +139,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		@Bean
-		public RoutingFunction<?> routingFunction() {
+		public RouterFunction<?> routerFunction() {
 			PersonHandler personHandler = personHandler();
 			return route(RequestPredicates.GET("/mono"), personHandler::mono)
 					.and(route(RequestPredicates.GET("/flux"), personHandler::flux));

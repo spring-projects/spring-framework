@@ -26,7 +26,7 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.function.HandlerFunction;
 import org.springframework.web.reactive.function.Request;
 import org.springframework.web.reactive.function.Response;
-import org.springframework.web.reactive.function.RoutingFunctions;
+import org.springframework.web.reactive.function.RouterFunctions;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -58,7 +58,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter {
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		HandlerFunction<?> handlerFunction = (HandlerFunction<?>) handler;
 		Request request =
-				exchange.<Request>getAttribute(RoutingFunctions.REQUEST_ATTRIBUTE)
+				exchange.<Request>getAttribute(RouterFunctions.REQUEST_ATTRIBUTE)
 						.orElseThrow(() -> new IllegalStateException("Could not find Request in exchange attributes"));
 
 		Response<?> response = handlerFunction.handle(request);

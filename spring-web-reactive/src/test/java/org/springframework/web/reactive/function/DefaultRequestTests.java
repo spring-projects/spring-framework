@@ -117,7 +117,7 @@ public class DefaultRequestTests {
 	@Test
 	public void pathVariable() throws Exception {
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		when(mockExchange.getAttribute(RoutingFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
+		when(mockExchange.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
 
 		assertEquals(Optional.of("bar"), defaultRequest.pathVariable("foo"));
 	}
@@ -125,7 +125,7 @@ public class DefaultRequestTests {
 	@Test
 	public void pathVariables() throws Exception {
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
-		when(mockExchange.getAttribute(RoutingFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
+		when(mockExchange.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
 
 		assertEquals(pathVariables, defaultRequest.pathVariables());
 	}

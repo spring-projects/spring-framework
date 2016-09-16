@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
  * @author Arjen Poutsma
  */
 @SuppressWarnings("unchecked")
-public class RoutingFunctionsTests {
+public class RouterFunctionsTests {
 
 	@Test
 	public void routeMatch() throws Exception {
@@ -54,7 +54,7 @@ public class RoutingFunctionsTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RoutingFunction<Void> result = RoutingFunctions.route(requestPredicate, handlerFunction);
+		RouterFunction<Void> result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -70,7 +70,7 @@ public class RoutingFunctionsTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RoutingFunction<Void> result = RoutingFunctions.route(requestPredicate, handlerFunction);
+		RouterFunction<Void> result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -80,13 +80,13 @@ public class RoutingFunctionsTests {
 	@Test
 	public void subrouteMatch() throws Exception {
 		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
-		RoutingFunction<Void> routingFunction = request -> Optional.of(handlerFunction);
+		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
 
 		MockRequest request = MockRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RoutingFunction<Void> result = RoutingFunctions.subroute(requestPredicate, routingFunction);
+		RouterFunction<Void> result = RouterFunctions.subroute(requestPredicate, routerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -97,13 +97,13 @@ public class RoutingFunctionsTests {
 	@Test
 	public void subrouteNoMatch() throws Exception {
 		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
-		RoutingFunction<Void> routingFunction = request -> Optional.of(handlerFunction);
+		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
 
 		MockRequest request = MockRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RoutingFunction<Void> result = RoutingFunctions.subroute(requestPredicate, routingFunction);
+		RouterFunction<Void> result = RouterFunctions.subroute(requestPredicate, routerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -127,14 +127,14 @@ public class RoutingFunctionsTests {
 		HandlerFunction handlerFunction = mock(HandlerFunction.class);
 		when(handlerFunction.handle(any(Request.class))).thenReturn(response);
 
-		RoutingFunction routingFunction = mock(RoutingFunction.class);
-		when(routingFunction.route(any(Request.class))).thenReturn(Optional.of(handlerFunction));
+		RouterFunction routerFunction = mock(RouterFunction.class);
+		when(routerFunction.route(any(Request.class))).thenReturn(Optional.of(handlerFunction));
 
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
 
-		HttpHandler result = RoutingFunctions.toHttpHandler(routingFunction, configuration);
+		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, configuration);
 		assertNotNull(result);
 
 		MockServerHttpRequest httpRequest =

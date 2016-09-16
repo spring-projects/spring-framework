@@ -30,36 +30,36 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 /**
  * <strong>Central entry point to Spring's functional web framework.</strong>
  * Exposes routing functionality, such as to
- * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RoutingFunction} given a
+ * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RouterFunction} given a
  * {@code RequestPredicate} and {@code HandlerFunction}, and to do further
- * {@linkplain #subroute(RequestPredicate, RoutingFunction) subrouting} on an existing routing
+ * {@linkplain #subroute(RequestPredicate, RouterFunction) subrouting} on an existing routing
  * function.
  *
- * <p>Additionally, this class can {@linkplain #toHttpHandler(RoutingFunction) transform} a
- * {@code RoutingFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
+ * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
+ * {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
  * Reactor, RxNetty, or Undertow.
- * And it can {@linkplain #toHandlerMapping(RoutingFunction, Configuration) transform} a
- * {@code RoutingFunction} into an {@code HandlerMapping}, which can be run in a
+ * And it can {@linkplain #toHandlerMapping(RouterFunction, Configuration) transform} a
+ * {@code RouterFunction} into an {@code HandlerMapping}, which can be run in a
  * {@code DispatcherHandler}.
  *
  * @author Arjen Poutsma
  * @since 5.0
  *
  */
-public abstract class RoutingFunctions {
+public abstract class RouterFunctions {
 
 	private static final HandlerFunction<Void> NOT_FOUND_HANDLER = request -> Response.notFound().build();
 
 	/**
 	 * Name of the {@link ServerWebExchange} attribute that contains the {@link Request}.
 	 */
-	public static final String REQUEST_ATTRIBUTE = RoutingFunctions.class.getName() + ".request";
+	public static final String REQUEST_ATTRIBUTE = RouterFunctions.class.getName() + ".request";
 
 	/**
 	 * Name of the {@link ServerWebExchange} attribute that contains the URI
 	 * templates map, mapping variable names to values.
 	 */
-	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = RoutingFunctions.class.getName() + ".uriTemplateVariables";
+	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE = RouterFunctions.class.getName() + ".uriTemplateVariables";
 
 	/**
 	 * Route to the given handler function if the given request predicate applies.
@@ -70,7 +70,7 @@ public abstract class RoutingFunctions {
 	 * @return a routing function that routes to {@code handlerFunction} if {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T> RoutingFunction<T> route(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
+	public static <T> RouterFunction<T> route(RequestPredicate predicate, HandlerFunction<T> handlerFunction) {
 		Assert.notNull(predicate, "'predicate' must not be null");
 		Assert.notNull(handlerFunction, "'handlerFunction' must not be null");
 
@@ -81,19 +81,19 @@ public abstract class RoutingFunctions {
 	 * Route to the given routing function if the given request predicate applies.
 	 *
 	 * @param predicate       the predicate to test
-	 * @param routingFunction the routing function to route to
+	 * @param routerFunction the routing function to route to
 	 * @param <T>             the type of the handler function
-	 * @return a routing function that routes to {@code routingFunction} if {@code predicate} evaluates to {@code true}
+	 * @return a routing function that routes to {@code routerFunction} if {@code predicate} evaluates to {@code true}
 	 * @see RequestPredicates
 	 */
-	public static <T> RoutingFunction<T> subroute(RequestPredicate predicate, RoutingFunction<T> routingFunction) {
+	public static <T> RouterFunction<T> subroute(RequestPredicate predicate, RouterFunction<T> routerFunction) {
 		Assert.notNull(predicate, "'predicate' must not be null");
-		Assert.notNull(routingFunction, "'routingFunction' must not be null");
+		Assert.notNull(routerFunction, "'routerFunction' must not be null");
 
 		return request -> {
 			if (predicate.test(request)) {
 				Request subRequest = predicate.subRequest(request);
-				return routingFunction.route(subRequest);
+				return routerFunction.route(subRequest);
 			}
 			else {
 				return Optional.empty();
@@ -102,7 +102,7 @@ public abstract class RoutingFunctions {
 	}
 
 	/**
-	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HttpHandler}.
+	 * Converts the given {@linkplain RouterFunction routing function} into a {@link HttpHandler}.
 	 * This conversion uses the {@linkplain Configuration#builder() default configuration}.
 	 *
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
@@ -117,15 +117,15 @@ public abstract class RoutingFunctions {
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
 	 *
-	 * @param routingFunction the routing function to convert
+	 * @param routerFunction the routing function to convert
 	 * @return an http handler that handles HTTP request using the given routing function
 	 */
-	public static HttpHandler toHttpHandler(RoutingFunction<?> routingFunction) {
-		return toHttpHandler(routingFunction, defaultConfiguration());
+	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
+		return toHttpHandler(routerFunction, defaultConfiguration());
 	}
 
 	/**
-	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HttpHandler},
+	 * Converts the given {@linkplain RouterFunction routing function} into a {@link HttpHandler},
 	 * using the given configuration.
 	 *
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
@@ -140,61 +140,61 @@ public abstract class RoutingFunctions {
 	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
 	 * </ul>
 	 *
-	 * @param routingFunction the routing function to convert
+	 * @param routerFunction the routing function to convert
 	 * @param configuration   the configuration to use
 	 * @return an http handler that handles HTTP request using the given routing function
 	 */
-	public static HttpHandler toHttpHandler(RoutingFunction<?> routingFunction, Configuration configuration) {
-		Assert.notNull(routingFunction, "'routingFunction' must not be null");
+	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, Configuration configuration) {
+		Assert.notNull(routerFunction, "'routerFunction' must not be null");
 		Assert.notNull(configuration, "'configuration' must not be null");
 
 		return new HttpWebHandlerAdapter(exchange -> {
 			Request request = new DefaultRequest(exchange, configuration);
 			addAttributes(exchange, request);
 
-			HandlerFunction<?> handlerFunction = routingFunction.route(request).orElse(notFound());
+			HandlerFunction<?> handlerFunction = routerFunction.route(request).orElse(notFound());
 			Response<?> response = handlerFunction.handle(request);
 			return response.writeTo(exchange, configuration);
 		});
 	}
 
 	/**
-	 * Converts the given {@code RoutingFunction} into a {@code HandlerMapping}.
+	 * Converts the given {@code RouterFunction} into a {@code HandlerMapping}.
 	 * This conversion uses the {@linkplain Configuration#builder() default configuration}.
 	 *
 	 * <p>The returned {@code HandlerMapping} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
 	 *
-	 * @param routingFunction the routing function to convert
+	 * @param routerFunction the routing function to convert
 	 * @return an handler mapping that maps HTTP request to a handler using the given routing function
 	 * @see org.springframework.web.reactive.function.support.HandlerFunctionAdapter
 	 * @see org.springframework.web.reactive.function.support.ResponseResultHandler
 	 */
-	public static HandlerMapping toHandlerMapping(RoutingFunction<?> routingFunction) {
-		return toHandlerMapping(routingFunction, defaultConfiguration());
+	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction) {
+		return toHandlerMapping(routerFunction, defaultConfiguration());
 	}
 
 	/**
-	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HandlerMapping}
+	 * Converts the given {@linkplain RouterFunction routing function} into a {@link HandlerMapping}
 	 * using the given configuration.
 	 *
 	 * <p>The returned {@code HandlerMapping} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
 	 *
-	 * @param routingFunction the routing function to convert
+	 * @param routerFunction the routing function to convert
 	 * @return an handler mapping that maps HTTP request to a handler using the given routing function
 	 * @see org.springframework.web.reactive.function.support.HandlerFunctionAdapter
 	 * @see org.springframework.web.reactive.function.support.ResponseResultHandler
 	 */
-	public static HandlerMapping toHandlerMapping(RoutingFunction<?> routingFunction, Configuration configuration) {
-		Assert.notNull(routingFunction, "'routingFunction' must not be null");
+	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction, Configuration configuration) {
+		Assert.notNull(routerFunction, "'routerFunction' must not be null");
 		Assert.notNull(configuration, "'configuration' must not be null");
 
 		return exchange -> {
 			Request request = new DefaultRequest(exchange, configuration);
 			addAttributes(exchange, request);
 
-			Optional<? extends HandlerFunction<?>> route = routingFunction.route(request);
+			Optional<? extends HandlerFunction<?>> route = routerFunction.route(request);
 			return Mono.justOrEmpty(route);
 		};
 	}

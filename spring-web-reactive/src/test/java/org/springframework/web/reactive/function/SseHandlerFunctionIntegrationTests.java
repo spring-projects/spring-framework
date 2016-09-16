@@ -32,13 +32,13 @@ import org.springframework.web.client.reactive.WebClient;
 
 import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
 import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
-import static org.springframework.web.reactive.function.RoutingFunctions.route;
+import static org.springframework.web.reactive.function.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
  */
 public class SseHandlerFunctionIntegrationTests
-		extends AbstractRoutingFunctionIntegrationTests {
+		extends AbstractRouterFunctionIntegrationTests {
 
 	private WebClient webClient;
 
@@ -48,7 +48,7 @@ public class SseHandlerFunctionIntegrationTests
 	}
 
 	@Override
-	protected RoutingFunction<?> routingFunction() {
+	protected RouterFunction<?> routerFunction() {
 		SseHandler sseHandler = new SseHandler();
 		return route(RequestPredicates.GET("/string"), sseHandler::string)
 				.and(route(RequestPredicates.GET("/person"), sseHandler::person))

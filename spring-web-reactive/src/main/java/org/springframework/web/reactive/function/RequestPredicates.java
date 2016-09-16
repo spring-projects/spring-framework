@@ -249,7 +249,7 @@ public abstract class RequestPredicates {
 				if (request instanceof DefaultRequest) {
 					DefaultRequest defaultRequest = (DefaultRequest) request;
 					Map<String, String> uriTemplateVariables = this.pathMatcher.extractUriTemplateVariables(this.pattern, path);
-					defaultRequest.exchange().getAttributes().put(RoutingFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+					defaultRequest.exchange().getAttributes().put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
 				}
 				return true;
 			}
