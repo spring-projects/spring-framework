@@ -35,11 +35,12 @@ configure(allprojects) { project ->
 	ext.annotationApiVersion   = "1.2"
 	ext.aspectjVersion         = "1.9.0.BETA-5"
 	ext.beanvalVersion         = "1.1.0.Final"
-	ext.caffeineVersion        = "2.3.2"
+	ext.cacheApiVersion        = "1.0.0"
+	ext.caffeineVersion        = "2.3.3"
 	ext.eclipselinkVersion     = "2.6.3"
 	ext.ehcacheVersion         = "2.10.2"
 	ext.ehcachejcacheVersion   = "1.0.1"
-	ext.ehcache3Version        = "3.1.1"
+	ext.ehcache3Version        = "3.1.2"
 	ext.ejbApiVersion          = "3.2"
 	ext.elApiVersion           = "3.0.1-b04"
 	ext.fileuploadVersion      = "1.3.2"
@@ -59,6 +60,7 @@ configure(allprojects) { project ->
 	ext.jaxwsVersion           = "2.2.11"
 	ext.jcaVersion             = "1.7"
 	ext.jettyVersion           = "9.4.0.M1"
+	ext.jmsVersion             = "2.0.1"
 	ext.jodaVersion            = "2.9.4"
 	ext.jpaVersion             = "2.1.1"
 	ext.jsfVersion             = "2.2"
@@ -78,10 +80,10 @@ configure(allprojects) { project ->
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.2.RELEASE'
 	ext.reactorNettyVersion    = '0.5.1.RELEASE'
-	ext.romeVersion            = "1.6.0"
+	ext.romeVersion            = "1.7.0"
 	ext.rxjavaVersion          = '1.1.9'
-	ext.rxjava2Version         = '2.0.0-RC1'
-	ext.rxnettyVersion         = '0.5.2-rc.3'
+	ext.rxjava2Version         = '2.0.0-RC2'
+	ext.rxnettyVersion         = '0.5.2-rc.4'
 	ext.servletVersion         = "3.1.0"
 	ext.slf4jVersion           = "1.7.21"
 	ext.snakeyamlVersion       = "1.17"
@@ -90,9 +92,9 @@ configure(allprojects) { project ->
 	ext.tiles3Version          = "3.0.5"
 	ext.tomcatVersion          = "8.5.5"
 	ext.tyrusVersion           = "1.13"
-	ext.undertowVersion        = "1.4.2.Final"
+	ext.undertowVersion        = "1.4.3.Final"
 	ext.websocketVersion       = "1.1"
-	ext.woodstoxVersion        = "5.0.2"
+	ext.woodstoxVersion        = "5.0.3"
 	ext.xmlunitVersion         = "2.2.1"
 	ext.xnioVersion            = "3.4.0.Final"
 	ext.xstreamVersion         = "1.4.9"
@@ -544,7 +546,7 @@ project("spring-oxm") {
 		optional("org.jibx:jibx-run:1.2.6")
 		testCompile(project(":spring-context"))
 		testCompile("xpp3:xpp3:1.1.4c")
-		testCompile("org.codehaus.jettison:jettison:1.3.7") {
+		testCompile("org.codehaus.jettison:jettison:1.3.8") {
 			exclude group: 'stax', module: 'stax-api'
 		}
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
@@ -629,7 +631,7 @@ project("spring-jms") {
 		compile(project(":spring-context"))
 		compile(project(":spring-messaging"))
 		compile(project(":spring-tx"))
-		provided("javax.jms:javax.jms-api:2.0.1")
+		provided("javax.jms:javax.jms-api:${jmsVersion}")
 		optional(project(":spring-oxm"))
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:javax.resource-api:${jcaVersion}")
@@ -666,7 +668,7 @@ project("spring-context-support") {
 		optional(project(":spring-tx"))  // for Quartz support
 		optional("javax.activation:activation:${activationApiVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
-		optional("javax.cache:cache-api:1.0.0")
+		optional("javax.cache:cache-api:${cacheApiVersion}")
 		optional("com.github.ben-manes.caffeine:caffeine:${caffeineVersion}")
 		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
 		optional("org.quartz-scheduler:quartz:${quartzVersion}")
@@ -737,8 +739,8 @@ project("spring-web") {
 		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional("io.undertow:undertow-core:${undertowVersion}")
 		optional("org.jboss.xnio:xnio-api:${xnioVersion}")
-		optional("io.netty:netty-buffer:${nettyVersion}") // Temporarily for JsonObjectDecoder
-	  	optional("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") { // woodstox before aalto
+		optional("io.netty:netty-buffer:${nettyVersion}")  // temporarily for JsonObjectDecoder
+	  	optional("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") {  // woodstox before aalto
 			exclude group: "stax", module: "stax-api"
 		}
 		optional("com.fasterxml:aalto-xml:1.0.0")
@@ -921,7 +923,7 @@ project("spring-webmvc") {
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.mozilla:rhino:1.7.7.1")
-		testRuntime("org.jruby:jruby:9.1.2.0")
+		testRuntime("org.jruby:jruby:9.1.5.0")
 		testRuntime("org.python:jython-standalone:2.5.3")
 		testRuntime("org.webjars:underscorejs:1.8.3")
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
@@ -1042,7 +1044,7 @@ project("spring-test") {
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
-		testCompile("javax.cache:cache-api:1.0.0")
+		testCompile("javax.cache:cache-api:${cacheApiVersion}")
 		testCompile('de.bechte.junit:junit-hierarchicalcontextrunner:4.12.1')
 
 		testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
@@ -1102,7 +1104,7 @@ project("spring-aspects") {
 		optional(project(":spring-orm"))  // for JPA exception translation support
 		optional(project(":spring-tx"))  // for JPA, @Transactional support
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")  // for @javax.transaction.Transactional support
-		optional("javax.cache:cache-api:1.0.0")
+		optional("javax.cache:cache-api:${cacheApiVersion}")
 		testCompile(project(":spring-core"))  // for CodeStyleAspect
 		testCompile(project(":spring-test"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
