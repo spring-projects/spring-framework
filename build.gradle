@@ -600,6 +600,11 @@ project("spring-messaging") {
 		testRuntime("com.sun.xml.bind:jaxb-core:${jaxbVersion}")
 		testRuntime("com.sun.xml.bind:jaxb-impl:${jaxbVersion}")
 	}
+
+	if (JavaVersion.current().java9Compatible) {
+		// Reactor2TcpClient's use of Netty requires access to sun.nio.ch.SelectorImpl
+		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
+	}
 }
 
 project("spring-tx") {
@@ -787,6 +792,11 @@ project("spring-web") {
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 	}
+
+	if (JavaVersion.current().java9Compatible) {
+		// Netty4ClientHttpRequestFactory requires access to sun.nio.ch.SelectorImpl
+		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
+	}
 }
 
 project("spring-web-reactive") {
@@ -826,6 +836,11 @@ project("spring-web-reactive") {
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
 		testRuntime("org.webjars:underscorejs:1.8.3")
+	}
+
+	if (JavaVersion.current().java9Compatible) {
+		// ReactorClientHttpConnector requires access to sun.nio.ch.SelectorImpl
+		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
 	}
 }
 
@@ -979,6 +994,11 @@ project("spring-websocket") {
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testRuntime("org.jboss.xnio:xnio-nio:${xnioVersion}")
 		testRuntime("org.jboss.logging:jboss-logging:3.3.0.Final")
+	}
+
+	if (JavaVersion.current().java9Compatible) {
+		// Reactor2TcpClient's use of Netty requires access to sun.nio.ch.SelectorImpl
+		test.jvmArgs(["--add-exports", "java.base/sun.nio.ch=ALL-UNNAMED"])
 	}
 }
 
