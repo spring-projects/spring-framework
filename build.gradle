@@ -349,7 +349,7 @@ project("spring-core") {
 		optional("log4j:log4j:${log4jVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
-		testCompile("com.fasterxml.woodstox:woodstox-core:5.0.2") {
+		testCompile("com.fasterxml.woodstox:woodstox-core:5.0.3") {
 			exclude group: "stax", module: "stax-api"
 		}
 	}
@@ -577,7 +577,7 @@ project("spring-oxm") {
 		testCompile(project(":spring-context"))
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("xpp3:xpp3:1.1.4c")
-		testCompile("org.codehaus.jettison:jettison:1.3.7") {
+		testCompile("org.codehaus.jettison:jettison:1.3.8") {
 			exclude group: 'stax', module: 'stax-api'
 		}
 		if (compileTestJava.enabled) {
