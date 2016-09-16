@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.util.function.Function;
 
+import org.apache.commons.logging.Log;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.HttpChannel;
 
@@ -35,6 +36,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  */
 public class ReactorHttpHandlerAdapter implements Function<HttpChannel, Mono<Void>> {
 
+	private static Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+
+
 	private final HttpHandler httpHandler;
 
 
@@ -51,10 +55,11 @@ public class ReactorHttpHandlerAdapter implements Function<HttpChannel, Mono<Voi
 		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel, bufferFactory);
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse)
 				.otherwise(ex -> {
-					LogFactory.getLog(ReactorHttpHandlerAdapter.class).error("Could not complete request", ex);
+					logger.debug("Could not complete request", ex);
 					channel.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 					return Mono.empty();
-				});
+				})
+				.doOnSuccess(aVoid -> logger.debug("Successfully completed request"));
 	}
 
 }

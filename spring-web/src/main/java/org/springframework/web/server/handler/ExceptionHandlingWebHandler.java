@@ -40,38 +40,34 @@ import org.springframework.web.server.WebHandler;
  * @since 5.0
  */
 public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
+
+	private static Log logger = LogFactory.getLog(ExceptionHandlingWebHandler.class);
+
 	/**
 	 * Log category to use on network IO exceptions after a client has gone away.
-	 * <p>The Servlet API does not provide notifications when a client disconnects;
+	 * <p>Servlet containers do not expose notifications when a client disconnects;
 	 * see <a href="https://java.net/jira/browse/SERVLET_SPEC-44">SERVLET_SPEC-44</a>.
 	 * Therefore network IO failures may occur simply because a client has gone away,
 	 * and that can fill the logs with unnecessary stack traces.
 	 * <p>We make a best effort to identify such network failures, on a per-server
-	 * basis, and log them under a separate log category. A simple one-line message
-	 * is logged at DEBUG level, while a full stack trace is shown at TRACE level.
-	 * @see #disconnectedClientLogger
+	 * basis and log them under a separate log category. A simple one-line message
+	 * is logged at DEBUG level instead while a full stack trace is shown at TRACE.
 	 */
 	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
-			"org.springframework.web.server.handler.DisconnectedClient";
+			ExceptionHandlingWebHandler.class.getName() + ".DisconnectedClient";
 
-	/**
-	 * Separate logger to use on network IO failure after a client has gone away.
-	 * @see #DISCONNECTED_CLIENT_LOG_CATEGORY
-	 */
 	private static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
-	private static final Set<String> disconnectedClientExceptions;
+	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS;
 
 	static {
 		Set<String> set = new HashSet<>(3);
 		set.add("ClientAbortException"); // Tomcat
 		set.add("EOFException"); // Tomcat
 		set.add("EofException"); // Jetty
-		// java.io.IOException "Broken pipe" on WildFly, Glassfish (already covered)
-		disconnectedClientExceptions = Collections.unmodifiableSet(set);
+		// java.io.IOException("Broken pipe") on WildFly (already covered)
+		DISCONNECTED_CLIENT_EXCEPTIONS = Collections.unmodifiableSet(set);
 	}
-
-	private static Log logger = LogFactory.getLog(ExceptionHandlingWebHandler.class);
 
 	private final List<WebExceptionHandler> exceptionHandlers;
 
@@ -82,7 +78,8 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 	}
 
 	private static List<WebExceptionHandler> initList(WebExceptionHandler[] list) {
-		return (list != null ? Collections.unmodifiableList(Arrays.asList(list)): Collections.emptyList());
+		return (list != null ? Collections.unmodifiableList(Arrays.asList(list)):
+				Collections.emptyList());
 	}
 
 
@@ -110,20 +107,19 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 	}
 
 	private Mono<? extends Void> handleUnresolvedException(ServerWebExchange exchange, Throwable ex) {
-		logError(ex);
+		logException(ex);
 		exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		return Mono.empty();
 	}
 
-	private void logError(Throwable t) {
+	private void logException(Throwable ex) {
 		@SuppressWarnings("serial")
-		NestedCheckedException nestedException = new NestedCheckedException("", t) {};
-
+		NestedCheckedException nestedException = new NestedCheckedException("", ex) {};
 		if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) ||
-				disconnectedClientExceptions.contains(t.getClass().getSimpleName())) {
+				DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName())) {
 
 			if (disconnectedClientLogger.isTraceEnabled()) {
-				disconnectedClientLogger.trace("Looks like the client has gone away", t);
+				disconnectedClientLogger.trace("Looks like the client has gone away", ex);
 			}
 			else if (disconnectedClientLogger.isDebugEnabled()) {
 				disconnectedClientLogger.debug("Looks like the client has gone away: " +
@@ -132,9 +128,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 			}
 		}
 		else {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not complete request", t);
-			}
+			logger.debug("Could not complete request", ex);
 		}
 	}
 

@@ -22,6 +22,7 @@ import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.adapter.RxJava1Adapter;
@@ -39,6 +40,9 @@ import org.springframework.util.Assert;
  */
 public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBuf> {
 
+	private static Log logger = LogFactory.getLog(RxNettyHttpHandlerAdapter.class);
+
+
 	private final HttpHandler httpHandler;
 
 
@@ -55,10 +59,11 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response, bufferFactory);
 		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse)
 				.otherwise(ex -> {
-					LogFactory.getLog(RxNettyHttpHandlerAdapter.class).error("Could not complete request", ex);
+					logger.debug("Could not complete request", ex);
 					response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 					return Mono.empty();
-				});
+				})
+				.doOnSuccess(aVoid -> logger.debug("Successfully completed request"));
 		return RxJava1Adapter.publisherToObservable(result);
 	}
 

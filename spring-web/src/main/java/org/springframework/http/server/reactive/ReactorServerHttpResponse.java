@@ -49,9 +49,8 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	private final HttpChannel channel;
 
 
-	public ReactorServerHttpResponse(HttpChannel response,
-			DataBufferFactory dataBufferFactory) {
-		super(dataBufferFactory);
+	public ReactorServerHttpResponse(HttpChannel response, DataBufferFactory bufferFactory) {
+		super(bufferFactory);
 		Assert.notNull("'response' must not be null.");
 		this.channel = response;
 	}
@@ -77,10 +76,9 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	protected Mono<Void> writeAndFlushWithInternal(
-			Publisher<Publisher<DataBuffer>> publisher) {
-		Publisher<Publisher<ByteBuf>> body = Flux.from(publisher).
-				map(ReactorServerHttpResponse::toByteBufs);
+	protected Mono<Void> writeAndFlushWithInternal(Publisher<Publisher<DataBuffer>> publisher) {
+		Publisher<Publisher<ByteBuf>> body = Flux.from(publisher)
+				.map(ReactorServerHttpResponse::toByteBufs);
 		return this.channel.sendAndFlush(body);
 	}
 
