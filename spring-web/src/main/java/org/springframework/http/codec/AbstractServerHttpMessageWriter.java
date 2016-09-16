@@ -30,7 +30,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
- * {@link HttpMessageWriter} wrapper to extend that implements {@link ServerHttpMessageWriter} in order
+ * {@link HttpMessageWriter} wrapper that implements {@link ServerHttpMessageWriter} in order
  * to allow providing hints.
  *
  * @author Sebastien Deleuze

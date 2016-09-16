@@ -30,7 +30,7 @@ import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
- * {@link HttpMessageReader} wrapper to extend that implements {@link ServerHttpMessageReader} in order
+ * {@link HttpMessageReader} wrapper that implements {@link ServerHttpMessageReader} in order
  * to allow providing hints.
  *
  * @author Sebastien Deleuze
