@@ -47,14 +47,7 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 
 		return Flux.from(inputStream).
 				take(1).
-				concatMap(t -> {
-					try {
-						return encode(t, bufferFactory, elementType, mimeType, hints);
-					}
-					catch (Exception ex) {
-						return Flux.error(ex);
-					}
-				});
+				concatMap(t -> encode(t, bufferFactory, elementType, mimeType, hints));
 	}
 
 	/**
@@ -65,9 +58,8 @@ public abstract class AbstractSingleValueEncoder<T> extends AbstractEncoder<T> {
 	 * @param mimeType the mime type to process
 	 * @param hints Additional information about how to do decode, optional
 	 * @return the output stream
-	 * @throws Exception in case of errors
 	 */
 	protected abstract Flux<DataBuffer> encode(T t, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Map<String, Object> hints) throws Exception;
+			ResolvableType type, MimeType mimeType, Map<String, Object> hints);
 
 }

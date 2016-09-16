@@ -64,10 +64,15 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 	@Override
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Map<String, Object> hints) throws IOException {
+			ResolvableType type, MimeType mimeType, Map<String, Object> hints) {
 
-		ReadableByteChannel channel = resource.readableChannel();
-		return DataBufferUtils.read(channel, dataBufferFactory, bufferSize);
+		try {
+			ReadableByteChannel channel = resource.readableChannel();
+			return DataBufferUtils.read(channel, dataBufferFactory, this.bufferSize);
+		}
+		catch (IOException ex) {
+			return Flux.error(ex);
+		}
 	}
 
 }
