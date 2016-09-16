@@ -28,25 +28,23 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 
 /**
- * <strong>Central entry point Spring's functional web framework.</strong>
+ * <strong>Central entry point to Spring's functional web framework.</strong>
  * Exposes routing functionality, such as to
- * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@link RoutingFunction} given a
- * {@link RequestPredicate} and {@link HandlerFunction}, and to do further
+ * {@linkplain #route(RequestPredicate, HandlerFunction) create} a {@code RoutingFunction} given a
+ * {@code RequestPredicate} and {@code HandlerFunction}, and to do further
  * {@linkplain #subroute(RequestPredicate, RoutingFunction) subrouting} on an existing routing
  * function.
  *
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RoutingFunction) transform} a
- * {@link RoutingFunction} into an {@link HttpHandler}, which can be run in
- * {@linkplain org.springframework.http.server.reactive.ServletHttpHandlerAdapter Servlet 3.1+},
- * {@linkplain org.springframework.http.server.reactive.ReactorHttpHandlerAdapter Reactor},
- * {@linkplain org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter RxNetty}, or
- * {@linkplain org.springframework.http.server.reactive.UndertowHttpHandlerAdapter Undertow}.
- * Or it {@linkplain #toHandlerMapping(RoutingFunction, Configuration) transform} a
-  * {@link RoutingFunction} into an {@link HandlerMapping}, which can be run in a
- * {@link org.springframework.web.reactive.DispatcherHandler DispatcherHandler}.
+ * {@code RoutingFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
+ * Reactor, RxNetty, or Undertow.
+ * And it can {@linkplain #toHandlerMapping(RoutingFunction, Configuration) transform} a
+ * {@code RoutingFunction} into an {@code HandlerMapping}, which can be run in a
+ * {@code DispatcherHandler}.
  *
  * @author Arjen Poutsma
  * @since 5.0
+ *
  */
 public abstract class RoutingFunctions {
 
@@ -56,13 +54,6 @@ public abstract class RoutingFunctions {
 	 * Name of the {@link ServerWebExchange} attribute that contains the {@link Request}.
 	 */
 	public static final String REQUEST_ATTRIBUTE = RoutingFunctions.class.getName() + ".request";
-
-	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the
-	 * {@linkplain Configuration configuration} used throughout the routing and handling of the
-	 * request.
-	 */
-	public static final String CONFIGURATION_ATTRIBUTE = RoutingFunctions.class.getName() + ".configuration";
 
 	/**
 	 * Name of the {@link ServerWebExchange} attribute that contains the URI
@@ -115,10 +106,16 @@ public abstract class RoutingFunctions {
 	 * This conversion uses the {@linkplain Configuration#builder() default configuration}.
 	 *
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
-	 * {@linkplain org.springframework.http.server.reactive.ServletHttpHandlerAdapter Servlet 3.1+},
-	 * {@linkplain org.springframework.http.server.reactive.ReactorHttpHandlerAdapter Reactor},
-	 * {@linkplain org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter RxNetty}, or
-	 * {@linkplain org.springframework.http.server.reactive.UndertowHttpHandlerAdapter Undertow}.
+	 * <ul>
+	 * <li>Servlet 3.1+ using the
+	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
+	 * <li>Reactor using the
+	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
+	 * <li>RxNetty using the
+	 * {@link org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter}, or </li>
+	 * <li>Undertow using the
+	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
+	 * </ul>
 	 *
 	 * @param routingFunction the routing function to convert
 	 * @return an http handler that handles HTTP request using the given routing function
@@ -132,10 +129,16 @@ public abstract class RoutingFunctions {
 	 * using the given configuration.
 	 *
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
-	 * {@linkplain org.springframework.http.server.reactive.ServletHttpHandlerAdapter Servlet 3.1+},
-	 * {@linkplain org.springframework.http.server.reactive.ReactorHttpHandlerAdapter Reactor},
-	 * {@linkplain org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter RxNetty}, or
-	 * {@linkplain org.springframework.http.server.reactive.UndertowHttpHandlerAdapter Undertow}.
+	 * <ul>
+	 * <li>Servlet 3.1+ using the
+	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter},</li>
+	 * <li>Reactor using the
+	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter},</li>
+	 * <li>RxNetty using the
+	 * {@link org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter}, or </li>
+	 * <li>Undertow using the
+	 * {@link org.springframework.http.server.reactive.UndertowHttpHandlerAdapter}.</li>
+	 * </ul>
 	 *
 	 * @param routingFunction the routing function to convert
 	 * @param configuration   the configuration to use
@@ -156,10 +159,10 @@ public abstract class RoutingFunctions {
 	}
 
 	/**
-	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HandlerMapping}.
+	 * Converts the given {@code RoutingFunction} into a {@code HandlerMapping}.
 	 * This conversion uses the {@linkplain Configuration#builder() default configuration}.
 	 *
-	 * <p>The returned {@code HttpHandler} can be run in a
+	 * <p>The returned {@code HandlerMapping} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
 	 *
 	 * @param routingFunction the routing function to convert
@@ -175,7 +178,7 @@ public abstract class RoutingFunctions {
 	 * Converts the given {@linkplain RoutingFunction routing function} into a {@link HandlerMapping}
 	 * using the given configuration.
 	 *
-	 * <p>The returned {@code HttpHandler} can be run in a
+	 * <p>The returned {@code HandlerMapping} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
 	 *
 	 * @param routingFunction the routing function to convert
@@ -210,4 +213,8 @@ public abstract class RoutingFunctions {
 		return (HandlerFunction<T>) NOT_FOUND_HANDLER;
 	}
 
+	@SuppressWarnings("unchecked")
+	static <T> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
+		return (HandlerFunction<T>) handlerFunction;
+	}
 }

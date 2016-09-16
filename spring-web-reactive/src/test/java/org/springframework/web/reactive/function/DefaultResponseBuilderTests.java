@@ -213,7 +213,6 @@ public class DefaultResponseBuilderTests {
 		assertNull(response.getBody());
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Test
 	public void bodyPopulator() throws Exception {
 		String body = "foo";
@@ -245,81 +244,6 @@ public class DefaultResponseBuilderTests {
 		result.writeTo(exchange, configuration).block();
 		assertNotNull(response.getBody());
 	}
-
-	/*
-
-	@Test
-	public void bodyNotAcceptable() throws Exception {
-		String body = "foo";
-		Response<String> result = Response.ok().contentType(MediaType.APPLICATION_JSON).body(body);
-		assertEquals(body, result.body());
-
-		MockServerHttpRequest request =
-				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		ServerWebExchange exchange =
-				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-
-		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
-		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-
-		Configuration configuration = mock(Configuration.class);
-		when(configuration.messageWriters()).thenReturn(messageWriters::stream);
-
-		result.writeTo(exchange, configuration).block();
-		assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
-	}
-
-	@Test
-	public void stream() throws Exception {
-		Publisher<String> publisher = Flux.just("foo", "bar");
-		Response<Publisher<String>> result = Response.ok().stream(publisher, String.class);
-
-		MockServerHttpRequest request =
-				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		ServerWebExchange exchange =
-				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-
-		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
-		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-
-		Configuration mockConfig = mock(Configuration.class);
-		when(mockConfig.messageWriters()).thenReturn(messageWriters::stream);
-		exchange.getAttributes().put(RoutingFunctions.CONFIGURATION_ATTRIBUTE, mockConfig);
-
-		result.writeTo(exchange).block();
-		assertNotNull(response.getBody());
-	}
-
-	@Test
-	public void resource() throws Exception {
-		Resource resource = new ClassPathResource("response.txt", DefaultResponseBuilderTests.class);
-		Response<Resource> result = Response.ok().resource(resource);
-
-		ServerWebExchange exchange = mock(ServerWebExchange.class);
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		when(exchange.getResponse()).thenReturn(response);
-
-
-		result.writeTo(exchange).block();
-		assertNotNull(response.getBody());
-	}
-
-	@Test
-	public void sse() throws Exception {
-		ServerSentEvent<String> sse = ServerSentEvent.<String>builder().data("42").build();
-		Mono<ServerSentEvent<String>> body = Mono.just(sse);
-		Response<Mono<ServerSentEvent<String>>> result = Response.ok().sse(body);
-
-		ServerWebExchange exchange = mock(ServerWebExchange.class);
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		when(exchange.getResponse()).thenReturn(response);
-
-		result.writeTo(exchange).block();
-		assertNotNull(response.getBodyWithFlush());
-	}
-	*/
 
 	@Test
 	public void render() throws Exception {

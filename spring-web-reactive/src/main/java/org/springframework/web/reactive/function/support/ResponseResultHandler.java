@@ -35,10 +35,16 @@ public class ResponseResultHandler implements HandlerResultHandler {
 
 	private final Configuration configuration;
 
+	/**
+	 * Create a {@code ResponseResultHandler} with a default configuration.
+	 */
 	public ResponseResultHandler() {
 		this(Configuration.builder().build());
 	}
 
+	/**
+	 * Create a {@code ResponseResultHandler} with the given configuration.
+	 */
 	public ResponseResultHandler(Configuration configuration) {
 		Assert.notNull(configuration, "'configuration' must not be null");
 		this.configuration = configuration;
@@ -46,8 +52,9 @@ public class ResponseResultHandler implements HandlerResultHandler {
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		Object returnValue = result.getReturnValue().orElse(null);
-		return returnValue instanceof Response;
+		return result.getReturnValue()
+				.filter(o -> o instanceof Response)
+				.isPresent();
 	}
 
 	@Override

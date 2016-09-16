@@ -24,6 +24,7 @@ import java.util.Optional;
  * @param <T> the type of the {@linkplain HandlerFunction handler function} to route to
  * @author Arjen Poutsma
  * @since 5.0
+ * @see RoutingFunctions
  */
 @FunctionalInterface
 public interface RoutingFunction<T> {
@@ -64,9 +65,9 @@ public interface RoutingFunction<T> {
 	default RoutingFunction<?> and(RoutingFunction<?> other) {
 		return request -> {
 			Optional<HandlerFunction<Object>> result = this.route(request).
-					map(CastingUtils::cast);
+					map(RoutingFunctions::cast);
 			return result.isPresent() ? result : other.route(request)
-					.map(CastingUtils::cast);
+					.map(RoutingFunctions::cast);
 		};
 	}
 
