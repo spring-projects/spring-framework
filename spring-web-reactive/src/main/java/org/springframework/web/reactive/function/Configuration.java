@@ -27,7 +27,9 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 
 /**
  * Defines the configuration to be used for processing {@link HandlerFunction}s. An instance of
- * this class is immutable, but a
+ * this class is immutable; instances are typically created through the mutable {@link Builder}:
+ * either through {@link #builder()} to create a default configuration, {@link #empty()} to create
+ * an empty configuration.
  *
  * @author Arjen Poutsma
  * @since 5.0
