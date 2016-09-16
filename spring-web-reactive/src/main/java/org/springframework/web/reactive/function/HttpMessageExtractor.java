@@ -16,21 +16,24 @@
 
 package org.springframework.web.reactive.function;
 
-import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.ReactiveHttpInputMessage;
 
 /**
+ * Contract to extract the content of a raw {@link ReactiveHttpInputMessage} decoding
+ * the request body and using a target composition API.
+ *
+ * @author Brian Clozel
  * @author Arjen Poutsma
+ * @since 5.0
  */
-@SuppressWarnings("unchecked")
-abstract class CastingUtils {
+@FunctionalInterface
+public interface HttpMessageExtractor<T, R extends ReactiveHttpInputMessage> {
 
-	public static <T> HttpMessageReader<T> cast(HttpMessageReader<?> messageReader) {
-		return (HttpMessageReader<T>) messageReader;
-	}
-
-	public static <T> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
-		return (HandlerFunction<T>) handlerFunction;
-	}
-
+	/**
+	 * Extract content from the response body
+	 * @param message the raw HTTP message
+	 * @return the extracted content
+	 */
+	T extract(R message);
 
 }

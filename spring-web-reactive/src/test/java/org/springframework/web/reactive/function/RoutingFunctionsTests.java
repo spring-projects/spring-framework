@@ -17,21 +17,12 @@
 package org.springframework.web.reactive.function;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ReactiveHttpInputMessage;
-import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -40,14 +31,20 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
  */
 @SuppressWarnings("unchecked")
-public class RouterTests {
+public class RoutingFunctionsTests {
 
 	@Test
 	public void routeMatch() throws Exception {
@@ -115,9 +112,17 @@ public class RouterTests {
 
 	@Test
 	public void toHttpHandler() throws Exception {
+		Configuration configuration = mock(Configuration.class);
+		when(configuration.messageReaders()).thenReturn(
+				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
+		when(configuration.messageWriters()).thenReturn(
+				() -> Collections.<HttpMessageWriter<?>>emptyList().stream());
+		when(configuration.viewResolvers()).thenReturn(
+				() -> Collections.<ViewResolver>emptyList().stream());
+
 		Request request = mock(Request.class);
 		Response response = mock(Response.class);
-		when(response.writeTo(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+		when(response.writeTo(any(ServerWebExchange.class), eq(configuration))).thenReturn(Mono.empty());
 
 		HandlerFunction handlerFunction = mock(HandlerFunction.class);
 		when(handlerFunction.handle(any(Request.class))).thenReturn(response);
@@ -128,13 +133,6 @@ public class RouterTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		Configuration configuration = mock(Configuration.class);
-		when(configuration.messageReaders()).thenReturn(
-				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
-		when(configuration.messageWriters()).thenReturn(
-				() -> Collections.<HttpMessageWriter<?>>emptyList().stream());
-		when(configuration.viewResolvers()).thenReturn(
-				() -> Collections.<ViewResolver>emptyList().stream());
 
 		HttpHandler result = RoutingFunctions.toHttpHandler(routingFunction, configuration);
 		assertNotNull(result);

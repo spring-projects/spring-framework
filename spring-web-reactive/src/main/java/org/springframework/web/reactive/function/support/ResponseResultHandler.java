@@ -18,8 +18,10 @@ package org.springframework.web.reactive.function.support;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
+import org.springframework.web.reactive.function.Configuration;
 import org.springframework.web.reactive.function.Response;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -31,6 +33,17 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ResponseResultHandler implements HandlerResultHandler {
 
+	private final Configuration configuration;
+
+	public ResponseResultHandler() {
+		this(Configuration.defaultBuilder().build());
+	}
+
+	public ResponseResultHandler(Configuration configuration) {
+		Assert.notNull(configuration, "'configuration' must not be null");
+		this.configuration = configuration;
+	}
+
 	@Override
 	public boolean supports(HandlerResult result) {
 		Object returnValue = result.getReturnValue().orElse(null);
@@ -41,6 +54,6 @@ public class ResponseResultHandler implements HandlerResultHandler {
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Response<?> response = (Response<?>) result.getReturnValue().orElseThrow(
 				IllegalStateException::new);
-		return response.writeTo(exchange);
+		return response.writeTo(exchange, this.configuration);
 	}
 }

@@ -21,17 +21,18 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -170,7 +171,7 @@ public interface Response<T> {
 	 * @param exchange the web exchange to write to
 	 * @return {@code Mono<Void>} to indicate when request handling is complete
 	 */
-	Mono<Void> writeTo(ServerWebExchange exchange);
+	Mono<Void> writeTo(ServerWebExchange exchange, Configuration configuration);
 
 
 	/**
@@ -306,55 +307,23 @@ public interface Response<T> {
 		 */
 		BodyBuilder contentType(MediaType contentType);
 
-//		<T> Response<T> body(BodyPopulator<T> populator);
-
 		/**
-		 * Set the body of the response to the given object and return it.
-		 *
-		 * @param body the body of the response
+		 * Write the body to the given {@code BodyPopulator} and return it.
+		 * @param writer a function that writes the body to the {@code ServerHttpResponse}
+		 * @param supplier a function that returns the body instance
+		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T> Response<T> body(T body);
+		<T> Response<T> body(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
+				Supplier<T> supplier);
 
 		/**
-		 * Set the body of the response to the given {@link Publisher} and return it.
-		 * @param publisher the publisher to stream to the response body
-		 * @param elementClass the class of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
+		 * Set the body of the response to the given {@code BodyPopulator} and return it.
+		 * @param populator the {@code BodyPopulator} that writes to the response
+		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T, S extends Publisher<T>> Response<S> stream(S publisher, Class<T> elementClass);
-		// ResolvableType
-
-		/**
-		 * Set the body of the response to the given {@link Resource} and return it.
-		 * If the resource can be resolved to a {@linkplain Resource#getFile() file}, it will be copied using
-		 * <a href="https://en.wikipedia.org/wiki/Zero-copy">zero-copy</a>
-		 *
-		 * @param resource the resource to write to the response
-		 * @return the built response
-		 */
-		Response<Resource> resource(Resource resource);
-
-		/**
-		 * Set the body of the response to the given {@link ServerSentEvent} publisher and return it.
-		 * @param eventsPublisher the {@link ServerSentEvent} publisher to stream to the response body
-		 * @param <T> the type of the elements contained in the {@link ServerSentEvent}
-		 * @return the built response
-		 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
-		 */
-		<T, S extends Publisher<ServerSentEvent<T>>> Response<S> sse(S eventsPublisher);
-
-		/**
-		 * Set the body of the response to the given Server-Sent Event {@link Publisher} and return it.
-		 * @param eventsPublisher the publisher to stream to the response body as Server-Sent Events
-		 * @param eventClass the class of event contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @return the built response
-		 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
-		 */
-		// remove?
-		<T, S extends Publisher<T>> Response<S> sse(S eventsPublisher, Class<T> eventClass);
+		<T> Response<T> body(BodyPopulator<T> populator);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.

@@ -20,7 +20,10 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.web.reactive.function.BodyPopulators.ofObject;
 
 /**
  * @author Arjen Poutsma
@@ -45,7 +48,7 @@ public class RoutingFunctionTests {
 
 	@Test
 	public void and() throws Exception {
-		HandlerFunction<String> handlerFunction = request -> Response.ok().body("42");
+		HandlerFunction<String> handlerFunction = request -> Response.ok().body(ofObject("42"));
 		RoutingFunction<Void> routingFunction1 = request -> Optional.empty();
 		RoutingFunction<String> routingFunction2 = request -> Optional.of(handlerFunction);
 
@@ -60,13 +63,13 @@ public class RoutingFunctionTests {
 
 	@Test
 	public void filter() throws Exception {
-		HandlerFunction<String> handlerFunction = request -> Response.ok().body("42");
+		HandlerFunction<String> handlerFunction = request -> Response.ok().body(ofObject("42"));
 		RoutingFunction<String> routingFunction = request -> Optional.of(handlerFunction);
 
 		FilterFunction<String, Integer> filterFunction = (request, next) -> {
 			Response<String> response = next.handle(request);
 			int i = Integer.parseInt(response.body());
-			return Response.ok().body(i);
+			return Response.ok().body(ofObject(i));
 		};
 		RoutingFunction<Integer> result = routingFunction.filter(filterFunction);
 		assertNotNull(result);

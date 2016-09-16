@@ -50,6 +50,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.web.reactive.function.BodyPopulators.ofPublisher;
 import static org.springframework.web.reactive.function.RoutingFunctions.route;
 
 /**
@@ -155,13 +156,13 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 		public Response<Publisher<Person>> mono(Request request) {
 			Person person = new Person("John");
-			return Response.ok().stream(Mono.just(person), Person.class);
+			return Response.ok().body(ofPublisher(Mono.just(person), Person.class));
 		}
 
 		public Response<Publisher<Person>> flux(Request request) {
 			Person person1 = new Person("John");
 			Person person2 = new Person("Jane");
-			return Response.ok().stream(Flux.just(person1, person2), Person.class);
+			return Response.ok().body(ofPublisher(Flux.just(person1, person2), Person.class));
 		}
 
 	}

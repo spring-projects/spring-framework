@@ -151,7 +151,7 @@ public abstract class RoutingFunctions {
 
 			HandlerFunction<?> handlerFunction = routingFunction.route(request).orElse(notFound());
 			Response<?> response = handlerFunction.handle(request);
-			return response.writeTo(exchange);
+			return response.writeTo(exchange, configuration);
 		});
 	}
 

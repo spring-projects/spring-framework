@@ -33,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertEquals;
+import static org.springframework.web.reactive.function.BodyPopulators.ofPublisher;
 import static org.springframework.web.reactive.function.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.RoutingFunctions.route;
@@ -97,18 +98,18 @@ public class PublisherHandlerFunctionIntegrationTests
 
 		public Response<Publisher<Person>> mono(Request request) {
 			Person person = new Person("John");
-			return Response.ok().stream(Mono.just(person), Person.class);
+			return Response.ok().body(ofPublisher(Mono.just(person), Person.class));
 		}
 
 		public Response<Publisher<Person>> postMono(Request request) {
 			Mono<Person> personMono = request.body().convertToMono(Person.class);
-			return Response.ok().stream(personMono, Person.class);
+			return Response.ok().body(ofPublisher(personMono, Person.class));
 		}
 
 		public Response<Publisher<Person>> flux(Request request) {
 			Person person1 = new Person("John");
 			Person person2 = new Person("Jane");
-			return Response.ok().stream(Flux.just(person1, person2), Person.class);
+			return Response.ok().body(ofPublisher(Flux.just(person1, person2), Person.class));
 		}
 
 	}

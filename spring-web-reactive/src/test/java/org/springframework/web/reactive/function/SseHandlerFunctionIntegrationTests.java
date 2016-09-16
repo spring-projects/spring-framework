@@ -32,6 +32,7 @@ import org.springframework.web.client.reactive.WebClient;
 
 import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
 import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
+import static org.springframework.web.reactive.function.BodyPopulators.ofServerSentEvents;
 import static org.springframework.web.reactive.function.RoutingFunctions.route;
 
 /**
@@ -111,13 +112,13 @@ public class SseHandlerFunctionIntegrationTests
 
 		public Response<Publisher<String>> string(Request request) {
 			Flux<String> flux = Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l).take(2);
-			return Response.ok().sse(flux, String.class);
+			return Response.ok().body(ofServerSentEvents(flux, String.class));
 		}
 
 		public Response<Publisher<Person>> person(Request request) {
 			Flux<Person> flux = Flux.interval(Duration.ofMillis(100))
 					.map(l -> new Person("foo " + l)).take(2);
-			return Response.ok().sse(flux, Person.class);
+			return Response.ok().body(ofServerSentEvents(flux, Person.class));
 		}
 
 		public Response<Publisher<ServerSentEvent<String>>> sse(Request request) {
@@ -127,7 +128,7 @@ public class SseHandlerFunctionIntegrationTests
 							.comment("bar")
 							.build()).take(2);
 
-			return Response.ok().sse(flux);
+			return Response.ok().body(ofServerSentEvents(flux));
 		}
 	}
 

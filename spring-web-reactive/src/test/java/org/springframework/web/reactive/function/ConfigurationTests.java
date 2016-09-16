@@ -47,7 +47,7 @@ public class ConfigurationTests {
 		applicationContext.registerSingleton("messageReader", DummyMessageReader.class);
 		applicationContext.refresh();
 
-		Configuration configuration = Configuration.toConfiguration(applicationContext);
+		Configuration configuration = Configuration.applicationContext(applicationContext).build();
 		assertTrue(configuration.messageReaders().get()
 				.allMatch(r -> r instanceof DummyMessageReader));
 		assertTrue(configuration.messageWriters().get()
