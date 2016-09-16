@@ -46,6 +46,31 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public interface Response<T> {
 
+	// Instance methods
+
+	/**
+	 * Return the status code of this response.
+	 */
+	HttpStatus statusCode();
+
+	/**
+	 * Return the headers of this response.
+	 */
+	HttpHeaders headers();
+
+	/**
+	 * Return the body of this response.
+	 */
+	T body();
+
+	/**
+	 * Writes this response to the given web exchange.
+	 *
+	 * @param exchange the web exchange to write to
+	 * @return {@code Mono<Void>} to indicate when request handling is complete
+	 */
+	Mono<Void> writeTo(ServerWebExchange exchange, Configuration configuration);
+
 	// Static builder methods
 
 	/**
@@ -147,31 +172,6 @@ public interface Response<T> {
 	static BodyBuilder unprocessableEntity() {
 		return status(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
-
-	// Instance methods
-
-	/**
-	 * Return the status code of this response.
-	 */
-	HttpStatus statusCode();
-
-	/**
-	 * Return the headers of this response.
-	 */
-	HttpHeaders headers();
-
-	/**
-	 * Return the body of this response.
-	 */
-	T body();
-
-	/**
-	 * Writes this response to the given web exchange.
-	 *
-	 * @param exchange the web exchange to write to
-	 * @return {@code Mono<Void>} to indicate when request handling is complete
-	 */
-	Mono<Void> writeTo(ServerWebExchange exchange, Configuration configuration);
 
 
 	/**

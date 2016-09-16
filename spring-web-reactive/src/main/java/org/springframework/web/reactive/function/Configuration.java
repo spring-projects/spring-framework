@@ -34,6 +34,29 @@ import org.springframework.web.reactive.result.view.ViewResolver;
  */
 public interface Configuration {
 
+	// Instance methods
+
+	/**
+	 * Supply a {@linkplain Stream stream} of {@link HttpMessageReader}s to be used for request
+	 * body conversion.
+	 * @return the stream of message readers
+	 */
+	Supplier<Stream<HttpMessageReader<?>>> messageReaders();
+
+	/**
+	 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s to be used for response
+	 * body conversion.
+	 * @return the stream of message writers
+	 */
+	Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+
+	/**
+	 * Supply a {@linkplain Stream stream} of {@link ViewResolver}s to be used for view name
+	 * resolution.
+	 * @return the stream of view resolvers
+	 */
+	Supplier<Stream<ViewResolver>> viewResolvers();
+
 	// Static methods
 
 	/**
@@ -69,29 +92,6 @@ public interface Configuration {
 		builder.applicationContext(applicationContext);
 		return builder;
 	}
-
-	// Instance methods
-
-	/**
-	 * Supply a {@linkplain Stream stream} of {@link HttpMessageReader}s to be used for request
-	 * body conversion.
-	 * @return the stream of message readers
-	 */
-	Supplier<Stream<HttpMessageReader<?>>> messageReaders();
-
-	/**
-	 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s to be used for response
-	 * body conversion.
-	 * @return the stream of message writers
-	 */
-	Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
-
-	/**
-	 * Supply a {@linkplain Stream stream} of {@link ViewResolver}s to be used for view name
-	 * resolution.
-	 * @return the stream of view resolvers
-	 */
-	Supplier<Stream<ViewResolver>> viewResolvers();
 
 
 	/**
