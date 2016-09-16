@@ -53,13 +53,13 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	private BeanDefinitionHolder decoratedDefinition;
 
-	boolean allowCaching = true;
+	private AnnotatedElement qualifiedElement;
 
-	volatile ResolvableType targetType;
+	boolean allowCaching = true;
 
 	boolean isFactoryMethodUnique = false;
 
-	volatile AnnotatedElement qualifiedElement;
+	volatile ResolvableType targetType;
 
 	/** Package-visible field for caching the determined Class of a given bean definition */
 	volatile Class<?> resolvedTargetType;
@@ -182,10 +182,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	public RootBeanDefinition(RootBeanDefinition original) {
 		super(original);
 		this.decoratedDefinition = original.decoratedDefinition;
-		this.allowCaching = original.allowCaching;
-		this.targetType = original.targetType;
-		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
 		this.qualifiedElement = original.qualifiedElement;
+		this.allowCaching = original.allowCaching;
+		this.isFactoryMethodUnique = original.isFactoryMethodUnique;
+		this.targetType = original.targetType;
 	}
 
 	/**
@@ -225,6 +225,26 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
+	 * Specify the {@link AnnotatedElement} defining qualifiers,
+	 * to be used instead of the target class or factory method.
+	 * @since 4.3.3
+	 * @see #setTargetType(ResolvableType)
+	 * @see #getResolvedFactoryMethod()
+	 */
+	public void setQualifiedElement(AnnotatedElement qualifiedElement) {
+		this.qualifiedElement = qualifiedElement;
+	}
+
+	/**
+	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
+	 * Otherwise, the factory method and target class will be checked.
+	 * @since 4.3.3
+	 */
+	public AnnotatedElement getQualifiedElement() {
+		return this.qualifiedElement;
+	}
+
+	/**
 	 * Specify a generics-containing target type of this bean definition, if known in advance.
 	 * @since 4.3.3
 	 */
@@ -259,22 +279,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		Assert.hasText(name, "Factory method name must not be empty");
 		setFactoryMethodName(name);
 		this.isFactoryMethodUnique = true;
-	}
-
-	/**
-	 * Specify the {@link AnnotatedElement} defining qualifiers.
-	 * @since 4.3.3
-	 */
-	public void setQualifiedElement(AnnotatedElement qualifiedElement) {
-		this.qualifiedElement = qualifiedElement;
-	}
-
-	/**
-	 * Return the {@link AnnotatedElement} defining qualifiers, if any.
-	 * @since 4.3.3
-	 */
-	public AnnotatedElement getQualifiedElement() {
-		return this.qualifiedElement;
 	}
 
 	/**
