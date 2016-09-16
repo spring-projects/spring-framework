@@ -198,7 +198,7 @@ An `HttpHandler` can then be installed in each supported runtime:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-// Tomcat and Jetty
+// Tomcat and Jetty (also see notes below)
 HttpServlet servlet = new ServletHttpHandlerAdapter(httpHandler);
 ...
 
@@ -217,6 +217,16 @@ HttpHandler handler = new UndertowHttpHandlerAdapter(httpHandler);
 Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(httpHandler).build();
 server.start();
 ----
+
+[NOTE]
+====
+For Servlet runtimes you can use the `AbstractAnnotationConfigDispatcherHandlerInitializer`,
+which as a `WebApplicationInitializer` is auto-detected by Servlet containers
+and it registers for you the `ServletHttpHandlerAdapter` shown above.
+Only implement one method to point to your Spring Java configuration classes.
+====
+
+
 
 
 [[web-reactive-getting-started-M1]]

@@ -130,10 +130,9 @@ public abstract class AbstractDispatcherHandlerInitializer implements WebApplica
 	/**
 	 * Refresh the given application context, if necessary.
 	 */
-	protected void refreshApplicationContext(ApplicationContext applicationContext) {
-		if (applicationContext instanceof ConfigurableApplicationContext) {
-			ConfigurableApplicationContext cac =
-					(ConfigurableApplicationContext) applicationContext;
+	protected void refreshApplicationContext(ApplicationContext context) {
+		if (context instanceof ConfigurableApplicationContext) {
+			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) context;
 			if (!cac.isActive()) {
 				cac.refresh();
 			}

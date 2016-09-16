@@ -28,8 +28,7 @@ import org.springframework.web.reactive.DispatcherHandler;
  * {@link org.springframework.context.annotation.Configuration @Configuration} classes in the
  * servlet context, wrapping it in a {@link ServletHttpHandlerAdapter}.
  *
- * <p>Concrete implementations are required to implement {@link #getConfigClasses()} and
- * {@link #getServletMapping()}.
+ * <p>Concrete implementations are required to implement {@link #getConfigClasses()}.
  * Further template and customization methods are provided by
  * {@link AbstractDispatcherHandlerInitializer}.
  *

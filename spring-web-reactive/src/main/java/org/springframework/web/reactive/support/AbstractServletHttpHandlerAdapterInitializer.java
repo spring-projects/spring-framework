@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive.support;
+package org.springframework.web.reactive.support;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -24,7 +24,6 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.Assert;
 import org.springframework.web.WebApplicationInitializer;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Base class for {@link org.springframework.web.WebApplicationInitializer}
@@ -46,6 +45,7 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer
 	 * The default servlet name. Can be customized by overriding {@link #getServletName}.
 	 */
 	public static final String DEFAULT_SERVLET_NAME = "http-handler-adapter";
+
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
@@ -104,7 +104,7 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer
 	protected abstract HttpHandler createHttpHandler();
 
 	/**
-	 * Create a {@link ServletHttpHandlerAdapter}  with the specified {@link WebApplicationContext}.
+	 * Create a {@link ServletHttpHandlerAdapter}  with the specified .
 	 * <p>Default implementation returns a {@code ServletHttpHandlerAdapter} with the provided
 	 * {@code httpHandler}.
 	 */
