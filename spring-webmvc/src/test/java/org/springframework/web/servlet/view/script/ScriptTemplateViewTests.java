@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,7 +32,9 @@ import javax.script.ScriptEngine;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
@@ -64,6 +67,8 @@ public class ScriptTemplateViewTests {
 
 	private StaticWebApplicationContext wac;
 
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	@Before
 	public void setup() {
@@ -76,14 +81,19 @@ public class ScriptTemplateViewTests {
 
 
 	@Test
+	public void missingTemplate() throws Exception {
+		this.view.setUrl(RESOURCE_LOADER_PATH + "missing.txt");
+		this.view.setEngine(mock(InvocableScriptEngine.class));
+		this.configurer.setRenderFunction("render");
+		this.view.setApplicationContext(this.wac);
+		assertFalse(this.view.checkResource(Locale.ENGLISH));
+	}
+
+	@Test
 	public void missingScriptTemplateConfig() throws Exception {
-		try {
-			this.view.setApplicationContext(new StaticApplicationContext());
-			fail("Should have thrown ApplicationContextException");
-		}
-		catch (ApplicationContextException ex) {
-			assertTrue(ex.getMessage().contains("ScriptTemplateConfig"));
-		}
+		this.expectedException.expect(ApplicationContextException.class);
+		this.view.setApplicationContext(new StaticApplicationContext());
+		this.expectedException.expectMessage(contains("ScriptTemplateConfig"));
 	}
 
 	@Test
@@ -159,25 +169,17 @@ public class ScriptTemplateViewTests {
 
 	@Test
 	public void nonInvocableScriptEngine() throws Exception {
-		try {
-			this.view.setEngine(mock(ScriptEngine.class));
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("instance"));
-		}
+		this.expectedException.expect(IllegalArgumentException.class);
+		this.view.setEngine(mock(ScriptEngine.class));
+		this.expectedException.expectMessage(contains("instance"));
 	}
 
 	@Test
 	public void noRenderFunctionDefined() {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
-		try {
-			this.view.setApplicationContext(this.wac);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("renderFunction"));
-		}
+		this.expectedException.expect(IllegalArgumentException.class);
+		this.view.setApplicationContext(this.wac);
+		this.expectedException.expectMessage(contains("renderFunction"));
 	}
 
 	@Test
@@ -185,13 +187,9 @@ public class ScriptTemplateViewTests {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setEngineName("test");
 		this.view.setRenderFunction("render");
-		try {
-			this.view.setApplicationContext(this.wac);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("'engine' or 'engineName'"));
-		}
+		this.expectedException.expect(IllegalArgumentException.class);
+		this.view.setApplicationContext(this.wac);
+		this.expectedException.expectMessage(contains("'engine' or 'engineName'"));
 	}
 
 	@Test
@@ -199,13 +197,9 @@ public class ScriptTemplateViewTests {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setRenderFunction("render");
 		this.view.setSharedEngine(false);
-		try {
-			this.view.setApplicationContext(this.wac);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("sharedEngine"));
-		}
+		this.expectedException.expect(IllegalArgumentException.class);
+		this.view.setApplicationContext(this.wac);
+		this.expectedException.expectMessage(contains("sharedEngine"));
 	}
 
 	@Test
