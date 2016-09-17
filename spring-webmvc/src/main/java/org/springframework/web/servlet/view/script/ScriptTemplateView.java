@@ -16,12 +16,14 @@
 
 package org.springframework.web.servlet.view.script;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -192,6 +194,19 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
+	@Override
+	public boolean checkResource(Locale locale) throws Exception {
+		try {
+			getTemplate(getUrl());
+			return true;
+		}
+		catch (IllegalStateException exc) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No ScriptTemplate view found for URL: " + getUrl());
+			}
+			return false;
+		}
+	}
 
 	@Override
 	protected void initApplicationContext(ApplicationContext context) {
