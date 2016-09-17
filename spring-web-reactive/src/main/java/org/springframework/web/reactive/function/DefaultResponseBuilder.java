@@ -141,7 +141,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 
 	@Override
 	public Response<Void> build() {
-		return body(BodyInsertor.of(
+		return body(BodyInserter.of(
 				(response, configuration) -> response.setComplete(),
 				() -> null));
 	}
@@ -149,7 +149,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	@Override
 	public <T extends Publisher<Void>> Response<T> build(T voidPublisher) {
 		Assert.notNull(voidPublisher, "'voidPublisher' must not be null");
-		return body(BodyInsertor.of(
+		return body(BodyInserter.of(
 				(response, configuration) -> Flux.from(voidPublisher).then(response.setComplete()),
 				() -> null));
 	}
@@ -157,13 +157,13 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	@Override
 	public <T> Response<T> body(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
 			Supplier<T> supplier) {
-		return body(BodyInsertor.of(writer, supplier));
+		return body(BodyInserter.of(writer, supplier));
 	}
 
 	@Override
-	public <T> Response<T> body(BodyInsertor<T> insertor) {
-		Assert.notNull(insertor, "'insertor' must not be null");
-		return new BodyInsertorResponse<T>(this.statusCode, this.headers, insertor);
+	public <T> Response<T> body(BodyInserter<T> inserter) {
+		Assert.notNull(inserter, "'inserter' must not be null");
+		return new BodyInserterResponse<T>(this.statusCode, this.headers, inserter);
 	}
 
 	@Override
@@ -233,27 +233,27 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		}
 	}
 
-	private static final class BodyInsertorResponse<T> extends AbstractResponse<T> {
+	private static final class BodyInserterResponse<T> extends AbstractResponse<T> {
 
-		private final BodyInsertor<T> insertor;
+		private final BodyInserter<T> inserter;
 
 
-		public BodyInsertorResponse(
-				int statusCode, HttpHeaders headers, BodyInsertor<T> insertor) {
+		public BodyInserterResponse(
+				int statusCode, HttpHeaders headers, BodyInserter<T> inserter) {
 			super(statusCode, headers);
-			this.insertor = insertor;
+			this.inserter = inserter;
 		}
 
 		@Override
 		public T body() {
-			return this.insertor.t();
+			return this.inserter.t();
 		}
 
 		@Override
 		public Mono<Void> writeTo(ServerWebExchange exchange, Configuration configuration) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
-			return this.insertor.insert(response, configuration);
+			return this.inserter.insert(response, configuration);
 		}
 
 	}

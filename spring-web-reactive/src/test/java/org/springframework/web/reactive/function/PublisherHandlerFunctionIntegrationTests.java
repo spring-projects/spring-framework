@@ -34,7 +34,7 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.web.reactive.function.BodyExtractors.toMono;
-import static org.springframework.web.reactive.function.BodyInsertors.fromPublisher;
+import static org.springframework.web.reactive.function.BodyInserters.fromPublisher;
 import static org.springframework.web.reactive.function.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.RouterFunctions.route;

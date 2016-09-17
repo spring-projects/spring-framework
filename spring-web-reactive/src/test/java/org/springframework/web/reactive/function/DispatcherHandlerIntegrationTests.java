@@ -155,14 +155,14 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 		public Response<Publisher<Person>> mono(Request request) {
 			Person person = new Person("John");
-			return Response.ok().body(BodyInsertors.fromPublisher(Mono.just(person), Person.class));
+			return Response.ok().body(BodyInserters.fromPublisher(Mono.just(person), Person.class));
 		}
 
 		public Response<Publisher<Person>> flux(Request request) {
 			Person person1 = new Person("John");
 			Person person2 = new Person("Jane");
 			return Response.ok().body(
-					BodyInsertors.fromPublisher(Flux.just(person1, person2), Person.class));
+					BodyInserters.fromPublisher(Flux.just(person1, person2), Person.class));
 		}
 
 	}

@@ -31,10 +31,10 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  * @see Response#body()
- * @see Response.BodyBuilder#body(BodyInsertor)
- * @see BodyInsertors
+ * @see Response.BodyBuilder#body(BodyInserter)
+ * @see BodyInserters
  */
-public interface BodyInsertor<T> {
+public interface BodyInserter<T> {
 
 	/**
 	 * Insert into the given response.
@@ -52,19 +52,19 @@ public interface BodyInsertor<T> {
 
 
 	/**
-	 * Return a new {@code BodyInsertor} described by the given writer and supplier functions.
-	 * @param writer  the writer function for the new insertor
-	 * @param supplier the supplier function for the new insertor
-	 * @param <T> the type supplied and written by the insertor
-	 * @return the new {@code BodyInsertor}
+	 * Return a new {@code BodyInserter} described by the given writer and supplier functions.
+	 * @param writer  the writer function for the new inserter
+	 * @param supplier the supplier function for the new inserter
+	 * @param <T> the type supplied and written by the inserter
+	 * @return the new {@code BodyInserter}
 	 */
-	static <T> BodyInsertor<T> of(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
+	static <T> BodyInserter<T> of(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
 			Supplier<T> supplier) {
 
 		Assert.notNull(writer, "'writer' must not be null");
 		Assert.notNull(supplier, "'supplier' must not be null");
 
-		return new BodyInsertors.DefaultBodyInsertor<T>(writer, supplier);
+		return new BodyInserters.DefaultBodyInserter<T>(writer, supplier);
 	}
 
 }

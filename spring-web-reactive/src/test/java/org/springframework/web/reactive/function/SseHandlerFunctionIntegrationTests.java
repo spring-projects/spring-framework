@@ -111,13 +111,13 @@ public class SseHandlerFunctionIntegrationTests
 
 		public Response<Publisher<String>> string(Request request) {
 			Flux<String> flux = Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l).take(2);
-			return Response.ok().body(BodyInsertors.fromServerSentEvents(flux, String.class));
+			return Response.ok().body(BodyInserters.fromServerSentEvents(flux, String.class));
 		}
 
 		public Response<Publisher<Person>> person(Request request) {
 			Flux<Person> flux = Flux.interval(Duration.ofMillis(100))
 					.map(l -> new Person("foo " + l)).take(2);
-			return Response.ok().body(BodyInsertors.fromServerSentEvents(flux, Person.class));
+			return Response.ok().body(BodyInserters.fromServerSentEvents(flux, Person.class));
 		}
 
 		public Response<Publisher<ServerSentEvent<String>>> sse(Request request) {
@@ -127,7 +127,7 @@ public class SseHandlerFunctionIntegrationTests
 							.comment("bar")
 							.build()).take(2);
 
-			return Response.ok().body(BodyInsertors.fromServerSentEvents(flux));
+			return Response.ok().body(BodyInserters.fromServerSentEvents(flux));
 		}
 	}
 

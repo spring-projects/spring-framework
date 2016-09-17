@@ -38,17 +38,17 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Arjen Poutsma
  */
-public class BodyInsertorsTests {
+public class BodyInsertersTests {
 
 	@Test
 	public void ofObject() throws Exception {
 		String body = "foo";
-		BodyInsertor<String> insertor = BodyInsertors.fromObject(body);
+		BodyInserter<String> inserter = BodyInserters.fromObject(body);
 
-		assertEquals(body, insertor.t());
+		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -62,12 +62,12 @@ public class BodyInsertorsTests {
 	@Test
 	public void ofPublisher() throws Exception {
 		Flux<String> body = Flux.just("foo");
-		BodyInsertor<Flux<String>> insertor = BodyInsertors.fromPublisher(body, String.class);
+		BodyInserter<Flux<String>> inserter = BodyInserters.fromPublisher(body, String.class);
 
-		assertEquals(body, insertor.t());
+		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -81,12 +81,12 @@ public class BodyInsertorsTests {
 	@Test
 	public void ofResource() throws Exception {
 		Resource body = new ClassPathResource("response.txt", getClass());
-		BodyInsertor<Resource> insertor = BodyInsertors.fromResource(body);
+		BodyInserter<Resource> inserter = BodyInserters.fromResource(body);
 
-		assertEquals(body, insertor.t());
+		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -105,13 +105,13 @@ public class BodyInsertorsTests {
 	public void ofServerSentEventFlux() throws Exception {
 		ServerSentEvent<String> event = ServerSentEvent.builder("foo").build();
 		Flux<ServerSentEvent<String>> body = Flux.just(event);
-		BodyInsertor<Flux<ServerSentEvent<String>>> insertor =
-				BodyInsertors.fromServerSentEvents(body);
+		BodyInserter<Flux<ServerSentEvent<String>>> inserter =
+				BodyInserters.fromServerSentEvents(body);
 
-		assertEquals(body, insertor.t());
+		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -120,13 +120,13 @@ public class BodyInsertorsTests {
 	@Test
 	public void ofServerSentEventClass() throws Exception {
 		Flux<String> body = Flux.just("foo");
-		BodyInsertor<Flux<String>> insertor =
-				BodyInsertors.fromServerSentEvents(body, String.class);
+		BodyInserter<Flux<String>> inserter =
+				BodyInserters.fromServerSentEvents(body, String.class);
 
-		assertEquals(body, insertor.t());
+		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
