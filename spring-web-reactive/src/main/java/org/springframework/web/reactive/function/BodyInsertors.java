@@ -240,14 +240,15 @@ public abstract class BodyInsertors {
 		}
 
 		@Override
-		public BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer() {
-			return this.writer;
+		public Mono<Void> insert(ServerHttpResponse response, Configuration configuration) {
+			return this.writer.apply(response, configuration);
 		}
 
 		@Override
-		public Supplier<T> supplier() {
-			return this.supplier;
+		public T t() {
+			return this.supplier.get();
 		}
+
 	}
 
 

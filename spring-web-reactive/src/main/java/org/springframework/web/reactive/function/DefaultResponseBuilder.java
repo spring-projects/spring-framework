@@ -246,14 +246,14 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 
 		@Override
 		public T body() {
-			return this.insertor.supplier().get();
+			return this.insertor.t();
 		}
 
 		@Override
 		public Mono<Void> writeTo(ServerWebExchange exchange, Configuration configuration) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
-			return this.insertor.writer().apply(response, configuration);
+			return this.insertor.insert(response, configuration);
 		}
 
 	}

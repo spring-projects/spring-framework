@@ -25,8 +25,9 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * A combination of functions that can insert data into a {@link Response} body.
+ * A component that can insert data into a {@link Response} body.
  *
+ * @param <T> the type of data to insert
  * @author Arjen Poutsma
  * @since 5.0
  * @see Response#body()
@@ -36,14 +37,19 @@ import org.springframework.util.Assert;
 public interface BodyInsertor<T> {
 
 	/**
-	 * Return a function that writes to the given response body.
+	 * Insert into the given response.
+	 * @param response the response to insert into
+	 * @param configuration the configuration to use
+	 * @return a {@code Mono} that indicates completion or error
 	 */
-	BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer();
+	Mono<Void> insert(ServerHttpResponse response, Configuration configuration);
 
 	/**
-	 * Return a function that supplies the type contained in the body.
+	 * Return the type contained in the body.
+	 * @return the type contained in the body
 	 */
-	Supplier<T> supplier();
+	T t();
+
 
 	/**
 	 * Return a new {@code BodyInsertor} described by the given writer and supplier functions.

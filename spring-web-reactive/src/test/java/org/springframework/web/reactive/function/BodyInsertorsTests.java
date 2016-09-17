@@ -18,7 +18,6 @@ package org.springframework.web.reactive.function;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
-import java.util.function.BiFunction;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -29,7 +28,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.tests.TestSubscriber;
 
@@ -47,11 +45,10 @@ public class BodyInsertorsTests {
 		String body = "foo";
 		BodyInsertor<String> insertor = BodyInsertors.fromObject(body);
 
-		assertEquals(body, insertor.supplier().get());
+		assertEquals(body, insertor.t());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = writer.apply(response, Configuration.builder().build());
+		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -67,11 +64,10 @@ public class BodyInsertorsTests {
 		Flux<String> body = Flux.just("foo");
 		BodyInsertor<Flux<String>> insertor = BodyInsertors.fromPublisher(body, String.class);
 
-		assertEquals(body, insertor.supplier().get());
+		assertEquals(body, insertor.t());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = writer.apply(response, Configuration.builder().build());
+		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -87,11 +83,10 @@ public class BodyInsertorsTests {
 		Resource body = new ClassPathResource("response.txt", getClass());
 		BodyInsertor<Resource> insertor = BodyInsertors.fromResource(body);
 
-		assertEquals(body, insertor.supplier().get());
+		assertEquals(body, insertor.t());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = writer.apply(response, Configuration.builder().build());
+		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -113,11 +108,10 @@ public class BodyInsertorsTests {
 		BodyInsertor<Flux<ServerSentEvent<String>>> insertor =
 				BodyInsertors.fromServerSentEvents(body);
 
-		assertEquals(body, insertor.supplier().get());
+		assertEquals(body, insertor.t());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = writer.apply(response, Configuration.builder().build());
+		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -129,11 +123,10 @@ public class BodyInsertorsTests {
 		BodyInsertor<Flux<String>> insertor =
 				BodyInsertors.fromServerSentEvents(body, String.class);
 
-		assertEquals(body, insertor.supplier().get());
+		assertEquals(body, insertor.t());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = writer.apply(response, Configuration.builder().build());
+		Mono<Void> result = insertor.insert(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
