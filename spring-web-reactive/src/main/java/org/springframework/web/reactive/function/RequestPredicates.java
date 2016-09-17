@@ -16,10 +16,12 @@
 
 package org.springframework.web.reactive.function;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -28,7 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
-import org.springframework.web.reactive.function.support.RequestWrapper;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful request matching operations, such as
@@ -262,12 +263,7 @@ public abstract class RequestPredicates {
 		public Request subRequest(Request request) {
 			String requestPath = request.path();
 			String subPath = this.pathMatcher.extractPathWithinPattern(this.pattern, requestPath);
-			return new RequestWrapper(request) {
-				@Override
-				public String path() {
-					return subPath;
-				}
-			};
+			return new SubPathRequestWrapper(request, subPath);
 		}
 	}
 
@@ -283,6 +279,68 @@ public abstract class RequestPredicates {
 		@Override
 		public boolean test(Request request) {
 			return this.headersPredicate.test(request.headers());
+		}
+	}
+
+	private static class SubPathRequestWrapper implements Request {
+
+		private final Request request;
+
+		private final String subPath;
+
+		public SubPathRequestWrapper(Request request, String subPath) {
+			this.request = request;
+			this.subPath = subPath;
+		}
+
+		@Override
+		public HttpMethod method() {
+			return this.request.method();
+		}
+
+		@Override
+		public URI uri() {
+			return this.request.uri();
+		}
+
+		@Override
+		public String path() {
+			return this.subPath;
+		}
+
+		@Override
+		public Headers headers() {
+			return this.request.headers();
+		}
+
+		@Override
+		public <T> T body(BodyExtractor<T> extractor) {
+			return this.request.body(extractor);
+		}
+
+		@Override
+		public <T> Optional<T> attribute(String name) {
+			return this.request.attribute(name);
+		}
+
+		@Override
+		public Optional<String> queryParam(String name) {
+			return this.request.queryParam(name);
+		}
+
+		@Override
+		public List<String> queryParams(String name) {
+			return this.request.queryParams(name);
+		}
+
+		@Override
+		public Optional<String> pathVariable(String name) {
+			return this.request.pathVariable(name);
+		}
+
+		@Override
+		public Map<String, String> pathVariables() {
+			return this.request.pathVariables();
 		}
 	}
 }
