@@ -228,7 +228,7 @@ public class EnableMBeanExportConfigurationTests {
 			return new MBeanServerFactoryBean();
 		}
 
-		@Bean(name="bean:name=testBean4")
+		@Bean("bean:name=testBean4")
 		@Lazy
 		public AnnotationTestBean testBean4() {
 			AnnotationTestBean bean = new AnnotationTestBean();
@@ -237,7 +237,7 @@ public class EnableMBeanExportConfigurationTests {
 			return bean;
 		}
 
-		@Bean(name="bean:name=testBean5")
+		@Bean("bean:name=testBean5")
 		public AnnotationTestBeanFactory testBean5() throws Exception {
 			return new AnnotationTestBeanFactory();
 		}
