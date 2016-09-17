@@ -59,7 +59,7 @@ public class TomcatHttpServer extends HttpServerSupport implements HttpServer, I
 		File base = new File(System.getProperty("java.io.tmpdir"));
 		Context rootContext = tomcatServer.addContext("", base.getAbsolutePath());
 		Tomcat.addServlet(rootContext, "httpHandlerServlet", servlet);
-		rootContext.addServletMapping("/", "httpHandlerServlet");
+		rootContext.addServletMappingDecoded("/", "httpHandlerServlet");
 	}
 
 
