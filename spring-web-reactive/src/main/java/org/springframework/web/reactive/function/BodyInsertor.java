@@ -25,32 +25,15 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * A combination of functions that can populate a {@link Response} body.
+ * A combination of functions that can insert data into a {@link Response} body.
  *
  * @author Arjen Poutsma
  * @since 5.0
  * @see Response#body()
- * @see Response.BodyBuilder#body(BodyPopulator)
- * @see BodyPopulators
+ * @see Response.BodyBuilder#body(BodyInsertor)
+ * @see BodyInsertors
  */
-public interface BodyPopulator<T> {
-
-	/**
-	 * Return a new {@code BodyPopulator} described by the given writer and supplier functions.
-
-	 * @param writer  the writer function for the new populator
-	 * @param supplier the supplier function for the new populator
-	 * @param <T> the type supplied and written by the populator
-	 * @return the new {@code BodyPopulator}
-	 */
-	static <T> BodyPopulator<T> of(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
-			Supplier<T> supplier) {
-
-		Assert.notNull(writer, "'writer' must not be null");
-		Assert.notNull(supplier, "'supplier' must not be null");
-
-		return new BodyPopulators.DefaultBodyPopulator<T>(writer, supplier);
-	}
+public interface BodyInsertor<T> {
 
 	/**
 	 * Return a function that writes to the given response body.
@@ -61,5 +44,21 @@ public interface BodyPopulator<T> {
 	 * Return a function that supplies the type contained in the body.
 	 */
 	Supplier<T> supplier();
+
+	/**
+	 * Return a new {@code BodyInsertor} described by the given writer and supplier functions.
+	 * @param writer  the writer function for the new insertor
+	 * @param supplier the supplier function for the new insertor
+	 * @param <T> the type supplied and written by the insertor
+	 * @return the new {@code BodyInsertor}
+	 */
+	static <T> BodyInsertor<T> of(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
+			Supplier<T> supplier) {
+
+		Assert.notNull(writer, "'writer' must not be null");
+		Assert.notNull(supplier, "'supplier' must not be null");
+
+		return new BodyInsertors.DefaultBodyInsertor<T>(writer, supplier);
+	}
 
 }

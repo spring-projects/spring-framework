@@ -214,7 +214,7 @@ public class DefaultResponseBuilderTests {
 	}
 
 	@Test
-	public void bodyPopulator() throws Exception {
+	public void bodyInsertor() throws Exception {
 		String body = "foo";
 		Supplier<String> supplier = () -> body;
 		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer =

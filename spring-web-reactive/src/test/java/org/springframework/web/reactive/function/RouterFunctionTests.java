@@ -23,7 +23,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.web.reactive.function.BodyPopulators.fromObject;
+import static org.springframework.web.reactive.function.BodyInsertors.fromObject;
 
 /**
  * @author Arjen Poutsma

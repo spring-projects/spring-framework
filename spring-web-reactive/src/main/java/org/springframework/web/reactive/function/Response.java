@@ -308,7 +308,7 @@ public interface Response<T> {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Write the body to the given {@code BodyPopulator} and return it.
+		 * Write the body to the given {@code BodyInsertor} and return it.
 		 * @param writer a function that writes the body to the {@code ServerHttpResponse}
 		 * @param supplier a function that returns the body instance
 		 * @param <T> the type contained in the body
@@ -318,12 +318,12 @@ public interface Response<T> {
 				Supplier<T> supplier);
 
 		/**
-		 * Set the body of the response to the given {@code BodyPopulator} and return it.
-		 * @param populator the {@code BodyPopulator} that writes to the response
+		 * Set the body of the response to the given {@code BodyInsertor} and return it.
+		 * @param insertor the {@code BodyInsertor} that writes to the response
 		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T> Response<T> body(BodyPopulator<T> populator);
+		<T> Response<T> body(BodyInsertor<T> insertor);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.

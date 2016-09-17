@@ -40,16 +40,16 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Arjen Poutsma
  */
-public class BodyPopulatorsTests {
+public class BodyInsertorsTests {
 
 	@Test
 	public void ofObject() throws Exception {
 		String body = "foo";
-		BodyPopulator<String> populator = BodyPopulators.fromObject(body);
+		BodyInsertor<String> insertor = BodyInsertors.fromObject(body);
 
-		assertEquals(body, populator.supplier().get());
+		assertEquals(body, insertor.supplier().get());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = populator.writer();
+		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = writer.apply(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
@@ -65,11 +65,11 @@ public class BodyPopulatorsTests {
 	@Test
 	public void ofPublisher() throws Exception {
 		Flux<String> body = Flux.just("foo");
-		BodyPopulator<Flux<String>> populator = BodyPopulators.fromPublisher(body, String.class);
+		BodyInsertor<Flux<String>> insertor = BodyInsertors.fromPublisher(body, String.class);
 
-		assertEquals(body, populator.supplier().get());
+		assertEquals(body, insertor.supplier().get());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = populator.writer();
+		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = writer.apply(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
@@ -85,11 +85,11 @@ public class BodyPopulatorsTests {
 	@Test
 	public void ofResource() throws Exception {
 		Resource body = new ClassPathResource("response.txt", getClass());
-		BodyPopulator<Resource> populator = BodyPopulators.fromResource(body);
+		BodyInsertor<Resource> insertor = BodyInsertors.fromResource(body);
 
-		assertEquals(body, populator.supplier().get());
+		assertEquals(body, insertor.supplier().get());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = populator.writer();
+		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = writer.apply(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
@@ -110,12 +110,12 @@ public class BodyPopulatorsTests {
 	public void ofServerSentEventFlux() throws Exception {
 		ServerSentEvent<String> event = ServerSentEvent.builder("foo").build();
 		Flux<ServerSentEvent<String>> body = Flux.just(event);
-		BodyPopulator<Flux<ServerSentEvent<String>>> populator =
-				BodyPopulators.fromServerSentEvents(body);
+		BodyInsertor<Flux<ServerSentEvent<String>>> insertor =
+				BodyInsertors.fromServerSentEvents(body);
 
-		assertEquals(body, populator.supplier().get());
+		assertEquals(body, insertor.supplier().get());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = populator.writer();
+		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = writer.apply(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)
@@ -126,12 +126,12 @@ public class BodyPopulatorsTests {
 	@Test
 	public void ofServerSentEventClass() throws Exception {
 		Flux<String> body = Flux.just("foo");
-		BodyPopulator<Flux<String>> populator =
-				BodyPopulators.fromServerSentEvents(body, String.class);
+		BodyInsertor<Flux<String>> insertor =
+				BodyInsertors.fromServerSentEvents(body, String.class);
 
-		assertEquals(body, populator.supplier().get());
+		assertEquals(body, insertor.supplier().get());
 
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = populator.writer();
+		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer = insertor.writer();
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = writer.apply(response, Configuration.builder().build());
 		TestSubscriber.subscribe(result)

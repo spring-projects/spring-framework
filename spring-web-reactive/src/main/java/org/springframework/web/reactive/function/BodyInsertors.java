@@ -37,13 +37,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Implementations of {@link BodyPopulator} that write various bodies, such a reactive streams,
+ * Implementations of {@link BodyInsertor} that write various bodies, such a reactive streams,
  * server-sent events, resources, etc.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
-public abstract class BodyPopulators {
+public abstract class BodyInsertors {
 
 	private static final ResolvableType RESOURCE_TYPE = ResolvableType.forClass(Resource.class);
 
@@ -52,32 +52,32 @@ public abstract class BodyPopulators {
 
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					BodyPopulators.class.getClassLoader()) &&
+					BodyInsertors.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							BodyPopulators.class.getClassLoader());
+							BodyInsertors.class.getClassLoader());
 
 	/**
-	 * Return a {@code BodyPopulator} that writes the given single object.
+	 * Return a {@code BodyInsertor} that writes the given single object.
 	 * @param body the body of the response
-	 * @return a {@code BodyPopulator} that writes a single object
+	 * @return a {@code BodyInsertor} that writes a single object
 	 */
-	public static <T> BodyPopulator<T> fromObject(T body) {
+	public static <T> BodyInsertor<T> fromObject(T body) {
 		Assert.notNull(body, "'body' must not be null");
-		return BodyPopulator.of(
+		return BodyInsertor.of(
 				(response, configuration) -> writeWithMessageWriters(response, configuration,
 						Mono.just(body), ResolvableType.forInstance(body)),
 				() -> body);
 	}
 
 	/**
-	 * Return a {@code BodyPopulator} that writes the given {@link Publisher}.
+	 * Return a {@code BodyInsertor} that writes the given {@link Publisher}.
 	 * @param publisher the publisher to stream to the response body
 	 * @param elementClass the class of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <S> the type of the {@code Publisher}.
-	 * @return a {@code BodyPopulator} that writes a {@code Publisher}
+	 * @return a {@code BodyInsertor} that writes a {@code Publisher}
 	 */
-	public static <S extends Publisher<T>, T> BodyPopulator<S> fromPublisher(S publisher,
+	public static <S extends Publisher<T>, T> BodyInsertor<S> fromPublisher(S publisher,
 			Class<T> elementClass) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
@@ -86,19 +86,19 @@ public abstract class BodyPopulators {
 	}
 
 	/**
-	 * Return a {@code BodyPopulator} that writes the given {@link Publisher}.
+	 * Return a {@code BodyInsertor} that writes the given {@link Publisher}.
 	 * @param publisher the publisher to stream to the response body
 	 * @param elementType the type of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
 	 * @param <S> the type of the {@code Publisher}.
-	 * @return a {@code BodyPopulator} that writes a {@code Publisher}
+	 * @return a {@code BodyInsertor} that writes a {@code Publisher}
 	 */
-	public static <S extends Publisher<T>, T> BodyPopulator<S> fromPublisher(S publisher,
+	public static <S extends Publisher<T>, T> BodyInsertor<S> fromPublisher(S publisher,
 			ResolvableType elementType) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
-		return BodyPopulator.of(
+		return BodyInsertor.of(
 				(response, configuration) -> writeWithMessageWriters(response, configuration,
 						publisher, elementType),
 				() -> publisher
@@ -106,17 +106,17 @@ public abstract class BodyPopulators {
 	}
 
 	/**
-	 * Return a {@code BodyPopulator} that writes the given {@code Resource}.
+	 * Return a {@code BodyInsertor} that writes the given {@code Resource}.
 	 * If the resource can be resolved to a {@linkplain Resource#getFile() file}, it will be copied
 	 * using
 	 * <a href="https://en.wikipedia.org/wiki/Zero-copy">zero-copy</a>
 	 * @param resource the resource to write to the response
 	 * @param <T> the type of the {@code Resource}
-	 * @return a {@code BodyPopulator} that writes a {@code Publisher}
+	 * @return a {@code BodyInsertor} that writes a {@code Publisher}
 	 */
-	public static <T extends Resource> BodyPopulator<T> fromResource(T resource) {
+	public static <T extends Resource> BodyInsertor<T> fromResource(T resource) {
 		Assert.notNull(resource, "'resource' must not be null");
-		return BodyPopulator.of(
+		return BodyInsertor.of(
 				(response, configuration) -> {
 					ResourceHttpMessageWriter messageWriter = new ResourceHttpMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
@@ -128,17 +128,17 @@ public abstract class BodyPopulators {
 	}
 
 	/**
-	 * Return a {@code BodyPopulator} that writes the given {@code ServerSentEvent} publisher.
+	 * Return a {@code BodyInsertor} that writes the given {@code ServerSentEvent} publisher.
 	 * @param eventsPublisher the {@code ServerSentEvent} publisher to write to the response body
 	 * @param <T> the type of the elements contained in the {@link ServerSentEvent}
-	 * @return a {@code BodyPopulator} that writes a {@code ServerSentEvent} publisher
+	 * @return a {@code BodyInsertor} that writes a {@code ServerSentEvent} publisher
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyPopulator<S> fromServerSentEvents(
+	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInsertor<S> fromServerSentEvents(
 			S eventsPublisher) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
-		return BodyPopulator.of(
+		return BodyInsertor.of(
 				(response, configuration) -> {
 					ServerSentEventHttpMessageWriter messageWriter = sseMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
@@ -150,16 +150,16 @@ public abstract class BodyPopulators {
 	}
 
 	/**
-	 * Return a {@code BodyPopulator} that writes the given {@code Publisher} publisher as
+	 * Return a {@code BodyInsertor} that writes the given {@code Publisher} publisher as
 	 * Server-Sent Events.
 	 * @param eventsPublisher the publisher to write to the response body as Server-Sent Events
 	 * @param eventClass the class of event contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
-	 * @return a {@code BodyPopulator} that writes the given {@code Publisher} publisher as
+	 * @return a {@code BodyInsertor} that writes the given {@code Publisher} publisher as
 	 * Server-Sent Events
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<T>> BodyPopulator<S> fromServerSentEvents(S eventsPublisher,
+	public static <T, S extends Publisher<T>> BodyInsertor<S> fromServerSentEvents(S eventsPublisher,
 			Class<T> eventClass) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
@@ -168,21 +168,21 @@ public abstract class BodyPopulators {
 	}
 
 	/**
-	 * Return a {@code BodyPopulator} that writes the given {@code Publisher} publisher as
+	 * Return a {@code BodyInsertor} that writes the given {@code Publisher} publisher as
 	 * Server-Sent Events.
 	 * @param eventsPublisher the publisher to write to the response body as Server-Sent Events
 	 * @param eventType the type of event contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
-	 * @return a {@code BodyPopulator} that writes the given {@code Publisher} publisher as
+	 * @return a {@code BodyInsertor} that writes the given {@code Publisher} publisher as
 	 * Server-Sent Events
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<T>> BodyPopulator<S> fromServerSentEvents(S eventsPublisher,
+	public static <T, S extends Publisher<T>> BodyInsertor<S> fromServerSentEvents(S eventsPublisher,
 			ResolvableType eventType) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventType, "'eventType' must not be null");
-		return BodyPopulator.of(
+		return BodyInsertor.of(
 				(response, configuration) -> {
 					ServerSentEventHttpMessageWriter messageWriter = sseMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
@@ -211,7 +211,7 @@ public abstract class BodyPopulators {
 				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType, Collections
 						.emptyMap()))
 				.findFirst()
-				.map(BodyPopulators::cast)
+				.map(BodyInsertors::cast)
 				.map(messageWriter -> messageWriter
 						.write(body, bodyType, contentType, response, Collections
 								.emptyMap()))
@@ -226,13 +226,13 @@ public abstract class BodyPopulators {
 		return (HttpMessageWriter<T>) messageWriter;
 	}
 
-	static class DefaultBodyPopulator<T> implements BodyPopulator<T> {
+	static class DefaultBodyInsertor<T> implements BodyInsertor<T> {
 
 		private final BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer;
 
 		private final Supplier<T> supplier;
 
-		public DefaultBodyPopulator(
+		public DefaultBodyInsertor(
 				BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
 				Supplier<T> supplier) {
 			this.writer = writer;
