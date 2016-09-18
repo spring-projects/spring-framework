@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.script;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -57,7 +56,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * An {@link AbstractUrlBasedView} subclass designed to run any template library
  * based on a JSR-223 script engine.
  *
- * <p>If not set, each property is auto-detected by looking up up a single
+ * <p>If not set, each property is auto-detected by looking up a single
  * {@link ScriptTemplateConfig} bean in the web application context and using
  * it to obtain the configured properties.
  *
@@ -189,19 +188,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		this.resourceLoaderPath = resourceLoaderPath;
 	}
 
-	@Override
-	public boolean checkResource(Locale locale) throws Exception {
-		try {
-			getTemplate(getUrl());
-			return true;
-		}
-		catch (FileNotFoundException exc) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No ScriptTemplate view found for URL: " + getUrl());
-			}
-			return false;
-		}
-	}
 
 	@Override
 	protected void initApplicationContext(ApplicationContext context) {
@@ -260,7 +246,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		Assert.isTrue(this.renderFunction != null, "The 'renderFunction' property must be defined.");
 	}
 
-
 	protected ScriptEngine getEngine() {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			Map<Object, ScriptEngine> engines = enginesHolder.get();
@@ -295,17 +280,17 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	protected void loadScripts(ScriptEngine engine) {
 		if (!ObjectUtils.isEmpty(this.scripts)) {
-			try {
-				for (String script : this.scripts) {
-					Resource resource = this.resourceLoader.getResource(script);
-					if (!resource.exists()) {
-						throw new IllegalStateException("Script resource [" + script + "] not found");
-					}
+			for (String script : this.scripts) {
+				Resource resource = this.resourceLoader.getResource(script);
+				if (!resource.exists()) {
+					throw new IllegalStateException("Script resource [" + script + "] not found");
+				}
+				try {
 					engine.eval(new InputStreamReader(resource.getInputStream()));
 				}
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Failed to load script", ex);
+				catch (Throwable ex) {
+					throw new IllegalStateException("Failed to evaluate script [" + script + "]", ex);
+				}
 			}
 		}
 	}
@@ -344,6 +329,11 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
+
+	@Override
+	public boolean checkResource(Locale locale) throws Exception {
+		return this.resourceLoader.getResource(getUrl()).exists();
+	}
 
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
