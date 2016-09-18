@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-
 import javax.inject.Provider;
 
 import org.junit.Rule;
@@ -279,6 +278,7 @@ public class ConfigurationClassProcessingTests {
 		}
 	}
 
+
 	@Configuration
 	static class ConfigWithBeanWithCustomNameConfiguredViaValueAttribute {
 
@@ -290,6 +290,7 @@ public class ConfigurationClassProcessingTests {
 		}
 	}
 
+
 	@Configuration
 	static class ConfigWithBeanWithAliases {
 
@@ -300,6 +301,7 @@ public class ConfigurationClassProcessingTests {
 			return testBean;
 		}
 	}
+
 
 	@Configuration
 	static class ConfigWithBeanWithAliasesConfiguredViaValueAttribute {
@@ -452,7 +454,7 @@ public class ConfigurationClassProcessingTests {
 			};
 		}
 
-		//@Bean
+		// @Bean
 		public BeanFactoryPostProcessor beanFactoryPostProcessor() {
 			return new BeanFactoryPostProcessor() {
 				@Override

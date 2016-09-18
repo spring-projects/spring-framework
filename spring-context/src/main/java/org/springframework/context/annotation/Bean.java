@@ -46,14 +46,14 @@ import org.springframework.core.annotation.AliasFor;
  * <h3>Bean Names</h3>
  *
  * <p>While a {@link #name} attribute is available, the default strategy for
- * determining the name of a bean is to use the name of the {@code @Bean} method. This
- * is convenient and intuitive, but if explicit naming is desired, the {@code name}
- * attribute (or its alias {@code value}) may be used. Also note that {@code name}
- * accepts an array of Strings. This is in order to allow for specifying multiple names
- * (i.e., aliases) for a single bean.
+ * determining the name of a bean is to use the name of the {@code @Bean} method.
+ * This is convenient and intuitive, but if explicit naming is desired, the
+ * {@code name} attribute (or its alias {@code value}) may be used. Also note
+ * that {@code name} accepts an array of Strings, allowing for multiple names
+ * (i.e. a primary bean name plus one or more aliases) for a single bean.
  *
  * <pre class="code">
- *     &#064;Bean({"b1","b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
+ *     &#064;Bean({"b1", "b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
  *     public MyBean myBean() {
  *         // instantiate and configure MyBean obj
  *         return obj;
@@ -79,9 +79,9 @@ import org.springframework.core.annotation.AliasFor;
  * <h3>{@code @Bean} Methods in {@code @Configuration} Classes</h3>
  *
  * <p>Typically, {@code @Bean} methods are declared within {@code @Configuration}
- * classes. In this case, bean methods may reference other {@code @Bean} methods
- * in the same class by calling them <i>directly</i>. This ensures that references between
- * beans are strongly typed and navigable. Such so-called <em>'inter-bean references'</em> are
+ * classes. In this case, bean methods may reference other {@code @Bean} methods in the
+ * same class by calling them <i>directly</i>. This ensures that references between beans
+ * are strongly typed and navigable. Such so-called <em>'inter-bean references'</em> are
  * guaranteed to respect scoping and AOP semantics, just like {@code getBean()} lookups
  * would. These are the semantics known from the original 'Spring JavaConfig' project
  * which require CGLIB subclassing of each such configuration class at runtime. As a
@@ -194,15 +194,15 @@ public @interface Bean {
 	 * Alias for {@link #name}.
 	 * <p>Intended to be used when no other attributes are needed, for example:
 	 * {@code @Bean("customBeanName")}.
-	 * @since 5.0
+	 * @since 4.3.3
 	 * @see #name
 	 */
 	@AliasFor("name")
 	String[] value() default {};
 
 	/**
-	 * The name of this bean, or if plural, aliases for this bean.
-	 * <p>If left unspecified the name of the bean is the name of the annotated method.
+	 * The name of this bean, or if several names, a primary bean name plus aliases.
+	 * <p>If left unspecified, the name of the bean is the name of the annotated method.
 	 * If specified, the method name is ignored.
 	 * <p>The bean name and aliases may also be configured via the {@link #value}
 	 * attribute if no other attributes are declared.
