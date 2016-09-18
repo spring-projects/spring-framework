@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.script;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -193,19 +192,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
-	@Override
-	public boolean checkResource(Locale locale) throws Exception {
-		try {
-			getTemplate(getUrl());
-			return true;
-		}
-		catch (IllegalStateException exc) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("No ScriptTemplate view found for URL: " + getUrl());
-			}
-			return false;
-		}
-	}
 
 	@Override
 	protected void initApplicationContext(ApplicationContext context) {
@@ -264,7 +250,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		Assert.isTrue(this.renderFunction != null, "The 'renderFunction' property must be defined.");
 	}
 
-
 	protected ScriptEngine getEngine() {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
 			Map<Object, ScriptEngine> engines = enginesHolder.get();
@@ -299,14 +284,17 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	protected void loadScripts(ScriptEngine engine) {
 		if (!ObjectUtils.isEmpty(this.scripts)) {
-			try {
-				for (String script : this.scripts) {
-					Resource resource = getResource(script);
+			for (String script : this.scripts) {
+				Resource resource = getResource(script);
+				if (resource == null) {
+					throw new IllegalStateException("Script resource [" + script + "] not found");
+				}
+				try {
 					engine.eval(new InputStreamReader(resource.getInputStream()));
 				}
-			}
-			catch (Exception ex) {
-				throw new IllegalStateException("Failed to load script", ex);
+				catch (Throwable ex) {
+					throw new IllegalStateException("Failed to evaluate script [" + script + "]", ex);
+				}
 			}
 		}
 	}
@@ -318,7 +306,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 				return resource;
 			}
 		}
-		throw new IllegalStateException("Resource [" + location + "] not found");
+		return null;
 	}
 
 	protected ScriptTemplateConfig autodetectViewConfig() throws BeansException {
@@ -331,6 +319,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 					"Servlet web application context or the parent root context: ScriptTemplateConfigurer is " +
 					"the usual implementation. This bean may have any name.", ex);
 		}
+	}
+
+
+	@Override
+	public boolean checkResource(Locale locale) throws Exception {
+		return (getResource(getUrl()) != null);
 	}
 
 	@Override
@@ -369,6 +363,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	protected String getTemplate(String path) throws IOException {
 		Resource resource = getResource(path);
+		if (resource == null) {
+			throw new IllegalStateException("Template resource [" + path + "] not found");
+		}
 		InputStreamReader reader = new InputStreamReader(resource.getInputStream(), this.charset);
 		return FileCopyUtils.copyToString(reader);
 	}
