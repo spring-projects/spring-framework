@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	public void deployConfig(WebApplicationContext wac, Filter... filters) {
 		Assert.state(this.port != -1, "setup() was never called.");
 		this.context = this.tomcatServer.addContext("", System.getProperty("java.io.tmpdir"));
-        this.context.addApplicationListener(WsContextListener.class.getName());
+		this.context.addApplicationListener(WsContextListener.class.getName());
 		Tomcat.addServlet(this.context, "dispatcherServlet", new DispatcherServlet(wac)).setAsyncSupported(true);
 		this.context.addServletMapping("/", "dispatcherServlet");
 		for (Filter filter : filters) {
