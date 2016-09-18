@@ -44,7 +44,6 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -63,6 +62,7 @@ public class ScriptTemplateViewTests {
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+
 
 	@Before
 	public void setup() {
