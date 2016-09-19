@@ -51,7 +51,9 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.web.reactive.HandlerMapping;
@@ -69,6 +71,7 @@ import org.springframework.web.reactive.result.method.annotation.ResponseEntityR
 import org.springframework.web.reactive.result.view.ViewResolutionResultHandler;
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.util.HttpRequestPathHelper;
 
 /**
  * The main class for Spring Web Reactive configuration.
@@ -198,12 +201,8 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
-			if (getPathMatchConfigurer() != null) {
-				handlerMapping.setPathMatcher(getPathMatchConfigurer().getPathMatcher());
-			}
-			if (getPathMatchConfigurer() != null) {
-				handlerMapping.setPathHelper(getPathMatchConfigurer().getPathHelper());
-			}
+			handlerMapping.setPathMatcher(mvcPathMatcher());
+			handlerMapping.setPathHelper(mvcPathHelper());
 		}
 		else {
 			handlerMapping = new EmptyHandlerMapping();
@@ -216,6 +215,30 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * @see ResourceHandlerRegistry
 	 */
 	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+	}
+
+	/**
+	 * Return a global {@link PathMatcher} instance for path matching
+	 * patterns in {@link HandlerMapping}s.
+	 * This instance can be configured using the {@link PathMatchConfigurer}
+	 * in {@link #configurePathMatching(PathMatchConfigurer)}.
+	 */
+	@Bean
+	public PathMatcher mvcPathMatcher() {
+		PathMatcher pathMatcher = getPathMatchConfigurer().getPathMatcher();
+		return (pathMatcher != null ? pathMatcher : new AntPathMatcher());
+	}
+
+	/**
+	 * Return a global {@link HttpRequestPathHelper} instance for path matching
+	 * patterns in {@link HandlerMapping}s.
+	 * This instance can be configured using the {@link PathMatchConfigurer}
+	 * in {@link #configurePathMatching(PathMatchConfigurer)}.
+	 */
+	@Bean
+	public HttpRequestPathHelper mvcPathHelper() {
+		HttpRequestPathHelper pathHelper = getPathMatchConfigurer().getPathHelper();
+		return (pathHelper != null ? pathHelper : new HttpRequestPathHelper());
 	}
 
 	@Bean
