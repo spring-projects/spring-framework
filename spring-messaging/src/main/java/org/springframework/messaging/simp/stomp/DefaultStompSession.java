@@ -456,8 +456,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			logger.debug("Connection closed session id=" + this.sessionId);
 		}
 		if (!this.closing) {
-			handleFailure(new ConnectionLostException("Connection closed"));
 			resetConnection();
+			handleFailure(new ConnectionLostException("Connection closed"));
 		}
 	}
 
@@ -647,8 +647,8 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			if (logger.isDebugEnabled()) {
 				logger.debug(error);
 			}
-			handleFailure(new IllegalStateException(error));
 			resetConnection();
+			handleFailure(new IllegalStateException(error));
 		}
 	}
 
