@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public class ResourceBundleMessageSourceTests {
 			pvs.add("alwaysUseMessageFormat", Boolean.TRUE);
 		}
 		Class<?> clazz = reloadable ?
-				(Class<?>) ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
+				ReloadableResourceBundleMessageSource.class : ResourceBundleMessageSource.class;
 		ac.registerSingleton("messageSource", clazz, pvs);
 		ac.refresh();
 
@@ -362,6 +362,13 @@ public class ResourceBundleMessageSourceTests {
 		ms.setFileEncodings(fileCharsets);
 		assertEquals("message1", ms.getMessage("code1", null, Locale.ENGLISH));
 		assertEquals("message2", ms.getMessage("code2", null, Locale.GERMAN));
+	}
+
+	@Test
+	public void testReloadableResourceBundleMessageSourceFileNameDotSeparatorDefaultCharset() {
+		ReloadableResourceBundleMessageSource ms = new ReloadableResourceBundleMessageSource();
+		ms.setBasename("org.springframework.context.support.more-messages");
+		assertEquals("message3", ms.getMessage("code3", null, Locale.ENGLISH));
 	}
 
 	@Test

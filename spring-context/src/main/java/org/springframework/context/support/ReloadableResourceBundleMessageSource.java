@@ -16,6 +16,7 @@
 
 package org.springframework.context.support;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -397,6 +398,13 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 		Resource resource = this.resourceLoader.getResource(filename + PROPERTIES_SUFFIX);
 		if (!resource.exists()) {
 			resource = this.resourceLoader.getResource(filename + XML_SUFFIX);
+		}
+		if (!resource.exists()) {
+			String fileNameFromDoted = filename.replace((char) 46, File.separatorChar);
+			resource = this.resourceLoader.getResource(fileNameFromDoted + PROPERTIES_SUFFIX);
+			if (!resource.exists()) {
+				resource = this.resourceLoader.getResource(fileNameFromDoted + XML_SUFFIX);
+			}
 		}
 
 		if (resource.exists()) {
