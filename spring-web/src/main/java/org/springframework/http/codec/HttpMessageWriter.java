@@ -58,7 +58,7 @@ public interface HttpMessageWriter<T> {
 	 * type of the converter must be used.
 	 * @param outputMessage the message to write to
 	 * @param hints additional information about how to write
-	 * @return the converted {@link Mono} of object
+	 * @return a {@link Mono} that indicates completion or error
 	 */
 	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
 			MediaType mediaType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints);
