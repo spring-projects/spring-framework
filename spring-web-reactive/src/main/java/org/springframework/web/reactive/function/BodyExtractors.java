@@ -61,7 +61,7 @@ public abstract class BodyExtractors {
 	 */
 	public static <T> BodyExtractor<Mono<T>> toMono(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-		return (request, configuration) -> readWithMessageReaders(request, configuration,
+		return (request, strategies) -> readWithMessageReaders(request, strategies,
 				elementType,
 				reader -> reader.readMono(elementType, request, Collections.emptyMap()),
 				Mono::error);
@@ -86,7 +86,7 @@ public abstract class BodyExtractors {
 	 */
 	public static <T> BodyExtractor<Flux<T>> toFlux(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-		return (request, configuration) -> readWithMessageReaders(request, configuration,
+		return (request, strategies) -> readWithMessageReaders(request, strategies,
 				elementType,
 				reader -> reader.read(elementType, request, Collections.emptyMap()),
 				Flux::error);
@@ -94,14 +94,13 @@ public abstract class BodyExtractors {
 
 	private static <T, S extends Publisher<T>> S readWithMessageReaders(
 			ServerHttpRequest request,
-			Configuration configuration,
+			StrategiesSupplier strategies,
 			ResolvableType elementType,
 			Function<HttpMessageReader<T>, S> readerFunction,
 			Function<Throwable, S> unsupportedError) {
 
 		MediaType contentType = contentType(request);
-		Supplier<Stream<HttpMessageReader<?>>> messageReaders =
-				configuration.messageReaders();
+		Supplier<Stream<HttpMessageReader<?>>> messageReaders = strategies.messageReaders();
 		return messageReaders.get()
 				.filter(r -> r.canRead(elementType, contentType, Collections.emptyMap()))
 				.findFirst()

@@ -112,17 +112,17 @@ public class RouterFunctionsTests {
 
 	@Test
 	public void toHttpHandler() throws Exception {
-		Configuration configuration = mock(Configuration.class);
-		when(configuration.messageReaders()).thenReturn(
+		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
+		when(strategies.messageReaders()).thenReturn(
 				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
-		when(configuration.messageWriters()).thenReturn(
+		when(strategies.messageWriters()).thenReturn(
 				() -> Collections.<HttpMessageWriter<?>>emptyList().stream());
-		when(configuration.viewResolvers()).thenReturn(
+		when(strategies.viewResolvers()).thenReturn(
 				() -> Collections.<ViewResolver>emptyList().stream());
 
 		Request request = mock(Request.class);
 		Response response = mock(Response.class);
-		when(response.writeTo(any(ServerWebExchange.class), eq(configuration))).thenReturn(Mono.empty());
+		when(response.writeTo(any(ServerWebExchange.class), eq(strategies))).thenReturn(Mono.empty());
 
 		HandlerFunction handlerFunction = mock(HandlerFunction.class);
 		when(handlerFunction.handle(any(Request.class))).thenReturn(response);
@@ -134,7 +134,7 @@ public class RouterFunctionsTests {
 		when(requestPredicate.test(request)).thenReturn(false);
 
 
-		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, configuration);
+		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, strategies);
 		assertNotNull(result);
 
 		MockServerHttpRequest httpRequest =

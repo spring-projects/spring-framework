@@ -39,10 +39,10 @@ public interface BodyInserter<T> {
 	/**
 	 * Insert into the given response.
 	 * @param response the response to insert into
-	 * @param configuration the configuration to use
+	 * @param strategies the strategies to use
 	 * @return a {@code Mono} that indicates completion or error
 	 */
-	Mono<Void> insert(ServerHttpResponse response, Configuration configuration);
+	Mono<Void> insert(ServerHttpResponse response, StrategiesSupplier strategies);
 
 	/**
 	 * Return the type contained in the body.
@@ -58,7 +58,7 @@ public interface BodyInserter<T> {
 	 * @param <T> the type supplied and written by the inserter
 	 * @return the new {@code BodyInserter}
 	 */
-	static <T> BodyInserter<T> of(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
+	static <T> BodyInserter<T> of(BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer,
 			Supplier<T> supplier) {
 
 		Assert.notNull(writer, "'writer' must not be null");

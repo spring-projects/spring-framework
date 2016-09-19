@@ -142,7 +142,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	@Override
 	public Response<Void> build() {
 		return body(BodyInserter.of(
-				(response, configuration) -> response.setComplete(),
+				(response, strategies) -> response.setComplete(),
 				() -> null));
 	}
 
@@ -150,12 +150,12 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	public <T extends Publisher<Void>> Response<T> build(T voidPublisher) {
 		Assert.notNull(voidPublisher, "'voidPublisher' must not be null");
 		return body(BodyInserter.of(
-				(response, configuration) -> Flux.from(voidPublisher).then(response.setComplete()),
+				(response, strategies) -> Flux.from(voidPublisher).then(response.setComplete()),
 				() -> null));
 	}
 
 	@Override
-	public <T> Response<T> body(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
+	public <T> Response<T> body(BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer,
 			Supplier<T> supplier) {
 		return body(BodyInserter.of(writer, supplier));
 	}
@@ -250,10 +250,10 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, Configuration configuration) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, StrategiesSupplier strategies) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
-			return this.inserter.insert(response, configuration);
+			return this.inserter.insert(response, strategies);
 		}
 
 	}
@@ -281,12 +281,12 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, Configuration configuration) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, StrategiesSupplier strategies) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();
 			Locale locale = Locale.ENGLISH; // TODO: resolve locale
-			Stream<ViewResolver> viewResolverStream = configuration.viewResolvers().get();
+			Stream<ViewResolver> viewResolverStream = strategies.viewResolvers().get();
 			return Flux.fromStream(viewResolverStream)
 					.concatMap(viewResolver -> viewResolver.resolveViewName(this.name, locale))
 					.next()

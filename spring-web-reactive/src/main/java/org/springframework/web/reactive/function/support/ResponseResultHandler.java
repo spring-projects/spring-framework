@@ -21,8 +21,8 @@ import reactor.core.publisher.Mono;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.function.Configuration;
 import org.springframework.web.reactive.function.Response;
+import org.springframework.web.reactive.function.StrategiesSupplier;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -33,21 +33,21 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ResponseResultHandler implements HandlerResultHandler {
 
-	private final Configuration configuration;
+	private final StrategiesSupplier strategies;
 
 	/**
-	 * Create a {@code ResponseResultHandler} with a default configuration.
+	 * Create a {@code ResponseResultHandler} with default strategies.
 	 */
 	public ResponseResultHandler() {
-		this(Configuration.builder().build());
+		this(StrategiesSupplier.builder().build());
 	}
 
 	/**
-	 * Create a {@code ResponseResultHandler} with the given configuration.
+	 * Create a {@code ResponseResultHandler} with the given strategies.
 	 */
-	public ResponseResultHandler(Configuration configuration) {
-		Assert.notNull(configuration, "'configuration' must not be null");
-		this.configuration = configuration;
+	public ResponseResultHandler(StrategiesSupplier strategies) {
+		Assert.notNull(strategies, "'strategies' must not be null");
+		this.strategies = strategies;
 	}
 
 	@Override
@@ -61,6 +61,6 @@ public class ResponseResultHandler implements HandlerResultHandler {
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Response<?> response = (Response<?>) result.getReturnValue().orElseThrow(
 				IllegalStateException::new);
-		return response.writeTo(exchange, this.configuration);
+		return response.writeTo(exchange, this.strategies);
 	}
 }

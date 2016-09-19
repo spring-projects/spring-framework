@@ -48,9 +48,9 @@ public class BodyExtractorsTests {
 		MockServerHttpRequest request = new MockServerHttpRequest();
 		request.setBody(body);
 
-		Configuration configuration = Configuration.builder().build();
+		StrategiesSupplier strategies = StrategiesSupplier.builder().build();
 
-		Mono<String> result = extractor.extract(request, configuration);
+		Mono<String> result = extractor.extract(request, strategies);
 
 		TestSubscriber.subscribe(result)
 				.assertComplete()
@@ -69,9 +69,9 @@ public class BodyExtractorsTests {
 		MockServerHttpRequest request = new MockServerHttpRequest();
 		request.setBody(body);
 
-		Configuration configuration = Configuration.builder().build();
+		StrategiesSupplier strategies = StrategiesSupplier.builder().build();
 
-		Flux<String> result = extractor.extract(request, configuration);
+		Flux<String> result = extractor.extract(request, strategies);
 		TestSubscriber.subscribe(result)
 				.assertComplete()
 				.assertValues("foo");
@@ -90,9 +90,9 @@ public class BodyExtractorsTests {
 		request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		request.setBody(body);
 
-		Configuration configuration = Configuration.empty().build();
+		StrategiesSupplier strategies = StrategiesSupplier.empty().build();
 
-		Flux<String> result = extractor.extract(request, configuration);
+		Flux<String> result = extractor.extract(request, strategies);
 		TestSubscriber.subscribe(result)
 				.assertError(UnsupportedMediaTypeStatusException.class);
 

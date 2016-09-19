@@ -120,7 +120,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		public HandlerMapping handlerMapping(RouterFunction<?> routerFunction,
 				ApplicationContext applicationContext) {
 			return RouterFunctions.toHandlerMapping(routerFunction,
-					new org.springframework.web.reactive.function.Configuration() {
+					new StrategiesSupplier() {
 						@Override
 						public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 							return () -> getMessageReaders().stream();

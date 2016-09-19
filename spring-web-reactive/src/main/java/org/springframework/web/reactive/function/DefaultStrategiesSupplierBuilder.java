@@ -17,7 +17,6 @@
 package org.springframework.web.reactive.function;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -41,20 +40,22 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 /**
+ * Default implementation of {@link StrategiesSupplier.Builder}.
+ *
  * @author Arjen Poutsma
  * @since 5.0
  */
-class DefaultConfigurationBuilder implements Configuration.Builder {
+class DefaultStrategiesSupplierBuilder implements StrategiesSupplier.Builder {
 
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					DefaultConfigurationBuilder.class.getClassLoader()) &&
+					DefaultStrategiesSupplierBuilder.class.getClassLoader()) &&
 					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							DefaultConfigurationBuilder.class.getClassLoader());
+							DefaultStrategiesSupplierBuilder.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder",
-					DefaultConfigurationBuilder.class.getClassLoader());
+					DefaultStrategiesSupplierBuilder.class.getClassLoader());
 
 
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
@@ -85,33 +86,33 @@ class DefaultConfigurationBuilder implements Configuration.Builder {
 	}
 
 	@Override
-	public Configuration.Builder messageReader(HttpMessageReader<?> messageReader) {
+	public StrategiesSupplier.Builder messageReader(HttpMessageReader<?> messageReader) {
 		Assert.notNull(messageReader, "'messageReader' must not be null");
 		this.messageReaders.add(messageReader);
 		return this;
 	}
 
 	@Override
-	public Configuration.Builder messageWriter(HttpMessageWriter<?> messageWriter) {
+	public StrategiesSupplier.Builder messageWriter(HttpMessageWriter<?> messageWriter) {
 		Assert.notNull(messageWriter, "'messageWriter' must not be null");
 		this.messageWriters.add(messageWriter);
 		return this;
 	}
 
 	@Override
-	public Configuration.Builder viewResolver(ViewResolver viewResolver) {
+	public StrategiesSupplier.Builder viewResolver(ViewResolver viewResolver) {
 		Assert.notNull(viewResolver, "'viewResolver' must not be null");
 		this.viewResolvers.add(viewResolver);
 		return this;
 	}
 
 	@Override
-	public Configuration build() {
-		return new DefaultConfiguration(this.messageReaders, this.messageWriters,
+	public StrategiesSupplier build() {
+		return new DefaultStrategiesSupplier(this.messageReaders, this.messageWriters,
 				this.viewResolvers);
 	}
 
-	private static class DefaultConfiguration implements Configuration {
+	private static class DefaultStrategiesSupplier implements StrategiesSupplier {
 
 		private final List<HttpMessageReader<?>> messageReaders;
 
@@ -119,7 +120,7 @@ class DefaultConfigurationBuilder implements Configuration.Builder {
 
 		private final List<ViewResolver> viewResolvers;
 
-		public DefaultConfiguration(
+		public DefaultStrategiesSupplier(
 				List<HttpMessageReader<?>> messageReaders,
 				List<HttpMessageWriter<?>> messageWriters,
 				List<ViewResolver> viewResolvers) {

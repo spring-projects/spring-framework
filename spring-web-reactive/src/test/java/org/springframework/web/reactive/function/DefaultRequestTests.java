@@ -65,7 +65,7 @@ public class DefaultRequestTests {
 
 	private ServerWebExchange mockExchange;
 
-	private Configuration mockConfiguration;
+	private StrategiesSupplier mockStrategiesSupplier;
 
 	private DefaultRequest defaultRequest;
 
@@ -77,9 +77,9 @@ public class DefaultRequestTests {
 		mockExchange = mock(ServerWebExchange.class);
 		when(mockExchange.getRequest()).thenReturn(mockRequest);
 		when(mockExchange.getResponse()).thenReturn(mockResponse);
-		mockConfiguration = mock(Configuration.class);
+		mockStrategiesSupplier = mock(StrategiesSupplier.class);
 
-		defaultRequest = new DefaultRequest(mockExchange, mockConfiguration);
+		defaultRequest = new DefaultRequest(mockExchange, mockStrategiesSupplier);
 	}
 
 	@Test
@@ -171,7 +171,7 @@ public class DefaultRequestTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		when(mockConfiguration.messageReaders()).thenReturn(messageReaders::stream);
+		when(mockStrategiesSupplier.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultRequest.body(toMono(String.class));
 		assertEquals("foo", resultMono.block());

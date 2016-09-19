@@ -19,6 +19,9 @@ package org.springframework.web.reactive.function;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -33,12 +36,41 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
  */
-public class ConfigurationTests {
+public class StrategiesSupplierTests {
+
+	@Test
+	public void empty() {
+		StrategiesSupplier strategies = StrategiesSupplier.empty().build();
+		assertEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
+		assertEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
+		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());
+	}
+
+
+	@Test
+	public void ofSuppliers() {
+		HttpMessageReader<?> messageReader = new DummyMessageReader();
+		HttpMessageWriter<?> messageWriter = new DummyMessageWriter();
+
+		StrategiesSupplier strategies = StrategiesSupplier.of(
+				() -> Stream.of(messageReader),
+				() -> Stream.of(messageWriter),
+				null);
+
+		assertEquals(1L, strategies.messageReaders().get().collect(Collectors.counting()).longValue());
+		assertEquals(Optional.of(messageReader), strategies.messageReaders().get().findFirst());
+
+		assertEquals(1L, strategies.messageWriters().get().collect(Collectors.counting()).longValue());
+		assertEquals(Optional.of(messageWriter), strategies.messageWriters().get().findFirst());
+
+		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());
+	}
 
 	@Test
 	public void toConfiguration() throws Exception {
@@ -47,10 +79,11 @@ public class ConfigurationTests {
 		applicationContext.registerSingleton("messageReader", DummyMessageReader.class);
 		applicationContext.refresh();
 
-		Configuration configuration = Configuration.applicationContext(applicationContext).build();
-		assertTrue(configuration.messageReaders().get()
+		StrategiesSupplier
+				strategies = StrategiesSupplier.applicationContext(applicationContext).build();
+		assertTrue(strategies.messageReaders().get()
 				.allMatch(r -> r instanceof DummyMessageReader));
-		assertTrue(configuration.messageWriters().get()
+		assertTrue(strategies.messageWriters().get()
 				.allMatch(r -> r instanceof DummyMessageWriter));
 
 	}

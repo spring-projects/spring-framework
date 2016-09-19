@@ -190,9 +190,9 @@ public class DefaultResponseBuilderTests {
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
-		Configuration configuration = mock(Configuration.class);
+		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
 
-		result.writeTo(exchange, configuration).block();
+		result.writeTo(exchange, strategies).block();
 		assertEquals(201, response.getStatusCode().value());
 		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
 		assertNull(response.getBody());
@@ -207,9 +207,9 @@ public class DefaultResponseBuilderTests {
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
-		Configuration configuration = mock(Configuration.class);
+		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
 
-		result.writeTo(exchange, configuration).block();
+		result.writeTo(exchange, strategies).block();
 		assertNull(response.getBody());
 	}
 
@@ -217,8 +217,8 @@ public class DefaultResponseBuilderTests {
 	public void bodyInserter() throws Exception {
 		String body = "foo";
 		Supplier<String> supplier = () -> body;
-		BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer =
-				(response, configuration) -> {
+		BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer =
+				(response, strategies) -> {
 					byte[] bodyBytes = body.getBytes(UTF_8);
 					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);
 					DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
@@ -238,10 +238,10 @@ public class DefaultResponseBuilderTests {
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
 
-		Configuration configuration = mock(Configuration.class);
-		when(configuration.messageWriters()).thenReturn(messageWriters::stream);
+		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
+		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
 
-		result.writeTo(exchange, configuration).block();
+		result.writeTo(exchange, strategies).block();
 		assertNotNull(response.getBody());
 	}
 
@@ -264,7 +264,7 @@ public class DefaultResponseBuilderTests {
 		List<ViewResolver> viewResolvers = new ArrayList<>();
 		viewResolvers.add(viewResolver);
 
-		Configuration mockConfig = mock(Configuration.class);
+		StrategiesSupplier mockConfig = mock(StrategiesSupplier.class);
 		when(mockConfig.viewResolvers()).thenReturn(viewResolvers::stream);
 
 		result.writeTo(exchange, mockConfig).block();

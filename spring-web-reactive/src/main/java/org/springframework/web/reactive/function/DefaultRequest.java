@@ -42,11 +42,11 @@ class DefaultRequest implements Request {
 
 	private final Headers headers;
 
-	private final Configuration configuration;
+	private final StrategiesSupplier strategies;
 
-	DefaultRequest(ServerWebExchange exchange, Configuration configuration) {
+	DefaultRequest(ServerWebExchange exchange, StrategiesSupplier strategies) {
 		this.exchange = exchange;
-		this.configuration = configuration;
+		this.strategies = strategies;
 		this.headers = new DefaultHeaders();
 	}
 
@@ -67,7 +67,7 @@ class DefaultRequest implements Request {
 
 	@Override
 	public <T> T body(BodyExtractor<T> extractor) {
-		return extractor.extract(request(), this.configuration);
+		return extractor.extract(request(), this.strategies);
 	}
 
 	@Override

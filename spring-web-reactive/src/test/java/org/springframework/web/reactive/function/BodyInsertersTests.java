@@ -48,7 +48,7 @@ public class BodyInsertersTests {
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -67,7 +67,7 @@ public class BodyInsertersTests {
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -86,7 +86,7 @@ public class BodyInsertersTests {
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -111,7 +111,7 @@ public class BodyInsertersTests {
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -126,7 +126,7 @@ public class BodyInsertersTests {
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, Configuration.builder().build());
+		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 

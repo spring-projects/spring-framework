@@ -33,9 +33,9 @@ public interface BodyExtractor<T> {
 	/**
 	 * Extract from the given request.
 	 * @param request the request to extract from
-	 * @param configuration the configuration to use
+	 * @param strategies the strategies to use
 	 * @return the extracted data
 	 */
-	T extract(ServerHttpRequest request, Configuration configuration);
+	T extract(ServerHttpRequest request, StrategiesSupplier strategies);
 
 }

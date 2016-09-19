@@ -67,9 +67,10 @@ public interface Response<T> {
 	 * Writes this response to the given web exchange.
 	 *
 	 * @param exchange the web exchange to write to
+	 * @param strategies the strategies to use when writing
 	 * @return {@code Mono<Void>} to indicate when request handling is complete
 	 */
-	Mono<Void> writeTo(ServerWebExchange exchange, Configuration configuration);
+	Mono<Void> writeTo(ServerWebExchange exchange, StrategiesSupplier strategies);
 
 	// Static builder methods
 
@@ -315,7 +316,7 @@ public interface Response<T> {
 		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T> Response<T> body(BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
+		<T> Response<T> body(BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer,
 				Supplier<T> supplier);
 
 		/**

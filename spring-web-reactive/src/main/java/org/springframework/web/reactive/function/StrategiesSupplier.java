@@ -26,15 +26,18 @@ import org.springframework.util.Assert;
 import org.springframework.web.reactive.result.view.ViewResolver;
 
 /**
- * Defines the configuration to be used for processing {@link HandlerFunction}s. An instance of
+ * Defines the strategies to be used for processing {@link HandlerFunction}s. An instance of
  * this class is immutable; instances are typically created through the mutable {@link Builder}:
- * either through {@link #builder()} to create a default configuration, {@link #empty()} to create
- * an empty configuration.
+ * either through {@link #builder()} to set up default strategies, or {@link #empty()} to start from
+ * scratch. Alternatively, {@code StrategiesSupplier} instances can be created through
+ * {@link #of(Supplier, Supplier, Supplier)}.
  *
  * @author Arjen Poutsma
  * @since 5.0
+ * @see RouterFunctions#toHttpHandler(RouterFunction, StrategiesSupplier)
+ * @see RouterFunctions#toHandlerMapping(RouterFunction, StrategiesSupplier)
  */
-public interface Configuration {
+public interface StrategiesSupplier {
 
 	// Instance methods
 
@@ -62,19 +65,55 @@ public interface Configuration {
 	// Static methods
 
 	/**
-	 * Return a mutable, empty builder for a {@code Configuration}.
+	 * Return a new {@code StrategiesSupplier} described by the given supplier functions. All
+	 * provided supplier function parameters can be {@code null} to indicate an empty stream is to
+	 * be returned.
+	 * @param messageReaders the supplier function for {@link HttpMessageReader} instances (can be {@code null})
+	 * @param messageWriters the supplier function for {@link HttpMessageWriter} instances (can be {@code null})
+	 * @param viewResolvers the supplier function for {@link ViewResolver} instances (can be {@code null})
+	 * @return the new {@code StrategiesSupplier}
+	 */
+	static StrategiesSupplier of(Supplier<Stream<HttpMessageReader<?>>> messageReaders,
+			Supplier<Stream<HttpMessageWriter<?>>> messageWriters,
+			Supplier<Stream<ViewResolver>> viewResolvers) {
+
+		return new StrategiesSupplier() {
+			@Override
+			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
+				return checkForNull(messageReaders);
+			}
+
+			@Override
+			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				return checkForNull(messageWriters);
+			}
+
+			@Override
+			public Supplier<Stream<ViewResolver>> viewResolvers() {
+				return checkForNull(viewResolvers);
+			}
+
+			private <T> Supplier<Stream<T>> checkForNull(Supplier<Stream<T>> supplier) {
+				return supplier != null ? supplier : Stream::empty;
+			}
+		};
+	}
+
+
+	/**
+	 * Return a mutable, empty builder for a {@code StrategiesSupplier}.
 	 * @return the builder
 	 */
 	static Builder empty() {
-		return new DefaultConfigurationBuilder();
+		return new DefaultStrategiesSupplierBuilder();
 	}
 
 	/**
-	 * Return a mutable builder for a {@code Configuration} with a default initialization.
+	 * Return a mutable builder for a {@code StrategiesSupplier} with a default initialization.
 	 * @return the builder
 	 */
 	static Builder builder() {
-		DefaultConfigurationBuilder builder = new DefaultConfigurationBuilder();
+		DefaultStrategiesSupplierBuilder builder = new DefaultStrategiesSupplierBuilder();
 		builder.defaultConfiguration();
 		return builder;
 	}
@@ -83,21 +122,21 @@ public interface Configuration {
 	 * Return a mutable builder based on the given {@linkplain ApplicationContext application context}.
 	 * The returned builder will search for all {@link HttpMessageReader}, {@link HttpMessageWriter},
 	 * and {@link ViewResolver} instances in the given application context and return them for
-	 * {@link #messageReaders()}, {@link #messageWriters()}, and {@link #viewResolvers()} in the
-	 * built configuration respectively.
-	 * @param applicationContext the application context to base the configuration on
+	 * {@link #messageReaders()}, {@link #messageWriters()}, and {@link #viewResolvers()}
+	 * respectively.
+	 * @param applicationContext the application context to base the strategies on
 	 * @return the builder
 	 */
 	static Builder applicationContext(ApplicationContext applicationContext) {
 		Assert.notNull(applicationContext, "'applicationContext' must not be null");
-		DefaultConfigurationBuilder builder = new DefaultConfigurationBuilder();
+		DefaultStrategiesSupplierBuilder builder = new DefaultStrategiesSupplierBuilder();
 		builder.applicationContext(applicationContext);
 		return builder;
 	}
 
 
 	/**
-	 * A mutable builder for a {@link Configuration}.
+	 * A mutable builder for a {@link StrategiesSupplier}.
 	 */
 	interface Builder {
 
@@ -123,10 +162,10 @@ public interface Configuration {
 		Builder viewResolver(ViewResolver viewResolver);
 
 		/**
-		 * Builds the {@link Configuration}.
-		 * @return the built configuration
+		 * Builds the {@link StrategiesSupplier}.
+		 * @return the built strategies
 		 */
-		Configuration build();
+		StrategiesSupplier build();
 
 	}
 }

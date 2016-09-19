@@ -64,7 +64,7 @@ public abstract class BodyInserters {
 	public static <T> BodyInserter<T> fromObject(T body) {
 		Assert.notNull(body, "'body' must not be null");
 		return BodyInserter.of(
-				(response, configuration) -> writeWithMessageWriters(response, configuration,
+				(response, strategies) -> writeWithMessageWriters(response, strategies,
 						Mono.just(body), ResolvableType.forInstance(body)),
 				() -> body);
 	}
@@ -99,7 +99,7 @@ public abstract class BodyInserters {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return BodyInserter.of(
-				(response, configuration) -> writeWithMessageWriters(response, configuration,
+				(response, strategies) -> writeWithMessageWriters(response, strategies,
 						publisher, elementType),
 				() -> publisher
 		);
@@ -117,7 +117,7 @@ public abstract class BodyInserters {
 	public static <T extends Resource> BodyInserter<T> fromResource(T resource) {
 		Assert.notNull(resource, "'resource' must not be null");
 		return BodyInserter.of(
-				(response, configuration) -> {
+				(response, strategies) -> {
 					ResourceHttpMessageWriter messageWriter = new ResourceHttpMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
 					return messageWriter.write(Mono.just(resource), RESOURCE_TYPE, contentType,
@@ -139,7 +139,7 @@ public abstract class BodyInserters {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		return BodyInserter.of(
-				(response, configuration) -> {
+				(response, strategies) -> {
 					ServerSentEventHttpMessageWriter messageWriter = sseMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
 					return messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
@@ -183,7 +183,7 @@ public abstract class BodyInserters {
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventType, "'eventType' must not be null");
 		return BodyInserter.of(
-				(response, configuration) -> {
+				(response, strategies) -> {
 					ServerSentEventHttpMessageWriter messageWriter = sseMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
 					return messageWriter.write(eventsPublisher, eventType, contentType, response,
@@ -201,13 +201,13 @@ public abstract class BodyInserters {
 	}
 
 	private static <T> Mono<Void> writeWithMessageWriters(ServerHttpResponse response,
-			Configuration configuration,
+			StrategiesSupplier strategies,
 			Publisher<T> body,
 			ResolvableType bodyType) {
 
 		// TODO: use ContentNegotiatingResultHandlerSupport
 		MediaType contentType = response.getHeaders().getContentType();
-		return configuration.messageWriters().get()
+		return strategies.messageWriters().get()
 				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType, Collections
 						.emptyMap()))
 				.findFirst()
@@ -228,20 +228,20 @@ public abstract class BodyInserters {
 
 	static class DefaultBodyInserter<T> implements BodyInserter<T> {
 
-		private final BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer;
+		private final BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer;
 
 		private final Supplier<T> supplier;
 
 		public DefaultBodyInserter(
-				BiFunction<ServerHttpResponse, Configuration, Mono<Void>> writer,
+				BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer,
 				Supplier<T> supplier) {
 			this.writer = writer;
 			this.supplier = supplier;
 		}
 
 		@Override
-		public Mono<Void> insert(ServerHttpResponse response, Configuration configuration) {
-			return this.writer.apply(response, configuration);
+		public Mono<Void> insert(ServerHttpResponse response, StrategiesSupplier strategies) {
+			return this.writer.apply(response, strategies);
 		}
 
 		@Override
