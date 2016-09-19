@@ -492,7 +492,7 @@ When the path location contains an Ant-style pattern, for example:
   classpath:com/mycompany/**/applicationContext.xml
 ----
 
-... the resolver follows a more complex but defined procedure to try to resolve the
+The resolver follows a more complex but defined procedure to try to resolve the
 wildcard. It produces a Resource for the path up to the last non-wildcard segment and
 obtains a URL from it. If this URL is not a `jar:` URL or container-specific variant
 (e.g. `zip:` in WebLogic, `wsjar` in WebSphere, etc.), then a `java.io.File` is
