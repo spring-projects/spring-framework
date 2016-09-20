@@ -75,12 +75,11 @@ public class ResourceHttpMessageWriter extends AbstractServerHttpMessageWriter<R
 	}
 
 	@Override
-	protected Map<String, Object> beforeWrite(ResolvableType streamType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+	protected Map<String, Object> resolveWriteHints(ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request) {
 		try {
 			List<HttpRange> httpRanges = request.getHeaders().getRange();
 			if (!httpRanges.isEmpty()) {
-				response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
 				return Collections.singletonMap(ResourceHttpMessageWriter.HTTP_RANGE_REQUEST_HINT, httpRanges);
 			}
 		}
@@ -111,8 +110,9 @@ public class ResourceHttpMessageWriter extends AbstractServerHttpMessageWriter<R
 			ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> mergedHints = new HashMap<>(hints);
-		mergedHints.putAll(beforeWrite(streamType, elementType, mediaType, request, response));
+		mergedHints.putAll(resolveWriteHints(streamType, elementType, mediaType, request));
 		if (mergedHints.containsKey(HTTP_RANGE_REQUEST_HINT)) {
+			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
 			List<HttpRange> httpRanges = (List<HttpRange>) mergedHints.get(HTTP_RANGE_REQUEST_HINT);
 			if (httpRanges.size() > 1) {
 				final String boundary = MimeTypeUtils.generateMultipartBoundaryString();

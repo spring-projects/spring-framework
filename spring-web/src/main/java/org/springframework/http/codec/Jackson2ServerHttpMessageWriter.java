@@ -27,7 +27,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * {@link ServerHttpMessageWriter} that resolves those annotation or request based Jackson 2 hints:
@@ -46,8 +45,8 @@ public class Jackson2ServerHttpMessageWriter extends AbstractServerHttpMessageWr
 	}
 
 	@Override
-	protected Map<String, Object> beforeWrite(ResolvableType streamType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
+	protected Map<String, Object> resolveWriteHints(ResolvableType streamType,
+			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request) {
 
 		Map<String, Object> hints = new HashMap<>();
 		Object source = streamType.getSource();

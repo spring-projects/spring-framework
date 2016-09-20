@@ -33,7 +33,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 /**
  * {@link HttpMessageReader} wrapper that implements {@link ServerHttpMessageReader} in order
  * to allow providing hints to the nested {@code reader} or setting the response status for
- * example, by implementing {@link #beforeRead(ResolvableType, ResolvableType, ServerHttpRequest, ServerHttpResponse)}.
+ * example, by implementing {@link #resolveReadHints(ResolvableType, ResolvableType, ServerHttpRequest)}.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -72,7 +72,7 @@ public abstract class AbstractServerHttpMessageReader<T> implements ServerHttpMe
 			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> mergedHints = new HashMap<>(hints);
-		mergedHints.putAll(beforeRead(streamType, elementType, request, response));
+		mergedHints.putAll(resolveReadHints(streamType, elementType, request));
 
 		return (this.reader instanceof ServerHttpMessageReader ?
 				((ServerHttpMessageReader<T>)this.reader).read(streamType, elementType, request, response, mergedHints) :
@@ -84,7 +84,7 @@ public abstract class AbstractServerHttpMessageReader<T> implements ServerHttpMe
 			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
 
 		Map<String, Object> mergedHints = new HashMap<>(hints);
-		mergedHints.putAll(beforeRead(streamType, elementType, request, response));
+		mergedHints.putAll(resolveReadHints(streamType, elementType, request));
 
 		return (this.reader instanceof ServerHttpMessageReader ?
 				((ServerHttpMessageReader<T>)this.reader).readMono(streamType, elementType, request, response, mergedHints) :
@@ -92,17 +92,16 @@ public abstract class AbstractServerHttpMessageReader<T> implements ServerHttpMe
 	}
 
 	/**
-	 * Invoked before reading the request by
+	 * Invoked before reading the request to resolve hints by
 	 * {@link #read(ResolvableType, ResolvableType, ServerHttpRequest, ServerHttpResponse, Map)}.
 	 *
 	 * @param streamType the original type used for the method return value. For annotation
 	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
 	 * @param elementType the stream element type to process
 	 * @param request the current HTTP request
-	 * @param response the current HTTP response
 	 * @return Additional information about how to write the body
 	 */
-	protected abstract Map<String, Object> beforeRead(ResolvableType streamType,
-			ResolvableType elementType, ServerHttpRequest request, ServerHttpResponse response);
+	protected abstract Map<String, Object> resolveReadHints(ResolvableType streamType,
+			ResolvableType elementType, ServerHttpRequest request);
 
 }
