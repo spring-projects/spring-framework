@@ -17,7 +17,6 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
@@ -30,6 +29,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.codec.ServerHttpMessageWriter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -119,18 +119,17 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 					"No converter for return value type: " + elementType));
 		}
 
+		ServerHttpRequest request = exchange.getRequest();
+		ServerHttpResponse response = exchange.getResponse();
 		MediaType bestMediaType = selectMediaType(exchange, producibleTypes);
-
 		if (bestMediaType != null) {
 			for (HttpMessageWriter<?> messageWriter : getMessageWriters()) {
-				Map<String, Object> hints = (messageWriter instanceof ServerHttpMessageWriter ?
-						((ServerHttpMessageWriter<?>)messageWriter).resolveWriteHints(bodyType, elementType,
-								bestMediaType, exchange.getRequest()) : Collections.emptyMap());
-				if (messageWriter.canWrite(elementType, bestMediaType, hints)) {
-
-					ServerHttpResponse response = exchange.getResponse();
-					return messageWriter.write((Publisher) publisher, elementType,
-							bestMediaType, response, hints);
+				if (messageWriter.canWrite(elementType, bestMediaType)) {
+					return (messageWriter instanceof ServerHttpMessageWriter ?
+							((ServerHttpMessageWriter<?>)messageWriter).write((Publisher) publisher,
+									bodyType, elementType, bestMediaType, request, response, Collections.emptyMap()) :
+							messageWriter.write((Publisher) publisher, elementType,
+									bestMediaType, response, Collections.emptyMap()));
 				}
 			}
 		}
@@ -140,7 +139,7 @@ public abstract class AbstractMessageWriterResultHandler extends ContentNegotiat
 
 	private List<MediaType> getProducibleMediaTypes(ResolvableType elementType) {
 		return getMessageWriters().stream()
-				.filter(converter -> converter.canWrite(elementType, null, Collections.emptyMap()))
+				.filter(converter -> converter.canWrite(elementType, null))
 				.flatMap(converter -> converter.getWritableMediaTypes().stream())
 				.collect(Collectors.toList());
 	}

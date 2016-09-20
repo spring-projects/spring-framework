@@ -28,10 +28,13 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * {@link HttpMessageWriter} wrapper that implements {@link ServerHttpMessageWriter} in order
- * to allow providing hints.
+ * to allow providing hints to the nested {@code writer} or setting the response status, for
+ * example, by implementing {@link #beforeWrite(ResolvableType, ResolvableType, MediaType, ServerHttpRequest, ServerHttpResponse)}
+ *
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -46,15 +49,8 @@ public abstract class AbstractServerHttpMessageWriter<T> implements ServerHttpMe
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
-		return this.writer.canWrite(elementType, mediaType, hints);
-	}
-
-	@Override
-	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
-			MediaType mediaType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
-
-		return this.writer.write(inputStream, elementType, mediaType, outputMessage, hints);
+	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
+		return this.writer.canWrite(elementType, mediaType);
 	}
 
 	@Override
@@ -63,29 +59,37 @@ public abstract class AbstractServerHttpMessageWriter<T> implements ServerHttpMe
 	}
 
 	@Override
-	public final Map<String, Object> resolveWriteHints(ResolvableType streamType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request) {
+	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType elementType,
+			MediaType mediaType, ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+		return this.writer.write(inputStream, elementType, mediaType, outputMessage, hints);
+	}
 
-		Map<String, Object> hints = new HashMap<>();
-		if (this.writer instanceof ServerHttpMessageWriter) {
-			hints.putAll(((ServerHttpMessageWriter<T>)this.writer).resolveWriteHints(streamType, elementType, mediaType, request));
-		}
-		hints.putAll(resolveWriteHintsInternal(streamType, elementType, mediaType, request));
-		return hints;
+	@Override
+	public Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> mergedHints = new HashMap<>(hints);
+		mergedHints.putAll(beforeWrite(streamType, elementType, mediaType, request, response));
+		return (this.writer instanceof ServerHttpMessageWriter ?
+				((ServerHttpMessageWriter<T>)this.writer).write(inputStream, streamType, elementType, mediaType, request, response, mergedHints) :
+				this.writer.write(inputStream, elementType, mediaType, response, mergedHints));
 	}
 
 	/**
-	 * Abstract method that returns hints which can be used to customize how the body should be written.
-	 * Invoked from {@link #resolveWriteHints}.
+	 * Invoked before writing the response by
+	 * {@link #write(Publisher, ResolvableType, ResolvableType, MediaType, ServerHttpRequest, ServerHttpResponse, Map)}.
+	 *
 	 * @param streamType the original type used for the method return value. For annotation
 	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
+	 * Can be {@code null}.
 	 * @param elementType the stream element type to process
 	 * @param mediaType the content type to use when writing. May be {@code null} to
 	 * indicate that the default content type of the converter must be used.
-	 * @param request the current HTTP request
+	 * @param request the current HTTP request, can be {@code null}
+	 * @param response the current HTTP response, can be {@code null}
 	 * @return Additional information about how to write the body
 	 */
-	protected abstract Map<String, Object> resolveWriteHintsInternal(ResolvableType streamType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request);
+	protected abstract Map<String, Object> beforeWrite(ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response);
 
 }

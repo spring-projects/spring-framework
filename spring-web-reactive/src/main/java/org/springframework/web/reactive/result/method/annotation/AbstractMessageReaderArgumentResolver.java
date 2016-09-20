@@ -18,7 +18,6 @@ package org.springframework.web.reactive.result.method.annotation;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.ServerHttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -126,6 +126,7 @@ public abstract class AbstractMessageReaderArgumentResolver {
 		}
 
 		ServerHttpRequest request = exchange.getRequest();
+		ServerHttpResponse response = exchange.getResponse();
 		MediaType mediaType = request.getHeaders().getContentType();
 		if (mediaType == null) {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
@@ -133,15 +134,14 @@ public abstract class AbstractMessageReaderArgumentResolver {
 
 		for (HttpMessageReader<?> reader : getMessageReaders()) {
 
-			Map<String, Object> hints = (reader instanceof ServerHttpMessageReader ?
-						((ServerHttpMessageReader<?>)reader).resolveReadHints(bodyType, elementType,
-								mediaType, exchange.getRequest()) : Collections.emptyMap());
-
-			if (reader.canRead(elementType, mediaType, hints)) {
+			if (reader.canRead(elementType, mediaType)) {
 
 				if (adapter != null && adapter.getDescriptor().isMultiValue()) {
-					Flux<?> flux = reader.read(elementType, request, hints)
-							.onErrorResumeWith(ex -> Flux.error(getReadError(ex, bodyParameter)));
+					Flux<?> flux = (reader instanceof ServerHttpMessageReader ?
+							((ServerHttpMessageReader<?>)reader).read(bodyType, elementType,
+									request, response, Collections.emptyMap()) :
+							reader.read(elementType, request, Collections.emptyMap())
+							.onErrorResumeWith(ex -> Flux.error(getReadError(ex, bodyParameter))));
 					if (checkRequired(adapter, isBodyRequired)) {
 						flux = flux.switchIfEmpty(Flux.error(getRequiredBodyError(bodyParameter)));
 					}
@@ -151,8 +151,11 @@ public abstract class AbstractMessageReaderArgumentResolver {
 					return Mono.just(adapter.fromPublisher(flux));
 				}
 				else {
-					Mono<?> mono = reader.readMono(elementType, request, hints)
-							.otherwise(ex -> Mono.error(getReadError(ex, bodyParameter)));
+					Mono<?> mono = (reader instanceof ServerHttpMessageReader ?
+							((ServerHttpMessageReader<?>)reader).readMono(bodyType, elementType,
+									request, response, Collections.emptyMap()) :
+							reader.readMono(elementType, request, Collections.emptyMap())
+							.otherwise(ex -> Mono.error(getReadError(ex, bodyParameter))));
 					if (checkRequired(adapter, isBodyRequired)) {
 						mono = mono.otherwiseIfEmpty(Mono.error(getRequiredBodyError(bodyParameter)));
 					}

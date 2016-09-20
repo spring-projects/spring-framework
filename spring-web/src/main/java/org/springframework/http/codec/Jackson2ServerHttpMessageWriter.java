@@ -16,16 +16,20 @@
 
 package org.springframework.http.codec;
 
-import java.util.Collections;
+
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * {@link ServerHttpMessageWriter} that resolves those annotation or request based Jackson 2 hints:
@@ -44,9 +48,10 @@ public class Jackson2ServerHttpMessageWriter extends AbstractServerHttpMessageWr
 	}
 
 	@Override
-	protected Map<String, Object> resolveWriteHintsInternal(ResolvableType streamType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request) {
+	protected Map<String, Object> beforeWrite(ResolvableType streamType, ResolvableType elementType,
+			MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
+		Map<String, Object> hints = new HashMap<>();
 		Object source = streamType.getSource();
 		MethodParameter returnValue = (source instanceof MethodParameter ? (MethodParameter)source : null);
 		if (returnValue != null) {
@@ -57,10 +62,10 @@ public class Jackson2ServerHttpMessageWriter extends AbstractServerHttpMessageWr
 					throw new IllegalArgumentException(
 							"@JsonView only supported for write hints with exactly 1 class argument: " + returnValue);
 				}
-				return Collections.singletonMap(AbstractJackson2Codec.JSON_VIEW_HINT, classes[0]);
+				hints.put(AbstractJackson2Codec.JSON_VIEW_HINT, classes[0]);
 			}
 		}
-		return Collections.emptyMap();
+		return hints;
 	}
 
 }

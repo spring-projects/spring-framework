@@ -23,9 +23,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * {@link ServerHttpMessageReader} that resolves those annotation or request based Jackson 2 hints:
@@ -44,8 +44,8 @@ public class Jackson2ServerHttpMessageReader extends AbstractServerHttpMessageRe
 	}
 
 	@Override
-	protected Map<String, Object> resolveReadHintsInternal(ResolvableType streamType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request) {
+	protected Map<String, Object> beforeRead(ResolvableType streamType,
+			ResolvableType elementType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		Object source = streamType.getSource();
 		MethodParameter parameter = (source instanceof MethodParameter ? (MethodParameter)source : null);

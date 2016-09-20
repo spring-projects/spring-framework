@@ -18,14 +18,18 @@ package org.springframework.http.codec;
 
 import java.util.Map;
 
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * Server oriented {@link HttpMessageWriter} that allows to resolve hints using annotations or
- * request based information.
+ * perform additional operation using {@link ServerHttpRequest} or {@link ServerHttpResponse}.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -33,16 +37,21 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 public interface ServerHttpMessageWriter<T> extends HttpMessageWriter<T> {
 
 	/**
-	 * Return hints that can be used to customize how the body should be written
+	 * Write a given object to the given output message with additional server related
+	 * parameters which could be used to create some hints or set the response status for example.
+	 *
 	 * @param streamType the original type used for the method return value. For annotation
 	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
+	 * Can be {@code null}.
 	 * @param elementType the stream element type to process
 	 * @param mediaType the content type to use when writing. May be {@code null} to
 	 * indicate that the default content type of the converter must be used.
-	 * @param request the current HTTP request
-	 * @return Additional information about how to write the body
+	 * @param request the current HTTP request, can be {@code null}
+	 * @param response the current HTTP response, can be {@code null}
+	 * @return a {@link Mono} that indicates completion or error
 	 */
-	Map<String, Object> resolveWriteHints(ResolvableType streamType, ResolvableType elementType,
-			MediaType mediaType, ServerHttpRequest request);
+	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType streamType,
+			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
+			ServerHttpResponse response, Map<String, Object> hints);
 
 }

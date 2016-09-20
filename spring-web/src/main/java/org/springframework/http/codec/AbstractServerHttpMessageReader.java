@@ -28,6 +28,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * {@link HttpMessageReader} wrapper that implements {@link ServerHttpMessageReader} in order
@@ -46,8 +47,8 @@ public abstract class AbstractServerHttpMessageReader<T> implements ServerHttpMe
 	}
 
 	@Override
-	public boolean canRead(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
-		return this.reader.canRead(elementType, mediaType, hints);
+	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
+		return this.reader.canRead(elementType, mediaType);
 	}
 
 	@Override
@@ -66,29 +67,42 @@ public abstract class AbstractServerHttpMessageReader<T> implements ServerHttpMe
 	}
 
 	@Override
-	public final Map<String, Object> resolveReadHints(ResolvableType streamType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request) {
+	public Flux<T> read(ResolvableType streamType, ResolvableType elementType,
+			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
 
-		Map<String, Object> hints = new HashMap<>();
-		if (this.reader instanceof ServerHttpMessageReader) {
-			hints.putAll(((ServerHttpMessageReader<T>)this.reader).resolveReadHints(streamType, elementType, mediaType, request));
-		}
-		hints.putAll(resolveReadHintsInternal(streamType, elementType, mediaType, request));
-		return hints;
+		Map<String, Object> mergedHints = new HashMap<>(hints);
+		mergedHints.putAll(beforeRead(streamType, elementType, request, response));
+
+		return (this.reader instanceof ServerHttpMessageReader ?
+				((ServerHttpMessageReader<T>)this.reader).read(streamType, elementType, request, response, mergedHints) :
+				this.read(elementType, request, mergedHints));
+	}
+
+	@Override
+	public Mono<T> readMono(ResolvableType streamType, ResolvableType elementType,
+			ServerHttpRequest request, ServerHttpResponse response, Map<String, Object> hints) {
+
+		Map<String, Object> mergedHints = new HashMap<>(hints);
+		mergedHints.putAll(beforeRead(streamType, elementType, request, response));
+
+		return (this.reader instanceof ServerHttpMessageReader ?
+				((ServerHttpMessageReader<T>)this.reader).readMono(streamType, elementType, request, response, mergedHints) :
+				this.readMono(elementType, request, mergedHints));
 	}
 
 	/**
-	 * Abstract method that returns hints which can be used to customize how the body should be read.
-	 * Invoked from {@link #resolveReadHints}.
-	 * @param streamType the original type used in the method parameter. For annotation
+	 * Invoked before reading the request by
+	 * {@link #read(ResolvableType, ResolvableType, ServerHttpRequest, ServerHttpResponse, Map)}
+	 *
+	 * @param streamType the original type used for the method return value. For annotation
 	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
-	 * @param elementType the stream element type to return
-	 * @param mediaType the media type to read, can be {@code null} if not specified.
-	 * Typically the value of a {@code Content-Type} header.
-	 * @param request the current HTTP request
-	 * @return Additional information about how to read the body
+	 * Can be {@code null}.
+	 * @param elementType the stream element type to process
+	 * @param request the current HTTP request, can be {@code null}
+	 * @param response the current HTTP response, can be {@code null}
+	 * @return Additional information about how to write the body
 	 */
-	protected abstract Map<String, Object> resolveReadHintsInternal(ResolvableType streamType,
-			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request);
+	protected abstract Map<String, Object> beforeRead(ResolvableType streamType,
+			ResolvableType elementType, ServerHttpRequest request, ServerHttpResponse response);
 
 }
