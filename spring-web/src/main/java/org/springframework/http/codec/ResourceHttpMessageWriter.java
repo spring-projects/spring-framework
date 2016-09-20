@@ -104,24 +104,30 @@ public class ResourceHttpMessageWriter extends AbstractServerHttpMessageWriter<R
 	public Mono<Void> write(Publisher<? extends Resource> inputStream, ResolvableType streamType,
 			ResolvableType elementType, MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
+		try {
+			response.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
+			Map<String, Object> mergedHints = new HashMap<>(hints);
+			mergedHints.putAll(resolveWriteHints(streamType, elementType, mediaType, request));
+			if (mergedHints.containsKey(HTTP_RANGE_REQUEST_HINT)) {
+				response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
+				List<HttpRange> httpRanges = (List<HttpRange>) mergedHints.get(HTTP_RANGE_REQUEST_HINT);
+				if (httpRanges.size() > 1) {
+					final String boundary = MimeTypeUtils.generateMultipartBoundaryString();
+					mergedHints.put(ResourceRegionHttpMessageWriter.BOUNDARY_STRING_HINT, boundary);
+				}
+				Flux<ResourceRegion> regions = Flux.from(inputStream)
+						.flatMap(resource -> Flux.fromIterable(HttpRange.toResourceRegions(httpRanges, resource)));
 
-		Map<String, Object> mergedHints = new HashMap<>(hints);
-		mergedHints.putAll(resolveWriteHints(streamType, elementType, mediaType, request));
-		if (mergedHints.containsKey(HTTP_RANGE_REQUEST_HINT)) {
-			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-			List<HttpRange> httpRanges = (List<HttpRange>) mergedHints.get(HTTP_RANGE_REQUEST_HINT);
-			if (httpRanges.size() > 1) {
-				final String boundary = MimeTypeUtils.generateMultipartBoundaryString();
-				mergedHints.put(ResourceRegionHttpMessageWriter.BOUNDARY_STRING_HINT, boundary);
+				return this.resourceRegionHttpMessageWriter
+						.write(regions, ResolvableType.forClass(ResourceRegion.class), mediaType, response, mergedHints);
 			}
-			Flux<ResourceRegion> regions = Flux.from(inputStream)
-					.flatMap(resource -> Flux.fromIterable(HttpRange.toResourceRegions(httpRanges, resource)));
-
-			return this.resourceRegionHttpMessageWriter
-					.write(regions, ResolvableType.forClass(ResourceRegion.class), mediaType, response, mergedHints);
+			else {
+				return write(inputStream, elementType, mediaType, response, mergedHints);
+			}
 		}
-		else {
-			return write(inputStream, elementType, mediaType, response, mergedHints);
+		catch (IllegalArgumentException exc) {
+			response.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+			return response.setComplete();
 		}
 	}
 

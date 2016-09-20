@@ -525,10 +525,10 @@ public class ResourceWebHandlerTests {
 		this.request.addHeader("Range", "bytes= foo bar");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
 
-		TestSubscriber.subscribe(this.handler.handle(this.exchange))
-				.assertErrorWith(throwable -> {
-					assertThat(throwable, instanceOf(IllegalArgumentException.class));
-				});
+		TestSubscriber.subscribe(this.handler.handle(this.exchange)).assertComplete();
+
+		assertEquals(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, this.response.getStatusCode());
+		assertEquals("bytes", this.response.getHeaders().getFirst("Accept-Ranges"));
 	}
 
 	@Test

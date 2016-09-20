@@ -54,7 +54,6 @@ import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.PathExtensionContentTypeResolver;
 import org.springframework.web.server.MethodNotAllowedException;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebHandler;
 
@@ -331,6 +330,7 @@ public class ResourceWebHandler
 						// Content phase
 						if (HttpMethod.HEAD.equals(exchange.getRequest().getMethod())) {
 							setHeaders(exchange, resource, mediaType);
+							exchange.getResponse().getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
 							logger.trace("HEAD request - skipping content");
 							return Mono.empty();
 						}
@@ -340,7 +340,7 @@ public class ResourceWebHandler
 								null, ResolvableType.forClass(Resource.class), mediaType,
 								exchange.getRequest(), exchange.getResponse(), Collections.emptyMap());
 					}
-					catch (IOException|ResponseStatusException ex) {
+					catch (IOException ex) {
 						return Mono.error(ex);
 					}
 				});
@@ -503,7 +503,6 @@ public class ResourceWebHandler
 			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
 			exchange.getResponse().getHeaders().putAll(resourceHeaders);
 		}
-		headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}
 
 
