@@ -47,6 +47,7 @@ public abstract class AbstractServerHttpMessageWriter<T> implements ServerHttpMe
 		this.writer = writer;
 	}
 
+
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
 		return this.writer.canWrite(elementType, mediaType);
@@ -78,14 +79,13 @@ public abstract class AbstractServerHttpMessageWriter<T> implements ServerHttpMe
 	/**
 	 * Invoked before writing the response to resolve hints by
 	 * {@link #write(Publisher, ResolvableType, ResolvableType, MediaType, ServerHttpRequest, ServerHttpResponse, Map)}.
-	 *
 	 * @param streamType the original type used for the method return value. For annotation
 	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
 	 * @param elementType the stream element type to process
 	 * @param mediaType the content type to use when writing. May be {@code null} to
 	 * indicate that the default content type of the converter must be used.
 	 * @param request the current HTTP request
-	 * @return Additional information about how to write the body
+	 * @return additional information about how to write the body
 	 */
 	protected abstract Map<String, Object> resolveWriteHints(ResolvableType streamType, ResolvableType elementType,
 			MediaType mediaType, ServerHttpRequest request);

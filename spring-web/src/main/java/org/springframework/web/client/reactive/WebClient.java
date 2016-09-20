@@ -86,15 +86,13 @@ import org.springframework.util.ClassUtils;
  */
 public final class WebClient {
 
-	private static final ClassLoader classLoader = WebClient.class.getClassLoader();
+	private static final boolean jackson2Present =
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebClient.class.getClassLoader()) &&
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebClient.class.getClassLoader());
 
-	private static final boolean jackson2Present = ClassUtils
-			.isPresent("com.fasterxml.jackson.databind.ObjectMapper", classLoader)
-			&& ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-			classLoader);
+	private static final boolean jaxb2Present =
+			ClassUtils.isPresent("javax.xml.bind.Binder", WebClient.class.getClassLoader());
 
-	private static final boolean jaxb2Present = ClassUtils
-			.isPresent("javax.xml.bind.Binder", classLoader);
 
 	private ClientHttpConnector clientHttpConnector;
 
@@ -107,7 +105,6 @@ public final class WebClient {
 	 * Create a {@code WebClient} instance, using the {@link ClientHttpConnector}
 	 * implementation given as an argument to drive the underlying
 	 * implementation.
-	 *
 	 * Register by default the following Encoders and Decoders:
 	 * <ul>
 	 * <li>{@link ByteBufferEncoder} / {@link ByteBufferDecoder}</li>
@@ -115,7 +112,6 @@ public final class WebClient {
 	 * <li>{@link Jaxb2XmlEncoder} / {@link Jaxb2XmlDecoder}</li>
 	 * <li>{@link Jackson2JsonEncoder} / {@link Jackson2JsonDecoder}</li>
 	 * </ul>
-	 *
 	 * @param clientHttpConnector the {@code ClientHttpRequestFactory} to use
 	 */
 	public WebClient(ClientHttpConnector clientHttpConnector) {
@@ -124,8 +120,9 @@ public final class WebClient {
 		this.webClientConfig.setResponseErrorHandler(new DefaultResponseErrorHandler());
 	}
 
+
 	/**
-	 * Adds default HTTP message readers.
+	 * Add default HTTP message readers.
 	 */
 	protected final void addDefaultHttpMessageReaders(List<HttpMessageReader<?>> messageReaders) {
 		messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
@@ -140,7 +137,7 @@ public final class WebClient {
 	}
 
 	/**
-	 * Adds default HTTP message writers.
+	 * Add default HTTP message writers.
 	 */
 	protected final void addDefaultHttpMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
 		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
@@ -187,11 +184,10 @@ public final class WebClient {
 				Collections.unmodifiableList(interceptors) : Collections.emptyList());
 	}
 
+
 	/**
 	 * Perform the actual HTTP request/response exchange
-	 *
-	 * <p>
-	 * Requesting from the exposed {@code Flux} will result in:
+	 * <p>Requesting from the exposed {@code Flux} will result in:
 	 * <ul>
 	 * <li>building the actual HTTP request using the provided {@code ClientWebRequestBuilder}</li>
 	 * <li>encoding the HTTP request body with the configured {@code HttpMessageWriter}s</li>
@@ -199,7 +195,6 @@ public final class WebClient {
 	 * </ul>
 	 */
 	public WebResponseActions perform(ClientWebRequestBuilder builder) {
-
 		ClientWebRequest clientWebRequest = builder.build();
 		DefaultClientHttpRequestInterceptionChain interception =
 				new DefaultClientHttpRequestInterceptionChain(this.clientHttpConnector,
@@ -214,13 +209,13 @@ public final class WebClient {
 			public void doWithStatus(Consumer<HttpStatus> consumer) {
 				clientResponse.doOnNext(clientHttpResponse -> consumer.accept(clientHttpResponse.getStatusCode()));
 			}
-
 			@Override
 			public <T> T extract(ResponseExtractor<T> extractor) {
 				return extractor.extract(clientResponse, webClientConfig);
 			}
 		};
 	}
+
 
 	protected class DefaultWebClientConfig implements WebClientConfig {
 
@@ -229,7 +224,6 @@ public final class WebClient {
 		private List<HttpMessageWriter<?>> messageWriters;
 
 		private ResponseErrorHandler responseErrorHandler;
-
 
 		public DefaultWebClientConfig() {
 			this.messageReaders = new ArrayList<>();
@@ -266,12 +260,12 @@ public final class WebClient {
 		}
 	}
 
+
 	protected class DefaultRequestCallback implements Function<ClientHttpRequest, Mono<Void>> {
 
 		private final ClientWebRequest clientWebRequest;
 
 		private final List<Consumer<? super HttpMessage>> requestCustomizers;
-
 
 		public DefaultRequestCallback(ClientWebRequest clientWebRequest,
 				List<Consumer<? super HttpMessage>> requestCustomizers) {
@@ -303,9 +297,8 @@ public final class WebClient {
 		}
 
 		@SuppressWarnings({"unchecked", "rawtypes"})
-		protected Mono<Void> writeRequestBody(Publisher<?> content,
-				ResolvableType requestType, ClientHttpRequest request,
-				List<HttpMessageWriter<?>> messageWriters) {
+		protected Mono<Void> writeRequestBody(Publisher<?> content, ResolvableType requestType,
+				ClientHttpRequest request, List<HttpMessageWriter<?>> messageWriters) {
 
 			MediaType contentType = request.getHeaders().getContentType();
 			Optional<HttpMessageWriter<?>> messageWriter = resolveWriter(messageWriters, requestType, contentType);
@@ -324,6 +317,7 @@ public final class WebClient {
 		}
 	}
 
+
 	protected class DefaultClientHttpRequestInterceptionChain implements ClientHttpRequestInterceptionChain {
 
 		private final ClientHttpConnector connector;
@@ -337,10 +331,9 @@ public final class WebClient {
 		private int index;
 
 		public DefaultClientHttpRequestInterceptionChain(ClientHttpConnector connector,
-				List<ClientHttpRequestInterceptor> interceptors,
-				ClientWebRequest clientWebRequest) {
+				List<ClientHttpRequestInterceptor> interceptors, ClientWebRequest clientWebRequest) {
 
-			Assert.notNull(connector, "'connector' should not be null");
+			Assert.notNull(connector, "ClientHttpConnector should not be null");
 			this.connector = connector;
 			this.interceptors = interceptors;
 			this.clientWebRequest = clientWebRequest;
@@ -364,7 +357,6 @@ public final class WebClient {
 						new DefaultRequestCallback(this.clientWebRequest, this.requestCustomizers));
 			}
 		}
-
 	}
 
 }

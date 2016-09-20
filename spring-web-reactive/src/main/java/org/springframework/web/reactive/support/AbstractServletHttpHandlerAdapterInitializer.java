@@ -38,8 +38,7 @@ import org.springframework.web.WebApplicationInitializer;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public abstract class AbstractServletHttpHandlerAdapterInitializer
-		implements WebApplicationInitializer {
+public abstract class AbstractServletHttpHandlerAdapterInitializer implements WebApplicationInitializer {
 
 	/**
 	 * The default servlet name. Can be customized by overriding {@link #getServletName}.
@@ -69,18 +68,16 @@ public abstract class AbstractServletHttpHandlerAdapterInitializer
 
 		HttpHandler httpHandler = createHttpHandler();
 		Assert.notNull(httpHandler,
-				"createHttpHandler() did not return a HttpHandler for servlet ["
-						+ servletName + "]");
+				"createHttpHandler() did not return a HttpHandler for servlet [" + servletName + "]");
 
 		ServletHttpHandlerAdapter servlet = createServlet(httpHandler);
 		Assert.notNull(servlet,
-				"createHttpHandler() did not return a ServletHttpHandlerAdapter for servlet ["
-						+ servletName + "]");
+				"createHttpHandler() did not return a ServletHttpHandlerAdapter for servlet [" + servletName + "]");
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, servlet);
 		Assert.notNull(registration,
 				"Failed to register servlet with name '" + servletName + "'." +
-						"Check if there is another servlet registered under the same name.");
+				"Check if there is another servlet registered under the same name.");
 
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMappings());
