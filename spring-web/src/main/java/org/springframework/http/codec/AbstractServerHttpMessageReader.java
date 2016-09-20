@@ -32,7 +32,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * {@link HttpMessageReader} wrapper that implements {@link ServerHttpMessageReader} in order
- * to allow providing hints.
+ * to allow providing hints to the nested {@code reader} or setting the response status for
+ * example, by implementing {@link #beforeRead(ResolvableType, ResolvableType, ServerHttpRequest, ServerHttpResponse)}.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -92,14 +93,13 @@ public abstract class AbstractServerHttpMessageReader<T> implements ServerHttpMe
 
 	/**
 	 * Invoked before reading the request by
-	 * {@link #read(ResolvableType, ResolvableType, ServerHttpRequest, ServerHttpResponse, Map)}
+	 * {@link #read(ResolvableType, ResolvableType, ServerHttpRequest, ServerHttpResponse, Map)}.
 	 *
 	 * @param streamType the original type used for the method return value. For annotation
 	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
-	 * Can be {@code null}.
 	 * @param elementType the stream element type to process
-	 * @param request the current HTTP request, can be {@code null}
-	 * @param response the current HTTP response, can be {@code null}
+	 * @param request the current HTTP request
+	 * @param response the current HTTP response
 	 * @return Additional information about how to write the body
 	 */
 	protected abstract Map<String, Object> beforeRead(ResolvableType streamType,

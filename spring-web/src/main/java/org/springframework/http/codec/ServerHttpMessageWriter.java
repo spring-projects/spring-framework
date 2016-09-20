@@ -46,8 +46,8 @@ public interface ServerHttpMessageWriter<T> extends HttpMessageWriter<T> {
 	 * @param elementType the stream element type to process
 	 * @param mediaType the content type to use when writing. May be {@code null} to
 	 * indicate that the default content type of the converter must be used.
-	 * @param request the current HTTP request, can be {@code null}
-	 * @param response the current HTTP response, can be {@code null}
+	 * @param request the current HTTP request
+	 * @param response the current HTTP response
 	 * @return a {@link Mono} that indicates completion or error
 	 */
 	Mono<Void> write(Publisher<? extends T> inputStream, ResolvableType streamType,

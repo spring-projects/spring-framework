@@ -32,9 +32,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * {@link HttpMessageWriter} wrapper that implements {@link ServerHttpMessageWriter} in order
- * to allow providing hints to the nested {@code writer} or setting the response status, for
- * example, by implementing {@link #beforeWrite(ResolvableType, ResolvableType, MediaType, ServerHttpRequest, ServerHttpResponse)}
- *
+ * to allow providing hints to the nested {@code writer} or setting the response status for
+ * example, by implementing {@link #beforeWrite(ResolvableType, ResolvableType, MediaType, ServerHttpRequest, ServerHttpResponse)}.
  *
  * @author Sebastien Deleuze
  * @since 5.0
@@ -71,7 +70,8 @@ public abstract class AbstractServerHttpMessageWriter<T> implements ServerHttpMe
 		Map<String, Object> mergedHints = new HashMap<>(hints);
 		mergedHints.putAll(beforeWrite(streamType, elementType, mediaType, request, response));
 		return (this.writer instanceof ServerHttpMessageWriter ?
-				((ServerHttpMessageWriter<T>)this.writer).write(inputStream, streamType, elementType, mediaType, request, response, mergedHints) :
+				((ServerHttpMessageWriter<T>)this.writer).write(inputStream, streamType,
+						elementType, mediaType, request, response, mergedHints) :
 				this.writer.write(inputStream, elementType, mediaType, response, mergedHints));
 	}
 
@@ -81,12 +81,11 @@ public abstract class AbstractServerHttpMessageWriter<T> implements ServerHttpMe
 	 *
 	 * @param streamType the original type used for the method return value. For annotation
 	 * based controllers, the {@link MethodParameter} is available via {@link ResolvableType#getSource()}.
-	 * Can be {@code null}.
 	 * @param elementType the stream element type to process
 	 * @param mediaType the content type to use when writing. May be {@code null} to
 	 * indicate that the default content type of the converter must be used.
-	 * @param request the current HTTP request, can be {@code null}
-	 * @param response the current HTTP response, can be {@code null}
+	 * @param request the current HTTP request
+	 * @param response the current HTTP response
 	 * @return Additional information about how to write the body
 	 */
 	protected abstract Map<String, Object> beforeWrite(ResolvableType streamType, ResolvableType elementType,
