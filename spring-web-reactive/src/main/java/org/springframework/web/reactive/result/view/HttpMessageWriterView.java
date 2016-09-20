@@ -124,7 +124,7 @@ public class HttpMessageWriterView implements View {
 		else if (map.size() == 1) {
 			return map.values().iterator().next();
 		}
-		else if (getMessageWriter().canWrite(ResolvableType.forClass(Map.class), null, Collections.emptyMap())) {
+		else if (getMessageWriter().canWrite(ResolvableType.forClass(Map.class), null)) {
 			return map;
 		}
 		else {
@@ -143,10 +143,10 @@ public class HttpMessageWriterView implements View {
 	protected boolean isEligibleAttribute(String attributeName, Object attributeValue) {
 		ResolvableType type = ResolvableType.forClass(attributeValue.getClass());
 		if (getModelKeys().isEmpty()) {
-			return getMessageWriter().canWrite(type, null, Collections.emptyMap());
+			return getMessageWriter().canWrite(type, null);
 		}
 		if (getModelKeys().contains(attributeName)) {
-			if (getMessageWriter().canWrite(type, null, Collections.emptyMap())) {
+			if (getMessageWriter().canWrite(type, null)) {
 				return true;
 			}
 			throw new IllegalStateException(

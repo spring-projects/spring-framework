@@ -45,8 +45,8 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(null, MediaType.APPLICATION_JSON, Collections.emptyMap()));
-		assertFalse(this.encoder.canEncode(null, MediaType.APPLICATION_XML, Collections.emptyMap()));
+		assertTrue(this.encoder.canEncode(null, MediaType.APPLICATION_JSON));
+		assertFalse(this.encoder.canEncode(null, MediaType.APPLICATION_XML));
 	}
 
 	@Test

@@ -297,7 +297,7 @@ public final class WebClient {
 		protected Optional<HttpMessageWriter<?>> resolveWriter(List<HttpMessageWriter<?>> messageWriters,
 				ResolvableType type, MediaType mediaType) {
 
-			return messageWriters.stream().filter(e -> e.canWrite(type, mediaType, Collections.emptyMap())).findFirst();
+			return messageWriters.stream().filter(e -> e.canWrite(type, mediaType)).findFirst();
 		}
 	}
 

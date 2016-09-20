@@ -92,7 +92,7 @@ public class StrategiesSupplierTests {
 	private static class DummyMessageWriter implements HttpMessageWriter<Object> {
 
 		@Override
-		public boolean canWrite(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
+		public boolean canWrite(ResolvableType type, MediaType mediaType) {
 			return false;
 		}
 
@@ -113,7 +113,7 @@ public class StrategiesSupplierTests {
 	private static class DummyMessageReader implements HttpMessageReader<Object> {
 
 		@Override
-		public boolean canRead(ResolvableType type, MediaType mediaType, Map<String, Object> hints) {
+		public boolean canRead(ResolvableType type, MediaType mediaType) {
 			return false;
 		}
 

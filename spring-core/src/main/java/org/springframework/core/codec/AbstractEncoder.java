@@ -46,7 +46,7 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 	}
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
 		if (mimeType == null) {
 			return true;
 		}

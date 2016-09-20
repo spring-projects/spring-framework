@@ -78,8 +78,8 @@ public class StringDecoder extends AbstractDecoder<String> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
-		return (super.canDecode(elementType, mimeType, hints) &&
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
+		return (super.canDecode(elementType, mimeType) &&
 				String.class.equals(elementType.getRawClass()));
 	}
 

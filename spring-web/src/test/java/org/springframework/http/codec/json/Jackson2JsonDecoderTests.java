@@ -47,8 +47,8 @@ public class Jackson2JsonDecoderTests extends AbstractDataBufferAllocatingTestCa
 	public void canDecode() {
 		Jackson2JsonDecoder decoder = new Jackson2JsonDecoder();
 
-		assertTrue(decoder.canDecode(null, MediaType.APPLICATION_JSON, Collections.emptyMap()));
-		assertFalse(decoder.canDecode(null, MediaType.APPLICATION_XML, Collections.emptyMap()));
+		assertTrue(decoder.canDecode(null, MediaType.APPLICATION_JSON));
+		assertFalse(decoder.canDecode(null, MediaType.APPLICATION_XML));
 	}
 
 	@Test

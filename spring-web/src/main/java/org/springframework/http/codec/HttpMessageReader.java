@@ -42,10 +42,9 @@ public interface HttpMessageReader<T> {
 	 * @param elementType the stream element type to test for readability
 	 * @param mediaType the media type to read, can be {@code null} if not specified.
 	 * Typically the value of a {@code Content-Type} header.
-	 * @param hints additional information about how to do read
 	 * @return {@code true} if readable; {@code false} otherwise
 	 */
-	boolean canRead(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints);
+	boolean canRead(ResolvableType elementType, MediaType mediaType);
 
 	/**
 	 * Read a {@link Flux} of the given type form the given input message, and returns it.
@@ -53,7 +52,7 @@ public interface HttpMessageReader<T> {
 	 * passed to the {@link #canRead canRead} method of this interface, which must have
 	 * returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
-	 * @param hints additional information about how to do read
+	 * @param hints additional information about how to read the body
 	 * @return the converted {@link Flux} of elements
 	 */
 	Flux<T> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints);
@@ -64,7 +63,7 @@ public interface HttpMessageReader<T> {
 	 * passed to the {@link #canRead canRead} method of this interface, which must have
 	 * returned {@code true}.
 	 * @param inputMessage the HTTP input message to read from
-	 * @param hints additional information about how to do read
+	 * @param hints additional information about how to read the body
 	 * @return the converted {@link Mono} of object
 	 */
 	Mono<T> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage, Map<String, Object> hints);

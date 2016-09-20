@@ -46,11 +46,11 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
 		return (InputStreamResource.class.equals(clazz) ||
 				clazz.isAssignableFrom(ByteArrayResource.class)) &&
-				super.canDecode(elementType, mimeType, hints);
+				super.canDecode(elementType, mimeType);
 	}
 
 	@Override

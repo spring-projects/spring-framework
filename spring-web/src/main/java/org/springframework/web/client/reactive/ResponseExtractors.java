@@ -196,7 +196,7 @@ public abstract class ResponseExtractors {
 			ResolvableType responseType, MediaType contentType) {
 
 		return messageReaders.stream()
-				.filter(e -> e.canRead(responseType, contentType, Collections.emptyMap()))
+				.filter(e -> e.canRead(responseType, contentType))
 				.findFirst()
 				.orElseThrow(() ->
 						new WebClientException(

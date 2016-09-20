@@ -60,8 +60,8 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
-		return this.encoder != null && this.encoder.canEncode(elementType, mediaType, hints);
+	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
+		return this.encoder != null && this.encoder.canEncode(elementType, mediaType);
 	}
 
 	@Override

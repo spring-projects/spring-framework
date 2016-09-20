@@ -102,7 +102,7 @@ public abstract class BodyExtractors {
 		MediaType contentType = contentType(request);
 		Supplier<Stream<HttpMessageReader<?>>> messageReaders = strategies.messageReaders();
 		return messageReaders.get()
-				.filter(r -> r.canRead(elementType, contentType, Collections.emptyMap()))
+				.filter(r -> r.canRead(elementType, contentType))
 				.findFirst()
 				.map(BodyExtractors::<T>cast)
 				.map(readerFunction)

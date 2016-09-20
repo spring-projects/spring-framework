@@ -42,10 +42,9 @@ public interface HttpMessageWriter<T> {
 	 * @param elementType the stream element type to test for writability
 	 * @param mediaType the media type to write, can be {@code null} if not specified.
 	 * Typically the value of an {@code Accept} header.
-	 * @param hints additional information about how to write
 	 * @return {@code true} if writable; {@code false} otherwise
 	 */
-	boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints);
+	boolean canWrite(ResolvableType elementType, MediaType mediaType);
 
 	/**
 	 * Write an given object to the given output message.

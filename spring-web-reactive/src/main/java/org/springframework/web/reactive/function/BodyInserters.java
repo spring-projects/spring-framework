@@ -208,8 +208,7 @@ public abstract class BodyInserters {
 		// TODO: use ContentNegotiatingResultHandlerSupport
 		MediaType contentType = response.getHeaders().getContentType();
 		return strategies.messageWriters().get()
-				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType, Collections
-						.emptyMap()))
+				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType))
 				.findFirst()
 				.map(BodyInserters::cast)
 				.map(messageWriter -> messageWriter
