@@ -198,11 +198,12 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
-			if (getPathMatchConfigurer() != null) {
-				handlerMapping.setPathMatcher(getPathMatchConfigurer().getPathMatcher());
+			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
+			if (pathMatchConfigurer.getPathMatcher() != null) {
+				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
 			}
-			if (getPathMatchConfigurer() != null) {
-				handlerMapping.setPathHelper(getPathMatchConfigurer().getPathHelper());
+			if (pathMatchConfigurer.getPathHelper() != null) {
+				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
 			}
 		}
 		else {

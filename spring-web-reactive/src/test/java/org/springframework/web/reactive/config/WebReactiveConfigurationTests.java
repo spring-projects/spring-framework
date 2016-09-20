@@ -50,6 +50,8 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
+import org.springframework.web.reactive.handler.AbstractHandlerMapping;
+import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -61,6 +63,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
@@ -246,6 +249,24 @@ public class WebReactiveConfigurationTests {
 		assertEquals(type, views.get(0).getSupportedMediaTypes().get(0));
 	}
 
+	@Test
+	public void resourceHandler() throws Exception {
+		ApplicationContext context = loadConfig(CustomResourceHandlingConfig.class);
+
+		String name = "resourceHandlerMapping";
+		AbstractHandlerMapping handlerMapping = context.getBean(name, AbstractHandlerMapping.class);
+		assertNotNull(handlerMapping);
+
+		assertEquals(Ordered.LOWEST_PRECEDENCE -1, handlerMapping.getOrder());
+
+		assertNotNull(handlerMapping.getPathHelper());
+		assertNotNull(handlerMapping.getPathMatcher());
+
+		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
+		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");
+		assertNotNull(webHandler);
+	}
+
 
 	private void assertHasMessageReader(List<HttpMessageReader<?>> readers, Class<?> clazz, MediaType mediaType) {
 		ResolvableType type = ResolvableType.forClass(clazz);
@@ -320,6 +341,16 @@ public class WebReactiveConfigurationTests {
 		}
 
 	}
+
+	@Configuration
+	static class CustomResourceHandlingConfig extends WebReactiveConfiguration {
+
+		@Override
+		protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+			registry.addResourceHandler("/images/**").addResourceLocations("/images/");
+		}
+	}
+
 
 	@XmlRootElement
 	static class TestBean {
