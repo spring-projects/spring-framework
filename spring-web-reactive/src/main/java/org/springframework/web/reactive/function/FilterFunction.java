@@ -25,6 +25,7 @@ import org.springframework.web.reactive.function.support.RequestWrapper;
  * @param <R> the type of the response of the function
  * @author Arjen Poutsma
  * @since 5.0
+ * @see RouterFunction#filter(FilterFunction) 
  */
 @FunctionalInterface
 public interface FilterFunction<T, R> {
