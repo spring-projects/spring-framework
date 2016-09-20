@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ResourceRegionEncoder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.MediaType;
@@ -80,7 +81,7 @@ class ResourceRegionHttpMessageWriter extends EncoderHttpMessageWriter<ResourceR
 	private void writeSingleResourceRegionHeaders(ResourceRegion region, MediaType contentType,
 			ReactiveHttpOutputMessage outputMessage) {
 
-		OptionalLong resourceLength = ResourceUtils.contentLength(region.getResource());
+		OptionalLong resourceLength = contentLength(region.getResource());
 		resourceLength.ifPresent(length -> {
 			long start = region.getPosition();
 			long end = start + region.getCount() - 1;
@@ -89,6 +90,24 @@ class ResourceRegionHttpMessageWriter extends EncoderHttpMessageWriter<ResourceR
 			outputMessage.getHeaders().setContentLength(end - start + 1);
 		});
 		outputMessage.getHeaders().setContentType(contentType);
+	}
+
+	/**
+	 * Determine, if possible, the contentLength of the given resource without reading it.
+	 * @param resource the resource instance
+	 * @return the contentLength of the resource
+	 */
+	private OptionalLong contentLength(Resource resource) {
+		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
+		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
+		if (InputStreamResource.class != resource.getClass()) {
+			try {
+				return OptionalLong.of(resource.contentLength());
+			}
+			catch (IOException ignored) {
+			}
+		}
+		return OptionalLong.empty();
 	}
 
 	private Mono<Void> writeResourceRegion(ResourceRegion region,

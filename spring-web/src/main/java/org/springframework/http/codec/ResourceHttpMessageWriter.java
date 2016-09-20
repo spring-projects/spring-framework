@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.ResourceEncoder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
@@ -43,8 +45,6 @@ import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.util.ResourceUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Implementation of {@link HttpMessageWriter} that can write
@@ -74,18 +74,14 @@ public class ResourceHttpMessageWriter extends AbstractServerHttpMessageWriter<R
 		this.resourceRegionHttpMessageWriter = new ResourceRegionHttpMessageWriter(bufferSize);
 	}
 
+
 	@Override
 	protected Map<String, Object> resolveWriteHints(ResolvableType streamType, ResolvableType elementType,
 			MediaType mediaType, ServerHttpRequest request) {
-		try {
-			List<HttpRange> httpRanges = request.getHeaders().getRange();
-			if (!httpRanges.isEmpty()) {
-				return Collections.singletonMap(ResourceHttpMessageWriter.HTTP_RANGE_REQUEST_HINT, httpRanges);
-			}
-		}
-		catch (IllegalArgumentException ex) {
-			throw new ResponseStatusException(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE,
-					"Could not parse Range request header", ex);
+
+		List<HttpRange> httpRanges = request.getHeaders().getRange();
+		if (!httpRanges.isEmpty()) {
+			return Collections.singletonMap(ResourceHttpMessageWriter.HTTP_RANGE_REQUEST_HINT, httpRanges);
 		}
 		return Collections.emptyMap();
 	}
@@ -139,12 +135,31 @@ public class ResourceHttpMessageWriter extends AbstractServerHttpMessageWriter<R
 			headers.setContentType(mediaType);
 		}
 		if (headers.getContentLength() < 0) {
-			ResourceUtils.contentLength(resource).ifPresent(headers::setContentLength);
+			contentLength(resource).ifPresent(headers::setContentLength);
 		}
+	}
+
+	/**
+	 * Determine, if possible, the contentLength of the given resource without reading it.
+	 * @param resource the resource instance
+	 * @return the contentLength of the resource
+	 */
+	private OptionalLong contentLength(Resource resource) {
+		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
+		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
+		if (InputStreamResource.class != resource.getClass()) {
+			try {
+				return OptionalLong.of(resource.contentLength());
+			}
+			catch (IOException ignored) {
+			}
+		}
+		return OptionalLong.empty();
 	}
 
 	private Mono<Void> writeContent(Resource resource, ResolvableType type,
 			ReactiveHttpOutputMessage outputMessage, Map<String, Object> hints) {
+
 		if (outputMessage instanceof ZeroCopyHttpOutputMessage) {
 			Optional<File> file = getFile(resource);
 			if (file.isPresent()) {

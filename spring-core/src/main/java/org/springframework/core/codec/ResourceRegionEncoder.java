@@ -28,6 +28,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -134,13 +136,31 @@ public class ResourceRegionEncoder extends AbstractEncoder<ResourceRegion> {
 	private byte[] getContentRangeHeader(ResourceRegion region) {
 		long start = region.getPosition();
 		long end = start + region.getCount() - 1;
-		OptionalLong contentLength = ResourceUtils.contentLength(region.getResource());
+		OptionalLong contentLength = contentLength(region.getResource());
 		if (contentLength.isPresent()) {
 			return getAsciiBytes("Content-Range: bytes " + start + "-" + end + "/" + contentLength.getAsLong() + "\r\n\r\n");
 		}
 		else {
 			return getAsciiBytes("Content-Range: bytes " + start + "-" + end + "\r\n\r\n");
 		}
+	}
+
+	/**
+	 * Determine, if possible, the contentLength of the given resource without reading it.
+	 * @param resource the resource instance
+	 * @return the contentLength of the resource
+	 */
+	private OptionalLong contentLength(Resource resource) {
+		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
+		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
+		if (InputStreamResource.class != resource.getClass()) {
+			try {
+				return OptionalLong.of(resource.contentLength());
+			}
+			catch (IOException ignored) {
+			}
+		}
+		return OptionalLong.empty();
 	}
 
 }

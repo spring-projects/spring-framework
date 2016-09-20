@@ -527,9 +527,7 @@ public class ResourceWebHandlerTests {
 
 		TestSubscriber.subscribe(this.handler.handle(this.exchange))
 				.assertErrorWith(throwable -> {
-					assertThat(throwable, instanceOf(ResponseStatusException.class));
-					ResponseStatusException exc = (ResponseStatusException) throwable;
-					assertThat(exc.getStatus(), is(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE));
+					assertThat(throwable, instanceOf(IllegalArgumentException.class));
 				});
 	}
 

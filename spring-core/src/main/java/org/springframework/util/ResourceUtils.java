@@ -18,16 +18,11 @@ package org.springframework.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.OptionalLong;
-
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 
 /**
  * Utility methods for resolving resource locations to files in the
@@ -387,25 +382,6 @@ public abstract class ResourceUtils {
 	 */
 	public static void useCachesIfNecessary(URLConnection con) {
 		con.setUseCaches(con.getClass().getSimpleName().startsWith("JNLP"));
-	}
-
-	/**
-	 * Determine, if possible, the contentLength of the given resource
-	 * without reading it.
-	 * @param resource the resource instance
-	 * @return the contentLength of the resource
-	 */
-	public static OptionalLong contentLength(Resource resource) {
-		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
-		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
-		if (InputStreamResource.class != resource.getClass()) {
-			try {
-				return OptionalLong.of(resource.contentLength());
-			}
-			catch (IOException ignored) {
-			}
-		}
-		return OptionalLong.empty();
 	}
 
 }

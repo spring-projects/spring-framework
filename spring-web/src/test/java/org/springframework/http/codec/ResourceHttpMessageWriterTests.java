@@ -16,13 +16,9 @@
 
 package org.springframework.http.codec;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,16 +36,18 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.server.ResponseStatusException;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ResourceHttpMessageWriter}.
+ *
  * @author Brian Clozel
  */
 public class ResourceHttpMessageWriterTests {
@@ -72,6 +70,7 @@ public class ResourceHttpMessageWriterTests {
 		this.resource = new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
 	}
 
+
 	@Test
 	public void writableMediaTypes() throws Exception {
 		assertThat(this.writer.getWritableMediaTypes(),
@@ -80,7 +79,6 @@ public class ResourceHttpMessageWriterTests {
 
 	@Test
 	public void shouldWriteResource() throws Exception {
-
 		TestSubscriber.subscribe(this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap())).assertComplete();
 
@@ -93,7 +91,6 @@ public class ResourceHttpMessageWriterTests {
 
 	@Test
 	public void shouldWriteResourceRange() throws Exception {
-
 		this.request.getHeaders().setRange(Collections.singletonList(HttpRange.createByteRange(0, 5)));
 
 		TestSubscriber.subscribe(this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
@@ -111,10 +108,9 @@ public class ResourceHttpMessageWriterTests {
 	public void shouldThrowErrorInvalidRange() throws Exception {
 		this.request.getHeaders().set(HttpHeaders.RANGE, "invalid");
 
-		this.expectedException.expect(ResponseStatusException.class);
+		this.expectedException.expect(IllegalArgumentException.class);
 		TestSubscriber.subscribe(this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap()));
-		this.expectedException.expect(Matchers.hasProperty("status", is(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE)));
 	}
 
 	private Mono<String> reduceToString(Publisher<DataBuffer> buffers, DataBufferFactory bufferFactory) {
@@ -127,4 +123,5 @@ public class ResourceHttpMessageWriterTests {
 				})
 				.map(buffer -> DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8));
 	}
+
 }
