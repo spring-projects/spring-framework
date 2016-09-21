@@ -21,7 +21,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
@@ -42,13 +41,12 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 
 	private static Log logger = LogFactory.getLog(RxNettyHttpHandlerAdapter.class);
 
+	private final HttpHandler delegate;
 
-	private final HttpHandler httpHandler;
 
-
-	public RxNettyHttpHandlerAdapter(HttpHandler httpHandler) {
-		Assert.notNull(httpHandler, "'httpHandler' is required");
-		this.httpHandler = httpHandler;
+	public RxNettyHttpHandlerAdapter(HttpHandler delegate) {
+		Assert.notNull(delegate, "HttpHandler delegate is required");
+		this.delegate = delegate;
 	}
 
 
@@ -57,13 +55,15 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(response.unsafeNettyChannel().alloc());
 		RxNettyServerHttpRequest adaptedRequest = new RxNettyServerHttpRequest(request, bufferFactory);
 		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response, bufferFactory);
-		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse)
+
+		Publisher<Void> result = this.delegate.handle(adaptedRequest, adaptedResponse)
 				.otherwise(ex -> {
 					logger.debug("Could not complete request", ex);
 					response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
 					return Mono.empty();
 				})
 				.doOnSuccess(aVoid -> logger.debug("Successfully completed request"));
+
 		return RxJava1Adapter.publisherToObservable(result);
 	}
 

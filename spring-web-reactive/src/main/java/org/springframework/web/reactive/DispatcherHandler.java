@@ -54,6 +54,7 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 5.0
  */
 public class DispatcherHandler implements WebHandler, ApplicationContextAware {
@@ -159,6 +160,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	 * a {@link org.springframework.web.server.adapter.WebHttpHandlerBuilder}.
 	 * @param applicationContext the application context to find the handler beans in
 	 * @see #DispatcherHandler(ApplicationContext)
+	 * @see org.springframework.web.server.adapter.WebHttpHandlerBuilder#webHandler
 	 */
 	public static WebHandler toWebHandler(ApplicationContext applicationContext) {
 		return new DispatcherHandler(applicationContext);
@@ -167,10 +169,14 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	/**
 	 * Expose a dispatcher-based {@link HttpHandler} for the given application context,
 	 * typically for direct registration with an engine adapter such as
-	 * {@link org.springframework.http.server.reactive.ReactorHttpHandlerAdapter}.
+	 * {@link org.springframework.http.server.reactive.ServletHttpHandlerAdapter}.
 	 * @param applicationContext the application context to find the handler beans in
 	 * @see #DispatcherHandler(ApplicationContext)
 	 * @see HttpWebHandlerAdapter
+	 * @see org.springframework.http.server.reactive.ServletHttpHandlerAdapter
+	 * @see org.springframework.http.server.reactive.ReactorHttpHandlerAdapter
+	 * @see org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter
+	 * @see org.springframework.http.server.reactive.UndertowHttpHandlerAdapter
 	 */
 	public static HttpHandler toHttpHandler(ApplicationContext applicationContext) {
 		return new HttpWebHandlerAdapter(new DispatcherHandler(applicationContext));

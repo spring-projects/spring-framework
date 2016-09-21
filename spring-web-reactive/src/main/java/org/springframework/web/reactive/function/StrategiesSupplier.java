@@ -33,6 +33,7 @@ import org.springframework.web.reactive.result.view.ViewResolver;
  * {@link #of(Supplier, Supplier, Supplier)}.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 5.0
  * @see RouterFunctions#toHttpHandler(RouterFunction, StrategiesSupplier)
  * @see RouterFunctions#toHandlerMapping(RouterFunction, StrategiesSupplier)
@@ -62,12 +63,35 @@ public interface StrategiesSupplier {
 	 */
 	Supplier<Stream<ViewResolver>> viewResolvers();
 
+
 	// Static methods
 
 	/**
-	 * Return a new {@code StrategiesSupplier} described by the given supplier functions. All
-	 * provided supplier function parameters can be {@code null} to indicate an empty stream is to
-	 * be returned.
+	 * Return a new {@code StrategiesSupplier} with default initialization.
+	 * @return the new {@code StrategiesSupplier}
+	 */
+	static StrategiesSupplier withDefaults() {
+		return builder().build();
+	}
+
+	/**
+	 * Return a new {@code StrategiesSupplier} based on the given
+	 * {@linkplain ApplicationContext application context}.
+	 * The returned supplier will search for all {@link HttpMessageReader}, {@link HttpMessageWriter},
+	 * and {@link ViewResolver} instances in the given application context and return them for
+	 * {@link #messageReaders()}, {@link #messageWriters()}, and {@link #viewResolvers()}
+	 * respectively.
+	 * @param applicationContext the application context to base the strategies on
+	 * @return the new {@code StrategiesSupplier}
+	 */
+	static StrategiesSupplier of(ApplicationContext applicationContext) {
+		return builder(applicationContext).build();
+	}
+
+	/**
+	 * Return a new {@code StrategiesSupplier} described by the given supplier functions.
+	 * All provided supplier function parameters can be {@code null} to indicate an empty
+	 * stream is to be returned.
 	 * @param messageReaders the supplier function for {@link HttpMessageReader} instances (can be {@code null})
 	 * @param messageWriters the supplier function for {@link HttpMessageWriter} instances (can be {@code null})
 	 * @param viewResolvers the supplier function for {@link ViewResolver} instances (can be {@code null})
@@ -82,17 +106,14 @@ public interface StrategiesSupplier {
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 				return checkForNull(messageReaders);
 			}
-
 			@Override
 			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
 				return checkForNull(messageWriters);
 			}
-
 			@Override
 			public Supplier<Stream<ViewResolver>> viewResolvers() {
 				return checkForNull(viewResolvers);
 			}
-
 			private <T> Supplier<Stream<T>> checkForNull(Supplier<Stream<T>> supplier) {
 				return supplier != null ? supplier : Stream::empty;
 			}
@@ -100,16 +121,10 @@ public interface StrategiesSupplier {
 	}
 
 
-	/**
-	 * Return a mutable, empty builder for a {@code StrategiesSupplier}.
-	 * @return the builder
-	 */
-	static Builder empty() {
-		return new DefaultStrategiesSupplierBuilder();
-	}
+	// Builder methods
 
 	/**
-	 * Return a mutable builder for a {@code StrategiesSupplier} with a default initialization.
+	 * Return a mutable builder for a {@code StrategiesSupplier} with default initialization.
 	 * @return the builder
 	 */
 	static Builder builder() {
@@ -127,11 +142,19 @@ public interface StrategiesSupplier {
 	 * @param applicationContext the application context to base the strategies on
 	 * @return the builder
 	 */
-	static Builder applicationContext(ApplicationContext applicationContext) {
-		Assert.notNull(applicationContext, "'applicationContext' must not be null");
+	static Builder builder(ApplicationContext applicationContext) {
+		Assert.notNull(applicationContext, "ApplicationContext must not be null");
 		DefaultStrategiesSupplierBuilder builder = new DefaultStrategiesSupplierBuilder();
 		builder.applicationContext(applicationContext);
 		return builder;
+	}
+
+	/**
+	 * Return a mutable, empty builder for a {@code StrategiesSupplier}.
+	 * @return the builder
+	 */
+	static Builder empty() {
+		return new DefaultStrategiesSupplierBuilder();
 	}
 
 
@@ -166,6 +189,6 @@ public interface StrategiesSupplier {
 		 * @return the built strategies
 		 */
 		StrategiesSupplier build();
-
 	}
+
 }

@@ -36,8 +36,7 @@ import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -51,7 +50,6 @@ public class StrategiesSupplierTests {
 		assertEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
 		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());
 	}
-
 
 	@Test
 	public void ofSuppliers() {
@@ -79,8 +77,7 @@ public class StrategiesSupplierTests {
 		applicationContext.registerSingleton("messageReader", DummyMessageReader.class);
 		applicationContext.refresh();
 
-		StrategiesSupplier
-				strategies = StrategiesSupplier.applicationContext(applicationContext).build();
+		StrategiesSupplier strategies = StrategiesSupplier.of(applicationContext);
 		assertTrue(strategies.messageReaders().get()
 				.allMatch(r -> r instanceof DummyMessageReader));
 		assertTrue(strategies.messageWriters().get()

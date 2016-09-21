@@ -83,18 +83,17 @@ public abstract class AbstractDispatcherHandlerInitializer implements WebApplica
 		Assert.notNull(applicationContext,
 				"createApplicationContext() did not return an application " +
 				"context for servlet [" + servletName + "]");
+
 		refreshApplicationContext(applicationContext);
 		registerCloseListener(servletContext, applicationContext);
 
 		WebHandler dispatcherHandler = createDispatcherHandler(applicationContext);
 		Assert.notNull(dispatcherHandler,
-			"createDispatcherHandler() did not return a WebHandler for servlet ["
-				+ servletName + "]");
+				"createDispatcherHandler() did not return a WebHandler for servlet [" + servletName + "]");
 
 		ServletHttpHandlerAdapter handlerAdapter = createHandlerAdapter(dispatcherHandler);
 		Assert.notNull(handlerAdapter,
-				"createHttpHandler() did not return a ServletHttpHandlerAdapter for servlet ["
-						+ servletName + "]");
+				"createHttpHandler() did not return a ServletHttpHandlerAdapter for servlet [" + servletName + "]");
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, handlerAdapter);
 		Assert.notNull(registration,
@@ -104,7 +103,6 @@ public abstract class AbstractDispatcherHandlerInitializer implements WebApplica
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMapping());
 		registration.setAsyncSupported(true);
-
 
 		customizeRegistration(registration);
 	}
@@ -176,22 +174,20 @@ public abstract class AbstractDispatcherHandlerInitializer implements WebApplica
 	}
 
 	/**
-	 * Register a {@link ServletContextListener} that closes the given application context when
-	 * the servlet context is destroyed.
+	 * Register a {@link ServletContextListener} that closes the given application context
+	 * when the servlet context is destroyed.
 	 * @param servletContext the servlet context to listen to
 	 * @param applicationContext the application context that is to be closed when
 	 * {@code servletContext} is destroyed
 	 */
-	protected void registerCloseListener(ServletContext servletContext,
-			ApplicationContext applicationContext) {
-
+	protected void registerCloseListener(ServletContext servletContext, ApplicationContext applicationContext) {
 		if (applicationContext instanceof ConfigurableApplicationContext) {
-			ConfigurableApplicationContext context =
-					(ConfigurableApplicationContext) applicationContext;
+			ConfigurableApplicationContext context = (ConfigurableApplicationContext) applicationContext;
 			ServletContextDestroyedListener listener = new ServletContextDestroyedListener(context);
 			servletContext.addListener(listener);
 		}
 	}
+
 
 	private static class ServletContextDestroyedListener implements ServletContextListener {
 

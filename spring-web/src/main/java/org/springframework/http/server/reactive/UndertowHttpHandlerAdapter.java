@@ -45,37 +45,31 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 
 	public UndertowHttpHandlerAdapter(HttpHandler delegate) {
-		Assert.notNull(delegate, "'delegate' is required");
+		Assert.notNull(delegate, "HttpHandler delegate is required");
 		this.delegate = delegate;
 	}
 
 
 	public void setDataBufferFactory(DataBufferFactory dataBufferFactory) {
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		Assert.notNull(dataBufferFactory, "DataBufferFactory must not be null");
 		this.dataBufferFactory = dataBufferFactory;
 	}
 
+
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
-
-		ServerHttpRequest request =
-				new UndertowServerHttpRequest(exchange, this.dataBufferFactory);
-
-		ServerHttpResponse response =
-				new UndertowServerHttpResponse(exchange, this.dataBufferFactory);
+		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, this.dataBufferFactory);
+		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, this.dataBufferFactory);
 
 		this.delegate.handle(request, response).subscribe(new Subscriber<Void>() {
-
 			@Override
 			public void onSubscribe(Subscription subscription) {
 				subscription.request(Long.MAX_VALUE);
 			}
-
 			@Override
 			public void onNext(Void aVoid) {
 				// no op
 			}
-
 			@Override
 			public void onError(Throwable ex) {
 				logger.debug("Could not complete request", ex);
@@ -84,7 +78,6 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 				}
 				exchange.endExchange();
 			}
-
 			@Override
 			public void onComplete() {
 				logger.debug("Successfully completed request");

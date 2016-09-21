@@ -44,11 +44,13 @@ class DefaultRequest implements Request {
 
 	private final StrategiesSupplier strategies;
 
+
 	DefaultRequest(ServerWebExchange exchange, StrategiesSupplier strategies) {
 		this.exchange = exchange;
 		this.strategies = strategies;
 		this.headers = new DefaultHeaders();
 	}
+
 
 	@Override
 	public HttpMethod method() {
@@ -96,9 +98,7 @@ class DefaultRequest implements Request {
 	}
 
 
-
 	private class DefaultHeaders implements Headers {
-
 
 		private HttpHeaders delegate() {
 			return request().getHeaders();
@@ -116,7 +116,8 @@ class DefaultRequest implements Request {
 
 		@Override
 		public OptionalLong contentLength() {
-			return toOptionalLong(delegate().getContentLength());
+			long value = delegate().getContentLength();
+			return (value != -1 ? OptionalLong.of(value) : OptionalLong.empty());
 		}
 
 		@Override
@@ -137,18 +138,13 @@ class DefaultRequest implements Request {
 		@Override
 		public List<String> header(String headerName) {
 			List<String> headerValues = delegate().get(headerName);
-			return headerValues != null ? headerValues : Collections.emptyList();
+			return (headerValues != null ? headerValues : Collections.emptyList());
 		}
 
 		@Override
 		public HttpHeaders asHttpHeaders() {
 			return HttpHeaders.readOnlyHttpHeaders(delegate());
 		}
-
-		private OptionalLong toOptionalLong(long value) {
-			return value != -1 ? OptionalLong.of(value) : OptionalLong.empty();
-		}
-
 	}
 
 }
