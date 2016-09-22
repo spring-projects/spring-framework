@@ -41,7 +41,7 @@ configure(allprojects) { project ->
 	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.11.Final"
-	ext.hibernate5Version    = "5.0.10.Final"
+	ext.hibernate5Version    = "5.0.11.Final"
 	ext.hibval4Version       = "4.3.2.Final"
 	ext.hibval5Version       = "5.2.4.Final"
 	ext.hsqldbVersion        = "2.3.4"
@@ -70,7 +70,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.36"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.3.24.Final"
+	ext.undertowVersion      = "1.3.25.Final"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.9"
 
