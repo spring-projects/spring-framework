@@ -44,10 +44,9 @@ public interface Encoder<T> {
 	 * type for the output stream.
 	 * @param elementType the type of elements in the source stream
 	 * @param mimeType the MIME type for the output stream
-	 * @param hints additional information about how to do encode
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canEncode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints);
+	boolean canEncode(ResolvableType elementType, MimeType mimeType);
 
 	/**
 	 * Encode a stream of Objects of type {@code T} into a {@link DataBuffer}

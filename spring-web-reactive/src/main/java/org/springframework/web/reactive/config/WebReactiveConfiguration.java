@@ -60,6 +60,8 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.http.codec.Jackson2ServerHttpMessageReader;
+import org.springframework.http.codec.Jackson2ServerHttpMessageWriter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -196,11 +198,12 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		if (handlerMapping != null) {
-			if (getPathMatchConfigurer() != null) {
-				handlerMapping.setPathMatcher(getPathMatchConfigurer().getPathMatcher());
+			PathMatchConfigurer pathMatchConfigurer = getPathMatchConfigurer();
+			if (pathMatchConfigurer.getPathMatcher() != null) {
+				handlerMapping.setPathMatcher(pathMatchConfigurer.getPathMatcher());
 			}
-			if (getPathMatchConfigurer() != null) {
-				handlerMapping.setPathHelper(getPathMatchConfigurer().getPathHelper());
+			if (pathMatchConfigurer.getPathHelper() != null) {
+				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
 			}
 		}
 		else {
@@ -286,7 +289,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			readers.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		}
 		if (jackson2Present) {
-			readers.add(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
+			readers.add(new Jackson2ServerHttpMessageReader(new  DecoderHttpMessageReader<>(new Jackson2JsonDecoder())));
 		}
 	}
 
@@ -404,10 +407,10 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		}
 		if (jackson2Present) {
 			Jackson2JsonEncoder jacksonEncoder = new Jackson2JsonEncoder();
-			writers.add(new EncoderHttpMessageWriter<>(jacksonEncoder));
+			writers.add(new Jackson2ServerHttpMessageWriter(new EncoderHttpMessageWriter<>(jacksonEncoder)));
 			sseDataEncoders.add(jacksonEncoder);
 		}
-		writers.add(new ServerSentEventHttpMessageWriter(sseDataEncoders));
+		writers.add(new Jackson2ServerHttpMessageWriter(new ServerSentEventHttpMessageWriter(sseDataEncoders)));
 	}
 	/**
 	 * Override this to modify the list of message writers after it has been

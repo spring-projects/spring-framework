@@ -56,8 +56,8 @@ public class DecoderHttpMessageReader<T> implements HttpMessageReader<T> {
 
 
 	@Override
-	public boolean canRead(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
-		return this.decoder != null && this.decoder.canDecode(elementType, mediaType, hints);
+	public boolean canRead(ResolvableType elementType, MediaType mediaType) {
+		return this.decoder != null && this.decoder.canDecode(elementType, mediaType);
 	}
 
 	@Override

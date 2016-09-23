@@ -62,7 +62,7 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 
 
 	@Override
-	public boolean canDecode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
 		if (mimeType == null) {
 			return true;
 		}

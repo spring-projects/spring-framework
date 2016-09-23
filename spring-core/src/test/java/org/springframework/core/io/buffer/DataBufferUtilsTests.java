@@ -99,4 +99,34 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		release(baz);
 	}
 
+	@Test
+	public void skipUntilByteCount() {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
+		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 5L);
+
+		TestSubscriber
+				.subscribe(result)
+				.assertNoError()
+				.assertComplete()
+				.assertValuesWith(stringConsumer("r"), stringConsumer("baz"));
+	}
+
+	@Test
+	public void skipUntilByteCountShouldSkipAll() {
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
+		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 9L);
+
+		TestSubscriber
+				.subscribe(result)
+				.assertNoError()
+				.assertNoValues()
+				.assertComplete();
+	}
+
 }

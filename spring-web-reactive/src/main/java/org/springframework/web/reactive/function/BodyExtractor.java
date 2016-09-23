@@ -16,26 +16,26 @@
 
 package org.springframework.web.reactive.function;
 
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
+ * A function that can extract data from a {@link Request} body.
+ *
+ * @param <T> the type of data to extract
  * @author Arjen Poutsma
+ * @since 5.0
+ * @see Request#body(BodyExtractor)
+ * @see BodyExtractors
  */
-@SuppressWarnings("unchecked")
-abstract class CastingUtils {
+@FunctionalInterface
+public interface BodyExtractor<T> {
 
-	public static <T> HttpMessageReader<T> cast(HttpMessageReader<?> messageReader) {
-		return (HttpMessageReader<T>) messageReader;
-	}
-
-	public static <T> HttpMessageWriter<T> cast(HttpMessageWriter<?> messageWriter) {
-		return (HttpMessageWriter<T>) messageWriter;
-	}
-
-	public static <T> HandlerFunction<T> cast(HandlerFunction<?> handlerFunction) {
-		return (HandlerFunction<T>) handlerFunction;
-	}
-
+	/**
+	 * Extract from the given request.
+	 * @param request the request to extract from
+	 * @param strategies the strategies to use
+	 * @return the extracted data
+	 */
+	T extract(ServerHttpRequest request, StrategiesSupplier strategies);
 
 }

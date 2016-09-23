@@ -25,8 +25,8 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  * @see RequestPredicates
- * @see Router#route(RequestPredicate, HandlerFunction)
- * @see Router#subroute(RequestPredicate, RoutingFunction)
+ * @see RouterFunctions#route(RequestPredicate, HandlerFunction)
+ * @see RouterFunctions#subroute(RequestPredicate, RouterFunction)
  */
 @FunctionalInterface
 public interface RequestPredicate {

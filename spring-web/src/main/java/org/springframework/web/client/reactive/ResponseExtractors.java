@@ -36,7 +36,7 @@ import org.springframework.http.codec.HttpMessageReader;
  * @author Brian Clozel
  * @since 5.0
  */
-public class ResponseExtractors {
+public abstract class ResponseExtractors {
 
 	private static final Object EMPTY_BODY = new Object();
 
@@ -196,7 +196,7 @@ public class ResponseExtractors {
 			ResolvableType responseType, MediaType contentType) {
 
 		return messageReaders.stream()
-				.filter(e -> e.canRead(responseType, contentType, Collections.emptyMap()))
+				.filter(e -> e.canRead(responseType, contentType))
 				.findFirst()
 				.orElseThrow(() ->
 						new WebClientException(

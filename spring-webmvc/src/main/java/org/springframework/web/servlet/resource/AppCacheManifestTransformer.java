@@ -47,11 +47,15 @@ import org.springframework.util.StringUtils;
  * thus changing the content of the manifest in order to trigger an appcache reload in the browser.
  * </ul>
  *
- * All files that have the ".appcache" file extension, or the extension given in the constructor,
- * will be transformed by this class.
+ * <p>All files that have the ".appcache" file extension, or the extension given in the constructor,
+ * will be transformed by this class. This hash is computed using the content of the appcache manifest
+ * and the content of the linked resources; so changing a resource linked in the manifest
+ * or the manifest itself should invalidate the browser cache.
  *
- * <p>This hash is computed using the content of the appcache manifest and the content of the linked resources;
- * so changing a resource linked in the manifest or the manifest itself should invalidate the browser cache.
+ * <p>In order to serve manifest files with the proper {@code "text/manifest"} content type,
+ * it is required to configure it with
+ * {@code contentNegotiationConfigurer.mediaType("appcache", MediaType.valueOf("text/manifest")}
+ * in a {@code WebMvcConfigurerAdapter}.
  *
  * @author Brian Clozel
  * @since 4.1

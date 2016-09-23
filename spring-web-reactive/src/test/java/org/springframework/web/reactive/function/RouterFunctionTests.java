@@ -20,21 +20,24 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.web.reactive.function.BodyInserters.fromObject;
 
 /**
  * @author Arjen Poutsma
  */
 @SuppressWarnings("unchecked")
-public class RoutingFunctionTests {
+public class RouterFunctionTests {
 
 	@Test
 	public void andSame() throws Exception {
 		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
-		RoutingFunction<Void> routingFunction1 = request -> Optional.empty();
-		RoutingFunction<Void> routingFunction2 = request -> Optional.of(handlerFunction);
+		RouterFunction<Void> routerFunction1 = request -> Optional.empty();
+		RouterFunction<Void> routerFunction2 = request -> Optional.of(handlerFunction);
 
-		RoutingFunction<Void> result = routingFunction1.andSame(routingFunction2);
+		RouterFunction<Void> result = routerFunction1.andSame(routerFunction2);
 		assertNotNull(result);
 
 		MockRequest request = MockRequest.builder().build();
@@ -45,11 +48,11 @@ public class RoutingFunctionTests {
 
 	@Test
 	public void and() throws Exception {
-		HandlerFunction<String> handlerFunction = request -> Response.ok().body("42");
-		RoutingFunction<Void> routingFunction1 = request -> Optional.empty();
-		RoutingFunction<String> routingFunction2 = request -> Optional.of(handlerFunction);
+		HandlerFunction<String> handlerFunction = request -> Response.ok().body(fromObject("42"));
+		RouterFunction<Void> routerFunction1 = request -> Optional.empty();
+		RouterFunction<String> routerFunction2 = request -> Optional.of(handlerFunction);
 
-		RoutingFunction<?> result = routingFunction1.and(routingFunction2);
+		RouterFunction<?> result = routerFunction1.and(routerFunction2);
 		assertNotNull(result);
 
 		MockRequest request = MockRequest.builder().build();
@@ -60,15 +63,15 @@ public class RoutingFunctionTests {
 
 	@Test
 	public void filter() throws Exception {
-		HandlerFunction<String> handlerFunction = request -> Response.ok().body("42");
-		RoutingFunction<String> routingFunction = request -> Optional.of(handlerFunction);
+		HandlerFunction<String> handlerFunction = request -> Response.ok().body(fromObject("42"));
+		RouterFunction<String> routerFunction = request -> Optional.of(handlerFunction);
 
 		FilterFunction<String, Integer> filterFunction = (request, next) -> {
 			Response<String> response = next.handle(request);
 			int i = Integer.parseInt(response.body());
-			return Response.ok().body(i);
+			return Response.ok().body(fromObject(i));
 		};
-		RoutingFunction<Integer> result = routingFunction.filter(filterFunction);
+		RouterFunction<Integer> result = routerFunction.filter(filterFunction);
 		assertNotNull(result);
 
 		MockRequest request = MockRequest.builder().build();

@@ -32,13 +32,13 @@ import org.springframework.web.client.reactive.WebClient;
 
 import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
 import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
-import static org.springframework.web.reactive.function.Router.route;
+import static org.springframework.web.reactive.function.RouterFunctions.route;
 
 /**
  * @author Arjen Poutsma
  */
 public class SseHandlerFunctionIntegrationTests
-		extends AbstractRoutingFunctionIntegrationTests {
+		extends AbstractRouterFunctionIntegrationTests {
 
 	private WebClient webClient;
 
@@ -48,7 +48,7 @@ public class SseHandlerFunctionIntegrationTests
 	}
 
 	@Override
-	protected RoutingFunction<?> routingFunction() {
+	protected RouterFunction<?> routerFunction() {
 		SseHandler sseHandler = new SseHandler();
 		return route(RequestPredicates.GET("/string"), sseHandler::string)
 				.and(route(RequestPredicates.GET("/person"), sseHandler::person))
@@ -111,13 +111,13 @@ public class SseHandlerFunctionIntegrationTests
 
 		public Response<Publisher<String>> string(Request request) {
 			Flux<String> flux = Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l).take(2);
-			return Response.ok().sse(flux, String.class);
+			return Response.ok().body(BodyInserters.fromServerSentEvents(flux, String.class));
 		}
 
 		public Response<Publisher<Person>> person(Request request) {
 			Flux<Person> flux = Flux.interval(Duration.ofMillis(100))
 					.map(l -> new Person("foo " + l)).take(2);
-			return Response.ok().sse(flux, Person.class);
+			return Response.ok().body(BodyInserters.fromServerSentEvents(flux, Person.class));
 		}
 
 		public Response<Publisher<ServerSentEvent<String>>> sse(Request request) {
@@ -127,7 +127,7 @@ public class SseHandlerFunctionIntegrationTests
 							.comment("bar")
 							.build()).take(2);
 
-			return Response.ok().sse(flux);
+			return Response.ok().body(BodyInserters.fromServerSentEvents(flux));
 		}
 	}
 

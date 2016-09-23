@@ -24,9 +24,10 @@ import java.util.Optional;
  * @param <T> the type of the {@linkplain HandlerFunction handler function} to route to
  * @author Arjen Poutsma
  * @since 5.0
+ * @see RouterFunctions
  */
 @FunctionalInterface
-public interface RoutingFunction<T> {
+public interface RouterFunction<T> {
 
 	/**
 	 * Return the {@linkplain HandlerFunction handler function} that matches the given request.
@@ -45,7 +46,7 @@ public interface RoutingFunction<T> {
 	 * @return a composed function that first routes with this function and then the {@code other} function if this
 	 * function has no result
 	 */
-	default RoutingFunction<T> andSame(RoutingFunction<T> other) {
+	default RouterFunction<T> andSame(RouterFunction<T> other) {
 		return request -> {
 			Optional<HandlerFunction<T>> result = this.route(request);
 			return result.isPresent() ? result : other.route(request);
@@ -61,12 +62,12 @@ public interface RoutingFunction<T> {
 	 * @return a composed function that first routes with this function and then the {@code other} function if this
 	 * function has no result
 	 */
-	default RoutingFunction<?> and(RoutingFunction<?> other) {
+	default RouterFunction<?> and(RouterFunction<?> other) {
 		return request -> {
 			Optional<HandlerFunction<Object>> result = this.route(request).
-					map(CastingUtils::cast);
+					map(RouterFunctions::cast);
 			return result.isPresent() ? result : other.route(request)
-					.map(CastingUtils::cast);
+					.map(RouterFunctions::cast);
 		};
 	}
 
@@ -78,7 +79,7 @@ public interface RoutingFunction<T> {
 	 * @param <S>            the filter return type
 	 * @return the filtered routing function
 	 */
-	default <S> RoutingFunction<S> filter(FilterFunction<T, S> filterFunction) {
+	default <S> RouterFunction<S> filter(FilterFunction<T, S> filterFunction) {
 		return request -> this.route(request)
 				.map(handlerFunction -> filterRequest -> filterFunction.filter(filterRequest, handlerFunction));
 	}

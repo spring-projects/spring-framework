@@ -24,25 +24,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.core.ResolvableType;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * {@code Request} implementation based on a {@link ServerWebExchange}.
@@ -54,13 +42,15 @@ class DefaultRequest implements Request {
 
 	private final Headers headers;
 
-	private final Body body;
+	private final StrategiesSupplier strategies;
 
-	DefaultRequest(ServerWebExchange exchange) {
+
+	DefaultRequest(ServerWebExchange exchange, StrategiesSupplier strategies) {
 		this.exchange = exchange;
+		this.strategies = strategies;
 		this.headers = new DefaultHeaders();
-		this.body = new DefaultBody();
 	}
+
 
 	@Override
 	public HttpMethod method() {
@@ -78,8 +68,8 @@ class DefaultRequest implements Request {
 	}
 
 	@Override
-	public Body body() {
-		return this.body;
+	public <T> T body(BodyExtractor<T> extractor) {
+		return extractor.extract(request(), this.strategies);
 	}
 
 	@Override
@@ -95,7 +85,7 @@ class DefaultRequest implements Request {
 
 	@Override
 	public Map<String, String> pathVariables() {
-		return this.exchange.<Map<String, String>>getAttribute(Router.URI_TEMPLATE_VARIABLES_ATTRIBUTE).
+		return this.exchange.<Map<String, String>>getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE).
 				orElseGet(Collections::emptyMap);
 	}
 
@@ -108,9 +98,7 @@ class DefaultRequest implements Request {
 	}
 
 
-
 	private class DefaultHeaders implements Headers {
-
 
 		private HttpHeaders delegate() {
 			return request().getHeaders();
@@ -128,7 +116,8 @@ class DefaultRequest implements Request {
 
 		@Override
 		public OptionalLong contentLength() {
-			return toOptionalLong(delegate().getContentLength());
+			long value = delegate().getContentLength();
+			return (value != -1 ? OptionalLong.of(value) : OptionalLong.empty());
 		}
 
 		@Override
@@ -149,68 +138,13 @@ class DefaultRequest implements Request {
 		@Override
 		public List<String> header(String headerName) {
 			List<String> headerValues = delegate().get(headerName);
-			return headerValues != null ? headerValues : Collections.emptyList();
+			return (headerValues != null ? headerValues : Collections.emptyList());
 		}
 
 		@Override
 		public HttpHeaders asHttpHeaders() {
 			return HttpHeaders.readOnlyHttpHeaders(delegate());
 		}
-
-		private OptionalLong toOptionalLong(long value) {
-			return value != -1 ? OptionalLong.of(value) : OptionalLong.empty();
-		}
-
-	}
-
-	private class DefaultBody implements Body {
-
-		@Override
-		public Flux<DataBuffer> stream() {
-			return request().getBody();
-		}
-
-		@Override
-		public <T> Flux<T> convertTo(Class<? extends T> aClass) {
-			ResolvableType elementType = ResolvableType.forClass(aClass);
-			return convertTo(aClass, reader -> reader.read(elementType, request(), Collections.emptyMap()));
-		}
-
-		@Override
-		public <T> Mono<T> convertToMono(Class<? extends T> aClass) {
-			ResolvableType elementType = ResolvableType.forClass(aClass);
-			return convertTo(aClass, reader -> reader.readMono(elementType, request(), Collections.emptyMap()));
-		}
-
-		private <T, S extends Publisher<T>> S convertTo(Class<? extends T> targetClass,
-				Function<HttpMessageReader<T>, S> readerFunction) {
-			ResolvableType elementType = ResolvableType.forClass(targetClass);
-			MediaType contentType = headers.contentType().orElse(MediaType.APPLICATION_OCTET_STREAM);
-			return messageReaderStream(exchange)
-					.filter(r -> r.canRead(elementType, contentType, Collections.emptyMap()))
-					.findFirst()
-					.map(CastingUtils::<T>cast)
-					.map(readerFunction)
-					.orElseGet(() -> {
-						List<MediaType> supportedMediaTypes = messageReaderStream(exchange)
-								.flatMap(messageReader -> messageReader.getReadableMediaTypes().stream())
-								.collect(Collectors.toList());
-						return cast(
-								Mono.<T>error(new UnsupportedMediaTypeStatusException(contentType, supportedMediaTypes)));
-					});
-		}
-
-		private Stream<HttpMessageReader<?>> messageReaderStream(ServerWebExchange exchange) {
-			return exchange.<Supplier<Stream<HttpMessageReader<?>>>>getAttribute(Router.HTTP_MESSAGE_READERS_ATTRIBUTE)
-					.orElseThrow(() -> new IllegalStateException("Could not find HttpMessageReaders in ServerWebExchange"))
-					.get();
-		}
-
-		@SuppressWarnings("unchecked")
-		private <T, S extends Publisher<T>> S cast(Mono<T> mono) {
-			return (S) mono;
-		}
-
 	}
 
 }

@@ -42,14 +42,14 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpChannel channel;
 
-	private final NettyDataBufferFactory dataBufferFactory;
+	private final NettyDataBufferFactory bufferFactory;
 
-	public ReactorServerHttpRequest(HttpChannel request,
-			NettyDataBufferFactory dataBufferFactory) {
+
+	public ReactorServerHttpRequest(HttpChannel request, NettyDataBufferFactory bufferFactory) {
 		Assert.notNull("'request' must not be null");
-		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
+		Assert.notNull(bufferFactory, "'bufferFactory' must not be null");
 		this.channel = request;
-		this.dataBufferFactory = dataBufferFactory;
+		this.bufferFactory = bufferFactory;
 	}
 
 
@@ -90,7 +90,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.channel.receive().retain().map(this.dataBufferFactory::wrap);
+		return this.channel.receive().retain().map(this.bufferFactory::wrap);
 	}
 
 }

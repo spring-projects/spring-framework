@@ -16,25 +16,20 @@
 
 package org.springframework.web.reactive.function;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
+import org.springframework.http.server.reactive.HttpHandler;
 
 /**
  * @author Arjen Poutsma
  */
-public class DefaultConfigurationTests {
+public abstract class AbstractRouterFunctionIntegrationTests
+		extends AbstractHttpHandlerIntegrationTests {
 
-	private DefaultConfiguration configuration = new DefaultConfiguration();
-
-	@Test
-	public void messageReaders() throws Exception {
-		assertEquals(4, configuration.messageReaders().get().count());
+	@Override
+	protected final HttpHandler createHttpHandler() {
+		RouterFunction<?> routerFunction = routerFunction();
+		return RouterFunctions.toHttpHandler(routerFunction);
 	}
 
-	@Test
-	public void messageWriters() throws Exception {
-		assertEquals(4, configuration.messageWriters().get().count());
-	}
-
+	protected abstract RouterFunction<?> routerFunction();
 }

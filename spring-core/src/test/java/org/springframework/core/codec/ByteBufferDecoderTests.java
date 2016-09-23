@@ -42,11 +42,11 @@ public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase
 	@Test
 	public void canDecode() {
 		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
-				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+				MimeTypeUtils.TEXT_PLAIN));
 		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Integer.class),
-				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
-				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
+				MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test

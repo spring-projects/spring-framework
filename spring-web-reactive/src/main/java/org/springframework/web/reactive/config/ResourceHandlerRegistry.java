@@ -150,7 +150,7 @@ public class ResourceHandlerRegistry {
 		}
 
 		SimpleUrlHandlerMapping handlerMapping = new SimpleUrlHandlerMapping();
-		handlerMapping.setOrder(order);
+		handlerMapping.setOrder(this.order);
 		handlerMapping.setUrlMap(urlMap);
 		return handlerMapping;
 	}

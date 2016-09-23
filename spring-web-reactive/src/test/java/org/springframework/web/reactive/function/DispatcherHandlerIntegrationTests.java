@@ -50,10 +50,10 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.web.reactive.function.Router.route;
+import static org.springframework.web.reactive.function.RouterFunctions.route;
 
 /**
- * Tests the use of {@link HandlerFunction} and {@link RoutingFunction} in a 
+ * Tests the use of {@link HandlerFunction} and {@link RouterFunction} in a
  * {@link DispatcherHandler}.
  * @author Arjen Poutsma
  */
@@ -117,10 +117,10 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		@Bean
-		public HandlerMapping handlerMapping(RoutingFunction<?> routingFunction,
+		public HandlerMapping handlerMapping(RouterFunction<?> routerFunction,
 				ApplicationContext applicationContext) {
-			return Router.toHandlerMapping(routingFunction,
-					new Router.Configuration() {
+			return RouterFunctions.toHandlerMapping(routerFunction,
+					new StrategiesSupplier() {
 						@Override
 						public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 							return () -> getMessageReaders().stream();
@@ -139,7 +139,7 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 		}
 
 		@Bean
-		public RoutingFunction<?> routingFunction() {
+		public RouterFunction<?> routerFunction() {
 			PersonHandler personHandler = personHandler();
 			return route(RequestPredicates.GET("/mono"), personHandler::mono)
 					.and(route(RequestPredicates.GET("/flux"), personHandler::flux));
@@ -155,13 +155,14 @@ public class DispatcherHandlerIntegrationTests extends AbstractHttpHandlerIntegr
 
 		public Response<Publisher<Person>> mono(Request request) {
 			Person person = new Person("John");
-			return Response.ok().stream(Mono.just(person), Person.class);
+			return Response.ok().body(BodyInserters.fromPublisher(Mono.just(person), Person.class));
 		}
 
 		public Response<Publisher<Person>> flux(Request request) {
 			Person person1 = new Person("John");
 			Person person2 = new Person("Jane");
-			return Response.ok().stream(Flux.just(person1, person2), Person.class);
+			return Response.ok().body(
+					BodyInserters.fromPublisher(Flux.just(person1, person2), Person.class));
 		}
 
 	}

@@ -18,9 +18,11 @@ package org.springframework.web.reactive.function.support;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.reactive.function.Response;
+import org.springframework.web.reactive.function.StrategiesSupplier;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -31,16 +33,34 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ResponseResultHandler implements HandlerResultHandler {
 
+	private final StrategiesSupplier strategies;
+
+	/**
+	 * Create a {@code ResponseResultHandler} with default strategies.
+	 */
+	public ResponseResultHandler() {
+		this(StrategiesSupplier.builder().build());
+	}
+
+	/**
+	 * Create a {@code ResponseResultHandler} with the given strategies.
+	 */
+	public ResponseResultHandler(StrategiesSupplier strategies) {
+		Assert.notNull(strategies, "'strategies' must not be null");
+		this.strategies = strategies;
+	}
+
 	@Override
 	public boolean supports(HandlerResult result) {
-		Object returnValue = result.getReturnValue().orElse(null);
-		return returnValue instanceof Response;
+		return result.getReturnValue()
+				.filter(o -> o instanceof Response)
+				.isPresent();
 	}
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Response<?> response = (Response<?>) result.getReturnValue().orElseThrow(
 				IllegalStateException::new);
-		return response.writeTo(exchange);
+		return response.writeTo(exchange, this.strategies);
 	}
 }

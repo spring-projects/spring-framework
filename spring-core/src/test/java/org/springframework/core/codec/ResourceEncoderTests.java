@@ -44,13 +44,13 @@ public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 	@Test
 	public void canEncode() throws Exception {
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
-				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
-				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Resource.class),
-				MimeTypeUtils.TEXT_PLAIN, Collections.emptyMap()));
+				MimeTypeUtils.TEXT_PLAIN));
 		assertTrue(this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
-				MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()));
+				MimeTypeUtils.APPLICATION_JSON));
 	}
 
 	@Test

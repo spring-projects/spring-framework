@@ -130,8 +130,8 @@ ClientHttpConnector httpConnector = new ReactorClientHttpConnector();
 WebClient webClient = new WebClient(httpConnector);
 
 Mono<Account> response = webClient
-		.perform(get("http://example.com/accounts/1").accept(APPLICATION_JSON))
-		.extract(body(Account.class));
+        .perform(get("http://example.com/accounts/1").accept(APPLICATION_JSON))
+        .extract(body(Account.class));
 ----
 
 The above assumes static method imports from `ClientWebRequestBuilders` and `ResponseExtractors`
@@ -142,8 +142,8 @@ that enable a fluent syntax. The same can also be done with RxJava using static 
 [subs="verbatim,quotes"]
 ----
 Single<Account> response = webClient
-		.perform(get("http://example.com/accounts/1").accept(APPLICATION_JSON))
-		.extract(body(Account.class));
+        .perform(get("http://example.com/accounts/1").accept(APPLICATION_JSON))
+        .extract(body(Account.class));
 ----
 
 
@@ -182,12 +182,8 @@ For the bootstrap code start with:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-context.register(WebReactiveConfiguration.class); 	// (1)
-context.refresh();
-
-DispatcherHandler dispatcherHandler = new DispatcherHandler(context);	// (2)
-HttpHandler httpHandler = WebHttpHandlerBuilder.webHandler(dispatcherHandler).build();
+ApplicationContext context = new AnnotationConfigApplicationContext(WebReactiveConfiguration.class);  // (1)
+HttpHandler handler = DispatcherHandler.toHttpHandler(context);  // (2)
 ----
 
 The above loads default Spring Web Reactive config (1), then creates a
@@ -198,25 +194,35 @@ An `HttpHandler` can then be installed in each supported runtime:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-// Tomcat and Jetty
-HttpServlet servlet = new ServletHttpHandlerAdapter(httpHandler);
+// Tomcat and Jetty (also see notes below)
+HttpServlet servlet = new ServletHttpHandlerAdapter(handler);
 ...
 
 // Reactor Netty
-ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(httpHandler);
+ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
 HttpServer server = HttpServer.create(host, port);
 server.startAndAwait(adapter);
 
 // RxNetty
-RxNettyHttpHandlerAdapter handlerAdapter = new RxNettyHttpHandlerAdapter(httpHandler);
+RxNettyHttpHandlerAdapter adapter = new RxNettyHttpHandlerAdapter(handler);
 HttpServer server = HttpServer.newServer(new InetSocketAddress(host, port));
 server.startAndAwait(adapter);
 
 // Undertow
-HttpHandler handler = new UndertowHttpHandlerAdapter(httpHandler);
-Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(httpHandler).build();
+UndertowHttpHandlerAdapter adapter = new UndertowHttpHandlerAdapter(handler);
+Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adapter).build();
 server.start();
 ----
+
+[NOTE]
+====
+For Servlet runtimes you can use the `AbstractAnnotationConfigDispatcherHandlerInitializer`,
+which as a `WebApplicationInitializer` is auto-detected by Servlet containers
+and it registers for you the `ServletHttpHandlerAdapter` shown above.
+Only implement one method to point to your Spring Java configuration classes.
+====
+
+
 
 
 [[web-reactive-getting-started-M1]]

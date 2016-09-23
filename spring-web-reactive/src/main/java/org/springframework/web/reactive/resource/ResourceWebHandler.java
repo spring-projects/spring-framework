@@ -82,6 +82,7 @@ import org.springframework.web.server.WebHandler;
  * client.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class ResourceWebHandler
@@ -188,7 +189,7 @@ public class ResourceWebHandler
 	}
 
 	/**
-	 * Return the list of configured resource converters.
+	 * Return the configured resource message writer.
 	 */
 	public ResourceHttpMessageWriter getResourceHttpMessageWriter() {
 		return this.resourceHttpMessageWriter;
@@ -329,17 +330,15 @@ public class ResourceWebHandler
 						// Content phase
 						if (HttpMethod.HEAD.equals(exchange.getRequest().getMethod())) {
 							setHeaders(exchange, resource, mediaType);
+							exchange.getResponse().getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
 							logger.trace("HEAD request - skipping content");
 							return Mono.empty();
 						}
 
-						// TODO: range requests
-
 						setHeaders(exchange, resource, mediaType);
-
-						return this.resourceHttpMessageWriter.write(
-								Mono.just(resource), ResolvableType.forClass(Resource.class),
-								mediaType, exchange.getResponse(), Collections.emptyMap());
+						return this.resourceHttpMessageWriter.write(Mono.just(resource),
+								null, ResolvableType.forClass(Resource.class), mediaType,
+								exchange.getRequest(), exchange.getResponse(), Collections.emptyMap());
 					}
 					catch (IOException ex) {
 						return Mono.error(ex);
@@ -504,7 +503,6 @@ public class ResourceWebHandler
 			HttpHeaders resourceHeaders = ((HttpResource) resource).getResponseHeaders();
 			exchange.getResponse().getHeaders().putAll(resourceHeaders);
 		}
-		headers.set(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}
 
 

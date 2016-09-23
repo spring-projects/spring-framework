@@ -24,15 +24,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.HandlerFunction;
 import org.springframework.web.reactive.function.Request;
 
@@ -86,8 +83,8 @@ public class RequestWrapper implements Request {
 	}
 
 	@Override
-	public Body body() {
-		return this.request.body();
+	public <T> T body(BodyExtractor<T> extractor) {
+		return this.request.body(extractor);
 	}
 
 	@Override
@@ -174,38 +171,4 @@ public class RequestWrapper implements Request {
 		}
 	}
 
-	/**
-	 * Implementation of the {@link Body} interface that can be subclassed to adapt the headers to a
-	 * {@link HandlerFunction handler function}. All methods default to calling through to the wrapped body.
-	 */
-	public static class BodyWrapper implements Request.Body {
-
-		private final Body body;
-
-		/**
-		 * Create a new {@code DelegatingBody} that wraps the given body.
-		 *
-		 * @param body the body to wrap
-		 */
-		public BodyWrapper(Body body) {
-			Assert.notNull(body, "'body' must not be null");
-			this.body = body;
-		}
-
-		@Override
-		public Flux<DataBuffer> stream() {
-			return this.body.stream();
-		}
-
-		@Override
-		public <T> Flux<T> convertTo(Class<? extends T> aClass) {
-			return this.body.convertTo(aClass);
-		}
-
-		@Override
-		public <T> Mono<T> convertToMono(Class<? extends T> aClass) {
-			return this.body.convertToMono(aClass);
-		}
-
-	}
 }

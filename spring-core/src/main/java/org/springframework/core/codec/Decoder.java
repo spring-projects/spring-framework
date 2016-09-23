@@ -43,10 +43,9 @@ public interface Decoder<T> {
 	 * type of the source stream.
 	 * @param elementType the target element type for the output stream
 	 * @param mimeType the mime type associated with the stream to decode
-	 * @param hints additional information about how to do encode
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
-	boolean canDecode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints);
+	boolean canDecode(ResolvableType elementType, MimeType mimeType);
 
 	/**
 	 * Decode a {@link DataBuffer} input stream into a Flux of {@code T}.

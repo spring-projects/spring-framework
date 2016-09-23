@@ -62,7 +62,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 	}
 
 	@Override
-	public boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
+	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
 		return mediaType == null || TEXT_EVENT_STREAM.isCompatibleWith(mediaType);
 	}
 
@@ -134,7 +134,7 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 		ResolvableType elementType = ResolvableType.forClass(data.getClass());
 		Optional<Encoder<?>> encoder = dataEncoders
 				.stream()
-				.filter(e -> e.canEncode(elementType, MimeTypeUtils.APPLICATION_JSON, Collections.emptyMap()))
+				.filter(e -> e.canEncode(elementType, MimeTypeUtils.APPLICATION_JSON))
 				.findFirst();
 		return ((Encoder<T>) encoder.orElseThrow(() -> new CodecException("No suitable encoder found!")))
 				.encode(Mono.just((T) data), bufferFactory, elementType, MimeTypeUtils.APPLICATION_JSON, hints)

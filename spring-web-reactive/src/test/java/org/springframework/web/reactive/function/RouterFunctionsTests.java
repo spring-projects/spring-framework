@@ -17,21 +17,12 @@
 package org.springframework.web.reactive.function;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ReactiveHttpInputMessage;
-import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.HttpHandler;
@@ -40,14 +31,20 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Arjen Poutsma
  */
 @SuppressWarnings("unchecked")
-public class RouterTests {
+public class RouterFunctionsTests {
 
 	@Test
 	public void routeMatch() throws Exception {
@@ -57,7 +54,7 @@ public class RouterTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RoutingFunction<Void> result = Router.route(requestPredicate, handlerFunction);
+		RouterFunction<Void> result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -73,7 +70,7 @@ public class RouterTests {
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RoutingFunction<Void> result = Router.route(requestPredicate, handlerFunction);
+		RouterFunction<Void> result = RouterFunctions.route(requestPredicate, handlerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -83,13 +80,13 @@ public class RouterTests {
 	@Test
 	public void subrouteMatch() throws Exception {
 		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
-		RoutingFunction<Void> routingFunction = request -> Optional.of(handlerFunction);
+		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
 
 		MockRequest request = MockRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
-		RoutingFunction<Void> result = Router.subroute(requestPredicate, routingFunction);
+		RouterFunction<Void> result = RouterFunctions.subroute(requestPredicate, routerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -100,13 +97,13 @@ public class RouterTests {
 	@Test
 	public void subrouteNoMatch() throws Exception {
 		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
-		RoutingFunction<Void> routingFunction = request -> Optional.of(handlerFunction);
+		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
 
 		MockRequest request = MockRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		RoutingFunction<Void> result = Router.subroute(requestPredicate, routingFunction);
+		RouterFunction<Void> result = RouterFunctions.subroute(requestPredicate, routerFunction);
 		assertNotNull(result);
 
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
@@ -115,93 +112,35 @@ public class RouterTests {
 
 	@Test
 	public void toHttpHandler() throws Exception {
+		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
+		when(strategies.messageReaders()).thenReturn(
+				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
+		when(strategies.messageWriters()).thenReturn(
+				() -> Collections.<HttpMessageWriter<?>>emptyList().stream());
+		when(strategies.viewResolvers()).thenReturn(
+				() -> Collections.<ViewResolver>emptyList().stream());
+
 		Request request = mock(Request.class);
 		Response response = mock(Response.class);
-		when(response.writeTo(any(ServerWebExchange.class))).thenReturn(Mono.empty());
+		when(response.writeTo(any(ServerWebExchange.class), eq(strategies))).thenReturn(Mono.empty());
 
 		HandlerFunction handlerFunction = mock(HandlerFunction.class);
 		when(handlerFunction.handle(any(Request.class))).thenReturn(response);
 
-		RoutingFunction routingFunction = mock(RoutingFunction.class);
-		when(routingFunction.route(any(Request.class))).thenReturn(Optional.of(handlerFunction));
+		RouterFunction routerFunction = mock(RouterFunction.class);
+		when(routerFunction.route(any(Request.class))).thenReturn(Optional.of(handlerFunction));
 
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
-		Router.Configuration configuration = mock(Router.Configuration.class);
-		when(configuration.messageReaders()).thenReturn(
-				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
-		when(configuration.messageWriters()).thenReturn(
-				() -> Collections.<HttpMessageWriter<?>>emptyList().stream());
-		when(configuration.viewResolvers()).thenReturn(
-				() -> Collections.<ViewResolver>emptyList().stream());
 
-		HttpHandler result = Router.toHttpHandler(routingFunction, configuration);
+		HttpHandler result = RouterFunctions.toHttpHandler(routerFunction, strategies);
 		assertNotNull(result);
 
-		MockServerHttpRequest httpRequest = new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
+		MockServerHttpRequest httpRequest =
+				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
 		MockServerHttpResponse serverHttpResponse = new MockServerHttpResponse();
 		result.handle(httpRequest, serverHttpResponse);
 	}
 
-	@Test
-	public void toConfiguration() throws Exception {
-		StaticApplicationContext applicationContext = new StaticApplicationContext();
-		applicationContext.registerSingleton("messageWriter", DummyMessageWriter.class);
-		applicationContext.registerSingleton("messageReader", DummyMessageReader.class);
-		applicationContext.refresh();
-
-		Router.Configuration configuration = Router.toConfiguration(applicationContext);
-		assertTrue(configuration.messageReaders().get()
-				.allMatch(r -> r instanceof DummyMessageReader));
-		assertTrue(configuration.messageWriters().get()
-				.allMatch(r -> r instanceof DummyMessageWriter));
-
-	}
-
-	private static class DummyMessageWriter implements HttpMessageWriter<Object> {
-
-		@Override
-		public boolean canWrite(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
-			return false;
-		}
-
-		@Override
-		public List<MediaType> getWritableMediaTypes() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public Mono<Void> write(Publisher<?> inputStream, ResolvableType elementType,
-				MediaType mediaType,
-				ReactiveHttpOutputMessage outputMessage,
-				Map<String, Object> hints) {
-			return Mono.empty();
-		}
-	}
-
-	private static class DummyMessageReader implements HttpMessageReader<Object> {
-
-		@Override
-		public boolean canRead(ResolvableType elementType, MediaType mediaType, Map<String, Object> hints) {
-			return false;
-		}
-
-		@Override
-		public List<MediaType> getReadableMediaTypes() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public Flux<Object> read(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
-				Map<String, Object> hints) {
-			return Flux.empty();
-		}
-
-		@Override
-		public Mono<Object> readMono(ResolvableType elementType, ReactiveHttpInputMessage inputMessage,
-				Map<String, Object> hints) {
-			return Mono.empty();
-		}
-	}
 }

@@ -17,22 +17,22 @@
 package org.springframework.web.reactive.function;
 
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.codec.CharSequenceEncoder;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -40,7 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.reactive.result.view.View;
@@ -49,7 +49,11 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -186,8 +190,9 @@ public class DefaultResponseBuilderTests {
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
+		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
 
-		result.writeTo(exchange).block();
+		result.writeTo(exchange, strategies).block();
 		assertEquals(201, response.getStatusCode().value());
 		assertEquals("MyValue", response.getHeaders().getFirst("MyKey"));
 		assertNull(response.getBody());
@@ -202,15 +207,26 @@ public class DefaultResponseBuilderTests {
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
+		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
 
-		result.writeTo(exchange).block();
+		result.writeTo(exchange, strategies).block();
 		assertNull(response.getBody());
 	}
 
 	@Test
-	public void body() throws Exception {
+	public void bodyInserter() throws Exception {
 		String body = "foo";
-		Response<String> result = Response.ok().body(body);
+		Supplier<String> supplier = () -> body;
+		BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer =
+				(response, strategies) -> {
+					byte[] bodyBytes = body.getBytes(UTF_8);
+					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);
+					DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
+
+					return response.writeWith(Mono.just(buffer));
+				};
+
+		Response<String> result = Response.ok().body(writer, supplier);
 		assertEquals(body, result.body());
 
 		MockServerHttpRequest request =
@@ -218,82 +234,15 @@ public class DefaultResponseBuilderTests {
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		ServerWebExchange exchange =
 				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-		Set<HttpMessageWriter<?>>
-				messageWriters = Collections
-				.singleton(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE,
-				(Supplier<Stream<HttpMessageWriter<?>>>) messageWriters::stream);
 
-		result.writeTo(exchange).block();
+		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
+
+		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
+		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
+
+		result.writeTo(exchange, strategies).block();
 		assertNotNull(response.getBody());
-	}
-
-	@Test
-	public void bodyNotAcceptable() throws Exception {
-		String body = "foo";
-		Response<String> result = Response.ok().contentType(MediaType.APPLICATION_JSON).body(body);
-		assertEquals(body, result.body());
-
-		MockServerHttpRequest request =
-				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		ServerWebExchange exchange =
-				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-		Set<HttpMessageWriter<?>>
-				messageWriters = Collections
-				.singleton(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE,
-				(Supplier<Stream<HttpMessageWriter<?>>>) messageWriters::stream);
-
-		result.writeTo(exchange).block();
-		assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
-	}
-
-	@Test
-	public void stream() throws Exception {
-		Publisher<String> publisher = Flux.just("foo", "bar");
-		Response<Publisher<String>> result = Response.ok().stream(publisher, String.class);
-
-		MockServerHttpRequest request =
-				new MockServerHttpRequest(HttpMethod.GET, "http://localhost");
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		ServerWebExchange exchange =
-				new DefaultServerWebExchange(request, response, new MockWebSessionManager());
-		Set<HttpMessageWriter<?>> messageWriters = Collections
-				.singleton(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
-		exchange.getAttributes().put(Router.HTTP_MESSAGE_WRITERS_ATTRIBUTE,
-				(Supplier<Stream<HttpMessageWriter<?>>>) messageWriters::stream);
-
-		result.writeTo(exchange).block();
-		assertNotNull(response.getBody());
-	}
-
-	@Test
-	public void resource() throws Exception {
-		Resource resource = new ClassPathResource("response.txt", DefaultResponseBuilderTests.class);
-		Response<Resource> result = Response.ok().resource(resource);
-
-		ServerWebExchange exchange = mock(ServerWebExchange.class);
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		when(exchange.getResponse()).thenReturn(response);
-
-
-		result.writeTo(exchange).block();
-		assertNotNull(response.getBody());
-	}
-
-	@Test
-	public void sse() throws Exception {
-		ServerSentEvent<String> sse = ServerSentEvent.<String>builder().data("42").build();
-		Mono<ServerSentEvent<String>> body = Mono.just(sse);
-		Response<Mono<ServerSentEvent<String>>> result = Response.ok().sse(body);
-
-		ServerWebExchange exchange = mock(ServerWebExchange.class);
-		MockServerHttpResponse response = new MockServerHttpResponse();
-		when(exchange.getResponse()).thenReturn(response);
-
-		result.writeTo(exchange).block();
-		assertNotNull(response.getBodyWithFlush());
 	}
 
 	@Test
@@ -311,12 +260,14 @@ public class DefaultResponseBuilderTests {
 		View view = mock(View.class);
 		when(viewResolver.resolveViewName("view", Locale.ENGLISH)).thenReturn(Mono.just(view));
 		when(view.render(model, null, exchange)).thenReturn(Mono.empty());
-		exchange.getAttributes().put(Router.VIEW_RESOLVERS_ATTRIBUTE,
-				(Supplier<Stream<ViewResolver>>) () -> Collections
-						.singleton(viewResolver).stream());
 
+		List<ViewResolver> viewResolvers = new ArrayList<>();
+		viewResolvers.add(viewResolver);
 
-		result.writeTo(exchange).block();
+		StrategiesSupplier mockConfig = mock(StrategiesSupplier.class);
+		when(mockConfig.viewResolvers()).thenReturn(viewResolvers::stream);
+
+		result.writeTo(exchange, mockConfig).block();
 	}
 
 	@Test

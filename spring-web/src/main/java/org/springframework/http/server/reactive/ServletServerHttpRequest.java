@@ -82,6 +82,11 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
+	public String getContextPath() {
+		return getServletRequest().getContextPath();
+	}
+
+	@Override
 	protected URI initUri() throws URISyntaxException {
 		StringBuffer url = this.request.getRequestURL();
 		String query = this.request.getQueryString();

@@ -53,8 +53,8 @@ public class Jaxb2XmlEncoder extends AbstractSingleValueEncoder<Object> {
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
-		if (super.canEncode(elementType, mimeType, hints)) {
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
+		if (super.canEncode(elementType, mimeType)) {
 			Class<?> outputClass = elementType.getRawClass();
 			return (outputClass.isAnnotationPresent(XmlRootElement.class) ||
 					outputClass.isAnnotationPresent(XmlType.class));

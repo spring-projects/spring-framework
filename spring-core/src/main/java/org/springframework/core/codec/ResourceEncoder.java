@@ -50,24 +50,29 @@ public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 	}
 
 	public ResourceEncoder(int bufferSize) {
-		super(MimeTypeUtils.ALL);
+		super(MimeTypeUtils.APPLICATION_OCTET_STREAM, MimeTypeUtils.ALL);
 		Assert.isTrue(bufferSize > 0, "'bufferSize' must be larger than 0");
 		this.bufferSize = bufferSize;
 	}
 
 
 	@Override
-	public boolean canEncode(ResolvableType elementType, MimeType mimeType, Map<String, Object> hints) {
+	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
 		Class<?> clazz = elementType.getRawClass();
-		return (super.canEncode(elementType, mimeType, hints) && Resource.class.isAssignableFrom(clazz));
+		return (super.canEncode(elementType, mimeType) && Resource.class.isAssignableFrom(clazz));
 	}
 
 	@Override
 	protected Flux<DataBuffer> encode(Resource resource, DataBufferFactory dataBufferFactory,
-			ResolvableType type, MimeType mimeType, Map<String, Object> hints) throws IOException {
+			ResolvableType type, MimeType mimeType, Map<String, Object> hints) {
 
-		ReadableByteChannel channel = resource.readableChannel();
-		return DataBufferUtils.read(channel, dataBufferFactory, bufferSize);
+		try {
+			ReadableByteChannel channel = resource.readableChannel();
+			return DataBufferUtils.read(channel, dataBufferFactory, this.bufferSize);
+		}
+		catch (IOException ex) {
+			return Flux.error(ex);
+		}
 	}
 
 }

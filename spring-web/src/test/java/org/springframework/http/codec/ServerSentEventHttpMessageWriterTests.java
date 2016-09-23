@@ -46,20 +46,19 @@ public class ServerSentEventHttpMessageWriterTests extends AbstractDataBufferAll
 
 	@Test
 	public void nullMimeType() {
-		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class), null,
-				Collections.emptyMap()));
+		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class), null));
 	}
 
 	@Test
 	public void unsupportedMimeType() {
 		assertFalse(messageWriter.canWrite(ResolvableType.forClass(Object.class),
-				new MediaType("foo", "bar"), Collections.emptyMap()));
+				new MediaType("foo", "bar")));
 	}
 
 	@Test
 	public void supportedMimeType() {
 		assertTrue(messageWriter.canWrite(ResolvableType.forClass(Object.class),
-				new MediaType("text", "event-stream"), Collections.emptyMap()));
+				new MediaType("text", "event-stream")));
 	}
 
 	@Test

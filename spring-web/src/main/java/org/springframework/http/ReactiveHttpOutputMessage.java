@@ -53,7 +53,7 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * Use the given {@link Publisher} to write the body of the message to the underlying
 	 * HTTP layer.
 	 * @param body the body content publisher
-	 * @return a publisher that indicates completion or error.
+	 * @return a {@link Mono} that indicates completion or error
 	 */
 	Mono<Void> writeWith(Publisher<DataBuffer> body);
 
@@ -62,7 +62,7 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * message to the underlying HTTP layer, flushing after each
 	 * {@code Publisher<DataBuffer>}.
 	 * @param body the body content publisher
-	 * @return a publisher that indicates completion or error.
+	 * @return a {@link Mono} that indicates completion or error
 	 */
 	Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body);
 
@@ -74,6 +74,7 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * <p>This method should be automatically invoked at the end of message
 	 * processing so typically applications should not have to invoke it.
 	 * If invoked multiple times it should have no side effects.
+	 * @return a {@link Mono} that indicates completion or error
 	 */
 	Mono<Void> setComplete();
 
