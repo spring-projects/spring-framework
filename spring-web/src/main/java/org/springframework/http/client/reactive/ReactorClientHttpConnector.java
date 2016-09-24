@@ -21,6 +21,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.config.ClientOptions;
+import reactor.ipc.netty.http.HttpClient;
 import reactor.ipc.netty.http.HttpException;
 import reactor.ipc.netty.http.HttpInbound;
 
@@ -30,12 +31,12 @@ import org.springframework.http.HttpMethod;
  * Reactor-Netty implementation of {@link ClientHttpConnector}
  *
  * @author Brian Clozel
+ * @see HttpClient
  * @since 5.0
- * @see reactor.ipc.netty.http.HttpClient
  */
 public class ReactorClientHttpConnector implements ClientHttpConnector {
 
-	private final ClientOptions clientOptions;
+	private final HttpClient httpClient;
 
 
 	/**
@@ -50,7 +51,7 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	 * Create a Reactor Netty {@link ClientHttpConnector} with the given {@link ClientOptions}
 	 */
 	public ReactorClientHttpConnector(ClientOptions clientOptions) {
-		this.clientOptions = clientOptions;
+		this.httpClient = HttpClient.create(clientOptions);
 	}
 
 
@@ -58,14 +59,14 @@ public class ReactorClientHttpConnector implements ClientHttpConnector {
 	public Mono<ClientHttpResponse> connect(HttpMethod method, URI uri,
 			Function<? super ClientHttpRequest, Mono<Void>> requestCallback) {
 
-		return reactor.ipc.netty.http.HttpClient.create(this.clientOptions)
+		return httpClient
 				.request(io.netty.handler.codec.http.HttpMethod.valueOf(method.name()),
 						uri.toString(),
 						httpClientRequest -> requestCallback
 								.apply(new ReactorClientHttpRequest(method, uri, httpClientRequest)))
 				.cast(HttpInbound.class)
 				.otherwise(HttpException.class, exc -> Mono.just(exc.getChannel()))
-				.map(httpInbound -> new ReactorClientHttpResponse(httpInbound));
+				.map(ReactorClientHttpResponse::new);
 	}
 
 }
