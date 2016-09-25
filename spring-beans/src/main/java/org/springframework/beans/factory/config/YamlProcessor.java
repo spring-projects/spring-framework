@@ -37,6 +37,7 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.parser.ParserException;
 import org.yaml.snakeyaml.reader.UnicodeReader;
 
+import org.springframework.core.CollectionFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -45,6 +46,7 @@ import org.springframework.util.StringUtils;
  * Base class for YAML factories.
  *
  * @author Dave Syer
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public abstract class YamlProcessor {
@@ -217,7 +219,7 @@ public abstract class YamlProcessor {
 	}
 
 	private boolean process(Map<String, Object> map, MatchCallback callback) {
-		Properties properties = new Properties();
+		Properties properties = CollectionFactory.createStringAdaptingProperties();
 		properties.putAll(getFlattenedMap(map));
 
 		if (this.documentMatchers.isEmpty()) {
@@ -302,21 +304,23 @@ public abstract class YamlProcessor {
 				}
 			}
 			else {
-				result.put(key, value != null ? value : "");
+				result.put(key, (value != null ? value : ""));
 			}
 		}
 	}
 
 
 	/**
-	 * Callback interface used to process properties in a resulting map.
+	 * Callback interface used to process the YAML parsing results.
 	 */
 	public interface MatchCallback {
 
 		/**
-		 * Process the properties.
-		 * @param properties the properties to process
-		 * @param map a mutable result map
+		 * Process the given representation of the parsing results.
+		 * @param properties the properties to process (as a flattened
+		 * representation with indexed keys in case of a collection or map)
+		 * @param map the result map (preserving the original value structure
+		 * in the YAML document)
 		 */
 		void process(Properties properties, Map<String, Object> map);
 	}
