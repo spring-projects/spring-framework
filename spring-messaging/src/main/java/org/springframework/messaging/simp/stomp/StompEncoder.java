@@ -20,7 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -47,7 +47,7 @@ public final class StompEncoder  {
 
 	private static final byte COLON = ':';
 
-	private final Log logger = LogFactory.getLog(StompEncoder.class);
+	private static final Log logger = LogFactory.getLog(StompEncoder.class);
 
 
 	/**
@@ -79,6 +79,7 @@ public final class StompEncoder  {
 				}
 				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
 			}
+
 			else {
 				StompCommand command = StompHeaderAccessor.getCommand(headers);
 				if (command == null) {
@@ -100,8 +101,8 @@ public final class StompEncoder  {
 		}
 	}
 
-	private void writeHeaders(StompCommand command, Map<String, Object> headers, byte[] payload, DataOutputStream output)
-			throws IOException {
+	private void writeHeaders(StompCommand command, Map<String, Object> headers, byte[] payload,
+			DataOutputStream output) throws IOException {
 
 		@SuppressWarnings("unchecked")
 		Map<String,List<String>> nativeHeaders =
@@ -125,7 +126,7 @@ public final class StompEncoder  {
 			List<String> values = entry.getValue();
 			if (StompCommand.CONNECT.equals(command) &&
 					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
-				values = Arrays.asList(StompHeaderAccessor.getPasscode(headers));
+				values = Collections.singletonList(StompHeaderAccessor.getPasscode(headers));
 			}
 
 			byte[] encodedKey = encodeHeaderString(entry.getKey(), shouldEscape);
