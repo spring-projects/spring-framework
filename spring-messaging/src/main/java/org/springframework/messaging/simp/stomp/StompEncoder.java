@@ -81,7 +81,10 @@ public final class StompEncoder  {
 			}
 			else {
 				StompCommand command = StompHeaderAccessor.getCommand(headers);
-				Assert.notNull(command, "Missing STOMP command: " + headers);
+				if (command == null) {
+					throw new IllegalStateException("Missing STOMP command: " + headers);
+				}
+
 				output.write(command.toString().getBytes(StandardCharsets.UTF_8));
 				output.write(LF);
 				writeHeaders(command, headers, payload, output);
@@ -115,22 +118,25 @@ public final class StompEncoder  {
 		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
 
 		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
-			byte[] key = encodeHeaderString(entry.getKey(), shouldEscape);
 			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {
 				continue;
 			}
+
 			List<String> values = entry.getValue();
 			if (StompCommand.CONNECT.equals(command) &&
 					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
 				values = Arrays.asList(StompHeaderAccessor.getPasscode(headers));
 			}
+
+			byte[] encodedKey = encodeHeaderString(entry.getKey(), shouldEscape);
 			for (String value : values) {
-				output.write(key);
+				output.write(encodedKey);
 				output.write(COLON);
 				output.write(encodeHeaderString(value, shouldEscape));
 				output.write(LF);
 			}
 		}
+
 		if (command.requiresContentLength()) {
 			int contentLength = payload.length;
 			output.write("content-length:".getBytes(StandardCharsets.UTF_8));
