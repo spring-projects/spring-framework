@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.messaging.simp.stomp;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,14 +39,15 @@ import org.springframework.util.Assert;
  * @author Andy Wilkinson
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @see StompDecoder
  */
-public final class StompEncoder  {
+public class StompEncoder  {
 
 	private static final byte LF = '\n';
 
 	private static final byte COLON = ':';
 
-	private final Log logger = LogFactory.getLog(StompEncoder.class);
+	private static final Log logger = LogFactory.getLog(StompEncoder.class);
 
 
 	/**
@@ -78,9 +79,13 @@ public final class StompEncoder  {
 				}
 				output.write(StompDecoder.HEARTBEAT_PAYLOAD);
 			}
+
 			else {
 				StompCommand command = StompHeaderAccessor.getCommand(headers);
-				Assert.notNull(command, "Missing STOMP command: " + headers);
+				if (command == null) {
+					throw new IllegalStateException("Missing STOMP command: " + headers);
+				}
+
 				output.write(command.toString().getBytes(StompDecoder.UTF8_CHARSET));
 				output.write(LF);
 				writeHeaders(command, headers, payload, output);
@@ -96,8 +101,8 @@ public final class StompEncoder  {
 		}
 	}
 
-	private void writeHeaders(StompCommand command, Map<String, Object> headers, byte[] payload, DataOutputStream output)
-			throws IOException {
+	private void writeHeaders(StompCommand command, Map<String, Object> headers, byte[] payload,
+			DataOutputStream output) throws IOException {
 
 		@SuppressWarnings("unchecked")
 		Map<String,List<String>> nativeHeaders =
@@ -114,22 +119,25 @@ public final class StompEncoder  {
 		boolean shouldEscape = (command != StompCommand.CONNECT && command != StompCommand.CONNECTED);
 
 		for (Entry<String, List<String>> entry : nativeHeaders.entrySet()) {
-			byte[] key = encodeHeaderString(entry.getKey(), shouldEscape);
 			if (command.requiresContentLength() && "content-length".equals(entry.getKey())) {
 				continue;
 			}
+
 			List<String> values = entry.getValue();
 			if (StompCommand.CONNECT.equals(command) &&
 					StompHeaderAccessor.STOMP_PASSCODE_HEADER.equals(entry.getKey())) {
-				values = Arrays.asList(StompHeaderAccessor.getPasscode(headers));
+				values = Collections.singletonList(StompHeaderAccessor.getPasscode(headers));
 			}
+
+			byte[] encodedKey = encodeHeaderString(entry.getKey(), shouldEscape);
 			for (String value : values) {
-				output.write(key);
+				output.write(encodedKey);
 				output.write(COLON);
 				output.write(encodeHeaderString(value, shouldEscape));
 				output.write(LF);
 			}
 		}
+
 		if (command.requiresContentLength()) {
 			int contentLength = payload.length;
 			output.write("content-length:".getBytes(StompDecoder.UTF8_CHARSET));
