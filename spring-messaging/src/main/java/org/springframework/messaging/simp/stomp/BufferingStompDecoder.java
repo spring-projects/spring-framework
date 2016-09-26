@@ -102,7 +102,7 @@ public class BufferingStompDecoder {
 		this.chunks.add(newBuffer);
 		checkBufferLimits();
 
-		if (getExpectedContentLength() != null && getBufferSize() < this.expectedContentLength) {
+		if (this.expectedContentLength != null && getBufferSize() < this.expectedContentLength) {
 			return Collections.<Message<byte[]>>emptyList();
 		}
 
@@ -139,12 +139,12 @@ public class BufferingStompDecoder {
 		if (this.expectedContentLength != null) {
 			if (this.expectedContentLength > this.bufferSizeLimit) {
 				throw new StompConversionException(
-						"'content-length' header value " + this.expectedContentLength +
-						"  exceeds configured message buffer size limit " + this.bufferSizeLimit);
+						"STOMP 'content-length' header value " + this.expectedContentLength +
+						"  exceeds configured buffer size limit " + this.bufferSizeLimit);
 			}
 		}
 		if (getBufferSize() > this.bufferSizeLimit) {
-			throw new StompConversionException("The configured stomp frame buffer size limit of " +
+			throw new StompConversionException("The configured STOMP buffer size limit of " +
 					this.bufferSizeLimit + " bytes has been exceeded");
 		}
 	}
