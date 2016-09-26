@@ -30,21 +30,21 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * A {@code MessageHeaderAccessor} to use when creating a {@code Message} from a
- * decoded STOMP frame, or when encoding a {@code Message} to a STOMP frame.
+ * A {@code MessageHeaderAccessor} to use when creating a {@code Message} from
+ * a decoded STOMP frame, or when encoding a {@code Message} to a STOMP frame.
  *
- * <p>When created from STOMP frame content, the actual STOMP headers are stored
- * in the native header sub-map managed by the parent class
+ * <p>When created from STOMP frame content, the actual STOMP headers are
+ * stored in the native header sub-map managed by the parent class
  * {@link org.springframework.messaging.support.NativeMessageHeaderAccessor}
- * while the parent class
- * {@link org.springframework.messaging.simp.SimpMessageHeaderAccessor} manages
- * common processing headers some of which are based on STOMP headers (e.g.
- * destination, content-type, etc).
+ * while the parent class {@link SimpMessageHeaderAccessor} manages common
+ * processing headers some of which are based on STOMP headers
+ * (e.g. destination, content-type, etc).
  *
  * <p>An instance of this class can also be created by wrapping an existing
  * {@code Message}. That message may have been created with the more generic
@@ -503,12 +503,8 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	}
 
 	public static Integer getContentLength(Map<String, List<String>> nativeHeaders) {
-		if (nativeHeaders.containsKey(STOMP_CONTENT_LENGTH_HEADER)) {
-			List<String> values = nativeHeaders.get(STOMP_CONTENT_LENGTH_HEADER);
-			String value = (values != null ? values.get(0) : null);
-			return Integer.valueOf(value);
-		}
-		return null;
+		List<String> values = nativeHeaders.get(STOMP_CONTENT_LENGTH_HEADER);
+		return (!CollectionUtils.isEmpty(values) ? Integer.valueOf(values.get(0)) : null);
 	}
 
 
