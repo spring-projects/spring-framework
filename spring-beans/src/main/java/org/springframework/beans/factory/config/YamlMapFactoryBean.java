@@ -108,15 +108,14 @@ public class YamlMapFactoryBean extends YamlProcessor implements FactoryBean<Map
 
 	/**
 	 * Template method that subclasses may override to construct the object
-	 * returned by this factory. The default implementation returns the
-	 * merged Map instance.
+	 * returned by this factory.
 	 * <p>Invoked lazily the first time {@link #getObject()} is invoked in
 	 * case of a shared singleton; else, on each {@link #getObject()} call.
+	 * <p>The default implementation returns the merged {@code Map} instance.
 	 * @return the object returned by this factory
 	 * @see #process(java.util.Map, MatchCallback)
 	 */
 	protected Map<String, Object> createMap() {
-
 		Map<String, Object> result = new LinkedHashMap<>();
 		process((properties, map) -> merge(result, map));
 		return result;
