@@ -615,8 +615,8 @@ public class DefaultPersistenceUnitManager
 			return null;
 		}
 		try {
-			Resource res = this.resourcePatternResolver.getResource(this.defaultPersistenceUnitRootLocation);
-			return res.getURL();
+			URL url = this.resourcePatternResolver.getResource(this.defaultPersistenceUnitRootLocation).getURL();
+			return (ResourceUtils.isJarURL(url) ? ResourceUtils.extractJarFileURL(url) : url);
 		}
 		catch (IOException ex) {
 			throw new PersistenceException("Unable to resolve persistence unit root URL", ex);
