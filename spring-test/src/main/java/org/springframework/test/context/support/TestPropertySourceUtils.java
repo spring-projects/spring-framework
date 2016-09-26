@@ -132,7 +132,7 @@ public abstract class TestPropertySourceUtils {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing inlined properties for TestPropertySource attributes %s", attrs));
 			}
-			properties.addAll(0, Arrays.<String>asList(attrs.getProperties()));
+			properties.addAll(0, Arrays.asList(attrs.getProperties()));
 			if (!attrs.isInheritProperties()) {
 				break;
 			}

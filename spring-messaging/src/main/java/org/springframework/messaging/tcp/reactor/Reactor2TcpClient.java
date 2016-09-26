@@ -299,8 +299,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 		@Override
 		public ReactorConfiguration read() {
-			return new ReactorConfiguration(
-					Collections.<DispatcherConfiguration>emptyList(), "sync", new Properties());
+			return new ReactorConfiguration(Collections.emptyList(), "sync", new Properties());
 		}
 	}
 

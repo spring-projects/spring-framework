@@ -134,7 +134,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public List<TriggerTask> getTriggerTaskList() {
 		return (this.triggerTasks != null? Collections.unmodifiableList(this.triggerTasks) :
-				Collections.<TriggerTask>emptyList());
+				Collections.emptyList());
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public List<CronTask> getCronTaskList() {
 		return (this.cronTasks != null ? Collections.unmodifiableList(this.cronTasks) :
-				Collections.<CronTask>emptyList());
+				Collections.emptyList());
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public List<IntervalTask> getFixedRateTaskList() {
 		return (this.fixedRateTasks != null ? Collections.unmodifiableList(this.fixedRateTasks) :
-				Collections.<IntervalTask>emptyList());
+				Collections.emptyList());
 	}
 
 	/**
@@ -227,7 +227,7 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 */
 	public List<IntervalTask> getFixedDelayTaskList() {
 		return (this.fixedDelayTasks != null ? Collections.unmodifiableList(this.fixedDelayTasks) :
-				Collections.<IntervalTask>emptyList());
+				Collections.emptyList());
 	}
 
 

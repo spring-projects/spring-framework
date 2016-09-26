@@ -120,7 +120,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(String type, String subtype) {
-		this(type, subtype, Collections.<String, String>emptyMap());
+		this(type, subtype, Collections.emptyMap());
 	}
 
 	/**

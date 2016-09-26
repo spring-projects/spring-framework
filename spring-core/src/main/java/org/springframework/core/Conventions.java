@@ -50,13 +50,10 @@ public abstract class Conventions {
 	 * when searching for the 'primary' interface of a proxy.
 	 */
 	private static final Set<Class<?>> IGNORED_INTERFACES;
+
 	static {
-		IGNORED_INTERFACES = Collections.unmodifiableSet(
-				new HashSet<>(Arrays.<Class<?>>asList(
-						Serializable.class,
-						Externalizable.class,
-						Cloneable.class,
-						Comparable.class)));
+		IGNORED_INTERFACES = Collections.unmodifiableSet(new HashSet<>(
+				Arrays.asList(Serializable.class, Externalizable.class, Cloneable.class, Comparable.class)));
 	}
 
 

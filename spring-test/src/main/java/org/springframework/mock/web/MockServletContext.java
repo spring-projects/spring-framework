@@ -425,13 +425,13 @@ public class MockServletContext implements ServletContext {
 	@Override
 	@Deprecated
 	public Enumeration<Servlet> getServlets() {
-		return Collections.enumeration(Collections.<Servlet>emptySet());
+		return Collections.enumeration(Collections.emptySet());
 	}
 
 	@Override
 	@Deprecated
 	public Enumeration<String> getServletNames() {
-		return Collections.enumeration(Collections.<String>emptySet());
+		return Collections.enumeration(Collections.emptySet());
 	}
 
 	@Override

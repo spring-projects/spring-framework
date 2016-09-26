@@ -183,7 +183,7 @@ public class ExpressionState {
 
 	public void enterScope() {
 		ensureVariableScopesInitialized();
-		this.variableScopes.push(new VariableScope(Collections.<String,Object>emptyMap()));
+		this.variableScopes.push(new VariableScope(Collections.emptyMap()));
 		this.scopeRootObjects.push(getActiveContextObject());
 	}
 

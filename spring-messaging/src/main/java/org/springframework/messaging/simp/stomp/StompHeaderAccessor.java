@@ -182,7 +182,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 	Map<String, List<String>> getNativeHeaders() {
 		@SuppressWarnings("unchecked")
 		Map<String, List<String>> map = (Map<String, List<String>>) getHeader(NATIVE_HEADERS);
-		return (map != null ? map : Collections.<String, List<String>>emptyMap());
+		return (map != null ? map : Collections.emptyMap());
 	}
 
 	public StompCommand updateStompCommandAsClientMessage() {
@@ -242,7 +242,7 @@ public class StompHeaderAccessor extends SimpMessageHeaderAccessor {
 
 	public Set<String> getAcceptVersion() {
 		String rawValue = getFirstNativeHeader(STOMP_ACCEPT_VERSION_HEADER);
-		return (rawValue != null ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.<String>emptySet());
+		return (rawValue != null ? StringUtils.commaDelimitedListToSet(rawValue) : Collections.emptySet());
 	}
 
 	public void setHost(String host) {

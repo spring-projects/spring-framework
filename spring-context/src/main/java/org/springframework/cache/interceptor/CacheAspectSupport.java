@@ -555,7 +555,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		public Collection<CacheOperationContext> get(Class<? extends CacheOperation> operationClass) {
 			Collection<CacheOperationContext> result = this.contexts.get(operationClass);
-			return (result != null ? result : Collections.<CacheOperationContext>emptyList());
+			return (result != null ? result : Collections.emptyList());
 		}
 
 		public boolean isSynchronized() {

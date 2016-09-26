@@ -269,7 +269,7 @@ public class MediaType extends MimeType implements Serializable {
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype) {
-		super(type, subtype, Collections.<String, String>emptyMap());
+		super(type, subtype, Collections.emptyMap());
 	}
 
 	/**
@@ -463,7 +463,7 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public static List<MediaType> parseMediaTypes(List<String> mediaTypes) {
 		if (CollectionUtils.isEmpty(mediaTypes)) {
-			return Collections.<MediaType>emptyList();
+			return Collections.emptyList();
 		}
 		else if (mediaTypes.size() == 1) {
 			return parseMediaTypes(mediaTypes.get(0));

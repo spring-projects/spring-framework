@@ -213,7 +213,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		public Enumeration<String> getHeaders(String name) {
 			List<String> value = this.headers.get(name);
-			return (Collections.enumeration(value != null ? value : Collections.<String>emptySet()));
+			return (Collections.enumeration(value != null ? value : Collections.emptySet()));
 		}
 
 		@Override

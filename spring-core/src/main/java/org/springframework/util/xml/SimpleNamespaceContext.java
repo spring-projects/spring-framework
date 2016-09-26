@@ -87,7 +87,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		}
 		else {
 			Set<String> prefixes = this.namespaceUriToPrefixes.get(namespaceUri);
-			return (prefixes != null ?  Collections.unmodifiableSet(prefixes) : Collections.<String>emptySet());
+			return (prefixes != null ?  Collections.unmodifiableSet(prefixes) : Collections.emptySet());
 		}
 	}
 
