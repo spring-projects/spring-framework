@@ -120,6 +120,24 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				);
 	}
 
+	@Test
+	public void sseAsEventWithoutAcceptHeader() throws Exception {
+		Flux<String> result = this.webClient
+				.perform(get("http://localhost:" + port + "/sse/event"))
+				.extract(bodyStream(String.class))
+				.filter(s -> !s.equals("\n"))
+				.map(s -> s.replace("\n", ""))
+				.take(2);
+
+		TestSubscriber
+				.subscribe(result)
+				.await(Duration.ofSeconds(5))
+				.assertValues(
+						"id:0:bardata:foo",
+						"id:1:bardata:foo"
+				);
+	}
+
 	@RestController
 	@SuppressWarnings("unused")
 	static class SseController {

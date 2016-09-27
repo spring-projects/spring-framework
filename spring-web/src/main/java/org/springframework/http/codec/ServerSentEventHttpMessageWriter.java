@@ -63,7 +63,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {
-		return mediaType == null || TEXT_EVENT_STREAM.isCompatibleWith(mediaType);
+		return mediaType == null || TEXT_EVENT_STREAM.isCompatibleWith(mediaType) ||
+				ServerSentEvent.class.isAssignableFrom(elementType.getRawClass());
 	}
 
 	@Override
