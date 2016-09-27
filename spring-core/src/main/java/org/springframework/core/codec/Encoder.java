@@ -43,7 +43,7 @@ public interface Encoder<T> {
 	 * Whether the encoder supports the given source element type and the MIME
 	 * type for the output stream.
 	 * @param elementType the type of elements in the source stream
-	 * @param mimeType the MIME type for the output stream
+	 * @param mimeType the MIME type for the output stream, can be {@code null} if not specified.
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
 	boolean canEncode(ResolvableType elementType, MimeType mimeType);

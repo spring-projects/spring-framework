@@ -42,7 +42,7 @@ public interface Decoder<T> {
 	 * Whether the decoder supports the given target element type and the MIME
 	 * type of the source stream.
 	 * @param elementType the target element type for the output stream
-	 * @param mimeType the mime type associated with the stream to decode
+	 * @param mimeType the mime type associated with the stream to decode, can be {@code null} if not specified.
 	 * @return {@code true} if supported, {@code false} otherwise
 	 */
 	boolean canDecode(ResolvableType elementType, MimeType mimeType);

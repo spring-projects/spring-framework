@@ -31,6 +31,7 @@ import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.Pojo;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.tests.TestSubscriber;
 
 import static org.junit.Assert.*;
@@ -45,8 +46,12 @@ public class Jackson2JsonEncoderTests extends AbstractDataBufferAllocatingTestCa
 
 	@Test
 	public void canEncode() {
-		assertTrue(this.encoder.canEncode(null, MediaType.APPLICATION_JSON));
-		assertFalse(this.encoder.canEncode(null, MediaType.APPLICATION_XML));
+		ResolvableType pojoType = ResolvableType.forClass(Pojo.class);
+		assertTrue(this.encoder.canEncode(pojoType, MediaType.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(pojoType, null));
+		assertFalse(this.encoder.canEncode(pojoType, MediaType.APPLICATION_XML));
+		ResolvableType sseType = ResolvableType.forClass(ServerSentEvent.class);
+		assertFalse(this.encoder.canEncode(sseType, MediaType.APPLICATION_JSON));
 	}
 
 	@Test

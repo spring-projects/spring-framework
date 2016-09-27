@@ -23,6 +23,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -63,10 +64,9 @@ public class Jackson2JsonDecoder extends AbstractJackson2Codec implements Decode
 
 	@Override
 	public boolean canDecode(ResolvableType elementType, MimeType mimeType) {
-		if (mimeType == null) {
-			return true;
-		}
-		return JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
+		JavaType javaType = this.mapper.getTypeFactory().constructType(elementType.getType());
+		return this.mapper.canDeserialize(javaType) &&
+				(mimeType == null || JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
 	}
 
 	@Override

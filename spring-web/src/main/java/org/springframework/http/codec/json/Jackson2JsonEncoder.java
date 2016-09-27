@@ -68,10 +68,8 @@ public class Jackson2JsonEncoder extends AbstractJackson2Codec implements Encode
 
 	@Override
 	public boolean canEncode(ResolvableType elementType, MimeType mimeType) {
-		if (mimeType == null) {
-			return true;
-		}
-		return JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType));
+		return this.mapper.canSerialize(elementType.getRawClass()) &&
+				(mimeType == null || JSON_MIME_TYPES.stream().anyMatch(m -> m.isCompatibleWith(mimeType)));
 	}
 
 	@Override
