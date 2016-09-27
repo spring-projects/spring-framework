@@ -405,11 +405,14 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		if (jaxb2Present) {
 			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
-		writers.add(new Jackson2ServerHttpMessageWriter(new ServerSentEventHttpMessageWriter(sseDataEncoders)));
 		if (jackson2Present) {
 			Jackson2JsonEncoder jacksonEncoder = new Jackson2JsonEncoder();
 			writers.add(new Jackson2ServerHttpMessageWriter(new EncoderHttpMessageWriter<>(jacksonEncoder)));
 			sseDataEncoders.add(jacksonEncoder);
+			writers.add(new Jackson2ServerHttpMessageWriter(new ServerSentEventHttpMessageWriter(sseDataEncoders)));
+		}
+		else {
+			writers.add(new ServerSentEventHttpMessageWriter(sseDataEncoders));
 		}
 	}
 	/**

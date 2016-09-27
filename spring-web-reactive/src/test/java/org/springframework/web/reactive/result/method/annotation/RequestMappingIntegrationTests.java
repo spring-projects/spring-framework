@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,9 +60,15 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 	}
 
 	@Test
-	public void streamResult() throws Exception {
+	public void longStreamResult() throws Exception {
 		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/stream-result", null, String[].class).getBody());
+		assertArrayEquals(expected, performGet("/long-stream-result", null, String[].class).getBody());
+	}
+
+	@Test
+	public void objectStreamResultWithAllMediaType() throws Exception {
+		String expected = "[{\"name\":\"bar\"}]";
+		assertEquals(expected, performGet("/object-stream-result", MediaType.ALL, String.class).getBody());
 	}
 
 
@@ -80,11 +87,36 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 			return Flux.just("Hello ", name, "!");
 		}
 
-		@GetMapping("/stream-result")
-		public Publisher<Long> stringStreamResponseBody() {
+		@GetMapping("/long-stream-result")
+		public Publisher<Long> longStreamResponseBody() {
 			return Flux.intervalMillis(100).take(5);
 		}
 
+		@GetMapping("/object-stream-result")
+		public Publisher<Foo> objectStreamResponseBody() {
+			return Flux.just(new Foo("bar"));
+		}
+
+	}
+
+	private static class Foo {
+
+		private String name;
+
+		public Foo() {
+		}
+
+		public Foo(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
 	}
 
 }
