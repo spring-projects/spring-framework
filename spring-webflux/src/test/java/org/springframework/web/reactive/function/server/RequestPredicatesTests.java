@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,6 +125,98 @@ public class RequestPredicatesTests {
 		RequestPredicate predicate = RequestPredicates.accept(json);
 		MockServerRequest request = MockServerRequest.builder().header("Accept", json.toString()).build();
 		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void pathExtension() throws Exception {
+		URI uri = URI.create("http://localhost/file.txt");
+		RequestPredicate predicate = RequestPredicates.pathExtension("txt");
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		predicate = RequestPredicates.pathExtension("bar");
+		assertFalse(predicate.test(request));
+
+		uri = URI.create("http://localhost/file.foo");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertFalse(predicate.test(request));
+
+	}
+
+	@Test
+	public void queryParam() throws Exception {
+		MockServerRequest request = MockServerRequest.builder().queryParam("foo", "bar").build();
+		RequestPredicate predicate = RequestPredicates.queryParam("foo", s -> s.equals("bar"));
+		assertTrue(predicate.test(request));
+
+		predicate = RequestPredicates.queryParam("foo", s -> s.equals("baz"));
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void json() throws Exception {
+		RequestPredicate predicate = RequestPredicates.json();
+		MockServerRequest request = MockServerRequest.builder().header("Accept", MediaType.APPLICATION_JSON.toString()).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().header("Accept", MediaType.TEXT_HTML.toString()).build();
+		assertFalse(predicate.test(request));
+
+		URI uri = URI.create("http://localhost/file.json");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		uri = URI.create("http://localhost/file.html");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertFalse(predicate.test(request));
+
+		request = MockServerRequest.builder().build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void html() throws Exception {
+		RequestPredicate predicate = RequestPredicates.html();
+		MockServerRequest request = MockServerRequest.builder().header("Accept", MediaType.TEXT_HTML.toString()).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().header("Accept", MediaType.APPLICATION_JSON.toString()).build();
+		assertFalse(predicate.test(request));
+
+		URI uri = URI.create("http://localhost/file.html");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		uri = URI.create("http://localhost/file.json");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertFalse(predicate.test(request));
+
+		request = MockServerRequest.builder().build();
+		assertFalse(predicate.test(request));
+	}
+
+	@Test
+	public void xml() throws Exception {
+		RequestPredicate predicate = RequestPredicates.xml();
+		MockServerRequest request = MockServerRequest.builder().header("Accept", MediaType.TEXT_XML.toString()).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().header("Accept", MediaType.APPLICATION_XML.toString()).build();
+		assertTrue(predicate.test(request));
+
+		request = MockServerRequest.builder().header("Accept", MediaType.TEXT_HTML.toString()).build();
+		assertFalse(predicate.test(request));
+
+		URI uri = URI.create("http://localhost/file.xml");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertTrue(predicate.test(request));
+
+		uri = URI.create("http://localhost/file.json");
+		request = MockServerRequest.builder().uri(uri).build();
+		assertFalse(predicate.test(request));
 
 		request = MockServerRequest.builder().build();
 		assertFalse(predicate.test(request));

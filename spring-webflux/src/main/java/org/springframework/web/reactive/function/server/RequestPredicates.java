@@ -36,6 +36,7 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.util.ParsingPathMatcher;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful request matching operations, such as
@@ -85,7 +86,10 @@ public abstract class RequestPredicates {
 	 * @return a predicate that tests against the given path pattern
 	 */
 	public static RequestPredicate path(String pattern, PathMatcher pathMatcher) {
-		return new PathPredicate(pattern, pathMatcher);
+		Assert.notNull(pattern, "'pattern' must not be null");
+		Assert.notNull(pathMatcher, "'pathMatcher' must not be null");
+
+		return new PathMatchingPredicate(pattern, pathMatcher);
 	}
 
 	/**
@@ -95,7 +99,7 @@ public abstract class RequestPredicates {
 	 * @return a predicate that tests against the given header predicate
 	 */
 	public static RequestPredicate headers(Predicate<ServerRequest.Headers> headersPredicate) {
-		return new HeaderPredicates(headersPredicate);
+		return new HeadersPredicate(headersPredicate);
 	}
 
 	/**
@@ -221,6 +225,90 @@ public abstract class RequestPredicates {
 		return method(HttpMethod.OPTIONS).and(path(pattern));
 	}
 
+	/**
+	 * Return a {@code RequestPredicate} that matches if the request's path has the given extension.
+	 * @param extension the path extension to match against
+	 * @return a predicate that matches if the request's path has the given file extension
+	 */
+	public static RequestPredicate pathExtension(String extension) {
+		Assert.notNull(extension, "'extension' must not be null");
+		return pathExtension(extension::equalsIgnoreCase);
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that matches if the request's path matches the given
+	 * predicate.
+	 * @param extensionPredicate the predicate to test against the request path extension
+	 * @return a predicate that matches if the given predicate matches against the request's path
+	 * file extension
+	 */
+	public static RequestPredicate pathExtension(Predicate<String> extensionPredicate) {
+		Assert.notNull(extensionPredicate, "'extensionPredicate' must not be null");
+		return request -> {
+			String pathExtension = UriUtils.extractFileExtension(request.path());
+			return extensionPredicate.test(pathExtension);
+		};
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that tests the request's query parameter of the given name
+	 * against the given predicate.
+	 * @param name the name of the query parameter to test against
+	 * @param predicate predicate to test against the query parameter value
+	 * @return a predicate that matches the given predicate against the query parameter of the given
+	 * name
+	 * @see ServerRequest#queryParam(String)
+	 */
+	public static RequestPredicate queryParam(String name, Predicate<String> predicate) {
+		return request -> {
+			Optional<String> s = request.queryParam(name);
+			return s.filter(predicate).isPresent();
+		};
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that matches JSON requests. The returned predicate
+	 * matches if the request has {@code application/json} in the {@code Accept} header, or if the
+	 * request path has a {@code .json} file extension.
+	 *
+	 * @return a predicate that matches JSON
+	 * @see #accept(MediaType...)
+	 * @see #pathExtension(String)
+	 */
+	public static RequestPredicate json() {
+		return accept(MediaType.APPLICATION_JSON)
+				.or(pathExtension("json"));
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that matches HTML requests. The returned predicate
+	 * matches if the request has {@code text/html} in the {@code Accept} header, or if the request
+	 * path has a {@code .html} file extension.
+	 *
+	 * @return a predicate that matches HTML requests
+	 * @see #accept(MediaType...)
+	 * @see #pathExtension(String)
+	 */
+	public static RequestPredicate html() {
+		return accept(MediaType.TEXT_HTML)
+				.or(pathExtension("html"));
+	}
+
+	/**
+	 * Return a {@code RequestPredicate} that matches XML requests. The returned predicate
+	 * matches if the request has {@code text/xml} or {@code application/xml} in the {@code Accept}
+	 * header, or if the request path has a {@code .xml} file extension.
+	 *
+	 * @return a predicate that matches XML requests
+	 * @see #accept(MediaType...)
+	 * @see #pathExtension(String)
+	 */
+	public static RequestPredicate xml() {
+		return accept(MediaType.TEXT_XML)
+				.or(accept(MediaType.APPLICATION_XML))
+				.or(pathExtension("xml"));
+	}
+
 	private static class HttpMethodPredicate implements RequestPredicate {
 
 		private final HttpMethod httpMethod;
@@ -236,13 +324,13 @@ public abstract class RequestPredicates {
 		}
 	}
 
-	private static class PathPredicate implements RequestPredicate {
+	private static class PathMatchingPredicate implements RequestPredicate {
 
 		private final String pattern;
 
 		private final PathMatcher pathMatcher;
 
-		public PathPredicate(String pattern, PathMatcher pathMatcher) {
+		public PathMatchingPredicate(String pattern, PathMatcher pathMatcher) {
 			Assert.notNull(pattern, "'pattern' must not be null");
 			Assert.notNull(pathMatcher, "'pathMatcher' must not be null");
 			this.pattern = pattern;
@@ -273,11 +361,11 @@ public abstract class RequestPredicates {
 		}
 	}
 
-	private static class HeaderPredicates implements RequestPredicate {
+	private static class HeadersPredicate implements RequestPredicate {
 
 		private final Predicate<ServerRequest.Headers> headersPredicate;
 
-		public HeaderPredicates(Predicate<ServerRequest.Headers> headersPredicate) {
+		public HeadersPredicate(Predicate<ServerRequest.Headers> headersPredicate) {
 			Assert.notNull(headersPredicate, "'headersPredicate' must not be null");
 			this.headersPredicate = headersPredicate;
 		}
