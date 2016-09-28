@@ -16,6 +16,7 @@
 
 package org.springframework.mock.http.server.reactive.test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -24,7 +25,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -57,6 +60,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return true;
 	}
 
+	@Override
 	public HttpStatus getStatusCode() {
 		return this.status;
 	}
@@ -104,5 +108,17 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	public DataBufferFactory bufferFactory() {
 		return this.bufferFactory;
 	}
+
+	public Mono<String> getBodyAsString() {
+
+		return Flux.from(body)
+				.reduce(bufferFactory.allocateBuffer(), (previous, current) -> {
+					previous.write(current);
+					DataBufferUtils.release(current);
+					return previous;
+				})
+				.map(buffer -> DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8));
+	}
+
 
 }

@@ -16,8 +16,8 @@
 
 package org.springframework.http.codec;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -28,17 +28,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -94,7 +89,7 @@ public class ResourceRegionHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE), is("bytes 0-5/39"));
 		assertThat(this.response.getHeaders().getContentLength(), is(6L));
 
-		Mono<String> result = reduceToString(this.response.getBody(), this.response.bufferFactory());
+		Mono<String> result = response.getBodyAsString();
 		TestSubscriber.subscribe(result).assertComplete().assertValues("Spring");
 	}
 
@@ -118,7 +113,7 @@ public class ResourceRegionHttpMessageWriterTests {
 		HttpHeaders headers = this.response.getHeaders();
 		assertThat(headers.getContentType().toString(), startsWith("multipart/byteranges;boundary=" + boundary));
 
-		Mono<String> result = reduceToString(this.response.getBody(), this.response.bufferFactory());
+		Mono<String> result = response.getBodyAsString();
 		TestSubscriber
 				.subscribe(result).assertNoError()
 				.assertComplete()
@@ -147,17 +142,6 @@ public class ResourceRegionHttpMessageWriterTests {
 
 					assertThat(ranges[16], is("--" + boundary + "--"));
 				});
-	}
-
-	private Mono<String> reduceToString(Publisher<DataBuffer> buffers, DataBufferFactory bufferFactory) {
-
-		return Flux.from(buffers)
-				.reduce(bufferFactory.allocateBuffer(), (previous, current) -> {
-					previous.write(current);
-					DataBufferUtils.release(current);
-					return previous;
-				})
-				.map(buffer -> DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8));
 	}
 
 }

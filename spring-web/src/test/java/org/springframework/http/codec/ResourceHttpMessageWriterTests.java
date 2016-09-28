@@ -21,17 +21,11 @@ import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
@@ -82,7 +76,7 @@ public class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getContentLength(), is(39L));
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 
-		Mono<String> result = reduceToString(this.response.getBody(), this.response.bufferFactory());
+		Mono<String> result = response.getBodyAsString();
 		TestSubscriber.subscribe(result).assertComplete().assertValues("Spring Framework test resource content.");
 	}
 
@@ -98,7 +92,7 @@ public class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 		assertThat(this.response.getHeaders().getContentLength(), is(6L));
 
-		Mono<String> result = reduceToString(this.response.getBody(), this.response.bufferFactory());
+		Mono<String> result = response.getBodyAsString();
 		TestSubscriber.subscribe(result).assertComplete().assertValues("Spring");
 	}
 
@@ -111,17 +105,6 @@ public class ResourceHttpMessageWriterTests {
 
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 		assertThat(this.response.getStatusCode(), is(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE));
-	}
-
-	private Mono<String> reduceToString(Publisher<DataBuffer> buffers, DataBufferFactory bufferFactory) {
-
-		return Flux.from(buffers)
-				.reduce(bufferFactory.allocateBuffer(), (previous, current) -> {
-					previous.write(current);
-					DataBufferUtils.release(current);
-					return previous;
-				})
-				.map(buffer -> DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8));
 	}
 
 }
