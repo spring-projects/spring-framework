@@ -18,6 +18,8 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -89,6 +91,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				servletRequest, this.dataBufferFactory, this.bufferSize);
 		ServletServerHttpResponse response = new ServletServerHttpResponse(
 				servletResponse, this.dataBufferFactory, this.bufferSize);
+		asyncContext.addListener(new HandlerAsyncEvent(request, response));
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(asyncContext);
 		this.handler.handle(request, response).subscribe(resultSubscriber);
 	}
@@ -127,4 +130,40 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 	}
 
+	private static final class HandlerAsyncEvent implements AsyncListener {
+		private final ServletServerHttpRequest request;
+		private final ServletServerHttpResponse response;
+
+		public HandlerAsyncEvent(ServletServerHttpRequest request,
+				ServletServerHttpResponse response) {
+			this.request = request;
+			this.response = response;
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) throws IOException {
+			// no op
+		}
+
+		@Override
+		public void onTimeout(AsyncEvent event) throws IOException {
+			Throwable t = event.getThrowable();
+			if (t == null) {
+				t = new IllegalStateException("Async operation timeout.");
+			}
+			request.onError(t);
+			response.onError(t);
+		}
+
+		@Override
+		public void onError(AsyncEvent event) throws IOException {
+			request.onError(event.getThrowable());
+			response.onError(event.getThrowable());
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) throws IOException {
+			// no op
+		}
+	}
 }

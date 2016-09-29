@@ -170,6 +170,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
+	void onError(Throwable t) {
+		if (this.bodyPublisher != null) {
+			this.bodyPublisher.onError(t);
+		}
+	}
+
 	private RequestBodyPublisher createBodyPublisher() throws IOException {
 		RequestBodyPublisher bodyPublisher = new RequestBodyPublisher(
 				this.request.getInputStream(), this.dataBufferFactory, this.bufferSize);

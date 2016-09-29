@@ -120,7 +120,7 @@ abstract class AbstractResponseBodyFlushProcessor implements Processor<Publisher
 
 	}
 
-	private void cancel() {
+	protected void cancel() {
 		this.subscription.cancel();
 	}
 
