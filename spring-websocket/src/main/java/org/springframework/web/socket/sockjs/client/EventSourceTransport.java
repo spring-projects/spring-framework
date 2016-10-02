@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,27 @@
 
 package org.springframework.web.socket.sockjs.client;
 
+import java.net.URI;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.socket.TextMessage;
+
 /**
- * A SockJS {@link Transport} that uses HTTP requests to simulate a WebSocket
+ * A SockJS {@link Transport} that uses HTTP EventSource to simulate a WebSocket
  * interaction. The {@code connect} method of the base {@code Transport} interface
  * is used to receive messages from the server while the
  * {@link #executeSendRequest} method here is used to send messages.
  *
- * @author Rossen Stoyanchev
- * @since 4.1
+ * @author Sebastian Lövdahl
+ * @since 5.0
  */
-public interface XhrTransport extends HttpTransport {
+public interface EventSourceTransport extends HttpTransport {
 
 	/**
-	 * An {@code XhrTransport} supports both the "xhr_streaming" and "xhr" SockJS
-	 * server transports. From a client perspective there is no implementation
-	 * difference.
-	 * <p>By default an {@code XhrTransport} will be used with "xhr_streaming"
-	 * first and then with "xhr", if the streaming fails to connect. In some
-	 * cases it may be useful to suppress streaming so that only "xhr" is used.
+	 * Execute a request to send the message to the server.
+	 *
+	 * @param transportUrl the URL for sending messages
+	 * @param message the message to send
 	 */
-	boolean isXhrStreamingDisabled();
-
+	void executeSendRequest(URI transportUrl, HttpHeaders headers, TextMessage message);
 }

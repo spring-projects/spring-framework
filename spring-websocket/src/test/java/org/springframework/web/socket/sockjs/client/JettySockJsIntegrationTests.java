@@ -52,6 +52,10 @@ public class JettySockJsIntegrationTests extends AbstractSockJsIntegrationTests 
 		return new JettyXhrTransport(new HttpClient());
 	}
 
+	@Override
+	protected AbstractEventSourceTransport createEventSourceTransport() {
+		return new JettyEventSourceTransport(new HttpClient());
+	}
 
 	@Configuration
 	static class JettyTestConfig {
