@@ -17,6 +17,8 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -28,6 +30,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.util.DigestUtils;
 
 import static org.junit.Assert.*;
 
@@ -44,6 +47,7 @@ public class CachingResourceResolverTests {
 	private ResourceResolverChain chain;
 
 	private List<Resource> locations;
+	private CachingResourceResolver cachingResourceResolver;
 
 
 	@Before
@@ -52,7 +56,8 @@ public class CachingResourceResolverTests {
 		this.cache = new ConcurrentMapCache("resourceCache");
 
 		List<ResourceResolver> resolvers = new ArrayList<>();
-		resolvers.add(new CachingResourceResolver(this.cache));
+		cachingResourceResolver = new CachingResourceResolver(this.cache);
+		resolvers.add(cachingResourceResolver);
 		resolvers.add(new PathResourceResolver());
 		this.chain = new DefaultResourceResolverChain(resolvers);
 
@@ -98,10 +103,33 @@ public class CachingResourceResolverTests {
 	@Test
 	public void resolverUrlPathFromCache() {
 		String expected = "cached-imaginary.css";
-		this.cache.put(CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css", expected);
+
+		String locationDigest = cachingResourceResolver.computeLocationDerivedDigest(this.locations);
+
+		this.cache.put(CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css+locationDigest=" + locationDigest, expected);
 		String actual = this.chain.resolveUrlPath("imaginary.css", this.locations);
 
 		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void resolveUrlPathFromCacheWithSamePathButDifferentLocations() {
+		String firstLocationDigest = cachingResourceResolver.computeLocationDerivedDigest(this.locations);
+
+		List<Resource> secondLocationList = Collections.singletonList(new ClassPathResource("test-second/", getClass()));
+		String secondLocationDigest = cachingResourceResolver.computeLocationDerivedDigest(secondLocationList);
+
+		String firstCacheKey = CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css+locationDigest=" + firstLocationDigest;
+		String secondCacheKey = CachingResourceResolver.RESOLVED_URL_PATH_CACHE_KEY_PREFIX + "imaginary.css+locationDigest=" + secondLocationDigest;
+
+		assertNull(this.cache.get(firstCacheKey));
+		assertNull(this.cache.get(secondCacheKey));
+
+		this.chain.resolveUrlPath("imaginary.css", this.locations);
+		this.chain.resolveUrlPath("imaginary.css", secondLocationList);
+
+		assertNotNull(this.cache.get(firstCacheKey));
+		assertNotNull(this.cache.get(secondCacheKey));
 	}
 
 	@Test
@@ -145,6 +173,19 @@ public class CachingResourceResolverTests {
 		request = new MockHttpServletRequest("GET", "bar.css");
 		request.addHeader("Accept-Encoding", "gzip");
 		assertSame(gzResource, this.chain.resolveResource(request, "bar.css", this.locations));
+	}
+
+	@Test
+	public void computeLocationDerivedDigest() {
+		ClassPathResource firstResource = new ClassPathResource("fake/path", getClass());
+		ClassPathResource secondResource = new ClassPathResource("another/sample/sample", getClass());
+
+		String concatResourceDescriptions = firstResource.getDescription() + "," + secondResource.getDescription();
+		String expectedLocationDigest = DigestUtils.md5DigestAsHex(concatResourceDescriptions.getBytes());
+
+		String actualLocationDigest = cachingResourceResolver.computeLocationDerivedDigest(Arrays.asList(firstResource, secondResource));
+
+		assertEquals(expectedLocationDigest, actualLocationDigest);
 	}
 
 }
