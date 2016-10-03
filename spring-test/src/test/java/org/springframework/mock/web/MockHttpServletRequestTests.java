@@ -58,7 +58,7 @@ public class MockHttpServletRequestTests {
 
 
 	@Test
-	public void content() throws IOException {
+	public void setContentAndGetInputStream() throws IOException {
 		byte[] bytes = "body".getBytes(Charset.defaultCharset());
 		request.setContent(bytes);
 		assertEquals(bytes.length, request.getContentLength());
@@ -67,10 +67,42 @@ public class MockHttpServletRequestTests {
 	}
 
 	@Test
+	public void setContentAndGetContentAsByteArray() throws IOException {
+		byte[] bytes = "request body".getBytes();
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getContentAsByteArray());
+		assertEquals(bytes, request.getContentAsByteArray());
+	}
+
+	@Test
+	public void setContentAndGetContentAsStringWithDefaultCharacterEncoding() throws IOException {
+		String palindrome = "ablE was I ere I saw Elba";
+		byte[] bytes = palindrome.getBytes();
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getContentAsString());
+		assertEquals(palindrome, request.getContentAsString());
+	}
+
+	@Test
+	public void setContentAndGetContentAsStringWithExplicitCharacterEncoding() throws IOException {
+		String palindrome = "ablE was I ere I saw Elba";
+		byte[] bytes = palindrome.getBytes("UTF-16");
+		request.setCharacterEncoding("UTF-16");
+		request.setContent(bytes);
+		assertEquals(bytes.length, request.getContentLength());
+		assertNotNull(request.getContentAsString());
+		assertEquals(palindrome, request.getContentAsString());
+	}
+
+	@Test
 	public void noContent() throws IOException {
 		assertEquals(-1, request.getContentLength());
 		assertNotNull(request.getInputStream());
 		assertEquals(-1, request.getInputStream().read());
+		assertNull(request.getContentAsByteArray());
+		assertNull(request.getContentAsString());
 	}
 
 	@Test

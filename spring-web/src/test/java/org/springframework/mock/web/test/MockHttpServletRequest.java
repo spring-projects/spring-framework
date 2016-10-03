@@ -371,8 +371,40 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
+	/**
+	 * Set the content of the request body as a byte array.
+	 * @see #getContentAsByteArray()
+	 * @see #getContentAsString()
+	 */
 	public void setContent(byte[] content) {
 		this.content = content;
+	}
+
+	/**
+	 * Get the content of the request body as a byte array.
+	 * @since 5.0
+	 * @see #setContent(byte[])
+	 * @see #getContentAsString()
+	 */
+	public byte[] getContentAsByteArray() {
+		return this.content;
+	}
+
+	/**
+	 * Get the content of the request body as a {@code String}, using the configured
+	 * {@linkplain #getCharacterEncoding character encoding} if present.
+	 * @since 5.0
+	 * @see #setContent(byte[])
+	 * @see #getContentAsByteArray()
+	 * @see #setCharacterEncoding(String)
+	 */
+	public String getContentAsString() throws UnsupportedEncodingException {
+		if (this.content == null) {
+			return null;
+		}
+
+		return (this.characterEncoding != null ?
+				new String(this.content, this.characterEncoding) : new String(this.content));
 	}
 
 	@Override
