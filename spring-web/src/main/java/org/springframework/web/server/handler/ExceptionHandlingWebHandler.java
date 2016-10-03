@@ -128,7 +128,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 			}
 		}
 		else {
-			logger.debug("Could not complete request", ex);
+			logger.error("Could not complete request", ex);
 		}
 	}
 

@@ -114,7 +114,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		@Override
 		public void onError(Throwable ex) {
-			logger.debug("Could not complete request", ex);
+			logger.error("Could not complete request", ex);
 			HttpServletResponse response = (HttpServletResponse) this.asyncContext.getResponse();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			this.asyncContext.complete();
