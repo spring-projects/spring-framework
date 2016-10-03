@@ -107,6 +107,7 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printValue("Request URI", request.getRequestURI());
 		this.printer.printValue("Parameters", getParamsMultiValueMap(request));
 		this.printer.printValue("Headers", getRequestHeaders(request));
+		this.printer.printValue("Body", request.getContentAsString());
 	}
 
 	protected final HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
