@@ -72,7 +72,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 			}
 			@Override
 			public void onError(Throwable ex) {
-				logger.debug("Could not complete request", ex);
+				logger.error("Could not complete request", ex);
 				if (!exchange.isResponseStarted() && exchange.getStatusCode() <= 500) {
 					exchange.setStatusCode(500);
 				}

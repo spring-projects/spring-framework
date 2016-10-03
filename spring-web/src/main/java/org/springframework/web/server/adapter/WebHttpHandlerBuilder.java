@@ -123,10 +123,8 @@ public class WebHttpHandlerBuilder {
 			WebFilter[] array = new WebFilter[this.filters.size()];
 			webHandler = new FilteringWebHandler(webHandler, this.filters.toArray(array));
 		}
-		if (!this.exceptionHandlers.isEmpty()) {
-			WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
-			webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
-		}
+		WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
+		webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
 		HttpWebHandlerAdapter httpHandler = new HttpWebHandlerAdapter(webHandler);
 		if (this.sessionManager != null) {
 			httpHandler.setSessionManager(this.sessionManager);
