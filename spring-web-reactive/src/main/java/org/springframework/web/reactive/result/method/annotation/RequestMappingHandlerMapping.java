@@ -18,14 +18,20 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringValueResolver;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.result.condition.RequestCondition;
@@ -271,6 +277,78 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			}
 			return resolvedPatterns;
 		}
+	}
+
+	@Override
+	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
+		HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+		CrossOrigin typeAnnotation = AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getBeanType(), CrossOrigin.class);
+		CrossOrigin methodAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, CrossOrigin.class);
+
+		if (typeAnnotation == null && methodAnnotation == null) {
+			return null;
+		}
+
+		CorsConfiguration config = new CorsConfiguration();
+		updateCorsConfig(config, typeAnnotation);
+		updateCorsConfig(config, methodAnnotation);
+
+		if (CollectionUtils.isEmpty(config.getAllowedOrigins())) {
+			config.setAllowedOrigins(Arrays.asList(CrossOrigin.DEFAULT_ORIGINS));
+		}
+		if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
+			for (RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
+				config.addAllowedMethod(allowedMethod.name());
+			}
+		}
+		if (CollectionUtils.isEmpty(config.getAllowedHeaders())) {
+			config.setAllowedHeaders(Arrays.asList(CrossOrigin.DEFAULT_ALLOWED_HEADERS));
+		}
+		if (config.getAllowCredentials() == null) {
+			config.setAllowCredentials(CrossOrigin.DEFAULT_ALLOW_CREDENTIALS);
+		}
+		if (config.getMaxAge() == null) {
+			config.setMaxAge(CrossOrigin.DEFAULT_MAX_AGE);
+		}
+		return config;
+	}
+
+	private void updateCorsConfig(CorsConfiguration config, CrossOrigin annotation) {
+		if (annotation == null) {
+			return;
+		}
+		for (String origin : annotation.origins()) {
+			config.addAllowedOrigin(resolveCorsAnnotationValue(origin));
+		}
+		for (RequestMethod method : annotation.methods()) {
+			config.addAllowedMethod(method.name());
+		}
+		for (String header : annotation.allowedHeaders()) {
+			config.addAllowedHeader(resolveCorsAnnotationValue(header));
+		}
+		for (String header : annotation.exposedHeaders()) {
+			config.addExposedHeader(resolveCorsAnnotationValue(header));
+		}
+
+		String allowCredentials = resolveCorsAnnotationValue(annotation.allowCredentials());
+		if ("true".equalsIgnoreCase(allowCredentials)) {
+			config.setAllowCredentials(true);
+		}
+		else if ("false".equalsIgnoreCase(allowCredentials)) {
+			config.setAllowCredentials(false);
+		}
+		else if (!allowCredentials.isEmpty()) {
+			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", " +
+					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
+		}
+
+		if (annotation.maxAge() >= 0 && config.getMaxAge() == null) {
+			config.setMaxAge(annotation.maxAge());
+		}
+	}
+
+	private String resolveCorsAnnotationValue(String value) {
+		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
 }
