@@ -19,6 +19,7 @@ package org.springframework.core.io.buffer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.function.Function;
@@ -149,7 +150,8 @@ public class DefaultDataBuffer implements DataBuffer {
 	 * applying the given function on {@link #byteBuffer}.
 	 */
 	private <T> T readInternal(Function<ByteBuffer, T> function) {
-		this.byteBuffer.position(this.readPosition);
+		// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+		((Buffer) this.byteBuffer).position(this.readPosition);
 		try {
 			return function.apply(this.byteBuffer);
 		}
@@ -207,7 +209,8 @@ public class DefaultDataBuffer implements DataBuffer {
 	 * after applying the given function on {@link #byteBuffer}.
 	 */
 	private <T> T writeInternal(Function<ByteBuffer, T> function) {
-		this.byteBuffer.position(this.writePosition);
+		// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+		((Buffer) this.byteBuffer).position(this.writePosition);
 		try {
 			return function.apply(this.byteBuffer);
 		}
@@ -219,23 +222,29 @@ public class DefaultDataBuffer implements DataBuffer {
 	@Override
 	public DataBuffer slice(int index, int length) {
 		int oldPosition = this.byteBuffer.position();
+		// Explicit access via Buffer base type for compatibility
+		// with covariant return type on JDK 9's ByteBuffer...
+		Buffer buffer = this.byteBuffer;
 		try {
-			this.byteBuffer.position(index);
+			buffer.position(index);
 			ByteBuffer slice = this.byteBuffer.slice();
-			slice.limit(length);
+			// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+			((Buffer) slice).limit(length);
 			return new SlicedDefaultDataBuffer(slice, 0, length, this.dataBufferFactory);
 		}
 		finally {
-			this.byteBuffer.position(oldPosition);
+			buffer.position(oldPosition);
 		}
-
 	}
 
 	@Override
 	public ByteBuffer asByteBuffer() {
 		ByteBuffer duplicate = this.byteBuffer.duplicate();
-		duplicate.position(this.readPosition);
-		duplicate.limit(this.writePosition);
+		// Explicit access via Buffer base type for compatibility
+		// with covariant return type on JDK 9's ByteBuffer...
+		Buffer buffer = duplicate;
+		buffer.position(this.readPosition);
+		buffer.limit(this.writePosition);
 		return duplicate;
 	}
 
@@ -262,7 +271,8 @@ public class DefaultDataBuffer implements DataBuffer {
 				(oldBuffer.isDirect() ? ByteBuffer.allocateDirect(minCapacity) :
 						ByteBuffer.allocate(minCapacity));
 
-		oldBuffer.position(this.readPosition);
+		// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
+		((Buffer) oldBuffer).position(this.readPosition);
 		newBuffer.put(oldBuffer);
 
 		this.byteBuffer = newBuffer;
