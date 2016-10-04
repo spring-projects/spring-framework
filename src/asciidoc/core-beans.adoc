@@ -2103,7 +2103,6 @@ overrides the method.
   in particular not with `@Bean` methods in configuration classes, since the container
   is not in charge of creating the instance in that case and therefore cannot create
   a runtime-generated subclass on the fly.
-* Finally, objects that have been the target of method injection cannot be serialized.
 ====
 
 Looking at the `CommandManager` class in the previous code snippet, you see that the
@@ -2150,30 +2149,72 @@ the original class. For example:
 [subs="verbatim,quotes"]
 ----
 	<!-- a stateful bean deployed as a prototype (non-singleton) -->
-	<bean id="command" class="fiona.apple.AsyncCommand" scope="prototype">
+	<bean id="myCommand" class="fiona.apple.AsyncCommand" scope="prototype">
 		<!-- inject dependencies here as required -->
 	</bean>
 
 	<!-- commandProcessor uses statefulCommandHelper -->
 	<bean id="commandManager" class="fiona.apple.CommandManager">
-		<lookup-method name="createCommand" bean="command"/>
+		<lookup-method name="createCommand" bean="myCommand"/>
 	</bean>
 ----
 
 The bean identified as __commandManager__ calls its own method `createCommand()`
-whenever it needs a new instance of the __command__ bean. You must be careful to deploy
-the `command` bean as a prototype, if that is actually what is needed. If it is deployed
-as a <<beans-factory-scopes-singleton,singleton>>, the same instance of the `command`
+whenever it needs a new instance of the __myCommand__ bean. You must be careful to deploy
+the `myCommand` bean as a prototype, if that is actually what is needed. If it is
+ as a <<beans-factory-scopes-singleton,singleton>>, the same instance of the `myCommand`
 bean is returned each time.
+
+Alternatively, within the annotation-based component model, you may declare a lookup
+method through the `@Lookup` annotation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public abstract class CommandManager {
+
+		public Object process(Object commandState) {
+			Command command = createCommand();
+			command.setState(commandState);
+			return command.execute();
+		}
+
+		@Lookup("myCommand")
+		protected abstract Command createCommand();
+	}
+----
+
+Or, more idiomatically, you may rely on the target bean getting resolved against the
+declared return type of the lookup method:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public abstract class CommandManager {
+
+		public Object process(Object commandState) {
+			MyCommand command = createCommand();
+			command.setState(commandState);
+			return command.execute();
+		}
+
+		@Lookup
+		protected abstract MyCommand createCommand();
+	}
+----
+
+Note that you will typically declare such annotated lookup methods with a concrete
+stub implementation, in order for them to be compatible with Spring's component
+scanning rules where abstract classes get ignored by default. This limitation does not
+apply in case of explicitly registered or explicitly imported bean classes.
 
 [TIP]
 ====
+Another way of accessing differently scoped target beans is an `ObjectFactory`/
+`Provider` injection point. Check out <<beans-factory-scopes-other-injection>>.
+
 The interested reader may also find the `ServiceLocatorFactoryBean` (in the
-`org.springframework.beans.factory.config` package) to be of use. The approach used in
-ServiceLocatorFactoryBean is similar to that of another utility class,
-`ObjectFactoryCreatingFactoryBean`, but it allows you to specify your own lookup
-interface as opposed to a Spring-specific lookup interface. Consult the javadocs of
-these classes for additional information.
+`org.springframework.beans.factory.config` package) to be of use.
 ====
 
 
@@ -2615,6 +2656,9 @@ lifecycle-safe fashion. You may also simply declare your injection point (i.e. t
 constructor/setter argument or autowired field) as `ObjectFactory<MyTargetBean>`,
 allowing for a `getObject()` call to retrieve the current instance on demand every
 time it is needed - without holding on to the instance or storing it separately.
+
+As an extended variant, you may declare `ObjectProvider<MyTargetBean>` which delivers
+several additional access variants, including `getIfAvailable` and `getIfUnique`.
 
 The JSR-330 variant of this is called `Provider`, used with a `Provider<MyTargetBean>`
 declaration and a corresponding `get()` call for every retrieval attempt.
@@ -6591,10 +6635,9 @@ type of configuration provides a natural means for implementing this pattern.
 		public Object process(Object commandState) {
 			// grab a new instance of the appropriate Command interface
 			Command command = createCommand();
-
 			// set the state on the (hopefully brand new) Command instance
 			command.setState(commandState);
-		return command.execute();
+			return command.execute();
 		}
 
 		// okay... but where is the implementation of this method?
