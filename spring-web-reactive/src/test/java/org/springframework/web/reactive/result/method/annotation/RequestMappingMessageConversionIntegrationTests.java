@@ -57,11 +57,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.http.MediaType.APPLICATION_XML;
-
+import static java.util.Arrays.*;
+import static org.junit.Assert.*;
+import static org.springframework.http.MediaType.*;
 
 /**
  * {@code @RequestMapping} integration tests focusing on serialization and
@@ -411,6 +409,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 	}
 
+
 	@RestController
 	@RequestMapping("/person-response")
 	@SuppressWarnings("unused")
@@ -463,6 +462,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 	}
 
+
 	@RestController
 	@SuppressWarnings("unused")
 	private static class ResourceController {
@@ -472,6 +472,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 			return new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
 		}
 	}
+
 
 	@RestController
 	@RequestMapping("/person-transform")
@@ -532,6 +533,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 	}
 
+
 	@RestController
 	@RequestMapping("/person-create")
 	@SuppressWarnings("unused")
@@ -570,17 +572,19 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 
 		@PostMapping("/rxjava2-observable")
-		public io.reactivex.Observable<Void> createWithRxJava2Observable(@RequestBody io.reactivex.Observable<Person> observable) {
-			return observable.toList().doOnNext(persons::addAll).flatMap(document -> io.reactivex.Observable.empty());
+		public io.reactivex.Completable createWithRxJava2Observable(@RequestBody io.reactivex.Observable<Person> observable) {
+			return observable.toList().doOnSuccess(persons::addAll).toCompletable();
 		}
 
 		@PostMapping("/flowable")
-		public Flowable<Void> createWithFlowable(@RequestBody Flowable<Person> flowable) {
-			return flowable.toList().doOnNext(persons::addAll).flatMap(document -> Flowable.empty());
+		public io.reactivex.Completable createWithFlowable(@RequestBody Flowable<Person> flowable) {
+			return flowable.toList().doOnSuccess(persons::addAll).toCompletable();
 		}
 	}
 
-	@XmlRootElement @SuppressWarnings("WeakerAccess")
+
+	@XmlRootElement
+	@SuppressWarnings("WeakerAccess")
 	private static class Person {
 
 		private String name;
@@ -626,7 +630,9 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 		}
 	}
 
-	@XmlRootElement @SuppressWarnings({"WeakerAccess", "unused"})
+
+	@XmlRootElement
+	@SuppressWarnings({"WeakerAccess", "unused"})
 	private static class People {
 
 		private List<Person> persons = new ArrayList<>();

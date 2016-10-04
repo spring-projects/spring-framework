@@ -61,12 +61,8 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.core.ResolvableType.forClass;
-import static org.springframework.core.ResolvableType.forClassWithGenerics;
+import static org.junit.Assert.*;
+import static org.springframework.core.ResolvableType.*;
 
 /**
  * Unit tests for {@link AbstractMessageReaderArgumentResolver}.
@@ -174,7 +170,7 @@ public class MessageReaderArgumentResolverTests {
 		io.reactivex.Observable<?> observable = resolveValue(param, body);
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
-				observable.toList().blockingFirst());
+				observable.toList().blockingGet());
 	}
 
 	@Test
@@ -185,7 +181,7 @@ public class MessageReaderArgumentResolverTests {
 		Flowable<?> flowable = resolveValue(param, body);
 
 		assertEquals(Arrays.asList(new TestBean("f1", "b1"), new TestBean("f2", "b2")),
-				flowable.toList().blockingFirst());
+				flowable.toList().blockingGet());
 	}
 
 	@Test
