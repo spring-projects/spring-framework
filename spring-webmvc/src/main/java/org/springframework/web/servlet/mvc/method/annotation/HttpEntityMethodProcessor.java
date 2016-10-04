@@ -28,6 +28,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -181,16 +182,16 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		if (responseEntity instanceof ResponseEntity) {
-      int responseStatus = ((ResponseEntity<?>) responseEntity).getStatusCodeValue();
-			outputMessage.getServletResponse().setStatus(responseStatus);
-      if(responseStatus == 200) {
-			  if (isResourceNotModified(inputMessage, outputMessage)) {
-				  // Ensure headers are flushed, no body should be written.
-				  outputMessage.flush();
-				  // Skip call to converters, as they may update the body.
-				  return;
-			  }
-      }  
+			int returnStatus = ((ResponseEntity<?>) responseEntity).getStatusCodeValue();
+			outputMessage.getServletResponse().setStatus(returnStatus);
+			if (returnStatus == 200) {
+				if (isResourceNotModified(inputMessage, outputMessage)) {
+					// Ensure headers are flushed, no body should be written.
+					outputMessage.flush();
+					// Skip call to converters, as they may update the body.
+					return;
+				}
+			}
 		}
 
 		// Try even with null body. ResponseBodyAdvice could get involved.
@@ -227,8 +228,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		HttpHeaders responseHeaders = outputMessage.getHeaders();
 		String etag = responseHeaders.getETag();
 		long lastModifiedTimestamp = responseHeaders.getLastModified();
-		responseHeaders.remove(HttpHeaders.ETAG);
-		responseHeaders.remove(HttpHeaders.LAST_MODIFIED);
+		if (inputMessage.getMethod() == HttpMethod.GET || inputMessage.getMethod() == HttpMethod.HEAD) {
+			responseHeaders.remove(HttpHeaders.ETAG);
+			responseHeaders.remove(HttpHeaders.LAST_MODIFIED);
+		}
 
 		return servletWebRequest.checkNotModified(etag, lastModifiedTimestamp);
 	}
