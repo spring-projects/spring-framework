@@ -15,12 +15,24 @@
  */
 package org.springframework.web.reactive.handler;
 
+import java.util.Map;
+
+import reactor.core.publisher.Mono;
+
 import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.core.Ordered;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsProcessor;
+import org.springframework.web.cors.reactive.CorsUtils;
+import org.springframework.web.cors.reactive.DefaultCorsProcessor;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebHandler;
 import org.springframework.web.util.HttpRequestPathHelper;
 
 /**
@@ -39,8 +51,9 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
+	protected CorsProcessor corsProcessor = new DefaultCorsProcessor();
 
-	// TODO: CORS
+	protected final UrlBasedCorsConfigurationSource corsConfigSource = new UrlBasedCorsConfigurationSource();
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
@@ -91,7 +104,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
-		// this.corsConfigSource.setPathMatcher(pathMatcher);
+		this.corsConfigSource.setPathMatcher(pathMatcher);
 	}
 
 	/**
@@ -100,6 +113,64 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 */
 	public PathMatcher getPathMatcher() {
 		return this.pathMatcher;
+	}
+
+	/**
+	 * Configure a custom {@link CorsProcessor} to use to apply the matched
+	 * {@link CorsConfiguration} for a request. By default {@link DefaultCorsProcessor} is used.
+	 */
+	public void setCorsProcessor(CorsProcessor corsProcessor) {
+		Assert.notNull(corsProcessor, "CorsProcessor must not be null");
+		this.corsProcessor = corsProcessor;
+	}
+
+	/**
+	 * Return the configured {@link CorsProcessor}.
+	 */
+	public CorsProcessor getCorsProcessor() {
+		return this.corsProcessor;
+	}
+
+	/**
+	 * Set "global" CORS configuration based on URL patterns. By default the first
+	 * matching URL pattern is combined with the CORS configuration for the
+	 * handler, if any.
+	 */
+	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
+		this.corsConfigSource.setCorsConfigurations(corsConfigurations);
+	}
+
+	/**
+	 * Get the CORS configuration.
+	 */
+	public Map<String, CorsConfiguration> getCorsConfigurations() {
+		return this.corsConfigSource.getCorsConfigurations();
+	}
+
+	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
+		if (handler != null && handler instanceof CorsConfigurationSource) {
+			return ((CorsConfigurationSource) handler).getCorsConfiguration(exchange);
+		}
+		return null;
+	}
+
+	protected Object processCorsRequest(ServerWebExchange exchange, Object handler) {
+		if (CorsUtils.isCorsRequest(exchange.getRequest())) {
+			CorsConfiguration globalConfig = this.corsConfigSource.getCorsConfiguration(exchange);
+			CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
+			CorsConfiguration config = (globalConfig != null ? globalConfig.combine(handlerConfig) : handlerConfig);
+			if (!corsProcessor.processRequest(config, exchange) || CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+				return new NoOpHandler();
+			}
+		}
+		return handler;
+	}
+
+	private class NoOpHandler implements WebHandler {
+		@Override
+		public Mono<Void> handle(ServerWebExchange exchange) {
+			return Mono.empty();
+		}
 	}
 
 }

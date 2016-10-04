@@ -710,8 +710,8 @@ public class UriComponentsBuilder implements Cloneable {
 			}
 		}
 
-		if ((this.scheme.equals("http") && "80".equals(this.port)) ||
-				(this.scheme.equals("https") && "443".equals(this.port))) {
+		if ((this.scheme != null) && ((this.scheme.equals("http") && "80".equals(this.port)) ||
+				(this.scheme.equals("https") && "443".equals(this.port)))) {
 			this.port = null;
 		}
 

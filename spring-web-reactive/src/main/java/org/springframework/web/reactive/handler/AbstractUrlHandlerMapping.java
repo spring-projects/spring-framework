@@ -101,6 +101,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 		Object handler = null;
 		try {
 			handler = lookupHandler(lookupPath, exchange);
+			handler = processCorsRequest(exchange, handler);
 		}
 		catch (Exception ex) {
 			return Mono.error(ex);

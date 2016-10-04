@@ -27,6 +27,7 @@ import java.util.Set;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
@@ -43,7 +44,7 @@ import org.springframework.web.server.UnsupportedMediaTypeStatusException;
  */
 public final class ConsumesRequestCondition extends AbstractRequestCondition<ConsumesRequestCondition> {
 
-//	private final static ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
+	private final static ConsumesRequestCondition PRE_FLIGHT_MATCH = new ConsumesRequestCondition();
 
 
 	private final List<ConsumeMediaTypeExpression> expressions;
@@ -160,9 +161,9 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 */
 	@Override
 	public ConsumesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-//		if (CorsUtils.isPreFlightRequest(request)) {
-//			return PRE_FLIGHT_MATCH;
-//		}
+		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			return PRE_FLIGHT_MATCH;
+		}
 		if (isEmpty()) {
 			return this;
 		}

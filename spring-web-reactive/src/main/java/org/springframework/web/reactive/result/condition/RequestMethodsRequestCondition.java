@@ -22,11 +22,11 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -103,9 +103,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public RequestMethodsRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-//		if (CorsUtils.isPreFlightRequest(request)) {
-//			return matchPreFlight(request);
-//		}
+		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			return matchPreFlight(exchange.getRequest());
+		}
 		if (getMethods().isEmpty()) {
 			if (RequestMethod.OPTIONS.name().equals(exchange.getRequest().getMethod().name())) {
 				return null; // No implicit match for OPTIONS (we handle it)
@@ -120,13 +120,12 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * Hence empty conditions is a match, otherwise try to match to the HTTP
 	 * method in the "Access-Control-Request-Method" header.
 	 */
-	@SuppressWarnings("unused")
-	private RequestMethodsRequestCondition matchPreFlight(HttpServletRequest request) {
+	private RequestMethodsRequestCondition matchPreFlight(ServerHttpRequest request) {
 		if (getMethods().isEmpty()) {
 			return this;
 		}
-		String expectedMethod = request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
-		return matchRequestMethod(expectedMethod);
+		HttpMethod expectedMethod = request.getHeaders().getAccessControlRequestMethod();
+		return matchRequestMethod(expectedMethod.name());
 	}
 
 	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
