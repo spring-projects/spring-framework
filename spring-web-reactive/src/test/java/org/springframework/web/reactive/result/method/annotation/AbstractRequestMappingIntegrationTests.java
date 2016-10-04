@@ -27,6 +27,7 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
+import org.springframework.web.server.handler.ResponseStatusExceptionHandler;
 
 import static org.springframework.http.RequestEntity.get;
 
@@ -46,6 +47,7 @@ public abstract class AbstractRequestMappingIntegrationTests extends AbstractHtt
 		this.applicationContext = initApplicationContext();
 		return WebHttpHandlerBuilder
 				.webHandler(new DispatcherHandler(this.applicationContext))
+				.exceptionHandlers(new ResponseStatusExceptionHandler())
 				.build();
 	}
 
