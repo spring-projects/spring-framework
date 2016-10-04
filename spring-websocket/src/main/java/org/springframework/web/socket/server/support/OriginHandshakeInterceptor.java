@@ -42,7 +42,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class OriginHandshakeInterceptor implements HandshakeInterceptor {
 
-	protected Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Set<String> allowedOrigins = new LinkedHashSet<>();
 

@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  */
 public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBuf> {
 
-	private static Log logger = LogFactory.getLog(RxNettyHttpHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(RxNettyHttpHandlerAdapter.class);
 
 	private final HttpHandler delegate;
 

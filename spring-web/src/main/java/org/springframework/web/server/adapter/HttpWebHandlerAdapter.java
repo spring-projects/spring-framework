@@ -42,7 +42,7 @@ import org.springframework.web.server.session.WebSessionManager;
  */
 public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
 
-	private static Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 

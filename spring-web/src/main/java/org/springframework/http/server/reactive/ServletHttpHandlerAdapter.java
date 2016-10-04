@@ -48,7 +48,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
 
-	private static Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
 
 	private final HttpHandler handler;
 

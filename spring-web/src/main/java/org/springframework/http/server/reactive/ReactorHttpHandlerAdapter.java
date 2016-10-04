@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  */
 public class ReactorHttpHandlerAdapter implements Function<HttpChannel, Mono<Void>> {
 
-	private static Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
 
 	private final HttpHandler delegate;
 

@@ -41,8 +41,6 @@ import org.springframework.web.server.WebHandler;
  */
 public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
-	private static Log logger = LogFactory.getLog(ExceptionHandlingWebHandler.class);
-
 	/**
 	 * Log category to use on network IO exceptions after a client has gone away.
 	 * <p>Servlet containers do not expose notifications when a client disconnects;
@@ -56,30 +54,29 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 	private static final String DISCONNECTED_CLIENT_LOG_CATEGORY =
 			ExceptionHandlingWebHandler.class.getName() + ".DisconnectedClient";
 
-	private static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
-
 	private static final Set<String> DISCONNECTED_CLIENT_EXCEPTIONS;
 
 	static {
 		Set<String> set = new HashSet<>(3);
-		set.add("ClientAbortException"); // Tomcat
-		set.add("EOFException"); // Tomcat
-		set.add("EofException"); // Jetty
+		set.add("ClientAbortException");  // Tomcat
+		set.add("EOFException");  // Tomcat
+		set.add("EofException");  // Jetty
 		// java.io.IOException("Broken pipe") on WildFly (already covered)
 		DISCONNECTED_CLIENT_EXCEPTIONS = Collections.unmodifiableSet(set);
 	}
+
+
+	private static final Log logger = LogFactory.getLog(ExceptionHandlingWebHandler.class);
+
+	private static final Log disconnectedClientLogger = LogFactory.getLog(DISCONNECTED_CLIENT_LOG_CATEGORY);
 
 	private final List<WebExceptionHandler> exceptionHandlers;
 
 
 	public ExceptionHandlingWebHandler(WebHandler delegate, WebExceptionHandler... exceptionHandlers) {
 		super(delegate);
-		this.exceptionHandlers = initList(exceptionHandlers);
-	}
-
-	private static List<WebExceptionHandler> initList(WebExceptionHandler[] list) {
-		return (list != null ? Collections.unmodifiableList(Arrays.asList(list)):
-				Collections.emptyList());
+		this.exceptionHandlers = (exceptionHandlers != null ?
+				Collections.unmodifiableList(Arrays.asList(exceptionHandlers)): Collections.emptyList());
 	}
 
 
@@ -115,6 +112,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 	private void logException(Throwable ex) {
 		@SuppressWarnings("serial")
 		NestedCheckedException nestedException = new NestedCheckedException("", ex) {};
+
 		if ("Broken pipe".equalsIgnoreCase(nestedException.getMostSpecificCause().getMessage()) ||
 				DISCONNECTED_CLIENT_EXCEPTIONS.contains(ex.getClass().getSimpleName())) {
 

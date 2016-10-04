@@ -49,7 +49,6 @@ import org.springframework.web.reactive.result.method.HandlerMethodArgumentResol
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
 
-
 /**
  * Supports the invocation of {@code @RequestMapping} methods.
  *
@@ -58,7 +57,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactoryAware, InitializingBean {
 
-	private static Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;

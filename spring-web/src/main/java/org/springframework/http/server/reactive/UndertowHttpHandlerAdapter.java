@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  */
 public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandler {
 
-	private static Log logger = LogFactory.getLog(UndertowHttpHandlerAdapter.class);
+	private static final Log logger = LogFactory.getLog(UndertowHttpHandlerAdapter.class);
 
 
 	private final HttpHandler delegate;
