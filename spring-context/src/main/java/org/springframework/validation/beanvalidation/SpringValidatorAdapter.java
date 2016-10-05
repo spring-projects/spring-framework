@@ -16,6 +16,7 @@
 
 package org.springframework.validation.beanvalidation;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -304,7 +305,8 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	 * Wrapper for a String attribute which can be resolved via a {@code MessageSource},
 	 * falling back to the original attribute as a default value otherwise.
 	 */
-	private static class ResolvableAttribute implements MessageSourceResolvable {
+	@SuppressWarnings("serial")
+	private static class ResolvableAttribute implements MessageSourceResolvable, Serializable {
 
 		private final String resolvableString;
 
