@@ -67,7 +67,7 @@ public class DefaultCorsProcessor implements CorsProcessor {
 			return true;
 		}
 
-		if (WebUtils.isSameOrigin(request)) {
+		if (CorsUtils.isSameOrigin(request)) {
 			logger.debug("Skip CORS processing: request is from same origin");
 			return true;
 		}
