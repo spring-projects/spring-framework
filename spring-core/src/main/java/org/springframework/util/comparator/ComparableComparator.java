@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,27 @@ public class ComparableComparator<T extends Comparable<T>> implements Comparator
 
 	@SuppressWarnings("rawtypes")
 	public static final ComparableComparator INSTANCE = new ComparableComparator();
+
+	protected ComparableComparator() {
+		super();
+	}
+
+	/**
+	 * Returns a type safe ComparableComparator instance.
+	 *
+	 * <p>This example illustrates the type-safe way to obtain an instance:
+	 * <pre>
+	 *     ComparableComparator&lt;Long&gt; s = ComparableComparator.get();
+	 * </pre>
+	 *
+	 * @param <T> type of elements
+	 * @return a ComparableComparator instance
+	 *
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Comparable<T>> ComparableComparator<T> get() {
+		return (ComparableComparator<T>) INSTANCE;
+	}
 
 	@Override
 	public int compare(T o1, T o2) {

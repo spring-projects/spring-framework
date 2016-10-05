@@ -33,7 +33,7 @@ import static org.junit.Assert.*;
 
 public class InvertibleComparatorTests {
 
-	private Comparator<Integer> comparator = new ComparableComparator<>();
+	private Comparator<Integer> comparator = ComparableComparator.get();
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldNeedComparator() throws Exception {

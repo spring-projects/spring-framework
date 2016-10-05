@@ -38,7 +38,7 @@ public class ComparableComparatorTests {
 
 	@Test
 	public void testComparableComparator() {
-		Comparator<String> c = new ComparableComparator<>();
+		Comparator<String> c = ComparableComparator.get();
 		String s1 = "abc";
 		String s2 = "cde";
 		assertTrue(c.compare(s1, s2) < 0);
@@ -47,7 +47,7 @@ public class ComparableComparatorTests {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void shouldNeedComparable() {
-		Comparator c = new ComparableComparator();
+		Comparator c = ComparableComparator.get();
 		Object o1 = new Object();
 		Object o2 = new Object();
 		thrown.expect(ClassCastException.class);
