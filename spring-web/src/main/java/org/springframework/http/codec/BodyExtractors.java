@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function;
+package org.springframework.http.codec;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,11 +28,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.http.HttpMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.util.Assert;
-import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * Implementations of {@link BodyExtractor} that read various bodies, such a reactive streams.
@@ -48,7 +47,7 @@ public abstract class BodyExtractors {
 	 * @param <T> the element type
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
-	public static <T> BodyExtractor<Mono<T>> toMono(Class<? extends T> elementClass) {
+	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(Class<? extends T> elementClass) {
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 		return toMono(ResolvableType.forClass(elementClass));
 	}
@@ -59,9 +58,9 @@ public abstract class BodyExtractors {
 	 * @param <T> the element type
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
-	public static <T> BodyExtractor<Mono<T>> toMono(ResolvableType elementType) {
+	public static <T> BodyExtractor<Mono<T>, ReactiveHttpInputMessage> toMono(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-		return (request, strategies) -> readWithMessageReaders(request, strategies,
+		return (request, context) -> readWithMessageReaders(request, context,
 				elementType,
 				reader -> reader.readMono(elementType, request, Collections.emptyMap()),
 				Mono::error);
@@ -73,7 +72,7 @@ public abstract class BodyExtractors {
 	 * @param <T> the element type
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
-	public static <T> BodyExtractor<Flux<T>> toFlux(Class<? extends T> elementClass) {
+	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(Class<? extends T> elementClass) {
 		Assert.notNull(elementClass, "'elementClass' must not be null");
 		return toFlux(ResolvableType.forClass(elementClass));
 	}
@@ -84,23 +83,23 @@ public abstract class BodyExtractors {
 	 * @param <T> the element type
 	 * @return a {@code BodyExtractor} that reads a mono
 	 */
-	public static <T> BodyExtractor<Flux<T>> toFlux(ResolvableType elementType) {
+	public static <T> BodyExtractor<Flux<T>, ReactiveHttpInputMessage> toFlux(ResolvableType elementType) {
 		Assert.notNull(elementType, "'elementType' must not be null");
-		return (request, strategies) -> readWithMessageReaders(request, strategies,
+		return (request, context) -> readWithMessageReaders(request, context,
 				elementType,
 				reader -> reader.read(elementType, request, Collections.emptyMap()),
 				Flux::error);
 	}
 
 	private static <T, S extends Publisher<T>> S readWithMessageReaders(
-			ServerHttpRequest request,
-			StrategiesSupplier strategies,
+			ReactiveHttpInputMessage inputMessage,
+			BodyExtractor.Context context,
 			ResolvableType elementType,
 			Function<HttpMessageReader<T>, S> readerFunction,
 			Function<Throwable, S> unsupportedError) {
 
-		MediaType contentType = contentType(request);
-		Supplier<Stream<HttpMessageReader<?>>> messageReaders = strategies.messageReaders();
+		MediaType contentType = contentType(inputMessage);
+		Supplier<Stream<HttpMessageReader<?>>> messageReaders = context.messageReaders();
 		return messageReaders.get()
 				.filter(r -> r.canRead(elementType, contentType))
 				.findFirst()
@@ -110,14 +109,14 @@ public abstract class BodyExtractors {
 					List<MediaType> supportedMediaTypes = messageReaders.get()
 							.flatMap(reader -> reader.getReadableMediaTypes().stream())
 							.collect(Collectors.toList());
-					UnsupportedMediaTypeStatusException error =
-							new UnsupportedMediaTypeStatusException(contentType, supportedMediaTypes);
+					UnsupportedMediaTypeException error =
+							new UnsupportedMediaTypeException(contentType, supportedMediaTypes);
 					return unsupportedError.apply(error);
 				});
 	}
 
-	private static MediaType contentType(ServerHttpRequest request) {
-		MediaType result = request.getHeaders().getContentType();
+	private static MediaType contentType(HttpMessage message) {
+		MediaType result = message.getHeaders().getContentType();
 		return result != null ? result : MediaType.APPLICATION_OCTET_STREAM;
 	}
 

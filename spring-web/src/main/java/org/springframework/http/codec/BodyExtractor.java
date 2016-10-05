@@ -14,28 +14,43 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function;
+package org.springframework.http.codec;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import org.springframework.http.ReactiveHttpInputMessage;
 
 /**
- * A function that can extract data from a {@link Request} body.
+ * A function that can extract data from a {@link ReactiveHttpInputMessage} body.
  *
  * @param <T> the type of data to extract
  * @author Arjen Poutsma
  * @since 5.0
- * @see Request#body(BodyExtractor)
  * @see BodyExtractors
  */
 @FunctionalInterface
-public interface BodyExtractor<T> {
+public interface BodyExtractor<T, M extends ReactiveHttpInputMessage> {
 
 	/**
 	 * Extract from the given request.
-	 * @param request the request to extract from
-	 * @param strategies the strategies to use
+	 * @param inputMessage request to extract from
+	 * @param context the configuration to use
 	 * @return the extracted data
 	 */
-	T extract(ServerHttpRequest request, StrategiesSupplier strategies);
+	T extract(M inputMessage, Context context);
+
+	/**
+	 * Defines the context used during the extraction.
+	 */
+	interface Context {
+
+		/**
+		 * Supply a {@linkplain Stream stream} of {@link HttpMessageReader}s to be used for body
+		 * extraction.
+		 * @return the stream of message readers
+		 */
+		Supplier<Stream<HttpMessageReader<?>>> messageReaders();
+	}
 
 }

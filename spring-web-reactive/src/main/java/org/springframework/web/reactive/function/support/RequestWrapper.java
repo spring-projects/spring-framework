@@ -28,8 +28,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.BodyExtractor;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
-import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.reactive.function.HandlerFunction;
 import org.springframework.web.reactive.function.Request;
 
@@ -83,7 +84,7 @@ public class RequestWrapper implements Request {
 	}
 
 	@Override
-	public <T> T body(BodyExtractor<T> extractor) {
+	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
 		return this.request.body(extractor);
 	}
 

@@ -14,20 +14,30 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function;
+package org.springframework.http.codec;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.codec.ByteBufferEncoder;
+import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
-import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.tests.TestSubscriber;
 
@@ -40,15 +50,35 @@ import static org.junit.Assert.assertEquals;
  */
 public class BodyInsertersTests {
 
+	private BodyInserter.Context context;
+
+	@Before
+	public void createContext() {
+		final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
+		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
+		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+		messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
+		messageWriters.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
+
+		this.context = new BodyInserter.Context() {
+			@Override
+			public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+				return messageWriters::stream;
+			}
+		};
+
+	}
+
+
 	@Test
 	public void ofObject() throws Exception {
 		String body = "foo";
-		BodyInserter<String> inserter = BodyInserters.fromObject(body);
+		BodyInserter<String, ReactiveHttpOutputMessage> inserter = BodyInserters.fromObject(body);
 
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
+		Mono<Void> result = inserter.insert(response, this.context);
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -62,12 +92,12 @@ public class BodyInsertersTests {
 	@Test
 	public void ofPublisher() throws Exception {
 		Flux<String> body = Flux.just("foo");
-		BodyInserter<Flux<String>> inserter = BodyInserters.fromPublisher(body, String.class);
+		BodyInserter<Flux<String>, ReactiveHttpOutputMessage> inserter = BodyInserters.fromPublisher(body, String.class);
 
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
+		Mono<Void> result = inserter.insert(response, this.context);
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -81,12 +111,12 @@ public class BodyInsertersTests {
 	@Test
 	public void ofResource() throws Exception {
 		Resource body = new ClassPathResource("response.txt", getClass());
-		BodyInserter<Resource> inserter = BodyInserters.fromResource(body);
+		BodyInserter<Resource, ReactiveHttpOutputMessage> inserter = BodyInserters.fromResource(body);
 
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
+		Mono<Void> result = inserter.insert(response, this.context);
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -105,13 +135,13 @@ public class BodyInsertersTests {
 	public void ofServerSentEventFlux() throws Exception {
 		ServerSentEvent<String> event = ServerSentEvent.builder("foo").build();
 		Flux<ServerSentEvent<String>> body = Flux.just(event);
-		BodyInserter<Flux<ServerSentEvent<String>>> inserter =
+		BodyInserter<Flux<ServerSentEvent<String>>, ServerHttpResponse> inserter =
 				BodyInserters.fromServerSentEvents(body);
 
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
+		Mono<Void> result = inserter.insert(response, this.context);
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 
@@ -120,13 +150,13 @@ public class BodyInsertersTests {
 	@Test
 	public void ofServerSentEventClass() throws Exception {
 		Flux<String> body = Flux.just("foo");
-		BodyInserter<Flux<String>> inserter =
+		BodyInserter<Flux<String>, ServerHttpResponse> inserter =
 				BodyInserters.fromServerSentEvents(body, String.class);
 
 		assertEquals(body, inserter.t());
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		Mono<Void> result = inserter.insert(response, StrategiesSupplier.builder().build());
+		Mono<Void> result = inserter.insert(response, this.context);
 		TestSubscriber.subscribe(result)
 				.assertComplete();
 

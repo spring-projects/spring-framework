@@ -38,6 +38,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.BodyInserter;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -217,7 +218,7 @@ public class DefaultResponseBuilderTests {
 	public void bodyInserter() throws Exception {
 		String body = "foo";
 		Supplier<String> supplier = () -> body;
-		BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer =
+		BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer =
 				(response, strategies) -> {
 					byte[] bodyBytes = body.getBytes(UTF_8);
 					ByteBuffer byteBuffer = ByteBuffer.wrap(bodyBytes);

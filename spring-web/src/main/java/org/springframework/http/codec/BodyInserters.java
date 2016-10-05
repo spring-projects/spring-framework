@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function;
+package org.springframework.http.codec;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.codec.HttpMessageWriter;
-import org.springframework.http.codec.ResourceHttpMessageWriter;
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
+import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -61,10 +60,10 @@ public abstract class BodyInserters {
 	 * @param body the body of the response
 	 * @return a {@code BodyInserter} that writes a single object
 	 */
-	public static <T> BodyInserter<T> fromObject(T body) {
+	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
 		Assert.notNull(body, "'body' must not be null");
 		return BodyInserter.of(
-				(response, strategies) -> writeWithMessageWriters(response, strategies,
+				(response, context) -> writeWithMessageWriters(response, context,
 						Mono.just(body), ResolvableType.forInstance(body)),
 				() -> body);
 	}
@@ -74,10 +73,10 @@ public abstract class BodyInserters {
 	 * @param publisher the publisher to stream to the response body
 	 * @param elementClass the class of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
-	 * @param <S> the type of the {@code Publisher}.
+	 * @param <S> the type of the {@code Publisher}
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
-	public static <S extends Publisher<T>, T> BodyInserter<S> fromPublisher(S publisher,
+	public static <S extends Publisher<T>, T> BodyInserter<S, ReactiveHttpOutputMessage> fromPublisher(S publisher,
 			Class<T> elementClass) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
@@ -90,16 +89,16 @@ public abstract class BodyInserters {
 	 * @param publisher the publisher to stream to the response body
 	 * @param elementType the type of elements contained in the publisher
 	 * @param <T> the type of the elements contained in the publisher
-	 * @param <S> the type of the {@code Publisher}.
+	 * @param <S> the type of the {@code Publisher}
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
-	public static <S extends Publisher<T>, T> BodyInserter<S> fromPublisher(S publisher,
+	public static <S extends Publisher<T>, T> BodyInserter<S, ReactiveHttpOutputMessage> fromPublisher(S publisher,
 			ResolvableType elementType) {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return BodyInserter.of(
-				(response, strategies) -> writeWithMessageWriters(response, strategies,
+				(response, context) -> writeWithMessageWriters(response, context,
 						publisher, elementType),
 				() -> publisher
 		);
@@ -114,10 +113,10 @@ public abstract class BodyInserters {
 	 * @param <T> the type of the {@code Resource}
 	 * @return a {@code BodyInserter} that writes a {@code Publisher}
 	 */
-	public static <T extends Resource> BodyInserter<T> fromResource(T resource) {
+	public static <T extends Resource> BodyInserter<T, ReactiveHttpOutputMessage> fromResource(T resource) {
 		Assert.notNull(resource, "'resource' must not be null");
 		return BodyInserter.of(
-				(response, strategies) -> {
+				(response, context) -> {
 					ResourceHttpMessageWriter messageWriter = new ResourceHttpMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
 					return messageWriter.write(Mono.just(resource), RESOURCE_TYPE, contentType,
@@ -134,12 +133,12 @@ public abstract class BodyInserters {
 	 * @return a {@code BodyInserter} that writes a {@code ServerSentEvent} publisher
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInserter<S> fromServerSentEvents(
+	public static <T, S extends Publisher<ServerSentEvent<T>>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(
 			S eventsPublisher) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		return BodyInserter.of(
-				(response, strategies) -> {
+				(response, context) -> {
 					ServerSentEventHttpMessageWriter messageWriter = sseMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
 					return messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
@@ -159,7 +158,7 @@ public abstract class BodyInserters {
 	 * Server-Sent Events
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<T>> BodyInserter<S> fromServerSentEvents(S eventsPublisher,
+	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
 			Class<T> eventClass) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
@@ -177,13 +176,13 @@ public abstract class BodyInserters {
 	 * Server-Sent Events
 	 * @see <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events W3C recommendation</a>
 	 */
-	public static <T, S extends Publisher<T>> BodyInserter<S> fromServerSentEvents(S eventsPublisher,
+	public static <T, S extends Publisher<T>> BodyInserter<S, ServerHttpResponse> fromServerSentEvents(S eventsPublisher,
 			ResolvableType eventType) {
 
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		Assert.notNull(eventType, "'eventType' must not be null");
 		return BodyInserter.of(
-				(response, strategies) -> {
+				(response, context) -> {
 					ServerSentEventHttpMessageWriter messageWriter = sseMessageWriter();
 					MediaType contentType = response.getHeaders().getContentType();
 					return messageWriter.write(eventsPublisher, eventType, contentType, response,
@@ -200,23 +199,27 @@ public abstract class BodyInserters {
 				new ServerSentEventHttpMessageWriter();
 	}
 
-	private static <T> Mono<Void> writeWithMessageWriters(ServerHttpResponse response,
-			StrategiesSupplier strategies,
+	private static <T> Mono<Void> writeWithMessageWriters(ReactiveHttpOutputMessage outputMessage,
+			BodyInserter.Context context,
 			Publisher<T> body,
 			ResolvableType bodyType) {
 
-		// TODO: use ContentNegotiatingResultHandlerSupport
-		MediaType contentType = response.getHeaders().getContentType();
-		return strategies.messageWriters().get()
+		MediaType contentType = outputMessage.getHeaders().getContentType();
+		Supplier<Stream<HttpMessageWriter<?>>> messageWriters = context.messageWriters();
+		return messageWriters.get()
 				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType))
 				.findFirst()
 				.map(BodyInserters::cast)
 				.map(messageWriter -> messageWriter
-						.write(body, bodyType, contentType, response, Collections
+						.write(body, bodyType, contentType, outputMessage, Collections
 								.emptyMap()))
 				.orElseGet(() -> {
-					response.setStatusCode(HttpStatus.NOT_ACCEPTABLE);
-					return response.setComplete();
+					List<MediaType> supportedMediaTypes = messageWriters.get()
+							.flatMap(reader -> reader.getWritableMediaTypes().stream())
+							.collect(Collectors.toList());
+					UnsupportedMediaTypeException error =
+							new UnsupportedMediaTypeException(contentType, supportedMediaTypes);
+					return Mono.error(error);
 				});
 	}
 
@@ -225,22 +228,23 @@ public abstract class BodyInserters {
 		return (HttpMessageWriter<T>) messageWriter;
 	}
 
-	static class DefaultBodyInserter<T> implements BodyInserter<T> {
+	static class DefaultBodyInserter<T, M extends ReactiveHttpOutputMessage>
+			implements BodyInserter<T, M> {
 
-		private final BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer;
+		private final BiFunction<M, Context, Mono<Void>> writer;
 
 		private final Supplier<T> supplier;
 
 		public DefaultBodyInserter(
-				BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer,
+				BiFunction<M, Context, Mono<Void>> writer,
 				Supplier<T> supplier) {
 			this.writer = writer;
 			this.supplier = supplier;
 		}
 
 		@Override
-		public Mono<Void> insert(ServerHttpResponse response, StrategiesSupplier strategies) {
-			return this.writer.apply(response, strategies);
+		public Mono<Void> insert(M outputMessage, Context context) {
+			return this.writer.apply(outputMessage, context);
 		}
 
 		@Override

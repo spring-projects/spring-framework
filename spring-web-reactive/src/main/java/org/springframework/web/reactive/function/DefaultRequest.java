@@ -24,11 +24,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.BodyExtractor;
+import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -68,8 +72,14 @@ class DefaultRequest implements Request {
 	}
 
 	@Override
-	public <T> T body(BodyExtractor<T> extractor) {
-		return extractor.extract(request(), this.strategies);
+	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
+		return extractor.extract(request(),
+				new BodyExtractor.Context() {
+					@Override
+					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
+						return DefaultRequest.this.strategies.messageReaders();
+					}
+				});
 	}
 
 	@Override

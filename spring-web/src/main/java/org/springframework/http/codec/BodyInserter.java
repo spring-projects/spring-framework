@@ -14,42 +14,38 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function;
+package org.springframework.http.codec;
 
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.util.Assert;
 
 /**
- * A component that can insert data into a {@link Response} body.
+ * A combination of functions that can populate a {@link ReactiveHttpOutputMessage} body.
  *
- * @param <T> the type of data to insert
  * @author Arjen Poutsma
  * @since 5.0
- * @see Response#body()
- * @see Response.BodyBuilder#body(BodyInserter)
- * @see BodyInserters
  */
-public interface BodyInserter<T> {
+public interface BodyInserter<T, M extends ReactiveHttpOutputMessage> {
 
 	/**
 	 * Insert into the given response.
-	 * @param response the response to insert into
-	 * @param strategies the strategies to use
+	 * @param outputMessage the response to insert into
+	 * @param context the context to use
 	 * @return a {@code Mono} that indicates completion or error
 	 */
-	Mono<Void> insert(ServerHttpResponse response, StrategiesSupplier strategies);
+	Mono<Void> insert(M outputMessage, Context context);
 
 	/**
 	 * Return the type contained in the body.
 	 * @return the type contained in the body
 	 */
 	T t();
-
 
 	/**
 	 * Return a new {@code BodyInserter} described by the given writer and supplier functions.
@@ -58,13 +54,29 @@ public interface BodyInserter<T> {
 	 * @param <T> the type supplied and written by the inserter
 	 * @return the new {@code BodyInserter}
 	 */
-	static <T> BodyInserter<T> of(BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer,
+	static <T, M extends ReactiveHttpOutputMessage> BodyInserter<T, M> of(
+			BiFunction<M, Context, Mono<Void>> writer,
 			Supplier<T> supplier) {
 
 		Assert.notNull(writer, "'writer' must not be null");
 		Assert.notNull(supplier, "'supplier' must not be null");
 
-		return new BodyInserters.DefaultBodyInserter<T>(writer, supplier);
+		return new BodyInserters.DefaultBodyInserter<T, M>(writer, supplier);
 	}
+
+	/**
+	 * Defines the context used during the insertion.
+	 */
+	interface Context {
+
+		/**
+		 * Supply a {@linkplain Stream stream} of {@link HttpMessageWriter}s to be used for response
+		 * body conversion.
+		 * @return the stream of message writers
+		 */
+		Supplier<Stream<HttpMessageWriter<?>>> messageWriters();
+
+	}
+
 
 }

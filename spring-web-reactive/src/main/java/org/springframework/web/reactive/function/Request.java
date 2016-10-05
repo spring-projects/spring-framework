@@ -28,6 +28,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.BodyExtractor;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
  * Represents an HTTP request, as handled by a {@code HandlerFunction}.
@@ -67,7 +69,7 @@ public interface Request {
 	 * @param <T> the type of the body returned
 	 * @return the extracted body
 	 */
-	<T> T body(BodyExtractor<T> extractor);
+	<T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor);
 
 	/**
 	 * Return the request attribute value if present.

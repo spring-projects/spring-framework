@@ -14,31 +14,60 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function;
+package org.springframework.http.codec;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.codec.ByteBufferDecoder;
+import org.springframework.core.codec.StringDecoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.MediaType;
+import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
-import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * @author Arjen Poutsma
  */
 public class BodyExtractorsTests {
 
+	private BodyExtractor.Context context;
+
+	@Before
+	public void createContext() {
+		final List<HttpMessageReader<?>> messageReaders = new ArrayList<>();
+		messageReaders.add(new DecoderHttpMessageReader<>(new ByteBufferDecoder()));
+		messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
+		messageReaders.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
+		messageReaders.add(new DecoderHttpMessageReader<>(new Jackson2JsonDecoder()));
+
+		this.context = new BodyExtractor.Context() {
+			@Override
+			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
+				return messageReaders::stream;
+			}
+		};
+
+	}
+
 	@Test
 	public void toMono() throws Exception {
-		BodyExtractor<Mono<String>> extractor = BodyExtractors.toMono(String.class);
+		BodyExtractor<Mono<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toMono(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
@@ -48,9 +77,7 @@ public class BodyExtractorsTests {
 		MockServerHttpRequest request = new MockServerHttpRequest();
 		request.setBody(body);
 
-		StrategiesSupplier strategies = StrategiesSupplier.builder().build();
-
-		Mono<String> result = extractor.extract(request, strategies);
+		Mono<String> result = extractor.extract(request, this.context);
 
 		TestSubscriber.subscribe(result)
 				.assertComplete()
@@ -59,7 +86,7 @@ public class BodyExtractorsTests {
 
 	@Test
 	public void toFlux() throws Exception {
-		BodyExtractor<Flux<String>> extractor = BodyExtractors.toFlux(String.class);
+		BodyExtractor<Flux<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
@@ -69,9 +96,7 @@ public class BodyExtractorsTests {
 		MockServerHttpRequest request = new MockServerHttpRequest();
 		request.setBody(body);
 
-		StrategiesSupplier strategies = StrategiesSupplier.builder().build();
-
-		Flux<String> result = extractor.extract(request, strategies);
+		Flux<String> result = extractor.extract(request, this.context);
 		TestSubscriber.subscribe(result)
 				.assertComplete()
 				.assertValues("foo");
@@ -79,7 +104,7 @@ public class BodyExtractorsTests {
 
 	@Test
 	public void toFluxUnacceptable() throws Exception {
-		BodyExtractor<Flux<String>> extractor = BodyExtractors.toFlux(String.class);
+		BodyExtractor<Flux<String>, ReactiveHttpInputMessage> extractor = BodyExtractors.toFlux(String.class);
 
 		DefaultDataBufferFactory factory = new DefaultDataBufferFactory();
 		DefaultDataBuffer dataBuffer =
@@ -90,12 +115,16 @@ public class BodyExtractorsTests {
 		request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		request.setBody(body);
 
-		StrategiesSupplier strategies = StrategiesSupplier.empty().build();
+		BodyExtractor.Context emptyContext = new BodyExtractor.Context() {
+			@Override
+			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
+				return () -> Collections.<HttpMessageReader<?>>emptySet().stream();
+			}
+		};
 
-		Flux<String> result = extractor.extract(request, strategies);
+		Flux<String> result = extractor.extract(request, emptyContext);
 		TestSubscriber.subscribe(result)
-				.assertError(UnsupportedMediaTypeStatusException.class);
-
+				.assertError(UnsupportedMediaTypeException.class);
 	}
 
 }

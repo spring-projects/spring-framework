@@ -41,6 +41,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.BodyInserter;
+import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -142,7 +144,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	@Override
 	public Response<Void> build() {
 		return body(BodyInserter.of(
-				(response, strategies) -> response.setComplete(),
+				(response, context) -> response.setComplete(),
 				() -> null));
 	}
 
@@ -150,18 +152,18 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	public <T extends Publisher<Void>> Response<T> build(T voidPublisher) {
 		Assert.notNull(voidPublisher, "'voidPublisher' must not be null");
 		return body(BodyInserter.of(
-				(response, strategies) -> Flux.from(voidPublisher).then(response.setComplete()),
+				(response, context) -> Flux.from(voidPublisher).then(response.setComplete()),
 				() -> null));
 	}
 
 	@Override
-	public <T> Response<T> body(BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer,
+	public <T> Response<T> body(BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer,
 			Supplier<T> supplier) {
 		return body(BodyInserter.of(writer, supplier));
 	}
 
 	@Override
-	public <T> Response<T> body(BodyInserter<T> inserter) {
+	public <T> Response<T> body(BodyInserter<T, ? super ServerHttpResponse> inserter) {
 		Assert.notNull(inserter, "'inserter' must not be null");
 		return new BodyInserterResponse<T>(this.statusCode, this.headers, inserter);
 	}
@@ -235,11 +237,12 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 
 	private static final class BodyInserterResponse<T> extends AbstractResponse<T> {
 
-		private final BodyInserter<T> inserter;
+		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
 
-		public BodyInserterResponse(
-				int statusCode, HttpHeaders headers, BodyInserter<T> inserter) {
+		public BodyInserterResponse(int statusCode, HttpHeaders headers,
+				BodyInserter<T, ? super ServerHttpResponse> inserter) {
+
 			super(statusCode, headers);
 			this.inserter = inserter;
 		}
@@ -253,7 +256,12 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		public Mono<Void> writeTo(ServerWebExchange exchange, StrategiesSupplier strategies) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
-			return this.inserter.insert(response, strategies);
+			return this.inserter.insert(response, new BodyInserter.Context() {
+				@Override
+				public Supplier<Stream<HttpMessageWriter<?>>> messageWriters() {
+					return strategies.messageWriters();
+				}
+			});
 		}
 
 	}

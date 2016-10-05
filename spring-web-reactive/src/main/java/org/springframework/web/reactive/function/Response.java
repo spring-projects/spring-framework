@@ -32,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.BodyInserter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
@@ -316,7 +317,7 @@ public interface Response<T> {
 		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T> Response<T> body(BiFunction<ServerHttpResponse, StrategiesSupplier, Mono<Void>> writer,
+		<T> Response<T> body(BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer,
 				Supplier<T> supplier);
 
 		/**
@@ -325,7 +326,7 @@ public interface Response<T> {
 		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T> Response<T> body(BodyInserter<T> inserter);
+		<T> Response<T> body(BodyInserter<T, ? super ServerHttpResponse> inserter);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.
