@@ -3991,8 +3991,7 @@ config). Listed below are some of the exceptions handled by this resolver and th
 corresponding status codes:
 
 |===
-| Exception
-| HTTP Status Code
+| Exception| HTTP Status Code
 
 | `BindException`
 | 400 (Bad Request)
