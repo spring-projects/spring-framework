@@ -19,6 +19,7 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLException;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelConfig;
@@ -32,6 +33,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -48,6 +50,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.1.2
  */
 public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
@@ -74,6 +77,8 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private volatile Bootstrap bootstrap;
 
+	private volatile Bootstrap sslBootstrap;
+
 
 	/**
 	 * Create a new {@code Netty4ClientHttpRequestFactory} with a default
@@ -99,6 +104,15 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 
+	private SslContext getDefaultClientSslContext() {
+		try {
+			return SslContextBuilder.forClient().build();
+		}
+		catch (SSLException exc) {
+			throw new IllegalStateException("Could not create default client SslContext", exc);
+		}
+	}
+
 	/**
 	 * Set the default maximum response size.
 	 * <p>By default this is set to {@link #DEFAULT_MAX_RESPONSE_SIZE}.
@@ -112,7 +126,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	/**
 	 * Set the SSL context. When configured it is used to create and insert an
 	 * {@link io.netty.handler.ssl.SslHandler} in the channel pipeline.
-	 * <p>By default this is not set.
+	 * <p>A default client SslContext is configured if none has been provided.
 	 */
 	public void setSslContext(SslContext sslContext) {
 		this.sslContext = sslContext;
@@ -136,29 +150,44 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.readTimeout = readTimeout;
 	}
 
-	private Bootstrap getBootstrap() {
-		if (this.bootstrap == null) {
-			Bootstrap bootstrap = new Bootstrap();
-			bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
-					.handler(new ChannelInitializer<SocketChannel>() {
-						@Override
-						protected void initChannel(SocketChannel channel) throws Exception {
-							configureChannel(channel.config());
-							ChannelPipeline pipeline = channel.pipeline();
-							if (sslContext != null) {
-								pipeline.addLast(sslContext.newHandler(channel.alloc()));
-							}
-							pipeline.addLast(new HttpClientCodec());
-							pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
-							if (readTimeout > 0) {
-								pipeline.addLast(new ReadTimeoutHandler(readTimeout,
-										TimeUnit.MILLISECONDS));
-							}
-						}
-					});
-			this.bootstrap = bootstrap;
+	private Bootstrap getBootstrap(URI uri) {
+		boolean isSecure = (uri.getPort() == 443)
+				|| (uri.getPort() == -1 && "https".equalsIgnoreCase(uri.getScheme()));
+		if (isSecure) {
+			if (this.sslBootstrap == null) {
+				this.sslBootstrap = buildBootstrap(true);
+			}
+			return this.sslBootstrap;
 		}
-		return this.bootstrap;
+		else {
+			if (this.bootstrap == null) {
+				this.bootstrap = buildBootstrap(false);
+			}
+			return this.bootstrap;
+		}
+	}
+
+	private Bootstrap buildBootstrap(boolean isSecure) {
+		Bootstrap bootstrap = new Bootstrap();
+		bootstrap.group(this.eventLoopGroup).channel(NioSocketChannel.class)
+				.handler(new ChannelInitializer<SocketChannel>() {
+					@Override
+					protected void initChannel(SocketChannel channel) throws Exception {
+						configureChannel(channel.config());
+						ChannelPipeline pipeline = channel.pipeline();
+						if (isSecure) {
+							Assert.notNull(sslContext, "sslContext should not be null");
+							pipeline.addLast(sslContext.newHandler(channel.alloc()));
+						}
+						pipeline.addLast(new HttpClientCodec());
+						pipeline.addLast(new HttpObjectAggregator(maxResponseSize));
+						if (readTimeout > 0) {
+							pipeline.addLast(new ReadTimeoutHandler(readTimeout,
+									TimeUnit.MILLISECONDS));
+						}
+					}
+				});
+		return bootstrap;
 	}
 
 	/**
@@ -173,10 +202,11 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	@Override
-	public void afterPropertiesSet() {
-		getBootstrap();
+	public void afterPropertiesSet() throws Exception {
+		if (this.sslContext == null) {
+			this.sslContext = getDefaultClientSslContext();
+		}
 	}
-
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
@@ -189,7 +219,7 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 	}
 
 	private Netty4ClientHttpRequest createRequestInternal(URI uri, HttpMethod httpMethod) {
-		return new Netty4ClientHttpRequest(getBootstrap(), uri, httpMethod);
+		return new Netty4ClientHttpRequest(getBootstrap(uri), uri, httpMethod);
 	}
 
 
