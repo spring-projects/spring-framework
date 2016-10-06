@@ -16,15 +16,11 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import java.io.File;
 import java.util.Properties;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.junit.runners.Parameterized;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -38,40 +34,17 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
-import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
-import org.springframework.http.server.reactive.bootstrap.RxNettyHttpServer;
-import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
-import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
-import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 
 /**
  * @author Sebastien Deleuze
  */
 public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegrationTests {
-
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		File base = new File(System.getProperty("java.io.tmpdir"));
-		return new Object[][] {
-				{new JettyHttpServer()},
-				{new RxNettyHttpServer()},
-				//{new ReactorHttpServer()}, // Reactor Netty blocks when sending 3 requests in classLevel test
-				{new TomcatHttpServer(base.getAbsolutePath())},
-				{new UndertowHttpServer()}
-		};
-	}
 
 	// JDK default HTTP client blacklist headers like Origin
 	private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
