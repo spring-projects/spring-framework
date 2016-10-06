@@ -51,6 +51,7 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @author Oliver Gierke
+ * @author Brian Clozel
  * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
@@ -687,10 +688,10 @@ public class UriComponentsBuilder implements Cloneable {
 			String hostHeader = headers.getFirst("X-Forwarded-Host");
 			if (StringUtils.hasText(hostHeader)) {
 				String hostToUse = StringUtils.tokenizeToStringArray(hostHeader, ",")[0];
-				String[] hostAndPort = StringUtils.split(hostToUse, ":");
-				if (hostAndPort != null) {
-					host(hostAndPort[0]);
-					port(Integer.parseInt(hostAndPort[1]));
+				int portSeparatorIdx = hostToUse.lastIndexOf(":");
+				if (portSeparatorIdx > hostToUse.lastIndexOf("]")) {
+					host(hostToUse.substring(0, portSeparatorIdx));
+					port(Integer.parseInt(hostToUse.substring(portSeparatorIdx + 1)));
 				}
 				else {
 					host(hostToUse);
