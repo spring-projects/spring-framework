@@ -79,7 +79,7 @@ configure(allprojects) { project ->
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
 	ext.reactorCoreVersion     = '3.0.2.RELEASE'
-	ext.reactorNettyVersion    = '0.5.1.RELEASE'
+	ext.reactorNettyVersion    = '0.5.2.RELEASE'
 	ext.romeVersion            = "1.7.0"
 	ext.rxjavaVersion          = '1.1.9'
 	ext.rxjava2Version         = '2.0.0-RC3'
