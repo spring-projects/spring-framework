@@ -146,7 +146,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 		Resource appCacheResource = transformerChain.getResolverChain()
 				.resolveResource(null, info.getLine(), Collections.singletonList(resource));
 
-		String path = resolveUrlPath(info.getLine(), request, resource, transformerChain);
+		String path = resolveUrlPath(toAbsolutePath(info.getLine(), request), request, resource, transformerChain);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Link modified: " + path + " (original: " + info.getLine() + ")");
 		}

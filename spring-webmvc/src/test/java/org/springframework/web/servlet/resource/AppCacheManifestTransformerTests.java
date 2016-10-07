@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,14 +28,14 @@ import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.util.FileCopyUtils;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
- * Unit tests for
- * {@link AppCacheManifestTransformer}.
+ * Unit tests for {@link AppCacheManifestTransformer}.
  *
  * @author Brian Clozel
  */
@@ -49,13 +49,34 @@ public class AppCacheManifestTransformerTests {
 
 	@Before
 	public void setup() {
+		ClassPathResource allowedLocation = new ClassPathResource("test/", getClass());
+		ResourceHttpRequestHandler resourceHandler = new ResourceHttpRequestHandler();
+		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
+		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
+
+		VersionResourceResolver versionResolver = new VersionResourceResolver();
+		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
+		PathResourceResolver pathResolver = new PathResourceResolver();
+		pathResolver.setAllowedLocations(allowedLocation);
+		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
+		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
+
+		CssLinkResourceTransformer cssLinkResourceTransformer = new CssLinkResourceTransformer();
+		cssLinkResourceTransformer.setResourceUrlProvider(resourceUrlProvider);
+		List<ResourceTransformer> transformers = Arrays.asList(cssLinkResourceTransformer);
+		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
 		this.transformer = new AppCacheManifestTransformer();
-		this.chain = mock(ResourceTransformerChain.class);
-		this.request = mock(HttpServletRequest.class);
+		this.transformer.setResourceUrlProvider(resourceUrlProvider);
+
+		resourceHandler.setResourceResolvers(resolvers);
+		resourceHandler.setResourceTransformers(transformers);
+		resourceHandler.setLocations(Collections.singletonList(allowedLocation));
 	}
 
 	@Test
 	public void noTransformIfExtensionNoMatch() throws Exception {
+		this.chain = mock(ResourceTransformerChain.class);
+		this.request = mock(HttpServletRequest.class);
 		Resource resource = mock(Resource.class);
 		given(resource.getFilename()).willReturn("foobar.file");
 		given(this.chain.transform(this.request, resource)).willReturn(resource);
@@ -66,6 +87,8 @@ public class AppCacheManifestTransformerTests {
 
 	@Test
 	public void syntaxErrorInManifest() throws Exception {
+		this.chain = mock(ResourceTransformerChain.class);
+		this.request = mock(HttpServletRequest.class);
 		Resource resource = new ClassPathResource("test/error.appcache", getClass());
 		given(this.chain.transform(this.request, resource)).willReturn(resource);
 
@@ -75,31 +98,18 @@ public class AppCacheManifestTransformerTests {
 
 	@Test
 	public void transformManifest() throws Exception {
-
-		VersionResourceResolver versionResolver = new VersionResourceResolver();
-		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
-
-		PathResourceResolver pathResolver = new PathResourceResolver();
-		pathResolver.setAllowedLocations(new ClassPathResource("test/", getClass()));
-
-		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
-		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
-
-		List<ResourceTransformer> transformers = new ArrayList<>();
-		transformers.add(new CssLinkResourceTransformer());
-		this.chain = new DefaultResourceTransformerChain(resolverChain, transformers);
-
+		this.request = new MockHttpServletRequest("GET", "/static/test.appcache");
 		Resource resource = new ClassPathResource("test/test.appcache", getClass());
 		Resource result = this.transformer.transform(this.request, resource, this.chain);
 		byte[] bytes = FileCopyUtils.copyToByteArray(result.getInputStream());
 		String content = new String(bytes, "UTF-8");
 
 		assertThat("should rewrite resource links", content,
-				Matchers.containsString("foo-e36d2e05253c6c7085a91522ce43a0b4.css"));
+				Matchers.containsString("/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css"));
 		assertThat("should rewrite resource links", content,
-				Matchers.containsString("bar-11e16cf79faee7ac698c805cf28248d2.css"));
+				Matchers.containsString("/static/bar-11e16cf79faee7ac698c805cf28248d2.css"));
 		assertThat("should rewrite resource links", content,
-				Matchers.containsString("js/bar-bd508c62235b832d960298ca6c0b7645.js"));
+				Matchers.containsString("/static/js/bar-bd508c62235b832d960298ca6c0b7645.js"));
 
 		assertThat("should not rewrite external resources", content,
 				Matchers.containsString("//example.org/style.css"));

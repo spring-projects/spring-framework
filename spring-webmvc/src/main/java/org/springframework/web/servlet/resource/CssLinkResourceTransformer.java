@@ -102,7 +102,7 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 			String link = content.substring(linkSegment.getStart(), linkSegment.getEnd());
 			String newLink = null;
 			if (!hasScheme(link)) {
-				newLink = resolveUrlPath(link, request, resource, transformerChain);
+				newLink = resolveUrlPath(toAbsolutePath(link, request), request, resource, transformerChain);
 			}
 			if (logger.isTraceEnabled()) {
 				if (newLink != null && !link.equals(newLink)) {

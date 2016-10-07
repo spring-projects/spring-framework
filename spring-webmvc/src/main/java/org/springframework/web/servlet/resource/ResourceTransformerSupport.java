@@ -20,6 +20,7 @@ import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 /**
  * A base class for a {@code ResourceTransformer} with an optional helper method
@@ -84,6 +85,20 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 			return transformerChain.getResolverChain().resolveUrlPath(
 					resourcePath, Collections.singletonList(resource));
 		}
+	}
+
+	/**
+	 * Transform the given relative request path to an absolute path,
+	 * taking the path of the given request as a point of reference.
+	 * The resulting path is also cleaned from sequences like "path/..".
+	 * @param path the relative path to transform
+	 * @param request the referer request
+	 * @return the absolute request path for the given resource path
+	 */
+	protected String toAbsolutePath(String path, HttpServletRequest request) {
+		String requestPath = this.getResourceUrlProvider().getUrlPathHelper().getRequestUri(request);
+		String absolutePath = StringUtils.applyRelativePath(requestPath, path);
+		return StringUtils.cleanPath(absolutePath);
 	}
 
 	private ResourceUrlProvider findResourceUrlProvider(HttpServletRequest request) {
