@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	public final WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
 			throws Exception {
 
@@ -74,7 +75,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
 	/**
 	 * Extension point to further initialize the created data binder instance
-	 * (e.g. with {@code @InitBinder} methods) after "global" initializaton
+	 * (e.g. with {@code @InitBinder} methods) after "global" initialization
 	 * via {@link WebBindingInitializer}.
 	 * @param dataBinder the data binder instance to customize
 	 * @param webRequest the current request

@@ -41,6 +41,7 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
+import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.reactive.HandlerAdapter;
@@ -67,6 +68,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(10);
 
 	private ReactiveAdapterRegistry reactiveAdapters = new ReactiveAdapterRegistry();
+
+	private WebBindingInitializer webBindingInitializer;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -134,6 +137,21 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
 		return this.reactiveAdapters;
+	}
+
+	/**
+	 * Provide a WebBindingInitializer with "global" initialization to apply
+	 * to every DataBinder instance.
+	 */
+	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
+		this.webBindingInitializer = webBindingInitializer;
+	}
+
+	/**
+	 * Return the configured WebBindingInitializer, or {@code null} if none.
+	 */
+	public WebBindingInitializer getWebBindingInitializer() {
+		return this.webBindingInitializer;
 	}
 
 	/**

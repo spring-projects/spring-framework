@@ -55,7 +55,10 @@ import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
+import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
@@ -255,6 +258,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		}
 
 		adapter.setMessageReaders(getMessageReaders());
+		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setConversionService(mvcConversionService());
 		adapter.setValidator(mvcValidator());
 
@@ -325,6 +329,18 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
 	}
 
+	/**
+	 * Return the {@link ConfigurableWebBindingInitializer} to use for
+	 * initializing all {@link WebDataBinder} instances.
+	 */
+	protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer() {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(mvcConversionService());
+		initializer.setValidator(mvcValidator());
+		initializer.setMessageCodesResolver(getMessageCodesResolver());
+		return initializer;
+	}
+
 	@Bean
 	public FormattingConversionService mvcConversionService() {
 		FormattingConversionService service = new DefaultFormattingConversionService();
@@ -375,6 +391,13 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * Override this method to provide a custom {@link Validator}.
 	 */
 	protected Validator getValidator() {
+		return null;
+	}
+
+	/**
+	 * Override this method to provide a custom {@link MessageCodesResolver}.
+	 */
+	protected MessageCodesResolver getMessageCodesResolver() {
 		return null;
 	}
 

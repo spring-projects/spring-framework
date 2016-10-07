@@ -49,6 +49,8 @@ import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean;
+import org.springframework.web.bind.WebExchangeDataBinder;
+import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
@@ -161,6 +163,13 @@ public class WebReactiveConfigurationTests {
 		Validator validator = context.getBean(name, Validator.class);
 		assertSame(validator, adapter.getValidator());
 		assertEquals(OptionalValidatorFactoryBean.class, validator.getClass());
+
+		WebBindingInitializer bindingInitializer = adapter.getWebBindingInitializer();
+		assertNotNull(bindingInitializer);
+		WebExchangeDataBinder binder = new WebExchangeDataBinder(new Object());
+		bindingInitializer.initBinder(binder);
+		assertSame(service, binder.getConversionService());
+		assertSame(validator, binder.getValidator());
 	}
 
 	@Test
