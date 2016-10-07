@@ -52,39 +52,45 @@ public class CssLinkResourceTransformerTests {
 
 	@Before
 	public void setUp() {
+		ClassPathResource allowedLocation = new ClassPathResource("test/", getClass());
+		ResourceWebHandler resourceHandler = new ResourceWebHandler();
+
+		ResourceUrlProvider resourceUrlProvider = new ResourceUrlProvider();
+		resourceUrlProvider.setHandlerMap(Collections.singletonMap("/static/**", resourceHandler));
+
 		VersionResourceResolver versionResolver = new VersionResourceResolver();
 		versionResolver.setStrategyMap(Collections.singletonMap("/**", new ContentVersionStrategy()));
-
 		PathResourceResolver pathResolver = new PathResourceResolver();
-		pathResolver.setAllowedLocations(new ClassPathResource("test/", getClass()));
-
+		pathResolver.setAllowedLocations(allowedLocation);
 		List<ResourceResolver> resolvers = Arrays.asList(versionResolver, pathResolver);
-		List<ResourceTransformer> transformers = Collections.singletonList(new CssLinkResourceTransformer());
 
+		CssLinkResourceTransformer cssLinkResourceTransformer = new CssLinkResourceTransformer();
+		cssLinkResourceTransformer.setResourceUrlProvider(resourceUrlProvider);
+		List<ResourceTransformer> transformers = Collections.singletonList(cssLinkResourceTransformer);
+
+		resourceHandler.setResourceResolvers(resolvers);
+		resourceHandler.setResourceTransformers(transformers);
+		resourceHandler.setLocations(Collections.singletonList(allowedLocation));
 		ResourceResolverChain resolverChain = new DefaultResourceResolverChain(resolvers);
 		this.transformerChain = new DefaultResourceTransformerChain(resolverChain, transformers);
-
-		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "");
-		ServerHttpResponse response = new MockServerHttpResponse();
-		WebSessionManager manager = new DefaultWebSessionManager();
-		this.exchange = new DefaultServerWebExchange(request, response, manager);
 	}
 
 
 	@Test
 	public void transform() throws Exception {
+		initExchange(HttpMethod.GET, "/static/main.css");
 		Resource css = new ClassPathResource("test/main.css", getClass());
 		TransformedResource actual =
 				(TransformedResource) this.transformerChain.transform(this.exchange, css)
 						.blockMillis(5000);
 
 		String expected = "\n" +
-				"@import url(\"bar-11e16cf79faee7ac698c805cf28248d2.css\");\n" +
-				"@import url('bar-11e16cf79faee7ac698c805cf28248d2.css');\n" +
-				"@import url(bar-11e16cf79faee7ac698c805cf28248d2.css);\n\n" +
-				"@import \"foo-e36d2e05253c6c7085a91522ce43a0b4.css\";\n" +
-				"@import 'foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
-				"body { background: url(\"images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n";
+				"@import url(\"/static/bar-11e16cf79faee7ac698c805cf28248d2.css\");\n" +
+				"@import url('/static/bar-11e16cf79faee7ac698c805cf28248d2.css');\n" +
+				"@import url(/static/bar-11e16cf79faee7ac698c805cf28248d2.css);\n\n" +
+				"@import \"/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css\";\n" +
+				"@import '/static/foo-e36d2e05253c6c7085a91522ce43a0b4.css';\n\n" +
+				"body { background: url(\"/static/images/image-f448cd1d5dba82b774f3202c878230b3.png\") }\n";
 
 		String result = new String(actual.getByteArray(), "UTF-8");
 		result = StringUtils.deleteAny(result, "\r");
@@ -93,6 +99,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformNoLinks() throws Exception {
+		initExchange(HttpMethod.GET, "/static/foo.css");
 		Resource expected = new ClassPathResource("test/foo.css", getClass());
 		Resource actual = this.transformerChain.transform(this.exchange, expected).blockMillis(5000);
 		assertSame(expected, actual);
@@ -100,6 +107,7 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformExtLinksNotAllowed() throws Exception {
+		initExchange(HttpMethod.GET, "/static/external.css");
 		ResourceResolverChain resolverChain = Mockito.mock(DefaultResourceResolverChain.class);
 		ResourceTransformerChain transformerChain = new DefaultResourceTransformerChain(resolverChain,
 				Collections.singletonList(new CssLinkResourceTransformer()));
@@ -125,9 +133,17 @@ public class CssLinkResourceTransformerTests {
 
 	@Test
 	public void transformWithNonCssResource() throws Exception {
+		initExchange(HttpMethod.GET, "/static/images/image.png");
 		Resource expected = new ClassPathResource("test/images/image.png", getClass());
 		Resource actual = this.transformerChain.transform(this.exchange, expected).blockMillis(5000);
 		assertSame(expected, actual);
+	}
+
+	private void initExchange(HttpMethod method, String url) {
+		MockServerHttpRequest request = new MockServerHttpRequest(method, url);
+		ServerHttpResponse response = new MockServerHttpResponse();
+		WebSessionManager manager = new DefaultWebSessionManager();
+		this.exchange = new DefaultServerWebExchange(request, response, manager);
 	}
 
 }

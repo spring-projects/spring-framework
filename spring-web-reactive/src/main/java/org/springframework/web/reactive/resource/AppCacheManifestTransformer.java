@@ -144,7 +144,8 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			return Mono.just(new LineOutput(info.getLine(), null));
 		}
 
-		Mono<String> pathMono = resolveUrlPath(info.getLine(), exchange, resource, chain)
+		String link = toAbsolutePath(info.getLine(), exchange.getRequest());
+		Mono<String> pathMono = resolveUrlPath(link, exchange, resource, chain)
 				.doOnNext(path -> {
 					if (logger.isTraceEnabled()) {
 						logger.trace("Link modified: " + path + " (original: " + info.getLine() + ")");

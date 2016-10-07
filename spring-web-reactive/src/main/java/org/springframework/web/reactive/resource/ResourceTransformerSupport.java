@@ -21,6 +21,8 @@ import java.util.Collections;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -72,13 +74,28 @@ public abstract class ResourceTransformerSupport implements ResourceTransformer 
 		if (resourcePath.startsWith("/")) {
 			// full resource path
 			ResourceUrlProvider urlProvider = getResourceUrlProvider();
-			return (urlProvider != null ? urlProvider.getForRequestUrl(exchange, resourcePath) : null);
+			return (urlProvider != null ? urlProvider.getForRequestUrl(exchange, resourcePath) : Mono.empty());
 		}
 		else {
 			// try resolving as relative path
 			return transformerChain.getResolverChain()
 					.resolveUrlPath(resourcePath, Collections.singletonList(resource));
 		}
+	}
+
+	/**
+	 * Transform the given relative request path to an absolute path,
+	 * taking the path of the given request as a point of reference.
+	 * The resulting path is also cleaned from sequences like "path/..".
+	 *
+	 * @param path the relative path to transform
+	 * @param request the referer request
+	 * @return the absolute request path for the given resource path
+	 */
+	protected String toAbsolutePath(String path, ServerHttpRequest request) {
+		String requestPath = request.getURI().getPath();
+		String absolutePath = StringUtils.applyRelativePath(requestPath, path);
+		return StringUtils.cleanPath(absolutePath);
 	}
 
 }

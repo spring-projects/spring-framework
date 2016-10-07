@@ -102,7 +102,8 @@ public class CssLinkResourceTransformer extends ResourceTransformerSupport {
 							.concatMap(segment -> {
 								String segmentContent = segment.getContent(fullContent);
 								if (segment.isLink() && !hasScheme(segmentContent)) {
-									return resolveUrlPath(segmentContent, exchange, newResource, transformerChain)
+									String link = toAbsolutePath(segmentContent, exchange.getRequest());
+									return resolveUrlPath(link, exchange, newResource, transformerChain)
 											.defaultIfEmpty(segmentContent);
 								}
 								else {
