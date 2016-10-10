@@ -86,8 +86,10 @@ import org.springframework.web.server.ServerWebExchange;
 public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper", WebReactiveConfiguration.class.getClassLoader()) &&
-			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator", WebReactiveConfiguration.class.getClassLoader());
+			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+					WebReactiveConfiguration.class.getClassLoader()) &&
+			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
+					WebReactiveConfiguration.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
 			ClassUtils.isPresent("javax.xml.bind.Binder", WebReactiveConfiguration.class.getClassLoader());
@@ -318,7 +320,8 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			readers.add(new DecoderHttpMessageReader<>(new Jaxb2XmlDecoder()));
 		}
 		if (jackson2Present) {
-			readers.add(new Jackson2ServerHttpMessageReader(new  DecoderHttpMessageReader<>(new Jackson2JsonDecoder())));
+			readers.add(new Jackson2ServerHttpMessageReader(
+					new  DecoderHttpMessageReader<>(new Jackson2JsonDecoder())));
 		}
 	}
 
@@ -454,10 +457,11 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			writers.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
 		}
 		if (jackson2Present) {
-			Jackson2JsonEncoder jacksonEncoder = new Jackson2JsonEncoder();
-			writers.add(new Jackson2ServerHttpMessageWriter(new EncoderHttpMessageWriter<>(jacksonEncoder)));
-			sseDataEncoders.add(jacksonEncoder);
-			writers.add(new Jackson2ServerHttpMessageWriter(new ServerSentEventHttpMessageWriter(sseDataEncoders)));
+			Jackson2JsonEncoder encoder = new Jackson2JsonEncoder();
+			writers.add(new Jackson2ServerHttpMessageWriter(encoder));
+			sseDataEncoders.add(encoder);
+			HttpMessageWriter<Object> writer = new ServerSentEventHttpMessageWriter(sseDataEncoders);
+			writers.add(new Jackson2ServerHttpMessageWriter(writer));
 		}
 		else {
 			writers.add(new ServerSentEventHttpMessageWriter(sseDataEncoders));

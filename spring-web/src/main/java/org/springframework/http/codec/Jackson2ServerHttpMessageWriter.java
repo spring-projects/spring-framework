@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.json.AbstractJackson2Codec;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -40,9 +41,15 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
  */
 public class Jackson2ServerHttpMessageWriter extends AbstractServerHttpMessageWriter<Object> {
 
+
+	public Jackson2ServerHttpMessageWriter(Encoder<Object> encoder) {
+		super(new EncoderHttpMessageWriter<>(encoder));
+	}
+
 	public Jackson2ServerHttpMessageWriter(HttpMessageWriter<Object> writer) {
 		super(writer);
 	}
+
 
 	@Override
 	protected Map<String, Object> resolveWriteHints(ResolvableType streamType,

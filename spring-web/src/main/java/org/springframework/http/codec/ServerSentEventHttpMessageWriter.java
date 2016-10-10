@@ -17,6 +17,7 @@
 package org.springframework.http.codec;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,10 +48,10 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Object> {
 
-	private static final MediaType TEXT_EVENT_STREAM =
-			new MediaType("text", "event-stream");
+	private static final MediaType TEXT_EVENT_STREAM = new MediaType("text", "event-stream");
 
 	private final List<Encoder<?>> dataEncoders;
+
 
 	public ServerSentEventHttpMessageWriter() {
 		this.dataEncoders = Collections.emptyList();
@@ -58,8 +59,9 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 
 	public ServerSentEventHttpMessageWriter(List<Encoder<?>> dataEncoders) {
 		Assert.notNull(dataEncoders, "'dataEncoders' must not be null");
-		this.dataEncoders = dataEncoders;
+		this.dataEncoders = new ArrayList<>(dataEncoders);
 	}
+
 
 	@Override
 	public boolean canWrite(ResolvableType elementType, MediaType mediaType) {

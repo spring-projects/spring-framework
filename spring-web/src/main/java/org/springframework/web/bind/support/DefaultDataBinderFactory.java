@@ -48,8 +48,8 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
-	public final WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
-			throws Exception {
+	public final WebDataBinder createBinder(NativeWebRequest webRequest, Object target,
+			String objectName) throws Exception {
 
 		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);
 		if (this.initializer != null) {
@@ -67,8 +67,8 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 * @param webRequest the current request
 	 * @throws Exception in case of invalid state or arguments
 	 */
-	protected WebDataBinder createBinderInstance(Object target, String objectName, NativeWebRequest webRequest)
-			throws Exception {
+	protected WebDataBinder createBinderInstance(Object target, String objectName,
+			NativeWebRequest webRequest) throws Exception {
 
 		return new WebRequestDataBinder(target, objectName);
 	}
@@ -81,7 +81,9 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 * @param webRequest the current request
 	 * @throws Exception if initialization fails
 	 */
-	protected void initBinder(WebDataBinder dataBinder, NativeWebRequest webRequest) throws Exception {
+	protected void initBinder(WebDataBinder dataBinder, NativeWebRequest webRequest)
+			throws Exception {
+
 	}
 
 }

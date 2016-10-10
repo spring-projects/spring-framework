@@ -61,15 +61,15 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	private static final Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
 
-	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
-
-	private List<HandlerMethodArgumentResolver> argumentResolvers;
-
 	private final List<HttpMessageReader<?>> messageReaders = new ArrayList<>(10);
+
+	private WebBindingInitializer webBindingInitializer;
 
 	private ReactiveAdapterRegistry reactiveAdapters = new ReactiveAdapterRegistry();
 
-	private WebBindingInitializer webBindingInitializer;
+	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
+
+	private List<HandlerMethodArgumentResolver> argumentResolvers;
 
 	private ConversionService conversionService = new DefaultFormattingConversionService();
 
@@ -77,7 +77,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 
 	private ConfigurableBeanFactory beanFactory;
 
-	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache = new ConcurrentHashMap<>(64);
+	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
+			new ConcurrentHashMap<>(64);
 
 
 
@@ -86,6 +87,44 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		this.messageReaders.add(new DecoderHttpMessageReader<>(new StringDecoder()));
 	}
 
+
+	/**
+	 * Configure message readers to de-serialize the request body with.
+	 */
+	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		this.messageReaders.clear();
+		this.messageReaders.addAll(messageReaders);
+	}
+
+	/**
+	 * Return the configured message readers.
+	 */
+	public List<HttpMessageReader<?>> getMessageReaders() {
+		return this.messageReaders;
+	}
+
+	/**
+	 * Provide a WebBindingInitializer with "global" initialization to apply
+	 * to every DataBinder instance.
+	 */
+	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
+		this.webBindingInitializer = webBindingInitializer;
+	}
+
+	/**
+	 * Return the configured WebBindingInitializer, or {@code null} if none.
+	 */
+	public WebBindingInitializer getWebBindingInitializer() {
+		return this.webBindingInitializer;
+	}
+
+	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
+		this.reactiveAdapters = registry;
+	}
+
+	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
+		return this.reactiveAdapters;
+	}
 
 	/**
 	 * Provide custom argument resolvers without overriding the built-in ones.
@@ -114,44 +153,6 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 	 */
 	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
 		return this.argumentResolvers;
-	}
-
-	/**
-	 * Configure message readers to de-serialize the request body with.
-	 */
-	public void setMessageReaders(List<HttpMessageReader<?>> messageReaders) {
-		this.messageReaders.clear();
-		this.messageReaders.addAll(messageReaders);
-	}
-
-	/**
-	 * Return the configured message readers.
-	 */
-	public List<HttpMessageReader<?>> getMessageReaders() {
-		return this.messageReaders;
-	}
-
-	public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {
-		this.reactiveAdapters = registry;
-	}
-
-	public ReactiveAdapterRegistry getReactiveAdapterRegistry() {
-		return this.reactiveAdapters;
-	}
-
-	/**
-	 * Provide a WebBindingInitializer with "global" initialization to apply
-	 * to every DataBinder instance.
-	 */
-	public void setWebBindingInitializer(WebBindingInitializer webBindingInitializer) {
-		this.webBindingInitializer = webBindingInitializer;
-	}
-
-	/**
-	 * Return the configured WebBindingInitializer, or {@code null} if none.
-	 */
-	public WebBindingInitializer getWebBindingInitializer() {
-		return this.webBindingInitializer;
 	}
 
 	/**
