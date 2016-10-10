@@ -150,19 +150,37 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 
-	protected Object processCorsRequest(ServerWebExchange exchange, Object handler) {
-		if (CorsUtils.isCorsRequest(exchange.getRequest())) {
-			CorsConfiguration configA = this.globalCorsConfigSource.getCorsConfiguration(exchange);
-			CorsConfiguration configB = getCorsConfiguration(handler, exchange);
-			CorsConfiguration config = (configA != null ? configA.combine(configB) : configB);
+	@Override
+	public Mono<Object> getHandler(ServerWebExchange exchange) {
+		return getHandlerInternal(exchange).map(handler -> {
+			if (CorsUtils.isCorsRequest(exchange.getRequest())) {
+				CorsConfiguration configA = this.globalCorsConfigSource.getCorsConfiguration(exchange);
+				CorsConfiguration configB = getCorsConfiguration(handler, exchange);
+				CorsConfiguration config = (configA != null ? configA.combine(configB) : configB);
 
-			if (!getCorsProcessor().processRequest(config, exchange) ||
-					CorsUtils.isPreFlightRequest(exchange.getRequest())) {
-				return REQUEST_HANDLED_HANDLER;
+				if (!getCorsProcessor().processRequest(config, exchange) ||
+						CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+					return REQUEST_HANDLED_HANDLER;
+				}
 			}
-		}
-		return handler;
+			return handler;
+		});
 	}
+
+	/**
+	 * Look up a handler for the given request, returning an empty {@code Mono}
+	 * if no specific one is found. This method is called by {@link #getHandler}.
+	 *
+	 * <p>On CORS pre-flight requests this method should return a match not for
+	 * the pre-flight request but for the expected actual request based on the URL
+	 * path, the HTTP methods from the "Access-Control-Request-Method" header, and
+	 * the headers from the "Access-Control-Request-Headers" header thus allowing
+	 * the CORS configuration to be obtained via {@link #getCorsConfigurations},
+	 *
+	 * @param exchange current exchange
+	 * @return {@code Mono} for the matching handler, if any
+	 */
+	protected abstract Mono<?> getHandlerInternal(ServerWebExchange exchange);
 
 	/**
 	 * Retrieve the CORS configuration for the given handler.

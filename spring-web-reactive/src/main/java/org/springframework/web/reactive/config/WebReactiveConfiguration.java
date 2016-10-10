@@ -469,7 +469,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	private static final class EmptyHandlerMapping extends AbstractHandlerMapping {
 
 		@Override
-		public Mono<Object> getHandler(ServerWebExchange exchange) {
+		public Mono<Object> getHandlerInternal(ServerWebExchange exchange) {
 			return Mono.empty();
 		}
 	}

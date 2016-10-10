@@ -96,12 +96,11 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 
 
 	@Override
-	public Mono<Object> getHandler(ServerWebExchange exchange) {
+	public Mono<Object> getHandlerInternal(ServerWebExchange exchange) {
 		String lookupPath = getPathHelper().getLookupPathForRequest(exchange);
 		Object handler;
 		try {
 			handler = lookupHandler(lookupPath, exchange);
-			handler = processCorsRequest(exchange, handler);
 		}
 		catch (Exception ex) {
 			return Mono.error(ex);

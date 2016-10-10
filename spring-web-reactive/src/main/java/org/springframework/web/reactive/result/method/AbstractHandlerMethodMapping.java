@@ -254,7 +254,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param exchange the current exchange
 	 */
 	@Override
-	public Mono<Object> getHandler(ServerWebExchange exchange) {
+	public Mono<HandlerMethod> getHandlerInternal(ServerWebExchange exchange) {
 		String lookupPath = getPathHelper().getLookupPathForRequest(exchange);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking up handler method for path " + lookupPath);
@@ -279,7 +279,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (handlerMethod != null) {
 				handlerMethod = handlerMethod.createWithResolvedBean();
 			}
-			return Mono.justOrEmpty(processCorsRequest(exchange, handlerMethod));
+			return Mono.justOrEmpty(handlerMethod);
 		}
 		finally {
 			this.mappingRegistry.releaseReadLock();
