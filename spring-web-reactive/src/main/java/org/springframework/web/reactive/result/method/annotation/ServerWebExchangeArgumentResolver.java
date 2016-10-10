@@ -21,7 +21,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.ui.ModelMap;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
@@ -52,7 +52,9 @@ public class ServerWebExchangeArgumentResolver implements HandlerMethodArgumentR
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
+			ServerWebExchange exchange) {
+
 		Class<?> paramType = parameter.getParameterType();
 		if (ServerWebExchange.class.isAssignableFrom(paramType)) {
 			return Mono.just(exchange);

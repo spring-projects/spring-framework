@@ -31,6 +31,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
@@ -82,7 +83,9 @@ public class ExpressionValueMethodArgumentResolverTests {
 	public void resolveSystemProperty() throws Exception {
 		System.setProperty("systemProperty", "22");
 		try {
-			Mono<Object> mono = this.resolver.resolveArgument(this.paramSystemProperty, null, this.exchange);
+			Mono<Object> mono = this.resolver.resolveArgument(
+					this.paramSystemProperty,  new BindingContext(), this.exchange);
+
 			Object value = mono.block();
 			assertEquals(22, value);
 		}

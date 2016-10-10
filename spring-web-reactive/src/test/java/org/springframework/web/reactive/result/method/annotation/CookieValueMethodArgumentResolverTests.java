@@ -34,6 +34,7 @@ import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -58,6 +59,8 @@ public class CookieValueMethodArgumentResolverTests {
 	private MethodParameter cookieParameter;
 	private MethodParameter cookieStringParameter;
 	private MethodParameter stringParameter;
+
+	private BindingContext bindingContext = new BindingContext();
 
 
 	@Before
@@ -90,7 +93,9 @@ public class CookieValueMethodArgumentResolverTests {
 		HttpCookie expected = new HttpCookie("name", "foo");
 		this.exchange.getRequest().getCookies().add(expected.getName(), expected);
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.cookieParameter, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.cookieParameter, this.bindingContext, this.exchange);
+
 		assertEquals(expected, mono.block());
 	}
 
@@ -99,14 +104,16 @@ public class CookieValueMethodArgumentResolverTests {
 		HttpCookie cookie = new HttpCookie("name", "foo");
 		this.exchange.getRequest().getCookies().add(cookie.getName(), cookie);
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.cookieStringParameter, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.cookieStringParameter, this.bindingContext, this.exchange);
+
 		assertEquals("Invalid result", cookie.getValue(), mono.block());
 	}
 
 	@Test
 	public void resolveCookieDefaultValue() {
-		Mono<Object> mono = this.resolver.resolveArgument(this.cookieStringParameter, null, this.exchange);
-		Object result = mono.block();
+		Object result = this.resolver.resolveArgument(
+				this.cookieStringParameter, this.bindingContext, this.exchange).block();
 
 		assertTrue(result instanceof String);
 		assertEquals("bar", result);
@@ -114,7 +121,7 @@ public class CookieValueMethodArgumentResolverTests {
 
 	@Test
 	public void notFound() {
-		Mono<Object> mono = resolver.resolveArgument(this.cookieParameter, null, this.exchange);
+		Mono<Object> mono = resolver.resolveArgument(this.cookieParameter, this.bindingContext, this.exchange);
 		TestSubscriber
 				.subscribe(mono)
 				.assertError(ServerWebInputException.class);

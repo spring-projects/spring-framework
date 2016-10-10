@@ -26,8 +26,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.tests.TestSubscriber;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.server.ServerWebExchange;
@@ -50,8 +48,6 @@ public class InvocableHandlerMethodTests {
 
 	private ServerWebExchange exchange;
 
-	private ModelMap model = new ExtendedModelMap();
-
 
 	@Before
 	public void setUp() throws Exception {
@@ -65,7 +61,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void invokeMethodWithNoArguments() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("noArgs");
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
 
 		assertHandlerResultValue(mono, "success");
 	}
@@ -74,7 +70,7 @@ public class InvocableHandlerMethodTests {
 	public void invokeMethodWithNoValue() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.empty());
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
 
 		assertHandlerResultValue(mono, "success:null");
 	}
@@ -83,7 +79,7 @@ public class InvocableHandlerMethodTests {
 	public void invokeMethodWithValue() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.just("value1"));
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
 
 		assertHandlerResultValue(mono, "success:value1");
 	}
@@ -91,7 +87,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void noMatchingResolver() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
 
 		TestSubscriber.subscribe(mono)
 				.assertError(IllegalStateException.class)
@@ -103,7 +99,7 @@ public class InvocableHandlerMethodTests {
 	public void resolverThrowsException() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.error(new UnsupportedMediaTypeStatusException("boo")));
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
 
 		TestSubscriber.subscribe(mono)
 				.assertError(UnsupportedMediaTypeStatusException.class)
@@ -114,7 +110,7 @@ public class InvocableHandlerMethodTests {
 	public void illegalArgumentExceptionIsWrappedWithInvocationDetails() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("singleArg");
 		addResolver(hm, Mono.just(1));
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
 
 		TestSubscriber.subscribe(mono)
 				.assertError(IllegalStateException.class)
@@ -126,7 +122,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void invocationTargetExceptionIsUnwrapped() throws Exception {
 		InvocableHandlerMethod hm = handlerMethod("exceptionMethod");
-		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, new BindingContext());
 
 		TestSubscriber.subscribe(mono)
 				.assertError(IllegalStateException.class)

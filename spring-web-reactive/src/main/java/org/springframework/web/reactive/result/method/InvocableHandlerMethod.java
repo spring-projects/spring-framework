@@ -81,18 +81,19 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the method and return a Publisher for the return value.
 	 * @param exchange the current exchange
-	 * @param model the model for request handling
+	 * @param bindingContext the binding context to use
 	 * @param providedArgs optional list of argument values to check by type
 	 * (via {@code instanceof}) for resolving method arguments.
 	 * @return Publisher that produces a single HandlerResult or an error signal;
 	 * never throws an exception
 	 */
-	public Mono<HandlerResult> invokeForRequest(ServerWebExchange exchange, ModelMap model,
-			Object... providedArgs) {
+	public Mono<HandlerResult> invokeForRequest(ServerWebExchange exchange,
+			BindingContext bindingContext, Object... providedArgs) {
 
-		return resolveArguments(exchange, model, providedArgs).then(args -> {
+		return resolveArguments(exchange, bindingContext, providedArgs).then(args -> {
 			try {
 				Object value = doInvoke(args);
+				ModelMap model = bindingContext.getModel();
 				HandlerResult handlerResult = new HandlerResult(this, value, getReturnType(), model);
 				return Mono.just(handlerResult);
 			}
@@ -106,7 +107,9 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(ServerWebExchange exchange, ModelMap model, Object... providedArgs) {
+	private Mono<Object[]> resolveArguments(ServerWebExchange exchange,
+			BindingContext bindingContext, Object... providedArgs) {
+
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return NO_ARGS;
 		}
@@ -127,7 +130,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 								.findFirst()
 								.orElseThrow(() -> getArgError("No resolver for ", param, null));
 						try {
-							return resolver.resolveArgument(param, model, exchange)
+							return resolver.resolveArgument(param, bindingContext, exchange)
 									.defaultIfEmpty(NO_VALUE)
 									.doOnError(cause -> {
 										if(logger.isDebugEnabled()) {

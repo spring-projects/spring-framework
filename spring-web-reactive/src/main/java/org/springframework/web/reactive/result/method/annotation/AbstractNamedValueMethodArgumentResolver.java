@@ -32,6 +32,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ValueConstants;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
@@ -85,7 +86,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
+			ServerWebExchange exchange) {
+
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
@@ -94,6 +97,8 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 			return Mono.error(new IllegalArgumentException(
 					"Specified name must not resolve to null: [" + namedValueInfo.name + "]"));
 		}
+
+		ModelMap model = bindingContext.getModel();
 
 		return resolveName(resolvedName.toString(), nestedParameter, exchange)
 				.map(arg -> {

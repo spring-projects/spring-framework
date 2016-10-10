@@ -21,12 +21,12 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.ui.ModelMap;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.reactive.result.ResolvableMethod;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -84,7 +84,7 @@ public class ServerWebExchangeArgumentResolverTests {
 	}
 
 	private void testResolveArgument(MethodParameter parameter, Object expected) {
-		Mono<Object> mono = this.resolver.resolveArgument(parameter, new ModelMap(), this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(parameter, new BindingContext(), this.exchange);
 		assertSame(expected, mono.block());
 	}
 

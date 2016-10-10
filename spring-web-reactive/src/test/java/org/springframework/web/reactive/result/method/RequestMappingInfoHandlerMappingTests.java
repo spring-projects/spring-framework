@@ -35,13 +35,11 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.tests.TestSubscriber;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -376,8 +374,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, requestURI);
 		HandlerMethod handlerMethod = (HandlerMethod) this.handlerMapping.getHandler(exchange).block();
 
-		ModelMap model = new ExtendedModelMap();
-		Mono<HandlerResult> mono = new InvocableHandlerMethod(handlerMethod).invokeForRequest(exchange, model);
+		BindingContext bindingContext = new BindingContext();
+		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
+		Mono<HandlerResult> mono = invocable.invokeForRequest(exchange, bindingContext);
 
 		HandlerResult result = mono.block();
 		assertNotNull(result);

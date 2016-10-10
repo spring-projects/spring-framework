@@ -23,10 +23,10 @@ import java.util.Optional;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -54,7 +54,7 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 	 * Return a Map with all URI template variables or an empty map.
 	 */
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model,
+	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
 			ServerWebExchange exchange) {
 
 		String name = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;

@@ -39,10 +39,10 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.tests.TestSubscriber;
-import org.springframework.ui.ExtendedModelMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.result.ResolvableMethod;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -213,7 +213,7 @@ public class RequestBodyArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValueWithEmptyBody(ResolvableType bodyType, boolean isRequired) {
 		MethodParameter param = this.testMethod.resolveParam(bodyType, requestBody(isRequired));
-		Mono<Object> result = this.resolver.resolveArgument(param, new ExtendedModelMap(), this.exchange);
+		Mono<Object> result = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		if (value != null) {

@@ -21,10 +21,10 @@ import java.util.Map;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -57,7 +57,9 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(MethodParameter parameter, BindingContext bindingContext,
+			ServerWebExchange exchange) {
+
 		Class<?> paramType = parameter.getParameterType();
 		MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
 		if (MultiValueMap.class.isAssignableFrom(paramType)) {

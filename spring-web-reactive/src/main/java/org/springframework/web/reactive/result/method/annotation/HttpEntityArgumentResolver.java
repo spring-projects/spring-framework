@@ -27,8 +27,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -73,7 +73,8 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter param, ModelMap model, ServerWebExchange exchange) {
+	public Mono<Object> resolveArgument(MethodParameter param, BindingContext bindingContext,
+			ServerWebExchange exchange) {
 
 		ResolvableType entityType = ResolvableType.forMethodParameter(param);
 		MethodParameter bodyParameter = new MethodParameter(param);

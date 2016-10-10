@@ -27,12 +27,12 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
@@ -86,7 +86,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 		uriTemplateVars.put("name2", "value2");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new ModelMap(), this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new BindingContext(), this.exchange);
 		Object result = mono.block();
 
 		assertEquals(uriTemplateVars, result);
@@ -94,7 +94,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgumentNoUriVars() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new ModelMap(), this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramMap, new BindingContext(), this.exchange);
 		Object result = mono.block();
 
 		assertEquals(Collections.emptyMap(), result);

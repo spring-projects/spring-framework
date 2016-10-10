@@ -30,14 +30,14 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
-import org.springframework.ui.ModelMap;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerErrorException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -98,7 +98,8 @@ public class PathVariableMethodArgumentResolverTests {
 		uriTemplateVars.put("name", "value");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, new ModelMap(), this.exchange);
+		BindingContext bindingContext = new BindingContext();
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, bindingContext, this.exchange);
 		Object result = mono.block();
 		assertEquals("value", result);
 	}
@@ -109,7 +110,8 @@ public class PathVariableMethodArgumentResolverTests {
 		uriTemplateVars.put("name", "value");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, new ModelMap(), this.exchange);
+		BindingContext bindingContext = new BindingContext();
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, bindingContext, this.exchange);
 		Object result = mono.block();
 		assertEquals("value", result);
 	}
@@ -120,14 +122,16 @@ public class PathVariableMethodArgumentResolverTests {
 		uriTemplateVars.put("name", "value");
 		this.exchange.getAttributes().put(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, new ModelMap(), this.exchange);
+		BindingContext bindingContext = new BindingContext();
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, bindingContext, this.exchange);
 		Object result = mono.block();
 		assertEquals(Optional.of("value"), result);
 	}
 
 	@Test
 	public void handleMissingValue() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, new ModelMap(), this.exchange);
+		BindingContext bindingContext = new BindingContext();
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, bindingContext, this.exchange);
 		TestSubscriber
 				.subscribe(mono)
 				.assertError(ServerErrorException.class);
@@ -135,7 +139,8 @@ public class PathVariableMethodArgumentResolverTests {
 
 	@Test
 	public void nullIfNotRequired() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, new ModelMap(), this.exchange);
+		BindingContext bindingContext = new BindingContext();
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, bindingContext, this.exchange);
 		TestSubscriber
 				.subscribe(mono)
 				.assertComplete()
@@ -144,7 +149,8 @@ public class PathVariableMethodArgumentResolverTests {
 
 	@Test
 	public void wrapEmptyWithOptional() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, new ModelMap(), this.exchange);
+		BindingContext bindingContext = new BindingContext();
+		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, bindingContext, this.exchange);
 		Object result = mono.block();
 		TestSubscriber
 				.subscribe(mono)

@@ -36,6 +36,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.WebSession;
@@ -95,14 +96,14 @@ public class SessionAttributeMethodArgumentResolverTests {
 	@Test
 	public void resolve() throws Exception {
 		MethodParameter param = initMethodParameter(0);
-		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		TestSubscriber
 				.subscribe(mono)
 				.assertError(ServerWebInputException.class);
 
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
-		mono = this.resolver.resolveArgument(param, null, this.exchange);
+		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
 
@@ -111,33 +112,33 @@ public class SessionAttributeMethodArgumentResolverTests {
 		MethodParameter param = initMethodParameter(1);
 		Foo foo = new Foo();
 		when(this.session.getAttribute("specialFoo")).thenReturn(Optional.of(foo));
-		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
 
 	@Test
 	public void resolveNotRequired() throws Exception {
 		MethodParameter param = initMethodParameter(2);
-		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertNull(mono.block());
 
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
-		mono = this.resolver.resolveArgument(param, null, this.exchange);
+		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertSame(foo, mono.block());
 	}
 
 	@Test
 	public void resolveOptional() throws Exception {
 		MethodParameter param = initMethodParameter(3);
-		Mono<Object> mono = this.resolver.resolveArgument(param, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());
 		assertFalse(((Optional) mono.block()).isPresent());
 
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
-		mono = this.resolver.resolveArgument(param, null, this.exchange);
+		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
 
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());

@@ -38,14 +38,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.Validator;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.result.method.InvocableHandlerMethod;
 import org.springframework.web.server.ServerWebExchange;
@@ -257,14 +256,16 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
-		ModelMap model = new ExtendedModelMap();
-		return invocable.invokeForRequest(exchange, model)
-				.map(result -> result.setExceptionHandler(ex -> handleException(ex, handlerMethod, exchange)))
-				.otherwise(ex -> handleException(ex, handlerMethod, exchange));
+		BindingContext bindingContext = new BindingContext(getWebBindingInitializer());
+		return invocable.invokeForRequest(exchange, bindingContext)
+				.map(result -> result.setExceptionHandler(
+						ex -> handleException(ex, handlerMethod, bindingContext, exchange)))
+				.otherwise(ex -> handleException(
+						ex, handlerMethod, bindingContext, exchange));
 	}
 
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
-			ServerWebExchange exchange) {
+			BindingContext bindingContext, ServerWebExchange exchange) {
 
 		if (ex instanceof Exception) {
 			InvocableHandlerMethod invocable = findExceptionHandler(handlerMethod, (Exception) ex);
@@ -274,8 +275,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactory
 						logger.debug("Invoking @ExceptionHandler method: " + invocable);
 					}
 					invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
-					ExtendedModelMap errorModel = new ExtendedModelMap();
-					return invocable.invokeForRequest(exchange, errorModel, ex);
+					bindingContext.getModel().clear();
+					return invocable.invokeForRequest(exchange, bindingContext, ex);
 				}
 				catch (Exception invocationEx) {
 					if (logger.isErrorEnabled()) {

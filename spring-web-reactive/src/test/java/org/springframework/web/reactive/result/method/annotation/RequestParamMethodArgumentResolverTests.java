@@ -39,6 +39,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -70,6 +71,8 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramRequired;
 	private MethodParameter paramNotRequired;
 	private MethodParameter paramOptional;
+
+	private BindingContext bindingContext = new BindingContext();
 
 
 	@Before @SuppressWarnings("ConfusingArgumentToVarargsMethod")
@@ -117,9 +120,10 @@ public class RequestParamMethodArgumentResolverTests {
 		String expected = "foo";
 		this.exchange.getRequest().getQueryParams().set("name", expected);
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedDefaultValueString, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramNamedDefaultValueString, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertTrue(result instanceof String);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -129,25 +133,29 @@ public class RequestParamMethodArgumentResolverTests {
 		String[] expected = {"foo", "bar"};
 		this.exchange.getRequest().getQueryParams().put("name", Arrays.asList(expected));
 
-		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedStringArray, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramNamedStringArray, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertTrue(result instanceof String[]);
 		assertArrayEquals(expected, (String[]) result);
 	}
 
 	@Test
 	public void resolveDefaultValue() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(paramNamedDefaultValueString, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramNamedDefaultValueString, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
 	}
 
 	@Test
 	public void missingRequestParam() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(paramNamedStringArray, null, this.exchange);
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramNamedStringArray, this.bindingContext, this.exchange);
+
 		TestSubscriber
 				.subscribe(mono)
 				.assertError(ServerWebInputException.class);
@@ -156,57 +164,63 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
 		this.exchange.getRequest().getQueryParams().set("stringNotAnnot", "plainValue");
-		Mono<Object> mono = this.resolver.resolveArgument(paramStringNotAnnot, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramStringNotAnnot, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertTrue(result instanceof String);
 		assertEquals("plainValue", result);
 	}
 
 	@Test  // SPR-8561
 	public void resolveSimpleTypeParamToNull() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(paramStringNotAnnot, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramStringNotAnnot, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertNull(result);
 	}
 
 	@Test  // SPR-10180
 	public void resolveEmptyValueToDefault() throws Exception {
 		this.exchange.getRequest().getQueryParams().set("name", "");
-		Mono<Object> mono = this.resolver.resolveArgument(paramNamedDefaultValueString, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramNamedDefaultValueString, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertEquals("bar", result);
 	}
 
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
 		this.exchange.getRequest().getQueryParams().set("stringNotAnnot", "");
-		Mono<Object> mono = this.resolver.resolveArgument(paramStringNotAnnot, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramStringNotAnnot, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertEquals("", result);
 	}
 
 	@Test
 	public void resolveEmptyValueRequiredWithoutDefault() throws Exception {
 		this.exchange.getRequest().getQueryParams().set("name", "");
-		Mono<Object> mono = this.resolver.resolveArgument(paramRequired, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramRequired, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertEquals("", result);
 	}
 
 	@Test
 	public void resolveOptionalParamValue() throws Exception {
-		Mono<Object> mono = this.resolver.resolveArgument(paramOptional, null, this.exchange);
-		Object result = mono.block();
+		Mono<Object> mono = this.resolver.resolveArgument(
+				this.paramOptional, this.bindingContext, this.exchange);
 
+		Object result = mono.block();
 		assertEquals(Optional.empty(), result);
 
 		this.exchange.getRequest().getQueryParams().set("name", "123");
-		mono = resolver.resolveArgument(paramOptional, null, this.exchange);
+		mono = this.resolver.resolveArgument(this.paramOptional, this.bindingContext, this.exchange);
 		result = mono.block();
 
 		assertEquals(Optional.class, result.getClass());
