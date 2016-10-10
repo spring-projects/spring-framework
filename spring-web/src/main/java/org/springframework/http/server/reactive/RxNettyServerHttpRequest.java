@@ -16,6 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -68,7 +69,17 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected URI initUri() throws URISyntaxException {
-		return new URI(this.request.getUri());
+		URI uri = new URI(this.request.getUri());
+		InetSocketAddress remoteAddress = this.getHeaders().getHost();
+		return new URI(
+				uri.getScheme(),
+				uri.getUserInfo(),
+				(remoteAddress != null ? remoteAddress.getHostString() : null),
+				(remoteAddress != null ? remoteAddress.getPort() : -1),
+				uri.getPath(),
+				uri.getQuery(),
+				uri.getFragment());
+
 	}
 
 	@Override
