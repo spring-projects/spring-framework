@@ -19,6 +19,7 @@ package org.springframework.web.cors.reactive;;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.Assert;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -59,8 +60,12 @@ public abstract class CorsUtils {
 		}
 		UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromHttpRequest(request);
 		UriComponents actualUrl = urlBuilder.build();
+		String actualHost = actualUrl.getHost();
+		int actualPort = getPort(actualUrl);
+		Assert.notNull(actualHost, "Actual request host must not be null");
+		Assert.isTrue(actualPort != -1, "Actual request port must not be undefined");
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
+		return (actualHost.equals(originUrl.getHost()) && actualPort == getPort(originUrl));
 	}
 
 	private static int getPort(UriComponents uri) {
