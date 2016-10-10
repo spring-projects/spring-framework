@@ -54,6 +54,7 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -95,6 +96,8 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	private List<HttpMessageWriter<?>> messageWriters;
 
+	private Map<String, CorsConfiguration> corsConfigurations;
+
 	private ApplicationContext applicationContext;
 
 
@@ -113,6 +116,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
 		mapping.setContentTypeResolver(mvcContentTypeResolver());
+		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
 		if (configurer.isUseSuffixPatternMatch() != null) {
@@ -438,6 +442,22 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * Override this to configure view resolution.
 	 */
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
+	}
+
+	protected final Map<String, CorsConfiguration> getCorsConfigurations() {
+		if (this.corsConfigurations == null) {
+			CorsRegistry registry = new CorsRegistry();
+			addCorsMappings(registry);
+			this.corsConfigurations = registry.getCorsConfigurations();
+		}
+		return this.corsConfigurations;
+	}
+
+	/**
+	 * Override this method to configure cross origin requests processing.
+	 * @see CorsRegistry
+	 */
+	protected void addCorsMappings(CorsRegistry registry) {
 	}
 
 

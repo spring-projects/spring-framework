@@ -27,6 +27,7 @@ import java.util.Set;
 import org.springframework.http.MediaType;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.cors.reactive.CorsUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
@@ -45,7 +46,7 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public final class ProducesRequestCondition extends AbstractRequestCondition<ProducesRequestCondition> {
 
-//	private final static ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
+	private final static ProducesRequestCondition PRE_FLIGHT_MATCH = new ProducesRequestCondition();
 
 
 	private final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
@@ -182,9 +183,9 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 */
 	@Override
 	public ProducesRequestCondition getMatchingCondition(ServerWebExchange exchange) {
-//		if (CorsUtils.isPreFlightRequest(request)) {
-//			return PRE_FLIGHT_MATCH;
-//		}
+		if (CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+			return PRE_FLIGHT_MATCH;
+		}
 		if (isEmpty()) {
 			return this;
 		}
