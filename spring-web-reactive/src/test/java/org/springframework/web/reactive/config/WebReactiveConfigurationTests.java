@@ -113,7 +113,7 @@ public class WebReactiveConfigurationTests {
 		assertTrue(mapping.useTrailingSlashMatch());
 		assertTrue(mapping.useRegisteredSuffixPatternMatch());
 
-		name = "mvcContentTypeResolver";
+		name = "webReactiveContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, mapping.getContentTypeResolver());
 
@@ -155,11 +155,11 @@ public class WebReactiveConfigurationTests {
 		assertHasMessageReader(readers, TestBean.class, APPLICATION_JSON);
 		assertHasMessageReader(readers, TestBean.class, null);
 
-		name = "mvcConversionService";
+		name = "webReactiveConversionService";
 		ConversionService service = context.getBean(name, ConversionService.class);
 		assertSame(service, adapter.getConversionService());
 
-		name = "mvcValidator";
+		name = "webReactiveValidator";
 		Validator validator = context.getBean(name, Validator.class);
 		assertSame(validator, adapter.getValidator());
 		assertEquals(OptionalValidatorFactoryBean.class, validator.getClass());
@@ -207,7 +207,7 @@ public class WebReactiveConfigurationTests {
 		assertHasMessageWriter(writers, TestBean.class, APPLICATION_JSON);
 		assertHasMessageWriter(writers, TestBean.class, MediaType.parseMediaType("text/event-stream"));
 
-		name = "mvcContentTypeResolver";
+		name = "webReactiveContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, handler.getContentTypeResolver());
 	}
@@ -232,7 +232,7 @@ public class WebReactiveConfigurationTests {
 		assertHasMessageWriter(writers, TestBean.class, APPLICATION_JSON);
 		assertHasMessageWriter(writers, TestBean.class, null);
 
-		name = "mvcContentTypeResolver";
+		name = "webReactiveContentTypeResolver";
 		RequestedContentTypeResolver resolver = context.getBean(name, RequestedContentTypeResolver.class);
 		assertSame(resolver, handler.getContentTypeResolver());
 	}

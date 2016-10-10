@@ -120,7 +120,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
 		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
 		mapping.setOrder(0);
-		mapping.setContentTypeResolver(mvcContentTypeResolver());
+		mapping.setContentTypeResolver(webReactiveContentTypeResolver());
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
@@ -151,7 +151,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	}
 
 	@Bean
-	public CompositeContentTypeResolver mvcContentTypeResolver() {
+	public CompositeContentTypeResolver webReactiveContentTypeResolver() {
 		RequestedContentTypeResolverBuilder builder = new RequestedContentTypeResolverBuilder();
 		builder.mediaTypes(getDefaultMediaTypeMappings());
 		configureRequestedContentTypeResolver(builder);
@@ -222,7 +222,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
 		ResourceHandlerRegistry registry =
-				new ResourceHandlerRegistry(this.applicationContext, mvcContentTypeResolver());
+				new ResourceHandlerRegistry(this.applicationContext, webReactiveContentTypeResolver());
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
@@ -261,8 +261,8 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 		adapter.setMessageReaders(getMessageReaders());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
-		adapter.setConversionService(mvcConversionService());
-		adapter.setValidator(mvcValidator());
+		adapter.setConversionService(webReactiveConversionService());
+		adapter.setValidator(webReactiveValidator());
 
 		return adapter;
 	}
@@ -338,14 +338,14 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 */
 	protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer() {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
-		initializer.setConversionService(mvcConversionService());
-		initializer.setValidator(mvcValidator());
+		initializer.setConversionService(webReactiveConversionService());
+		initializer.setValidator(webReactiveValidator());
 		initializer.setMessageCodesResolver(getMessageCodesResolver());
 		return initializer;
 	}
 
 	@Bean
-	public FormattingConversionService mvcConversionService() {
+	public FormattingConversionService webReactiveConversionService() {
 		FormattingConversionService service = new DefaultFormattingConversionService();
 		addFormatters(service);
 		return service;
@@ -366,7 +366,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * implementation is not available, a "no-op" {@link Validator} is returned.
 	 */
 	@Bean
-	public Validator mvcValidator() {
+	public Validator webReactiveValidator() {
 		Validator validator = getValidator();
 		if (validator == null) {
 			if (ClassUtils.isPresent("javax.validation.Validator", getClass().getClassLoader())) {
@@ -411,12 +411,12 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 
 	@Bean
 	public ResponseEntityResultHandler responseEntityResultHandler() {
-		return new ResponseEntityResultHandler(getMessageWriters(), mvcContentTypeResolver());
+		return new ResponseEntityResultHandler(getMessageWriters(), webReactiveContentTypeResolver());
 	}
 
 	@Bean
 	public ResponseBodyResultHandler responseBodyResultHandler() {
-		return new ResponseBodyResultHandler(getMessageWriters(), mvcContentTypeResolver());
+		return new ResponseBodyResultHandler(getMessageWriters(), webReactiveContentTypeResolver());
 	}
 
 	/**
@@ -479,7 +479,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 		ViewResolverRegistry registry = new ViewResolverRegistry(getApplicationContext());
 		configureViewResolvers(registry);
 		List<ViewResolver> resolvers = registry.getViewResolvers();
-		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, mvcContentTypeResolver());
+		ViewResolutionResultHandler handler = new ViewResolutionResultHandler(resolvers, webReactiveContentTypeResolver());
 		handler.setDefaultViews(registry.getDefaultViews());
 		handler.setOrder(registry.getOrder());
 		return handler;
