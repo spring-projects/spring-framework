@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,13 +57,13 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 	@Test
 	public void handleWithParam() throws Exception {
 		String expected = "Hello George!";
-		assertEquals(expected, performGet("/param?name=George", null, String.class).getBody());
+		assertEquals(expected, performGet("/param?name=George", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
 	public void longStreamResult() throws Exception {
 		String[] expected = {"0", "1", "2", "3", "4"};
-		assertArrayEquals(expected, performGet("/long-stream-result", null, String[].class).getBody());
+		assertArrayEquals(expected, performGet("/long-stream-result", new HttpHeaders(), String[].class).getBody());
 	}
 
 	@Test

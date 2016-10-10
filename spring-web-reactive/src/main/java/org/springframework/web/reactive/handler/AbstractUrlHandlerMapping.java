@@ -98,7 +98,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	@Override
 	public Mono<Object> getHandler(ServerWebExchange exchange) {
 		String lookupPath = getPathHelper().getLookupPathForRequest(exchange);
-		Object handler = null;
+		Object handler;
 		try {
 			handler = lookupHandler(lookupPath, exchange);
 			handler = processCorsRequest(exchange, handler);

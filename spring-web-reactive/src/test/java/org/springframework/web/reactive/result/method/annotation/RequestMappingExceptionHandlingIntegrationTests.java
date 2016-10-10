@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,13 +53,13 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 	@Test
 	public void controllerThrowingException() throws Exception {
 		String expected = "Recovered from error: Boo";
-		assertEquals(expected, performGet("/thrown-exception", null, String.class).getBody());
+		assertEquals(expected, performGet("/thrown-exception", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
 	public void controllerReturnsMonoError() throws Exception {
 		String expected = "Recovered from error: Boo";
-		assertEquals(expected, performGet("/mono-error", null, String.class).getBody());
+		assertEquals(expected, performGet("/mono-error", new HttpHeaders(), String.class).getBody());
 	}
 
 

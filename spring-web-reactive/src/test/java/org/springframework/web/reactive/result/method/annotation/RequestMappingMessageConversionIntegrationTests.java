@@ -45,6 +45,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -94,25 +95,26 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 	@Test
 	public void byteBufferResponseBodyWithFlux() throws Exception {
 		String expected = "Hello!";
-		assertEquals(expected, performGet("/raw-response/flux", null, String.class).getBody());
+		assertEquals(expected, performGet("/raw-response/flux", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
 	public void byteBufferResponseBodyWithObservable() throws Exception {
 		String expected = "Hello!";
-		assertEquals(expected, performGet("/raw-response/observable", null, String.class).getBody());
+		assertEquals(expected, performGet("/raw-response/observable", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
 	public void byteBufferResponseBodyWithRxJava2Observable() throws Exception {
 		String expected = "Hello!";
-		assertEquals(expected, performGet("/raw-response/rxjava2-observable", null, String.class).getBody());
+		assertEquals(expected, performGet("/raw-response/rxjava2-observable",
+				new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
 	public void byteBufferResponseBodyWithFlowable() throws Exception {
 		String expected = "Hello!";
-		assertEquals(expected, performGet("/raw-response/flowable", null, String.class).getBody());
+		assertEquals(expected, performGet("/raw-response/flowable", new HttpHeaders(), String.class).getBody());
 	}
 
 	@Test
@@ -171,7 +173,7 @@ public class RequestMappingMessageConversionIntegrationTests extends AbstractReq
 
 	@Test
 	public void resource() throws Exception {
-		ResponseEntity<byte[]> response = performGet("/resource", null, byte[].class);
+		ResponseEntity<byte[]> response = performGet("/resource", new HttpHeaders(), byte[].class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue(response.hasBody());

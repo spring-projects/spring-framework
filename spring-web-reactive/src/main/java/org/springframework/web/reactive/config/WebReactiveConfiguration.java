@@ -45,6 +45,8 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.http.codec.Jackson2ServerHttpMessageReader;
+import org.springframework.http.codec.Jackson2ServerHttpMessageWriter;
 import org.springframework.http.codec.ResourceHttpMessageWriter;
 import org.springframework.http.codec.ServerSentEventHttpMessageWriter;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
@@ -61,8 +63,6 @@ import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuild
 import org.springframework.web.reactive.handler.AbstractHandlerMapping;
 import org.springframework.web.reactive.result.SimpleHandlerAdapter;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
-import org.springframework.http.codec.Jackson2ServerHttpMessageReader;
-import org.springframework.http.codec.Jackson2ServerHttpMessageWriter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -90,13 +90,13 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			ClassUtils.isPresent("javax.xml.bind.Binder", WebReactiveConfiguration.class.getClassLoader());
 
 
+	private Map<String, CorsConfiguration> corsConfigurations;
+
 	private PathMatchConfigurer pathMatchConfigurer;
 
 	private List<HttpMessageReader<?>> messageReaders;
 
 	private List<HttpMessageWriter<?>> messageWriters;
-
-	private Map<String, CorsConfiguration> corsConfigurations;
 
 	private ApplicationContext applicationContext;
 
@@ -172,6 +172,26 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	}
 
 	/**
+	 * Callback for building the global CORS configuration. This method is final.
+	 * Use {@link #addCorsMappings(CorsRegistry)} to customize the CORS conifg.
+	 */
+	protected final Map<String, CorsConfiguration> getCorsConfigurations() {
+		if (this.corsConfigurations == null) {
+			CorsRegistry registry = new CorsRegistry();
+			addCorsMappings(registry);
+			this.corsConfigurations = registry.getCorsConfigurations();
+		}
+		return this.corsConfigurations;
+	}
+
+	/**
+	 * Override this method to configure cross origin requests processing.
+	 * @see CorsRegistry
+	 */
+	protected void addCorsMappings(CorsRegistry registry) {
+	}
+
+	/**
 	 * Callback for building the {@link PathMatchConfigurer}. This method is
 	 * final, use {@link #configurePathMatching} to customize path matching.
 	 */
@@ -209,6 +229,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			if (pathMatchConfigurer.getPathHelper() != null) {
 				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
 			}
+
 		}
 		else {
 			handlerMapping = new EmptyHandlerMapping();
@@ -442,22 +463,6 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	 * Override this to configure view resolution.
 	 */
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
-	}
-
-	protected final Map<String, CorsConfiguration> getCorsConfigurations() {
-		if (this.corsConfigurations == null) {
-			CorsRegistry registry = new CorsRegistry();
-			addCorsMappings(registry);
-			this.corsConfigurations = registry.getCorsConfigurations();
-		}
-		return this.corsConfigurations;
-	}
-
-	/**
-	 * Override this method to configure cross origin requests processing.
-	 * @see CorsRegistry
-	 */
-	protected void addCorsMappings(CorsRegistry registry) {
 	}
 
 

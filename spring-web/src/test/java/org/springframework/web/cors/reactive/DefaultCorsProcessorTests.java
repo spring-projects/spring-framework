@@ -16,7 +16,6 @@
 
 package org.springframework.web.cors.reactive;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,17 +25,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.reactive.DefaultCorsProcessor;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS;
+import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS;
+import static org.springframework.http.HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD;
+
 /**
- * Test reactive {@link DefaultCorsProcessor} with simple or preflight CORS request.
+ * {@link DefaultCorsProcessor} tests with simple or pre-flight CORS request.
  *
  * @author Sebastien Deleuze
- * @author Rossen Stoyanchev
- * @author Juergen Hoeller
  */
 public class DefaultCorsProcessorTests {
 
@@ -69,7 +73,7 @@ public class DefaultCorsProcessorTests {
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertFalse(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals(HttpStatus.FORBIDDEN, this.response.getStatusCode());
 	}
 
@@ -79,7 +83,7 @@ public class DefaultCorsProcessorTests {
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 
 		this.processor.processRequest(null, this.exchange);
-		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertFalse(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 	}
 
@@ -90,8 +94,8 @@ public class DefaultCorsProcessorTests {
 		this.conf.addAllowedOrigin("*");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("*", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("*", this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_MAX_AGE));
 		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
@@ -107,8 +111,8 @@ public class DefaultCorsProcessorTests {
 		this.conf.setAllowCredentials(true);
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
@@ -122,8 +126,8 @@ public class DefaultCorsProcessorTests {
 		this.conf.setAllowCredentials(true);
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
@@ -136,7 +140,7 @@ public class DefaultCorsProcessorTests {
 		this.conf.addAllowedOrigin("http://DOMAIN2.com");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 	}
 
@@ -149,8 +153,8 @@ public class DefaultCorsProcessorTests {
 		this.conf.addAllowedOrigin("http://domain2.com");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS));
 		assertTrue(this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS).contains("header1"));
 		assertTrue(this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS).contains("header2"));
@@ -161,7 +165,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestAllOriginsAllowed() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.conf.addAllowedOrigin("*");
 
 		this.processor.processRequest(this.conf, this.exchange);
@@ -172,7 +176,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestWrongAllowedMethod() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "DELETE");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "DELETE");
 		this.conf.addAllowedOrigin("*");
 
 		this.processor.processRequest(this.conf, this.exchange);
@@ -183,7 +187,7 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestMatchedAllowedMethod() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.conf.addAllowedOrigin("*");
 
 		this.processor.processRequest(this.conf, this.exchange);
@@ -197,7 +201,7 @@ public class DefaultCorsProcessorTests {
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertFalse(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals(HttpStatus.FORBIDDEN, this.response.getStatusCode());
 	}
 
@@ -205,10 +209,10 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestWithoutRequestMethod() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertFalse(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals(HttpStatus.FORBIDDEN, this.response.getStatusCode());
 	}
 
@@ -216,11 +220,11 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestWithRequestAndMethodHeaderButNoConfig() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertFalse(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals(HttpStatus.FORBIDDEN, this.response.getStatusCode());
 	}
 
@@ -228,8 +232,8 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestValidRequestAndConfig() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
 		this.conf.addAllowedOrigin("*");
 		this.conf.addAllowedMethod("GET");
 		this.conf.addAllowedMethod("PUT");
@@ -237,8 +241,8 @@ public class DefaultCorsProcessorTests {
 		this.conf.addAllowedHeader("header2");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("*", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("*", this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS));
 		assertEquals("GET,PUT", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS));
 		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_MAX_AGE));
@@ -249,8 +253,8 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestCredentials() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
 		this.conf.addAllowedOrigin("http://domain1.com");
 		this.conf.addAllowedOrigin("http://domain2.com");
 		this.conf.addAllowedOrigin("http://domain3.com");
@@ -258,8 +262,8 @@ public class DefaultCorsProcessorTests {
 		this.conf.setAllowCredentials(true);
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals("true", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
@@ -269,8 +273,8 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestCredentialsWithOriginWildcard() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_HEADERS, "Header1");
 		this.conf.addAllowedOrigin("http://domain1.com");
 		this.conf.addAllowedOrigin("*");
 		this.conf.addAllowedOrigin("http://domain3.com");
@@ -278,8 +282,8 @@ public class DefaultCorsProcessorTests {
 		this.conf.setAllowCredentials(true);
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertEquals("http://domain2.com", this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 	}
 
@@ -287,19 +291,19 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestAllowedHeaders() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2");
 		this.conf.addAllowedHeader("Header1");
 		this.conf.addAllowedHeader("Header2");
 		this.conf.addAllowedHeader("Header3");
 		this.conf.addAllowedOrigin("http://domain2.com");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS));
-		assertTrue(this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header1"));
-		assertTrue(this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header2"));
-		assertFalse(this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header3"));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_HEADERS));
+		assertTrue(this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header1"));
+		assertTrue(this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header2"));
+		assertFalse(this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header3"));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 	}
 
@@ -307,17 +311,17 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestAllowsAllHeaders() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_HEADERS, "Header1, Header2");
 		this.conf.addAllowedHeader("*");
 		this.conf.addAllowedOrigin("http://domain2.com");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS));
-		assertTrue(this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header1"));
-		assertTrue(this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("Header2"));
-		assertFalse(this.response.getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS).contains("*"));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_HEADERS));
+		assertTrue(this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header1"));
+		assertTrue(this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("Header2"));
+		assertFalse(this.response.getHeaders().getFirst(ACCESS_CONTROL_ALLOW_HEADERS).contains("*"));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 	}
 
@@ -325,14 +329,14 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestWithEmptyHeaders() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_HEADERS, "");
 		this.conf.addAllowedHeader("*");
 		this.conf.addAllowedOrigin("http://domain2.com");
 
 		this.processor.processRequest(this.conf, this.exchange);
-		assertTrue(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
-		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS));
+		assertTrue(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertFalse(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_HEADERS));
 		assertEquals(HttpStatus.OK, this.response.getStatusCode());
 	}
 
@@ -340,11 +344,11 @@ public class DefaultCorsProcessorTests {
 	public void preflightRequestWithNullConfig() throws Exception {
 		this.request.setHttpMethod(HttpMethod.OPTIONS);
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain2.com");
-		this.request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.request.addHeader(ACCESS_CONTROL_REQUEST_METHOD, "GET");
 		this.conf.addAllowedOrigin("*");
 
 		this.processor.processRequest(null, this.exchange);
-		assertFalse(this.response.getHeaders().containsKey(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
+		assertFalse(this.response.getHeaders().containsKey(ACCESS_CONTROL_ALLOW_ORIGIN));
 		assertEquals(HttpStatus.FORBIDDEN, this.response.getStatusCode());
 	}
 

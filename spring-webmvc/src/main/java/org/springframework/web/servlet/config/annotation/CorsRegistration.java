@@ -46,6 +46,7 @@ public class CorsRegistration {
 
 	private final CorsConfiguration config;
 
+
 	public CorsRegistration(String pathPattern) {
 		this.pathPattern = pathPattern;
 		// Same implicit default values as the @CrossOrigin annotation + allows simple methods

@@ -24,20 +24,16 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
- * {@code CorsRegistration} assists with the creation of a
- * {@link CorsConfiguration} instance mapped to a path pattern.
+ * Assists with the creation of a {@link CorsConfiguration} instance mapped to
+ * a path pattern.
  *
- * <p>If no path pattern is specified, cross-origin request handling is
- * mapped to {@code "/**"}.
- *
- * <p>By default, all origins, all headers, credentials and {@code GET},
- * {@code HEAD}, and {@code POST} methods are allowed, and the max age is
- * set to 30 minutes.
+ * <p>If no path pattern is specified, by default cross-origin request handling
+ * is mapped to {@code "/**"}. Also by default, all origins, headers,
+ * credentials and {@code GET}, {@code HEAD}, and {@code POST} methods are
+ * allowed, while the max age is set to 30 minutes.
  *
  * @author Sebastien Deleuze
- * @author Sam Brannen
  * @since 5.0
- * @see CorsConfiguration
  * @see CorsRegistry
  */
 public class CorsRegistration {

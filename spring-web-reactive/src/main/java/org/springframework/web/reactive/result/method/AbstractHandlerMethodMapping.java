@@ -29,14 +29,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.servlet.http.HttpServletRequest;
-
 import reactor.core.publisher.Mono;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.MethodIntrospector;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -75,8 +72,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	private static final String SCOPED_TARGET_NAME_PREFIX = "scopedTarget.";
 
+	/**
+	 * HandlerMethod to return on a pre-flight request match when the request
+	 * mappings are more nuanced than the access control headers.
+	 */
 	private static final HandlerMethod PREFLIGHT_AMBIGUOUS_MATCH =
-			new HandlerMethod(new EmptyHandler(), ClassUtils.getMethod(EmptyHandler.class, "handle"));
+			new HandlerMethod(new PreFlightAmbiguousMatchHandler(),
+					ClassUtils.getMethod(PreFlightAmbiguousMatchHandler.class, "handle"));
 
 	private static final CorsConfiguration ALLOW_CORS_CONFIG = new CorsConfiguration();
 
@@ -372,12 +374,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		if (handler instanceof HandlerMethod) {
 			HandlerMethod handlerMethod = (HandlerMethod) handler;
 			if (handlerMethod.equals(PREFLIGHT_AMBIGUOUS_MATCH)) {
-				return AbstractHandlerMethodMapping.ALLOW_CORS_CONFIG;
+				return ALLOW_CORS_CONFIG;
 			}
-			else {
-				CorsConfiguration corsConfigFromMethod = this.mappingRegistry.getCorsConfiguration(handlerMethod);
-				corsConfig = (corsConfig != null ? corsConfig.combine(corsConfigFromMethod) : corsConfigFromMethod);
-			}
+			CorsConfiguration methodConfig = this.mappingRegistry.getCorsConfiguration(handlerMethod);
+			corsConfig = (corsConfig != null ? corsConfig.combine(methodConfig) : methodConfig);
 		}
 		return corsConfig;
 	}
@@ -625,7 +625,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
-	private static class EmptyHandler {
+	private static class PreFlightAmbiguousMatchHandler {
 
 		public void handle() {
 			throw new UnsupportedOperationException("not implemented");

@@ -18,8 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Properties;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
@@ -28,76 +27,82 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 /**
+ * Integration tests with {@code @CrossOrigin} and {@code @RequestMapping}
+ * annotated handler methods.
+ *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappingIntegrationTests {
 
-	// JDK default HTTP client blacklist headers like Origin
-	private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+	private HttpHeaders headers;
+
+
+	@Before
+	public void setup() throws Exception {
+		super.setup();
+		this.headers = new HttpHeaders();
+		this.headers.setOrigin("http://site1.com");
+	}
 
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(WebConfig.class);
 		Properties props = new Properties();
 		props.setProperty("myOrigin", "http://site1.com");
-		wac.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
-		wac.register(PropertySourcesPlaceholderConfigurer.class);
-		wac.refresh();
-		return wac;
+		context.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("ps", props));
+		context.register(PropertySourcesPlaceholderConfigurer.class);
+		context.refresh();
+		return context;
 	}
 
 	@Override
-	RestTemplate getRestTemplate() {
-		return this.restTemplate;
+	protected RestTemplate initRestTemplate() {
+		// JDK default HTTP client blacklist headers like Origin
+		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 	}
 
+
 	@Test
-	public void actualGetRequestWithoutAnnotation() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/no"),
-				HttpMethod.GET, requestEntity, String.class);
+	public void actualGetRequestWithoutAnnotation() throws Exception {
+		ResponseEntity<String> entity = performGet("/no", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertNull(entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals("no", entity.getBody());
 	}
 
 	@Test
-	public void actualPostRequestWithoutAnnotation() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/no"),
-				HttpMethod.POST, requestEntity, String.class);
+	public void actualPostRequestWithoutAnnotation() throws Exception {
+		ResponseEntity<String> entity = performPost("/no", this.headers, null, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertNull(entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals("no-post", entity.getBody());
 	}
 
 	@Test
-	public void actualRequestWithDefaultAnnotation() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/default"),
-				HttpMethod.GET, requestEntity, String.class);
+	public void actualRequestWithDefaultAnnotation() throws Exception {
+		ResponseEntity<String> entity = performGet("/default", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
@@ -105,13 +110,9 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 	}
 
 	@Test
-	public void preflightRequestWithDefaultAnnotation() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<Void> entity = this.restTemplate.exchange(getUrl("/default"),
-				HttpMethod.OPTIONS, requestEntity, Void.class);
+	public void preflightRequestWithDefaultAnnotation() throws Exception {
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		ResponseEntity<Void> entity = performOptions("/default", this.headers, Void.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals(1800, entity.getHeaders().getAccessControlMaxAge());
@@ -119,23 +120,17 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 	}
 
 	@Test
-	public void actualRequestWithDefaultAnnotationAndNoOrigin() {
+	public void actualRequestWithDefaultAnnotationAndNoOrigin() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/default"),
-				HttpMethod.GET, requestEntity, String.class);
+		ResponseEntity<String> entity = performGet("/default", headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertNull(entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals("default", entity.getBody());
 	}
 
 	@Test
-	public void actualRequestWithCustomizedAnnotation() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/customized"),
-				HttpMethod.GET, requestEntity, String.class);
+	public void actualRequestWithCustomizedAnnotation() throws Exception {
+		ResponseEntity<String> entity = performGet("/customized", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
@@ -144,67 +139,54 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 	}
 
 	@Test
-	public void preflightRequestWithCustomizedAnnotation() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/customized"),
-				HttpMethod.OPTIONS, requestEntity, String.class);
+	public void preflightRequestWithCustomizedAnnotation() throws Exception {
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1, header2");
+		ResponseEntity<String> entity = performOptions("/customized", this.headers, String.class);
+
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
-		assertArrayEquals(new HttpMethod[] {HttpMethod.GET}, entity.getHeaders().getAccessControlAllowMethods().toArray());
+		assertArrayEquals(new HttpMethod[] {HttpMethod.GET},
+				entity.getHeaders().getAccessControlAllowMethods().toArray());
+		assertArrayEquals(new String[] {"header1", "header2"},
+				entity.getHeaders().getAccessControlAllowHeaders().toArray());
+		assertArrayEquals(new String[] {"header3", "header4"},
+				entity.getHeaders().getAccessControlExposeHeaders().toArray());
 		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
-		assertArrayEquals(new String[] {"header1", "header2"}, entity.getHeaders().getAccessControlAllowHeaders().toArray());
-		assertArrayEquals(new String[] {"header3", "header4"}, entity.getHeaders().getAccessControlExposeHeaders().toArray());
 		assertEquals(123, entity.getHeaders().getAccessControlMaxAge());
 	}
 
 	@Test
-	public void customOriginDefinedViaValueAttribute() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/origin-value-attribute"),
-				HttpMethod.GET, requestEntity, String.class);
+	public void customOriginDefinedViaValueAttribute() throws Exception {
+		ResponseEntity<String> entity = performGet("/origin-value-attribute", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals("value-attribute", entity.getBody());
 	}
 
 	@Test
-	public void customOriginDefinedViaPlaceholder() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/origin-placeholder"),
-				HttpMethod.GET, requestEntity, String.class);
+	public void customOriginDefinedViaPlaceholder() throws Exception {
+		ResponseEntity<String> entity = performGet("/origin-placeholder", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals("placeholder", entity.getBody());
 	}
 
 	@Test
-	public void classLevel() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/foo"),
-				HttpMethod.GET, requestEntity, String.class);
+	public void classLevel() throws Exception {
+		ResponseEntity<String> entity = performGet("/foo", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals("foo", entity.getBody());
 
-		entity = this.restTemplate.exchange(getUrl("/bar"), HttpMethod.GET, requestEntity, String.class);
+		entity = performGet("/bar", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("*", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals(false, entity.getHeaders().getAccessControlAllowCredentials());
 		assertEquals("bar", entity.getBody());
 
-		entity = this.restTemplate.exchange(getUrl("/baz"), HttpMethod.GET, requestEntity, String.class);
+		entity = performGet("/baz", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
@@ -213,36 +195,29 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 
 	@Test
 	public void ambiguousHeaderPreflightRequest() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/ambiguous-header"),
-				HttpMethod.OPTIONS, requestEntity, String.class);
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "header1");
+		ResponseEntity<String> entity = performOptions("/ambiguous-header", this.headers, String.class);
+
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
-		assertArrayEquals(new HttpMethod[] {HttpMethod.GET}, entity.getHeaders().getAccessControlAllowMethods().toArray());
+		assertArrayEquals(new HttpMethod[] {HttpMethod.GET},
+				entity.getHeaders().getAccessControlAllowMethods().toArray());
+		assertArrayEquals(new String[] {"header1"},
+				entity.getHeaders().getAccessControlAllowHeaders().toArray());
 		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
-		assertArrayEquals(new String[] {"header1"}, entity.getHeaders().getAccessControlAllowHeaders().toArray());
 	}
 
 	@Test
 	public void ambiguousProducesPreflightRequest() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://site1.com");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/ambiguous-produces"),
-				HttpMethod.OPTIONS, requestEntity, String.class);
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		ResponseEntity<String> entity = performOptions("/ambiguous-produces", this.headers, String.class);
+
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://site1.com", entity.getHeaders().getAccessControlAllowOrigin());
-		assertArrayEquals(new HttpMethod[] {HttpMethod.GET}, entity.getHeaders().getAccessControlAllowMethods().toArray());
+		assertArrayEquals(new HttpMethod[] {HttpMethod.GET},
+				entity.getHeaders().getAccessControlAllowMethods().toArray());
 		assertEquals(true, entity.getHeaders().getAccessControlAllowCredentials());
-	}
-
-	private String getUrl(String path) {
-		return "http://localhost:" + this.port + path;
 	}
 
 
@@ -250,70 +225,74 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 	@ComponentScan(resourcePattern = "**/CrossOriginAnnotationIntegrationTests*")
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig extends WebReactiveConfiguration {
-
 	}
 
-	@RestController
+	@RestController @SuppressWarnings("unused")
 	private static class MethodLevelController {
 
-		@RequestMapping(path = "/no", method = RequestMethod.GET)
+		@GetMapping("/no")
 		public String noAnnotation() {
 			return "no";
 		}
 
-		@RequestMapping(path = "/no", method = RequestMethod.POST)
+		@PostMapping("/no")
 		public String noAnnotationPost() {
 			return "no-post";
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/default", method = RequestMethod.GET)
+		@GetMapping("/default")
 		public String defaultAnnotation() {
 			return "default";
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/default", method = RequestMethod.GET, params = "q")
+		@GetMapping(path = "/default", params = "q")
 		public void defaultAnnotationWithParams() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/ambiguous-header", method = RequestMethod.GET, headers = "header1=a")
+		@GetMapping(path = "/ambiguous-header", headers = "header1=a")
 		public void ambigousHeader1a() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/ambiguous-header", method = RequestMethod.GET, headers = "header1=b")
+		@GetMapping(path = "/ambiguous-header", headers = "header1=b")
 		public void ambigousHeader1b() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/ambiguous-produces", method = RequestMethod.GET, produces = "application/xml")
+		@GetMapping(path = "/ambiguous-produces", produces = "application/xml")
 		public String ambigousProducesXml() {
 			return "<a></a>";
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/ambiguous-produces", method = RequestMethod.GET, produces = "application/json")
+		@GetMapping(path = "/ambiguous-produces", produces = "application/json")
 		public String ambigousProducesJson() {
 			return "{}";
 		}
 
-		@CrossOrigin(origins = { "http://site1.com", "http://site2.com" }, allowedHeaders = { "header1", "header2" },
-				exposedHeaders = { "header3", "header4" }, methods = RequestMethod.GET, maxAge = 123, allowCredentials = "false")
+		@CrossOrigin(
+				origins = { "http://site1.com", "http://site2.com" },
+				allowedHeaders = { "header1", "header2" },
+				exposedHeaders = { "header3", "header4" },
+				methods = RequestMethod.GET,
+				maxAge = 123,
+				allowCredentials = "false")
 		@RequestMapping(path = "/customized", method = { RequestMethod.GET, RequestMethod.POST })
 		public String customized() {
 			return "customized";
 		}
 
 		@CrossOrigin("http://site1.com")
-		@RequestMapping("/origin-value-attribute")
+		@GetMapping("/origin-value-attribute")
 		public String customOriginDefinedViaValueAttribute() {
 			return "value-attribute";
 		}
 
 		@CrossOrigin("${myOrigin}")
-		@RequestMapping("/origin-placeholder")
+		@GetMapping("/origin-placeholder")
 		public String customOriginDefinedViaPlaceholder() {
 			return "placeholder";
 		}
@@ -321,25 +300,25 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 
 	@RestController
 	@CrossOrigin(allowCredentials = "false")
+	@SuppressWarnings("unused")
 	private static class ClassLevelController {
 
-		@RequestMapping(path = "/foo", method = RequestMethod.GET)
+		@GetMapping("/foo")
 		public String foo() {
 			return "foo";
 		}
 
 		@CrossOrigin
-		@RequestMapping(path = "/bar", method = RequestMethod.GET)
+		@GetMapping("/bar")
 		public String bar() {
 			return "bar";
 		}
 
 		@CrossOrigin(allowCredentials = "true")
-		@RequestMapping(path = "/baz", method = RequestMethod.GET)
+		@GetMapping("/baz")
 		public String baz() {
 			return "baz";
 		}
-
 	}
 
 }

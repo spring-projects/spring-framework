@@ -16,8 +16,6 @@
 
 package org.springframework.web.cors.reactive;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
@@ -29,19 +27,23 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 /**
- * Unit tests for reactive {@link UrlBasedCorsConfigurationSource}.
+ * Unit tests for {@link UrlBasedCorsConfigurationSource}.
+ *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class UrlBasedCorsConfigurationSourceTests {
 
 	private final UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
 
+
 	@Test
 	public void empty() {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/bar/test.html");
-		ServerWebExchange exchange = new DefaultServerWebExchange(request,
-				new MockServerHttpResponse(), new MockWebSessionManager());
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/bar/test.html");
 		assertNull(this.configSource.getCorsConfiguration(exchange));
 	}
 
@@ -49,20 +51,25 @@ public class UrlBasedCorsConfigurationSourceTests {
 	public void registerAndMatch() {
 		CorsConfiguration config = new CorsConfiguration();
 		this.configSource.registerCorsConfiguration("/bar/**", config);
-		assertNull(this.configSource.getCorsConfiguration(
-				new DefaultServerWebExchange(
-						new MockServerHttpRequest(HttpMethod.GET, "/foo/test.html"),
-						new MockServerHttpResponse(),
-						new MockWebSessionManager())));
-		assertEquals(config, this.configSource.getCorsConfiguration(new DefaultServerWebExchange(
-						new MockServerHttpRequest(HttpMethod.GET, "/bar/test.html"),
-						new MockServerHttpResponse(),
-						new MockWebSessionManager())));
+
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/foo/test.html");
+		assertNull(this.configSource.getCorsConfiguration(exchange));
+
+		exchange = createExchange(HttpMethod.GET, "/bar/test.html");
+		assertEquals(config, this.configSource.getCorsConfiguration(exchange));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void unmodifiableConfigurationsMap() {
 		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
+	}
+
+
+	private ServerWebExchange createExchange(HttpMethod httpMethod, String url) {
+		ServerHttpRequest request = new MockServerHttpRequest(httpMethod, url);
+		MockServerHttpResponse response = new MockServerHttpResponse();
+		MockWebSessionManager sessionManager = new MockWebSessionManager();
+		return new DefaultServerWebExchange(request, response, sessionManager);
 	}
 
 }

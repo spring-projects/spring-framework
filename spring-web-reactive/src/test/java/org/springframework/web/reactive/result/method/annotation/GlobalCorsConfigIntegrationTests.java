@@ -16,16 +16,14 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
-import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -36,34 +34,49 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.config.CorsRegistry;
 import org.springframework.web.reactive.config.WebReactiveConfiguration;
 
-/**
- * @author Sebastien Deleuze
- */
-public class CorsConfigurationIntegrationTests extends AbstractRequestMappingIntegrationTests {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
-	// JDK default HTTP client blacklist headers like Origin
-	private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+/**
+ *
+ * Integration tests with {@code @RequestMapping} handler methods and global
+ * CORS configuration.
+ *
+ * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
+ */
+public class GlobalCorsConfigIntegrationTests extends AbstractRequestMappingIntegrationTests {
+
+	private HttpHeaders headers;
+
+
+	@Before
+	public void setup() throws Exception {
+		super.setup();
+		this.headers = new HttpHeaders();
+		this.headers.setOrigin("http://localhost:9000");
+	}
+
 
 	@Override
 	protected ApplicationContext initApplicationContext() {
-		AnnotationConfigApplicationContext wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
-		wac.refresh();
-		return wac;
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(WebConfig.class);
+		context.refresh();
+		return context;
 	}
 
 	@Override
-	RestTemplate getRestTemplate() {
-		return this.restTemplate;
+	protected RestTemplate initRestTemplate() {
+		// JDK default HTTP client blacklists headers like Origin
+		return new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 	}
+
 
 	@Test
 	public void actualRequestWithCorsEnabled() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://localhost:9000");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/cors"),
-				HttpMethod.GET, requestEntity, String.class);
+		ResponseEntity<String> entity = performGet("/cors", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://localhost:9000", entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals("cors", entity.getBody());
@@ -71,85 +84,58 @@ public class CorsConfigurationIntegrationTests extends AbstractRequestMappingInt
 
 	@Test
 	public void actualRequestWithCorsRejected() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://localhost:9000");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
 		try {
-			this.restTemplate.exchange(getUrl("/cors-restricted"), HttpMethod.GET,
-					requestEntity, String.class);
+			performGet("/cors-restricted", this.headers, String.class);
+			fail();
 		}
 		catch (HttpClientErrorException e) {
 			assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
-			return;
 		}
-		fail();
 	}
 
 	@Test
 	public void actualRequestWithoutCorsEnabled() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://localhost:9000");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/welcome"),
-				HttpMethod.GET, requestEntity, String.class);
+		ResponseEntity<String> entity = performGet("/welcome", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertNull(entity.getHeaders().getAccessControlAllowOrigin());
 		assertEquals("welcome", entity.getBody());
 	}
 
 	@Test
-	public void preflightRequestWithCorsEnabled() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://localhost:9000");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
-		ResponseEntity<String> entity = this.restTemplate.exchange(getUrl("/cors"),
-				HttpMethod.OPTIONS, requestEntity, String.class);
+	public void preFlightRequestWithCorsEnabled() throws Exception {
+		this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+		ResponseEntity<String> entity = performOptions("/cors", this.headers, String.class);
 		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertEquals("http://localhost:9000", entity.getHeaders().getAccessControlAllowOrigin());
 	}
 
 	@Test
-	public void preflightRequestWithCorsRejected() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://localhost:9000");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
+	public void preFlightRequestWithCorsRejected() throws Exception {
 		try {
-			this.restTemplate.exchange(getUrl("/cors-restricted"), HttpMethod.OPTIONS,
-					requestEntity, String.class);
+			this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+			performOptions("/cors-restricted", this.headers, String.class);
+			fail();
 		}
 		catch (HttpClientErrorException e) {
 			assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
-			return;
 		}
-		fail();
 	}
 
 	@Test
-	public void preflightRequestWithoutCorsEnabled() throws Exception {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.ORIGIN, "http://localhost:9000");
-		headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
-		HttpEntity<?> requestEntity = new HttpEntity(headers);
+	public void preFlightRequestWithoutCorsEnabled() throws Exception {
 		try {
-			this.restTemplate.exchange(getUrl("/welcome"), HttpMethod.OPTIONS,
-					requestEntity, String.class);
+			this.headers.add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "GET");
+			performOptions("/welcome", this.headers, String.class);
+			fail();
 		}
 		catch (HttpClientErrorException e) {
 			assertEquals(HttpStatus.FORBIDDEN, e.getStatusCode());
-			return;
 		}
-		fail();
-	}
-
-	private String getUrl(String path) {
-		return "http://localhost:" + this.port + path;
 	}
 
 
 	@Configuration
-	@ComponentScan(resourcePattern = "**/CorsConfigurationIntegrationTests*.class")
+	@ComponentScan(resourcePattern = "**/GlobalCorsConfigIntegrationTests*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
 	static class WebConfig extends WebReactiveConfiguration {
 
@@ -160,7 +146,7 @@ public class CorsConfigurationIntegrationTests extends AbstractRequestMappingInt
 		}
 	}
 
-	@RestController
+	@RestController @SuppressWarnings("unused")
 	static class TestController {
 
 		@GetMapping("/welcome")
@@ -177,7 +163,6 @@ public class CorsConfigurationIntegrationTests extends AbstractRequestMappingInt
 		public String corsRestricted() {
 			return "corsRestricted";
 		}
-
 	}
 
 }

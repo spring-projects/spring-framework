@@ -63,12 +63,12 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		}
 
 		if (responseHasCors(response)) {
-			logger.debug("Skip CORS processing: response already contains \"Access-Control-Allow-Origin\" header");
+			logger.debug("Skip CORS: response already contains \"Access-Control-Allow-Origin\" header");
 			return true;
 		}
 
 		if (CorsUtils.isSameOrigin(request)) {
-			logger.debug("Skip CORS processing: request is from same origin");
+			logger.debug("Skip CORS: request is from same origin");
 			return true;
 		}
 

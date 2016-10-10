@@ -58,4 +58,5 @@ public class CorsRegistry {
 		}
 		return configs;
 	}
+
 }

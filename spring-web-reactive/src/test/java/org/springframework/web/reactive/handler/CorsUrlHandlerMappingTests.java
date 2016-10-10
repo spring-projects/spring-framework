@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.handler;
 
-import java.net.URISyntaxException;
 import java.util.Collections;
 
 import static org.junit.Assert.*;
@@ -23,9 +22,6 @@ import static org.junit.Assert.assertSame;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -44,132 +40,111 @@ import org.springframework.web.server.session.WebSessionManager;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-public class CorsAbstractUrlHandlerMappingTests {
+public class CorsUrlHandlerMappingTests {
 
-	private AnnotationConfigApplicationContext wac;
+	private AbstractUrlHandlerMapping handlerMapping;
 
-	private TestUrlHandlerMapping handlerMapping;
+	private Object welcomeController = new Object();
 
-	private Object mainController;
+	private CorsAwareHandler corsController = new CorsAwareHandler();
 
-	private CorsAwareHandler corsConfigurationSourceController;
 
 	@Before
 	public void setup() {
-		wac = new AnnotationConfigApplicationContext();
-		wac.register(WebConfig.class);
-		wac.refresh();
-
-		handlerMapping = (TestUrlHandlerMapping) wac.getBean("handlerMapping");
-		mainController = wac.getBean("mainController");
-		corsConfigurationSourceController = (CorsAwareHandler) wac.getBean("corsConfigurationSourceController");
+		this.handlerMapping = new AbstractUrlHandlerMapping() {};
+		this.handlerMapping.setUseTrailingSlashMatch(true);
+		this.handlerMapping.registerHandler("/welcome.html", this.welcomeController);
+		this.handlerMapping.registerHandler("/cors.html", this.corsController);
 	}
+
 
 	@Test
 	public void actualRequestWithoutCorsConfigurationProvider() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", "http://domain2.com", "GET");
-		Object actual = handlerMapping.getHandler(exchange).block();
+		String origin = "http://domain2.com";
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin, "GET");
+		Object actual = this.handlerMapping.getHandler(exchange).block();
+
 		assertNotNull(actual);
-		assertSame(mainController, actual);
+		assertSame(this.welcomeController, actual);
 	}
 
 	@Test
 	public void preflightRequestWithoutCorsConfigurationProvider() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", "http://domain2.com", "GET");
-		Object actual = handlerMapping.getHandler(exchange).block();
+		String origin = "http://domain2.com";
+		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin, "GET");
+		Object actual = this.handlerMapping.getHandler(exchange).block();
+
 		assertNotNull(actual);
-		assertEquals("NoOpHandler", actual.getClass().getSimpleName());
+		assertNotSame(this.welcomeController, actual);
 		assertNull(exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 	}
 
 	@Test
-	public void actualRequestWithCorsConfigurationProvider() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/cors.html", "http://domain2.com", "GET");
-		Object actual = handlerMapping.getHandler(exchange).block();
+	public void actualRequestWithCorsAwareHandler() throws Exception {
+		String origin = "http://domain2.com";
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/cors.html", origin, "GET");
+		Object actual = this.handlerMapping.getHandler(exchange).block();
+
 		assertNotNull(actual);
-		assertSame(corsConfigurationSourceController, actual);
-		CorsConfiguration config = ((CorsConfigurationSource)actual).getCorsConfiguration(createExchange(HttpMethod.GET, "", "",""));
-		assertNotNull(config);
-		assertArrayEquals(config.getAllowedOrigins().toArray(), new String[]{"*"});
+		assertSame(this.corsController, actual);
 		assertEquals("*", exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 	}
 
 	@Test
-	public void preflightRequestWithCorsConfigurationProvider() throws Exception {
-		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/cors.html", "http://domain2.com", "GET");
-		Object actual = handlerMapping.getHandler(exchange).block();
+	public void preFlightWithCorsAwareHandler() throws Exception {
+		String origin = "http://domain2.com";
+		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/cors.html", origin, "GET");
+		Object actual = this.handlerMapping.getHandler(exchange).block();
+
 		assertNotNull(actual);
-		assertEquals("NoOpHandler", actual.getClass().getSimpleName());
+		assertNotSame(this.corsController, actual);
 		assertEquals("*", exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 	}
 
 	@Test
-	public void actualRequestWithMappedCorsConfiguration() throws Exception {
+	public void actualRequestWithGlobalCorsConfig() throws Exception {
 		CorsConfiguration mappedConfig = new CorsConfiguration();
 		mappedConfig.addAllowedOrigin("*");
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/welcome.html", mappedConfig));
 
-		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", "http://domain2.com", "GET");
-		Object actual = handlerMapping.getHandler(exchange).block();
+		String origin = "http://domain2.com";
+		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/welcome.html", origin, "GET");
+		Object actual = this.handlerMapping.getHandler(exchange).block();
+
 		assertNotNull(actual);
-		assertSame(mainController, actual);
+		assertSame(this.welcomeController, actual);
 		assertEquals("*", exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 	}
 
 	@Test
-	public void preflightRequestWithMappedCorsConfiguration() throws Exception {
+	public void preFlightRequestWithGlobalCorsConfig() throws Exception {
 		CorsConfiguration mappedConfig = new CorsConfiguration();
 		mappedConfig.addAllowedOrigin("*");
 		this.handlerMapping.setCorsConfigurations(Collections.singletonMap("/welcome.html", mappedConfig));
 
-		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", "http://domain2.com", "GET");
-		Object actual = handlerMapping.getHandler(exchange).block();
+		String origin = "http://domain2.com";
+		ServerWebExchange exchange = createExchange(HttpMethod.OPTIONS, "/welcome.html", origin, "GET");
+		Object actual = this.handlerMapping.getHandler(exchange).block();
+
 		assertNotNull(actual);
-		assertEquals("NoOpHandler", actual.getClass().getSimpleName());
+		assertNotSame(this.welcomeController, actual);
 		assertEquals("*", exchange.getResponse().getHeaders().getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN));
 	}
 
 
 	private ServerWebExchange createExchange(HttpMethod method, String path, String origin,
-			String accessControlRequestMethod) throws URISyntaxException {
+			String accessControlRequestMethod) {
 
 		ServerHttpRequest request = new MockServerHttpRequest(method, "http://localhost" + path);
 		request.getHeaders().add(HttpHeaders.ORIGIN, origin);
 		request.getHeaders().add(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, accessControlRequestMethod);
+		MockServerHttpResponse response = new MockServerHttpResponse();
 		WebSessionManager sessionManager = new MockWebSessionManager();
-		return new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+		return new DefaultServerWebExchange(request, response, sessionManager);
 	}
 
 
-	@Configuration
-	static class WebConfig {
-	
-		@Bean @SuppressWarnings("unused")
-		public TestUrlHandlerMapping handlerMapping() {
-			TestUrlHandlerMapping hm = new TestUrlHandlerMapping();
-			hm.setUseTrailingSlashMatch(true);
-			hm.registerHandler("/welcome.html", mainController());
-			hm.registerHandler("/cors.html", corsConfigurationSourceController());
-			return hm;
-		}
-
-		@Bean
-		public Object mainController() {
-			return new Object();
-		}
-
-		@Bean
-		public CorsAwareHandler corsConfigurationSourceController() {
-			return new CorsAwareHandler();
-		}
-
-	}
-
-	static class TestUrlHandlerMapping extends AbstractUrlHandlerMapping {
-
-	}
-
-	static class CorsAwareHandler implements CorsConfigurationSource {
+	private class CorsAwareHandler implements CorsConfigurationSource {
 
 		@Override
 		public CorsConfiguration getCorsConfiguration(ServerWebExchange exchange) {

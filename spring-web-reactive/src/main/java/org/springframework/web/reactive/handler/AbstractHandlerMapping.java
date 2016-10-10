@@ -51,9 +51,10 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	protected CorsProcessor corsProcessor = new DefaultCorsProcessor();
+	private final UrlBasedCorsConfigurationSource globalCorsConfigSource = new UrlBasedCorsConfigurationSource();
 
-	protected final UrlBasedCorsConfigurationSource corsConfigSource = new UrlBasedCorsConfigurationSource();
+	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
+
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
@@ -104,7 +105,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
-		this.corsConfigSource.setPathMatcher(pathMatcher);
+		this.globalCorsConfigSource.setPathMatcher(pathMatcher);
 	}
 
 	/**
@@ -116,8 +117,25 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	}
 
 	/**
+	 * Set "global" CORS configuration based on URL patterns. By default the
+	 * first matching URL pattern is combined with handler-level CORS
+	 * configuration if any.
+	 */
+	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
+		this.globalCorsConfigSource.setCorsConfigurations(corsConfigurations);
+	}
+
+	/**
+	 * Return the "global" CORS configuration.
+	 */
+	public Map<String, CorsConfiguration> getCorsConfigurations() {
+		return this.globalCorsConfigSource.getCorsConfigurations();
+	}
+
+	/**
 	 * Configure a custom {@link CorsProcessor} to use to apply the matched
-	 * {@link CorsConfiguration} for a request. By default {@link DefaultCorsProcessor} is used.
+	 * {@link CorsConfiguration} for a request.
+	 * <p>By default an instance of {@link DefaultCorsProcessor} is used.
 	 */
 	public void setCorsProcessor(CorsProcessor corsProcessor) {
 		Assert.notNull(corsProcessor, "CorsProcessor must not be null");
@@ -131,22 +149,27 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		return this.corsProcessor;
 	}
 
-	/**
-	 * Set "global" CORS configuration based on URL patterns. By default the first
-	 * matching URL pattern is combined with the CORS configuration for the
-	 * handler, if any.
-	 */
-	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
-		this.corsConfigSource.setCorsConfigurations(corsConfigurations);
+
+	protected Object processCorsRequest(ServerWebExchange exchange, Object handler) {
+		if (CorsUtils.isCorsRequest(exchange.getRequest())) {
+			CorsConfiguration configA = this.globalCorsConfigSource.getCorsConfiguration(exchange);
+			CorsConfiguration configB = getCorsConfiguration(handler, exchange);
+			CorsConfiguration config = (configA != null ? configA.combine(configB) : configB);
+
+			if (!getCorsProcessor().processRequest(config, exchange) ||
+					CorsUtils.isPreFlightRequest(exchange.getRequest())) {
+				return REQUEST_HANDLED_HANDLER;
+			}
+		}
+		return handler;
 	}
 
 	/**
-	 * Get the CORS configuration.
+	 * Retrieve the CORS configuration for the given handler.
+	 * @param handler the handler to check (never {@code null}).
+	 * @param exchange the current exchange
+	 * @return the CORS configuration for the handler or {@code null}.
 	 */
-	public Map<String, CorsConfiguration> getCorsConfigurations() {
-		return this.corsConfigSource.getCorsConfigurations();
-	}
-
 	protected CorsConfiguration getCorsConfiguration(Object handler, ServerWebExchange exchange) {
 		if (handler != null && handler instanceof CorsConfigurationSource) {
 			return ((CorsConfigurationSource) handler).getCorsConfiguration(exchange);
@@ -154,23 +177,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 		return null;
 	}
 
-	protected Object processCorsRequest(ServerWebExchange exchange, Object handler) {
-		if (CorsUtils.isCorsRequest(exchange.getRequest())) {
-			CorsConfiguration globalConfig = this.corsConfigSource.getCorsConfiguration(exchange);
-			CorsConfiguration handlerConfig = getCorsConfiguration(handler, exchange);
-			CorsConfiguration config = (globalConfig != null ? globalConfig.combine(handlerConfig) : handlerConfig);
-			if (!corsProcessor.processRequest(config, exchange) || CorsUtils.isPreFlightRequest(exchange.getRequest())) {
-				return new NoOpHandler();
-			}
-		}
-		return handler;
-	}
 
-	private class NoOpHandler implements WebHandler {
-		@Override
-		public Mono<Void> handle(ServerWebExchange exchange) {
-			return Mono.empty();
-		}
-	}
+	private static final WebHandler REQUEST_HANDLED_HANDLER = exchange -> Mono.empty();
 
 }
