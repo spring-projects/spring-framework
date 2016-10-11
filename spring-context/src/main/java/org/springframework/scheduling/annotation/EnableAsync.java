@@ -32,15 +32,22 @@ import org.springframework.core.Ordered;
  * Enables Spring's asynchronous method execution capability, similar to functionality
  * found in Spring's {@code <task:*>} XML namespace.
  *
- * <p>To be used on @{@link Configuration} classes as follows, where {@code MyAsyncBean}
- * is a user-defined type with one or more methods annotated with either Spring's
- * {@code @Async} annotation, the EJB 3.1 {@code @javax.ejb.Asynchronous} annotation,
- * or any custom annotation specified via the {@link #annotation} attribute.
- *
+ * <p>To be used together with @{@link Configuration Configuration} classes as follows:
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableAsync
  * public class AppConfig {
+ *
+ * }</pre>
+ *
+ * {@code MyAsyncBean} is a user-defined type with one or more methods annotated with
+ * either Spring's {@code @Async} annotation, the EJB 3.1 {@code @javax.ejb.Asynchronous}
+ * annotation, or any custom annotation specified via the {@link #annotation} attribute.
+ * The aspect is added transparently for any registered bean, for instance via this
+ * configuration:
+ * <pre class="code">
+ * &#064;Configuration
+ * public class AnotherAppConfig {
  *
  *     &#064;Bean
  *     public MyAsyncBean asyncBean() {
@@ -78,11 +85,6 @@ import org.springframework.core.Ordered;
  * &#064;Configuration
  * &#064;EnableAsync
  * public class AppConfig implements AsyncConfigurer {
- *
- *     &#064;Bean
- *     public MyAsyncBean asyncBean() {
- *         return new MyAsyncBean();
- *     }
  *
  *     &#064;Override
  *     public Executor getAsyncExecutor() {
