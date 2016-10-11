@@ -18,7 +18,9 @@ package org.springframework.web.cors;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
@@ -123,11 +125,10 @@ public class CorsConfiguration {
 		if (source == null || source.contains(ALL)) {
 			return other;
 		}
-		List<String> combined = new ArrayList<>(source);
+		Set<String> combined = new LinkedHashSet<>(source);
 		combined.addAll(other);
-		return combined;
+		return new ArrayList<>(combined);
 	}
-
 
 	/**
 	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
