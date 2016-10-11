@@ -17,7 +17,9 @@
 package org.springframework.test.web.servlet.result;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -31,6 +33,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -49,6 +52,11 @@ import static org.junit.Assert.*;
  * @see org.springframework.test.web.servlet.samples.standalone.resulthandlers.PrintingResultHandlerSmokeTests
  */
 public class PrintingResultHandlerTests {
+
+	private static final List<String> textContentTypes = Arrays.asList(MimeTypeUtils.APPLICATION_JSON_VALUE,
+		MimeTypeUtils.APPLICATION_XML_VALUE, MimeTypeUtils.APPLICATION_XHTML_XML_VALUE,
+		MimeTypeUtils.TEXT_HTML_VALUE, MimeTypeUtils.TEXT_PLAIN_VALUE);
+
 
 	private final TestPrintingResultHandler handler = new TestPrintingResultHandler();
 
@@ -81,7 +89,6 @@ public class PrintingResultHandlerTests {
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		params.add("param", "paramValue");
-
 
 		assertValue("MockHttpServletRequest", "HTTP Method", this.request.getMethod());
 		assertValue("MockHttpServletRequest", "Request URI", this.request.getRequestURI());
@@ -137,6 +144,46 @@ public class PrintingResultHandlerTests {
 		assertTrue(cookie2.startsWith("[" + Cookie.class.getSimpleName()));
 		assertTrue(cookie2.contains("name = 'enigma', value = '42', comment = 'This is a comment', domain = '.example.com', maxAge = 1234, path = '/crumbs', secure = true, version = 0, httpOnly = true"));
 		assertTrue(cookie2.endsWith("]"));
+	}
+
+	@Test
+	public void printRequestWithTextContentTypes() throws Exception {
+		this.request.setContent("text".getBytes());
+
+		for (String contentType: textContentTypes) {
+			this.request.setContentType(contentType);
+			this.handler.handle(this.mvcResult);
+			assertValue("MockHttpServletRequest", "Body", "text");
+		}
+	}
+
+	@Test
+	public void printResponseWithTextContentTypes() throws Exception {
+		this.response.getWriter().print("text");
+
+		for (String contentType: textContentTypes) {
+			this.response.setContentType(contentType);
+			this.handler.handle(this.mvcResult);
+			assertValue("MockHttpServletResponse", "Body", "text");
+		}
+	}
+
+	@Test
+	public void printRequestWithBinaryContentType() throws Exception {
+		this.request.setContentType(MimeTypeUtils.IMAGE_JPEG_VALUE);
+
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletRequest", "Body", "<content type is not printable text>");
+	}
+
+	@Test
+	public void printResponseWithBinaryContentType() throws Exception {
+		this.response.setContentType(MimeTypeUtils.IMAGE_JPEG_VALUE);
+
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletResponse", "Body", "<content type is not printable text>");
 	}
 
 	@Test
