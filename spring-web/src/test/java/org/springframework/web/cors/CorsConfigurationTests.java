@@ -34,10 +34,9 @@ import static org.junit.Assert.*;
  */
 public class CorsConfigurationTests {
 
-	private CorsConfiguration config = new CorsConfiguration();
-
 	@Test
 	public void setNullValues() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(null);
 		assertNull(config.getAllowedOrigins());
 		config.setAllowedHeaders(null);
@@ -54,6 +53,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void setValues() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
 		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
 		config.addAllowedHeader("*");
@@ -71,16 +71,19 @@ public class CorsConfigurationTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void asteriskWildCardOnAddExposedHeader() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.addExposedHeader("*");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void asteriskWildCardOnSetExposedHeaders() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.setExposedHeaders(Arrays.asList("*"));
 	}
 
 	@Test
 	public void combineWithNull() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(Arrays.asList("*"));
 		config.combine(null);
 		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
@@ -88,6 +91,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void combineWithNullProperties() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
 		config.addAllowedHeader("header1");
 		config.addExposedHeader("header3");
@@ -106,6 +110,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void combineWithAsteriskWildCard() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("*");
 		config.addAllowedHeader("*");
 		config.addAllowedMethod("*");
@@ -128,6 +133,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void combine() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.addAllowedOrigin("http://domain1.com");
 		config.addAllowedHeader("header1");
 		config.addExposedHeader("header3");
@@ -152,6 +158,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkOriginAllowed() {
+		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowedOrigins(Arrays.asList("*"));
 		assertEquals("*", config.checkOrigin("http://domain.com"));
 		config.setAllowCredentials(true);
@@ -164,6 +171,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkOriginNotAllowed() {
+		CorsConfiguration config = new CorsConfiguration();
 		assertNull(config.checkOrigin(null));
 		assertNull(config.checkOrigin("http://domain.com"));
 		config.addAllowedOrigin("*");
@@ -176,6 +184,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkMethodAllowed() {
+		CorsConfiguration config = new CorsConfiguration();
 		assertEquals(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD), config.checkHttpMethod(HttpMethod.GET));
 		config.addAllowedMethod("GET");
 		assertEquals(Arrays.asList(HttpMethod.GET), config.checkHttpMethod(HttpMethod.GET));
@@ -186,6 +195,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkMethodNotAllowed() {
+		CorsConfiguration config = new CorsConfiguration();
 		assertNull(config.checkHttpMethod(null));
 		assertNull(config.checkHttpMethod(HttpMethod.DELETE));
 		config.setAllowedMethods(new ArrayList<>());
@@ -194,6 +204,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkHeadersAllowed() {
+		CorsConfiguration config = new CorsConfiguration();
 		assertEquals(Collections.emptyList(), config.checkHeaders(Collections.emptyList()));
 		config.addAllowedHeader("header1");
 		config.addAllowedHeader("header2");
@@ -204,13 +215,11 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkHeadersNotAllowed() {
+		CorsConfiguration config = new CorsConfiguration();
 		assertNull(config.checkHeaders(null));
-
 		assertNull(config.checkHeaders(Arrays.asList("header1")));
-
 		config.setAllowedHeaders(Collections.emptyList());
 		assertNull(config.checkHeaders(Arrays.asList("header1")));
-
 		config.addAllowedHeader("header2");
 		config.addAllowedHeader("header3");
 		assertNull(config.checkHeaders(Arrays.asList("header1")));
