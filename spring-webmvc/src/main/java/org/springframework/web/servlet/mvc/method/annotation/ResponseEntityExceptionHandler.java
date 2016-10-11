@@ -56,7 +56,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>This base class provides an {@code @ExceptionHandler} method for handling
  * internal Spring MVC exceptions. This method returns a {@code ResponseEntity}
- * for writing to the response with a {@link HttpMessageConverter message converter}.
+ * for writing to the response with a {@link HttpMessageConverter message converter},
  * in contrast to
  * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
  * DefaultHandlerExceptionResolver} which returns a
