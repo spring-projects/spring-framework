@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.util.ParsingPathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 
@@ -244,7 +245,7 @@ public class HandlerMethodMappingTests {
 
 		private UrlPathHelper pathHelper = new UrlPathHelper();
 
-		private PathMatcher pathMatcher = new AntPathMatcher();
+		private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 
 		public MyHandlerMethodMapping() {

@@ -33,7 +33,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
@@ -41,6 +40,7 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.MockWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
+import org.springframework.web.util.ParsingPathMatcher;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -158,7 +158,7 @@ public class HandlerMethodMappingTests {
 
 	private static class MyHandlerMethodMapping extends AbstractHandlerMethodMapping<String> {
 
-		private PathMatcher pathMatcher = new AntPathMatcher();
+		private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 		@Override
 		protected boolean isHandler(Class<?> beanType) {

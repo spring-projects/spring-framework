@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.Ordered;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.HttpRequestHandler;
@@ -42,6 +41,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.ParsingPathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -72,7 +72,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
+	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 	private final List<Object> interceptors = new ArrayList<>();
 

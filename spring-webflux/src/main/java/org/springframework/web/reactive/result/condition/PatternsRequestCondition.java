@@ -27,11 +27,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
+import org.springframework.web.util.ParsingPathMatcher;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -90,7 +90,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
 		this.pathHelper = (pathHelper != null ? pathHelper : new HttpRequestPathHelper());
-		this.pathMatcher = (pathMatcher != null ? pathMatcher : new AntPathMatcher());
+		this.pathMatcher = (pathMatcher != null ? pathMatcher : new ParsingPathMatcher());
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 		if (fileExtensions != null) {

@@ -31,9 +31,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.util.ParsingPathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -53,7 +53,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
+	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 	private final Map<String, ResourceHttpRequestHandler> handlerMap = new LinkedHashMap<>();
 

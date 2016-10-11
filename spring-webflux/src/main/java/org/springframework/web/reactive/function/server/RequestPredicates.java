@@ -31,11 +31,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.function.BodyExtractor;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.util.ParsingPathMatcher;
 
 /**
  * Implementations of {@link RequestPredicate} that implement various useful request matching operations, such as
@@ -46,7 +46,7 @@ import org.springframework.web.server.WebSession;
  */
 public abstract class RequestPredicates {
 
-	private static final PathMatcher DEFAULT_PATH_MATCHER = new AntPathMatcher();
+	private static final PathMatcher DEFAULT_PATH_MATCHER = new ParsingPathMatcher();
 
 	/**
 	 * Returns a {@code RequestPredicate} that always matches.

@@ -55,7 +55,6 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
@@ -94,6 +93,7 @@ import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
+import org.springframework.web.util.ParsingPathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -140,7 +140,7 @@ import org.springframework.web.util.UrlPathHelper;
  * exception types
  * </ul>
  *
- * <p>Registers an {@link AntPathMatcher} and a {@link UrlPathHelper}
+ * <p>Registers an {@link ParsingPathMatcher} and a {@link UrlPathHelper}
  * to be used by:
  * <ul>
  * <li>the {@link RequestMappingHandlerMapping},
@@ -345,7 +345,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	public PathMatcher mvcPathMatcher() {
 		PathMatcher pathMatcher = getPathMatchConfigurer().getPathMatcher();
-		return (pathMatcher != null ? pathMatcher : new AntPathMatcher());
+		return (pathMatcher != null ? pathMatcher : new ParsingPathMatcher());
 	}
 
 	/**

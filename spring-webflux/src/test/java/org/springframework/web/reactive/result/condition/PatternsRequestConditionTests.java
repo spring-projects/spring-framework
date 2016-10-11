@@ -98,9 +98,9 @@ public class PatternsRequestConditionTests {
 
 	@Test
 	public void matchSortPatterns() throws Exception {
-		PatternsRequestCondition condition = new PatternsRequestCondition("/**", "/foo/bar", "/foo/*");
+		PatternsRequestCondition condition = new PatternsRequestCondition("/*/*", "/foo/bar", "/foo/*");
 		PatternsRequestCondition match = condition.getMatchingCondition(createExchange("/foo/bar"));
-		PatternsRequestCondition expected = new PatternsRequestCondition("/foo/bar", "/foo/*", "/**");
+		PatternsRequestCondition expected = new PatternsRequestCondition("/foo/bar", "/foo/*", "/*/*");
 
 		assertEquals(expected, match);
 	}

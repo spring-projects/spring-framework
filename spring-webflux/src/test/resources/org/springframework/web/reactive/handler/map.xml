@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">	
+	
 	<bean id="mapping" class="org.springframework.web.reactive.handler.SimpleUrlHandlerMapping">
 		<property name="urlDecode" value="true" />
 		<property name="mappings">
 			<value>
 				welcome.html=mainController
-				/**/pathmatchingTest.html=mainController
-				/**/pathmatching??.html=mainController
-				/**/path??matching.html=mainController
-				/**/??path??matching.html=mainController
-				/**/*.jsp=mainController
-				/administrator/**/pathmatching.html=mainController
-				/administrator/**/testlast*=mainController
+				/*pathmatchingTest.html=mainController
+				/pathmatching??.html=mainController
+				/administrator/pathmatching.html=mainController
+				/administrator/*/pathmatching.html=mainController
+				/administrator/*/testlast*=mainController
+				/administrator/testing/longer/*=mainController
+				/??path??matching.html=mainController
+				/path??matching.html=mainController
 				/administrator/another/bla.xml=mainController
-				/administrator/testing/longer/**/**/**/**/**=mainController
-				/administrator/testing/longer2/**/**/bla/**=mainController
 				/*test*.jpeg=mainController
 				/*/test.jpeg=mainController
 				/outofpattern*yeah=mainController

@@ -37,6 +37,7 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
+import org.springframework.web.util.ParsingPathMatcher;
 
 import static org.junit.Assert.*;
 
@@ -152,7 +153,7 @@ public class InterceptorRegistryTests {
 
 
 	private List<HandlerInterceptor> getInterceptorsForPath(String lookupPath) {
-		PathMatcher pathMatcher = new AntPathMatcher();
+		PathMatcher pathMatcher = new ParsingPathMatcher();
 		List<HandlerInterceptor> result = new ArrayList<>();
 		for (Object interceptor : this.registry.getInterceptors()) {
 			if (interceptor instanceof MappedInterceptor) {

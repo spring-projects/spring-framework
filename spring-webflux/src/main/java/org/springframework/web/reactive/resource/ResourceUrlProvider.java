@@ -33,11 +33,11 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.support.HttpRequestPathHelper;
+import org.springframework.web.util.ParsingPathMatcher;
 
 /**
  * A central component to use to obtain the public URL path that clients should
@@ -56,7 +56,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private HttpRequestPathHelper urlPathHelper = new HttpRequestPathHelper();
 
-	private PathMatcher pathMatcher = new AntPathMatcher();
+	private PathMatcher pathMatcher = new ParsingPathMatcher();
 
 	private final Map<String, ResourceWebHandler> handlerMap = new LinkedHashMap<>();
 
