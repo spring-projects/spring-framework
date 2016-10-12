@@ -252,17 +252,14 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
+		adapter.setMessageReaders(getMessageReaders());
+		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 		addArgumentResolvers(resolvers);
 		if (!resolvers.isEmpty()) {
 			adapter.setCustomArgumentResolvers(resolvers);
 		}
-
-		adapter.setMessageReaders(getMessageReaders());
-		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
-		adapter.setConversionService(webReactiveConversionService());
-		adapter.setValidator(webReactiveValidator());
 
 		return adapter;
 	}

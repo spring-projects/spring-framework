@@ -25,13 +25,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.reactive.result.method.BindingContext;
@@ -67,8 +65,7 @@ public class CookieValueMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		ConversionService cs = new DefaultConversionService();
-		this.resolver = new CookieValueMethodArgumentResolver(cs, context.getBeanFactory());
+		this.resolver = new CookieValueMethodArgumentResolver(context.getBeanFactory());
 
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		WebSessionManager sessionManager = new MockWebSessionManager();

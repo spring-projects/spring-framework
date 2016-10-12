@@ -46,15 +46,14 @@ import org.springframework.web.server.ServerWebInputException;
  */
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
+
 	/**
 	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
 	 */
-	public RequestHeaderMethodArgumentResolver(ConversionService conversionService,
-			ConfigurableBeanFactory beanFactory) {
-
-		super(conversionService, beanFactory);
+	public RequestHeaderMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+		super(beanFactory);
 	}
 
 

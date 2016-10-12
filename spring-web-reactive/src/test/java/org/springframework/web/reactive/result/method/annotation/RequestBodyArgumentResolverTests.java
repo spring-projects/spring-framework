@@ -39,7 +39,6 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.tests.TestSubscriber;
-import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.reactive.result.method.BindingContext;
@@ -53,7 +52,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
 
@@ -85,7 +83,7 @@ public class RequestBodyArgumentResolverTests {
 	private RequestBodyArgumentResolver resolver() {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		readers.add(new DecoderHttpMessageReader<>(new StringDecoder()));
-		return new RequestBodyArgumentResolver(readers, mock(Validator.class));
+		return new RequestBodyArgumentResolver(readers);
 	}
 
 
@@ -199,7 +197,7 @@ public class RequestBodyArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
 		this.request.setBody(body);
-		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
+		Mono<Object> result = this.resolver.readBody(param, true, new BindingContext(), this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);

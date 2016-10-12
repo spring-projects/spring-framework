@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.server.ServerWebExchange;
@@ -35,10 +34,8 @@ import org.springframework.web.server.ServerWebInputException;
 public class RequestAttributeMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
 
-	public RequestAttributeMethodArgumentResolver(ConversionService conversionService,
-			ConfigurableBeanFactory beanFactory) {
-
-		super(conversionService, beanFactory);
+	public RequestAttributeMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+		super(beanFactory);
 	}
 
 

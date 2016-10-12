@@ -23,7 +23,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
@@ -54,10 +53,9 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
-	public PathVariableMethodArgumentResolver(ConversionService conversionService,
-			ConfigurableBeanFactory beanFactory) {
 
-		super(conversionService, beanFactory);
+	public PathVariableMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
+		super(beanFactory);
 	}
 
 

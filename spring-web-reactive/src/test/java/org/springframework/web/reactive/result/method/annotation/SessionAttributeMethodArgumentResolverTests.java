@@ -27,15 +27,15 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -74,8 +74,7 @@ public class SessionAttributeMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		ConversionService cs = new DefaultConversionService();
-		this.resolver = new SessionAttributeMethodArgumentResolver(cs, context.getBeanFactory());
+		this.resolver = new SessionAttributeMethodArgumentResolver(context.getBeanFactory());
 
 		this.session = mock(WebSession.class);
 		when(this.session.getAttribute(any())).thenReturn(Optional.empty());
@@ -136,9 +135,13 @@ public class SessionAttributeMethodArgumentResolverTests {
 		assertEquals(Optional.class, mono.block().getClass());
 		assertFalse(((Optional) mono.block()).isPresent());
 
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultFormattingConversionService());
+		BindingContext bindingContext = new BindingContext(initializer);
+
 		Foo foo = new Foo();
 		when(this.session.getAttribute("foo")).thenReturn(Optional.of(foo));
-		mono = this.resolver.resolveArgument(param, new BindingContext(), this.exchange);
+		mono = this.resolver.resolveArgument(param, bindingContext, this.exchange);
 
 		assertNotNull(mono.block());
 		assertEquals(Optional.class, mono.block().getClass());

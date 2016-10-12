@@ -47,22 +47,18 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 	/**
 	 * Constructor with {@link HttpMessageReader}'s and a {@link Validator}.
 	 * @param readers readers for de-serializing the request body with
-	 * @param validator validator to validate decoded objects with
 	 */
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator) {
-		super(readers, validator);
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers) {
+		super(readers);
 	}
 
 	/**
 	 * Constructor that also accepts a {@link ReactiveAdapterRegistry}.
 	 * @param readers readers for de-serializing the request body with
-	 * @param validator validator to validate decoded objects with
-	 * @param adapterRegistry for adapting to other reactive types from Flux and Mono
+	 * @param registry for adapting to other reactive types from Flux and Mono
 	 */
-	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, Validator validator,
-			ReactiveAdapterRegistry adapterRegistry) {
-
-		super(readers, validator, adapterRegistry);
+	public HttpEntityArgumentResolver(List<HttpMessageReader<?>> readers, ReactiveAdapterRegistry registry) {
+		super(readers, registry);
 	}
 
 
@@ -80,7 +76,7 @@ public class HttpEntityArgumentResolver extends AbstractMessageReaderArgumentRes
 		MethodParameter bodyParameter = new MethodParameter(param);
 		bodyParameter.increaseNestingLevel();
 
-		return readBody(bodyParameter, false, exchange)
+		return readBody(bodyParameter, false, bindingContext, exchange)
 				.map(body -> createHttpEntity(body, entityType, exchange))
 				.defaultIfEmpty(createHttpEntity(null, entityType, exchange));
 	}

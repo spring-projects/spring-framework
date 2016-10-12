@@ -29,16 +29,15 @@ import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -72,13 +71,12 @@ public class RequestParamMethodArgumentResolverTests {
 	private MethodParameter paramNotRequired;
 	private MethodParameter paramOptional;
 
-	private BindingContext bindingContext = new BindingContext();
+	private BindingContext bindingContext;
 
 
 	@Before @SuppressWarnings("ConfusingArgumentToVarargsMethod")
 	public void setUp() throws Exception {
-		ConversionService conversionService = new DefaultConversionService();
-		this.resolver = new RequestParamMethodArgumentResolver(conversionService, null, true);
+		this.resolver = new RequestParamMethodArgumentResolver(null, true);
 
 		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
@@ -96,12 +94,17 @@ public class RequestParamMethodArgumentResolverTests {
 		this.paramRequired = new SynthesizingMethodParameter(method, 5);
 		this.paramNotRequired = new SynthesizingMethodParameter(method, 6);
 		this.paramOptional = new SynthesizingMethodParameter(method, 7);
+
+
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultFormattingConversionService());
+		this.bindingContext = new BindingContext(initializer);
 	}
 
 
 	@Test
 	public void supportsParameter() {
-		this.resolver = new RequestParamMethodArgumentResolver(new GenericConversionService(), null, true);
+		this.resolver = new RequestParamMethodArgumentResolver(null, true);
 		assertTrue(this.resolver.supportsParameter(this.paramNamedDefaultValueString));
 		assertTrue(this.resolver.supportsParameter(this.paramNamedStringArray));
 		assertTrue(this.resolver.supportsParameter(this.paramNamedMap));
@@ -111,7 +114,7 @@ public class RequestParamMethodArgumentResolverTests {
 		assertTrue(this.resolver.supportsParameter(this.paramNotRequired));
 		assertTrue(this.resolver.supportsParameter(this.paramOptional));
 
-		this.resolver = new RequestParamMethodArgumentResolver(new GenericConversionService(), null, false);
+		this.resolver = new RequestParamMethodArgumentResolver(null, false);
 		assertFalse(this.resolver.supportsParameter(this.paramStringNotAnnot));
 	}
 

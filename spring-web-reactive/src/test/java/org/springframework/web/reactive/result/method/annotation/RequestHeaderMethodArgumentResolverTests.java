@@ -30,15 +30,15 @@ import reactor.core.publisher.Mono;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
@@ -71,15 +71,14 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	private ServerWebExchange exchange;
 
-	private BindingContext bindingContext = new BindingContext();
+	private BindingContext bindingContext;
 
 
 	@Before
 	public void setUp() throws Exception {
-		ConversionService conversionService = new DefaultFormattingConversionService();
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.refresh();
-		this.resolver = new RequestHeaderMethodArgumentResolver(conversionService, context.getBeanFactory());
+		this.resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
 
 		@SuppressWarnings("ConfusingArgumentToVarargsMethod")
 		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
@@ -95,6 +94,10 @@ public class RequestHeaderMethodArgumentResolverTests {
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "/");
 		WebSessionManager sessionManager = new MockWebSessionManager();
 		this.exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
+
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(new DefaultFormattingConversionService());
+		this.bindingContext = new BindingContext(initializer);
 	}
 
 

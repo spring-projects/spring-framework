@@ -22,15 +22,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.ConversionNotSupportedException;
-import org.springframework.beans.SimpleTypeConverter;
+import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
@@ -64,22 +62,13 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	private final Map<MethodParameter, NamedValueInfo> namedValueInfoCache = new ConcurrentHashMap<>(256);
 
-	/** Instead of a WebDataBinder for now */
-	private final SimpleTypeConverter typeConverter;
-
 
 	/**
-	 * @param conversionService for type conversion (to be replaced with WebDataBinder)
 	 * @param beanFactory a bean factory to use for resolving ${...} placeholder
 	 * and #{...} SpEL expressions in default values, or {@code null} if default
 	 * values are not expected to contain expressions
 	 */
-	public AbstractNamedValueMethodArgumentResolver(ConversionService conversionService,
-			ConfigurableBeanFactory beanFactory) {
-
-		Assert.notNull(conversionService, "'conversionService' is required.");
-		this.typeConverter = new SimpleTypeConverter();
-		this.typeConverter.setConversionService(conversionService);
+	public AbstractNamedValueMethodArgumentResolver(ConfigurableBeanFactory beanFactory) {
 		this.configurableBeanFactory = beanFactory;
 		this.expressionContext = (beanFactory != null ? new BeanExpressionContext(beanFactory, null) : null);
 	}
@@ -105,11 +94,12 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 					if ("".equals(arg) && namedValueInfo.defaultValue != null) {
 						arg = resolveStringValue(namedValueInfo.defaultValue);
 					}
-					arg = applyConversion(arg, parameter);
+					arg = applyConversion(arg, parameter, bindingContext);
 					handleResolvedValue(arg, namedValueInfo.name, parameter, model, exchange);
 					return arg;
 				})
-				.otherwiseIfEmpty(getDefaultValue(namedValueInfo, parameter, model, exchange));
+				.otherwiseIfEmpty(getDefaultValue(
+						namedValueInfo, parameter, bindingContext, model, exchange));
 	}
 
 	/**
@@ -179,9 +169,10 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	protected abstract Mono<Object> resolveName(String name, MethodParameter parameter,
 			ServerWebExchange exchange);
 
-	private Object applyConversion(Object value, MethodParameter parameter) {
+	private Object applyConversion(Object value, MethodParameter parameter, BindingContext bindingContext) {
 		try {
-			value = this.typeConverter.convertIfNecessary(value, parameter.getParameterType(), parameter);
+			TypeConverter typeConverter = bindingContext.getTypeConverter();
+			value = typeConverter.convertIfNecessary(value, parameter.getParameterType(), parameter);
 		}
 		catch (ConversionNotSupportedException ex) {
 			throw new ServerErrorException("Conversion not supported.", parameter, ex);
@@ -193,7 +184,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	}
 
 	private Mono<Object> getDefaultValue(NamedValueInfo namedValueInfo, MethodParameter parameter,
-			ModelMap model, ServerWebExchange exchange) {
+			BindingContext bindingContext, ModelMap model, ServerWebExchange exchange) {
 
 		Object value = null;
 		try {
@@ -204,7 +195,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 				handleMissingValue(namedValueInfo.name, parameter, exchange);
 			}
 			value = handleNullValue(namedValueInfo.name, value, parameter.getNestedParameterType());
-			value = applyConversion(value, parameter);
+			value = applyConversion(value, parameter, bindingContext);
 			handleResolvedValue(value, namedValueInfo.name, parameter, model, exchange);
 			return Mono.justOrEmpty(value);
 		}

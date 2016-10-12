@@ -49,8 +49,10 @@ import org.springframework.tests.TestSubscriber;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.result.ResolvableMethod;
+import org.springframework.web.reactive.result.method.BindingContext;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
@@ -76,6 +78,8 @@ public class MessageReaderArgumentResolverTests {
 
 	private MockServerHttpRequest request;
 
+	private BindingContext bindingContext;
+
 	private ResolvableMethod testMethod = ResolvableMethod.onClass(this.getClass()).name("handle");
 
 
@@ -84,6 +88,10 @@ public class MessageReaderArgumentResolverTests {
 		this.request = new MockServerHttpRequest(HttpMethod.POST, "/path");
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		this.exchange = new DefaultServerWebExchange(this.request, response, new MockWebSessionManager());
+
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setValidator(new TestBeanValidator());
+		this.bindingContext = new BindingContext(initializer);
 	}
 
 
@@ -92,7 +100,7 @@ public class MessageReaderArgumentResolverTests {
 		this.request.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}");
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
-		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
+		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, this.exchange);
 
 		TestSubscriber.subscribe(result)
 				.assertError(UnsupportedMediaTypeStatusException.class);
@@ -105,7 +113,8 @@ public class MessageReaderArgumentResolverTests {
 		this.request.setHeader("Content-Type", "application/json");
 		ResolvableType type = forClassWithGenerics(Mono.class, TestBean.class);
 		MethodParameter param = this.testMethod.resolveParam(type);
-		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(param, true, this.exchange).block();
+		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
+				param, true, this.bindingContext, this.exchange).block();
 
 		TestSubscriber.subscribe(result).assertError(ServerWebInputException.class);
 	}
@@ -285,7 +294,7 @@ public class MessageReaderArgumentResolverTests {
 	@SuppressWarnings("unchecked")
 	private <T> T resolveValue(MethodParameter param, String body) {
 		this.request.setHeader("Content-Type", "application/json").setBody(body);
-		Mono<Object> result = this.resolver.readBody(param, true, this.exchange);
+		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, this.exchange);
 		Object value = result.block(Duration.ofSeconds(5));
 
 		assertNotNull(value);
@@ -299,7 +308,7 @@ public class MessageReaderArgumentResolverTests {
 	private AbstractMessageReaderArgumentResolver resolver(Decoder<?>... decoders) {
 		List<HttpMessageReader<?>> readers = new ArrayList<>();
 		Arrays.asList(decoders).forEach(decoder -> readers.add(new DecoderHttpMessageReader<>(decoder)));
-		return new AbstractMessageReaderArgumentResolver(readers, new TestBeanValidator()) {};
+		return new AbstractMessageReaderArgumentResolver(readers) {};
 	}
 
 
