@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.ConversionNotSupportedException;
-import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
@@ -171,8 +170,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	private Object applyConversion(Object value, MethodParameter parameter, BindingContext bindingContext) {
 		try {
-			TypeConverter typeConverter = bindingContext.getTypeConverter();
-			value = typeConverter.convertIfNecessary(value, parameter.getParameterType(), parameter);
+			value = bindingContext.convertIfNecessary(value, parameter.getParameterType(), parameter);
 		}
 		catch (ConversionNotSupportedException ex) {
 			throw new ServerErrorException("Conversion not supported.", parameter, ex);

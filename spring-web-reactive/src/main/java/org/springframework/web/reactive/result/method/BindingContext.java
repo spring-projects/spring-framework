@@ -15,15 +15,17 @@
  */
 package org.springframework.web.reactive.result.method;
 
+import java.lang.reflect.Field;
+
 import reactor.core.publisher.Mono;
 
-import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeConverter;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.MethodParameter;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.WebExchangeDataBinder;
-import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebBindingInitializer;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -34,13 +36,13 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-public class BindingContext {
+public class BindingContext implements TypeConverter {
 
 	private final ModelMap model = new BindingAwareModelMap();
 
 	private final WebBindingInitializer initializer;
 
-	private final TypeConverter typeConverter;
+	private final WebDataBinder simpleValueDataBinder;
 
 
 	public BindingContext() {
@@ -49,21 +51,10 @@ public class BindingContext {
 
 	public BindingContext(WebBindingInitializer initializer) {
 		this.initializer = initializer;
-		this.typeConverter = initSimpleTypeConverter(initializer);
-	}
-
-	private static SimpleTypeConverter initSimpleTypeConverter(WebBindingInitializer initializer) {
-		SimpleTypeConverter converter = new SimpleTypeConverter();
-		if (initializer instanceof ConfigurableWebBindingInitializer) {
-			converter.setConversionService(
-					((ConfigurableWebBindingInitializer) initializer).getConversionService());
+		this.simpleValueDataBinder = new WebExchangeDataBinder(null);
+		if (initializer != null) {
+			initializer.initBinder(this.simpleValueDataBinder);
 		}
-		else if (initializer != null) {
-			WebDataBinder dataBinder = new WebDataBinder(null);
-			initializer.initBinder(dataBinder);
-			converter.setConversionService(dataBinder.getConversionService());
-		}
-		return converter;
 	}
 
 
@@ -96,19 +87,24 @@ public class BindingContext {
 		return new WebExchangeDataBinder(target, objectName);
 	}
 
-	protected Mono<WebExchangeDataBinder> initBinder(WebExchangeDataBinder dataBinder, ServerWebExchange exchange) {
-		return Mono.just(dataBinder);
+	protected Mono<WebExchangeDataBinder> initBinder(WebExchangeDataBinder binder, ServerWebExchange exchange) {
+		return Mono.just(binder);
 	}
 
-	/**
-	 * Return a {@link TypeConverter} for converting plain parameter values.
-	 * This is a shortcut for:
-	 * <pre>
-	 * new WebDataBinder(null).getTypeConverter();
-	 * </pre>
-	 */
-	public TypeConverter getTypeConverter() {
-		return this.typeConverter;
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
+		return this.simpleValueDataBinder.convertIfNecessary(value, requiredType);
+	}
+
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
+			throws TypeMismatchException {
+
+		return this.simpleValueDataBinder.convertIfNecessary(value, requiredType, methodParam);
+	}
+
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
+			throws TypeMismatchException {
+
+		return this.simpleValueDataBinder.convertIfNecessary(value, requiredType, field);
 	}
 
 }
