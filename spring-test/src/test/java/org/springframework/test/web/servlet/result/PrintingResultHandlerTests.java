@@ -17,9 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -33,7 +31,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -52,11 +49,6 @@ import static org.junit.Assert.*;
  * @see org.springframework.test.web.servlet.samples.standalone.resulthandlers.PrintingResultHandlerSmokeTests
  */
 public class PrintingResultHandlerTests {
-
-	private static final List<String> textContentTypes = Arrays.asList(MimeTypeUtils.APPLICATION_JSON_VALUE,
-		MimeTypeUtils.APPLICATION_XML_VALUE, MimeTypeUtils.APPLICATION_XHTML_XML_VALUE,
-		MimeTypeUtils.TEXT_HTML_VALUE, MimeTypeUtils.TEXT_PLAIN_VALUE);
-
 
 	private final TestPrintingResultHandler handler = new TestPrintingResultHandler();
 
@@ -147,43 +139,48 @@ public class PrintingResultHandlerTests {
 	}
 
 	@Test
-	public void printRequestWithTextContentTypes() throws Exception {
-		this.request.setContent("text".getBytes());
+	public void printRequestWithCharacterEncoding() throws Exception {
+		this.request.setCharacterEncoding("UTF-8");
+		this.request.setContent("text".getBytes("UTF-8"));
 
-		for (String contentType: textContentTypes) {
-			this.request.setContentType(contentType);
-			this.handler.handle(this.mvcResult);
-			assertValue("MockHttpServletRequest", "Body", "text");
-		}
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletRequest", "Body", "text");
 	}
 
 	@Test
-	public void printResponseWithTextContentTypes() throws Exception {
+	public void printRequestWithoutCharacterEncoding() throws Exception {
+		this.handler.handle(this.mvcResult);
+
+		assertValue("MockHttpServletRequest", "Body", "<no character encoding set>");
+	}
+
+	@Test
+	public void printResponseWithCharacterEncoding() throws Exception {
+		this.response.setCharacterEncoding("UTF-8");
 		this.response.getWriter().print("text");
 
-		for (String contentType: textContentTypes) {
-			this.response.setContentType(contentType);
-			this.handler.handle(this.mvcResult);
-			assertValue("MockHttpServletResponse", "Body", "text");
-		}
+		this.handler.handle(this.mvcResult);
+		assertValue("MockHttpServletResponse", "Body", "text");
 	}
 
 	@Test
-	public void printRequestWithBinaryContentType() throws Exception {
-		this.request.setContentType(MimeTypeUtils.IMAGE_JPEG_VALUE);
+	public void printResponseWithDefaultCharacterEncoding() throws Exception {
+		this.response.getWriter().print("text");
 
 		this.handler.handle(this.mvcResult);
 
-		assertValue("MockHttpServletRequest", "Body", "<content type is not printable text>");
+		assertValue("MockHttpServletResponse", "Body", "text");
 	}
 
 	@Test
-	public void printResponseWithBinaryContentType() throws Exception {
-		this.response.setContentType(MimeTypeUtils.IMAGE_JPEG_VALUE);
+	public void printResponseWithoutCharacterEncoding() throws Exception {
+		this.response.setCharacterEncoding(null);
+		this.response.getWriter().print("text");
 
 		this.handler.handle(this.mvcResult);
 
-		assertValue("MockHttpServletResponse", "Body", "<content type is not printable text>");
+		assertValue("MockHttpServletResponse", "Body", "<no character encoding set>");
 	}
 
 	@Test

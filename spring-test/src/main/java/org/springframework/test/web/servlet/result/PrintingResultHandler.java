@@ -16,9 +16,7 @@
 
 package org.springframework.test.web.servlet.result;
 
-import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
@@ -31,8 +29,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
@@ -58,12 +54,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class PrintingResultHandler implements ResultHandler {
 
-	private static final String NOT_PRINTABLE = "<content type is not printable text>";
-
-	private static final List<MimeType> printableMimeTypes = Arrays.asList(
-			MimeTypeUtils.APPLICATION_JSON, MimeTypeUtils.APPLICATION_XML,
-			new MimeType("text", "*"), new MimeType("application", "*+json"),
-			new MimeType("application", "*+xml"));
+	private static final String MISSING_CHARACTER_ENCODING = "<no character encoding set>";
 
 
 	private final ResultValuePrinter printer;
@@ -115,8 +106,8 @@ public class PrintingResultHandler implements ResultHandler {
 	 * Print the request.
 	 */
 	protected void printRequest(MockHttpServletRequest request) throws Exception {
-		String body = (isPrintableContentType(request.getContentType()) ?
-				request.getContentAsString() : NOT_PRINTABLE);
+		String body = (request.getCharacterEncoding() != null ?
+				request.getContentAsString() : MISSING_CHARACTER_ENCODING);
 
 		this.printer.printValue("HTTP Method", request.getMethod());
 		this.printer.printValue("Request URI", request.getRequestURI());
@@ -238,8 +229,8 @@ public class PrintingResultHandler implements ResultHandler {
 	 * Print the response.
 	 */
 	protected void printResponse(MockHttpServletResponse response) throws Exception {
-		String body = (isPrintableContentType(response.getContentType()) ?
-				response.getContentAsString() : NOT_PRINTABLE);
+		String body = (response.getCharacterEncoding() != null ?
+				response.getContentAsString() : MISSING_CHARACTER_ENCODING);
 
 		this.printer.printValue("Status", response.getStatus());
 		this.printer.printValue("Error message", response.getErrorMessage());
@@ -281,23 +272,6 @@ public class PrintingResultHandler implements ResultHandler {
 			headers.put(name, response.getHeaders(name));
 		}
 		return headers;
-	}
-
-
-	/**
-	 * Determine if the supplied content type is <em>printable</em> (i.e., text-based).
-	 * <p>If the supplied content type is {@code null} (i.e., unknown), this method
-	 * assumes that the content is printable by default and returns {@code true}.
-	 * @param contentType the content type to check; {@code null} if unknown
-	 * @return {@code true} if the content type is known to be or assumed to be printable
-	 * @since 5.0
-	 */
-	private static boolean isPrintableContentType(String contentType) {
-		if (contentType == null) {
-			return true;
-		}
-		MimeType mimeType = MimeType.valueOf(contentType);
-		return printableMimeTypes.stream().anyMatch(printable -> printable.includes(mimeType));
 	}
 
 
