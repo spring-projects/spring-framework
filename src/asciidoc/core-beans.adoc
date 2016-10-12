@@ -4016,7 +4016,6 @@ Consult the `PropertyPlaceholderConfigurer` javadocs for more information.
 
 [TIP]
 ====
-
 You can use the `PropertyPlaceholderConfigurer` to substitute class names, which is
 sometimes useful when you have to pick a particular implementation class at runtime. For
 example:
@@ -4402,7 +4401,6 @@ the `@Order` or standard `@Priority` annotation if you want items in the array o
 to be sorted into a specific order.
 ====
 
-
 Even typed Maps can be autowired as long as the expected key type is `String`. The Map
 values will contain all beans of the expected type, and the keys will contain the
 corresponding bean names:
@@ -4669,7 +4667,6 @@ be injected into a `Set<MovieCatalog>` annotated with `@Qualifier("action")`.
 
 [TIP]
 ====
-
 If you intend to express annotation-driven injection by name, do not primarily use
 `@Autowired`, even if is technically capable of referring to a bean name through
 `@Qualifier` values. Instead, use the JSR-250 `@Resource` annotation, which is
@@ -5356,7 +5353,6 @@ The following is an alternative using XML
 
 [TIP]
 ====
-
 The use of `<context:component-scan>` implicitly enables the functionality of
 `<context:annotation-config>`. There is usually no need to include the
 `<context:annotation-config>` element when using `<context:component-scan>`.
@@ -5522,7 +5518,6 @@ support for autowiring of `@Bean` methods:
 		}
 
 		// use of a custom qualifier and autowiring of method parameters
-
 		@Bean
 		protected TestBean protectedInstance(
 				@Qualifier("public") TestBean spouse,
@@ -5553,7 +5548,30 @@ defines the value of the property through the notation `#{ <expression> }`. For 
 annotations, an expression resolver is preconfigured to look for bean names when
 resolving expression text.
 
-The `@Bean` methods in a Spring component are processed differently than their
+As of Spring Framework 4.3, you may also declare a factory method parameter of type
+`InjectionPoint` (or its more specific subclass `DependencyDescriptor`) in order to
+access the requesting injection point that triggers the creation of the current bean.
+Note that this will only apply to the actual creation of bean instances, not to the
+injection of existing instances. As a consequence, this feature makes most sense for
+beans of prototype scope. For other scopes, the factory method will only ever see the
+injection point which triggered the creation of a new bean instance in the given scope:
+for example, the dependency that triggered the creation of a lazy singleton bean.
+Use the provided injection point metadata with semantic care in such scenarios.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Component
+	public class FactoryMethodComponent {
+
+		@Bean @Scope("prototype")
+		public TestBean prototypeInstance(InjectionPoint injectionPoint) {
+			return new TestBean("prototypeInstance for " + injectionPoint.getMember());
+		}
+	}
+----
+
+The `@Bean` methods in a regular Spring component are processed differently than their
 counterparts inside a Spring `@Configuration` class. The difference is that `@Component`
 classes are not enhanced with CGLIB to intercept the invocation of methods and fields.
 CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods
@@ -6180,7 +6198,6 @@ To enable component scanning, just annotate your `@Configuration` class as follo
 
 [TIP]
 ====
-
 Experienced Spring users will be familiar with the XML declaration equivalent from
 Spring's `context:` namespace
 
@@ -6471,7 +6488,6 @@ method directly during construction:
 
 [TIP]
 ====
-
 When you work directly in Java, you can do anything you like with your objects and do
 not always need to rely on the container lifecycle!
 ====
