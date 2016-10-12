@@ -34,7 +34,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpAttributes;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -463,18 +462,13 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 	}
 
-	private  StompHeaderAccessor getStompHeaderAccessor(Message<?> message) {
+	private StompHeaderAccessor getStompHeaderAccessor(Message<?> message) {
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
-		if (accessor == null) {
-			// Shouldn't happen (only broker broadcasts directly to clients)
-			throw new IllegalStateException("No header accessor in " + message);
-		}
-		StompHeaderAccessor stompAccessor;
 		if (accessor instanceof StompHeaderAccessor) {
-			stompAccessor = (StompHeaderAccessor) accessor;
+			return (StompHeaderAccessor) accessor;
 		}
-		else if (accessor instanceof SimpMessageHeaderAccessor) {
-			stompAccessor = StompHeaderAccessor.wrap(message);
+		else {
+			StompHeaderAccessor stompAccessor = StompHeaderAccessor.wrap(message);
 			SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(message.getHeaders());
 			if (SimpMessageType.CONNECT_ACK.equals(messageType)) {
 				stompAccessor = convertConnectAcktoStompConnected(stompAccessor);
@@ -496,13 +490,8 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 			else if (stompAccessor.getCommand() == null || StompCommand.SEND.equals(stompAccessor.getCommand())) {
 				stompAccessor.updateStompCommandAsServerMessage();
 			}
+			return stompAccessor;
 		}
-		else {
-			// Shouldn't happen (only broker broadcasts directly to clients)
-			throw new IllegalStateException(
-					"Unexpected header accessor type: " + accessor.getClass() + " in " + message);
-		}
-		return stompAccessor;
 	}
 
 	/**
