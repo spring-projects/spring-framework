@@ -18,12 +18,13 @@ package org.springframework.http.server.reactive;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -45,34 +46,26 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
-	private static final int STATE_NEW = 1;
-
-	private static final int STATE_COMMITTING = 2;
-
-	private static final int STATE_COMMITTED = 3;
-
-
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final DataBufferFactory dataBufferFactory;
+
+	private HttpStatus statusCode;
 
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
 
-	private final List<Supplier<? extends Mono<Void>>> beforeCommitActions = new ArrayList<>(4);
+	private volatile boolean committed;
 
-	private final AtomicInteger state = new AtomicInteger(STATE_NEW);
-
-	private HttpStatus statusCode;
+	private final List<Supplier<? extends Mono<Void>>> commitActions = new ArrayList<>(4);
 
 
 	public AbstractServerHttpResponse(DataBufferFactory dataBufferFactory) {
 		Assert.notNull(dataBufferFactory, "'dataBufferFactory' must not be null");
-
 		this.dataBufferFactory = dataBufferFactory;
 		this.headers = new HttpHeaders();
-		this.cookies = new LinkedMultiValueMap<String, ResponseCookie>();
+		this.cookies = new LinkedMultiValueMap<>();
 	}
 
 
@@ -84,15 +77,17 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public boolean setStatusCode(HttpStatus statusCode) {
 		Assert.notNull(statusCode);
-		if (STATE_NEW == this.state.get()) {
+		if (this.committed) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Can't set the status " + statusCode.toString() +
+						" because the HTTP response has already been committed");
+			}
+			return false;
+		}
+		else {
 			this.statusCode = statusCode;
 			return true;
 		}
-		else if (logger.isDebugEnabled()) {
-			logger.debug("Can't set the status " + statusCode.toString() +
-					" because the HTTP response has already been committed");
-		}
-		return false;
 	}
 
 	@Override
@@ -102,64 +97,78 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		if (STATE_COMMITTED == this.state.get()) {
-			return HttpHeaders.readOnlyHttpHeaders(this.headers);
-		}
-		else {
-			return this.headers;
-		}
+		return (this.committed ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
-		if (STATE_COMMITTED == this.state.get()) {
-			return CollectionUtils.unmodifiableMultiValueMap(this.cookies);
-		}
-		return this.cookies;
+		return (this.committed ? CollectionUtils.unmodifiableMultiValueMap(this.cookies) : this.cookies);
 	}
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-		Assert.notNull(action);
-		this.beforeCommitActions.add(action);
+		if (action != null) {
+			this.commitActions.add(action);
+		}
 	}
 
 	@Override
 	public final Mono<Void> writeWith(Publisher<DataBuffer> body) {
-		return new ChannelSendOperator<>(body, writePublisher -> applyBeforeCommit()
-				.then(() -> writeWithInternal(writePublisher)));
+		return new ChannelSendOperator<>(body,
+				writePublisher -> doCommit(() -> writeWithInternal(writePublisher)));
 	}
 
 	@Override
 	public final Mono<Void> writeAndFlushWith(Publisher<Publisher<DataBuffer>> body) {
-		return new ChannelSendOperator<>(body, writePublisher -> applyBeforeCommit()
-				.then(() -> writeAndFlushWithInternal(writePublisher)));
+		return new ChannelSendOperator<>(body,
+				writePublisher -> doCommit(() -> writeAndFlushWithInternal(writePublisher)));
 	}
 
 	@Override
 	public Mono<Void> setComplete() {
-		return applyBeforeCommit();
+		return doCommit();
 	}
 
-	protected Mono<Void> applyBeforeCommit() {
-		Mono<Void> mono = Mono.empty();
-		if (this.state.compareAndSet(STATE_NEW, STATE_COMMITTING)) {
-			for (Supplier<? extends Mono<Void>> action : this.beforeCommitActions) {
-				mono = mono.then(action);
+	/**
+	 * A variant of {@link #doCommit(Supplier)} for a response without no body.
+	 * @return a completion publisher
+	 */
+	protected Mono<Void> doCommit() {
+		return doCommit(null);
+	}
+
+	/**
+	 * Apply {@link #beforeCommit(Supplier) beforeCommit} actions, apply the
+	 * response status and headers/cookies, and write the response body.
+	 * @param writeAction the action to write the response body or {@code null}
+	 * @return a completion publisher
+	 */
+	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
+		if (this.committed) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Can't set the status " + statusCode.toString() +
+						" because the HTTP response has already been committed");
 			}
-			mono = mono.otherwise(ex -> {
-				// Ignore errors from beforeCommit actions
-				return Mono.empty();
-			});
-			mono = mono.then(() -> {
-				this.state.set(STATE_COMMITTED);
-				writeStatusCode();
-				writeHeaders();
-				writeCookies();
-				return Mono.empty();
-			});
+			return Mono.empty();
 		}
-		return mono;
+
+		this.committed = true;
+
+		this.commitActions.add(() -> {
+			applyStatusCode();
+			applyHeaders();
+			applyCookies();
+			return Mono.empty();
+		});
+
+		if (writeAction != null) {
+			this.commitActions.add(writeAction);
+		}
+
+		List<? extends Mono<Void>> actions = this.commitActions.stream()
+				.map(Supplier::get).collect(Collectors.toList());
+
+		return Flux.concat(actions).next();
 	}
 
 
@@ -180,18 +189,18 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * Implement this method to write the status code to the underlying response.
 	 * This method is called once only.
 	 */
-	protected abstract void writeStatusCode();
+	protected abstract void applyStatusCode();
 
 	/**
 	 * Implement this method to apply header changes from {@link #getHeaders()}
 	 * to the underlying response. This method is called once only.
 	 */
-	protected abstract void writeHeaders();
+	protected abstract void applyHeaders();
 
 	/**
 	 * Implement this method to add cookies from {@link #getHeaders()} to the
 	 * underlying response. This method is called once only.
 	 */
-	protected abstract void writeCookies();
+	protected abstract void applyCookies();
 
 }

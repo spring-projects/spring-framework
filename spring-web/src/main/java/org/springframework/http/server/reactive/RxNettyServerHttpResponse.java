@@ -63,7 +63,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 
 	@Override
-	protected void writeStatusCode() {
+	protected void applyStatusCode() {
 		HttpStatus statusCode = this.getStatusCode();
 		if (statusCode != null) {
 			this.response.setStatus(HttpResponseStatus.valueOf(statusCode.value()));
@@ -91,7 +91,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected void writeHeaders() {
+	protected void applyHeaders() {
 		for (String name : getHeaders().keySet()) {
 			for (String value : getHeaders().get(name)) {
 				this.response.addHeader(name, value);
@@ -100,7 +100,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected void writeCookies() {
+	protected void applyCookies() {
 		for (String name : getCookies().keySet()) {
 			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new DefaultCookie(name, httpCookie.getValue());

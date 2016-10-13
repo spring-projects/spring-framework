@@ -62,7 +62,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 
 	@Override
-	protected void writeStatusCode() {
+	protected void applyStatusCode() {
 		HttpStatus statusCode = this.getStatusCode();
 		if (statusCode != null) {
 			getReactorChannel().status(HttpResponseStatus.valueOf(statusCode.value()));
@@ -83,7 +83,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	protected void writeHeaders() {
+	protected void applyHeaders() {
 		// TODO: temporarily, see https://github.com/reactor/reactor-netty/issues/2
 		if(getHeaders().containsKey(HttpHeaders.CONTENT_LENGTH)){
 			this.channel.responseTransfer(false);
@@ -96,7 +96,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 	}
 
 	@Override
-	protected void writeCookies() {
+	protected void applyCookies() {
 		for (String name : getCookies().keySet()) {
 			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new DefaultCookie(name, httpCookie.getValue());
@@ -114,12 +114,11 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
-		return applyBeforeCommit().then(() -> this.channel.sendFile(file, position, count));
+		return doCommit(() -> this.channel.sendFile(file, position, count));
 	}
 
 	private static Publisher<ByteBuf> toByteBufs(Publisher<DataBuffer> dataBuffers) {
-		return Flux.from(dataBuffers).
-				map(NettyDataBufferFactory::toByteBuf);
+		return Flux.from(dataBuffers).map(NettyDataBufferFactory::toByteBuf);
 	}
 
 

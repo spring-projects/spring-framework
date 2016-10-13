@@ -68,7 +68,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	protected void writeStatusCode() {
+	protected void applyStatusCode() {
 		HttpStatus statusCode = this.getStatusCode();
 		if (statusCode != null) {
 			getUndertowExchange().setStatusCode(statusCode.value());
@@ -77,8 +77,8 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 
 	@Override
 	public Mono<Void> writeWith(File file, long position, long count) {
-		writeHeaders();
-		writeCookies();
+		applyHeaders();
+		applyCookies();
 		try {
 			StreamSinkChannel responseChannel = getUndertowExchange().getResponseChannel();
 			@SuppressWarnings("resource")
@@ -98,7 +98,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	protected void writeHeaders() {
+	protected void applyHeaders() {
 		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
 			HttpString headerName = HttpString.tryFromString(entry.getKey());
 			this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
@@ -106,7 +106,7 @@ public class UndertowServerHttpResponse extends AbstractListenerServerHttpRespon
 	}
 
 	@Override
-	protected void writeCookies() {
+	protected void applyCookies() {
 		for (String name : getCookies().keySet()) {
 			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new CookieImpl(name, httpCookie.getValue());

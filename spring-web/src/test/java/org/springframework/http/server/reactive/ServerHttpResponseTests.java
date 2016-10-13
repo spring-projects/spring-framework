@@ -158,19 +158,19 @@ public class ServerHttpResponseTests {
 		}
 
 		@Override
-		public void writeStatusCode() {
+		public void applyStatusCode() {
 			assertFalse(this.statusCodeWritten);
 			this.statusCodeWritten = true;
 		}
 
 		@Override
-		protected void writeHeaders() {
+		protected void applyHeaders() {
 			assertFalse(this.headersWritten);
 			this.headersWritten = true;
 		}
 
 		@Override
-		protected void writeCookies() {
+		protected void applyCookies() {
 			assertFalse(this.cookiesWritten);
 			this.cookiesWritten = true;
 		}
