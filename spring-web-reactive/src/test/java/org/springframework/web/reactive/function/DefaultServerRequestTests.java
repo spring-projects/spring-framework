@@ -119,7 +119,15 @@ public class DefaultServerRequestTests {
 		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
 		when(mockExchange.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
 
-		assertEquals(Optional.of("bar"), defaultRequest.pathVariable("foo"));
+		assertEquals("bar", defaultRequest.pathVariable("foo"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void pathVariableNotFound() throws Exception {
+		Map<String, String> pathVariables = Collections.singletonMap("foo", "bar");
+		when(mockExchange.getAttribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)).thenReturn(Optional.of(pathVariables));
+
+		assertEquals("bar", defaultRequest.pathVariable("baz"));
 	}
 
 	@Test

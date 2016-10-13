@@ -72,6 +72,22 @@ public interface RouterFunction<T> {
 	}
 
 	/**
+	 * Return a composed routing function that first invokes this function,
+	 * and then routes to the given handler function if the given request predicate applies. This
+	 * method is a convenient combination of {@link #and(RouterFunction)} and
+	 * {@link RouterFunctions#route(RequestPredicate, HandlerFunction)}.
+	 * @param predicate the predicate to test
+	 * @param handlerFunction the handler function to route to
+	 * @return a composed function that first routes with this function and then the function
+	 * created from {@code predicate} and {@code handlerFunction} if this
+	 * function has no result
+	 */
+	default RouterFunction<?> andRoute(RequestPredicate predicate,
+			HandlerFunction<?> handlerFunction) {
+		return and(RouterFunctions.route(predicate, handlerFunction));
+	}
+
+	/**
 	 * Filter all {@linkplain HandlerFunction handler functions} routed by this function with the given
 	 * {@linkplain HandlerFilterFunction filter function}.
 	 *
@@ -80,8 +96,7 @@ public interface RouterFunction<T> {
 	 * @return the filtered routing function
 	 */
 	default <S> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
-		return request -> this.route(request)
-				.map(handlerFunction -> filterRequest -> filterFunction.filter(filterRequest, handlerFunction));
+		return request -> this.route(request).map(filterFunction::apply);
 	}
 
 }

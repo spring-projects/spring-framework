@@ -104,7 +104,7 @@ public class ServerRequestWrapper implements ServerRequest {
 	}
 
 	@Override
-	public Optional<String> pathVariable(String name) {
+	public String pathVariable(String name) {
 		return this.request.pathVariable(name);
 	}
 

@@ -116,9 +116,9 @@ public class ServerRequestWrapperTests {
 	public void pathVariable() throws Exception {
 		String name = "foo";
 		String value = "bar";
-		when(mockRequest.pathVariable(name)).thenReturn(Optional.of(value));
+		when(mockRequest.pathVariable(name)).thenReturn(value);
 
-		assertEquals(Optional.of(value), wrapper.pathVariable(name));
+		assertEquals(value, wrapper.pathVariable(name));
 	}
 
 	@Test

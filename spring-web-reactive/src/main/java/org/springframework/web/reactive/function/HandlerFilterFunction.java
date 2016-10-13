@@ -16,6 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.support.ServerRequestWrapper;
 
 /**
@@ -42,5 +43,31 @@ public interface HandlerFilterFunction<T, R> {
 	 * @see ServerRequestWrapper
 	 */
 	ServerResponse<R> filter(ServerRequest request, HandlerFunction<T> next);
+
+	/**
+	 * Return a composed filter function that first applies this filter, and then applies the
+	 * {@code after} filter.
+	 * @param after the filter to apply after this filter is applied
+	 * @return a composed filter that first applies this function and then applies the
+	 * {@code after} function
+	 */
+	default HandlerFilterFunction<T, R> andThen(HandlerFilterFunction<T, T> after) {
+		Assert.notNull(after, "'after' must not be null");
+		return (request, next) -> {
+			HandlerFunction<T> nextHandler =
+					handlerRequest -> after.filter(handlerRequest, next);
+			return filter(request, nextHandler);
+		};
+	}
+
+	/**
+	 * Apply this filter to the given handler function, resulting in a filtered handler function.
+	 * @param handler the handler function to filter
+	 * @return the filtered handler function
+	 */
+	default HandlerFunction<R> apply(HandlerFunction<T> handler) {
+		Assert.notNull(handler, "'handler' must not be null");
+		return request -> this.filter(request, handler);
+	}
 
 }

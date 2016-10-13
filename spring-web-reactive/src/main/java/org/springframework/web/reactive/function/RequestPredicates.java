@@ -336,7 +336,7 @@ public abstract class RequestPredicates {
 		}
 
 		@Override
-		public Optional<String> pathVariable(String name) {
+		public String pathVariable(String name) {
 			return this.request.pathVariable(name);
 		}
 

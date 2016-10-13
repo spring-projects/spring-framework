@@ -101,9 +101,17 @@ public interface ServerRequest {
 	 * Return the path variable with the given name, if present.
 	 * @param name the variable name
 	 * @return the variable value
+	 * @throws IllegalArgumentException if there is no path variable with the given name
 	 */
-	default Optional<String> pathVariable(String name) {
-		return Optional.ofNullable(this.pathVariables().get(name));
+	default String pathVariable(String name) {
+		Map<String, String> pathVariables = pathVariables();
+		if (pathVariables.containsKey(name)) {
+			return pathVariables().get(name);
+		}
+		else {
+			throw new IllegalArgumentException(
+					"No path variable with name \"" + name + "\" available");
+		}
 	}
 
 	/**
