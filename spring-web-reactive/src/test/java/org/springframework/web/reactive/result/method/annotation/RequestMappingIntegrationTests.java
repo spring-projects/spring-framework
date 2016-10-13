@@ -29,7 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.config.WebReactiveConfiguration;
+import org.springframework.web.reactive.config.EnableWebReactive;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -74,9 +74,10 @@ public class RequestMappingIntegrationTests extends AbstractRequestMappingIntegr
 
 
 	@Configuration
+	@EnableWebReactive
 	@ComponentScan(resourcePattern = "**/RequestMappingIntegrationTests$*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebReactiveConfiguration {
+	static class WebConfig {
 	}
 
 	@RestController
