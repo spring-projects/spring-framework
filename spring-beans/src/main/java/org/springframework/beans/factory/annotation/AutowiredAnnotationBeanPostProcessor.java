@@ -24,14 +24,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -60,6 +53,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -409,13 +403,14 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		Class<?> targetClass = clazz;
 
 		do {
-			final LinkedList<InjectionMetadata.InjectedElement> currElements =
-					new LinkedList<InjectionMetadata.InjectedElement>();
+			final List<InjectionMetadata.InjectedElement> currElements =
+					new ArrayList<InjectionMetadata.InjectedElement>();
 
 			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
 				@Override
 				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 					AnnotationAttributes ann = findAutowiredAnnotation(field);
+
 					if (ann != null) {
 						if (Modifier.isStatic(field.getModifiers())) {
 							if (logger.isWarnEnabled()) {
@@ -428,6 +423,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					}
 				}
 			});
+
+			int methodsOffset = currElements.size();
 
 			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
 				@Override
@@ -444,17 +441,22 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 							}
 							return;
 						}
-						if (method.getParameterTypes().length == 0) {
-							if (logger.isWarnEnabled()) {
-								logger.warn("Autowired annotation should be used on methods with parameters: " + method);
-							}
-						}
 						boolean required = determineRequiredStatus(ann);
 						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
 						currElements.add(new AutowiredMethodElement(method, required, pd));
 					}
 				}
 			});
+
+			if (methodsOffset < currElements.size()) {
+				Comparator<InjectionMetadata.InjectedElement> comparator = new Comparator<InjectionMetadata.InjectedElement>() {
+					@Override
+					public int compare(InjectionMetadata.InjectedElement o1, InjectionMetadata.InjectedElement o2) {
+						return AnnotationAwareOrderComparator.INSTANCE.compare(o1.getMember(), o2.getMember());
+					}
+				};
+				Collections.sort(currElements.subList(methodsOffset, currElements.size()), comparator);
+			}
 
 			elements.addAll(0, currElements);
 			targetClass = targetClass.getSuperclass();
