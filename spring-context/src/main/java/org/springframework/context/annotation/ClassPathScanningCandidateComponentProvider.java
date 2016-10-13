@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.index.CandidateComponentsIndex;
 import org.springframework.context.index.CandidateComponentsIndexLoader;
@@ -57,6 +58,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A component provider that provides candidate components from a base package. Can
@@ -334,8 +336,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	protected Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			for(String resolvedBasePackage : resolveBasePackage(basePackage)){
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
-					resolveBasePackage(basePackage) + "/" + this.resourcePattern;
+					resolvedBasePackage + "/" + this.resourcePattern;
 			Resource[] resources = this.resourcePatternResolver.getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
@@ -379,6 +382,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 					}
 				}
 			}
+			}
 		}
 		catch (IOException ex) {
 			throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
@@ -395,8 +399,12 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @param basePackage the base package as specified by the user
 	 * @return the pattern specification to be used for package searching
 	 */
-	protected String resolveBasePackage(String basePackage) {
-		return ClassUtils.convertClassNameToResourcePath(this.environment.resolveRequiredPlaceholders(basePackage));
+	protected String[] resolveBasePackage(String basePackage) {
+		String[] basePackages = StringUtils.tokenizeToStringArray(this.environment.resolveRequiredPlaceholders(basePackage),
+				ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
+		for(int i=0; i<basePackages.length; i++)
+			basePackages[i] = ClassUtils.convertClassNameToResourcePath(basePackages[i]);
+		return basePackages;
 	}
 
 	/**
