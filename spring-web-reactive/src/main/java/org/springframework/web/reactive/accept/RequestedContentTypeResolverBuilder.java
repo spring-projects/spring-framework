@@ -51,7 +51,7 @@ import org.springframework.util.CollectionUtils;
  * <tr>
  *     <td>{@link #ignoreAcceptHeader}</td>
  *     <td>{@link HeaderContentTypeResolver Header resolver}</td>
- *     <td>On</td>
+ *     <td>Off</td>
  * </tr>
  * <tr>
  *     <td>{@link #defaultContentType}</td>
