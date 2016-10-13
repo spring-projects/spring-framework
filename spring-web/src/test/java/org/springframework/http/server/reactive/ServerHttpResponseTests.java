@@ -33,7 +33,6 @@ import org.springframework.http.ResponseCookie;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 /**
@@ -94,24 +93,6 @@ public class ServerHttpResponseTests {
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
 		assertSame(cookie, response.getCookies().getFirst("ID"));
-
-		assertEquals(3, response.body.size());
-		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));
-		assertEquals("b", new String(response.body.get(1).asByteBuffer().array(), StandardCharsets.UTF_8));
-		assertEquals("c", new String(response.body.get(2).asByteBuffer().array(), StandardCharsets.UTF_8));
-	}
-
-	@Test
-	public void beforeCommitActionWithError() throws Exception {
-		TestServerHttpResponse response = new TestServerHttpResponse();
-		IllegalStateException error = new IllegalStateException("boo");
-		response.beforeCommit(() -> Mono.error(error));
-		response.writeWith(Flux.just(wrap("a"), wrap("b"), wrap("c"))).block();
-
-		assertTrue("beforeCommit action errors should be ignored", response.statusCodeWritten);
-		assertTrue("beforeCommit action errors should be ignored", response.headersWritten);
-		assertTrue("beforeCommit action errors should be ignored", response.cookiesWritten);
-		assertNull(response.getCookies().get("ID"));
 
 		assertEquals(3, response.body.size());
 		assertEquals("a", new String(response.body.get(0).asByteBuffer().array(), StandardCharsets.UTF_8));

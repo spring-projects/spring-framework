@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,15 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
+	/**
+	 * COMMITTING -> COMMITTED is the period after doCommit is called but before
+	 * the response status and headers have been applied to the underlying
+	 * response during which time pre-commit actions can still make changes to
+	 * the response status and headers.
+	 */
+	private enum State {NEW, COMMITTING, COMMITTED};
+
+
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private final DataBufferFactory dataBufferFactory;
@@ -56,7 +66,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
 
-	private volatile boolean committed;
+	private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
 	private final List<Supplier<? extends Mono<Void>>> commitActions = new ArrayList<>(4);
 
@@ -77,7 +87,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public boolean setStatusCode(HttpStatus statusCode) {
 		Assert.notNull(statusCode);
-		if (this.committed) {
+		if (this.state.get() == State.COMMITTED) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Can't set the status " + statusCode.toString() +
 						" because the HTTP response has already been committed");
@@ -97,12 +107,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.committed ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
+		return (this.state.get() == State.COMMITTED ?
+				HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
-		return (this.committed ? CollectionUtils.unmodifiableMultiValueMap(this.cookies) : this.cookies);
+		return (this.state.get() == State.COMMITTED ?
+				CollectionUtils.unmodifiableMultiValueMap(this.cookies) : this.cookies);
 	}
 
 	@Override
@@ -144,7 +156,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
-		if (this.committed) {
+		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Can't set the status " + statusCode.toString() +
 						" because the HTTP response has already been committed");
@@ -152,12 +164,11 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			return Mono.empty();
 		}
 
-		this.committed = true;
-
 		this.commitActions.add(() -> {
 			applyStatusCode();
 			applyHeaders();
 			applyCookies();
+			this.state.set(State.COMMITTED);
 			return Mono.empty();
 		});
 
