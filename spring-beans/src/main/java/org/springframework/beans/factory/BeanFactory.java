@@ -67,8 +67,8 @@ import org.springframework.core.ResolvableType;
  * 1. BeanNameAware's {@code setBeanName}<br>
  * 2. BeanClassLoaderAware's {@code setBeanClassLoader}<br>
  * 3. BeanFactoryAware's {@code setBeanFactory}<br>
- * 4. EnvironmentAware's {@code setEnvironment}
- * 5. EmbeddedValueResolverAware's {@code setEmbeddedValueResolver}
+ * 4. EnvironmentAware's {@code setEnvironment}<br>
+ * 5. EmbeddedValueResolverAware's {@code setEmbeddedValueResolver}<br>
  * 6. ResourceLoaderAware's {@code setResourceLoader}
  * (only applicable when running in an application context)<br>
  * 7. ApplicationEventPublisherAware's {@code setApplicationEventPublisher}
