@@ -154,15 +154,15 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 	}
 
-
-	void onError(Throwable t) {
-		if (bodyFlushProcessor != null) {
-			bodyFlushProcessor.cancel();
-			bodyFlushProcessor.onError(t);
+	/** Handle a timeout/error callback from the Servlet container */
+	void handleAsyncListenerError(Throwable ex) {
+		if (this.bodyFlushProcessor != null) {
+			this.bodyFlushProcessor.cancel();
+			this.bodyFlushProcessor.onError(ex);
 		}
-		if (bodyProcessor != null) {
-			bodyProcessor.cancel();
-			bodyProcessor.onError(t);
+		if (this.bodyProcessor != null) {
+			this.bodyProcessor.cancel();
+			this.bodyProcessor.onError(ex);
 		}
 	}
 

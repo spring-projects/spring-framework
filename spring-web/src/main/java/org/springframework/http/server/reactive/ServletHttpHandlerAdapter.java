@@ -91,7 +91,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				servletRequest, this.dataBufferFactory, this.bufferSize);
 		ServletServerHttpResponse response = new ServletServerHttpResponse(
 				servletResponse, this.dataBufferFactory, this.bufferSize);
-		asyncContext.addListener(new HandlerAsyncEvent(request, response));
+		asyncContext.addListener(new ErrorHandlingAsyncListener(request, response));
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(asyncContext);
 		this.handler.handle(request, response).subscribe(resultSubscriber);
 	}
@@ -130,40 +130,47 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 	}
 
-	private static final class HandlerAsyncEvent implements AsyncListener {
+
+	private static final class ErrorHandlingAsyncListener implements AsyncListener {
+
 		private final ServletServerHttpRequest request;
+
 		private final ServletServerHttpResponse response;
 
-		public HandlerAsyncEvent(ServletServerHttpRequest request,
+
+		public ErrorHandlingAsyncListener(ServletServerHttpRequest request,
 				ServletServerHttpResponse response) {
+
 			this.request = request;
 			this.response = response;
 		}
 
+
 		@Override
-		public void onComplete(AsyncEvent event) throws IOException {
+		public void onTimeout(AsyncEvent event) {
+			Throwable ex = event.getThrowable();
+			if (ex == null) {
+				ex = new IllegalStateException("Async operation timeout.");
+			}
+			this.request.handleAsyncListenerError(ex);
+			this.response.handleAsyncListenerError(ex);
+		}
+
+		@Override
+		public void onError(AsyncEvent event) {
+			this.request.handleAsyncListenerError(event.getThrowable());
+			this.response.handleAsyncListenerError(event.getThrowable());
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) {
 			// no op
 		}
 
 		@Override
-		public void onTimeout(AsyncEvent event) throws IOException {
-			Throwable t = event.getThrowable();
-			if (t == null) {
-				t = new IllegalStateException("Async operation timeout.");
-			}
-			request.onError(t);
-			response.onError(t);
-		}
-
-		@Override
-		public void onError(AsyncEvent event) throws IOException {
-			request.onError(event.getThrowable());
-			response.onError(event.getThrowable());
-		}
-
-		@Override
-		public void onStartAsync(AsyncEvent event) throws IOException {
+		public void onComplete(AsyncEvent event) {
 			// no op
 		}
 	}
+
 }

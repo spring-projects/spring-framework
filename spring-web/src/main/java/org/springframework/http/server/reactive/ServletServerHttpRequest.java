@@ -170,9 +170,10 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
-	void onError(Throwable t) {
+	/** Handle a timeout/error callback from the Servlet container */
+	void handleAsyncListenerError(Throwable ex) {
 		if (this.bodyPublisher != null) {
-			this.bodyPublisher.onError(t);
+			this.bodyPublisher.onError(ex);
 		}
 	}
 
