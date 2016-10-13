@@ -37,6 +37,11 @@ public class MockMvcResultMatchersTests {
 	}
 
 	@Test
+	public void redirectWithUrlTemplate() throws Exception {
+		redirectedUrl("/orders/{orderId}/items/{itemId}", 1, 2).match(getRedirectedUrlStubMvcResult("/orders/1/items/2"));
+	}
+
+	@Test
 	public void redirectWithMatchingPattern() throws Exception {
 		redirectedUrlPattern("/resource/*").match(getRedirectedUrlStubMvcResult("/resource/1"));
 	}
@@ -54,6 +59,11 @@ public class MockMvcResultMatchersTests {
 	@Test
 	public void forwardWithQueryString() throws Exception {
 		forwardedUrl("/api/resource/1?arg=value").match(getForwardedUrlStubMvcResult("/api/resource/1?arg=value"));
+	}
+
+	@Test
+	public void forwardWithUrlTemplate() throws Exception {
+		forwardedUrl("/orders/{orderId}/items/{itemId}", 1, 2).match(getForwardedUrlStubMvcResult("/orders/1/items/2"));
 	}
 
 	@Test

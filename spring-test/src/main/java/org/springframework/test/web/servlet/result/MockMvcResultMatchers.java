@@ -23,6 +23,7 @@ import org.hamcrest.Matcher;
 
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.springframework.test.util.AssertionErrors.*;
 
@@ -80,11 +81,14 @@ public abstract class MockMvcResultMatchers {
 
 	/**
 	 * Asserts the request was forwarded to the given URL.
-	 * <p>This method accepts only exact matches.
-	 * @param expectedUrl the exact URL expected
+	 * <p>This method accepts exact matches against the expanded URL template.
+	 * @param urlTemplate a URL template; the expanded URL will be encoded
+	 * @param urlVars zero or more URL variables to populate the template
+	 * @see UriComponentsBuilder#fromUriString(String)
 	 */
-	public static ResultMatcher forwardedUrl(String expectedUrl) {
-		return result -> assertEquals("Forwarded URL", expectedUrl, result.getResponse().getForwardedUrl());
+	public static ResultMatcher forwardedUrl(String urlTemplate, Object... urlVars) {
+		String uri = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(urlVars).encode().toUriString();
+		return result -> assertEquals("Forwarded URL", uri, result.getResponse().getForwardedUrl());
 	}
 
 	/**
@@ -105,11 +109,14 @@ public abstract class MockMvcResultMatchers {
 
 	/**
 	 * Asserts the request was redirected to the given URL.
-	 * <p>This method accepts only exact matches.
-	 * @param expectedUrl the exact URL expected
+	 * <p>This method accepts exact matches against the expanded URL template.
+	 * @param urlTemplate a URL template; the expanded URL will be encoded
+	 * @param urlVars zero or more URL variables to populate the template
+	 * @see UriComponentsBuilder#fromUriString(String)
 	 */
-	public static ResultMatcher redirectedUrl(String expectedUrl) {
-		return result -> assertEquals("Redirected URL", expectedUrl, result.getResponse().getRedirectedUrl());
+	public static ResultMatcher redirectedUrl(String urlTemplate, Object... urlVars) {
+		String uri = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(urlVars).encode().toUriString();
+		return result -> assertEquals("Redirected URL", uri, result.getResponse().getRedirectedUrl());
 	}
 
 	/**
