@@ -35,7 +35,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.config.ViewResolverRegistry;
-import org.springframework.web.reactive.config.WebReactiveConfiguration;
+import org.springframework.web.reactive.config.WebReactiveConfigurationSupport;
 import org.springframework.web.reactive.result.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -81,7 +81,7 @@ public class RequestMappingViewResolutionIntegrationTests extends AbstractReques
 	@Configuration
 	@ComponentScan(resourcePattern = "**/RequestMappingViewResolutionIntegrationTests$*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebReactiveConfiguration {
+	static class WebConfig extends WebReactiveConfigurationSupport {
 
 		@Override
 		protected void configureViewResolvers(ViewResolverRegistry registry) {

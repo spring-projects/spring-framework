@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.WebClient;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.config.WebReactiveConfiguration;
+import org.springframework.web.reactive.config.EnableWebReactive;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
@@ -163,8 +163,9 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	}
 
 	@Configuration
+	@EnableWebReactive
 	@SuppressWarnings("unused")
-	static class TestConfiguration extends WebReactiveConfiguration {
+	static class TestConfiguration {
 
 		@Bean
 		public SseController sseController() {
