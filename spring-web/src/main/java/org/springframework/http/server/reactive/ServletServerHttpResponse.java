@@ -54,6 +54,8 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 	private volatile ResponseBodyProcessor bodyProcessor;
 
+	private volatile ResponseBodyFlushProcessor bodyFlushProcessor;
+
 
 	public ServletServerHttpResponse(HttpServletResponse response,
 			DataBufferFactory dataBufferFactory, int bufferSize) throws IOException {
@@ -116,8 +118,9 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 
 	@Override
 	protected Processor<Publisher<DataBuffer>, Void> createBodyFlushProcessor() {
-		Processor<Publisher<DataBuffer>, Void> processor = new ResponseBodyFlushProcessor();
+		ResponseBodyFlushProcessor processor = new ResponseBodyFlushProcessor();
 		registerListener();
+		bodyFlushProcessor = processor;
 		return processor;
 	}
 
@@ -148,6 +151,18 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 		else {
 			this.flushOnNext = true;
+		}
+	}
+
+	/** Handle a timeout/error callback from the Servlet container */
+	void handleAsyncListenerError(Throwable ex) {
+		if (this.bodyFlushProcessor != null) {
+			this.bodyFlushProcessor.cancel();
+			this.bodyFlushProcessor.onError(ex);
+		}
+		if (this.bodyProcessor != null) {
+			this.bodyProcessor.cancel();
+			this.bodyProcessor.onError(ex);
 		}
 	}
 

@@ -170,6 +170,13 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
+	/** Handle a timeout/error callback from the Servlet container */
+	void handleAsyncListenerError(Throwable ex) {
+		if (this.bodyPublisher != null) {
+			this.bodyPublisher.onError(ex);
+		}
+	}
+
 	private RequestBodyPublisher createBodyPublisher() throws IOException {
 		RequestBodyPublisher bodyPublisher = new RequestBodyPublisher(
 				this.request.getInputStream(), this.dataBufferFactory, this.bufferSize);

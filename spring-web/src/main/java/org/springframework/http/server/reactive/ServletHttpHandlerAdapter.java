@@ -18,6 +18,8 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -89,6 +91,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				servletRequest, this.dataBufferFactory, this.bufferSize);
 		ServletServerHttpResponse response = new ServletServerHttpResponse(
 				servletResponse, this.dataBufferFactory, this.bufferSize);
+		asyncContext.addListener(new ErrorHandlingAsyncListener(request, response));
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(asyncContext);
 		this.handler.handle(request, response).subscribe(resultSubscriber);
 	}
@@ -124,6 +127,49 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		public void onComplete() {
 			logger.debug("Successfully completed request");
 			this.asyncContext.complete();
+		}
+	}
+
+
+	private static final class ErrorHandlingAsyncListener implements AsyncListener {
+
+		private final ServletServerHttpRequest request;
+
+		private final ServletServerHttpResponse response;
+
+
+		public ErrorHandlingAsyncListener(ServletServerHttpRequest request,
+				ServletServerHttpResponse response) {
+
+			this.request = request;
+			this.response = response;
+		}
+
+
+		@Override
+		public void onTimeout(AsyncEvent event) {
+			Throwable ex = event.getThrowable();
+			if (ex == null) {
+				ex = new IllegalStateException("Async operation timeout.");
+			}
+			this.request.handleAsyncListenerError(ex);
+			this.response.handleAsyncListenerError(ex);
+		}
+
+		@Override
+		public void onError(AsyncEvent event) {
+			this.request.handleAsyncListenerError(event.getThrowable());
+			this.response.handleAsyncListenerError(event.getThrowable());
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) {
+			// no op
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) {
+			// no op
 		}
 	}
 
