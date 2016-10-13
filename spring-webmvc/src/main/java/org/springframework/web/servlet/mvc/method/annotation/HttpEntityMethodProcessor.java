@@ -121,6 +121,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		Type paramType = getHttpEntityType(parameter);
+		if (paramType == null) {
+			throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
+					"' in method " + parameter.getMethod() + " is not parameterized");
+		}
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		if (RequestEntity.class == parameter.getParameterType()) {
@@ -146,8 +150,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		else if (parameterType instanceof Class) {
 			return Object.class;
 		}
-		throw new IllegalArgumentException("HttpEntity parameter '" + parameter.getParameterName() +
-				"' in method " + parameter.getMethod() + " is not parameterized");
+		else {
+			return null;
+		}
 	}
 
 	@Override
@@ -243,6 +248,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 		else {
 			Type type = getHttpEntityType(returnType);
+			type = (type != null ? type : Object.class);
 			return ResolvableType.forMethodParameter(returnType, type).resolve(Object.class);
 		}
 	}
