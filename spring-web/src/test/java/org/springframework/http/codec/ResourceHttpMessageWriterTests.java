@@ -76,7 +76,7 @@ public class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getContentLength(), is(39L));
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 
-		Mono<String> result = response.getBodyAsString();
+		Mono<String> result = this.response.getBodyAsString();
 		TestSubscriber.subscribe(result).assertComplete().assertValues("Spring Framework test resource content.");
 	}
 
@@ -92,7 +92,7 @@ public class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 		assertThat(this.response.getHeaders().getContentLength(), is(6L));
 
-		Mono<String> result = response.getBodyAsString();
+		Mono<String> result = this.response.getBodyAsString();
 		TestSubscriber.subscribe(result).assertComplete().assertValues("Spring");
 	}
 
