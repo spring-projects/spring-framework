@@ -35,10 +35,6 @@ package org.springframework.jdbc.support.nativejdbc;
  * flags to "true". If none of the statement types is wrapped - or you solely need
  * Connection unwrapping in the first place -, the defaults are fine.
  *
- * <p>SimpleNativeJdbcExtractor is a common choice for use with OracleLobHandler, which
- * just needs Connection unwrapping via the {@link #getNativeConnectionFromStatement}
- * method. This usage will work with almost any connection pool.
- *
  * <p>For full usage with JdbcTemplate, i.e. to also provide Statement unwrapping:
  * <ul>
  * <li>Use a default SimpleNativeJdbcExtractor for Resin and SJSAS (no JDBC
