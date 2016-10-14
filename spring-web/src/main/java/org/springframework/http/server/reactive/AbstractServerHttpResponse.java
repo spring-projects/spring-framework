@@ -146,7 +146,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * @return a completion publisher
 	 */
 	protected Mono<Void> doCommit() {
-		return doCommit(null);
+		return (this.state.get() == State.NEW ? doCommit(null) : Mono.empty());
 	}
 
 	/**
@@ -158,8 +158,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	protected Mono<Void> doCommit(Supplier<? extends Mono<Void>> writeAction) {
 		if (!this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Can't set the status " + statusCode.toString() +
-						" because the HTTP response has already been committed");
+				logger.debug("Skipping doCommit (response already committed).");
 			}
 			return Mono.empty();
 		}
