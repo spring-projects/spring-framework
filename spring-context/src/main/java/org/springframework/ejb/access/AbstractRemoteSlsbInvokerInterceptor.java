@@ -53,7 +53,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 	 * Set a home interface that this invoker will narrow to before performing
 	 * the parameterless SLSB {@code create()} call that returns the actual
 	 * SLSB proxy.
-	 * <p>Default is none, which will work on all J2EE servers that are not based
+	 * <p>Default is none, which will work on all Java EE servers that are not based
 	 * on CORBA. A plain {@code javax.ejb.EJBHome} interface is known to be
 	 * sufficient to make a WebSphere 5.0 Remote SLSB work. On other servers,
 	 * the specific home interface for the target SLSB might be necessary.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
  * providing configurable lookup of a specific JNDI resource.
  *
  * <p>Exposes a {@link #setJndiName "jndiName"} property. This may or may not
- * include the "java:comp/env/" prefix expected by J2EE applications when
+ * include the "java:comp/env/" prefix expected by Java EE applications when
  * accessing a locally mapped (Environmental Naming Context) resource. If it
  * doesn't, the "java:comp/env/" prefix will be prepended if the "resourceRef"
  * property is true (the default is <strong>false</strong>) and no other scheme

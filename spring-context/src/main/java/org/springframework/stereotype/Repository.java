@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * Domain-Driven Design (Evans, 2003) as "a mechanism for encapsulating storage,
  * retrieval, and search behavior which emulates a collection of objects".
  *
- * <p>Teams implementing traditional J2EE patterns such as "Data Access Object"
+ * <p>Teams implementing traditional Java EE patterns such as "Data Access Object"
  * may also apply this stereotype to DAO classes, though care should be taken to
  * understand the distinction between Data Access Object and DDD-style repositories
  * before doing so. This annotation is a general-purpose stereotype and individual teams

@@ -209,7 +209,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Set whether the lookup occurs in a J2EE container, i.e. if the prefix
+	 * Set whether the lookup occurs in a Java EE container, i.e. if the prefix
 	 * "java:comp/env/" needs to be added if the JNDI name doesn't already
 	 * contain it. PersistenceAnnotationBeanPostProcessor's default is "true".
 	 * @see org.springframework.jndi.JndiLocatorSupport#setResourceRef
