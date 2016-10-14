@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.config.WebReactiveConfiguration;
+import org.springframework.web.reactive.config.EnableWebReactive;
 
 /**
  * @author Sebastien Deleuze
@@ -93,8 +93,9 @@ public class JacksonHintsIntegrationTests extends AbstractRequestMappingIntegrat
 
 	@Configuration
 	@ComponentScan(resourcePattern = "**/JacksonHintsIntegrationTests*.class")
+	@EnableWebReactive
 	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebReactiveConfiguration {
+	static class WebConfig {
 	}
 
 	@RestController

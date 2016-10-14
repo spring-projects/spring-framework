@@ -28,7 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.config.WebReactiveConfiguration;
+import org.springframework.web.reactive.config.EnableWebReactive;
 
 import static org.junit.Assert.assertEquals;
 
@@ -64,9 +64,10 @@ public class RequestMappingExceptionHandlingIntegrationTests extends AbstractReq
 
 
 	@Configuration
+	@EnableWebReactive
 	@ComponentScan(resourcePattern = "**/RequestMappingExceptionHandlingIntegrationTests$*.class")
 	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebReactiveConfiguration {
+	static class WebConfig {
 
 	}
 

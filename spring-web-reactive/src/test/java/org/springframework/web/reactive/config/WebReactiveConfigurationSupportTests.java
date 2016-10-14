@@ -80,10 +80,10 @@ import static org.springframework.http.MediaType.IMAGE_PNG;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 /**
- * Unit tests for {@link WebReactiveConfiguration}.
+ * Unit tests for {@link WebReactiveConfigurationSupport}.
  * @author Rossen Stoyanchev
  */
-public class WebReactiveConfigurationTests {
+public class WebReactiveConfigurationSupportTests {
 
 	private MockServerHttpRequest request;
 
@@ -100,7 +100,7 @@ public class WebReactiveConfigurationTests {
 
 	@Test
 	public void requestMappingHandlerMapping() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfiguration.class);
+		ApplicationContext context = loadConfig(WebReactiveConfig.class);
 
 		String name = "requestMappingHandlerMapping";
 		RequestMappingHandlerMapping mapping = context.getBean(name, RequestMappingHandlerMapping.class);
@@ -138,10 +138,10 @@ public class WebReactiveConfigurationTests {
 
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfiguration.class);
+		ApplicationContext context = loadConfig(WebReactiveConfig.class);
 
 		String name = "requestMappingHandlerAdapter";
-		RequestMappingHandlerAdapter adapter = context.getBean(name,  RequestMappingHandlerAdapter.class);
+		RequestMappingHandlerAdapter adapter = context.getBean(name, RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 
 		List<HttpMessageReader<?>> readers = adapter.getMessageReaders();
@@ -185,7 +185,7 @@ public class WebReactiveConfigurationTests {
 
 	@Test
 	public void responseEntityResultHandler() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfiguration.class);
+		ApplicationContext context = loadConfig(WebReactiveConfig.class);
 
 		String name = "responseEntityResultHandler";
 		ResponseEntityResultHandler handler = context.getBean(name, ResponseEntityResultHandler.class);
@@ -210,7 +210,7 @@ public class WebReactiveConfigurationTests {
 
 	@Test
 	public void responseBodyResultHandler() throws Exception {
-		ApplicationContext context = loadConfig(WebReactiveConfiguration.class);
+		ApplicationContext context = loadConfig(WebReactiveConfig.class);
 
 		String name = "responseBodyResultHandler";
 		ResponseBodyResultHandler handler = context.getBean(name, ResponseBodyResultHandler.class);
@@ -262,7 +262,7 @@ public class WebReactiveConfigurationTests {
 		AbstractHandlerMapping handlerMapping = context.getBean(name, AbstractHandlerMapping.class);
 		assertNotNull(handlerMapping);
 
-		assertEquals(Ordered.LOWEST_PRECEDENCE -1, handlerMapping.getOrder());
+		assertEquals(Ordered.LOWEST_PRECEDENCE - 1, handlerMapping.getOrder());
 
 		assertNotNull(handlerMapping.getPathHelper());
 		assertNotNull(handlerMapping.getPathMatcher());
@@ -296,9 +296,12 @@ public class WebReactiveConfigurationTests {
 		return context;
 	}
 
+	@EnableWebReactive
+	static class WebReactiveConfig {
+	}
 
 	@Configuration
-	static class CustomPatchMatchConfig extends WebReactiveConfiguration {
+	static class CustomPatchMatchConfig extends WebReactiveConfigurationSupport {
 
 		@Override
 		public void configurePathMatching(PathMatchConfigurer configurer) {
@@ -308,7 +311,7 @@ public class WebReactiveConfigurationTests {
 	}
 
 	@Configuration
-	static class CustomMessageConverterConfig extends WebReactiveConfiguration {
+	static class CustomMessageConverterConfig extends WebReactiveConfigurationSupport {
 
 		@Override
 		protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
@@ -331,8 +334,9 @@ public class WebReactiveConfigurationTests {
 		}
 	}
 
-	@Configuration @SuppressWarnings("unused")
-	static class CustomViewResolverConfig extends WebReactiveConfiguration {
+	@Configuration
+	@SuppressWarnings("unused")
+	static class CustomViewResolverConfig extends WebReactiveConfigurationSupport {
 
 		@Override
 		protected void configureViewResolvers(ViewResolverRegistry registry) {
@@ -348,7 +352,7 @@ public class WebReactiveConfigurationTests {
 	}
 
 	@Configuration
-	static class CustomResourceHandlingConfig extends WebReactiveConfiguration {
+	static class CustomResourceHandlingConfig extends WebReactiveConfigurationSupport {
 
 		@Override
 		protected void addResourceHandlers(ResourceHandlerRegistry registry) {
