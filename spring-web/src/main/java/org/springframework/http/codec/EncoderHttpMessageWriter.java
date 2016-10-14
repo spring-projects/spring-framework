@@ -110,13 +110,15 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 	 * Used when {@link #write} is called without a concrete content type.
 	 *
 	 * <p>By default returns the first of {@link Encoder#getEncodableMimeTypes()
-	 * encodableMimeTypes}, if any.
+	 * encodableMimeTypes} that is concrete({@link MediaType#isConcrete()}), if any.
 	 *
 	 * @param elementType the type of element for encoding
 	 * @return the content type, or {@code null}
 	 */
 	protected MediaType getDefaultContentType(ResolvableType elementType) {
-		return (!this.writableMediaTypes.isEmpty() ? this.writableMediaTypes.get(0) : null);
+		return writableMediaTypes.stream()
+				.filter(MediaType::isConcrete)
+				.findFirst().orElse(null);
 	}
 
 }

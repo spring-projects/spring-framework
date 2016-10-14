@@ -16,6 +16,8 @@
 
 package org.springframework.mock.http.server.reactive;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -24,11 +26,14 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -104,6 +109,44 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public DataBufferFactory bufferFactory() {
 		return this.bufferFactory;
+	}
+
+	/**
+	 * Return the body of the response aggregated and converted to a String
+	 * using the charset of the Content-Type response or otherwise defaulting
+	 * to "UTF-8".
+	 */
+	public Mono<String> getBodyAsString() {
+		Charset charset = getCharset();
+		Charset charsetToUse = (charset != null ? charset : StandardCharsets.UTF_8);
+		return Flux.from(this.body)
+				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
+					previous.write(current);
+					DataBufferUtils.release(current);
+					return previous;
+				})
+				.map(buffer -> dumpString(buffer, charsetToUse));
+	}
+
+	private static String dumpString(DataBuffer buffer, Charset charset) {
+		Assert.notNull(charset, "'charset' must not be null");
+		byte[] bytes = dumpBytes(buffer);
+		return new String(bytes, charset);
+	}
+
+	private static byte[] dumpBytes(DataBuffer buffer) {
+		Assert.notNull(buffer, "'buffer' must not be null");
+		byte[] bytes = new byte[buffer.readableByteCount()];
+		buffer.read(bytes);
+		return bytes;
+	}
+
+	private Charset getCharset() {
+		MediaType contentType = getHeaders().getContentType();
+		if (contentType != null) {
+			return contentType.getCharset();
+		}
+		return null;
 	}
 
 }

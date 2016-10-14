@@ -16,6 +16,8 @@
 
 package org.springframework.mock.http.server.reactive.test;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -24,9 +26,12 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.LinkedMultiValueMap;
@@ -57,6 +62,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return true;
 	}
 
+	@Override
 	public HttpStatus getStatusCode() {
 		return this.status;
 	}
@@ -103,6 +109,31 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public DataBufferFactory bufferFactory() {
 		return this.bufferFactory;
+	}
+
+	/**
+	 * Return the body of the response aggregated and converted to a String
+	 * using the charset of the Content-Type response or otherwise defaulting
+	 * to "UTF-8".
+	 */
+	public Mono<String> getBodyAsString() {
+		Charset charset = getCharset();
+		Charset charsetToUse = (charset != null ? charset : StandardCharsets.UTF_8);
+		return Flux.from(this.body)
+				.reduce(this.bufferFactory.allocateBuffer(), (previous, current) -> {
+					previous.write(current);
+					DataBufferUtils.release(current);
+					return previous;
+				})
+				.map(buffer -> DataBufferTestUtils.dumpString(buffer, charsetToUse));
+	}
+
+	private Charset getCharset() {
+		MediaType contentType = getHeaders().getContentType();
+		if (contentType != null) {
+			return contentType.getCharset();
+		}
+		return null;
 	}
 
 }
