@@ -37,12 +37,6 @@ public class WebReactiveConfigurerComposite implements WebReactiveConfigurer {
 
 
 	@Override
-	public Optional<RequestMappingHandlerMapping> createRequestMappingHandlerMapping() {
-		return createSingleBean(WebReactiveConfigurer::createRequestMappingHandlerMapping,
-				RequestMappingHandlerMapping.class);
-	}
-
-	@Override
 	public void configureRequestedContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
 		this.delegates.stream().forEach(delegate -> delegate.configureRequestedContentTypeResolver(builder));
 	}
@@ -63,24 +57,18 @@ public class WebReactiveConfigurerComposite implements WebReactiveConfigurer {
 	}
 
 	@Override
-	public Optional<RequestMappingHandlerAdapter> createRequestMappingHandlerAdapter() {
-		return createSingleBean(WebReactiveConfigurer::createRequestMappingHandlerAdapter,
-				RequestMappingHandlerAdapter.class);
-	}
-
-	@Override
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 		this.delegates.stream().forEach(delegate -> delegate.addArgumentResolvers(resolvers));
 	}
 
 	@Override
-	public void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
-		this.delegates.stream().forEach(delegate -> delegate.configureMessageReaders(messageReaders));
+	public void configureMessageReaders(List<HttpMessageReader<?>> readers) {
+		this.delegates.stream().forEach(delegate -> delegate.configureMessageReaders(readers));
 	}
 
 	@Override
-	public void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
-		this.delegates.stream().forEach(delegate -> delegate.extendMessageReaders(messageReaders));
+	public void extendMessageReaders(List<HttpMessageReader<?>> readers) {
+		this.delegates.stream().forEach(delegate -> delegate.extendMessageReaders(readers));
 	}
 
 	@Override
@@ -99,18 +87,30 @@ public class WebReactiveConfigurerComposite implements WebReactiveConfigurer {
 	}
 
 	@Override
-	public void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
-		this.delegates.stream().forEach(delegate -> delegate.configureMessageWriters(messageWriters));
+	public void configureMessageWriters(List<HttpMessageWriter<?>> writers) {
+		this.delegates.stream().forEach(delegate -> delegate.configureMessageWriters(writers));
 	}
 
 	@Override
-	public void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
-		this.delegates.stream().forEach(delegate -> delegate.extendMessageWriters(messageWriters));
+	public void extendMessageWriters(List<HttpMessageWriter<?>> writers) {
+		this.delegates.stream().forEach(delegate -> delegate.extendMessageWriters(writers));
 	}
 
 	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
 		this.delegates.stream().forEach(delegate -> delegate.configureViewResolvers(registry));
+	}
+
+	@Override
+	public Optional<RequestMappingHandlerMapping> createRequestMappingHandlerMapping() {
+		return createSingleBean(WebReactiveConfigurer::createRequestMappingHandlerMapping,
+				RequestMappingHandlerMapping.class);
+	}
+
+	@Override
+	public Optional<RequestMappingHandlerAdapter> createRequestMappingHandlerAdapter() {
+		return createSingleBean(WebReactiveConfigurer::createRequestMappingHandlerAdapter,
+				RequestMappingHandlerAdapter.class);
 	}
 
 	private <T> Optional<T> createSingleBean(Function<WebReactiveConfigurer, Optional<T>> factory,

@@ -32,15 +32,6 @@ import org.springframework.web.reactive.result.method.annotation.RequestMappingH
 public interface WebReactiveConfigurer {
 
 	/**
-	 * Provide a custom sub-class of {@link RequestMappingHandlerMapping}
-	 * instead of the one created by default.
-	 * The default implementation returns {@code Optional.empty()}.
-	 */
-	default Optional<RequestMappingHandlerMapping> createRequestMappingHandlerMapping() {
-		return Optional.empty();
-	}
-
-	/**
 	 * Configure how the requested content type is resolved.
 	 * <p>The given builder will create a composite of multiple
 	 * {@link RequestedContentTypeResolver}s, each defining a way to resolve the
@@ -74,15 +65,6 @@ public interface WebReactiveConfigurer {
 	}
 
 	/**
-	 * Provide a custom sub-class of {@link RequestMappingHandlerAdapter}
-	 * instead of the one created by default.
-	 * The default implementation returns {@code Optional.empty()}.
-	 */
-	default Optional<RequestMappingHandlerAdapter> createRequestMappingHandlerAdapter() {
-		return Optional.empty();
-	}
-
-	/**
 	 * Provide custom argument resolvers without overriding the built-in ones.
 	 * @param resolvers a list of resolvers to add to the built-in ones
 	 */
@@ -93,16 +75,16 @@ public interface WebReactiveConfigurer {
 	 * Configure the message readers to use for decoding controller method arguments.
 	 * <p>If no message readers are specified, default readers will be added via
 	 * {@link WebReactiveConfigurationSupport#addDefaultHttpMessageReaders}.
-	 * @param messageReaders a list to add message readers to, initially an empty list
+	 * @param readers a list to add message readers to, initially an empty list
 	 */
-	default void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	default void configureMessageReaders(List<HttpMessageReader<?>> readers) {
 	}
 
 	/**
 	 * Modify the list of message readers to use for decoding controller method arguments,
 	 * for example to add some in addition to the ones already configured.
 	 */
-	default void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+	default void extendMessageReaders(List<HttpMessageReader<?>> readers) {
 	}
 
 	/**
@@ -134,16 +116,16 @@ public interface WebReactiveConfigurer {
 	 * Configure the message writers to use for encoding return values.
 	 * <p>If no message writers are specified, default writers will be added via
 	 * {@link WebReactiveConfigurationSupport#addDefaultHttpMessageWriters(List)}.
-	 * @param messageWriters a list to add message writers to, initially an empty list
+	 * @param writers a list to add message writers to, initially an empty list
 	 */
-	default void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+	default void configureMessageWriters(List<HttpMessageWriter<?>> writers) {
 	}
 
 	/**
 	 * Modify the list of message writers to use for encoding return values,
 	 * for example to add some in addition to the ones already configured.
 	 */
-	default void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+	default void extendMessageWriters(List<HttpMessageWriter<?>> writers) {
 	}
 
 	/**
@@ -151,6 +133,26 @@ public interface WebReactiveConfigurer {
 	 * @see ViewResolverRegistry
 	 */
 	default void configureViewResolvers(ViewResolverRegistry registry) {
+	}
+
+	/**
+	 * Factory method for the {@link RequestMappingHandlerMapping} bean creating
+	 * an instance or a custom extension of it. Note that only one configurer
+	 * is allowed to implement this method.
+	 * The default implementation returns {@code Optional.empty()}.
+	 */
+	default Optional<RequestMappingHandlerMapping> createRequestMappingHandlerMapping() {
+		return Optional.empty();
+	}
+
+	/**
+	 * Factory method for the {@link RequestMappingHandlerAdapter} bean creating
+	 * an instance or a custom extension of it. Note that only one configurer
+	 * is allowed to implement this method.
+	 * The default implementation returns {@code Optional.empty()}.
+	 */
+	default Optional<RequestMappingHandlerAdapter> createRequestMappingHandlerAdapter() {
+		return Optional.empty();
 	}
 
 }
