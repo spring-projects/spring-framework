@@ -3230,7 +3230,7 @@ Sometimes you need to access vendor specific JDBC methods that differ from the s
 JDBC API. This can be problematic if you are running in an application server or with a
 `DataSource` that wraps the `Connection`, `Statement` and `ResultSet` objects with its
 own wrapper objects. To gain access to the native objects you can configure your
-`JdbcTemplate` or `OracleLobHandler` with a `NativeJdbcExtractor`.
+`JdbcTemplate` with a `NativeJdbcExtractor`.
 
 The `NativeJdbcExtractor` comes in a variety of flavors to match your execution
 environment:
