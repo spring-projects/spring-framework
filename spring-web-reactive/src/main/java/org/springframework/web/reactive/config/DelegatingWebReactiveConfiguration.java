@@ -1,0 +1,115 @@
+package org.springframework.web.reactive.config;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.http.codec.HttpMessageReader;
+import org.springframework.http.codec.HttpMessageWriter;
+import org.springframework.util.CollectionUtils;
+import org.springframework.validation.MessageCodesResolver;
+import org.springframework.validation.Validator;
+import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
+import org.springframework.web.reactive.result.method.HandlerMethodArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
+import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
+
+/**
+ * A subclass of {@code WebReactiveConfigurationSupport} that detects and delegates
+ * to all beans of type {@link WebReactiveConfigurer} allowing them to customize the
+ * configuration provided by {@code WebReactiveConfigurationSupport}. This is the
+ * class actually imported by {@link EnableWebReactive @EnableWebReactive}.
+ *
+ * @author Brian Clozel
+ * @since 5.0
+ */
+@Configuration
+public class DelegatingWebReactiveConfiguration extends WebReactiveConfigurationSupport {
+
+	private final WebReactiveConfigurerComposite configurers = new WebReactiveConfigurerComposite();
+
+	@Autowired(required = false)
+	public void setConfigurers(List<WebReactiveConfigurer> configurers) {
+		if (!CollectionUtils.isEmpty(configurers)) {
+			this.configurers.addWebReactiveConfigurers(configurers);
+		}
+	}
+
+	@Override
+	protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
+		return this.configurers.createRequestMappingHandlerMapping()
+				.orElse(super.createRequestMappingHandlerMapping());
+	}
+
+	@Override
+	protected void configureRequestedContentTypeResolver(RequestedContentTypeResolverBuilder builder) {
+		this.configurers.configureRequestedContentTypeResolver(builder);
+	}
+
+	@Override
+	protected void addCorsMappings(CorsRegistry registry) {
+		this.configurers.addCorsMappings(registry);
+	}
+
+	@Override
+	public void configurePathMatching(PathMatchConfigurer configurer) {
+		this.configurers.configurePathMatching(configurer);
+	}
+
+	@Override
+	protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+		this.configurers.addResourceHandlers(registry);
+	}
+
+	@Override
+	protected RequestMappingHandlerAdapter createRequestMappingHandlerAdapter() {
+		return this.configurers.createRequestMappingHandlerAdapter()
+				.orElse(super.createRequestMappingHandlerAdapter());
+	}
+
+	@Override
+	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+		this.configurers.addArgumentResolvers(resolvers);
+	}
+
+	@Override
+	protected void configureMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		this.configurers.configureMessageReaders(messageReaders);
+	}
+
+	@Override
+	protected void extendMessageReaders(List<HttpMessageReader<?>> messageReaders) {
+		this.configurers.extendMessageReaders(messageReaders);
+	}
+
+	@Override
+	protected void addFormatters(FormatterRegistry registry) {
+		this.configurers.addFormatters(registry);
+	}
+
+	@Override
+	protected Validator getValidator() {
+		return this.configurers.getValidator().orElse(super.getValidator());
+	}
+
+	@Override
+	protected MessageCodesResolver getMessageCodesResolver() {
+		return this.configurers.getMessageCodesResolver().orElse(super.getMessageCodesResolver());
+	}
+
+	@Override
+	protected void configureMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+		this.configurers.configureMessageWriters(messageWriters);
+	}
+
+	@Override
+	protected void extendMessageWriters(List<HttpMessageWriter<?>> messageWriters) {
+		this.configurers.extendMessageWriters(messageWriters);
+	}
+
+	@Override
+	protected void configureViewResolvers(ViewResolverRegistry registry) {
+		this.configurers.configureViewResolvers(registry);
+	}
+}

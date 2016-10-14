@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.config.WebReactiveConfiguration;
+import org.springframework.web.reactive.config.EnableWebReactive;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -222,9 +222,10 @@ public class CrossOriginAnnotationIntegrationTests extends AbstractRequestMappin
 
 
 	@Configuration
+	@EnableWebReactive
 	@ComponentScan(resourcePattern = "**/CrossOriginAnnotationIntegrationTests*")
 	@SuppressWarnings({"unused", "WeakerAccess"})
-	static class WebConfig extends WebReactiveConfiguration {
+	static class WebConfig {
 	}
 
 	@RestController @SuppressWarnings("unused")

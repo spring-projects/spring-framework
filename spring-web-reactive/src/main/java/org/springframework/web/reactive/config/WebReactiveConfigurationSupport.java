@@ -28,7 +28,6 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -82,17 +81,16 @@ import org.springframework.web.server.ServerWebExchange;
  * @author Rossen Stoyanchev
  * @since 5.0
  */
-@Configuration
-public class WebReactiveConfiguration implements ApplicationContextAware {
+public class WebReactiveConfigurationSupport implements ApplicationContextAware {
 
 	private static final boolean jackson2Present =
 			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					WebReactiveConfiguration.class.getClassLoader()) &&
+					WebReactiveConfigurationSupport.class.getClassLoader()) &&
 			ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-					WebReactiveConfiguration.class.getClassLoader());
+					WebReactiveConfigurationSupport.class.getClassLoader());
 
 	private static final boolean jaxb2Present =
-			ClassUtils.isPresent("javax.xml.bind.Binder", WebReactiveConfiguration.class.getClassLoader());
+			ClassUtils.isPresent("javax.xml.bind.Binder", WebReactiveConfigurationSupport.class.getClassLoader());
 
 
 	private Map<String, CorsConfiguration> corsConfigurations;
@@ -234,7 +232,6 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			if (pathMatchConfigurer.getPathHelper() != null) {
 				handlerMapping.setPathHelper(pathMatchConfigurer.getPathHelper());
 			}
-
 		}
 		else {
 			handlerMapping = new EmptyHandlerMapping();
@@ -464,6 +461,7 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 			writers.add(new ServerSentEventHttpMessageWriter(sseDataEncoders));
 		}
 	}
+
 	/**
 	 * Override this to modify the list of message writers after it has been
 	 * configured, for example to add some in addition to the default ones.
@@ -484,7 +482,8 @@ public class WebReactiveConfiguration implements ApplicationContextAware {
 	}
 
 	/**
-	 * Override this to configure view resolution.
+	 * Configure view resolution for supporting template engines.
+	 * @see ViewResolverRegistry
 	 */
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
 	}
