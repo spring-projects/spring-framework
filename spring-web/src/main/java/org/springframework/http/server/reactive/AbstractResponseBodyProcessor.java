@@ -218,7 +218,10 @@ abstract class AbstractResponseBodyProcessor implements Processor<DataBuffer, Vo
 
 			@Override
 			public void onNext(AbstractResponseBodyProcessor processor, DataBuffer dataBuffer) {
-				if (processor.changeState(this, RECEIVED)) {
+				if (dataBuffer.readableByteCount() == 0) {
+					processor.subscription.request(1);
+				}
+				else if (processor.changeState(this, RECEIVED)) {
 					processor.receiveBuffer(dataBuffer);
 					processor.writeIfPossible();
 				}
