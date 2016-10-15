@@ -42,9 +42,8 @@ package org.springframework.jdbc.support.nativejdbc;
  * <li>Use a SimpleNativeJdbcExtractor with all "nativeConnectionNecessaryForXxx"
  * flags set to "true" for C3P0 (all JDBC Statement objects are wrapped,
  * but none of the wrappers allow for unwrapping).
- * <li>Use a CommonsDbcpNativeJdbcExtractor for Apache Commons DBCP or a
- * JBossNativeJdbcExtractor for JBoss (all JDBC Statement objects are wrapped,
- * but all of them can be extracted by casting to implementation classes).
+ * <li>Use a JBossNativeJdbcExtractor for JBoss (all JDBC Statement objects are
+ * wrapped, but all of them can be extracted by casting to implementation classes).
  * </ul>
  *
  * @author Juergen Hoeller
