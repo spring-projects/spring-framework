@@ -180,7 +180,7 @@
 	A reference to the DestinationResolver strategy for resolving destination names.
 	Default is a DynamicDestinationResolver, using the JMS provider's queue/topic
 	name resolution. Alternatively, specify a reference to a JndiDestinationResolver
-	(typically in a J2EE environment).
+	(typically in a Java EE environment).
 					]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
@@ -262,7 +262,7 @@
 	The cache level for JMS resources: "none", "connection", "session", "consumer"
 	or "auto". By default ("auto"), the cache level will effectively be "consumer",
 	unless an external transaction manager has been specified - in which case the
-	effective default will be "none" (assuming J2EE-style transaction management
+	effective default will be "none" (assuming Java EE-style transaction management
 	where the given ConnectionFactory is an XA-aware pool).
 					]]></xsd:documentation>
 				</xsd:annotation>
@@ -437,7 +437,7 @@
 					<xsd:documentation><![CDATA[
 	A reference to the DestinationResolver strategy for resolving destination names.
 	Default is to pass in the destination name Strings into the JCA ActivationSpec as-is.
-	Alternatively, specify a reference to a JndiDestinationResolver (typically in a J2EE
+	Alternatively, specify a reference to a JndiDestinationResolver (typically in a Java EE
 	environment, in particular if the server insists on receiving Destination objects).
 					]]></xsd:documentation>
 					<xsd:appinfo>
