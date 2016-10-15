@@ -40,8 +40,8 @@ import org.springframework.beans.BeansException;
  * {@code BeanFactory} from which it gets the real object, to which it
  * delegates, then proper Dependency Injection has been achieved.
  *
- * <p>As another example, in a complex Java EE app with multiple layers, with each
- * layer having its own {@code ApplicationContext} definition (in a
+ * <p>As another example, in a complex Java EE app with multiple layers, with
+ * each layer having its own {@code ApplicationContext} definition (in a
  * hierarchy), a class like {@code SingletonBeanFactoryLocator} may be used
  * to demand load these contexts.
  *
