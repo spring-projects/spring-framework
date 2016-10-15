@@ -139,7 +139,7 @@ public class WebReactiveConfigurerComposite implements WebReactiveConfigurer {
 			return Optional.empty();
 		}
 		else if (result.size() == 1) {
-			return result.get(1);
+			return result.get(0);
 		}
 		else {
 			throw new IllegalStateException("More than one WebReactiveConfigurer implements " +
