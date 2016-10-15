@@ -35,7 +35,7 @@ import org.springframework.util.ClassUtils;
  * configure JNDI appropriately, so that {@code new InitialContext()}
  * will expose the required objects. Also usable for standalone applications,
  * e.g. for binding a JDBC DataSource to a well-known JNDI location, to be
- * able to use traditional J2EE data access code outside of a J2EE container.
+ * able to use traditional Java EE data access code outside of a Java EE container.
  *
  * <p>There are various choices for DataSource implementations:
  * <ul>

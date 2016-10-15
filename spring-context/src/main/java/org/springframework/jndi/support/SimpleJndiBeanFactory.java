@@ -40,7 +40,7 @@ import org.springframework.jndi.TypeMismatchNamingException;
  * the {@link org.springframework.beans.factory.ListableBeanFactory} interface.
  *
  * <p>This factory resolves given bean names as JNDI names within the
- * J2EE application's "java:comp/env/" namespace. It caches the resolved
+ * Java EE application's "java:comp/env/" namespace. It caches the resolved
  * types for all obtained objects, and optionally also caches shareable
  * objects (if they are explicitly marked as
  * {@link #addShareableResource shareable resource}.

@@ -64,7 +64,7 @@ import org.springframework.util.StringUtils;
  * to such components.
  *
  * <p>This ResourceAdapter is to be defined in a "META-INF/ra.xml" file
- * within a J2EE ".rar" deployment unit like as follows:
+ * within a Java EE ".rar" deployment unit like as follows:
  *
  * <pre class="code">
  * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
