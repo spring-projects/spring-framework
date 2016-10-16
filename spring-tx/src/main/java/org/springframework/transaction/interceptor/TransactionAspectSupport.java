@@ -395,7 +395,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
 	 */
 	protected String methodIdentification(Method method, Class<?> targetClass) {
-		return (targetClass != null ? targetClass : method.getDeclaringClass()).getName() + "." + method.getName();
+		return (targetClass != null ? targetClass : method.getDeclaringClass()).getName() + '.' + method.getName();
 	}
 
 	/**
