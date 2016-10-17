@@ -16,6 +16,7 @@
 
 package org.springframework.web.server;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
@@ -67,6 +68,11 @@ public interface ServerWebExchange {
 	 * for more details.
 	 */
 	Mono<WebSession> getSession();
+
+	/**
+	 * Return the authenticated user for the request, if any.
+	 */
+	<T extends Principal> Optional<T> getPrincipal();
 
 	/**
 	 * Returns {@code true} if the one of the {@code checkNotModified} methods

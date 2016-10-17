@@ -16,6 +16,7 @@
 
 package org.springframework.web.server.adapter;
 
+import java.security.Principal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -102,6 +103,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Mono<WebSession> getSession() {
 		return this.sessionMono;
+	}
+
+	@Override
+	public <T extends Principal> Optional<T> getPrincipal() {
+		return Optional.empty();
 	}
 
 	@Override
