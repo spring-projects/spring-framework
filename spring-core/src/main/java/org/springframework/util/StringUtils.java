@@ -51,6 +51,7 @@ import java.util.TimeZone;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @author Brian Clozel
+ * @author Damien Bouclier
  * @since 16 April 2001
  */
 public abstract class StringUtils {
@@ -79,12 +80,49 @@ public abstract class StringUtils {
 	 * that commonly deals with Strings but generally has to iterate over
 	 * Objects since attributes may e.g. be primitive value objects as well.
 	 * @param str the candidate String
+	 * @return true if string is empty
 	 * @since 3.2.1
 	 */
 	public static boolean isEmpty(Object str) {
 		return (str == null || "".equals(str));
 	}
 
+    /**
+     * Check whether the given {@code String} is not empty 
+     * 
+     *
+     * @param str the candidate String
+     * @return true if string is not empty
+     */
+    public static boolean isNotEmpty(CharSequence str)
+    {
+        return !isEmpty(str);
+    }
+
+    /**
+     * Check whether the given {@code String} is blank.
+     * return true if the string is equals to " " OR "" OR null
+     *
+     * @param str the candidate String
+     * @return true if string is blank
+     */
+    public static boolean isBlank(String str)
+    {
+        return isEmpty(trimWhitespace(str));
+    }
+
+    /**
+     * Check whether the given String is blank.
+     * return true if the string is not equals to " " OR "" OR null
+     *
+     * @param str the candidate String
+     * @return true if the string is not blank
+     */
+    public static boolean isNotBlank(String str)
+    {
+        return isNotEmpty(trimWhitespace(str));
+    }
+	
 	/**
 	 * Check that the given {@code CharSequence} is neither {@code null} nor
 	 * of length 0.

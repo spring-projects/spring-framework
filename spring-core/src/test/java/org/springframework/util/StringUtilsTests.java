@@ -28,28 +28,29 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
+ * @author Damien Bouclier
  */
 public class StringUtilsTests {
 
 	@Test
-	public void testHasTextBlank() throws Exception {
+	public void testHasTextBlank() {
 		String blank = "          ";
 		assertEquals(false, StringUtils.hasText(blank));
 	}
 
 	@Test
-	public void testHasTextNullEmpty() throws Exception {
+	public void testHasTextNullEmpty() {
 		assertEquals(false, StringUtils.hasText(null));
 		assertEquals(false, StringUtils.hasText(""));
 	}
 
 	@Test
-	public void testHasTextValid() throws Exception {
+	public void testHasTextValid() {
 		assertEquals(true, StringUtils.hasText("t"));
 	}
 
 	@Test
-	public void testContainsWhitespace() throws Exception {
+	public void testContainsWhitespace() {
 		assertFalse(StringUtils.containsWhitespace(null));
 		assertFalse(StringUtils.containsWhitespace(""));
 		assertFalse(StringUtils.containsWhitespace("a"));
@@ -62,7 +63,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testTrimWhitespace() throws Exception {
+	public void testTrimWhitespace() {
 		assertEquals(null, StringUtils.trimWhitespace(null));
 		assertEquals("", StringUtils.trimWhitespace(""));
 		assertEquals("", StringUtils.trimWhitespace(" "));
@@ -75,7 +76,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testTrimAllWhitespace() throws Exception {
+	public void testTrimAllWhitespace() {
 		assertEquals("", StringUtils.trimAllWhitespace(""));
 		assertEquals("", StringUtils.trimAllWhitespace(" "));
 		assertEquals("", StringUtils.trimAllWhitespace("\t"));
@@ -87,7 +88,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testTrimLeadingWhitespace() throws Exception {
+	public void testTrimLeadingWhitespace() {
 		assertEquals(null, StringUtils.trimLeadingWhitespace(null));
 		assertEquals("", StringUtils.trimLeadingWhitespace(""));
 		assertEquals("", StringUtils.trimLeadingWhitespace(" "));
@@ -100,7 +101,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testTrimTrailingWhitespace() throws Exception {
+	public void testTrimTrailingWhitespace() {
 		assertEquals(null, StringUtils.trimTrailingWhitespace(null));
 		assertEquals("", StringUtils.trimTrailingWhitespace(""));
 		assertEquals("", StringUtils.trimTrailingWhitespace(" "));
@@ -113,7 +114,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testTrimLeadingCharacter() throws Exception {
+	public void testTrimLeadingCharacter() {
 		assertEquals(null, StringUtils.trimLeadingCharacter(null, ' '));
 		assertEquals("", StringUtils.trimLeadingCharacter("", ' '));
 		assertEquals("", StringUtils.trimLeadingCharacter(" ", ' '));
@@ -126,7 +127,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testTrimTrailingCharacter() throws Exception {
+	public void testTrimTrailingCharacter() {
 		assertEquals(null, StringUtils.trimTrailingCharacter(null, ' '));
 		assertEquals("", StringUtils.trimTrailingCharacter("", ' '));
 		assertEquals("", StringUtils.trimTrailingCharacter(" ", ' '));
@@ -166,7 +167,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testReplace() throws Exception {
+	public void testReplace() {
 		String inString = "a6AazAaa77abaa";
 		String oldPattern = "aa";
 		String newPattern = "foo";
@@ -189,7 +190,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testDelete() throws Exception {
+	public void testDelete() {
 		String inString = "The quick brown fox jumped over the lazy dog";
 
 		String noThe = StringUtils.delete(inString, "the");
@@ -216,7 +217,7 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testDeleteAny() throws Exception {
+	public void testDeleteAny() {
 		String inString = "Able was I ere I saw Elba";
 
 		String res = StringUtils.deleteAny(inString, "I");
@@ -599,7 +600,7 @@ public class StringUtilsTests {
 
 
 	@Test
-	public void testParseLocaleStringSunnyDay() throws Exception {
+	public void testParseLocaleStringSunnyDay() {
 		Locale expectedLocale = Locale.UK;
 		Locale locale = StringUtils.parseLocaleString(expectedLocale.toString());
 		assertNotNull("When given a bona-fide Locale string, must not return null.", locale);
@@ -607,19 +608,19 @@ public class StringUtilsTests {
 	}
 
 	@Test
-	public void testParseLocaleStringWithMalformedLocaleString() throws Exception {
+	public void testParseLocaleStringWithMalformedLocaleString() {
 		Locale locale = StringUtils.parseLocaleString("_banjo_on_my_knee");
 		assertNotNull("When given a malformed Locale string, must not return null.", locale);
 	}
 
 	@Test
-	public void testParseLocaleStringWithEmptyLocaleStringYieldsNullLocale() throws Exception {
+	public void testParseLocaleStringWithEmptyLocaleStringYieldsNullLocale() {
 		Locale locale = StringUtils.parseLocaleString("");
 		assertNull("When given an empty Locale string, must return null.", locale);
 	}
 
 	@Test  // SPR-8637
-	public void testParseLocaleWithMultiSpecialCharactersInVariant() throws Exception {
+	public void testParseLocaleWithMultiSpecialCharactersInVariant() {
 		String variant = "proper-northern";
 		String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
@@ -627,7 +628,7 @@ public class StringUtilsTests {
 	}
 
 	@Test  // SPR-3671
-	public void testParseLocaleWithMultiValuedVariant() throws Exception {
+	public void testParseLocaleWithMultiValuedVariant() {
 		String variant = "proper_northern";
 		String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
@@ -635,7 +636,7 @@ public class StringUtilsTests {
 	}
 
 	@Test  // SPR-3671
-	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparators() throws Exception {
+	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparators() {
 		String variant = "proper northern";
 		String localeString = "en GB " + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
@@ -643,7 +644,7 @@ public class StringUtilsTests {
 	}
 
 	@Test  // SPR-3671
-	public void testParseLocaleWithMultiValuedVariantUsingMixtureOfUnderscoresAndSpacesAsSeparators() throws Exception {
+	public void testParseLocaleWithMultiValuedVariantUsingMixtureOfUnderscoresAndSpacesAsSeparators() {
 		String variant = "proper northern";
 		String localeString = "en_GB_" + variant;
 		Locale locale = StringUtils.parseLocaleString(localeString);
@@ -651,7 +652,7 @@ public class StringUtilsTests {
 	}
 
 	@Test  // SPR-3671
-	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparatorsWithLotsOfLeadingWhitespace() throws Exception {
+	public void testParseLocaleWithMultiValuedVariantUsingSpacesAsSeparatorsWithLotsOfLeadingWhitespace() {
 		String variant = "proper northern";
 		String localeString = "en GB            " + variant;  // lots of whitespace
 		Locale locale = StringUtils.parseLocaleString(localeString);
@@ -659,7 +660,7 @@ public class StringUtilsTests {
 	}
 
 	@Test  // SPR-3671
-	public void testParseLocaleWithMultiValuedVariantUsingUnderscoresAsSeparatorsWithLotsOfLeadingWhitespace() throws Exception {
+	public void testParseLocaleWithMultiValuedVariantUsingUnderscoresAsSeparatorsWithLotsOfLeadingWhitespace() {
 		String variant = "proper_northern";
 		String localeString = "en_GB_____" + variant;  // lots of underscores
 		Locale locale = StringUtils.parseLocaleString(localeString);
@@ -695,5 +696,41 @@ public class StringUtilsTests {
 	public void testParseJava7Variant() {
 		assertEquals("sr_#LATN", StringUtils.parseLocaleString("sr_#LATN").toString());
 	}
+	
+	@Test
+    public void testIsEmpty()
+    {
+	    assertTrue(StringUtils.isEmpty(null));
+	    assertTrue(StringUtils.isEmpty(""));
+	    assertFalse(StringUtils.isEmpty(" "));
+	    assertFalse(StringUtils.isEmpty("someString"));
+    }
+	
+    @Test
+    public void testIsNotEmpty()
+    {
+        assertFalse(StringUtils.isNotEmpty(null));
+        assertFalse(StringUtils.isNotEmpty(""));
+        assertTrue(StringUtils.isNotEmpty(" "));
+        assertTrue(StringUtils.isNotEmpty("someString"));
+    }
+    
+    @Test
+    public void testIsBlank()
+    {
+        assertTrue(StringUtils.isBlank(null));
+        assertTrue(StringUtils.isBlank(""));
+        assertTrue(StringUtils.isBlank(" "));
+        assertFalse(StringUtils.isBlank("someString"));
+    }
+    
+    @Test
+    public void testIsNotBlank()
+    {
+        assertFalse(StringUtils.isNotBlank(null));
+        assertFalse(StringUtils.isNotBlank(""));
+        assertFalse(StringUtils.isNotBlank(" "));
+        assertTrue(StringUtils.isNotBlank("someString"));
+    }
 
 }
