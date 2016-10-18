@@ -272,10 +272,13 @@ public class DefaultDataBuffer implements DataBuffer {
 						ByteBuffer.allocate(minCapacity));
 
 		// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer
-		((Buffer) oldBuffer).position(this.readPosition);
+		final int remaining = readableByteCount();
+		((Buffer) oldBuffer).position(this.readPosition).limit(this.writePosition);
 		newBuffer.put(oldBuffer);
 
 		this.byteBuffer = newBuffer;
+		this.readPosition = 0;
+		this.writePosition = remaining;
 		oldBuffer.clear();
 	}
 
