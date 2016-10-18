@@ -17,6 +17,7 @@
 package org.springframework.web.cors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -71,7 +72,9 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Construct a new, empty {@code CorsConfiguration} instance.
+	 * Construct a new {@code CorsConfiguration} instance with nothing allowed by default
+	 * but {@code "GET"} and {@code "HEAD"} methods.
+	 * @see #applyDefaultPermitConfiguration()
 	 */
 	public CorsConfiguration() {
 	}
@@ -90,6 +93,36 @@ public class CorsConfiguration {
 		this.maxAge = other.maxAge;
 	}
 
+	/**
+	 * Apply the following default permit configuration only for properties that has not
+	 * been defined:
+	 * <ul>
+	 *     <li>All origins are allowed</li>
+	 *     <li>Simple methods ({@code GET}, {@code HEAD} and {@code POST}) are allowed</li>
+	 *     <li>All headers are allowed</li>
+	 *     <li>Credentials are allowed</li>
+	 *     <li>Max age is set to 1800 seconds (30 minutes)</li>
+	 * </ul>
+	 */
+	public CorsConfiguration applyDefaultPermitConfiguration() {
+		if (this.allowedOrigins == null) {
+			this.addAllowedOrigin(ALL);
+		}
+		if (this.allowedMethods == null) {
+			this.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),
+					HttpMethod.HEAD.name(), HttpMethod.POST.name()));
+		}
+		if (this.allowedHeaders == null) {
+			this.addAllowedHeader(ALL);
+		}
+		if (this.allowCredentials == null) {
+			this.setAllowCredentials(true);
+		}
+		if (this.maxAge == null) {
+			this.setMaxAge(1800L);
+		}
+		return this;
+	}
 
 	/**
 	 * Combine the supplied {@code CorsConfiguration} with this one.
