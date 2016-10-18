@@ -21,10 +21,10 @@ import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -32,15 +32,16 @@ import org.springframework.tests.TestSubscriber;
 public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
-	public void decodeSingleChunkToJsonObject()  {
+	public void decodeSingleChunkToJsonObject() throws Exception {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<String> output =
 				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
+		ScriptedSubscriber.<String>create()
+				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
+				.expectComplete()
+				.verify(output);
 	}
 
 	@Test
@@ -50,9 +51,10 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				stringBuffer(", \"bar\": \"barbar\"}"));
 		Flux<String> output =
 				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
+		ScriptedSubscriber.<String>create()
+				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
+				.expectComplete()
+				.verify(output);
 	}
 
 	@Test
@@ -62,10 +64,11 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
 				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
-							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
+		ScriptedSubscriber.<String>create()
+				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
+				.expectNext("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}")
+				.expectComplete()
+				.verify(output);
 	}
 
 	@Test
@@ -76,10 +79,11 @@ public class JsonObjectDecoderTests extends AbstractDataBufferAllocatingTestCase
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
 				decoder.decode(source, null, null, Collections.emptyMap()).map(JsonObjectDecoderTests::toString);
-		TestSubscriber
-				.subscribe(output)
-				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
-							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
+		ScriptedSubscriber.<String>create()
+				.expectNext("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}")
+				.expectNext("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}")
+				.expectComplete()
+				.verify(output);
 	}
 
 

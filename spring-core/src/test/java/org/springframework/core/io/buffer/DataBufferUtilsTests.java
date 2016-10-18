@@ -24,9 +24,9 @@ import java.nio.file.StandardOpenOption;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import org.springframework.tests.TestSubscriber;
+import reactor.test.subscriber.ScriptedSubscriber;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Arjen Poutsma
@@ -39,13 +39,13 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 3);
 
-		TestSubscriber
-				.subscribe(flux)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(
-						stringConsumer("foo"), stringConsumer("bar"),
-						stringConsumer("baz"), stringConsumer("qux"));
+		ScriptedSubscriber
+				.<DataBuffer>create()
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
+				.expectComplete().verify(flux);
 
 		assertFalse(channel.isOpen());
 	}
@@ -56,77 +56,74 @@ public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.bufferFactory, 5);
 
-		TestSubscriber
-				.subscribe(flux)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(
-						stringConsumer("fooba"), stringConsumer("rbazq"),
-						stringConsumer("ux")
-				);
+		ScriptedSubscriber
+				.<DataBuffer>create()
+				.consumeNextWith(stringConsumer("fooba"))
+				.consumeNextWith(stringConsumer("rbazq"))
+				.consumeNextWith(stringConsumer("ux"))
+				.expectComplete().verify(flux);
 
 		assertFalse(channel.isOpen());
 	}
 
 	@Test
-	public void readInputStream() {
+	public void readInputStream() throws Exception {
 		InputStream is = DataBufferUtilsTests.class.getResourceAsStream("DataBufferUtilsTests.txt");
 		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.bufferFactory, 3);
 
-		TestSubscriber
-				.subscribe(flux)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(
-						stringConsumer("foo"), stringConsumer("bar"),
-						stringConsumer("baz"), stringConsumer("qux"));
+		ScriptedSubscriber
+				.<DataBuffer>create()
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("bar"))
+				.consumeNextWith(stringConsumer("baz"))
+				.consumeNextWith(stringConsumer("qux"))
+				.expectComplete().verify(flux);
 	}
 
 	@Test
-	public void takeUntilByteCount() {
+	public void takeUntilByteCount() throws Exception {
 		DataBuffer foo = stringBuffer("foo");
 		DataBuffer bar = stringBuffer("bar");
 		DataBuffer baz = stringBuffer("baz");
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
 
-		TestSubscriber
-				.subscribe(result)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(stringConsumer("foo"), stringConsumer("ba"));
+		ScriptedSubscriber
+				.<DataBuffer>create()
+				.consumeNextWith(stringConsumer("foo"))
+				.consumeNextWith(stringConsumer("ba"))
+				.expectComplete().verify(result);
 
 		release(baz);
 	}
 
 	@Test
-	public void skipUntilByteCount() {
+	public void skipUntilByteCount() throws Exception {
 		DataBuffer foo = stringBuffer("foo");
 		DataBuffer bar = stringBuffer("bar");
 		DataBuffer baz = stringBuffer("baz");
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 5L);
 
-		TestSubscriber
-				.subscribe(result)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(stringConsumer("r"), stringConsumer("baz"));
+		ScriptedSubscriber
+				.<DataBuffer>create()
+				.consumeNextWith(stringConsumer("r"))
+				.consumeNextWith(stringConsumer("baz"))
+				.expectComplete().verify(result);
 	}
 
 	@Test
-	public void skipUntilByteCountShouldSkipAll() {
+	public void skipUntilByteCountShouldSkipAll() throws Exception {
 		DataBuffer foo = stringBuffer("foo");
 		DataBuffer bar = stringBuffer("bar");
 		DataBuffer baz = stringBuffer("baz");
 		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 		Flux<DataBuffer> result = DataBufferUtils.skipUntilByteCount(flux, 9L);
 
-		TestSubscriber
-				.subscribe(result)
-				.assertNoError()
-				.assertNoValues()
-				.assertComplete();
+		ScriptedSubscriber
+				.<DataBuffer>create()
+				.expectNextCount(0)
+				.expectComplete().verify(result);
 	}
 
 }

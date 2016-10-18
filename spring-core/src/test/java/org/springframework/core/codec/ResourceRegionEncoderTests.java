@@ -16,9 +16,6 @@
 
 package org.springframework.core.codec;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
@@ -26,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -36,10 +34,13 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.core.io.support.ResourceRegion;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for {@link ResourceRegionEncoder} class.
@@ -80,10 +81,10 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 				ResolvableType.forClass(ResourceRegion.class), MimeTypeUtils.APPLICATION_OCTET_STREAM
 				, Collections.emptyMap());
 
-		TestSubscriber.subscribe(result)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(stringConsumer("Spring"));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(stringConsumer("Spring"))
+				.expectComplete()
+				.verify(result);
 	}
 
 	@Test
@@ -110,36 +111,34 @@ public class ResourceRegionEncoderTests extends AbstractDataBufferAllocatingTest
 					return previous;
 				});
 
-		TestSubscriber
-				.subscribe(reduced)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(dataBuffer -> {
-					String content = DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
-					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
-
-					assertThat(ranges[0], is("--" + boundary));
-					assertThat(ranges[1], is("Content-Type: text/plain"));
-					assertThat(ranges[2], is("Content-Range: bytes 0-5/39"));
-					assertThat(ranges[3], is("Spring"));
-
-					assertThat(ranges[4], is("--" + boundary));
-					assertThat(ranges[5], is("Content-Type: text/plain"));
-					assertThat(ranges[6], is("Content-Range: bytes 7-15/39"));
-					assertThat(ranges[7], is("Framework"));
-
-					assertThat(ranges[8], is("--" + boundary));
-					assertThat(ranges[9], is("Content-Type: text/plain"));
-					assertThat(ranges[10], is("Content-Range: bytes 17-20/39"));
-					assertThat(ranges[11], is("test"));
-
-					assertThat(ranges[12], is("--" + boundary));
-					assertThat(ranges[13], is("Content-Type: text/plain"));
-					assertThat(ranges[14], is("Content-Range: bytes 22-38/39"));
-					assertThat(ranges[15], is("resource content."));
-
-					assertThat(ranges[16], is("--" + boundary + "--"));
-				});
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(buf -> {
+					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
+					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n",
+							false, true);
+					String[] expected = new String[] {
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 0-5/39",
+							"Spring",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 7-15/39",
+							"Framework",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 17-20/39",
+							"test",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 22-38/39",
+							"resource content.",
+							"--" + boundary + "--"
+					};
+					assertArrayEquals(expected, ranges);
+				})
+				.expectComplete()
+				.verify(reduced);
 	}
 
 }

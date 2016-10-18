@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.GenericApplicationContext;
@@ -32,7 +33,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.server.ServerWebExchange;
@@ -123,10 +123,12 @@ public class FreeMarkerViewTests {
 		model.addAttribute("hello", "hi FreeMarker");
 		view.render(model, null, this.exchange);
 
-		TestSubscriber
-				.subscribe(this.response.getBody())
-				.assertValuesWith(dataBuffer ->
-					assertEquals("<html><body>hi FreeMarker</body></html>", asString(dataBuffer)));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(buf -> {
+					assertEquals("<html><body>hi FreeMarker</body></html>", asString(buf));
+				})
+				.expectComplete()
+				.verify(this.response.getBody());
 	}
 
 

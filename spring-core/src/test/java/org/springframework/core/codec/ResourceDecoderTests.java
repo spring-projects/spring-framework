@@ -21,6 +21,7 @@ import java.util.Collections;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -28,7 +29,6 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StreamUtils;
 
@@ -64,21 +64,18 @@ public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<Resource> result = this.decoder
 				.decode(source, ResolvableType.forClass(Resource.class), null, Collections.emptyMap());
 
-		TestSubscriber
-				.subscribe(result)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(resource -> {
+		ScriptedSubscriber.<Resource>create()
+				.consumeNextWith(resource -> {
 					try {
-						byte[] bytes =
-								StreamUtils.copyToByteArray(resource.getInputStream());
+						byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
 						assertEquals("foobar", new String(bytes));
 					}
 					catch (IOException e) {
 						fail(e.getMessage());
 					}
-				});
-
+				})
+				.expectComplete()
+				.verify(result);
 	}
 
 }

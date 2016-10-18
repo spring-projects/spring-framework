@@ -21,11 +21,11 @@ import java.util.Collections;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.assertFalse;
@@ -61,11 +61,11 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
 		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class),
 				null, Collections.emptyMap());
+		ScriptedSubscriber
+				.<String>create()
+				.expectNext("foo", "bar", "baz")
+				.expectComplete().verify(output);
 
-		TestSubscriber.subscribe(output)
-				.assertNoError()
-				.assertComplete()
-				.assertValues("foo", "bar", "baz");
 	}
 
 	@Test
@@ -75,10 +75,11 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<DataBuffer> source = Flux.just(fooBar, baz);
 		Flux<String> output = decoder.decode(source, ResolvableType.forClass(String.class),
 				null, Collections.emptyMap());
+		ScriptedSubscriber
+				.<String>create()
+				.expectNext("\n", "foo\r", "\n", "bar\r", "\n", "baz")
+				.expectComplete().verify(output);
 
-		TestSubscriber.subscribe(output)
-				.assertNoError()
-				.assertComplete().assertValues("\n", "foo\r", "\n", "bar\r", "\n", "baz");
 	}
 
 	@Test
@@ -87,10 +88,11 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<String> output = this.decoder.decode(source, ResolvableType.forClass(String.class),
 				null, Collections.emptyMap());
 
-		TestSubscriber.subscribe(output)
-				.assertNoError()
-				.assertComplete()
-				.assertNoValues();
+		ScriptedSubscriber
+				.<String>create()
+				.expectNextCount(0)
+				.expectComplete().verify(output);
+
 	}
 
 	@Test
@@ -99,7 +101,11 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Flux<String> output = this.decoder.decode(source,
 				ResolvableType.forClass(String.class), null, Collections.emptyMap());
 
-		TestSubscriber.subscribe(output).assertValues("");
+		ScriptedSubscriber
+				.<String>create()
+				.expectNext("")
+				.expectComplete().verify(output);
+
 	}
 
 	@Test
@@ -109,10 +115,11 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Mono<String> output = this.decoder.decodeToMono(source,
 				ResolvableType.forClass(String.class), null, Collections.emptyMap());
 
-		TestSubscriber.subscribe(output)
-				.assertNoError()
-				.assertComplete()
-				.assertValues("foobarbaz");
+		ScriptedSubscriber
+				.<String>create()
+				.expectNext("foobarbaz")
+				.expectComplete()
+				.verify(output);
 	}
 
 	@Test
@@ -121,10 +128,11 @@ public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 		Mono<String> output = this.decoder.decodeToMono(source,
 				ResolvableType.forClass(String.class), null, Collections.emptyMap());
 
-		TestSubscriber.subscribe(output)
-				.assertNoError()
-				.assertComplete()
-				.assertNoValues();
+		ScriptedSubscriber
+				.<String>create()
+				.expectNextCount(0)
+				.expectComplete()
+				.verify(output);
 	}
 
 }

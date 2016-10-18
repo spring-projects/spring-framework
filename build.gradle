@@ -170,6 +170,7 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
+		mavenLocal()
 		maven { url "https://repo.spring.io/libs-release" }
 		maven { url "https://repo.spring.io/milestone" }
 		maven { url "https://repo.spring.io/snapshot" }	// Reactor 3 snapshots
@@ -396,6 +397,7 @@ project("spring-core") {
 		optional "io.reactivex.rxjava2:rxjava:${rxjava2Version}"
 		optional "io.reactivex:rxjava-reactive-streams:${rxjavaAdapterVersion}"
 		optional("io.netty:netty-buffer:${nettyVersion}")
+		testCompile("io.projectreactor.addons:reactor-test:1.0.0.BUILD-SNAPSHOT")
 		testCompile("javax.xml.bind:jaxb-api:${jaxbVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.xmlunit:xmlunit-matchers:${xmlunitVersion}")
@@ -776,6 +778,7 @@ project("spring-web") {
 		optional("javax.xml.ws:jaxws-api:${jaxwsVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
+		testCompile("io.projectreactor.addons:reactor-test:1.0.0.BUILD-SNAPSHOT")
 		testCompile("org.apache.taglibs:taglibs-standard-jstlel:1.2.1") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
@@ -817,6 +820,7 @@ project("spring-web-reactive") {
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
 		optional "org.apache.httpcomponents:httpclient:${httpclientVersion}"
 		optional('org.webjars:webjars-locator:0.32')
+		testCompile("io.projectreactor.addons:reactor-test:1.0.0.BUILD-SNAPSHOT")
 		testCompile("javax.validation:validation-api:${beanvalVersion}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
 		testCompile("javax.el:javax.el-api:${elApiVersion}")

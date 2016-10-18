@@ -23,11 +23,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.junit.Assert.assertFalse;
@@ -61,27 +61,25 @@ public class CharSequenceEncoderTests extends AbstractDataBufferAllocatingTestCa
 	}
 
 	@Test
-	public void writeString() throws InterruptedException {
+	public void writeString() {
 		Flux<String> stringFlux = Flux.just("foo");
 		Flux<DataBuffer> output = Flux.from(
-				this.encoder.encode(stringFlux, this.bufferFactory, null, null,Collections.emptyMap()));
-		TestSubscriber
-				.subscribe(output)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(stringConsumer("foo"));
+				this.encoder.encode(stringFlux, this.bufferFactory, null, null, Collections.emptyMap()));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(stringConsumer("foo"))
+				.expectComplete()
+				.verify(output);
 	}
 
 	@Test
-	public void writeStringBuilder() throws InterruptedException {
+	public void writeStringBuilder() {
 		Flux<StringBuilder> stringBuilderFlux = Flux.just(new StringBuilder("foo"));
 		Flux<DataBuffer> output = Flux.from(
 				this.encoder.encode(stringBuilderFlux, this.bufferFactory, null, null, Collections.emptyMap()));
-		TestSubscriber
-				.subscribe(output)
-				.assertNoError()
-				.assertComplete()
-				.assertValuesWith(stringConsumer("foo"));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(stringConsumer("foo"))
+				.expectComplete()
+				.verify(output);
 	}
 
 }

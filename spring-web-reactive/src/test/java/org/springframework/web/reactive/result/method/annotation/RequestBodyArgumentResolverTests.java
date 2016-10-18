@@ -26,6 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
+import rx.Completable;
 import rx.Observable;
 import rx.RxReactiveStreams;
 import rx.Single;
@@ -38,7 +40,6 @@ import org.springframework.http.codec.DecoderHttpMessageReader;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.result.ResolvableMethod;
 import org.springframework.web.reactive.result.method.BindingContext;
@@ -124,26 +125,26 @@ public class RequestBodyArgumentResolverTests {
 	public void emptyBodyWithMono() throws Exception {
 		ResolvableType type = forClassWithGenerics(Mono.class, String.class);
 
-		TestSubscriber.subscribe(resolveValueWithEmptyBody(type, true))
-				.assertNoValues()
-				.assertError(ServerWebInputException.class);
+		ScriptedSubscriber.<Void>create().expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify((Mono<Void>) resolveValueWithEmptyBody(type, true));
 
-		TestSubscriber.subscribe(resolveValueWithEmptyBody(type, false))
-				.assertNoValues()
-				.assertComplete();
+		ScriptedSubscriber.<Void>create().expectNextCount(0)
+				.expectComplete()
+				.verify((Mono<Void>) resolveValueWithEmptyBody(type, false));
 	}
 
 	@Test
 	public void emptyBodyWithFlux() throws Exception {
 		ResolvableType type = forClassWithGenerics(Flux.class, String.class);
 
-		TestSubscriber.subscribe(resolveValueWithEmptyBody(type, true))
-				.assertNoValues()
-				.assertError(ServerWebInputException.class);
+		ScriptedSubscriber.<Void>create().expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify((Flux<Void>) resolveValueWithEmptyBody(type, true));
 
-		TestSubscriber.subscribe(resolveValueWithEmptyBody(type, false))
-				.assertNoValues()
-				.assertComplete();
+		ScriptedSubscriber.<Void>create().expectNextCount(0)
+				.expectComplete()
+				.verify((Flux<Void>) resolveValueWithEmptyBody(type, false));
 	}
 
 	@Test
@@ -151,14 +152,14 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Single.class, String.class);
 
 		Single<String> single = resolveValueWithEmptyBody(type, true);
-		TestSubscriber.subscribe(RxReactiveStreams.toPublisher(single))
-				.assertNoValues()
-				.assertError(ServerWebInputException.class);
+		ScriptedSubscriber.<String>create().expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify(RxReactiveStreams.toPublisher(single));
 
 		single = resolveValueWithEmptyBody(type, false);
-		TestSubscriber.subscribe(RxReactiveStreams.toPublisher(single))
-				.assertNoValues()
-				.assertError(ServerWebInputException.class);
+		ScriptedSubscriber.<String>create().expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify(RxReactiveStreams.toPublisher(single));
 	}
 
 	@Test
@@ -166,14 +167,14 @@ public class RequestBodyArgumentResolverTests {
 		ResolvableType type = forClassWithGenerics(Observable.class, String.class);
 
 		Observable<String> observable = resolveValueWithEmptyBody(type, true);
-		TestSubscriber.subscribe(RxReactiveStreams.toPublisher(observable))
-				.assertNoValues()
-				.assertError(ServerWebInputException.class);
+		ScriptedSubscriber.<String>create().expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify(RxReactiveStreams.toPublisher(observable));
 
 		observable = resolveValueWithEmptyBody(type, false);
-		TestSubscriber.subscribe(RxReactiveStreams.toPublisher(observable))
-				.assertNoValues()
-				.assertComplete();
+		ScriptedSubscriber.<String>create().expectNextCount(0)
+				.expectComplete()
+				.verify(RxReactiveStreams.toPublisher(observable));
 	}
 
 	@Test

@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 import rx.Completable;
 import rx.Observable;
 
@@ -42,6 +43,7 @@ import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.EncoderHttpMessageWriter;
@@ -52,7 +54,6 @@ import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
@@ -136,7 +137,7 @@ public class MessageWriterResultHandlerTests {
 		HttpMessageWriter<?> writer = new EncoderHttpMessageWriter<>(new ByteBufferEncoder());
 		Mono<Void> mono = createResultHandler(writer).writeBody(body, returnType(type), this.exchange);
 
-		TestSubscriber.subscribe(mono).assertError(IllegalStateException.class);
+		ScriptedSubscriber.create().expectError(IllegalStateException.class).verify(mono);
 	}
 
 	@Test  // SPR-12811
@@ -193,9 +194,11 @@ public class MessageWriterResultHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		TestSubscriber.subscribe(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(buf -> assertEquals(responseBody,
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
+				.expectComplete()
+				.verify(this.response.getBody());
 	}
 
 

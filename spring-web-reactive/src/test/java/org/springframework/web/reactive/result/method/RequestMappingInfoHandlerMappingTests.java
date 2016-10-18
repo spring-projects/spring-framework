@@ -29,6 +29,7 @@ import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -39,7 +40,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -164,7 +164,9 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.registerHandler(new UserController());
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		TestSubscriber.subscribe(mono).assertError(NotAcceptableStatusException.class);
+		ScriptedSubscriber.<Object>create()
+				.expectError(NotAcceptableStatusException.class)
+				.verify(mono);
 	}
 
 	@Test // SPR-8462
@@ -350,12 +352,14 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@SuppressWarnings("unchecked")
 	private <T> void assertError(Mono<Object> mono, final Class<T> exceptionClass, final Consumer<T> consumer)  {
-		TestSubscriber
-				.subscribe(mono)
-				.assertErrorWith(ex -> {
-					assertEquals(exceptionClass, ex.getClass());
-					consumer.accept((T) ex);
-				});
+
+		ScriptedSubscriber.<Object>create()
+				.consumeErrorWith(error -> {
+					assertEquals(exceptionClass, error.getClass());
+					consumer.accept((T) error);
+
+				})
+				.verify(mono);
 	}
 
 

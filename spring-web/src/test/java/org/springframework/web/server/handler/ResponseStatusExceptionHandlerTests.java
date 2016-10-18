@@ -21,12 +21,12 @@ import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -72,8 +72,10 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable expected = new IllegalStateException();
 		Mono<Void> mono = this.handler.handle(this.exchange, expected);
 
-		TestSubscriber.subscribe(mono)
-				.assertErrorWith(actual -> assertSame(expected, actual));
+		ScriptedSubscriber
+				.<Void>create()
+				.consumeErrorWith(actual -> assertSame(expected, actual))
+				.verify(mono);
 	}
 
 }

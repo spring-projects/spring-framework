@@ -24,6 +24,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -34,7 +35,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -159,9 +159,9 @@ public class RequestParamMethodArgumentResolverTests {
 		Mono<Object> mono = this.resolver.resolveArgument(
 				this.paramNamedStringArray, this.bindingContext, this.exchange);
 
-		TestSubscriber
-				.subscribe(mono)
-				.assertError(ServerWebInputException.class);
+		ScriptedSubscriber.create().expectNextCount(0)
+				.expectError(ServerWebInputException.class)
+				.verify(mono);
 	}
 
 	@Test

@@ -23,12 +23,12 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.BodyExtractors;
 import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.web.client.reactive.ClientRequest;
 import org.springframework.web.client.reactive.WebClient;
 
@@ -74,10 +74,11 @@ public class SseHandlerFunctionIntegrationTests
 				.map(s -> (s.replace("\n", "")))
 				.take(2);
 
-		TestSubscriber
-				.subscribe(result)
-				.await(Duration.ofSeconds(5))
-				.assertValues("data:foo 0", "data:foo 1");
+		ScriptedSubscriber.<String>create()
+				.expectNext("data:foo 0")
+				.expectNext("data:foo 1")
+				.expectComplete()
+				.verify(result, Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -96,10 +97,10 @@ public class SseHandlerFunctionIntegrationTests
 				.takeUntil(s -> s.endsWith("foo 1\"}"))
 				.reduce((s1, s2) -> s1 + s2);
 
-		TestSubscriber
-				.subscribe(result)
-				.await(Duration.ofSeconds(5))
-				.assertValues("data:{\"name\":\"foo 0\"}data:{\"name\":\"foo 1\"}");
+		ScriptedSubscriber.<String>create()
+				.expectNext("data:{\"name\":\"foo 0\"}data:{\"name\":\"foo 1\"}")
+				.expectComplete()
+				.verify(result, Duration.ofSeconds(5));
 	}
 
 	@Test
@@ -117,14 +118,11 @@ public class SseHandlerFunctionIntegrationTests
 				.map(s -> s.replace("\n", ""))
 				.take(2);
 
-		TestSubscriber
-				.subscribe(result)
-				.await(Duration.ofSeconds(5))
-				.assertValues(
-						"id:0:bardata:foo",
-						"id:1:bardata:foo"
-				);
-		;
+		ScriptedSubscriber.<String>create()
+				.expectNext("id:0:bardata:foo")
+				.expectNext("id:1:bardata:foo")
+				.expectComplete()
+				.verify(result, Duration.ofSeconds(5));
 	}
 
 	private static class SseHandler {

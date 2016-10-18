@@ -16,10 +16,6 @@
 
 package org.springframework.web.reactive.resource;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.reactive.HandlerMapping.*;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -32,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -48,16 +45,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolverBuilder;
 import org.springframework.web.server.MethodNotAllowedException;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.springframework.web.reactive.HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 
 /**
  * Unit tests for {@link ResourceWebHandler}.
@@ -525,7 +527,10 @@ public class ResourceWebHandlerTests {
 		this.request.addHeader("Range", "bytes= foo bar");
 		this.exchange.getAttributes().put(PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.txt");
 
-		TestSubscriber.subscribe(this.handler.handle(this.exchange)).assertComplete();
+		ScriptedSubscriber.create()
+				.expectNextCount(0)
+				.expectComplete()
+				.verify(this.handler.handle(this.exchange));
 
 		assertEquals(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE, this.response.getStatusCode());
 		assertEquals("bytes", this.response.getHeaders().getFirst("Accept-Ranges"));
@@ -550,8 +555,8 @@ public class ResourceWebHandlerTests {
 					return previous;
 				});
 
-		TestSubscriber.subscribe(reduced)
-				.assertValuesWith(buf -> {
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(buf -> {
 					String content = DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8);
 					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
 
@@ -569,7 +574,9 @@ public class ResourceWebHandlerTests {
 					assertEquals("Content-Type: text/plain", ranges[9]);
 					assertEquals("Content-Range: bytes 8-9/10", ranges[10]);
 					assertEquals("t.", ranges[11]);
-				});
+				})
+				.expectComplete()
+				.verify(reduced);
 	}
 
 	@Test  // SPR-14005
@@ -591,9 +598,11 @@ public class ResourceWebHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		TestSubscriber.subscribe(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(buf -> assertEquals(responseBody,
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
+				.expectComplete()
+				.verify(this.response.getBody());
 	}
 
 }

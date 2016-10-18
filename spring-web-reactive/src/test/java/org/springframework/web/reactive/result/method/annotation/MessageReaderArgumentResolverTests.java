@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 import rx.Observable;
 import rx.Single;
 
@@ -45,7 +46,6 @@ import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -102,8 +102,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<Object> result = this.resolver.readBody(param, true, this.bindingContext, this.exchange);
 
-		TestSubscriber.subscribe(result)
-				.assertError(UnsupportedMediaTypeStatusException.class);
+		ScriptedSubscriber.create().expectError(UnsupportedMediaTypeStatusException.class).verify(result);
 	}
 
 	// More extensive "empty body" tests in RequestBody- and HttpEntityArgumentResolverTests
@@ -116,7 +115,7 @@ public class MessageReaderArgumentResolverTests {
 		Mono<TestBean> result = (Mono<TestBean>) this.resolver.readBody(
 				param, true, this.bindingContext, this.exchange).block();
 
-		TestSubscriber.subscribe(result).assertError(ServerWebInputException.class);
+		ScriptedSubscriber.create().expectError(ServerWebInputException.class).verify(result);
 	}
 
 	@Test
@@ -263,9 +262,7 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Mono<TestBean> mono = resolveValue(param, body);
 
-		TestSubscriber.subscribe(mono)
-				.assertNoValues()
-				.assertError(ServerWebInputException.class);
+		ScriptedSubscriber.create().expectNextCount(0).expectError(ServerWebInputException.class).verify(mono);
 	}
 
 	@Test @SuppressWarnings("unchecked")
@@ -275,16 +272,17 @@ public class MessageReaderArgumentResolverTests {
 		MethodParameter param = this.testMethod.resolveParam(type);
 		Flux<TestBean> flux = resolveValue(param, body);
 
-		TestSubscriber.subscribe(flux)
-				.assertValues(new TestBean("f1", "b1"))
-				.assertError(ServerWebInputException.class);
+		ScriptedSubscriber.<TestBean>create()
+				.expectNext(new TestBean("f1", "b1"))
+				.expectError(ServerWebInputException.class)
+				.verify(flux);
 	}
 
 	@Test // SPR-9964
 	public void parameterizedMethodArgument() throws Exception {
 		Method method = AbstractParameterizedController.class.getMethod("handleDto", Identifiable.class);
- 		HandlerMethod handlerMethod = new HandlerMethod(new ConcreteParameterizedController(), method);
- 		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
+		HandlerMethod handlerMethod = new HandlerMethod(new ConcreteParameterizedController(), method);
+		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
 		SimpleBean simpleBean = resolveValue(methodParam, "{\"name\" : \"Jad\"}");
 
 		assertEquals("Jad", simpleBean.getName());
@@ -417,7 +415,7 @@ public class MessageReaderArgumentResolverTests {
 		void setId(Long id);
 	}
 
-	@SuppressWarnings({ "serial" })
+	@SuppressWarnings({"serial"})
 	private static class SimpleBean implements Identifiable {
 
 		private Long id;

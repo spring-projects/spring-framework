@@ -24,6 +24,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
@@ -32,7 +33,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -134,35 +134,40 @@ public class PathVariableMethodArgumentResolverTests {
 	public void handleMissingValue() throws Exception {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNamedString, bindingContext, this.exchange);
-		TestSubscriber
-				.subscribe(mono)
-				.assertError(ServerErrorException.class);
+		ScriptedSubscriber
+				.create().expectNextCount(0)
+				.expectError(ServerErrorException.class)
+				.verify(mono);
 	}
 
 	@Test
 	public void nullIfNotRequired() throws Exception {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramNotRequired, bindingContext, this.exchange);
-		TestSubscriber
-				.subscribe(mono)
-				.assertComplete()
-				.assertNoValues();
+		ScriptedSubscriber
+				.create().expectNextCount(0)
+				.expectComplete()
+				.verify(mono);
 	}
 
 	@Test
 	public void wrapEmptyWithOptional() throws Exception {
 		BindingContext bindingContext = new BindingContext();
 		Mono<Object> mono = this.resolver.resolveArgument(this.paramOptional, bindingContext, this.exchange);
-		Object result = mono.block();
-		TestSubscriber
-				.subscribe(mono)
-				.assertValues(Optional.empty());
+
+		ScriptedSubscriber.create()
+				.consumeNextWith(value -> {
+					assertTrue(value instanceof Optional);
+					assertFalse(((Optional) value).isPresent());
+				})
+				.expectComplete()
+				.verify(mono);
 	}
 
 
 	@SuppressWarnings("unused")
 	public void handle(@PathVariable(value = "name") String param1, String param2,
-			@PathVariable(name="name", required = false) String param3,
+			@PathVariable(name = "name", required = false) String param3,
 			@PathVariable("name") Optional<String> param4) {
 	}
 

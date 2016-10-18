@@ -15,25 +15,24 @@
  */
 package org.springframework.http.codec;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
-
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
+
+import static java.nio.charset.StandardCharsets.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link EncoderHttpMessageWriter}.
@@ -69,7 +68,10 @@ public class EncoderHttpMessageWriterTest {
 				MediaType.APPLICATION_OCTET_STREAM, this.response, Collections.emptyMap());
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.APPLICATION_OCTET_STREAM));
-		TestSubscriber.subscribe(this.response.getBodyAsString()).assertComplete().assertValues(payload);
+		ScriptedSubscriber.<String>create()
+				.expectNext(payload)
+				.expectComplete()
+				.verify(this.response.getBodyAsString());
 	}
 
 	@NotNull

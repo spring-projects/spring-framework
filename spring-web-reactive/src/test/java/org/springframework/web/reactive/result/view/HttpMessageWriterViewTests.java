@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -35,7 +37,6 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MimeType;
@@ -45,7 +46,10 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 
 /**
@@ -151,10 +155,12 @@ public class HttpMessageWriterViewTests {
 
 		this.view.render(this.model, MediaType.APPLICATION_JSON, exchange);
 
-		TestSubscriber
-				.subscribe(response.getBody())
-				.assertValuesWith(buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith( buf -> assertEquals("{\"foo\":\"f\",\"bar\":\"b\"}",
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8))
+				)
+				.expectComplete()
+				.verify(response.getBody());
 	}
 
 

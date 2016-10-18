@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 import rx.Completable;
 import rx.Single;
 
@@ -42,10 +43,9 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -180,7 +180,7 @@ public class ViewResolutionResultHandlerTests {
 
 		ModelMap model = new ExtendedModelMap().addAttribute("id", "123");
 		HandlerResult result = new HandlerResult(new Object(), returnValue, returnType(type), model);
-		ViewResolutionResultHandler handler =  createResultHandler(new TestViewResolver("account"));
+		ViewResolutionResultHandler handler = createResultHandler(new TestViewResolver("account"));
 
 		this.request.setUri("/account");
 		handler.handleResult(this.exchange, result).block(Duration.ofSeconds(5));
@@ -204,7 +204,9 @@ public class ViewResolutionResultHandlerTests {
 		this.request.setUri("/path");
 		Mono<Void> mono = createResultHandler().handleResult(this.exchange, handlerResult);
 
-		TestSubscriber.subscribe(mono).assertErrorMessage("Could not resolve view with name 'account'.");
+		ScriptedSubscriber.create().expectNextCount(0)
+				.expectErrorWith(err -> err.getMessage().equals("Could not resolve view with name 'account'."))
+				.verify(mono);
 	}
 
 	@Test
@@ -237,7 +239,9 @@ public class ViewResolutionResultHandlerTests {
 
 		ViewResolutionResultHandler resultHandler = createResultHandler(new TestViewResolver("account"));
 		Mono<Void> mono = resultHandler.handleResult(this.exchange, handlerResult);
-		TestSubscriber.subscribe(mono).assertError(NotAcceptableStatusException.class);
+		ScriptedSubscriber.create().expectNextCount(0)
+				.expectError(NotAcceptableStatusException.class)
+				.verify(mono);
 	}
 
 
@@ -271,7 +275,7 @@ public class ViewResolutionResultHandlerTests {
 	private void testHandle(String path, ResolvableType returnType, Object returnValue,
 			String responseBody, ViewResolver... resolvers) throws URISyntaxException {
 
-		testHandle(path,  ResolvableMethod.onClass(TestController.class).returning(returnType),
+		testHandle(path, ResolvableMethod.onClass(TestController.class).returning(returnType),
 				returnValue, responseBody, resolvers);
 	}
 
@@ -287,9 +291,11 @@ public class ViewResolutionResultHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		TestSubscriber.subscribe(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(buf -> assertEquals(responseBody,
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
+				.expectComplete()
+				.verify(this.response.getBody());
 	}
 
 

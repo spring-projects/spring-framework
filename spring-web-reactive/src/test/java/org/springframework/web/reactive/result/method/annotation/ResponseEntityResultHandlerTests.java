@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 import rx.Completable;
 import rx.Single;
 
@@ -36,6 +37,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,7 +50,6 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
@@ -64,8 +65,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.core.ResolvableType.forClassWithGenerics;
-import static org.springframework.http.ResponseEntity.ok;
 import static org.springframework.http.ResponseEntity.notFound;
+import static org.springframework.http.ResponseEntity.ok;
 
 /**
  * Unit tests for {@link ResponseEntityResultHandler}. When adding a test also
@@ -113,7 +114,8 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 
-	@Test @SuppressWarnings("ConstantConditions")
+	@Test
+	@SuppressWarnings("ConstantConditions")
 	public void supports() throws NoSuchMethodException {
 
 		Object value = null;
@@ -201,7 +203,7 @@ public class ResponseEntityResultHandlerTests {
 	@Test
 	public void handleReturnValueLastModified() throws Exception {
 		Instant currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-		Instant oneMinAgo  = currentTime.minusSeconds(60);
+		Instant oneMinAgo = currentTime.minusSeconds(60);
 		this.request.getHeaders().setIfModifiedSince(currentTime.toEpochMilli());
 
 		ResponseEntity<String> entity = ok().lastModified(oneMinAgo.toEpochMilli()).body("body");
@@ -241,7 +243,7 @@ public class ResponseEntityResultHandlerTests {
 		this.request.getHeaders().setIfNoneMatch(eTag);
 
 		Instant currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-		Instant oneMinAgo  = currentTime.minusSeconds(60);
+		Instant oneMinAgo = currentTime.minusSeconds(60);
 		this.request.getHeaders().setIfModifiedSince(currentTime.toEpochMilli());
 
 		ResponseEntity<String> entity = ok().eTag(eTag).lastModified(oneMinAgo.toEpochMilli()).body("body");
@@ -258,7 +260,7 @@ public class ResponseEntityResultHandlerTests {
 		this.request.getHeaders().setIfNoneMatch(etag);
 
 		Instant currentTime = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-		Instant oneMinAgo  = currentTime.minusSeconds(60);
+		Instant oneMinAgo = currentTime.minusSeconds(60);
 		this.request.getHeaders().setIfModifiedSince(currentTime.toEpochMilli());
 
 		ResponseEntity<String> entity = ok().eTag(newEtag).lastModified(oneMinAgo.toEpochMilli()).body("body");
@@ -289,12 +291,14 @@ public class ResponseEntityResultHandlerTests {
 	}
 
 	private void assertResponseBody(String responseBody) {
-		TestSubscriber.subscribe(this.response.getBody())
-				.assertValuesWith(buf -> assertEquals(responseBody,
-						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)));
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(buf -> assertEquals(responseBody,
+						DataBufferTestUtils.dumpString(buf, StandardCharsets.UTF_8)))
+				.expectComplete()
+				.verify(this.response.getBody());
 	}
 
-	private void assertConditionalResponse(HttpStatus status, String body, String etag, Instant lastModified) {
+	private void assertConditionalResponse(HttpStatus status, String body, String etag, Instant lastModified) throws Exception {
 		assertEquals(status, this.response.getStatusCode());
 		if (body != null) {
 			assertResponseBody(body);

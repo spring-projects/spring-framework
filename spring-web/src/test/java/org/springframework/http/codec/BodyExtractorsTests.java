@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.codec.ByteBufferDecoder;
 import org.springframework.core.codec.StringDecoder;
@@ -39,7 +40,7 @@ import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.xml.Jaxb2XmlDecoder;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
-import org.springframework.tests.TestSubscriber;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * @author Arjen Poutsma
@@ -79,9 +80,10 @@ public class BodyExtractorsTests {
 
 		Mono<String> result = extractor.extract(request, this.context);
 
-		TestSubscriber.subscribe(result)
-				.assertComplete()
-				.assertValues("foo");
+		ScriptedSubscriber.<String>create()
+				.expectNext("foo")
+				.expectComplete()
+				.verify(result);
 	}
 
 	@Test
@@ -97,9 +99,11 @@ public class BodyExtractorsTests {
 		request.setBody(body);
 
 		Flux<String> result = extractor.extract(request, this.context);
-		TestSubscriber.subscribe(result)
-				.assertComplete()
-				.assertValues("foo");
+
+		ScriptedSubscriber.<String>create()
+				.expectNext("foo")
+				.expectComplete()
+				.verify(result);
 	}
 
 	@Test
@@ -123,8 +127,9 @@ public class BodyExtractorsTests {
 		};
 
 		Flux<String> result = extractor.extract(request, emptyContext);
-		TestSubscriber.subscribe(result)
-				.assertError(UnsupportedMediaTypeException.class);
+		ScriptedSubscriber.create()
+				.expectError(UnsupportedMediaTypeException.class)
+				.verify(result);
 	}
 
 }

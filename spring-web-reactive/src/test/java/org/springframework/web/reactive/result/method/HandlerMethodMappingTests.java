@@ -26,13 +26,13 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Controller;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -100,7 +100,7 @@ public class HandlerMethodMappingTests {
 		this.mapping.registerMapping("/fo?", this.handler, this.method2);
 		Mono<Object> result = this.mapping.getHandler(createExchange(HttpMethod.GET, "/foo"));
 
-		TestSubscriber.subscribe(result).assertError(IllegalStateException.class);
+		ScriptedSubscriber.create().expectError(IllegalStateException.class).verify(result);
 	}
 
 	@Test
@@ -193,11 +193,13 @@ public class HandlerMethodMappingTests {
 	@Controller
 	private static class MyHandler {
 
-		@RequestMapping @SuppressWarnings("unused")
+		@RequestMapping
+		@SuppressWarnings("unused")
 		public void handlerMethod1() {
 		}
 
-		@RequestMapping @SuppressWarnings("unused")
+		@RequestMapping
+		@SuppressWarnings("unused")
 		public void handlerMethod2() {
 		}
 	}

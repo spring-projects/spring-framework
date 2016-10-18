@@ -16,8 +16,6 @@
 
 package org.springframework.http.codec;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.Matchers.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -30,6 +28,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -38,9 +37,11 @@ import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ResourceRegionHttpMessageWriter}.
@@ -82,15 +83,16 @@ public class ResourceRegionHttpMessageWriterTests {
 
 		ResourceRegion region = new ResourceRegion(this.resource, 0, 6);
 
-		TestSubscriber.subscribe(this.writer.write(Mono.just(region), ResolvableType.forClass(ResourceRegion.class),
-				MediaType.TEXT_PLAIN, this.response, Collections.emptyMap())).assertComplete();
+		Mono<Void> mono = this.writer.write(Mono.just(region), ResolvableType.forClass(ResourceRegion.class),
+				MediaType.TEXT_PLAIN, this.response, Collections.emptyMap());
+		ScriptedSubscriber.<Void>create().expectComplete().verify(mono);
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.TEXT_PLAIN));
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE), is("bytes 0-5/39"));
 		assertThat(this.response.getHeaders().getContentLength(), is(6L));
 
 		Mono<String> result = response.getBodyAsString();
-		TestSubscriber.subscribe(result).assertComplete().assertValues("Spring");
+		ScriptedSubscriber.<String>create().expectNext("Spring").expectComplete().verify(result);
 	}
 
 	@Test
@@ -105,43 +107,43 @@ public class ResourceRegionHttpMessageWriterTests {
 		Map<String, Object> hints = new HashMap<>(1);
 		hints.put(ResourceRegionHttpMessageWriter.BOUNDARY_STRING_HINT, boundary);
 
-		TestSubscriber.subscribe(
-				this.writer.write(regions, ResolvableType.forClass(ResourceRegion.class),
-						MediaType.TEXT_PLAIN, this.response, hints))
-				.assertComplete();
+		Mono<Void> mono = this.writer.write(regions, ResolvableType.forClass(ResourceRegion.class),
+				MediaType.TEXT_PLAIN, this.response, hints);
+		ScriptedSubscriber.<Void>create().expectComplete().verify(mono);
 
 		HttpHeaders headers = this.response.getHeaders();
 		assertThat(headers.getContentType().toString(), startsWith("multipart/byteranges;boundary=" + boundary));
 
 		Mono<String> result = response.getBodyAsString();
-		TestSubscriber
-				.subscribe(result).assertNoError()
-				.assertComplete()
-				.assertValuesWith(content -> {
-					String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
 
-					assertThat(ranges[0], is("--" + boundary));
-					assertThat(ranges[1], is("Content-Type: text/plain"));
-					assertThat(ranges[2], is("Content-Range: bytes 0-5/39"));
-					assertThat(ranges[3], is("Spring"));
-
-					assertThat(ranges[4], is("--" + boundary));
-					assertThat(ranges[5], is("Content-Type: text/plain"));
-					assertThat(ranges[6], is("Content-Range: bytes 7-15/39"));
-					assertThat(ranges[7], is("Framework"));
-
-					assertThat(ranges[8], is("--" + boundary));
-					assertThat(ranges[9], is("Content-Type: text/plain"));
-					assertThat(ranges[10], is("Content-Range: bytes 17-20/39"));
-					assertThat(ranges[11], is("test"));
-
-					assertThat(ranges[12], is("--" + boundary));
-					assertThat(ranges[13], is("Content-Type: text/plain"));
-					assertThat(ranges[14], is("Content-Range: bytes 22-38/39"));
-					assertThat(ranges[15], is("resource content."));
-
-					assertThat(ranges[16], is("--" + boundary + "--"));
-				});
+		ScriptedSubscriber
+				.<String>create()
+				.consumeNextWith(content -> {
+					String[] ranges = StringUtils
+							.tokenizeToStringArray(content, "\r\n", false, true);
+					String[] expected = new String[] {
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 0-5/39",
+							"Spring",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 7-15/39",
+							"Framework",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 17-20/39",
+							"test",
+							"--" + boundary,
+							"Content-Type: text/plain",
+							"Content-Range: bytes 22-38/39",
+							"resource content.",
+							"--" + boundary + "--"
+					};
+					assertArrayEquals(expected, ranges);
+				})
+				.expectComplete()
+				.verify(result);
 	}
 
 }

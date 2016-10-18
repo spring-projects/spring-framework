@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.codec.ByteBufferEncoder;
 import org.springframework.core.codec.CharSequenceEncoder;
@@ -39,7 +40,6 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.codec.xml.Jaxb2XmlEncoder;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.Assert.assertArrayEquals;
@@ -79,14 +79,14 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		TestSubscriber.subscribe(result)
-				.assertComplete();
+		ScriptedSubscriber.create().expectComplete().verify(result);
 
 		ByteBuffer byteBuffer = ByteBuffer.wrap(body.getBytes(UTF_8));
 		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-		TestSubscriber.subscribe(response.getBody())
-				.assertComplete()
-				.assertValues(buffer);
+		ScriptedSubscriber.<DataBuffer>create()
+				.expectNext(buffer)
+				.expectComplete()
+				.verify(response.getBody());
 	}
 
 	@Test
@@ -98,14 +98,14 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		TestSubscriber.subscribe(result)
-				.assertComplete();
+		ScriptedSubscriber.create().expectComplete().verify(result);
 
 		ByteBuffer byteBuffer = ByteBuffer.wrap("foo".getBytes(UTF_8));
 		DataBuffer buffer = new DefaultDataBufferFactory().wrap(byteBuffer);
-		TestSubscriber.subscribe(response.getBody())
-				.assertComplete()
-				.assertValues(buffer);
+		ScriptedSubscriber.<DataBuffer>create()
+				.expectNext(buffer)
+				.expectComplete()
+				.verify(response.getBody());
 	}
 
 	@Test
@@ -117,18 +117,18 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		TestSubscriber.subscribe(result)
-				.assertComplete();
+		ScriptedSubscriber.create().expectComplete().verify(result);
 
 		byte[] expectedBytes = Files.readAllBytes(body.getFile().toPath());
 
-		TestSubscriber.subscribe(response.getBody())
-				.assertComplete()
-				.assertValuesWith(dataBuffer -> {
+		ScriptedSubscriber.<DataBuffer>create()
+				.consumeNextWith(dataBuffer -> {
 					byte[] resultBytes = new byte[dataBuffer.readableByteCount()];
 					dataBuffer.read(resultBytes);
 					assertArrayEquals(expectedBytes, resultBytes);
-				});
+				})
+				.expectComplete()
+				.verify(response.getBody());
 	}
 
 	@Test
@@ -142,9 +142,7 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		TestSubscriber.subscribe(result)
-				.assertComplete();
-
+		ScriptedSubscriber.create().expectNextCount(0).expectComplete().verify(result);
 	}
 
 	@Test
@@ -157,9 +155,7 @@ public class BodyInsertersTests {
 
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		Mono<Void> result = inserter.insert(response, this.context);
-		TestSubscriber.subscribe(result)
-				.assertComplete();
-
+		ScriptedSubscriber.create().expectNextCount(0).expectComplete().verify(result);
 	}
 
 }

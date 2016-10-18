@@ -32,7 +32,7 @@ import org.springframework.http.codec.BodyExtractors;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.tests.TestSubscriber;
+import reactor.test.subscriber.ScriptedSubscriber;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.reactive.ClientRequest;
@@ -87,10 +87,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.map(s -> (s.replace("\n", "")))
 				.take(2);
 
-		TestSubscriber
-				.subscribe(result)
-				.await(Duration.ofSeconds(5))
-				.assertValues("data:foo 0", "data:foo 1");
+		ScriptedSubscriber.<String>create()
+				.expectNext("data:foo 0")
+				.expectNext("data:foo 1")
+				.expectComplete()
+				.verify(result, Duration.ofSeconds(5L));
 	}
 	@Test
 	public void sseAsPerson() throws Exception {
@@ -108,10 +109,10 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.takeUntil(s -> s.endsWith("foo 1\"}"))
 				.reduce((s1, s2) -> s1 + s2);
 
-		TestSubscriber
-				.subscribe(result)
-				.await(Duration.ofSeconds(5))
-				.assertValues("data:{\"name\":\"foo 0\"}data:{\"name\":\"foo 1\"}");
+		ScriptedSubscriber.<String>create()
+				.expectNext("data:{\"name\":\"foo 0\"}data:{\"name\":\"foo 1\"}")
+				.expectComplete()
+				.verify(result, Duration.ofSeconds(5L));
 	}
 
 	@Test
@@ -128,13 +129,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.map(s -> s.replace("\n", ""))
 				.take(2);
 
-		TestSubscriber
-				.subscribe(result)
-				.await(Duration.ofSeconds(5))
-				.assertValues(
-						"id:0:bardata:foo",
-						"id:1:bardata:foo"
-				);
+		ScriptedSubscriber.<String>create()
+				.expectNext("id:0:bardata:foo")
+				.expectNext("id:1:bardata:foo")
+				.expectComplete()
+				.verify(result, Duration.ofSeconds(5L));
 	}
 
 	@Test
@@ -152,13 +151,11 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.map(s -> s.replace("\n", ""))
 				.take(2);
 
-		TestSubscriber
-				.subscribe(result)
-				.await(Duration.ofSeconds(5))
-				.assertValues(
-						"id:0:bardata:foo",
-						"id:1:bardata:foo"
-				);
+		ScriptedSubscriber.<String>create()
+				.expectNext("id:0:bardata:foo")
+				.expectNext("id:1:bardata:foo")
+				.expectComplete()
+				.verify(result, Duration.ofSeconds(5L));
 	}
 
 	@RestController

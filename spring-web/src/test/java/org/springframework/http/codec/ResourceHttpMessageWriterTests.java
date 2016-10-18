@@ -22,6 +22,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.test.subscriber.ScriptedSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
@@ -32,7 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpRequest;
 import org.springframework.mock.http.server.reactive.test.MockServerHttpResponse;
-import org.springframework.tests.TestSubscriber;
 import org.springframework.util.MimeTypeUtils;
 
 import static org.hamcrest.Matchers.*;
@@ -69,23 +69,38 @@ public class ResourceHttpMessageWriterTests {
 
 	@Test
 	public void shouldWriteResource() throws Exception {
-		TestSubscriber.subscribe(this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
-				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap())).assertComplete();
+
+		Mono<Void> mono = this.writer.write(Mono.just(resource), null,
+				ResolvableType.forClass(Resource.class),
+				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
+		ScriptedSubscriber
+				.<Void>create()
+				.expectNextCount(0)
+				.expectComplete()
+				.verify(mono);
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.TEXT_PLAIN));
 		assertThat(this.response.getHeaders().getContentLength(), is(39L));
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 
 		Mono<String> result = this.response.getBodyAsString();
-		TestSubscriber.subscribe(result).assertComplete().assertValues("Spring Framework test resource content.");
+		ScriptedSubscriber
+				.<String>create()
+				.expectNext("Spring Framework test resource content.")
+				.expectComplete()
+				.verify(result);
 	}
 
 	@Test
 	public void shouldWriteResourceRange() throws Exception {
 		this.request.getHeaders().setRange(Collections.singletonList(HttpRange.createByteRange(0, 5)));
-
-		TestSubscriber.subscribe(this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
-				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap())).assertComplete();
+		Mono<Void> mono = this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
+				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
+		ScriptedSubscriber
+				.<Void>create()
+				.expectNextCount(0)
+				.expectComplete()
+				.verify(mono);
 
 		assertThat(this.response.getHeaders().getContentType(), is(MediaType.TEXT_PLAIN));
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.CONTENT_RANGE), is("bytes 0-5/39"));
@@ -93,15 +108,24 @@ public class ResourceHttpMessageWriterTests {
 		assertThat(this.response.getHeaders().getContentLength(), is(6L));
 
 		Mono<String> result = this.response.getBodyAsString();
-		TestSubscriber.subscribe(result).assertComplete().assertValues("Spring");
+		ScriptedSubscriber
+				.<String>create()
+				.expectNext("Spring")
+				.expectComplete()
+				.verify(result);
 	}
 
 	@Test
 	public void shouldSetRangeNotSatisfiableStatus() throws Exception {
 		this.request.getHeaders().set(HttpHeaders.RANGE, "invalid");
 
-		TestSubscriber.subscribe(this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
-				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap()));
+		Mono<Void> mono = this.writer.write(Mono.just(resource), null, ResolvableType.forClass(Resource.class),
+				MediaType.TEXT_PLAIN, this.request, this.response, Collections.emptyMap());
+		ScriptedSubscriber
+				.<Void>create()
+				.expectNextCount(0)
+				.expectComplete()
+				.verify(mono);
 
 		assertThat(this.response.getHeaders().getFirst(HttpHeaders.ACCEPT_RANGES), is("bytes"));
 		assertThat(this.response.getStatusCode(), is(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE));
