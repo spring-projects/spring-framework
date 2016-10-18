@@ -26,7 +26,6 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.web.cors.CorsConfiguration;
@@ -42,18 +41,6 @@ import org.springframework.web.cors.CorsConfiguration;
  */
 public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 
-	private static final List<String> DEFAULT_ALLOWED_ORIGINS = Arrays.asList("*");
-
-	private static final List<String> DEFAULT_ALLOWED_METHODS =
-			Arrays.asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name());
-
-	private static final List<String> DEFAULT_ALLOWED_HEADERS = Arrays.asList("*");
-
-	private static final boolean DEFAULT_ALLOW_CREDENTIALS = true;
-
-	private static final long DEFAULT_MAX_AGE = 1600;
-
-
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 
@@ -61,12 +48,7 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 		List<Element> mappings = DomUtils.getChildElementsByTagName(element, "mapping");
 
 		if (mappings.isEmpty()) {
-			CorsConfiguration config = new CorsConfiguration();
-			config.setAllowedOrigins(DEFAULT_ALLOWED_ORIGINS);
-			config.setAllowedMethods(DEFAULT_ALLOWED_METHODS);
-			config.setAllowedHeaders(DEFAULT_ALLOWED_HEADERS);
-			config.setAllowCredentials(DEFAULT_ALLOW_CREDENTIALS);
-			config.setMaxAge(DEFAULT_MAX_AGE);
+			CorsConfiguration config = new CorsConfiguration().applyDefaultPermitConfiguration();
 			corsConfigurations.put("/**", config);
 		}
 		else {
@@ -76,22 +58,13 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 					String[] allowedOrigins = StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-origins"), ",");
 					config.setAllowedOrigins(Arrays.asList(allowedOrigins));
 				}
-				else {
-					config.setAllowedOrigins(DEFAULT_ALLOWED_ORIGINS);
-				}
 				if (mapping.hasAttribute("allowed-methods")) {
 					String[] allowedMethods = StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-methods"), ",");
 					config.setAllowedMethods(Arrays.asList(allowedMethods));
 				}
-				else {
-					config.setAllowedMethods(DEFAULT_ALLOWED_METHODS);
-				}
 				if (mapping.hasAttribute("allowed-headers")) {
 					String[] allowedHeaders = StringUtils.tokenizeToStringArray(mapping.getAttribute("allowed-headers"), ",");
 					config.setAllowedHeaders(Arrays.asList(allowedHeaders));
-				}
-				else {
-					config.setAllowedHeaders(DEFAULT_ALLOWED_HEADERS);
 				}
 				if (mapping.hasAttribute("exposed-headers")) {
 					String[] exposedHeaders = StringUtils.tokenizeToStringArray(mapping.getAttribute("exposed-headers"), ",");
@@ -100,16 +73,10 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 				if (mapping.hasAttribute("allow-credentials")) {
 					config.setAllowCredentials(Boolean.parseBoolean(mapping.getAttribute("allow-credentials")));
 				}
-				else {
-					config.setAllowCredentials(DEFAULT_ALLOW_CREDENTIALS);
-				}
 				if (mapping.hasAttribute("max-age")) {
 					config.setMaxAge(Long.parseLong(mapping.getAttribute("max-age")));
 				}
-				else {
-					config.setMaxAge(DEFAULT_MAX_AGE);
-				}
-				corsConfigurations.put(mapping.getAttribute("path"), config);
+				corsConfigurations.put(mapping.getAttribute("path"), config.applyDefaultPermitConfiguration());
 			}
 		}
 
