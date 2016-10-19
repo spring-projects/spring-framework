@@ -166,6 +166,18 @@ public class ServletServerHttpResponse extends AbstractListenerServerHttpRespons
 		}
 	}
 
+	/** Handle a complete callback from the Servlet container */
+	void handleAsyncListenerComplete() {
+		if (this.bodyFlushProcessor != null) {
+			this.bodyFlushProcessor.cancel();
+			this.bodyFlushProcessor.onComplete();
+		}
+		if (this.bodyProcessor != null) {
+			this.bodyProcessor.cancel();
+			this.bodyProcessor.onComplete();
+		}
+	}
+
 
 	private class ResponseBodyProcessor extends AbstractResponseBodyProcessor {
 
