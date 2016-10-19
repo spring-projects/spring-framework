@@ -43,6 +43,7 @@ import java.util.TimeZone;
  * classes. It also provides easy-to-use methods to convert between
  * delimited strings, such as CSV strings, and collections and arrays.
  *
+ * @author Damien Bouclier
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Keith Donald
@@ -51,7 +52,6 @@ import java.util.TimeZone;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @author Brian Clozel
- * @author Damien Bouclier
  * @since 16 April 2001
  */
 public abstract class StringUtils {
@@ -93,6 +93,7 @@ public abstract class StringUtils {
      *
      * @param str the candidate String
      * @return true if string is not empty
+     * @since 5.0.0
      */
     public static boolean isNotEmpty(CharSequence str)
     {
@@ -105,6 +106,7 @@ public abstract class StringUtils {
      *
      * @param str the candidate String
      * @return true if string is blank
+     * @since 5.0.0
      */
     public static boolean isBlank(String str)
     {
@@ -117,6 +119,7 @@ public abstract class StringUtils {
      *
      * @param str the candidate String
      * @return true if the string is not blank
+     * @since 5.0.0
      */
     public static boolean isNotBlank(String str)
     {
