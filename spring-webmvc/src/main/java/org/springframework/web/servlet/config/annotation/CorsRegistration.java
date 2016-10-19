@@ -19,20 +19,14 @@ package org.springframework.web.servlet.config.annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
- * {@code CorsRegistration} assists with the creation of a
- * {@link CorsConfiguration} instance mapped to a path pattern.
+ * {@code CorsRegistration} assists with the creation of a {@link CorsConfiguration}
+ * instance mapped to a path pattern.
  *
- * <p>If no path pattern is specified, cross-origin request handling is
- * mapped to {@code "/**"}.
- *
- * <p>By default, all origins, all headers, credentials and {@code GET},
- * {@code HEAD}, and {@code POST} methods are allowed, and the max age is
- * set to 30 minutes.
+ * <p>By default, all origins, headers, credentials and {@code GET}, {@code HEAD}, and
+ * {@code POST} methods are allowed, and the max age is set to 30 minutes.
  *
  * @author Sebastien Deleuze
  * @author Sam Brannen
@@ -47,43 +41,84 @@ public class CorsRegistration {
 	private final CorsConfiguration config;
 
 
+	/**
+	 * Create a new {@link CorsRegistration} instance with all origins, headers, credentials
+	 * and {@code GET}, {@code HEAD}, and {@code POST} methods allowed, and the max age
+	 * set to 30 minutes on the specified path.
+	 * @param pathPattern the path where the CORS configuration should apply. Exact path
+	 * mapping URIs (such as {@code "/admin"}) are supported as well as Ant-style path
+	 * patterns (such as {@code "/admin/**"}).
+	 */
 	public CorsRegistration(String pathPattern) {
 		this.pathPattern = pathPattern;
 		// Same implicit default values as the @CrossOrigin annotation + allows simple methods
-		this.config = new CorsConfiguration();
-		this.config.setAllowedOrigins(Arrays.asList(CrossOrigin.DEFAULT_ORIGINS));
-		this.config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),
-				HttpMethod.HEAD.name(), HttpMethod.POST.name()));
-		this.config.setAllowedHeaders(Arrays.asList(CrossOrigin.DEFAULT_ALLOWED_HEADERS));
-		this.config.setAllowCredentials(CrossOrigin.DEFAULT_ALLOW_CREDENTIALS);
-		this.config.setMaxAge(CrossOrigin.DEFAULT_MAX_AGE);
+		this.config = new CorsConfiguration().applyDefaultPermitConfiguration();
 	}
 
+	/**
+	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
+	 * <p>The special value {@code "*"} allows all domains.
+	 * <p>By default, all origins are allowed.
+	 */
 	public CorsRegistration allowedOrigins(String... origins) {
 		this.config.setAllowedOrigins(new ArrayList<>(Arrays.asList(origins)));
 		return this;
 	}
 
+
+	/**
+	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"},
+	 * {@code "PUT"}, etc.
+	 * <p>The special value {@code "*"} allows all methods.
+	 * <p>By default, simple methods ({@code GET}, {@code HEAD}, and {@code POST}) are allowed.
+	 */
 	public CorsRegistration allowedMethods(String... methods) {
 		this.config.setAllowedMethods(new ArrayList<>(Arrays.asList(methods)));
 		return this;
 	}
 
+	/**
+	 * Set the list of headers that a pre-flight request can list as allowed
+	 * for use during an actual request.
+	 * <p>The special value {@code "*"} allows actual requests to send any
+	 * header.
+	 * <p>A header name is not required to be listed if it is one of:
+	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
+	 * {@code Last-Modified}, or {@code Pragma}.
+	 * <p>By default, all headers are allowed.
+	 */
 	public CorsRegistration allowedHeaders(String... headers) {
 		this.config.setAllowedHeaders(new ArrayList<>(Arrays.asList(headers)));
 		return this;
 	}
 
+	/**
+	 * Set the list of response headers other than simple headers (i.e.
+	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
+	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}) that an
+	 * actual response might have and can be exposed.
+	 * <p>Note that {@code "*"} is not a valid exposed header value.
+	 * <p>By default this is not set.
+	 */
 	public CorsRegistration exposedHeaders(String... headers) {
 		this.config.setExposedHeaders(new ArrayList<>(Arrays.asList(headers)));
 		return this;
 	}
 
+	/**
+	 * Configure how long, in seconds, the response from a pre-flight request
+	 * can be cached by clients.
+	 * <p>By default, this is set to 1800 seconds (30 minutes).
+	 */
 	public CorsRegistration maxAge(long maxAge) {
 		this.config.setMaxAge(maxAge);
 		return this;
 	}
 
+	/**
+	 * Whether user credentials are supported.
+	 * <p>By default, this is set to {@code true} (i.e. user credentials are supported).
+	 */
 	public CorsRegistration allowCredentials(boolean allowCredentials) {
 		this.config.setAllowCredentials(allowCredentials);
 		return this;

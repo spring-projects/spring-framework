@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -305,24 +304,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		updateCorsConfig(config, typeAnnotation);
 		updateCorsConfig(config, methodAnnotation);
 
-		if (CollectionUtils.isEmpty(config.getAllowedOrigins())) {
-			config.setAllowedOrigins(Arrays.asList(CrossOrigin.DEFAULT_ORIGINS));
-		}
 		if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
 			for (RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
 				config.addAllowedMethod(allowedMethod.name());
 			}
 		}
-		if (CollectionUtils.isEmpty(config.getAllowedHeaders())) {
-			config.setAllowedHeaders(Arrays.asList(CrossOrigin.DEFAULT_ALLOWED_HEADERS));
-		}
-		if (config.getAllowCredentials() == null) {
-			config.setAllowCredentials(CrossOrigin.DEFAULT_ALLOW_CREDENTIALS);
-		}
-		if (config.getMaxAge() == null) {
-			config.setMaxAge(CrossOrigin.DEFAULT_MAX_AGE);
-		}
-		return config;
+		return config.applyDefaultPermitConfiguration();
 	}
 
 	private void updateCorsConfig(CorsConfiguration config, CrossOrigin annotation) {
