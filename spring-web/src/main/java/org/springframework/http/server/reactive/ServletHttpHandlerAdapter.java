@@ -91,7 +91,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				servletRequest, this.dataBufferFactory, this.bufferSize);
 		ServletServerHttpResponse response = new ServletServerHttpResponse(
 				servletResponse, this.dataBufferFactory, this.bufferSize);
-		asyncContext.addListener(new ErrorHandlingAsyncListener(request, response));
+		asyncContext.addListener(new EventHandlingAsyncListener(request, response));
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(asyncContext);
 		this.handler.handle(request, response).subscribe(resultSubscriber);
 	}
@@ -131,14 +131,14 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 	}
 
 
-	private static final class ErrorHandlingAsyncListener implements AsyncListener {
+	private static final class EventHandlingAsyncListener implements AsyncListener {
 
 		private final ServletServerHttpRequest request;
 
 		private final ServletServerHttpResponse response;
 
 
-		public ErrorHandlingAsyncListener(ServletServerHttpRequest request,
+		public EventHandlingAsyncListener(ServletServerHttpRequest request,
 				ServletServerHttpResponse response) {
 
 			this.request = request;
@@ -169,7 +169,8 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		@Override
 		public void onComplete(AsyncEvent event) {
-			// no op
+			this.request.handleAsyncListenerComplete();
+			this.response.handleAsyncListenerComplete();
 		}
 	}
 

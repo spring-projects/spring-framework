@@ -177,6 +177,13 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		}
 	}
 
+	/** Handle a complete callback from the Servlet container */
+	void handleAsyncListenerComplete() {
+		if (this.bodyPublisher != null) {
+			this.bodyPublisher.onAllDataRead();
+		}
+	}
+
 	private RequestBodyPublisher createBodyPublisher() throws IOException {
 		RequestBodyPublisher bodyPublisher = new RequestBodyPublisher(
 				this.request.getInputStream(), this.dataBufferFactory, this.bufferSize);
