@@ -25,10 +25,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
+ * @author Damien Bouclier 
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rick Evans
- * @author Damien Bouclier
  */
 public class StringUtilsTests {
 
@@ -697,18 +697,16 @@ public class StringUtilsTests {
 		assertEquals("sr_#LATN", StringUtils.parseLocaleString("sr_#LATN").toString());
 	}
 	
-	@Test
-    public void testIsEmpty()
-    {
-	    assertTrue(StringUtils.isEmpty(null));
-	    assertTrue(StringUtils.isEmpty(""));
-	    assertFalse(StringUtils.isEmpty(" "));
-	    assertFalse(StringUtils.isEmpty("someString"));
-    }
-	
     @Test
-    public void testIsNotEmpty()
-    {
+    public void testIsEmpty() {
+        assertTrue(StringUtils.isEmpty(null));
+        assertTrue(StringUtils.isEmpty(""));
+        assertFalse(StringUtils.isEmpty(" "));
+        assertFalse(StringUtils.isEmpty("someString"));
+    }
+    
+    @Test
+    public void testIsNotEmpty() {
         assertFalse(StringUtils.isNotEmpty(null));
         assertFalse(StringUtils.isNotEmpty(""));
         assertTrue(StringUtils.isNotEmpty(" "));
@@ -716,8 +714,7 @@ public class StringUtilsTests {
     }
     
     @Test
-    public void testIsBlank()
-    {
+    public void testIsBlank() {
         assertTrue(StringUtils.isBlank(null));
         assertTrue(StringUtils.isBlank(""));
         assertTrue(StringUtils.isBlank(" "));
@@ -725,8 +722,7 @@ public class StringUtilsTests {
     }
     
     @Test
-    public void testIsNotBlank()
-    {
+    public void testIsNotBlank() {
         assertFalse(StringUtils.isNotBlank(null));
         assertFalse(StringUtils.isNotBlank(""));
         assertFalse(StringUtils.isNotBlank(" "));

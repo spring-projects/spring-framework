@@ -95,8 +95,7 @@ public abstract class StringUtils {
      * @return true if string is not empty
      * @since 5.0.0
      */
-    public static boolean isNotEmpty(CharSequence str)
-    {
+    public static boolean isNotEmpty(Object str) {
         return !isEmpty(str);
     }
 
@@ -108,8 +107,7 @@ public abstract class StringUtils {
      * @return true if string is blank
      * @since 5.0.0
      */
-    public static boolean isBlank(String str)
-    {
+    public static boolean isBlank(String str) {
         return isEmpty(trimWhitespace(str));
     }
 
@@ -121,8 +119,7 @@ public abstract class StringUtils {
      * @return true if the string is not blank
      * @since 5.0.0
      */
-    public static boolean isNotBlank(String str)
-    {
+    public static boolean isNotBlank(String str) {
         return isNotEmpty(trimWhitespace(str));
     }
 	
