@@ -29,8 +29,16 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * A container for CORS configuration that also provides methods to check
- * the actual or requested origin, HTTP methods, and headers.
+ * A container for CORS configuration along with methods to check against the
+ * actual origin, HTTP methods, and headers of a given request.
+ *
+ * <p>By default a newly created {@code CorsConfiguration} does not permit any
+ * cross-origin requests and must be configured explicitly to indicate what
+ * should be allowed.
+ *
+ * <p>Use {@link #applyPermitDefaultValues()} to flip the initialization model
+ * to start with open defaults that permit all cross-origin requests for GET,
+ * HEAD, and POST requests.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
@@ -72,9 +80,9 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Construct a new {@code CorsConfiguration} instance with nothing allowed by default
-	 * but {@code "GET"} and {@code "HEAD"} methods.
-	 * @see #applyDefaultPermitConfiguration()
+	 * Construct a new {@code CorsConfiguration} instance with no cross-origin
+	 * requests allowed for any origin by default.
+	 * @see #applyPermitDefaultValues()
 	 */
 	public CorsConfiguration() {
 	}
@@ -93,75 +101,6 @@ public class CorsConfiguration {
 		this.maxAge = other.maxAge;
 	}
 
-	/**
-	 * Apply the following default permit configuration only for properties that has not
-	 * been defined:
-	 * <ul>
-	 *     <li>All origins are allowed</li>
-	 *     <li>Simple methods ({@code GET}, {@code HEAD} and {@code POST}) are allowed</li>
-	 *     <li>All headers are allowed</li>
-	 *     <li>Credentials are allowed</li>
-	 *     <li>Max age is set to 1800 seconds (30 minutes)</li>
-	 * </ul>
-	 */
-	public CorsConfiguration applyDefaultPermitConfiguration() {
-		if (this.allowedOrigins == null) {
-			this.addAllowedOrigin(ALL);
-		}
-		if (this.allowedMethods == null) {
-			this.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(),
-					HttpMethod.HEAD.name(), HttpMethod.POST.name()));
-		}
-		if (this.allowedHeaders == null) {
-			this.addAllowedHeader(ALL);
-		}
-		if (this.allowCredentials == null) {
-			this.setAllowCredentials(true);
-		}
-		if (this.maxAge == null) {
-			this.setMaxAge(1800L);
-		}
-		return this;
-	}
-
-	/**
-	 * Combine the supplied {@code CorsConfiguration} with this one.
-	 * <p>Properties of this configuration are overridden by any non-null
-	 * properties of the supplied one.
-	 * @return the combined {@code CorsConfiguration} or {@code this}
-	 * configuration if the supplied configuration is {@code null}
-	 */
-	public CorsConfiguration combine(CorsConfiguration other) {
-		if (other == null) {
-			return this;
-		}
-		CorsConfiguration config = new CorsConfiguration(this);
-		config.setAllowedOrigins(combine(getAllowedOrigins(), other.getAllowedOrigins()));
-		config.setAllowedMethods(combine(getAllowedMethods(), other.getAllowedMethods()));
-		config.setAllowedHeaders(combine(getAllowedHeaders(), other.getAllowedHeaders()));
-		config.setExposedHeaders(combine(getExposedHeaders(), other.getExposedHeaders()));
-		Boolean allowCredentials = other.getAllowCredentials();
-		if (allowCredentials != null) {
-			config.setAllowCredentials(allowCredentials);
-		}
-		Long maxAge = other.getMaxAge();
-		if (maxAge != null) {
-			config.setMaxAge(maxAge);
-		}
-		return config;
-	}
-
-	private List<String> combine(List<String> source, List<String> other) {
-		if (other == null || other.contains(ALL)) {
-			return source;
-		}
-		if (source == null || source.contains(ALL)) {
-			return other;
-		}
-		Set<String> combined = new LinkedHashSet<>(source);
-		combined.addAll(other);
-		return new ArrayList<>(combined);
-	}
 
 	/**
 	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
@@ -358,6 +297,83 @@ public class CorsConfiguration {
 		return this.maxAge;
 	}
 
+	/**
+	 * By default a newly created {@code CorsConfiguration} does not permit any
+	 * cross-origin requests and must be configured explicitly to indicate what
+	 * should be allowed.
+	 *
+	 * <p>Use this method to flip the initialization model to start with open
+	 * defaults that permit all cross-origin requests for GET, HEAD, and POST
+	 * requests. Note however that this method will not override any existing
+	 * values already set.
+	 *
+	 * <p>The following defaults are applied if not already set:
+	 * <ul>
+	 *     <li>Allow all origins, i.e. {@code "*"}.</li>
+	 *     <li>Allow "simple" methods {@code GET}, {@code HEAD} and {@code POST}.</li>
+	 *     <li>Allow all headers.</li>
+	 *     <li>Allow credentials.</li>
+	 *     <li>Set max age to 1800 seconds (30 minutes).</li>
+	 * </ul>
+	 */
+	public CorsConfiguration applyPermitDefaultValues() {
+		if (this.allowedOrigins == null) {
+			this.addAllowedOrigin(ALL);
+		}
+		if (this.allowedMethods == null) {
+			this.setAllowedMethods(Arrays.asList(
+					HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name()));
+		}
+		if (this.allowedHeaders == null) {
+			this.addAllowedHeader(ALL);
+		}
+		if (this.allowCredentials == null) {
+			this.setAllowCredentials(true);
+		}
+		if (this.maxAge == null) {
+			this.setMaxAge(1800L);
+		}
+		return this;
+	}
+
+	/**
+	 * Combine the supplied {@code CorsConfiguration} with this one.
+	 * <p>Properties of this configuration are overridden by any non-null
+	 * properties of the supplied one.
+	 * @return the combined {@code CorsConfiguration} or {@code this}
+	 * configuration if the supplied configuration is {@code null}
+	 */
+	public CorsConfiguration combine(CorsConfiguration other) {
+		if (other == null) {
+			return this;
+		}
+		CorsConfiguration config = new CorsConfiguration(this);
+		config.setAllowedOrigins(combine(getAllowedOrigins(), other.getAllowedOrigins()));
+		config.setAllowedMethods(combine(getAllowedMethods(), other.getAllowedMethods()));
+		config.setAllowedHeaders(combine(getAllowedHeaders(), other.getAllowedHeaders()));
+		config.setExposedHeaders(combine(getExposedHeaders(), other.getExposedHeaders()));
+		Boolean allowCredentials = other.getAllowCredentials();
+		if (allowCredentials != null) {
+			config.setAllowCredentials(allowCredentials);
+		}
+		Long maxAge = other.getMaxAge();
+		if (maxAge != null) {
+			config.setMaxAge(maxAge);
+		}
+		return config;
+	}
+
+	private List<String> combine(List<String> source, List<String> other) {
+		if (other == null || other.contains(ALL)) {
+			return source;
+		}
+		if (source == null || source.contains(ALL)) {
+			return other;
+		}
+		Set<String> combined = new LinkedHashSet<>(source);
+		combined.addAll(other);
+		return new ArrayList<>(combined);
+	}
 
 	/**
 	 * Check the origin of the request against the configured allowed origins.

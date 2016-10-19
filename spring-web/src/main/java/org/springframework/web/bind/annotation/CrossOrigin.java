@@ -28,8 +28,10 @@ import org.springframework.web.cors.CorsConfiguration;
 /**
  * Marks the annotated method or type as permitting cross origin requests.
  *
- * <p>By default, all origins, headers are permitted, credentials are allowed and the
- * maximum age is set to 30 minutes.
+ * <p>By default all origins and headers are permitted, credentials are allowed,
+ * and the maximum age is set to 1800 seconds (30 minutes). The list of HTTP
+ * methods is set to the methods on the {@code @RequestMapping} if not
+ * explicitly set on {@code @CrossOrigin}.
  *
  * <p><b>NOTE:</b> {@code @CrossOrigin} is processed if an appropriate
  * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
@@ -47,25 +49,25 @@ import org.springframework.web.cors.CorsConfiguration;
 public @interface CrossOrigin {
 
 	/**
-	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyDefaultPermitConfiguration}
+	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyPermitDefaultValues}
 	 */
 	@Deprecated
 	String[] DEFAULT_ORIGINS = { "*" };
 
 	/**
-	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyDefaultPermitConfiguration}
+	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyPermitDefaultValues}
 	 */
 	@Deprecated
 	String[] DEFAULT_ALLOWED_HEADERS = { "*" };
 
 	/**
-	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyDefaultPermitConfiguration}
+	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyPermitDefaultValues}
 	 */
 	@Deprecated
 	boolean DEFAULT_ALLOW_CREDENTIALS = true;
 
 	/**
-	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyDefaultPermitConfiguration}
+	 * @deprecated as of Spring 5.0, in favor of using {@link CorsConfiguration#applyPermitDefaultValues}
 	 */
 	@Deprecated
 	long DEFAULT_MAX_AGE = 1800;

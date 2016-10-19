@@ -309,7 +309,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				config.addAllowedMethod(allowedMethod.name());
 			}
 		}
-		return config.applyDefaultPermitConfiguration();
+		return config.applyPermitDefaultValues();
 	}
 
 	private void updateCorsConfig(CorsConfiguration config, CrossOrigin annotation) {

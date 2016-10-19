@@ -48,7 +48,7 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 		List<Element> mappings = DomUtils.getChildElementsByTagName(element, "mapping");
 
 		if (mappings.isEmpty()) {
-			CorsConfiguration config = new CorsConfiguration().applyDefaultPermitConfiguration();
+			CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
 			corsConfigurations.put("/**", config);
 		}
 		else {
@@ -76,7 +76,7 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 				if (mapping.hasAttribute("max-age")) {
 					config.setMaxAge(Long.parseLong(mapping.getAttribute("max-age")));
 				}
-				corsConfigurations.put(mapping.getAttribute("path"), config.applyDefaultPermitConfiguration());
+				corsConfigurations.put(mapping.getAttribute("path"), config.applyPermitDefaultValues());
 			}
 		}
 

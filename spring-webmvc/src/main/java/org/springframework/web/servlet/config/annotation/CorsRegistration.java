@@ -22,13 +22,13 @@ import java.util.Arrays;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
- * {@code CorsRegistration} assists with the creation of a {@link CorsConfiguration}
- * instance mapped to a path pattern.
- *
- * <p>By default, all origins, headers, credentials and {@code GET}, {@code HEAD}, and
- * {@code POST} methods are allowed, and the max age is set to 30 minutes.
+ * Assists with the creation of a {@link CorsConfiguration} instance mapped to
+ * a path pattern. By default all origins, headers, and credentials for
+ * {@code GET}, {@code HEAD}, and {@code POST} requests are allowed while the
+ * max age is set to 30 minutes.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @author Sam Brannen
  * @since 4.2
  * @see CorsConfiguration
@@ -42,17 +42,18 @@ public class CorsRegistration {
 
 
 	/**
-	 * Create a new {@link CorsRegistration} instance with all origins, headers, credentials
-	 * and {@code GET}, {@code HEAD}, and {@code POST} methods allowed, and the max age
-	 * set to 30 minutes on the specified path.
-	 * @param pathPattern the path where the CORS configuration should apply. Exact path
-	 * mapping URIs (such as {@code "/admin"}) are supported as well as Ant-style path
-	 * patterns (such as {@code "/admin/**"}).
+	 * Create a new {@link CorsRegistration} that allows all origins, headers, and
+	 * credentials for {@code GET}, {@code HEAD}, and {@code POST} requests with
+	 * max age set to 1800 seconds (30 minutes) for the specified path.
+	 *
+	 * @param pathPattern the path that the CORS configuration should apply to;
+	 * exact path mapping URIs (such as {@code "/admin"}) are supported as well
+	 * as Ant-style path patterns (such as {@code "/admin/**"}).
 	 */
 	public CorsRegistration(String pathPattern) {
 		this.pathPattern = pathPattern;
 		// Same implicit default values as the @CrossOrigin annotation + allows simple methods
-		this.config = new CorsConfiguration().applyDefaultPermitConfiguration();
+		this.config = new CorsConfiguration().applyPermitDefaultValues();
 	}
 
 	/**
@@ -67,10 +68,10 @@ public class CorsRegistration {
 
 
 	/**
-	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"},
-	 * {@code "PUT"}, etc.
+	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"}, etc.
 	 * <p>The special value {@code "*"} allows all methods.
-	 * <p>By default, simple methods ({@code GET}, {@code HEAD}, and {@code POST}) are allowed.
+	 * <p>By default "simple" methods {@code GET}, {@code HEAD}, and {@code POST}
+	 * are allowed.
 	 */
 	public CorsRegistration allowedMethods(String... methods) {
 		this.config.setAllowedMethods(new ArrayList<>(Arrays.asList(methods)));
@@ -80,12 +81,11 @@ public class CorsRegistration {
 	/**
 	 * Set the list of headers that a pre-flight request can list as allowed
 	 * for use during an actual request.
-	 * <p>The special value {@code "*"} allows actual requests to send any
-	 * header.
+	 * <p>The special value {@code "*"} may be used to allow all headers.
 	 * <p>A header name is not required to be listed if it is one of:
 	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
-	 * {@code Last-Modified}, or {@code Pragma}.
-	 * <p>By default, all headers are allowed.
+	 * {@code Last-Modified}, or {@code Pragma} as per the CORS spec.
+	 * <p>By default all headers are allowed.
 	 */
 	public CorsRegistration allowedHeaders(String... headers) {
 		this.config.setAllowedHeaders(new ArrayList<>(Arrays.asList(headers)));
@@ -93,11 +93,11 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Set the list of response headers other than simple headers (i.e.
+	 * Set the list of response headers other than "simple" headers, i.e.
 	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
-	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}) that an
+	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}, that an
 	 * actual response might have and can be exposed.
-	 * <p>Note that {@code "*"} is not a valid exposed header value.
+	 * <p>Note that {@code "*"} is not supported on this property.
 	 * <p>By default this is not set.
 	 */
 	public CorsRegistration exposedHeaders(String... headers) {
@@ -106,9 +106,9 @@ public class CorsRegistration {
 	}
 
 	/**
-	 * Configure how long, in seconds, the response from a pre-flight request
+	 * Configure how long in seconds the response from a pre-flight request
 	 * can be cached by clients.
-	 * <p>By default, this is set to 1800 seconds (30 minutes).
+	 * <p>By default this is set to 1800 seconds (30 minutes).
 	 */
 	public CorsRegistration maxAge(long maxAge) {
 		this.config.setMaxAge(maxAge);
@@ -117,7 +117,8 @@ public class CorsRegistration {
 
 	/**
 	 * Whether user credentials are supported.
-	 * <p>By default, this is set to {@code true} (i.e. user credentials are supported).
+	 * <p>By default this is set to {@code true} in which case user credentials
+	 * are supported.
 	 */
 	public CorsRegistration allowCredentials(boolean allowCredentials) {
 		this.config.setAllowCredentials(allowCredentials);
