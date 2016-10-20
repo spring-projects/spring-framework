@@ -42,6 +42,8 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 
 	private URI url;
 
+	private String contextPath = "";
+
 	private final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
 	private final HttpHeaders headers = new HttpHeaders();
@@ -97,6 +99,15 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public URI getURI() {
 		return this.url;
+	}
+
+	public void setContextPath(String contextPath) {
+		this.contextPath = contextPath;
+	}
+
+	@Override
+	public String getContextPath() {
+		return this.contextPath;
 	}
 
 	public MockServerHttpRequest addHeader(String name, String value) {

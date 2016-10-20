@@ -16,9 +16,9 @@
 
 package org.springframework.http.server.reactive;
 
+import java.util.Map;
+
 import io.undertow.server.HttpServerExchange;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -34,19 +34,18 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandler {
-
-	private static final Log logger = LogFactory.getLog(UndertowHttpHandlerAdapter.class);
-
-
-	private final HttpHandler delegate;
+public class UndertowHttpHandlerAdapter extends HttpHandlerAdapterSupport
+		implements io.undertow.server.HttpHandler {
 
 	private DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory(false);
 
 
-	public UndertowHttpHandlerAdapter(HttpHandler delegate) {
-		Assert.notNull(delegate, "HttpHandler delegate is required");
-		this.delegate = delegate;
+	public UndertowHttpHandlerAdapter(HttpHandler httpHandler) {
+		super(httpHandler);
+	}
+
+	public UndertowHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
+		super(handlerMap);
 	}
 
 
@@ -58,10 +57,11 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
+
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, this.dataBufferFactory);
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange, this.dataBufferFactory);
 
-		this.delegate.handle(request, response).subscribe(new Subscriber<Void>() {
+		getHttpHandler().handle(request, response).subscribe(new Subscriber<Void>() {
 			@Override
 			public void onSubscribe(Subscription subscription) {
 				subscription.request(Long.MAX_VALUE);

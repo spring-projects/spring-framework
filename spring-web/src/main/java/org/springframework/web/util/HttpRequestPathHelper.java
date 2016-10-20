@@ -66,7 +66,8 @@ public class HttpRequestPathHelper {
 		if (!StringUtils.hasText(contextPath)) {
 			return path;
 		}
-		return (path.length() > contextPath.length() ? path.substring(contextPath.length()) : "");
+		int contextLength = contextPath.length();
+		return (path.length() > contextLength ? path.substring(contextLength) : "");
 	}
 
 	private String decode(ServerWebExchange exchange, String path) {

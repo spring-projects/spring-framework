@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * return the authenticated user for the request.
  *
  * @author Rossen Stoyanchev
+ * @since 5.0
  */
 public class ServerWebExchangeDecorator implements ServerWebExchange {
 

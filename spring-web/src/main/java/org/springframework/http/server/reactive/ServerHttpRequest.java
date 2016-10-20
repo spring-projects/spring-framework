@@ -30,9 +30,6 @@ import org.springframework.util.MultiValueMap;
  */
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
 
-
-	// TODO: https://jira.spring.io/browse/SPR-14726
-
 	/**
 	 * Returns the portion of the URL path that represents the context path for
 	 * the current {@link HttpHandler}. The context path is always at the

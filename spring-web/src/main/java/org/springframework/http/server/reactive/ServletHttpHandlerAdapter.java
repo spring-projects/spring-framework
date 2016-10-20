@@ -17,17 +17,19 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
-import javax.servlet.ServletException;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -45,14 +47,11 @@ import org.springframework.util.Assert;
  */
 @WebServlet(asyncSupported = true)
 @SuppressWarnings("serial")
-public class ServletHttpHandlerAdapter extends HttpServlet {
+public class ServletHttpHandlerAdapter extends HttpHandlerAdapterSupport
+		implements Servlet {
 
 	private static final int DEFAULT_BUFFER_SIZE = 8192;
 
-
-	private static final Log logger = LogFactory.getLog(ServletHttpHandlerAdapter.class);
-
-	private final HttpHandler handler;
 
 	// Servlet is based on blocking I/O, hence the usage of non-direct, heap-based buffers
 	// (i.e. 'false' as constructor argument)
@@ -61,13 +60,12 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
 
-	/**
-	 * Create a new {@code ServletHttpHandlerAdapter} with the given HTTP handler.
-	 * @param handler the handler
-     */
-	public ServletHttpHandlerAdapter(HttpHandler handler) {
-		Assert.notNull(handler, "HttpHandler must not be null");
-		this.handler = handler;
+	public ServletHttpHandlerAdapter(HttpHandler httpHandler) {
+		super(httpHandler);
+	}
+
+	public ServletHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
+		super(handlerMap);
 	}
 
 
@@ -76,28 +74,56 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		this.dataBufferFactory = dataBufferFactory;
 	}
 
+	public DataBufferFactory getDataBufferFactory() {
+		return this.dataBufferFactory;
+	}
+
 	public void setBufferSize(int bufferSize) {
 		Assert.isTrue(bufferSize > 0);
 		this.bufferSize = bufferSize;
 	}
 
+	public int getBufferSize() {
+		return this.bufferSize;
+	}
 
 	@Override
-	protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
-			throws ServletException, IOException {
+	public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
+
+		ServletServerHttpRequest request = new ServletServerHttpRequest(
+				((HttpServletRequest) servletRequest), getDataBufferFactory(), getBufferSize());
+		ServletServerHttpResponse response = new ServletServerHttpResponse(
+				((HttpServletResponse) servletResponse), getDataBufferFactory(), getBufferSize());
 
 		AsyncContext asyncContext = servletRequest.startAsync();
-		ServletServerHttpRequest request = new ServletServerHttpRequest(
-				servletRequest, this.dataBufferFactory, this.bufferSize);
-		ServletServerHttpResponse response = new ServletServerHttpResponse(
-				servletResponse, this.dataBufferFactory, this.bufferSize);
 		asyncContext.addListener(new EventHandlingAsyncListener(request, response));
+
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(asyncContext);
-		this.handler.handle(request, response).subscribe(resultSubscriber);
+		getHttpHandler().handle(request, response).subscribe(resultSubscriber);
+	}
+
+	// Other Servlet methods...
+
+	@Override
+	public void init(ServletConfig config) {
+	}
+
+	@Override
+	public ServletConfig getServletConfig() {
+		return null;
+	}
+
+	@Override
+	public String getServletInfo() {
+		return "";
+	}
+
+	@Override
+	public void destroy() {
 	}
 
 
-	private static class HandlerResultSubscriber implements Subscriber<Void> {
+	private class HandlerResultSubscriber implements Subscriber<Void> {
 
 		private final AsyncContext asyncContext;
 

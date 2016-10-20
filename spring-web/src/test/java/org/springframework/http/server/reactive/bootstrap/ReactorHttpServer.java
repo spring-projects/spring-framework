@@ -35,9 +35,13 @@ public class ReactorHttpServer extends HttpServerSupport implements HttpServer, 
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
-		Assert.notNull(getHttpHandler());
-		this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
+		if (getHttpHandlerMap() != null) {
+			this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandlerMap());
+		}
+		else {
+			Assert.notNull(getHttpHandler());
+			this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
+		}
 		this.reactorServer = reactor.ipc.netty.http.HttpServer.create(getHost(), getPort());
 	}
 

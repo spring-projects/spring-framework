@@ -16,16 +16,14 @@
 
 package org.springframework.http.server.reactive;
 
+import java.util.Map;
 import java.util.function.Function;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 import reactor.ipc.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
-import org.springframework.util.Assert;
 
 /**
  * Adapt {@link HttpHandler} to the Reactor Netty channel handling function.
@@ -33,26 +31,27 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  * @since 5.0
  */
-public class ReactorHttpHandlerAdapter implements Function<HttpChannel, Mono<Void>> {
-
-	private static final Log logger = LogFactory.getLog(ReactorHttpHandlerAdapter.class);
-
-	private final HttpHandler delegate;
+public class ReactorHttpHandlerAdapter extends HttpHandlerAdapterSupport
+		implements Function<HttpChannel, Mono<Void>> {
 
 
-	public ReactorHttpHandlerAdapter(HttpHandler delegate) {
-		Assert.notNull(delegate, "HttpHandler delegate is required");
-		this.delegate = delegate;
+	public ReactorHttpHandlerAdapter(HttpHandler httpHandler) {
+		super(httpHandler);
+	}
+
+	public ReactorHttpHandlerAdapter(Map<String, HttpHandler> handlerMap) {
+		super(handlerMap);
 	}
 
 
 	@Override
 	public Mono<Void> apply(HttpChannel channel) {
-		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.delegate().alloc());
-		ReactorServerHttpRequest adaptedRequest = new ReactorServerHttpRequest(channel, bufferFactory);
-		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel, bufferFactory);
 
-		return this.delegate.handle(adaptedRequest, adaptedResponse)
+		NettyDataBufferFactory bufferFactory = new NettyDataBufferFactory(channel.delegate().alloc());
+		ReactorServerHttpRequest request = new ReactorServerHttpRequest(channel, bufferFactory);
+		ReactorServerHttpResponse response = new ReactorServerHttpResponse(channel, bufferFactory);
+
+		return getHttpHandler().handle(request, response)
 				.otherwise(ex -> {
 					logger.error("Could not complete request", ex);
 					channel.status(HttpResponseStatus.INTERNAL_SERVER_ERROR);
