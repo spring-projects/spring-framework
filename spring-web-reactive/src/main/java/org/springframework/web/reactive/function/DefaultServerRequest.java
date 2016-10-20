@@ -27,13 +27,18 @@ import java.util.OptionalLong;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.BodyExtractor;
+import org.springframework.http.codec.BodyExtractors;
 import org.springframework.http.codec.HttpMessageReader;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -73,6 +78,7 @@ class DefaultServerRequest implements ServerRequest {
 
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
+		Assert.notNull(extractor, "'extractor' must not be null");
 		return extractor.extract(request(),
 				new BodyExtractor.Context() {
 					@Override
@@ -80,6 +86,16 @@ class DefaultServerRequest implements ServerRequest {
 						return DefaultServerRequest.this.strategies.messageReaders();
 					}
 				});
+	}
+
+	@Override
+	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
+		return body(BodyExtractors.toMono(elementClass));
+	}
+
+	@Override
+	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
+		return body(BodyExtractors.toFlux(elementClass));
 	}
 
 	@Override

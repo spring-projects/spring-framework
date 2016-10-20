@@ -25,6 +25,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.BodyExtractor;
@@ -318,6 +321,16 @@ public abstract class RequestPredicates {
 		@Override
 		public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
 			return this.request.body(extractor);
+		}
+
+		@Override
+		public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
+			return this.request.bodyToMono(elementClass);
+		}
+
+		@Override
+		public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
+			return this.request.bodyToFlux(elementClass);
 		}
 
 		@Override

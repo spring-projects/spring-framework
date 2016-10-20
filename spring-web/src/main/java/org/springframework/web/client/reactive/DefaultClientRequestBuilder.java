@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -149,12 +148,6 @@ class DefaultClientRequestBuilder implements ClientRequest.BodyBuilder {
 	@Override
 	public <T, S extends Publisher<T>> ClientRequest<S> body(S publisher, Class<T> elementClass) {
 		return body(BodyInserters.fromPublisher(publisher, elementClass));
-	}
-
-	@Override
-	public <T, S extends Publisher<T>> ClientRequest<S> body(S publisher,
-			ResolvableType elementType) {
-		return body(BodyInserters.fromPublisher(publisher, elementType));
 	}
 
 	private static class BodyInserterRequest<T> implements ClientRequest<T> {

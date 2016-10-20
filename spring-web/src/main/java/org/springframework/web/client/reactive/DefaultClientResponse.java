@@ -23,11 +23,15 @@ import java.util.OptionalLong;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpResponse;
 import org.springframework.http.codec.BodyExtractor;
+import org.springframework.http.codec.BodyExtractors;
 import org.springframework.http.codec.HttpMessageReader;
 
 /**
@@ -71,8 +75,14 @@ class DefaultClientResponse implements ClientResponse {
 		});
 	}
 
-	public ClientHttpResponse clientHttpResponse() {
-		return this.response;
+	@Override
+	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
+		return body(BodyExtractors.toMono(elementClass));
+	}
+
+	@Override
+	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
+		return body(BodyExtractors.toFlux(elementClass));
 	}
 
 	private class DefaultHeaders implements Headers {

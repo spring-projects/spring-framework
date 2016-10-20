@@ -25,7 +25,6 @@ import java.util.Set;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -328,18 +327,6 @@ public interface ServerResponse<T> {
 		 * @return the built request
 		 */
 		<S extends Publisher<T>, T> ServerResponse<S> body(S publisher, Class<T> elementClass);
-
-		/**
-		 * Set the body of the response to the given {@code Publisher} and return it. This
-		 * convenience method combines {@link #body(BodyInserter)} and
-		 * {@link BodyInserters#fromPublisher(Publisher, ResolvableType)}.
-		 * @param publisher the {@code Publisher} to write to the response
-		 * @param elementType the type of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <S> the type of the {@code Publisher}
-		 * @return the built request
-		 */
-		<S extends Publisher<T>, T> ServerResponse<S> body(S publisher, ResolvableType elementType);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.

@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -94,6 +97,18 @@ public class MockServerRequest<T> implements ServerRequest {
 	@SuppressWarnings("unchecked")
 	public <S> S body(BodyExtractor<S, ? super ServerHttpRequest> extractor){
 		return (S) this.body;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S> Mono<S> bodyToMono(Class<? extends S> elementClass) {
+		return (Mono<S>) this.body;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S> Flux<S> bodyToFlux(Class<? extends S> elementClass) {
+		return (Flux<S>) this.body;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -23,7 +23,6 @@ import java.time.ZonedDateTime;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -317,16 +316,6 @@ public interface ClientRequest<T> {
 		 * @return the built request
 		 */
 		<T, S extends Publisher<T>> ClientRequest<S> body(S publisher, Class<T> elementClass);
-
-		/**
-		 * Set the body of the request to the given {@code Publisher} and return it.
-		 * @param publisher the {@code Publisher} to write to the request
-		 * @param elementType the type of elements contained in the publisher
-		 * @param <T> the type of the elements contained in the publisher
-		 * @param <S> the type of the {@code Publisher}.
-		 * @return the built request
-		 */
-		<T, S extends Publisher<T>> ClientRequest<S> body(S publisher, ResolvableType elementType);
 
 	}
 

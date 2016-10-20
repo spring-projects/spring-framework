@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
@@ -86,6 +89,16 @@ public class ServerRequestWrapper implements ServerRequest {
 	@Override
 	public <T> T body(BodyExtractor<T, ? super ServerHttpRequest> extractor) {
 		return this.request.body(extractor);
+	}
+
+	@Override
+	public <T> Mono<T> bodyToMono(Class<? extends T> elementClass) {
+		return this.request.bodyToMono(elementClass);
+	}
+
+	@Override
+	public <T> Flux<T> bodyToFlux(Class<? extends T> elementClass) {
+		return this.request.bodyToFlux(elementClass);
 	}
 
 	@Override

@@ -35,7 +35,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Conventions;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -166,11 +165,6 @@ class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 	@Override
 	public <S extends Publisher<T>, T> ServerResponse<S> body(S publisher, Class<T> elementClass) {
 		return body(BodyInserters.fromPublisher(publisher, elementClass));
-	}
-
-	@Override
-	public <S extends Publisher<T>, T> ServerResponse<S> body(S publisher, ResolvableType elementType) {
-		return body(BodyInserters.fromPublisher(publisher, elementType));
 	}
 
 	@Override

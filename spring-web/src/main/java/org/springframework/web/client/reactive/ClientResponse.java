@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,6 +57,23 @@ public interface ClientResponse {
 	 * @return the extracted body
 	 */
 	<T> T body(BodyExtractor<T, ? super ClientHttpResponse> extractor);
+
+	/**
+	 * Extract the body to a {@code Mono}.
+	 * @param elementClass the class of element in the {@code Mono}
+	 * @param <T> the element type
+	 * @return the body as a mono
+	 */
+	<T> Mono<T> bodyToMono(Class<? extends T> elementClass);
+
+	/**
+	 * Extract the body to a {@code Flux}.
+	 * @param elementClass the class of element in the {@code Flux}
+	 * @param <T> the element type
+	 * @return the body as a flux
+	 */
+	<T> Flux<T> bodyToFlux(Class<? extends T> elementClass);
+
 
 	/**
 	 * Represents the headers of the HTTP response.
