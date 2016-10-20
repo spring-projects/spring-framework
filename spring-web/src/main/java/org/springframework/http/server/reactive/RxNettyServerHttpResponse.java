@@ -24,10 +24,10 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.ResponseContentWriter;
 import org.reactivestreams.Publisher;
-import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import rx.Observable;
+import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
@@ -72,9 +72,9 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> writeWithInternal(Publisher<DataBuffer> body) {
-		Observable<ByteBuf> content = RxJava1Adapter.publisherToObservable(body)
+		Observable<ByteBuf> content = RxReactiveStreams.toObservable(body)
 				.map(NettyDataBufferFactory::toByteBuf);
-		return RxJava1Adapter.observableToFlux(this.response.write(content))
+		return Flux.from(RxReactiveStreams.toPublisher(this.response.write(content)))
 				.then();
 	}
 
@@ -85,9 +85,9 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 				flatMap(publisher -> Flux.from(publisher).
 						map(NettyDataBufferFactory::toByteBuf).
 						concatWith(Mono.just(FLUSH_SIGNAL)));
-		Observable<ByteBuf> content = RxJava1Adapter.publisherToObservable(bodyWithFlushSignals);
+		Observable<ByteBuf> content = RxReactiveStreams.toObservable(bodyWithFlushSignals);
 		ResponseContentWriter<ByteBuf> writer = this.response.write(content, bb -> bb == FLUSH_SIGNAL);
-		return RxJava1Adapter.observableToFlux(writer).then();
+		return Flux.from(RxReactiveStreams.toPublisher(writer)).then();
 	}
 
 	@Override

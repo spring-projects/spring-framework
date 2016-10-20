@@ -24,9 +24,9 @@ import io.reactivex.netty.protocol.http.server.RequestHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.adapter.RxJava1Adapter;
 import reactor.core.publisher.Mono;
 import rx.Observable;
+import rx.RxReactiveStreams;
 
 import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.util.Assert;
@@ -64,7 +64,7 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 				})
 				.doOnSuccess(aVoid -> logger.debug("Successfully completed request"));
 
-		return RxJava1Adapter.publisherToObservable(result);
+		return RxReactiveStreams.toObservable(result);
 	}
 
 }
