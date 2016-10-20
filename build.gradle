@@ -78,7 +78,7 @@ configure(allprojects) { project ->
 	ext.quartzVersion          = "2.2.3"
 	ext.reactivestreamsVersion = "1.0.0"
 	ext.reactorVersion         = "2.0.8.RELEASE"
-	ext.reactorCoreVersion     = '3.0.2.RELEASE'
+	ext.reactorCoreVersion     = '3.0.3.BUILD-SNAPSHOT'
 	ext.reactorNettyVersion    = '0.5.2.RELEASE'
 	ext.romeVersion            = "1.7.0"
 	ext.rxjavaVersion          = '1.2.1'
