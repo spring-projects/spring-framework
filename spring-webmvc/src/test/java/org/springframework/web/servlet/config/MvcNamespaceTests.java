@@ -904,7 +904,7 @@ public class MvcNamespaceTests {
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());
 			assertTrue(config.getAllowCredentials());
-			assertEquals(new Long(1600), config.getMaxAge());
+			assertEquals(new Long(1800), config.getMaxAge());
 		}
 	}
 
@@ -934,7 +934,7 @@ public class MvcNamespaceTests {
 			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
 			assertNull(config.getExposedHeaders());
 			assertTrue(config.getAllowCredentials());
-			assertEquals(new Long(1600), config.getMaxAge());
+			assertEquals(new Long(1800), config.getMaxAge());
 		}
 	}
 
