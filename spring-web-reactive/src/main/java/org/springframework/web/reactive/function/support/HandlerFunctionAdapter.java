@@ -24,9 +24,9 @@ import org.springframework.core.MethodParameter;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.function.HandlerFunction;
-import org.springframework.web.reactive.function.Request;
-import org.springframework.web.reactive.function.Response;
 import org.springframework.web.reactive.function.RouterFunctions;
+import org.springframework.web.reactive.function.ServerRequest;
+import org.springframework.web.reactive.function.ServerResponse;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -41,7 +41,7 @@ public class HandlerFunctionAdapter implements HandlerAdapter {
 
 	static {
 		try {
-			Method method = HandlerFunction.class.getMethod("handle", Request.class);
+			Method method = HandlerFunction.class.getMethod("handle", ServerRequest.class);
 			HANDLER_FUNCTION_RETURN_TYPE = new MethodParameter(method, -1);
 		}
 		catch (NoSuchMethodException ex) {
@@ -57,11 +57,12 @@ public class HandlerFunctionAdapter implements HandlerAdapter {
 	@Override
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		HandlerFunction<?> handlerFunction = (HandlerFunction<?>) handler;
-		Request request =
-				exchange.<Request>getAttribute(RouterFunctions.REQUEST_ATTRIBUTE)
-						.orElseThrow(() -> new IllegalStateException("Could not find Request in exchange attributes"));
+		ServerRequest request =
+				exchange.<ServerRequest>getAttribute(RouterFunctions.REQUEST_ATTRIBUTE)
+						.orElseThrow(() -> new IllegalStateException(
+								"Could not find ServerRequest in exchange attributes"));
 
-		Response<?> response = handlerFunction.handle(request);
+		ServerResponse<?> response = handlerFunction.handle(request);
 		HandlerResult handlerResult =
 				new HandlerResult(handlerFunction, response, HANDLER_FUNCTION_RETURN_TYPE);
 		return Mono.just(handlerResult);

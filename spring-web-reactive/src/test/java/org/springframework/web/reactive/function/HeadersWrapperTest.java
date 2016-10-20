@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.support.RequestWrapper;
+import org.springframework.web.reactive.function.support.ServerRequestWrapper;
 
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
@@ -41,15 +41,15 @@ import static org.mockito.Mockito.when;
  */
 public class HeadersWrapperTest {
 
-	private Request.Headers mockHeaders;
+	private ServerRequest.Headers mockHeaders;
 
-	private RequestWrapper.HeadersWrapper wrapper;
+	private ServerRequestWrapper.HeadersWrapper wrapper;
 
 
 	@Before
 	public void createWrapper() {
-		mockHeaders = mock(Request.Headers.class);
-		wrapper = new RequestWrapper.HeadersWrapper(mockHeaders);
+		mockHeaders = mock(ServerRequest.Headers.class);
+		wrapper = new ServerRequestWrapper.HeadersWrapper(mockHeaders);
 	}
 
 	@Test

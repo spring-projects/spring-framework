@@ -33,14 +33,14 @@ public class RouterFunctionTests {
 
 	@Test
 	public void andSame() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
+		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<Void> routerFunction1 = request -> Optional.empty();
 		RouterFunction<Void> routerFunction2 = request -> Optional.of(handlerFunction);
 
 		RouterFunction<Void> result = routerFunction1.andSame(routerFunction2);
 		assertNotNull(result);
 
-		MockRequest request = MockRequest.builder().build();
+		MockServerRequest request = MockServerRequest.builder().build();
 		Optional<HandlerFunction<Void>> resultHandlerFunction = result.route(request);
 		assertTrue(resultHandlerFunction.isPresent());
 		assertEquals(handlerFunction, resultHandlerFunction.get());
@@ -48,14 +48,14 @@ public class RouterFunctionTests {
 
 	@Test
 	public void and() throws Exception {
-		HandlerFunction<String> handlerFunction = request -> Response.ok().body(fromObject("42"));
+		HandlerFunction<String> handlerFunction = request -> ServerResponse.ok().body(fromObject("42"));
 		RouterFunction<Void> routerFunction1 = request -> Optional.empty();
 		RouterFunction<String> routerFunction2 = request -> Optional.of(handlerFunction);
 
 		RouterFunction<?> result = routerFunction1.and(routerFunction2);
 		assertNotNull(result);
 
-		MockRequest request = MockRequest.builder().build();
+		MockServerRequest request = MockServerRequest.builder().build();
 		Optional<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
 		assertTrue(resultHandlerFunction.isPresent());
 		assertEquals(handlerFunction, resultHandlerFunction.get());
@@ -63,21 +63,21 @@ public class RouterFunctionTests {
 
 	@Test
 	public void filter() throws Exception {
-		HandlerFunction<String> handlerFunction = request -> Response.ok().body(fromObject("42"));
+		HandlerFunction<String> handlerFunction = request -> ServerResponse.ok().body(fromObject("42"));
 		RouterFunction<String> routerFunction = request -> Optional.of(handlerFunction);
 
-		FilterFunction<String, Integer> filterFunction = (request, next) -> {
-			Response<String> response = next.handle(request);
+		HandlerFilterFunction<String, Integer> filterFunction = (request, next) -> {
+			ServerResponse<String> response = next.handle(request);
 			int i = Integer.parseInt(response.body());
-			return Response.ok().body(fromObject(i));
+			return ServerResponse.ok().body(fromObject(i));
 		};
 		RouterFunction<Integer> result = routerFunction.filter(filterFunction);
 		assertNotNull(result);
 
-		MockRequest request = MockRequest.builder().build();
+		MockServerRequest request = MockServerRequest.builder().build();
 		Optional<? extends HandlerFunction<?>> resultHandlerFunction = result.route(request);
 		assertTrue(resultHandlerFunction.isPresent());
-		Response<?> resultResponse = resultHandlerFunction.get().handle(request);
+		ServerResponse<?> resultResponse = resultHandlerFunction.get().handle(request);
 		assertEquals(42, resultResponse.body());
 	}
 

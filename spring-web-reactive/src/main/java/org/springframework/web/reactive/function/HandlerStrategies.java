@@ -29,16 +29,16 @@ import org.springframework.web.reactive.result.view.ViewResolver;
  * Defines the strategies to be used for processing {@link HandlerFunction}s. An instance of
  * this class is immutable; instances are typically created through the mutable {@link Builder}:
  * either through {@link #builder()} to set up default strategies, or {@link #empty()} to start from
- * scratch. Alternatively, {@code StrategiesSupplier} instances can be created through
+ * scratch. Alternatively, {@code HandlerStrategies} instances can be created through
  * {@link #of(Supplier, Supplier, Supplier)}.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 5.0
- * @see RouterFunctions#toHttpHandler(RouterFunction, StrategiesSupplier)
- * @see RouterFunctions#toHandlerMapping(RouterFunction, StrategiesSupplier)
+ * @see RouterFunctions#toHttpHandler(RouterFunction, HandlerStrategies)
+ * @see RouterFunctions#toHandlerMapping(RouterFunction, HandlerStrategies)
  */
-public interface StrategiesSupplier {
+public interface HandlerStrategies {
 
 	// Instance methods
 
@@ -67,41 +67,41 @@ public interface StrategiesSupplier {
 	// Static methods
 
 	/**
-	 * Return a new {@code StrategiesSupplier} with default initialization.
-	 * @return the new {@code StrategiesSupplier}
+	 * Return a new {@code HandlerStrategies} with default initialization.
+	 * @return the new {@code HandlerStrategies}
 	 */
-	static StrategiesSupplier withDefaults() {
+	static HandlerStrategies withDefaults() {
 		return builder().build();
 	}
 
 	/**
-	 * Return a new {@code StrategiesSupplier} based on the given
+	 * Return a new {@code HandlerStrategies} based on the given
 	 * {@linkplain ApplicationContext application context}.
 	 * The returned supplier will search for all {@link HttpMessageReader}, {@link HttpMessageWriter},
 	 * and {@link ViewResolver} instances in the given application context and return them for
 	 * {@link #messageReaders()}, {@link #messageWriters()}, and {@link #viewResolvers()}
 	 * respectively.
 	 * @param applicationContext the application context to base the strategies on
-	 * @return the new {@code StrategiesSupplier}
+	 * @return the new {@code HandlerStrategies}
 	 */
-	static StrategiesSupplier of(ApplicationContext applicationContext) {
+	static HandlerStrategies of(ApplicationContext applicationContext) {
 		return builder(applicationContext).build();
 	}
 
 	/**
-	 * Return a new {@code StrategiesSupplier} described by the given supplier functions.
+	 * Return a new {@code HandlerStrategies} described by the given supplier functions.
 	 * All provided supplier function parameters can be {@code null} to indicate an empty
 	 * stream is to be returned.
 	 * @param messageReaders the supplier function for {@link HttpMessageReader} instances (can be {@code null})
 	 * @param messageWriters the supplier function for {@link HttpMessageWriter} instances (can be {@code null})
 	 * @param viewResolvers the supplier function for {@link ViewResolver} instances (can be {@code null})
-	 * @return the new {@code StrategiesSupplier}
+	 * @return the new {@code HandlerStrategies}
 	 */
-	static StrategiesSupplier of(Supplier<Stream<HttpMessageReader<?>>> messageReaders,
+	static HandlerStrategies of(Supplier<Stream<HttpMessageReader<?>>> messageReaders,
 			Supplier<Stream<HttpMessageWriter<?>>> messageWriters,
 			Supplier<Stream<ViewResolver>> viewResolvers) {
 
-		return new StrategiesSupplier() {
+		return new HandlerStrategies() {
 			@Override
 			public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
 				return checkForNull(messageReaders);
@@ -124,11 +124,11 @@ public interface StrategiesSupplier {
 	// Builder methods
 
 	/**
-	 * Return a mutable builder for a {@code StrategiesSupplier} with default initialization.
+	 * Return a mutable builder for a {@code HandlerStrategies} with default initialization.
 	 * @return the builder
 	 */
 	static Builder builder() {
-		DefaultStrategiesSupplierBuilder builder = new DefaultStrategiesSupplierBuilder();
+		DefaultHandlerStrategiesBuilder builder = new DefaultHandlerStrategiesBuilder();
 		builder.defaultConfiguration();
 		return builder;
 	}
@@ -144,22 +144,22 @@ public interface StrategiesSupplier {
 	 */
 	static Builder builder(ApplicationContext applicationContext) {
 		Assert.notNull(applicationContext, "ApplicationContext must not be null");
-		DefaultStrategiesSupplierBuilder builder = new DefaultStrategiesSupplierBuilder();
+		DefaultHandlerStrategiesBuilder builder = new DefaultHandlerStrategiesBuilder();
 		builder.applicationContext(applicationContext);
 		return builder;
 	}
 
 	/**
-	 * Return a mutable, empty builder for a {@code StrategiesSupplier}.
+	 * Return a mutable, empty builder for a {@code HandlerStrategies}.
 	 * @return the builder
 	 */
 	static Builder empty() {
-		return new DefaultStrategiesSupplierBuilder();
+		return new DefaultHandlerStrategiesBuilder();
 	}
 
 
 	/**
-	 * A mutable builder for a {@link StrategiesSupplier}.
+	 * A mutable builder for a {@link HandlerStrategies}.
 	 */
 	interface Builder {
 
@@ -185,10 +185,10 @@ public interface StrategiesSupplier {
 		Builder viewResolver(ViewResolver viewResolver);
 
 		/**
-		 * Builds the {@link StrategiesSupplier}.
+		 * Builds the {@link HandlerStrategies}.
 		 * @return the built strategies
 		 */
-		StrategiesSupplier build();
+		HandlerStrategies build();
 	}
 
 }

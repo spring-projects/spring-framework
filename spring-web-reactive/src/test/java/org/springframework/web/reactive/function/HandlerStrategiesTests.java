@@ -41,11 +41,11 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  */
-public class StrategiesSupplierTests {
+public class HandlerStrategiesTests {
 
 	@Test
 	public void empty() {
-		StrategiesSupplier strategies = StrategiesSupplier.empty().build();
+		HandlerStrategies strategies = HandlerStrategies.empty().build();
 		assertEquals(Optional.empty(), strategies.messageReaders().get().findFirst());
 		assertEquals(Optional.empty(), strategies.messageWriters().get().findFirst());
 		assertEquals(Optional.empty(), strategies.viewResolvers().get().findFirst());
@@ -56,7 +56,7 @@ public class StrategiesSupplierTests {
 		HttpMessageReader<?> messageReader = new DummyMessageReader();
 		HttpMessageWriter<?> messageWriter = new DummyMessageWriter();
 
-		StrategiesSupplier strategies = StrategiesSupplier.of(
+		HandlerStrategies strategies = HandlerStrategies.of(
 				() -> Stream.of(messageReader),
 				() -> Stream.of(messageWriter),
 				null);
@@ -77,7 +77,7 @@ public class StrategiesSupplierTests {
 		applicationContext.registerSingleton("messageReader", DummyMessageReader.class);
 		applicationContext.refresh();
 
-		StrategiesSupplier strategies = StrategiesSupplier.of(applicationContext);
+		HandlerStrategies strategies = HandlerStrategies.of(applicationContext);
 		assertTrue(strategies.messageReaders().get()
 				.allMatch(r -> r instanceof DummyMessageReader));
 		assertTrue(strategies.messageWriters().get()

@@ -35,7 +35,7 @@ public class RequestPredicatesTests {
 	@Test
 	public void all() throws Exception {
 		RequestPredicate predicate = RequestPredicates.all();
-		MockRequest request = MockRequest.builder().build();
+		MockServerRequest request = MockServerRequest.builder().build();
 		assertTrue(predicate.test(request));
 	}
 
@@ -43,10 +43,10 @@ public class RequestPredicatesTests {
 	public void method() throws Exception {
 		HttpMethod httpMethod = HttpMethod.GET;
 		RequestPredicate predicate = RequestPredicates.method(httpMethod);
-		MockRequest request = MockRequest.builder().method(httpMethod).build();
+		MockServerRequest request = MockServerRequest.builder().method(httpMethod).build();
 		assertTrue(predicate.test(request));
 
-		request = MockRequest.builder().method(HttpMethod.POST).build();
+		request = MockServerRequest.builder().method(HttpMethod.POST).build();
 		assertFalse(predicate.test(request));
 	}
 
@@ -55,31 +55,31 @@ public class RequestPredicatesTests {
 		URI uri = URI.create("http://localhost/path");
 
 		RequestPredicate predicate = RequestPredicates.GET("/p*");
-		MockRequest request = MockRequest.builder().method(HttpMethod.GET).uri(uri).build();
+		MockServerRequest request = MockServerRequest.builder().method(HttpMethod.GET).uri(uri).build();
 		assertTrue(predicate.test(request));
 
 		predicate = RequestPredicates.HEAD("/p*");
-		request = MockRequest.builder().method(HttpMethod.HEAD).uri(uri).build();
+		request = MockServerRequest.builder().method(HttpMethod.HEAD).uri(uri).build();
 		assertTrue(predicate.test(request));
 
 		predicate = RequestPredicates.POST("/p*");
-		request = MockRequest.builder().method(HttpMethod.POST).uri(uri).build();
+		request = MockServerRequest.builder().method(HttpMethod.POST).uri(uri).build();
 		assertTrue(predicate.test(request));
 
 		predicate = RequestPredicates.PUT("/p*");
-		request = MockRequest.builder().method(HttpMethod.PUT).uri(uri).build();
+		request = MockServerRequest.builder().method(HttpMethod.PUT).uri(uri).build();
 		assertTrue(predicate.test(request));
 
 		predicate = RequestPredicates.PATCH("/p*");
-		request = MockRequest.builder().method(HttpMethod.PATCH).uri(uri).build();
+		request = MockServerRequest.builder().method(HttpMethod.PATCH).uri(uri).build();
 		assertTrue(predicate.test(request));
 
 		predicate = RequestPredicates.DELETE("/p*");
-		request = MockRequest.builder().method(HttpMethod.DELETE).uri(uri).build();
+		request = MockServerRequest.builder().method(HttpMethod.DELETE).uri(uri).build();
 		assertTrue(predicate.test(request));
 
 		predicate = RequestPredicates.OPTIONS("/p*");
-		request = MockRequest.builder().method(HttpMethod.OPTIONS).uri(uri).build();
+		request = MockServerRequest.builder().method(HttpMethod.OPTIONS).uri(uri).build();
 		assertTrue(predicate.test(request));
 
 	}
@@ -88,10 +88,10 @@ public class RequestPredicatesTests {
 	public void path() throws Exception {
 		URI uri = URI.create("http://localhost/path");
 		RequestPredicate predicate = RequestPredicates.path("/p*");
-		MockRequest request = MockRequest.builder().uri(uri).build();
+		MockServerRequest request = MockServerRequest.builder().uri(uri).build();
 		assertTrue(predicate.test(request));
 
-		request = MockRequest.builder().build();
+		request = MockServerRequest.builder().build();
 		assertFalse(predicate.test(request));
 	}
 
@@ -104,10 +104,10 @@ public class RequestPredicatesTests {
 					return headers.header(name).equals(
 							Collections.singletonList(value));
 				});
-		MockRequest request = MockRequest.builder().header(name, value).build();
+		MockServerRequest request = MockServerRequest.builder().header(name, value).build();
 		assertTrue(predicate.test(request));
 
-		request = MockRequest.builder().build();
+		request = MockServerRequest.builder().build();
 		assertFalse(predicate.test(request));
 	}
 
@@ -115,10 +115,11 @@ public class RequestPredicatesTests {
 	public void contentType() throws Exception {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.contentType(json);
-		MockRequest request = MockRequest.builder().header("Content-Type", json.toString()).build();
+		MockServerRequest
+				request = MockServerRequest.builder().header("Content-Type", json.toString()).build();
 		assertTrue(predicate.test(request));
 
-		request = MockRequest.builder().build();
+		request = MockServerRequest.builder().build();
 		assertFalse(predicate.test(request));
 	}
 
@@ -126,10 +127,10 @@ public class RequestPredicatesTests {
 	public void accept() throws Exception {
 		MediaType json = MediaType.APPLICATION_JSON;
 		RequestPredicate predicate = RequestPredicates.accept(json);
-		MockRequest request = MockRequest.builder().header("Accept", json.toString()).build();
+		MockServerRequest request = MockServerRequest.builder().header("Accept", json.toString()).build();
 		assertTrue(predicate.test(request));
 
-		request = MockRequest.builder().build();
+		request = MockServerRequest.builder().build();
 		assertFalse(predicate.test(request));
 	}
 

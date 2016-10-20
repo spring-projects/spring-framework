@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.function;
 
-import org.springframework.web.reactive.function.support.RequestWrapper;
+import org.springframework.web.reactive.function.support.ServerRequestWrapper;
 
 /**
  * Represents a function that filters a {@linkplain HandlerFunction handler function}.
@@ -25,22 +25,22 @@ import org.springframework.web.reactive.function.support.RequestWrapper;
  * @param <R> the type of the response of the function
  * @author Arjen Poutsma
  * @since 5.0
- * @see RouterFunction#filter(FilterFunction) 
+ * @see RouterFunction#filter(HandlerFilterFunction)
  */
 @FunctionalInterface
-public interface FilterFunction<T, R> {
+public interface HandlerFilterFunction<T, R> {
 
 	/**
 	 * Apply this filter to the given handler function. The given
 	 * {@linkplain HandlerFunction handler function} represents the next entity in the
-	 * chain, and can be {@linkplain HandlerFunction#handle(Request) invoked} in order
+	 * chain, and can be {@linkplain HandlerFunction#handle(ServerRequest) invoked} in order
 	 * to proceed to this entity, or not invoked to block the chain.
 	 *
 	 * @param request the request
 	 * @param next    the next handler or filter function in the chain
 	 * @return the filtered response
-	 * @see RequestWrapper
+	 * @see ServerRequestWrapper
 	 */
-	Response<R> filter(Request request, HandlerFunction<T> next);
+	ServerResponse<R> filter(ServerRequest request, HandlerFunction<T> next);
 
 }

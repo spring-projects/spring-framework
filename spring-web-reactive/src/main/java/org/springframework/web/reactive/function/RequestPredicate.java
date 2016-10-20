@@ -19,7 +19,7 @@ package org.springframework.web.reactive.function;
 import org.springframework.util.Assert;
 
 /**
- * Represents a function that evaluates on a given {@link Request}.
+ * Represents a function that evaluates on a given {@link ServerRequest}.
  * Instances of this function that evaluate on common request properties can be found in {@link RequestPredicates}.
  *
  * @author Arjen Poutsma
@@ -38,7 +38,7 @@ public interface RequestPredicate {
 	 * @param request the request to match against
 	 * @return {@code true} if the request matches the predicate; {@code false} otherwise
 	 */
-	boolean test(Request request);
+	boolean test(ServerRequest request);
 
 	/**
 	 * Returns a composed request predicate that tests against both this predicate AND the {@code other} predicate.
@@ -52,12 +52,12 @@ public interface RequestPredicate {
 		Assert.notNull(other, "'other' must not be null");
 		return new RequestPredicate() {
 			@Override
-			public boolean test(Request t) {
+			public boolean test(ServerRequest t) {
 				return RequestPredicate.this.test(t) && other.test(t);
 			}
 
 			@Override
-			public Request subRequest(Request request) {
+			public ServerRequest subRequest(ServerRequest request) {
 				return other.subRequest(RequestPredicate.this.subRequest(request));
 			}
 		};
@@ -85,7 +85,7 @@ public interface RequestPredicate {
 		return (t) -> test(t) || other.test(t);
 	}
 
-	default Request subRequest(Request request) {
+	default ServerRequest subRequest(ServerRequest request) {
 		return request;
 	}
 }

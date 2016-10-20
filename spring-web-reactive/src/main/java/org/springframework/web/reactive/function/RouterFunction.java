@@ -35,7 +35,7 @@ public interface RouterFunction<T> {
 	 * @return an {@code Optional} describing the {@code HandlerFunction} that matches this request,
 	 * or an empty {@code Optional} if there is no match
 	 */
-	Optional<HandlerFunction<T>> route(Request request);
+	Optional<HandlerFunction<T>> route(ServerRequest request);
 
 	/**
 	 * Return a composed routing function that first invokes this function,
@@ -73,13 +73,13 @@ public interface RouterFunction<T> {
 
 	/**
 	 * Filter all {@linkplain HandlerFunction handler functions} routed by this function with the given
-	 * {@linkplain FilterFunction filter function}.
+	 * {@linkplain HandlerFilterFunction filter function}.
 	 *
 	 * @param filterFunction the filter to apply
 	 * @param <S>            the filter return type
 	 * @return the filtered routing function
 	 */
-	default <S> RouterFunction<S> filter(FilterFunction<T, S> filterFunction) {
+	default <S> RouterFunction<S> filter(HandlerFilterFunction<T, S> filterFunction) {
 		return request -> this.route(request)
 				.map(handlerFunction -> filterRequest -> filterFunction.filter(filterRequest, handlerFunction));
 	}

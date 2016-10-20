@@ -129,25 +129,25 @@ public class SseHandlerFunctionIntegrationTests
 
 	private static class SseHandler {
 
-		public Response<Publisher<String>> string(Request request) {
+		public ServerResponse<Publisher<String>> string(ServerRequest request) {
 			Flux<String> flux = Flux.interval(Duration.ofMillis(100)).map(l -> "foo " + l).take(2);
-			return Response.ok().body(fromServerSentEvents(flux, String.class));
+			return ServerResponse.ok().body(fromServerSentEvents(flux, String.class));
 		}
 
-		public Response<Publisher<Person>> person(Request request) {
+		public ServerResponse<Publisher<Person>> person(ServerRequest request) {
 			Flux<Person> flux = Flux.interval(Duration.ofMillis(100))
 					.map(l -> new Person("foo " + l)).take(2);
-			return Response.ok().body(fromServerSentEvents(flux, Person.class));
+			return ServerResponse.ok().body(fromServerSentEvents(flux, Person.class));
 		}
 
-		public Response<Publisher<ServerSentEvent<String>>> sse(Request request) {
+		public ServerResponse<Publisher<ServerSentEvent<String>>> sse(ServerRequest request) {
 			Flux<ServerSentEvent<String>> flux = Flux.interval(Duration.ofMillis(100))
 					.map(l -> ServerSentEvent.<String>builder().data("foo")
 							.id(Long.toString(l))
 							.comment("bar")
 							.build()).take(2);
 
-			return Response.ok().body(fromServerSentEvents(flux));
+			return ServerResponse.ok().body(fromServerSentEvents(flux));
 		}
 	}
 

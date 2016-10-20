@@ -21,31 +21,31 @@ import reactor.core.publisher.Mono;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.reactive.function.Response;
-import org.springframework.web.reactive.function.StrategiesSupplier;
+import org.springframework.web.reactive.function.ServerResponse;
+import org.springframework.web.reactive.function.HandlerStrategies;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code HandlerResultHandler} implementation that supports {@link Response}s.
+ * {@code HandlerResultHandler} implementation that supports {@link ServerResponse}s.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class ResponseResultHandler implements HandlerResultHandler {
+public class ServerResponseResultHandler implements HandlerResultHandler {
 
-	private final StrategiesSupplier strategies;
+	private final HandlerStrategies strategies;
 
 	/**
 	 * Create a {@code ResponseResultHandler} with default strategies.
 	 */
-	public ResponseResultHandler() {
-		this(StrategiesSupplier.builder().build());
+	public ServerResponseResultHandler() {
+		this(HandlerStrategies.builder().build());
 	}
 
 	/**
 	 * Create a {@code ResponseResultHandler} with the given strategies.
 	 */
-	public ResponseResultHandler(StrategiesSupplier strategies) {
+	public ServerResponseResultHandler(HandlerStrategies strategies) {
 		Assert.notNull(strategies, "'strategies' must not be null");
 		this.strategies = strategies;
 	}
@@ -53,13 +53,13 @@ public class ResponseResultHandler implements HandlerResultHandler {
 	@Override
 	public boolean supports(HandlerResult result) {
 		return result.getReturnValue()
-				.filter(o -> o instanceof Response)
+				.filter(o -> o instanceof ServerResponse)
 				.isPresent();
 	}
 
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		Response<?> response = (Response<?>) result.getReturnValue().orElseThrow(
+		ServerResponse<?> response = (ServerResponse<?>) result.getReturnValue().orElseThrow(
 				IllegalStateException::new);
 		return response.writeTo(exchange, this.strategies);
 	}

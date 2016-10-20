@@ -37,19 +37,19 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code Request} implementation based on a {@link ServerWebExchange}.
+ * {@code ServerRequest} implementation based on a {@link ServerWebExchange}.
  * @author Arjen Poutsma
  */
-class DefaultRequest implements Request {
+class DefaultServerRequest implements ServerRequest {
 
 	private final ServerWebExchange exchange;
 
 	private final Headers headers;
 
-	private final StrategiesSupplier strategies;
+	private final HandlerStrategies strategies;
 
 
-	DefaultRequest(ServerWebExchange exchange, StrategiesSupplier strategies) {
+	DefaultServerRequest(ServerWebExchange exchange, HandlerStrategies strategies) {
 		this.exchange = exchange;
 		this.strategies = strategies;
 		this.headers = new DefaultHeaders();
@@ -77,7 +77,7 @@ class DefaultRequest implements Request {
 				new BodyExtractor.Context() {
 					@Override
 					public Supplier<Stream<HttpMessageReader<?>>> messageReaders() {
-						return DefaultRequest.this.strategies.messageReaders();
+						return DefaultServerRequest.this.strategies.messageReaders();
 					}
 				});
 	}

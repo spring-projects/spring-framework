@@ -21,31 +21,31 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.BodyInserter;
+import org.springframework.http.codec.BodyInserters;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Represents a typed HTTP response, as returned by a {@linkplain HandlerFunction handler function} or
- * {@linkplain FilterFunction filter function}.
+ * Represents a typed, server-side HTTP response, as returned by a
+ * {@linkplain HandlerFunction handler function} or {@linkplain HandlerFilterFunction filter function}.
  *
  * @author Arjen Poutsma
  * @since 5.0
  * @param <T> the type of the body that this response contains
  */
-public interface Response<T> {
+public interface ServerResponse<T> {
 
 	// Instance methods
 
@@ -69,9 +69,9 @@ public interface Response<T> {
 	 *
 	 * @param exchange the web exchange to write to
 	 * @param strategies the strategies to use when writing
-	 * @return {@code Mono<Void>} to indicate when request handling is complete
+	 * @return {@code Mono<Void>} to indicate when writing is complete
 	 */
-	Mono<Void> writeTo(ServerWebExchange exchange, StrategiesSupplier strategies);
+	Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies);
 
 	// Static builder methods
 
@@ -81,9 +81,9 @@ public interface Response<T> {
 	 * @param other the response to copy the status and headers from
 	 * @return the created builder
 	 */
-	static BodyBuilder from(Response<?> other) {
+	static BodyBuilder from(ServerResponse<?> other) {
 		Assert.notNull(other, "'other' must not be null");
-		DefaultResponseBuilder builder = new DefaultResponseBuilder(other.statusCode().value());
+		DefaultServerResponseBuilder builder = new DefaultServerResponseBuilder(other.statusCode().value());
 		return builder.headers(other.headers());
 	}
 
@@ -95,7 +95,7 @@ public interface Response<T> {
 	 */
 	static BodyBuilder status(HttpStatus status) {
 		Assert.notNull(status, "HttpStatus must not be null");
-		return new DefaultResponseBuilder(status.value());
+		return new DefaultServerResponseBuilder(status.value());
 	}
 
 	/**
@@ -105,7 +105,7 @@ public interface Response<T> {
 	 * @return the created builder
 	 */
 	static BodyBuilder status(int status) {
-		return new DefaultResponseBuilder(status);
+		return new DefaultServerResponseBuilder(status);
 	}
 
 	/**
@@ -271,7 +271,7 @@ public interface Response<T> {
 		 *
 		 * @return the built response
 		 */
-		Response<Void> build();
+		ServerResponse<Void> build();
 
 		/**
 		 * Build the response entity with no body.
@@ -280,7 +280,7 @@ public interface Response<T> {
 		 * @param voidPublisher publisher publisher to indicate when the response should be committed
 		 * @return the built response
 		 */
-		<T extends Publisher<Void>> Response<T> build(T voidPublisher);
+		<T extends Publisher<Void>> ServerResponse<T> build(T voidPublisher);
 	}
 
 
@@ -310,23 +310,36 @@ public interface Response<T> {
 		BodyBuilder contentType(MediaType contentType);
 
 		/**
-		 * Set the body with the given {@code supplier} function, and write it with the given
-		 * {@code writer} function.
-		 * @param writer a function that writes the body to the {@code ServerHttpResponse}
-		 * @param supplier a function that returns the body instance
-		 * @param <T> the type contained in the body
-		 * @return the built response
-		 */
-		<T> Response<T> body(BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer,
-				Supplier<T> supplier);
-
-		/**
 		 * Set the body of the response to the given {@code BodyInserter} and return it.
 		 * @param inserter the {@code BodyInserter} that writes to the response
 		 * @param <T> the type contained in the body
 		 * @return the built response
 		 */
-		<T> Response<T> body(BodyInserter<T, ? super ServerHttpResponse> inserter);
+		<T> ServerResponse<T> body(BodyInserter<T, ? super ServerHttpResponse> inserter);
+
+		/**
+		 * Set the body of the response to the given {@code Publisher} and return it. This
+		 * convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromPublisher(Publisher, Class)}.
+		 * @param publisher the {@code Publisher} to write to the response
+		 * @param elementClass the class of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <S> the type of the {@code Publisher}
+		 * @return the built request
+		 */
+		<S extends Publisher<T>, T> ServerResponse<S> body(S publisher, Class<T> elementClass);
+
+		/**
+		 * Set the body of the response to the given {@code Publisher} and return it. This
+		 * convenience method combines {@link #body(BodyInserter)} and
+		 * {@link BodyInserters#fromPublisher(Publisher, ResolvableType)}.
+		 * @param publisher the {@code Publisher} to write to the response
+		 * @param elementType the type of elements contained in the publisher
+		 * @param <T> the type of the elements contained in the publisher
+		 * @param <S> the type of the {@code Publisher}
+		 * @return the built request
+		 */
+		<S extends Publisher<T>, T> ServerResponse<S> body(S publisher, ResolvableType elementType);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.
@@ -339,7 +352,7 @@ public interface Response<T> {
 		 * @param modelAttributes the modelAttributes used to render the template
 		 * @return the built response
 		 */
-		Response<Rendering> render(String name, Object... modelAttributes);
+		ServerResponse<Rendering> render(String name, Object... modelAttributes);
 
 		/**
 		 * Render the template with the given {@code name} using the given {@code model}.
@@ -347,7 +360,7 @@ public interface Response<T> {
 		 * @param model the model used to render the template
 		 * @return the built response
 		 */
-		Response<Rendering> render(String name, Map<String, ?> model);
+		ServerResponse<Rendering> render(String name, Map<String, ?> model);
 
 	}
 

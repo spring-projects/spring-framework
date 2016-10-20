@@ -26,7 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,12 +35,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.Conventions;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.BodyInserter;
+import org.springframework.http.codec.BodyInserters;
 import org.springframework.http.codec.HttpMessageWriter;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -50,22 +51,22 @@ import org.springframework.web.reactive.result.view.ViewResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Default {@link Response.BodyBuilder} implementation.
+ * Default {@link ServerResponse.BodyBuilder} implementation.
  *
  * @author Arjen Poutsma
  */
-class DefaultResponseBuilder implements Response.BodyBuilder {
+class DefaultServerResponseBuilder implements ServerResponse.BodyBuilder {
 
 	private final int statusCode;
 
 	private final HttpHeaders headers = new HttpHeaders();
 
-	public DefaultResponseBuilder(int statusCode) {
+	public DefaultServerResponseBuilder(int statusCode) {
 		this.statusCode = statusCode;
 	}
 
 	@Override
-	public Response.BodyBuilder header(String headerName, String... headerValues) {
+	public ServerResponse.BodyBuilder header(String headerName, String... headerValues) {
 		for (String headerValue : headerValues) {
 			this.headers.add(headerName, headerValue);
 		}
@@ -73,7 +74,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public Response.BodyBuilder headers(HttpHeaders headers) {
+	public ServerResponse.BodyBuilder headers(HttpHeaders headers) {
 		if (headers != null) {
 			this.headers.putAll(headers);
 		}
@@ -81,25 +82,25 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public Response.BodyBuilder allow(HttpMethod... allowedMethods) {
+	public ServerResponse.BodyBuilder allow(HttpMethod... allowedMethods) {
 		this.headers.setAllow(new LinkedHashSet<>(Arrays.asList(allowedMethods)));
 		return this;
 	}
 
 	@Override
-	public Response.BodyBuilder contentLength(long contentLength) {
+	public ServerResponse.BodyBuilder contentLength(long contentLength) {
 		this.headers.setContentLength(contentLength);
 		return this;
 	}
 
 	@Override
-	public Response.BodyBuilder contentType(MediaType contentType) {
+	public ServerResponse.BodyBuilder contentType(MediaType contentType) {
 		this.headers.setContentType(contentType);
 		return this;
 	}
 
 	@Override
-	public Response.BodyBuilder eTag(String eTag) {
+	public ServerResponse.BodyBuilder eTag(String eTag) {
 		if (eTag != null) {
 			if (!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
 				eTag = "\"" + eTag;
@@ -113,7 +114,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public Response.BodyBuilder lastModified(ZonedDateTime lastModified) {
+	public ServerResponse.BodyBuilder lastModified(ZonedDateTime lastModified) {
 		ZonedDateTime gmt = lastModified.withZoneSameInstant(ZoneId.of("GMT"));
 		String headerValue = DateTimeFormatter.RFC_1123_DATE_TIME.format(gmt);
 		this.headers.set(HttpHeaders.LAST_MODIFIED, headerValue);
@@ -121,13 +122,13 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public Response.BodyBuilder location(URI location) {
+	public ServerResponse.BodyBuilder location(URI location) {
 		this.headers.setLocation(location);
 		return this;
 	}
 
 	@Override
-	public Response.BodyBuilder cacheControl(CacheControl cacheControl) {
+	public ServerResponse.BodyBuilder cacheControl(CacheControl cacheControl) {
 		String ccValue = cacheControl.getHeaderValue();
 		if (ccValue != null) {
 			this.headers.setCacheControl(cacheControl.getHeaderValue());
@@ -136,20 +137,20 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public Response.BodyBuilder varyBy(String... requestHeaders) {
+	public ServerResponse.BodyBuilder varyBy(String... requestHeaders) {
 		this.headers.setVary(Arrays.asList(requestHeaders));
 		return this;
 	}
 
 	@Override
-	public Response<Void> build() {
+	public ServerResponse<Void> build() {
 		return body(BodyInserter.of(
 				(response, context) -> response.setComplete(),
 				() -> null));
 	}
 
 	@Override
-	public <T extends Publisher<Void>> Response<T> build(T voidPublisher) {
+	public <T extends Publisher<Void>> ServerResponse<T> build(T voidPublisher) {
 		Assert.notNull(voidPublisher, "'voidPublisher' must not be null");
 		return body(BodyInserter.of(
 				(response, context) -> Flux.from(voidPublisher).then(response.setComplete()),
@@ -157,19 +158,23 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public <T> Response<T> body(BiFunction<ServerHttpResponse, BodyInserter.Context, Mono<Void>> writer,
-			Supplier<T> supplier) {
-		return body(BodyInserter.of(writer, supplier));
-	}
-
-	@Override
-	public <T> Response<T> body(BodyInserter<T, ? super ServerHttpResponse> inserter) {
+	public <T> ServerResponse<T> body(BodyInserter<T, ? super ServerHttpResponse> inserter) {
 		Assert.notNull(inserter, "'inserter' must not be null");
-		return new BodyInserterResponse<T>(this.statusCode, this.headers, inserter);
+		return new BodyInserterServerResponse<T>(this.statusCode, this.headers, inserter);
 	}
 
 	@Override
-	public Response<Rendering> render(String name, Object... modelAttributes) {
+	public <S extends Publisher<T>, T> ServerResponse<S> body(S publisher, Class<T> elementClass) {
+		return body(BodyInserters.fromPublisher(publisher, elementClass));
+	}
+
+	@Override
+	public <S extends Publisher<T>, T> ServerResponse<S> body(S publisher, ResolvableType elementType) {
+		return body(BodyInserters.fromPublisher(publisher, elementType));
+	}
+
+	@Override
+	public ServerResponse<Rendering> render(String name, Object... modelAttributes) {
 		Assert.hasLength(name, "'name' must not be empty");
 		return render(name, toModelMap(modelAttributes));
 	}
@@ -190,24 +195,24 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 	@Override
-	public Response<Rendering> render(String name, Map<String, ?> model) {
+	public ServerResponse<Rendering> render(String name, Map<String, ?> model) {
 		Assert.hasLength(name, "'name' must not be empty");
 		Map<String, Object> modelMap = new LinkedHashMap<>();
 		if (model != null) {
 			modelMap.putAll(model);
 		}
-		return new RenderingResponse(this.statusCode, this.headers, name, modelMap);
+		return new RenderingServerResponse(this.statusCode, this.headers, name, modelMap);
 	}
 
 
-	private static abstract class AbstractResponse<T> implements Response<T> {
+	private static abstract class AbstractServerResponse<T> implements ServerResponse<T> {
 
 		private final int statusCode;
 
 		private final HttpHeaders headers;
 
 
-		protected AbstractResponse(int statusCode, HttpHeaders headers) {
+		protected AbstractServerResponse(int statusCode, HttpHeaders headers) {
 			this.statusCode = statusCode;
 			this.headers = HttpHeaders.readOnlyHttpHeaders(headers);
 		}
@@ -235,12 +240,12 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		}
 	}
 
-	private static final class BodyInserterResponse<T> extends AbstractResponse<T> {
+	private static final class BodyInserterServerResponse<T> extends AbstractServerResponse<T> {
 
 		private final BodyInserter<T, ? super ServerHttpResponse> inserter;
 
 
-		public BodyInserterResponse(int statusCode, HttpHeaders headers,
+		public BodyInserterServerResponse(int statusCode, HttpHeaders headers,
 				BodyInserter<T, ? super ServerHttpResponse> inserter) {
 
 			super(statusCode, headers);
@@ -253,7 +258,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, StrategiesSupplier strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			return this.inserter.insert(response, new BodyInserter.Context() {
@@ -267,7 +272,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 	}
 
 
-	private static final class RenderingResponse extends AbstractResponse<Rendering> {
+	private static final class RenderingServerResponse extends AbstractServerResponse<Rendering> {
 
 		private final String name;
 
@@ -275,7 +280,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 
 		private final Rendering rendering;
 
-		public RenderingResponse(int statusCode, HttpHeaders headers, String name,
+		public RenderingServerResponse(int statusCode, HttpHeaders headers, String name,
 				Map<String, Object> model) {
 			super(statusCode, headers);
 			this.name = name;
@@ -289,7 +294,7 @@ class DefaultResponseBuilder implements Response.BodyBuilder {
 		}
 
 		@Override
-		public Mono<Void> writeTo(ServerWebExchange exchange, StrategiesSupplier strategies) {
+		public Mono<Void> writeTo(ServerWebExchange exchange, HandlerStrategies strategies) {
 			ServerHttpResponse response = exchange.getResponse();
 			writeStatusAndHeaders(response);
 			MediaType contentType = exchange.getResponse().getHeaders().getContentType();

@@ -32,14 +32,14 @@ import org.springframework.http.codec.BodyExtractor;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
- * Represents an HTTP request, as handled by a {@code HandlerFunction}.
+ * Represents a server-side HTTP request, as handled by a {@code HandlerFunction}.
  * Access to headers and body is offered by {@link Headers} and
  * {@link #body(BodyExtractor)} respectively.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
-public interface Request {
+public interface ServerRequest {
 
 	/**
 	 * Return the HTTP method.
@@ -115,7 +115,7 @@ public interface Request {
 
 	/**
 	 * Represents the headers of the HTTP request.
-	 * @see Request#headers()
+	 * @see ServerRequest#headers()
 	 */
 	interface Headers {
 

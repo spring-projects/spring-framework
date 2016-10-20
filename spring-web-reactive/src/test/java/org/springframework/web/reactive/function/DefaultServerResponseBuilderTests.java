@@ -61,137 +61,137 @@ import static org.mockito.Mockito.when;
 /**
  * @author Arjen Poutsma
  */
-public class DefaultResponseBuilderTests {
+public class DefaultServerResponseBuilderTests {
 
 	@Test
 	public void from() throws Exception {
-		Response<Void> other = Response.ok().header("foo", "bar").build();
-		Response<Void> result = Response.from(other).build();
+		ServerResponse<Void> other = ServerResponse.ok().header("foo", "bar").build();
+		ServerResponse<Void> result = ServerResponse.from(other).build();
 		assertEquals(HttpStatus.OK, result.statusCode());
 		assertEquals("bar", result.headers().getFirst("foo"));
 	}
 
 	@Test
 	public void status() throws Exception {
-		Response<Void> result = Response.status(HttpStatus.CREATED).build();
+		ServerResponse<Void> result = ServerResponse.status(HttpStatus.CREATED).build();
 		assertEquals(HttpStatus.CREATED, result.statusCode());
 	}
 
 	@Test
 	public void statusInt() throws Exception {
-		Response<Void> result = Response.status(201).build();
+		ServerResponse<Void> result = ServerResponse.status(201).build();
 		assertEquals(HttpStatus.CREATED, result.statusCode());
 	}
 
 	@Test
 	public void ok() throws Exception {
-		Response<Void> result = Response.ok().build();
+		ServerResponse<Void> result = ServerResponse.ok().build();
 		assertEquals(HttpStatus.OK, result.statusCode());
 	}
 
 	@Test
 	public void created() throws Exception {
 		URI location = URI.create("http://example.com");
-		Response<Void> result = Response.created(location).build();
+		ServerResponse<Void> result = ServerResponse.created(location).build();
 		assertEquals(HttpStatus.CREATED, result.statusCode());
 		assertEquals(location, result.headers().getLocation());
 	}
 
 	@Test
 	public void accepted() throws Exception {
-		Response<Void> result = Response.accepted().build();
+		ServerResponse<Void> result = ServerResponse.accepted().build();
 		assertEquals(HttpStatus.ACCEPTED, result.statusCode());
 	}
 
 	@Test
 	public void noContent() throws Exception {
-		Response<Void> result = Response.noContent().build();
+		ServerResponse<Void> result = ServerResponse.noContent().build();
 		assertEquals(HttpStatus.NO_CONTENT, result.statusCode());
 	}
 
 	@Test
 	public void badRequest() throws Exception {
-		Response<Void> result = Response.badRequest().build();
+		ServerResponse<Void> result = ServerResponse.badRequest().build();
 		assertEquals(HttpStatus.BAD_REQUEST, result.statusCode());
 	}
 
 	@Test
 	public void notFound() throws Exception {
-		Response<Void> result = Response.notFound().build();
+		ServerResponse<Void> result = ServerResponse.notFound().build();
 		assertEquals(HttpStatus.NOT_FOUND, result.statusCode());
 	}
 
 	@Test
 	public void unprocessableEntity() throws Exception {
-		Response<Void> result = Response.unprocessableEntity().build();
+		ServerResponse<Void> result = ServerResponse.unprocessableEntity().build();
 		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, result.statusCode());
 	}
 
 	@Test
 	public void allow() throws Exception {
-		Response<Void> result = Response.ok().allow(HttpMethod.GET).build();
+		ServerResponse<Void> result = ServerResponse.ok().allow(HttpMethod.GET).build();
 		assertEquals(Collections.singleton(HttpMethod.GET), result.headers().getAllow());
 	}
 
 	@Test
 	public void contentLength() throws Exception {
-		Response<Void> result = Response.ok().contentLength(42).build();
+		ServerResponse<Void> result = ServerResponse.ok().contentLength(42).build();
 		assertEquals(42, result.headers().getContentLength());
 	}
 
 	@Test
 	public void contentType() throws Exception {
-		Response<Void> result = Response.ok().contentType(MediaType.APPLICATION_JSON).build();
+		ServerResponse<Void> result = ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).build();
 		assertEquals(MediaType.APPLICATION_JSON, result.headers().getContentType());
 	}
 
 	@Test
 	public void eTag() throws Exception {
-		Response<Void> result = Response.ok().eTag("foo").build();
+		ServerResponse<Void> result = ServerResponse.ok().eTag("foo").build();
 		assertEquals("\"foo\"", result.headers().getETag());
 	}
 
 	@Test
 	public void lastModified() throws Exception {
 		ZonedDateTime now = ZonedDateTime.now();
-		Response<Void> result = Response.ok().lastModified(now).build();
+		ServerResponse<Void> result = ServerResponse.ok().lastModified(now).build();
 		assertEquals(now.toInstant().toEpochMilli()/1000, result.headers().getLastModified()/1000);
 	}
 
 	@Test
 	public void cacheControlTag() throws Exception {
-		Response<Void> result = Response.ok().cacheControl(CacheControl.noCache()).build();
+		ServerResponse<Void> result = ServerResponse.ok().cacheControl(CacheControl.noCache()).build();
 		assertEquals("no-cache", result.headers().getCacheControl());
 	}
 
 	@Test
 	public void varyBy() throws Exception {
-		Response<Void> result = Response.ok().varyBy("foo").build();
+		ServerResponse<Void> result = ServerResponse.ok().varyBy("foo").build();
 		assertEquals(Collections.singletonList("foo"), result.headers().getVary());
 	}
 
 	@Test
 	public void statusCode() throws Exception {
 		HttpStatus statusCode = HttpStatus.ACCEPTED;
-		Response<Void> result = Response.status(statusCode).build();
+		ServerResponse<Void> result = ServerResponse.status(statusCode).build();
 		assertSame(statusCode, result.statusCode());
 	}
 
 	@Test
 	public void headers() throws Exception {
 		HttpHeaders headers = new HttpHeaders();
-		Response<Void> result = Response.ok().headers(headers).build();
+		ServerResponse<Void> result = ServerResponse.ok().headers(headers).build();
 		assertEquals(headers, result.headers());
 	}
 
 	@Test
 	public void build() throws Exception {
-		Response<Void> result = Response.status(201).header("MyKey", "MyValue").build();
+		ServerResponse<Void> result = ServerResponse.status(201).header("MyKey", "MyValue").build();
 
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
-		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
+		HandlerStrategies strategies = mock(HandlerStrategies.class);
 
 		result.writeTo(exchange, strategies).block();
 		assertEquals(201, response.getStatusCode().value());
@@ -203,12 +203,12 @@ public class DefaultResponseBuilderTests {
 	@Test
 	public void buildVoidPublisher() throws Exception {
 		Mono<Void> mono = Mono.empty();
-		Response<Mono<Void>> result = Response.ok().build(mono);
+		ServerResponse<Mono<Void>> result = ServerResponse.ok().build(mono);
 
 		ServerWebExchange exchange = mock(ServerWebExchange.class);
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		when(exchange.getResponse()).thenReturn(response);
-		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
+		HandlerStrategies strategies = mock(HandlerStrategies.class);
 
 		result.writeTo(exchange, strategies).block();
 		assertNull(response.getBody());
@@ -227,7 +227,7 @@ public class DefaultResponseBuilderTests {
 					return response.writeWith(Mono.just(buffer));
 				};
 
-		Response<String> result = Response.ok().body(writer, supplier);
+		ServerResponse<String> result = ServerResponse.ok().body(BodyInserter.of(writer, supplier));
 		assertEquals(body, result.body());
 
 		MockServerHttpRequest request =
@@ -239,7 +239,7 @@ public class DefaultResponseBuilderTests {
 		List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<CharSequence>(new CharSequenceEncoder()));
 
-		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
+		HandlerStrategies strategies = mock(HandlerStrategies.class);
 		when(strategies.messageWriters()).thenReturn(messageWriters::stream);
 
 		result.writeTo(exchange, strategies).block();
@@ -249,7 +249,7 @@ public class DefaultResponseBuilderTests {
 	@Test
 	public void render() throws Exception {
 		Map<String, Object> model = Collections.singletonMap("foo", "bar");
-		Response<Rendering> result = Response.ok().render("view", model);
+		ServerResponse<Rendering> result = ServerResponse.ok().render("view", model);
 
 		assertEquals("view", result.body().name());
 		assertEquals(model, result.body().model());
@@ -265,7 +265,7 @@ public class DefaultResponseBuilderTests {
 		List<ViewResolver> viewResolvers = new ArrayList<>();
 		viewResolvers.add(viewResolver);
 
-		StrategiesSupplier mockConfig = mock(StrategiesSupplier.class);
+		HandlerStrategies mockConfig = mock(HandlerStrategies.class);
 		when(mockConfig.viewResolvers()).thenReturn(viewResolvers::stream);
 
 		result.writeTo(exchange, mockConfig).block();
@@ -273,11 +273,11 @@ public class DefaultResponseBuilderTests {
 
 	@Test
 	public void renderObjectArray() throws Exception {
-		Response<Rendering> result =
-				Response.ok().render("name", this, Collections.emptyList(), "foo");
+		ServerResponse<Rendering> result =
+				ServerResponse.ok().render("name", this, Collections.emptyList(), "foo");
 		Map<String, Object> model = result.body().model();
 		assertEquals(2, model.size());
-		assertEquals(this, model.get("defaultResponseBuilderTests"));
+		assertEquals(this, model.get("defaultServerResponseBuilderTests"));
 		assertEquals("foo", model.get("string"));
 	}
 

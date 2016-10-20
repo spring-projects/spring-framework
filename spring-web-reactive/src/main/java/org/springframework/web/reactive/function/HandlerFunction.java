@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.function;
 
 /**
- * Represents a function that handles a {@linkplain Request request}.
+ * Represents a function that handles a {@linkplain ServerRequest request}.
  *
  * @param <T> the type of the response of the function
  * @author Arjen Poutsma
@@ -31,6 +31,6 @@ public interface HandlerFunction<T> {
 	 * @param request the request to handle
 	 * @return the response
 	 */
-	Response<T> handle(Request request);
+	ServerResponse<T> handle(ServerRequest request);
 
 }

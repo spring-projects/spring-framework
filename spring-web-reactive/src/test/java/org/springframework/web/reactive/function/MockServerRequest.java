@@ -42,7 +42,7 @@ import org.springframework.util.MultiValueMap;
 /**
  * @author Arjen Poutsma
  */
-public class MockRequest<T> implements Request {
+public class MockServerRequest<T> implements ServerRequest {
 
 	private final HttpMethod method;
 
@@ -58,7 +58,7 @@ public class MockRequest<T> implements Request {
 
 	private final Map<String, String> pathVariables;
 
-	private MockRequest(HttpMethod method, URI uri,
+	private MockServerRequest(HttpMethod method, URI uri,
 			MockHeaders headers, T body, Map<String, Object> attributes,
 			MultiValueMap<String, String> queryParams,
 			Map<String, String> pathVariables) {
@@ -134,9 +134,9 @@ public class MockRequest<T> implements Request {
 
 		Builder<T> pathVariables(Map<String, String> pathVariables);
 
-		MockRequest<T> body(T body);
+		MockServerRequest<T> body(T body);
 
-		MockRequest<Void> build();
+		MockServerRequest<Void> build();
 
 	}
 
@@ -231,15 +231,15 @@ public class MockRequest<T> implements Request {
 		}
 
 		@Override
-		public MockRequest<T> body(T body) {
+		public MockServerRequest<T> body(T body) {
 			this.body = body;
-			return new MockRequest<T>(this.method, this.uri, this.headers, this.body,
+			return new MockServerRequest<T>(this.method, this.uri, this.headers, this.body,
 					this.attributes, this.queryParams, this.pathVariables);
 		}
 
 		@Override
-		public MockRequest<Void> build() {
-			return new MockRequest<Void>(this.method, this.uri, this.headers, null,
+		public MockServerRequest<Void> build() {
+			return new MockServerRequest<Void>(this.method, this.uri, this.headers, null,
 					this.attributes, this.queryParams, this.pathVariables);
 		}
 

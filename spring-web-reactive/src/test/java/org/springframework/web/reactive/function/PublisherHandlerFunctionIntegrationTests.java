@@ -97,20 +97,20 @@ public class PublisherHandlerFunctionIntegrationTests
 
 	private static class PersonHandler {
 
-		public Response<Publisher<Person>> mono(Request request) {
+		public ServerResponse<Publisher<Person>> mono(ServerRequest request) {
 			Person person = new Person("John");
-			return Response.ok().body(fromPublisher(Mono.just(person), Person.class));
+			return ServerResponse.ok().body(fromPublisher(Mono.just(person), Person.class));
 		}
 
-		public Response<Publisher<Person>> postMono(Request request) {
+		public ServerResponse<Publisher<Person>> postMono(ServerRequest request) {
 			Mono<Person> personMono = request.body(toMono(Person.class));
-			return Response.ok().body(fromPublisher(personMono, Person.class));
+			return ServerResponse.ok().body(fromPublisher(personMono, Person.class));
 		}
 
-		public Response<Publisher<Person>> flux(Request request) {
+		public ServerResponse<Publisher<Person>> flux(ServerRequest request) {
 			Person person1 = new Person("John");
 			Person person2 = new Person("Jane");
-			return Response.ok().body(
+			return ServerResponse.ok().body(
 					fromPublisher(Flux.just(person1, person2), Person.class));
 		}
 

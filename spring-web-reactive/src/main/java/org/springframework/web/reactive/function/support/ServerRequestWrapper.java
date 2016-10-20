@@ -32,18 +32,18 @@ import org.springframework.http.codec.BodyExtractor;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.HandlerFunction;
-import org.springframework.web.reactive.function.Request;
+import org.springframework.web.reactive.function.ServerRequest;
 
 /**
- * Implementation of the {@link Request} interface that can be subclassed to adapt the request to a
+ * Implementation of the {@link ServerRequest} interface that can be subclassed to adapt the request to a
  * {@link HandlerFunction handler function}. All methods default to calling through to the wrapped request.
  *
  * @author Arjen Poutsma
  * @since 5.0
  */
-public class RequestWrapper implements Request {
+public class ServerRequestWrapper implements ServerRequest {
 
-	private final Request request;
+	private final ServerRequest request;
 
 
 	/**
@@ -51,7 +51,7 @@ public class RequestWrapper implements Request {
 	 *
 	 * @param request the request to wrap
 	 */
-	public RequestWrapper(Request request) {
+	public ServerRequestWrapper(ServerRequest request) {
 		Assert.notNull(request, "'request' must not be null");
 		this.request = request;
 	}
@@ -59,7 +59,7 @@ public class RequestWrapper implements Request {
 	/**
 	 * Return the wrapped request.
 	 */
-	public Request request() {
+	public ServerRequest request() {
 		return this.request;
 	}
 
@@ -117,7 +117,7 @@ public class RequestWrapper implements Request {
 	 * Implementation of the {@link Headers} interface that can be subclassed to adapt the headers to a
 	 * {@link HandlerFunction handler function}. All methods default to calling through to the wrapped headers.
 	 */
-	public static class HeadersWrapper implements Request.Headers {
+	public static class HeadersWrapper implements ServerRequest.Headers {
 
 		private final Headers headers;
 

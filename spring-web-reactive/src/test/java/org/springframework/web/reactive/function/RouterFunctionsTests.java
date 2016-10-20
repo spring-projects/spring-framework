@@ -48,9 +48,9 @@ public class RouterFunctionsTests {
 
 	@Test
 	public void routeMatch() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
+		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
 
-		MockRequest request = MockRequest.builder().build();
+		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
@@ -64,9 +64,9 @@ public class RouterFunctionsTests {
 
 	@Test
 	public void routeNoMatch() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
+		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
 
-		MockRequest request = MockRequest.builder().build();
+		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
@@ -79,10 +79,10 @@ public class RouterFunctionsTests {
 
 	@Test
 	public void subrouteMatch() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
+		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
 
-		MockRequest request = MockRequest.builder().build();
+		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(true);
 
@@ -96,10 +96,10 @@ public class RouterFunctionsTests {
 
 	@Test
 	public void subrouteNoMatch() throws Exception {
-		HandlerFunction<Void> handlerFunction = request -> Response.ok().build();
+		HandlerFunction<Void> handlerFunction = request -> ServerResponse.ok().build();
 		RouterFunction<Void> routerFunction = request -> Optional.of(handlerFunction);
 
-		MockRequest request = MockRequest.builder().build();
+		MockServerRequest request = MockServerRequest.builder().build();
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);
 
@@ -112,7 +112,7 @@ public class RouterFunctionsTests {
 
 	@Test
 	public void toHttpHandler() throws Exception {
-		StrategiesSupplier strategies = mock(StrategiesSupplier.class);
+		HandlerStrategies strategies = mock(HandlerStrategies.class);
 		when(strategies.messageReaders()).thenReturn(
 				() -> Collections.<HttpMessageReader<?>>emptyList().stream());
 		when(strategies.messageWriters()).thenReturn(
@@ -120,15 +120,15 @@ public class RouterFunctionsTests {
 		when(strategies.viewResolvers()).thenReturn(
 				() -> Collections.<ViewResolver>emptyList().stream());
 
-		Request request = mock(Request.class);
-		Response response = mock(Response.class);
+		ServerRequest request = mock(ServerRequest.class);
+		ServerResponse response = mock(ServerResponse.class);
 		when(response.writeTo(any(ServerWebExchange.class), eq(strategies))).thenReturn(Mono.empty());
 
 		HandlerFunction handlerFunction = mock(HandlerFunction.class);
-		when(handlerFunction.handle(any(Request.class))).thenReturn(response);
+		when(handlerFunction.handle(any(ServerRequest.class))).thenReturn(response);
 
 		RouterFunction routerFunction = mock(RouterFunction.class);
-		when(routerFunction.route(any(Request.class))).thenReturn(Optional.of(handlerFunction));
+		when(routerFunction.route(any(ServerRequest.class))).thenReturn(Optional.of(handlerFunction));
 
 		RequestPredicate requestPredicate = mock(RequestPredicate.class);
 		when(requestPredicate.test(request)).thenReturn(false);

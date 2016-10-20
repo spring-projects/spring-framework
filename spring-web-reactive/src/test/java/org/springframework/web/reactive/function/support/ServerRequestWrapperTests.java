@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.function;
+package org.springframework.web.reactive.function.support;
 
 import java.net.URI;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.web.reactive.function.support.RequestWrapper;
+import org.springframework.web.reactive.function.ServerRequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
@@ -36,16 +36,16 @@ import static org.mockito.Mockito.when;
 /**
  * @author Arjen Poutsma
  */
-public class RequestWrapperTests {
+public class ServerRequestWrapperTests {
 
-	private Request mockRequest;
+	private ServerRequest mockRequest;
 
-	private RequestWrapper wrapper;
+	private ServerRequestWrapper wrapper;
 
 	@Before
 	public void createWrapper() {
-		mockRequest = mock(Request.class);
-		wrapper = new RequestWrapper(mockRequest);
+		mockRequest = mock(ServerRequest.class);
+		wrapper = new ServerRequestWrapper(mockRequest);
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class RequestWrapperTests {
 
 	@Test
 	public void headers() throws Exception {
-		Request.Headers headers = mock(Request.Headers.class);
+		ServerRequest.Headers headers = mock(ServerRequest.Headers.class);
 		when(mockRequest.headers()).thenReturn(headers);
 
 		assertSame(headers, wrapper.headers());

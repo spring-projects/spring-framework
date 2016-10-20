@@ -57,7 +57,7 @@ import static org.springframework.http.codec.BodyExtractors.toMono;
 /**
  * @author Arjen Poutsma
  */
-public class DefaultRequestTests {
+public class DefaultServerRequestTests {
 
 	private ServerHttpRequest mockRequest;
 
@@ -65,9 +65,9 @@ public class DefaultRequestTests {
 
 	private ServerWebExchange mockExchange;
 
-	private StrategiesSupplier mockStrategiesSupplier;
+	private HandlerStrategies mockHandlerStrategies;
 
-	private DefaultRequest defaultRequest;
+	private DefaultServerRequest defaultRequest;
 
 	@Before
 	public void createMocks() {
@@ -77,9 +77,9 @@ public class DefaultRequestTests {
 		mockExchange = mock(ServerWebExchange.class);
 		when(mockExchange.getRequest()).thenReturn(mockRequest);
 		when(mockExchange.getResponse()).thenReturn(mockResponse);
-		mockStrategiesSupplier = mock(StrategiesSupplier.class);
+		mockHandlerStrategies = mock(HandlerStrategies.class);
 
-		defaultRequest = new DefaultRequest(mockExchange, mockStrategiesSupplier);
+		defaultRequest = new DefaultServerRequest(mockExchange, mockHandlerStrategies);
 	}
 
 	@Test
@@ -149,7 +149,7 @@ public class DefaultRequestTests {
 
 		when(mockRequest.getHeaders()).thenReturn(httpHeaders);
 
-		Request.Headers headers = defaultRequest.headers();
+		ServerRequest.Headers headers = defaultRequest.headers();
 		assertEquals(accept, headers.accept());
 		assertEquals(acceptCharset, headers.acceptCharset());
 		assertEquals(OptionalLong.of(contentLength), headers.contentLength());
@@ -171,7 +171,7 @@ public class DefaultRequestTests {
 
 		Set<HttpMessageReader<?>> messageReaders = Collections
 				.singleton(new DecoderHttpMessageReader<String>(new StringDecoder()));
-		when(mockStrategiesSupplier.messageReaders()).thenReturn(messageReaders::stream);
+		when(mockHandlerStrategies.messageReaders()).thenReturn(messageReaders::stream);
 
 		Mono<String> resultMono = defaultRequest.body(toMono(String.class));
 		assertEquals("foo", resultMono.block());

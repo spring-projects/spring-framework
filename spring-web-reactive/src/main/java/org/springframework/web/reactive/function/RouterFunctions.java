@@ -38,7 +38,7 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
  * <p>Additionally, this class can {@linkplain #toHttpHandler(RouterFunction) transform} a
  * {@code RouterFunction} into an {@code HttpHandler}, which can be run in Servlet 3.1+,
  * Reactor, RxNetty, or Undertow.
- * And it can {@linkplain #toHandlerMapping(RouterFunction, StrategiesSupplier) transform} a
+ * And it can {@linkplain #toHandlerMapping(RouterFunction, HandlerStrategies) transform} a
  * {@code RouterFunction} into an {@code HandlerMapping}, which can be run in a
  * {@code DispatcherHandler}.
  *
@@ -48,7 +48,7 @@ import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 public abstract class RouterFunctions {
 
 	/**
-	 * Name of the {@link ServerWebExchange} attribute that contains the {@link Request}.
+	 * Name of the {@link ServerWebExchange} attribute that contains the {@link ServerRequest}.
 	 */
 	public static final String REQUEST_ATTRIBUTE = RouterFunctions.class.getName() + ".request";
 
@@ -59,7 +59,7 @@ public abstract class RouterFunctions {
 	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE =
 			RouterFunctions.class.getName() + ".uriTemplateVariables";
 
-	private static final HandlerFunction<Void> NOT_FOUND_HANDLER = request -> Response.notFound().build();
+	private static final HandlerFunction<Void> NOT_FOUND_HANDLER = request -> ServerResponse.notFound().build();
 
 
 	/**
@@ -93,7 +93,7 @@ public abstract class RouterFunctions {
 
 		return request -> {
 			if (predicate.test(request)) {
-				Request subRequest = predicate.subRequest(request);
+				ServerRequest subRequest = predicate.subRequest(request);
 				return routerFunction.route(subRequest);
 			}
 			else {
@@ -104,7 +104,7 @@ public abstract class RouterFunctions {
 
 	/**
 	 * Convert the given {@linkplain RouterFunction routing function} into a {@link HttpHandler}.
-	 * This conversion uses {@linkplain StrategiesSupplier#builder() default strategies}.
+	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
 	 * <p>The returned {@code HttpHandler} can be adapted to run in
 	 * <ul>
 	 * <li>Servlet 3.1+ using the
@@ -120,7 +120,7 @@ public abstract class RouterFunctions {
 	 * @return an http handler that handles HTTP request using the given routing function
 	 */
 	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction) {
-		return toHttpHandler(routerFunction, StrategiesSupplier.withDefaults());
+		return toHttpHandler(routerFunction, HandlerStrategies.withDefaults());
 	}
 
 	/**
@@ -141,31 +141,31 @@ public abstract class RouterFunctions {
 	 * @param strategies the strategies to use
 	 * @return an http handler that handles HTTP request using the given routing function
 	 */
-	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, StrategiesSupplier strategies) {
+	public static HttpHandler toHttpHandler(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
-		Assert.notNull(strategies, "StrategiesSupplier must not be null");
+		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
 		return new HttpWebHandlerAdapter(exchange -> {
-			Request request = new DefaultRequest(exchange, strategies);
+			ServerRequest request = new DefaultServerRequest(exchange, strategies);
 			addAttributes(exchange, request);
 			HandlerFunction<?> handlerFunction = routerFunction.route(request).orElse(notFound());
-			Response<?> response = handlerFunction.handle(request);
+			ServerResponse<?> response = handlerFunction.handle(request);
 			return response.writeTo(exchange, strategies);
 		});
 	}
 
 	/**
 	 * Convert the given {@code RouterFunction} into a {@code HandlerMapping}.
-	 * This conversion uses {@linkplain StrategiesSupplier#builder() default strategies}.
+	 * This conversion uses {@linkplain HandlerStrategies#builder() default strategies}.
 	 * <p>The returned {@code HandlerMapping} can be run in a
 	 * {@link org.springframework.web.reactive.DispatcherHandler}.
 	 * @param routerFunction the routing function to convert
 	 * @return an handler mapping that maps HTTP request to a handler using the given routing function
 	 * @see org.springframework.web.reactive.function.support.HandlerFunctionAdapter
-	 * @see org.springframework.web.reactive.function.support.ResponseResultHandler
+	 * @see org.springframework.web.reactive.function.support.ServerResponseResultHandler
 	 */
 	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction) {
-		return toHandlerMapping(routerFunction, StrategiesSupplier.withDefaults());
+		return toHandlerMapping(routerFunction, HandlerStrategies.withDefaults());
 	}
 
 	/**
@@ -177,14 +177,14 @@ public abstract class RouterFunctions {
 	 * @param strategies the strategies to use
 	 * @return an handler mapping that maps HTTP request to a handler using the given routing function
 	 * @see org.springframework.web.reactive.function.support.HandlerFunctionAdapter
-	 * @see org.springframework.web.reactive.function.support.ResponseResultHandler
+	 * @see org.springframework.web.reactive.function.support.ServerResponseResultHandler
 	 */
-	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction, StrategiesSupplier strategies) {
+	public static HandlerMapping toHandlerMapping(RouterFunction<?> routerFunction, HandlerStrategies strategies) {
 		Assert.notNull(routerFunction, "RouterFunction must not be null");
-		Assert.notNull(strategies, "StrategiesSupplier must not be null");
+		Assert.notNull(strategies, "HandlerStrategies must not be null");
 
 		return exchange -> {
-			Request request = new DefaultRequest(exchange, strategies);
+			ServerRequest request = new DefaultServerRequest(exchange, strategies);
 			addAttributes(exchange, request);
 			Optional<? extends HandlerFunction<?>> route = routerFunction.route(request);
 			return Mono.justOrEmpty(route);
@@ -192,7 +192,7 @@ public abstract class RouterFunctions {
 	}
 
 
-	private static void addAttributes(ServerWebExchange exchange, Request request) {
+	private static void addAttributes(ServerWebExchange exchange, ServerRequest request) {
 		Map<String, Object> attributes = exchange.getAttributes();
 		attributes.put(REQUEST_ATTRIBUTE, request);
 	}
