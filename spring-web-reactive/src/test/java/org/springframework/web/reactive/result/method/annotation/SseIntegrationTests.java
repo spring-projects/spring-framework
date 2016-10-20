@@ -28,34 +28,38 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.BodyExtractors;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.tests.TestSubscriber;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.reactive.ClientRequest;
 import org.springframework.web.client.reactive.WebClient;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.config.EnableWebReactive;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
-import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
 
 /**
  * @author Sebastien Deleuze
  */
 public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
+	private static final MediaType EVENT_STREAM = new MediaType("text", "event-stream");
+
+
 	private AnnotationConfigApplicationContext wac;
 
 	private WebClient webClient;
 
 
+	@Override
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		this.webClient = new WebClient(new ReactorClientHttpConnector());
+		this.webClient = WebClient.create(new ReactorClientHttpConnector());
 	}
 
 
@@ -70,10 +74,15 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsString() throws Exception {
+		ClientRequest<Void> request =
+				ClientRequest
+						.GET("http://localhost:{port}/sse/string", this.port)
+						.accept(EVENT_STREAM)
+						.build();
+
 		Flux<String> result = this.webClient
-				.perform(get("http://localhost:" + port + "/sse/string")
-				.accept(new MediaType("text", "event-stream")))
-				.extract(bodyStream(String.class))
+				.exchange(request)
+				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
 				.filter(s -> !s.equals("\n"))
 				.map(s -> (s.replace("\n", "")))
 				.take(2);
@@ -83,13 +92,17 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 				.await(Duration.ofSeconds(5))
 				.assertValues("data:foo 0", "data:foo 1");
 	}
-
 	@Test
 	public void sseAsPerson() throws Exception {
+		ClientRequest<Void> request =
+				ClientRequest
+						.GET("http://localhost:{port}/sse/person", this.port)
+						.accept(EVENT_STREAM)
+						.build();
+
 		Mono<String> result = this.webClient
-				.perform(get("http://localhost:" + port + "/sse/person")
-				.accept(new MediaType("text", "event-stream")))
-				.extract(bodyStream(String.class))
+				.exchange(request)
+				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
 				.filter(s -> !s.equals("\n"))
 				.map(s -> s.replace("\n", ""))
 				.takeUntil(s -> s.endsWith("foo 1\"}"))
@@ -103,10 +116,14 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsEvent() throws Exception {
+		ClientRequest<Void> request =
+				ClientRequest
+						.GET("http://localhost:{port}/sse/event", this.port)
+						.accept(EVENT_STREAM)
+						.build();
 		Flux<String> result = this.webClient
-				.perform(get("http://localhost:" + port + "/sse/event")
-				.accept(new MediaType("text", "event-stream")))
-				.extract(bodyStream(String.class))
+				.exchange(request)
+				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
 				.filter(s -> !s.equals("\n"))
 				.map(s -> s.replace("\n", ""))
 				.take(2);
@@ -122,9 +139,15 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Test
 	public void sseAsEventWithoutAcceptHeader() throws Exception {
+		ClientRequest<Void> request =
+		ClientRequest
+				.GET("http://localhost:{port}/sse/event", this.port)
+				.accept(EVENT_STREAM)
+				.build();
+
 		Flux<String> result = this.webClient
-				.perform(get("http://localhost:" + port + "/sse/event"))
-				.extract(bodyStream(String.class))
+				.exchange(request)
+				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
 				.filter(s -> !s.equals("\n"))
 				.map(s -> s.replace("\n", ""))
 				.take(2);

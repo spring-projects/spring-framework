@@ -16,12 +16,7 @@
 
 package org.springframework.web.client.reactive;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.client.reactive.ClientWebRequestBuilders.*;
-import static org.springframework.web.client.reactive.ResponseExtractors.*;
-
 import java.time.Duration;
-import java.util.function.Consumer;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -35,11 +30,18 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.BodyExtractors;
+import org.springframework.http.codec.BodyInserters;
 import org.springframework.http.codec.Pojo;
 import org.springframework.tests.TestSubscriber;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.springframework.http.codec.BodyExtractors.toFlux;
+import static org.springframework.http.codec.BodyExtractors.toMono;
 
 /**
  * {@link WebClient} integration tests with the {@code Flux} and {@code Mono} API.
@@ -55,18 +57,18 @@ public class WebClientIntegrationTests {
 	@Before
 	public void setup() {
 		this.server = new MockWebServer();
-		this.webClient = new WebClient(new ReactorClientHttpConnector());
+		this.webClient = WebClient.create(new ReactorClientHttpConnector());
 	}
 
 	@Test
-	public void shouldGetHeaders() throws Exception {
-
+	public void headers() throws Exception {
 		HttpUrl baseUrl = server.url("/greeting?name=Spring");
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
+		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString()).build();
 		Mono<HttpHeaders> result = this.webClient
-				.perform(get(baseUrl.toString()))
-				.extract(headers());
+				.exchange(request)
+				.map(response -> response.headers().asHttpHeaders());
 
 		TestSubscriber
 				.subscribe(result)
@@ -77,116 +79,101 @@ public class WebClientIntegrationTests {
 						})
 				.assertComplete();
 
-		RecordedRequest request = server.takeRequest();
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-		assertEquals("/greeting?name=Spring", request.getPath());
+		assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/greeting?name=Spring", recordedRequest.getPath());
 	}
 
 	@Test
-	public void shouldGetPlainTextResponseAsObject() throws Exception {
-
+	public void plainText() throws Exception {
 		HttpUrl baseUrl = server.url("/greeting?name=Spring");
 		this.server.enqueue(new MockResponse().setBody("Hello Spring!"));
 
-		Mono<String> result = this.webClient
-				.perform(get(baseUrl.toString())
-						.header("X-Test-Header", "testvalue"))
-				.extract(body(String.class));
+		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+				.header("X-Test-Header", "testvalue")
+				.build();
 
+		Mono<String> result = this.webClient
+				.exchange(request)
+				.then(response -> response.body(toMono(String.class)));
 
 		TestSubscriber
 				.subscribe(result)
 				.awaitAndAssertNextValues("Hello Spring!")
 				.assertComplete();
 
-		RecordedRequest request = server.takeRequest();
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("testvalue", request.getHeader("X-Test-Header"));
-		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-		assertEquals("/greeting?name=Spring", request.getPath());
+		assertEquals("testvalue", recordedRequest.getHeader("X-Test-Header"));
+		assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/greeting?name=Spring", recordedRequest.getPath());
 	}
 
 	@Test
-	public void shouldGetPlainTextResponse() throws Exception {
-
-		HttpUrl baseUrl = server.url("/greeting?name=Spring");
-		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
-
-		Mono<ResponseEntity<String>> result = this.webClient
-				.perform(get(baseUrl.toString())
-						.accept(MediaType.TEXT_PLAIN))
-				.extract(response(String.class));
-
-		TestSubscriber
-				.subscribe(result)
-				.awaitAndAssertNextValuesWith((Consumer<ResponseEntity<String>>) response -> {
-					assertEquals(200, response.getStatusCode().value());
-					assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
-					assertEquals("Hello Spring!", response.getBody());
-				});
-		RecordedRequest request = server.takeRequest();
-		assertEquals(1, server.getRequestCount());
-		assertEquals("/greeting?name=Spring", request.getPath());
-		assertEquals("text/plain", request.getHeader(HttpHeaders.ACCEPT));
-	}
-
-	@Test
-	public void shouldGetJsonAsMonoOfString() throws Exception {
-
+	public void jsonString() throws Exception {
 		HttpUrl baseUrl = server.url("/json");
 		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody(content));
 
+		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+				.accept(MediaType.APPLICATION_JSON)
+				.build();
+
 		Mono<String> result = this.webClient
-				.perform(get(baseUrl.toString())
-						.accept(MediaType.APPLICATION_JSON))
-				.extract(body(String.class));
+				.exchange(request)
+				.then(response -> response.body(toMono(String.class)));
 
 		TestSubscriber
 				.subscribe(result)
 				.awaitAndAssertNextValues(content)
 				.assertComplete();
-		RecordedRequest request = server.takeRequest();
+
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("/json", request.getPath());
-		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/json", recordedRequest.getPath());
+		assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
 	}
 
 	@Test
-	public void shouldGetJsonAsMonoOfPojo() throws Exception {
-
+	public void jsonPojoMono() throws Exception {
 		HttpUrl baseUrl = server.url("/pojo");
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"barbar\",\"foo\":\"foofoo\"}"));
 
+		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+				.accept(MediaType.APPLICATION_JSON)
+				.build();
+
 		Mono<Pojo> result = this.webClient
-				.perform(get(baseUrl.toString())
-						.accept(MediaType.APPLICATION_JSON))
-				.extract(body(Pojo.class));
+				.exchange(request)
+				.then(response -> response.body(toMono(Pojo.class)));
 
 		TestSubscriber
 				.subscribe(result)
 				.awaitAndAssertNextValuesWith(p -> assertEquals("barbar", p.getBar()))
 				.assertComplete();
-		RecordedRequest request = server.takeRequest();
+
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("/pojo", request.getPath());
-		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/pojo", recordedRequest.getPath());
+		assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
 	}
 
 	@Test
-	public void shouldGetJsonAsFluxOfPojos() throws Exception {
-
+	public void jsonPojoFlux() throws Exception {
 		HttpUrl baseUrl = server.url("/pojos");
 		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
 				.setBody("[{\"bar\":\"bar1\",\"foo\":\"foo1\"},{\"bar\":\"bar2\",\"foo\":\"foo2\"}]"));
 
+		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+				.accept(MediaType.APPLICATION_JSON)
+				.build();
+
 		Flux<Pojo> result = this.webClient
-				.perform(get(baseUrl.toString())
-						.accept(MediaType.APPLICATION_JSON))
-				.extract(bodyStream(Pojo.class));
+				.exchange(request)
+				.flatMap(response -> response.body(toFlux(Pojo.class)));
 
 		TestSubscriber
 				.subscribe(result)
@@ -195,153 +182,124 @@ public class WebClientIntegrationTests {
 						p -> assertThat(p.getBar(), Matchers.is("bar2")))
 				.assertValueCount(2)
 				.assertComplete();
-		RecordedRequest request = server.takeRequest();
+
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("/pojos", request.getPath());
-		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/pojos", recordedRequest.getPath());
+		assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
 	}
 
 	@Test
-	public void shouldGetJsonAsResponseOfPojosStream() throws Exception {
-
-		HttpUrl baseUrl = server.url("/pojos");
-		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
-				.setBody("[{\"bar\":\"bar1\",\"foo\":\"foo1\"},{\"bar\":\"bar2\",\"foo\":\"foo2\"}]"));
-
-		Mono<ResponseEntity<Flux<Pojo>>> result = this.webClient
-				.perform(get(baseUrl.toString())
-						.accept(MediaType.APPLICATION_JSON))
-				.extract(responseStream(Pojo.class));
-
-		TestSubscriber
-				.subscribe(result)
-				.awaitAndAssertNextValuesWith(
-						response -> {
-							assertEquals(200, response.getStatusCode().value());
-							assertEquals(MediaType.APPLICATION_JSON, response.getHeaders().getContentType());
-						})
-				.assertComplete();
-		RecordedRequest request = server.takeRequest();
-		assertEquals(1, server.getRequestCount());
-		assertEquals("/pojos", request.getPath());
-		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
-	}
-
-	@Test
-	public void shouldPostPojoAsJson() throws Exception {
-
+	public void postJsonPojo() throws Exception {
 		HttpUrl baseUrl = server.url("/pojo/capitalize");
 		this.server.enqueue(new MockResponse()
 				.setHeader("Content-Type", "application/json")
 				.setBody("{\"bar\":\"BARBAR\",\"foo\":\"FOOFOO\"}"));
 
 		Pojo spring = new Pojo("foofoo", "barbar");
+		ClientRequest<Pojo> request = ClientRequest.POST(baseUrl.toString())
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(BodyInserters.fromObject(spring));
+
 		Mono<Pojo> result = this.webClient
-				.perform(post(baseUrl.toString())
-						.body(spring)
-						.contentType(MediaType.APPLICATION_JSON)
-						.accept(MediaType.APPLICATION_JSON))
-				.extract(body(Pojo.class));
+				.exchange(request)
+				.then(response -> response.body(BodyExtractors.toMono(Pojo.class)));
 
 		TestSubscriber
 				.subscribe(result)
 				.awaitAndAssertNextValuesWith(p -> assertEquals("BARBAR", p.getBar()))
 				.assertComplete();
 
-		RecordedRequest request = server.takeRequest();
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("/pojo/capitalize", request.getPath());
-		assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", request.getBody().readUtf8());
-		assertEquals("chunked", request.getHeader(HttpHeaders.TRANSFER_ENCODING));
-		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
-		assertEquals("application/json", request.getHeader(HttpHeaders.CONTENT_TYPE));
+		assertEquals("/pojo/capitalize", recordedRequest.getPath());
+		assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", recordedRequest.getBody().readUtf8());
+		assertEquals("chunked", recordedRequest.getHeader(HttpHeaders.TRANSFER_ENCODING));
+		assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("application/json", recordedRequest.getHeader(HttpHeaders.CONTENT_TYPE));
 	}
 
 	@Test
-	public void shouldSendCookieHeader() throws Exception {
+	public void cookies() throws Exception {
 		HttpUrl baseUrl = server.url("/test");
 		this.server.enqueue(new MockResponse()
 				.setHeader("Content-Type", "text/plain").setBody("test"));
 
+		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString())
+				.cookie("testkey", "testvalue")
+				.build();
+
 		Mono<String> result = this.webClient
-				.perform(get(baseUrl.toString())
-						.cookie("testkey", "testvalue"))
-				.extract(body(String.class));
+				.exchange(request)
+				.then(response -> response.body(toMono(String.class)));
 
 		TestSubscriber
 				.subscribe(result)
 				.awaitAndAssertNextValues("test")
 				.assertComplete();
 
-		RecordedRequest request = server.takeRequest();
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("/test", request.getPath());
-		assertEquals("testkey=testvalue", request.getHeader(HttpHeaders.COOKIE));
+		assertEquals("/test", recordedRequest.getPath());
+		assertEquals("testkey=testvalue", recordedRequest.getHeader(HttpHeaders.COOKIE));
 	}
 
 	@Test
-	public void shouldGetErrorWhen404() throws Exception {
-
+	public void notFound() throws Exception {
 		HttpUrl baseUrl = server.url("/greeting?name=Spring");
 		this.server.enqueue(new MockResponse().setResponseCode(404)
 				.setHeader("Content-Type", "text/plain").setBody("Not Found"));
 
-		Mono<String> result = this.webClient
-				.perform(get(baseUrl.toString()))
-				.extract(body(String.class));
+		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString()).build();
+
+		Mono<ClientResponse> result = this.webClient
+				.exchange(request);
 
 		TestSubscriber
 				.subscribe(result)
 				.await(Duration.ofSeconds(3))
-				.assertErrorWith(t -> {
-					assertThat(t, Matchers.instanceOf(WebClientErrorException.class));
-					WebClientErrorException exc = (WebClientErrorException) t;
-					assertEquals(404, exc.getStatus().value());
-					assertEquals(MediaType.TEXT_PLAIN, exc.getResponseHeaders().getContentType());
-
-					Mono<String> body = exc.getResponseBody(as(String.class));
-
-					TestSubscriber.subscribe(body)
-							.awaitAndAssertNextValues("Not Found")
-							.assertComplete();
+				.assertValuesWith(response -> {
+					assertEquals(HttpStatus.NOT_FOUND, response.statusCode());
 				});
 
-		RecordedRequest request = server.takeRequest();
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-		assertEquals("/greeting?name=Spring", request.getPath());
+		assertEquals("*/*", recordedRequest.getHeader(HttpHeaders.ACCEPT));
+		assertEquals("/greeting?name=Spring", recordedRequest.getPath());
 	}
 
 	@Test
-	public void shouldGetErrorWhen500() throws Exception {
-
+	public void filter() throws Exception {
 		HttpUrl baseUrl = server.url("/greeting?name=Spring");
-		this.server.enqueue(new MockResponse().setResponseCode(500)
-				.setHeader("Content-Type", "text/plain").setBody("Server Error"));
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "text/plain").setBody("Hello Spring!"));
 
-		Mono<String> result = this.webClient
-				.perform(get(baseUrl.toString()))
-				.extract(body(String.class));
+		ExchangeFilterFunction filter = (request, next) -> {
+			ClientRequest<?> filteredRequest = ClientRequest.from(request)
+					.header("foo", "bar").build();
+			return next.exchange(filteredRequest);
+		};
+		WebClient filteredClient = WebClient.builder(new ReactorClientHttpConnector())
+				.filter(filter).build();
+
+		ClientRequest<Void> request = ClientRequest.GET(baseUrl.toString()).build();
+
+		Mono<String> result = filteredClient.exchange(request)
+				.then(response -> response.body(toMono(String.class)));
 
 		TestSubscriber
 				.subscribe(result)
-				.await(Duration.ofSeconds(3))
-				.assertErrorWith(t -> {
-					assertThat(t, Matchers.instanceOf(WebServerErrorException.class));
-					WebServerErrorException exc = (WebServerErrorException) t;
-					assertEquals(500, exc.getStatus().value());
-					assertEquals(MediaType.TEXT_PLAIN, exc.getResponseHeaders().getContentType());
-				});
+				.awaitAndAssertNextValues("Hello Spring!")
+				.assertComplete();
 
-		RecordedRequest request = server.takeRequest();
+		RecordedRequest recordedRequest = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
-		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
-		assertEquals("/greeting?name=Spring", request.getPath());
+		assertEquals("bar", recordedRequest.getHeader("foo"));
+
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		this.server.shutdown();
 	}
-
 }

@@ -16,27 +16,23 @@
 
 package org.springframework.web.client.reactive;
 
-import java.util.List;
-
-import org.springframework.http.client.reactive.ClientHttpResponse;
-import org.springframework.http.codec.HttpMessageReader;
+import reactor.core.publisher.Mono;
 
 /**
- * Strategy interface used by the {@link WebClient} to handle errors in
- * {@link ClientHttpResponse}s if needed.
+ * Represents a function that exchanges a {@linkplain ClientRequest request} for a (delayed)
+ * {@linkplain ClientResponse}.
  *
- * @author Brian Clozel
- * @see DefaultResponseErrorHandler
+ * @author Arjen Poutsma
  * @since 5.0
  */
-public interface ResponseErrorHandler {
+@FunctionalInterface
+public interface ExchangeFunction {
 
 	/**
-	 * Handle the error in the given response.
-	 * Implementations will typically inspect the
-	 * {@link ClientHttpResponse#getStatusCode() HttpStatus} of the response and
-	 * throw {@link WebClientException}s in case of errors.
+	 * Exchange the given request for a response mono.
+	 * @param request the request to exchange
+	 * @return the response, wrapped in a {@code Mono}
 	 */
-	void handleError(ClientHttpResponse response, List<HttpMessageReader<?>> messageReaders);
+	Mono<ClientResponse> exchange(ClientRequest<?> request);
 
 }

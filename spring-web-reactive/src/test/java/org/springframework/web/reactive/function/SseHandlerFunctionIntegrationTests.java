@@ -26,13 +26,13 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.BodyExtractors;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.tests.TestSubscriber;
+import org.springframework.web.client.reactive.ClientRequest;
 import org.springframework.web.client.reactive.WebClient;
 
 import static org.springframework.http.codec.BodyInserters.fromServerSentEvents;
-import static org.springframework.web.client.reactive.ClientWebRequestBuilders.get;
-import static org.springframework.web.client.reactive.ResponseExtractors.bodyStream;
 import static org.springframework.web.reactive.function.RouterFunctions.route;
 
 /**
@@ -41,11 +41,13 @@ import static org.springframework.web.reactive.function.RouterFunctions.route;
 public class SseHandlerFunctionIntegrationTests
 		extends AbstractRouterFunctionIntegrationTests {
 
+	private static final MediaType EVENT_STREAM = new MediaType("text", "event-stream");
+
 	private WebClient webClient;
 
 	@Before
 	public void createWebClient() {
-		this.webClient = new WebClient(new ReactorClientHttpConnector());
+		this.webClient = WebClient.create(new ReactorClientHttpConnector());
 	}
 
 	@Override
@@ -59,10 +61,15 @@ public class SseHandlerFunctionIntegrationTests
 
 	@Test
 	public void sseAsString() throws Exception {
+		ClientRequest<Void> request =
+				ClientRequest
+						.GET("http://localhost:{port}/string", this.port)
+						.accept(EVENT_STREAM)
+						.build();
+
 		Flux<String> result = this.webClient
-				.perform(get("http://localhost:" + port + "/string")
-				.accept(new MediaType("text", "event-stream")))
-				.extract(bodyStream(String.class))
+				.exchange(request)
+				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
 				.filter(s -> !s.equals("\n"))
 				.map(s -> (s.replace("\n", "")))
 				.take(2);
@@ -75,10 +82,15 @@ public class SseHandlerFunctionIntegrationTests
 
 	@Test
 	public void sseAsPerson() throws Exception {
+		ClientRequest<Void> request =
+				ClientRequest
+						.GET("http://localhost:{port}/person", this.port)
+						.accept(EVENT_STREAM)
+						.build();
+
 		Mono<String> result = this.webClient
-				.perform(get("http://localhost:" + port + "/person")
-				.accept(new MediaType("text", "event-stream")))
-				.extract(bodyStream(String.class))
+				.exchange(request)
+				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
 				.filter(s -> !s.equals("\n"))
 				.map(s -> s.replace("\n", ""))
 				.takeUntil(s -> s.endsWith("foo 1\"}"))
@@ -92,10 +104,15 @@ public class SseHandlerFunctionIntegrationTests
 
 	@Test
 	public void sseAsEvent() throws Exception {
+		ClientRequest<Void> request =
+				ClientRequest
+						.GET("http://localhost:{port}/event", this.port)
+						.accept(EVENT_STREAM)
+						.build();
+
 		Flux<String> result = this.webClient
-				.perform(get("http://localhost:" + port + "/event")
-				.accept(new MediaType("text", "event-stream")))
-				.extract(bodyStream(String.class))
+				.exchange(request)
+				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
 				.filter(s -> !s.equals("\n"))
 				.map(s -> s.replace("\n", ""))
 				.take(2);
@@ -107,7 +124,9 @@ public class SseHandlerFunctionIntegrationTests
 						"id:0:bardata:foo",
 						"id:1:bardata:foo"
 				);
+		;
 	}
+
 	private static class SseHandler {
 
 		public Response<Publisher<String>> string(Request request) {
@@ -176,6 +195,5 @@ public class SseHandlerFunctionIntegrationTests
 					'}';
 		}
 	}
-
 
 }

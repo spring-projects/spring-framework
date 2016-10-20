@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import java.time.Duration;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -24,12 +26,10 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.codec.BodyExtractors;
 import org.springframework.tests.TestSubscriber;
-import org.springframework.web.client.reactive.ClientWebRequestBuilders;
-import org.springframework.web.client.reactive.ResponseExtractors;
+import org.springframework.web.client.reactive.ClientRequest;
 import org.springframework.web.client.reactive.WebClient;
-
-import java.time.Duration;
 
 /**
  * @author Sebastien Deleuze
@@ -41,17 +41,19 @@ public class FlushingIntegrationTests extends AbstractHttpHandlerIntegrationTest
 	@Before
 	public void setup() throws Exception {
 		super.setup();
-		this.webClient = new WebClient(new ReactorClientHttpConnector());
+		this.webClient = WebClient.create(new ReactorClientHttpConnector());
 	}
 
 	@Test
 	public void testFlushing() throws Exception {
+
+		ClientRequest<Void> request = ClientRequest.GET("http://localhost:" + port).build();
+
+
 		Mono<String> result = this.webClient
-				.perform(ClientWebRequestBuilders.get("http://localhost:" + port))
-				.extract(ResponseExtractors.bodyStream(String.class))
-				.takeUntil(s -> {
-					return s.endsWith("data1");
-				})
+				.exchange(request)
+				.flatMap(response -> response.body(BodyExtractors.toFlux(String.class)))
+				.takeUntil(s -> s.endsWith("data1"))
 				.reduce((s1, s2) -> s1 + s2);
 
 		TestSubscriber
