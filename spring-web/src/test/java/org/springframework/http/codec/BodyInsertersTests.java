@@ -19,6 +19,7 @@ package org.springframework.http.codec;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -57,8 +58,13 @@ public class BodyInsertersTests {
 		final List<HttpMessageWriter<?>> messageWriters = new ArrayList<>();
 		messageWriters.add(new EncoderHttpMessageWriter<>(new ByteBufferEncoder()));
 		messageWriters.add(new EncoderHttpMessageWriter<>(new CharSequenceEncoder()));
+		messageWriters.add(new ResourceHttpMessageWriter());
 		messageWriters.add(new EncoderHttpMessageWriter<>(new Jaxb2XmlEncoder()));
-		messageWriters.add(new EncoderHttpMessageWriter<>(new Jackson2JsonEncoder()));
+		Jackson2JsonEncoder jsonEncoder = new Jackson2JsonEncoder();
+		messageWriters.add(new EncoderHttpMessageWriter<>(jsonEncoder));
+		messageWriters
+				.add(new ServerSentEventHttpMessageWriter(Collections.singletonList(jsonEncoder)));
+
 
 		this.context = new BodyInserter.Context() {
 			@Override

@@ -30,10 +30,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Implementations of {@link BodyInserter} that write various bodies, such a reactive streams,
@@ -49,12 +47,6 @@ public abstract class BodyInserters {
 	private static final ResolvableType SERVER_SIDE_EVENT_TYPE =
 			ResolvableType.forClass(ServerSentEvent.class);
 
-	private static final boolean jackson2Present =
-			ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-					BodyInserters.class.getClassLoader()) &&
-					ClassUtils.isPresent("com.fasterxml.jackson.core.JsonGenerator",
-							BodyInserters.class.getClassLoader());
-
 	/**
 	 * Return a {@code BodyInserter} that writes the given single object.
 	 * @param body the body of the response
@@ -63,8 +55,7 @@ public abstract class BodyInserters {
 	public static <T> BodyInserter<T, ReactiveHttpOutputMessage> fromObject(T body) {
 		Assert.notNull(body, "'body' must not be null");
 		return BodyInserter.of(
-				(response, context) -> writeWithMessageWriters(response, context,
-						Mono.just(body), ResolvableType.forInstance(body)),
+				writeFunctionFor(Mono.just(body), ResolvableType.forInstance(body)),
 				() -> body);
 	}
 
@@ -81,7 +72,10 @@ public abstract class BodyInserters {
 
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementClass, "'elementClass' must not be null");
-		return fromPublisher(publisher, ResolvableType.forClass(elementClass));
+		return BodyInserter.of(
+				writeFunctionFor(publisher, ResolvableType.forClass(elementClass)),
+				() -> publisher
+		);
 	}
 
 	/**
@@ -98,8 +92,7 @@ public abstract class BodyInserters {
 		Assert.notNull(publisher, "'publisher' must not be null");
 		Assert.notNull(elementType, "'elementType' must not be null");
 		return BodyInserter.of(
-				(response, context) -> writeWithMessageWriters(response, context,
-						publisher, elementType),
+				writeFunctionFor(publisher, elementType),
 				() -> publisher
 		);
 	}
@@ -117,13 +110,21 @@ public abstract class BodyInserters {
 		Assert.notNull(resource, "'resource' must not be null");
 		return BodyInserter.of(
 				(response, context) -> {
-					ResourceHttpMessageWriter messageWriter = new ResourceHttpMessageWriter();
-					MediaType contentType = response.getHeaders().getContentType();
-					return messageWriter.write(Mono.just(resource), RESOURCE_TYPE, contentType,
+					HttpMessageWriter<Resource> messageWriter = resourceHttpMessageWriter(context);
+					return messageWriter.write(Mono.just(resource), RESOURCE_TYPE, null,
 							response, Collections.emptyMap());
 				},
 				() -> resource
 		);
+	}
+
+	private static HttpMessageWriter<Resource> resourceHttpMessageWriter(BodyInserter.Context context) {
+		return context.messageWriters().get()
+				.filter(messageWriter -> messageWriter.canWrite(RESOURCE_TYPE, null))
+				.findFirst()
+				.map(BodyInserters::<Resource>cast)
+				.orElseThrow(() -> new IllegalStateException(
+						"Could not find HttpMessageWriter that supports Resources."));
 	}
 
 	/**
@@ -139,10 +140,9 @@ public abstract class BodyInserters {
 		Assert.notNull(eventsPublisher, "'eventsPublisher' must not be null");
 		return BodyInserter.of(
 				(response, context) -> {
-					ServerSentEventHttpMessageWriter messageWriter = sseMessageWriter();
-					MediaType contentType = response.getHeaders().getContentType();
+					HttpMessageWriter<ServerSentEvent<T>> messageWriter = sseMessageWriter(context);
 					return messageWriter.write(eventsPublisher, SERVER_SIDE_EVENT_TYPE,
-							contentType, response, Collections.emptyMap());
+							MediaType.TEXT_EVENT_STREAM, response, Collections.emptyMap());
 				},
 				() -> eventsPublisher
 		);
@@ -183,44 +183,49 @@ public abstract class BodyInserters {
 		Assert.notNull(eventType, "'eventType' must not be null");
 		return BodyInserter.of(
 				(response, context) -> {
-					ServerSentEventHttpMessageWriter messageWriter = sseMessageWriter();
-					MediaType contentType = response.getHeaders().getContentType();
-					return messageWriter.write(eventsPublisher, eventType, contentType, response,
-							Collections.emptyMap());
+					HttpMessageWriter<T> messageWriter = sseMessageWriter(context);
+					return messageWriter.write(eventsPublisher, eventType,
+							MediaType.TEXT_EVENT_STREAM, response, Collections.emptyMap());
 
 				},
 				() -> eventsPublisher
 		);
 	}
 
-	private static ServerSentEventHttpMessageWriter sseMessageWriter() {
-		return jackson2Present ? new ServerSentEventHttpMessageWriter(
-				Collections.singletonList(new Jackson2JsonEncoder())) :
-				new ServerSentEventHttpMessageWriter();
+	private static <T> HttpMessageWriter<T> sseMessageWriter(BodyInserter.Context context) {
+		return context.messageWriters().get()
+				.filter(messageWriter -> messageWriter
+						.canWrite(SERVER_SIDE_EVENT_TYPE, MediaType.TEXT_EVENT_STREAM))
+				.findFirst()
+				.map(BodyInserters::<T>cast)
+				.orElseThrow(() -> new IllegalStateException(
+						"Could not find HttpMessageWriter that supports " +
+								MediaType.TEXT_EVENT_STREAM_VALUE));
 	}
 
-	private static <T> Mono<Void> writeWithMessageWriters(ReactiveHttpOutputMessage outputMessage,
-			BodyInserter.Context context,
-			Publisher<T> body,
-			ResolvableType bodyType) {
+	private static <T, M extends ReactiveHttpOutputMessage> BiFunction<M, BodyInserter.Context, Mono<Void>>
+		writeFunctionFor(Publisher<T> body, ResolvableType bodyType) {
 
-		MediaType contentType = outputMessage.getHeaders().getContentType();
-		Supplier<Stream<HttpMessageWriter<?>>> messageWriters = context.messageWriters();
-		return messageWriters.get()
-				.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType))
-				.findFirst()
-				.map(BodyInserters::cast)
-				.map(messageWriter -> messageWriter
-						.write(body, bodyType, contentType, outputMessage, Collections
-								.emptyMap()))
-				.orElseGet(() -> {
-					List<MediaType> supportedMediaTypes = messageWriters.get()
-							.flatMap(reader -> reader.getWritableMediaTypes().stream())
-							.collect(Collectors.toList());
-					UnsupportedMediaTypeException error =
-							new UnsupportedMediaTypeException(contentType, supportedMediaTypes);
-					return Mono.error(error);
-				});
+		return (m, context) -> {
+
+			MediaType contentType = m.getHeaders().getContentType();
+			Supplier<Stream<HttpMessageWriter<?>>> messageWriters = context.messageWriters();
+			return messageWriters.get()
+					.filter(messageWriter -> messageWriter.canWrite(bodyType, contentType))
+					.findFirst()
+					.map(BodyInserters::cast)
+					.map(messageWriter -> messageWriter
+							.write(body, bodyType, contentType, m, Collections
+									.emptyMap()))
+					.orElseGet(() -> {
+						List<MediaType> supportedMediaTypes = messageWriters.get()
+								.flatMap(reader -> reader.getWritableMediaTypes().stream())
+								.collect(Collectors.toList());
+						UnsupportedMediaTypeException error =
+								new UnsupportedMediaTypeException(contentType, supportedMediaTypes);
+						return Mono.error(error);
+					});
+		};
 	}
 
 	@SuppressWarnings("unchecked")
